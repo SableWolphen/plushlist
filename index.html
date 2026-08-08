@@ -1859,6 +1859,7 @@ function GlowUpTracker() {
   const [arrivalRitualVisible, setArrivalRitualVisible] = useState(true);
   const [careExtraSupportOpen, setCareExtraSupportOpen] = useState(false);
   const [habitGardenOpen, setHabitGardenOpen] = useState(false);
+  const [progressDetailsOpen, setProgressDetailsOpen] = useState(false);
   const [preferences, setPreferences] = useState({
     notifications_enabled: false,
     reminder_times: ["08:00", "12:30", "17:30", "20:30"],
@@ -9564,7 +9565,7 @@ function GlowUpTracker() {
               );
             })()}
           </div>
-          <div style={{ display: hasWeeklyActivity ? "grid" : "none", gridTemplateColumns: preferences.gentle_streaks ? "repeat(2, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))", gap: 8, marginTop: 12 }}>
+          <div style={{ display: hasWeeklyActivity && progressDetailsOpen ? "grid" : "none", gridTemplateColumns: preferences.gentle_streaks ? "repeat(2, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))", gap: 8, marginTop: 12 }}>
             <div style={{ padding: "10px 8px", borderRadius: 12, textAlign: "center", background: "#FFF8FC" }}>
               <div style={{ fontSize: 17, fontWeight: 900, color: "#A65DC1" }}>{weeklyEssentialPct}%</div>
               <div style={{ marginTop: 2, fontSize: 10.5, color: "#8C6B9E" }}>ESSENTIALS</div>
@@ -9582,10 +9583,10 @@ function GlowUpTracker() {
               <div style={{ marginTop: 2, fontSize: 10.5, color: "#8C6B9E" }}>CARING DAYS</div>
             </div>}
           </div>
-          {hasWeeklyActivity && <div style={{ marginTop: 10, fontSize: 11.5, lineHeight: 1.45, color: "#8C6B9E" }}>
+          {hasWeeklyActivity && progressDetailsOpen && <div style={{ marginTop: 10, fontSize: 11.5, lineHeight: 1.45, color: "#8C6B9E" }}>
             Bonus items are celebrated separately, so they never lower your essentials score. 💛
           </div>}
-          {hasWeeklyActivity && <div style={{ marginTop: 9, padding: "9px 10px", borderRadius: 10, background: "#FFFFFF99", fontSize: 11.5, lineHeight: 1.45, color: "#6B5A7D" }}>
+          {hasWeeklyActivity && progressDetailsOpen && <div style={{ marginTop: 9, padding: "9px 10px", borderRadius: 10, background: "#FFFFFF99", fontSize: 11.5, lineHeight: 1.45, color: "#6B5A7D" }}>
             <strong>Gentle weekly review:</strong> {weeklyEssentialDone} essentials and {weeklyBonusDone} bonus wins completed across {caringDays} caring {caringDays === 1 ? "day" : "days"}. A missed day never erases the care you gave yourself.
           </div>}
           {false && <div style={{ marginTop: 9, padding: "12px", borderRadius: 12, background: "#F5FBF8", border: "1px solid #CFE8E1", color: "#526F67" }}>
@@ -9613,7 +9614,7 @@ function GlowUpTracker() {
               </div>
             </div>
           )}
-          {patternInsightCards.length > 0 && (() => {
+          {progressDetailsOpen && patternInsightCards.length > 0 && (() => {
             const card = patternInsightCards[insightCardIndex % patternInsightCards.length];
             return (
               <div key={card.key} style={{ marginTop: 9, padding: "11px 12px", borderRadius: 12, background: card.background, border: `1px solid ${card.border}`, fontSize: 11.5, lineHeight: 1.5, color: card.color }}>
@@ -9641,11 +9642,13 @@ function GlowUpTracker() {
               )}
             </div>
           )}
-          <button type="button" onClick={goWriteWeeklyIntention} style={{ marginTop: 9, width: "100%", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#A65DC1", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>📝 Set next week's intention</button>
-          <button type="button" onClick={() => setShareCardOpen(true)} style={{ marginTop: 8, width: "100%", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#A65DC1", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>📸 Share my week</button>
+          <button type="button" onClick={goWriteWeeklyIntention} style={{ display: progressDetailsOpen ? undefined : "none", marginTop: 9, width: "100%", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#A65DC1", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>📝 Set next week's intention</button>
+          <button type="button" onClick={() => setShareCardOpen(true)} style={{ display: progressDetailsOpen ? undefined : "none", marginTop: 8, width: "100%", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#A65DC1", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>📸 Share my week</button>
         </div>
 
-        <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.5)", border: "1px solid #E6D4F2", boxShadow: "0 8px 24px rgba(183,143,224,0.10)" }}>
+        <button type="button" onClick={() => setProgressDetailsOpen((open) => !open)} aria-expanded={progressDetailsOpen} style={{ width: "100%", margin: "-6px 0 14px", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{progressDetailsOpen ? "Hide full progress" : "See full progress"}</button>
+
+        <div style={{ display: progressDetailsOpen ? undefined : "none", marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.5)", border: "1px solid #E6D4F2", boxShadow: "0 8px 24px rgba(183,143,224,0.10)" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
             <div>
               <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "#A65DC1", fontWeight: 800 }}>{new Date(`${currentMonthKey}-01T12:00:00`).toLocaleDateString("en-US", { month: "long" }).toUpperCase()} SO FAR</div>
