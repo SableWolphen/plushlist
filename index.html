@@ -8053,19 +8053,22 @@ function GlowUpTracker() {
           <div style={{ marginBottom: 14, padding: 16, borderRadius: 16, background: "#F7FCFA", border: "1px solid #CFE8E1" }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: "#318C79" }}>STARTER PACKS · ADD A GENTLE HEAD START</div>
             <div style={{ marginTop: 5, fontSize: 11.5, lineHeight: 1.45, color: "#6B7F78" }}>Add a pack whenever you want. It only adds missing every-day tasks — your current list stays exactly as it is.</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 7, marginTop: 10 }}>
-              {TEMPLATE_PACKS.map((pack) => {
-                const selected = starterPackId === pack.id;
-                return <button key={pack.id} type="button" aria-pressed={selected} onClick={() => { setStarterPackId(pack.id); setStarterPackMessage(""); }} style={{ minWidth: 0, padding: "9px 7px", borderRadius: 11, border: selected ? "2px solid #318C79" : "1px solid #CFE8E1", background: selected ? "#E8F7F1" : "white", color: selected ? "#236B5D" : "#5E766F", fontWeight: 900, fontSize: 11, lineHeight: 1.3, cursor: "pointer" }}>
-                  <span style={{ display: "block", fontSize: 17 }}>{pack.emoji}</span>{pack.label}
-                </button>;
-              })}
-            </div>
             {(() => {
               const selectedPack = TEMPLATE_PACKS.find((pack) => pack.id === starterPackId) || TEMPLATE_PACKS[0];
+              const existingTaskNames = new Set(trackerTasks.filter((item) => item.day_id === "daily" && !item.archived_at).map((item) => item.task.trim().toLocaleLowerCase()));
+              const missingTasks = selectedPack.tasks.filter((item) => !existingTaskNames.has(item.task.trim().toLocaleLowerCase()));
               return <>
-                <div style={{ marginTop: 8, fontSize: 11, lineHeight: 1.45, color: "#6B7F78" }}>{selectedPack.tasks.map((item) => item.task).join(" · ")}</div>
-                <button type="button" onClick={addStarterPack} style={{ marginTop: 9, padding: "8px 12px", borderRadius: 10, border: 0, background: "#318C79", color: "white", fontWeight: 900, cursor: "pointer" }}>Add {selectedPack.label}</button>
+                <label style={{ display: "block", marginTop: 11, fontSize: 11, fontWeight: 900, color: "#3E746A" }}>
+                  Choose a starter pack
+                  <select aria-label="Choose a starter pack" value={starterPackId} onChange={(event) => { setStarterPackId(event.target.value); setStarterPackMessage(""); }} style={{ width: "100%", marginTop: 5, padding: "10px 11px", borderRadius: 10, border: "1px solid #9ED8CB", background: "white", color: "#285F55", fontWeight: 800, fontSize: 12.5 }}>
+                    {TEMPLATE_PACKS.map((pack) => <option key={pack.id} value={pack.id}>{pack.emoji} {pack.label}</option>)}
+                  </select>
+                </label>
+                <div style={{ marginTop: 10, padding: "10px 11px", borderRadius: 11, background: "white", border: "1px solid #D6EEE7" }}>
+                  <div style={{ fontSize: 11, fontWeight: 900, color: "#318C79" }}>{missingTasks.length ? `This will add ${missingTasks.length} missing ${missingTasks.length === 1 ? "task" : "tasks"}` : "You already have every task in this pack"}</div>
+                  {missingTasks.length > 0 && <div style={{ marginTop: 6, display: "grid", gap: 4, fontSize: 11.5, lineHeight: 1.35, color: "#5E766F" }}>{missingTasks.map((item) => <div key={item.task}>○ {item.task}</div>)}</div>}
+                </div>
+                <button type="button" disabled={missingTasks.length === 0} onClick={addStarterPack} style={{ marginTop: 9, padding: "8px 12px", borderRadius: 10, border: 0, background: missingTasks.length ? "#318C79" : "#AFC8C1", color: "white", fontWeight: 900, cursor: missingTasks.length ? "pointer" : "not-allowed" }}>Add {selectedPack.label}</button>
               </>;
             })()}
             {starterPackMessage && <div role={starterPackMessage.includes("Couldn't") ? "alert" : "status"} aria-live="polite" style={{ marginTop: 8, fontSize: 11.5, lineHeight: 1.45, color: starterPackMessage.includes("Couldn't") ? "#B24D65" : "#318C79", fontWeight: 700 }}>{starterPackMessage}</div>}
