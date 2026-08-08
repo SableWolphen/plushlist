@@ -4934,15 +4934,20 @@ function GlowUpTracker() {
     if (!user || targetDate > period.date) return;
     if (targetDate !== period.date) {
       const dateDoneKeys = targetDate === selectedProgressDate
-        ? historicalDoneKeys
-        : new Set((weeklyHistory.find((entry) => entry.progress_date === targetDate)?.completed_keys) || []);
+        ? new Set(longHistoryByDate.get(targetDate) || historicalDoneKeys)
+        : new Set((longHistoryByDate.get(targetDate) || weeklyHistory.find((entry) => entry.progress_date === targetDate)?.completed_keys || []));
       const nextKeys = new Set(dateDoneKeys);
       if (nextKeys.has(key)) nextKeys.delete(key);
       else { nextKeys.add(key); triggerCelebrate(key); }
       const completedKeys = [...nextKeys];
       const previousHistory = [...weeklyHistory];
+      const previousLongHistory = [...longHistory];
       const previousHabitHistory = [...habitHistory];
       setWeeklyHistory((entries) => [
+        ...entries.filter((entry) => entry.progress_date !== targetDate),
+        { progress_date: targetDate, completed_keys: completedKeys },
+      ]);
+      setLongHistory((entries) => [
         ...entries.filter((entry) => entry.progress_date !== targetDate),
         { progress_date: targetDate, completed_keys: completedKeys },
       ]);
@@ -4965,6 +4970,7 @@ function GlowUpTracker() {
             return;
           }
           setWeeklyHistory(previousHistory);
+          setLongHistory(previousLongHistory);
           setHabitHistory(previousHabitHistory);
           setSyncStatus("error");
           return;
@@ -5594,6 +5600,37 @@ function GlowUpTracker() {
     todayDailyCoreKeys.every((key) => completedKeysForToday.has(key));
 
   const longHistoryByDate = new Map(longHistory.map((entry) => [entry.progress_date, new Set(entry.completed_keys || [])]));
+  const markPastTasksDone = async (date, taskKeys) => {
+    if (!user || date >= period.date || taskKeys.length === 0) return;
+    const alreadyDone = new Set(longHistoryByDate.get(date) || []);
+    const missingKeys = taskKeys.filter((key) => !alreadyDone.has(key));
+    if (missingKeys.length === 0) return;
+    if (!window.confirm(`Mark these ${missingKeys.length} activities as done for ${new Date(`${date}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}? You can still uncheck any one afterward.`)) return;
+    const completedKeys = [...new Set([...alreadyDone, ...taskKeys])];
+    const previousHistory = [...weeklyHistory];
+    const previousLongHistory = [...longHistory];
+    const previousHabitHistory = [...habitHistory];
+    const entry = { progress_date: date, completed_keys: completedKeys };
+    setWeeklyHistory((entries) => [...entries.filter((item) => item.progress_date !== date), entry]);
+    setLongHistory((entries) => [...entries.filter((item) => item.progress_date !== date), entry]);
+    setHabitHistory((entries) => [...entries.filter((item) => item.progress_date !== date), entry]);
+    setSyncStatus("syncing");
+    const { error } = await supabase.from("daily_progress").upsert({
+      user_id: user.id,
+      progress_date: date,
+      completed_keys: completedKeys,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id,progress_date" });
+    if (error) {
+      setWeeklyHistory(previousHistory);
+      setLongHistory(previousLongHistory);
+      setHabitHistory(previousHabitHistory);
+      setSyncStatus(navigator.onLine ? "error" : "offline");
+      return;
+    }
+    setSyncStatus("ready");
+    setLastSyncedAt(new Date().toISOString());
+  };
   const dayCompletionPct = (date) => {
     if (date > period.date) return null;
     const requiredKeys = requiredKeysForDate(date);
@@ -9236,6 +9273,8 @@ function GlowUpTracker() {
               return <button key={date} type="button" disabled={isFutureDate} title={calendarTitle || undefined} aria-label={calendarTitle ? `${number}: ${calendarTitle}` : String(number)} onClick={() => {
                 if (isFutureDate) return;
                 setSelectedProgressDate(date);
+                setDayViewDate(date);
+                setWeekCardIndex(2);
                 if (date === period.date) setActive("daily");
                 if (hasReflection && !checkIn) setReflectionViewerDate(date);
                 if (checkIn) setCheckInViewerDate(date);
@@ -9355,14 +9394,18 @@ function GlowUpTracker() {
           const groupedTasks = ["Morning", "Afternoon", "Evening", "Anytime"]
             .map((group) => ({ group, tasks: previewTasks.filter((task) => timeBucket(task) === group) }))
             .filter((entry) => entry.tasks.length > 0);
+          const completedForViewedDay = longHistoryByDate.get(dayViewDate) || new Set();
+          const catchUpTasks = !isFuture && dayViewDate !== period.date
+            ? previewTasks.filter((task) => !isTaskPausedOnDate(task, dayViewDate) && !completedForViewedDay.has(task.task_key))
+            : [];
           return (
             <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.5)", border: "1px solid #E6D4F2", boxShadow: "0 8px 24px rgba(183,143,224,0.10)" }}>
               <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "#A65DC1", fontWeight: 800 }}>📆 DAY VIEW</div>
               <div style={{ marginTop: 4, fontSize: 11.5, color: "#8C6B9E" }}>Jump to any date — past days show what actually happened, future days show what's planned.</div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12, flexWrap: "wrap" }}>
-                <button type="button" aria-label="Previous day" onClick={() => { const next = offsetDate(dayViewDate, -1); setDayViewDate(next); setSelectedProgressDate(next); if (next === period.date) setActive("daily"); }} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #DCC9E8", background: "white", color: "#8E4EAA", cursor: "pointer" }}>←</button>
-                <input type="date" value={dayViewDate} max={offsetDate(period.date, 365)} onChange={(event) => { const next = event.target.value || period.date; setDayViewDate(next); setSelectedProgressDate(next); if (next === period.date) setActive("daily"); }} style={{ padding: "6px 8px", borderRadius: 8, border: "1px solid #DCC9E8", fontSize: 12.5 }} />
-                <button type="button" aria-label="Next day" onClick={() => { const next = offsetDate(dayViewDate, 1); setDayViewDate(next); setSelectedProgressDate(next); if (next === period.date) setActive("daily"); }} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #DCC9E8", background: "white", color: "#8E4EAA", cursor: "pointer" }}>→</button>
+                <button type="button" aria-label="Previous day" onClick={() => { const next = offsetDate(dayViewDate, -1); setDayViewDate(next); setSelectedProgressDate(next); setReflectionCalendarMonth(next.slice(0, 7)); if (next === period.date) setActive("daily"); }} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #DCC9E8", background: "white", color: "#8E4EAA", cursor: "pointer" }}>←</button>
+                <input type="date" value={dayViewDate} max={offsetDate(period.date, 365)} onChange={(event) => { const next = event.target.value || period.date; setDayViewDate(next); setSelectedProgressDate(next); setReflectionCalendarMonth(next.slice(0, 7)); if (next === period.date) setActive("daily"); }} style={{ padding: "6px 8px", borderRadius: 8, border: "1px solid #DCC9E8", fontSize: 12.5 }} />
+                <button type="button" aria-label="Next day" onClick={() => { const next = offsetDate(dayViewDate, 1); setDayViewDate(next); setSelectedProgressDate(next); setReflectionCalendarMonth(next.slice(0, 7)); if (next === period.date) setActive("daily"); }} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #DCC9E8", background: "white", color: "#8E4EAA", cursor: "pointer" }}>→</button>
                 {dayViewDate !== period.date && <button type="button" onClick={() => { setDayViewDate(period.date); setSelectedProgressDate(period.date); setActive("daily"); }} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #DCC9E8", background: "white", color: "#8E4EAA", fontWeight: 800, fontSize: 11, cursor: "pointer" }}>Today</button>}
               </div>
               <div style={{ marginTop: 10, fontSize: 14, fontWeight: 900, color: "#5B4B6B" }}>
@@ -9370,6 +9413,7 @@ function GlowUpTracker() {
                 {isRestDay && !isFuture ? " · 🌴 Resting" : pct !== null ? ` · ${pct}% complete` : isFuture ? " · Planned" : ""}
               </div>
               {checkIn && <div style={{ marginTop: 6, fontSize: 12, color: "#8C6B9E" }}>{moodOption ? `Feeling ${moodOption[2]}` : ""}</div>}
+              {catchUpTasks.length > 0 && <button type="button" onClick={() => markPastTasksDone(dayViewDate, catchUpTasks.map((task) => task.task_key))} style={{ marginTop: 10, width: "100%", padding: "9px 11px", borderRadius: 10, border: "1px solid #A9DCCD", background: "#F4FFF9", color: "#318C79", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>✓ Catch up: mark {catchUpTasks.length} remaining {catchUpTasks.length === 1 ? "activity" : "activities"} as done</button>}
               {!dayViewExpanded ? (
                 <button type="button" onClick={() => setDayViewExpanded(true)} style={{ marginTop: 12, width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#5B4B6B", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>
                   <span>📋 {previewTasks.length} {previewTasks.length === 1 ? "activity" : "activities"}</span>
@@ -9396,13 +9440,14 @@ function GlowUpTracker() {
                         // about it; future ones say "Planned".
                         const label = paused ? "⏸ Paused" : isFuture ? "Planned" : isDone ? "✓ Done" : isToday ? "" : "Missed";
                         return (
-                          <div key={task.task_key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "7px 10px", borderRadius: 9, background: "#FFFFFFAA", border: "1px solid #EADDE2", fontSize: 12, color: "#5B4B6B" }}>
-                            <span>
+                          <label key={task.task_key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "7px 10px", borderRadius: 9, background: "#FFFFFFAA", border: "1px solid #EADDE2", fontSize: 12, color: "#5B4B6B", cursor: isFuture || paused ? "default" : "pointer" }}>
+                            <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                              {!isFuture && !paused && <input type="checkbox" checked={isDone} onChange={() => toggle(task.task_key, dayViewDate)} aria-label={`Mark ${task.task} done for ${dayViewDate}`} />}
                               <HabitTypeIcon task={task} />
                               {taskIsOptional(task) ? "⭐ " : ""}{task.task}
                             </span>
                             {label && <span style={{ fontSize: 10.5, fontWeight: 800, color: paused ? "#9A6918" : isDone ? "#318C79" : "#B0576B" }}>{label}</span>}
-                          </div>
+                          </label>
                         );
                       })}
                     </div>
