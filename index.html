@@ -8927,7 +8927,6 @@ function GlowUpTracker() {
               <div style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 800 }}>{selectedTaskViewIsRest ? "REST DAY" : isFutureView ? `${selectedTaskDateLabel.toUpperCase()} TASKS` : isHistoricalView ? `${selectedTaskDateLabel.toUpperCase()} HISTORY` : "TODAY'S TASKS"}</div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 7, flexWrap: "wrap" }}>
                 <span style={{ fontSize: 13, color: day.accent, fontWeight: 700 }}>{selectedTaskViewIsRest ? "NO TASKS REQUIRED" : `${pct}% · ${requiredDoneCount}/${requiredRows.length}`}</span>
-                {!selectedTaskViewIsRest && ((preferences.focus_mode && !focusModeShowAll) || taskListCollapsed) && <button type="button" onClick={() => { if (preferences.focus_mode && !focusModeShowAll) setFocusModeShowAll(true); setTaskListCollapsed(false); }} style={{ padding: "6px 9px", borderRadius: 8, border: `1px solid ${day.accent}55`, background: "white", color: day.accent, fontWeight: 900, fontSize: 11, cursor: "pointer" }}>📋 See all tasks</button>}
                 {!isHistoricalView && <button type="button" onClick={() => openTaskManager(dayIdForDate(period.date))} style={{ padding: "6px 9px", borderRadius: 8, border: `1px solid ${day.accent}55`, background: "white", color: day.accent, fontWeight: 900, fontSize: 11, cursor: "pointer" }}>✏️ Edit tasks</button>}
               </div>
             </div>
@@ -9001,12 +9000,23 @@ function GlowUpTracker() {
                   </div>
                 </div>
               );
-            })() : taskListCollapsed ? (
-              <button type="button" onClick={() => setTaskListCollapsed(false)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 14px", borderRadius: 13, border: `1px solid ${day.accent}55`, background: "white", cursor: "pointer", textAlign: "left" }}>
-                <span style={{ fontWeight: 800, fontSize: 13.5, color: "#5B4B6B" }}>📋 See today's full list</span>
-                <span style={{ fontWeight: 900, fontSize: 12.5, color: day.accent }}>{requiredDoneCount}/{requiredRows.length} done ›</span>
-              </button>
-            ) : (
+            })() : taskListCollapsed ? (() => {
+              const pendingRows = rows.filter((r) => !viewDone[r.key] && !(r.sourceTask && isTaskPausedOnDate(r.sourceTask, period.date)));
+              const requiredPendingRows = pendingRows.filter((r) => !r.isBonus);
+              const previewRows = (requiredPendingRows.length ? requiredPendingRows : pendingRows).slice(0, 3);
+              const pendingCount = pendingRows.length;
+              return (
+                <button type="button" onClick={() => setTaskListCollapsed(false)} style={{ width: "100%", display: "block", padding: "13px 14px", borderRadius: 13, border: `1px solid ${day.accent}55`, background: "white", cursor: "pointer", textAlign: "left" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontWeight: 900, fontSize: 13.5, color: "#5B4B6B" }}>📋 {pendingCount ? `${pendingCount} task${pendingCount === 1 ? "" : "s"} still waiting` : "Today's tasks"}</span>
+                    <span style={{ fontWeight: 900, fontSize: 12.5, color: day.accent, whiteSpace: "nowrap" }}>See full list ›</span>
+                  </div>
+                  {previewRows.length > 0 && <div style={{ marginTop: 8, display: "grid", gap: 4 }}>
+                    {previewRows.map((r) => <div key={r.key} style={{ fontSize: 12, color: "#6B5A7D", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>○ {r.sourceTask && <HabitTypeIcon task={r.sourceTask} />}{r.label}</div>)}
+                  </div>}
+                </button>
+              );
+            })() : (
               <>
                 <button type="button" onClick={() => setTaskListCollapsed(true)} style={{ marginBottom: 10, padding: "7px 11px", borderRadius: 9, border: "1px solid #E6D4F2", background: "white", color: "#8C6B9E", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>▾ Collapse list</button>
                 {preferences.focus_mode && (
