@@ -5222,6 +5222,13 @@ function GlowUpTracker() {
   const habitTasks = trackerTasks
     .filter((task) => habitTypeForTask(task) !== "regular")
     .map((task) => ({ ...task, habitType: habitTypeForTask(task), stats: habitStatsForTask(task) }));
+  const habitGardenTotalCheckIns = habitTasks.reduce((total, task) => total + task.stats.total, 0);
+  const habitGardenGrowthPct = habitTasks.length
+    ? Math.round(habitTasks.reduce((total, task) => {
+      const nextCount = task.stats.nextReward?.count;
+      return total + (nextCount ? Math.min(100, (task.stats.total / nextCount) * 100) : 100);
+    }, 0) / habitTasks.length)
+    : 0;
   const bestBuildHabitStreak = Math.max(
     0,
     ...habitTasks.filter((task) => task.habitType === "build").map((task) => task.stats.best)
@@ -9413,6 +9420,11 @@ function GlowUpTracker() {
             <div style={{ fontSize: 11, letterSpacing: "0.14em", fontWeight: 900, color: "#318C79" }}>🌱 HABIT GARDEN & REWARDS</div>
             <div style={{ marginTop: 5, fontSize: 12, lineHeight: 1.5, color: "#5E766F" }}>
               Habits you are building grow here, and habits you are breaking count as caring wins too. A reset never takes away a badge you already earned.
+            </div>
+            <div style={{ marginTop: 10, padding: "9px 10px", borderRadius: 11, background: "#FFFFFFB8", border: "1px solid #D7EEE2" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline", color: "#4D746A" }}><strong style={{ fontSize: 11.5 }}>Growing toward your next rewards</strong><strong style={{ fontSize: 13 }}>{habitGardenGrowthPct}%</strong></div>
+              <div style={{ height: 7, marginTop: 6, overflow: "hidden", borderRadius: 99, background: "#E2F3EA" }}><div style={{ width: `${habitGardenGrowthPct}%`, height: "100%", borderRadius: 99, background: "linear-gradient(90deg,#4DD0B0,#4C8FE8)", transition: "width .4s ease" }} /></div>
+              <div style={{ marginTop: 5, fontSize: 10.5, color: "#6B8A82" }}>{habitGardenTotalCheckIns} caring {habitGardenTotalCheckIns === 1 ? "check-in" : "check-ins"} across {habitTasks.length} {habitTasks.length === 1 ? "habit" : "habits"}.</div>
             </div>
             <button type="button" onClick={() => setHabitGardenOpen((open) => !open)} aria-expanded={habitGardenOpen} style={{ marginTop: 10, padding: "6px 9px", borderRadius: 8, border: "1px solid #A9DFC4", background: "white", color: "#318C79", fontWeight: 900, fontSize: 10.5, cursor: "pointer" }}>{habitGardenOpen ? "Hide garden details" : `View ${habitTasks.length} habits`}</button>
             {habitGardenOpen && <div style={{ display: "grid", gap: 8, marginTop: 11 }}>
