@@ -1856,6 +1856,9 @@ function GlowUpTracker() {
   const [scheduleDraft, setScheduleDraft] = useState({ entries: [] });
   const [scheduleMessage, setScheduleMessage] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [arrivalRitualVisible, setArrivalRitualVisible] = useState(true);
+  const [careExtraSupportOpen, setCareExtraSupportOpen] = useState(false);
+  const [habitGardenOpen, setHabitGardenOpen] = useState(false);
   const [preferences, setPreferences] = useState({
     notifications_enabled: false,
     reminder_times: ["08:00", "12:30", "17:30", "20:30"],
@@ -6935,13 +6938,16 @@ function GlowUpTracker() {
             onOpenCloset={() => setCollectionOpen(true)}
           />
         )}
-        {user && babyMode && dashboard === "today" && (
-          <BabyArrivalRitual
-            comfortItemName={trackerProfile?.comfort_item_name?.trim() || ""}
-            onShowTinyThing={() => setTodayCardIndex(1)}
-            onSoftDay={() => selectDayType("soft")}
-            onShowPlanner={() => setTodayCardIndex(1)}
-          />
+        {user && babyMode && dashboard === "today" && arrivalRitualVisible && (
+          <div style={{ position: "relative" }}>
+            <BabyArrivalRitual
+              comfortItemName={trackerProfile?.comfort_item_name?.trim() || ""}
+              onShowTinyThing={() => setTodayCardIndex(1)}
+              onSoftDay={() => selectDayType("soft")}
+              onShowPlanner={() => setTodayCardIndex(1)}
+            />
+            <button type="button" onClick={() => setArrivalRitualVisible(false)} style={{ position: "absolute", top: 8, right: 8, padding: "4px 7px", borderRadius: 8, border: "1px solid #E6BCEB", background: "#FFFFFFCC", color: "#9A62AB", fontWeight: 800, fontSize: 10, cursor: "pointer" }}>Tuck away</button>
+          </div>
         )}
 
         {user && (betaBannerDismissed ? (
@@ -7021,6 +7027,9 @@ function GlowUpTracker() {
               {careMessage && <div aria-live="polite" style={{ marginTop: 10, padding: "9px 11px", borderRadius: 10, background: "#FFFFFFB8", color: "#5E766F", fontSize: 11.5, lineHeight: 1.5 }}>{careMessage}</div>}
             </div>
 
+            <details open={careExtraSupportOpen} onToggle={(event) => setCareExtraSupportOpen(event.currentTarget.open)} style={{ borderRadius: 14, border: "1px solid #E6D4F2", background: "#FFFFFF99", padding: "10px 12px" }}>
+              <summary style={{ color: "#76558A", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>More cozy support</summary>
+              <div style={{ marginTop: 10, display: "grid", gap: 12 }}>
             {isMamaCornerProfile && <MamasCorner incompleteTasks={rows.filter((row) => !viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => toggle(taskKey)} />}
 
             {babyMode && (
@@ -7035,6 +7044,8 @@ function GlowUpTracker() {
                 onSoftDay={() => selectDayType("soft")}
               />
             )}
+              </div>
+            </details>
 
             <div role="tablist" aria-label="Care library" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 7, padding: 6, borderRadius: 15, background: "#FFFFFF99", border: "1px solid #E6D4F2" }}>
               {[["quick", "🌿", "PlushCalm"], ["paths", "🗺️", "PlushPaths"], ["sleep", "🌙", "PlushSleep"]].map(([value, icon, label]) => (
@@ -9403,7 +9414,8 @@ function GlowUpTracker() {
             <div style={{ marginTop: 5, fontSize: 12, lineHeight: 1.5, color: "#5E766F" }}>
               Habits you are building grow here, and habits you are breaking count as caring wins too. A reset never takes away a badge you already earned.
             </div>
-            <div style={{ display: "grid", gap: 8, marginTop: 11 }}>
+            <button type="button" onClick={() => setHabitGardenOpen((open) => !open)} aria-expanded={habitGardenOpen} style={{ marginTop: 10, padding: "6px 9px", borderRadius: 8, border: "1px solid #A9DFC4", background: "white", color: "#318C79", fontWeight: 900, fontSize: 10.5, cursor: "pointer" }}>{habitGardenOpen ? "Hide garden details" : `View ${habitTasks.length} habits`}</button>
+            {habitGardenOpen && <div style={{ display: "grid", gap: 8, marginTop: 11 }}>
               {habitTasks.map((habit) => {
                 const nextCount = habit.stats.nextReward?.count;
                 const progressPct = nextCount ? Math.min(100, Math.round((habit.stats.total / nextCount) * 100)) : 100;
@@ -9453,7 +9465,7 @@ function GlowUpTracker() {
                 </div>
                 );
               })}
-            </div>
+            </div>}
           </div>
         )}
 
