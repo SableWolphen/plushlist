@@ -6348,6 +6348,7 @@ function GlowUpTracker() {
         .dash-arrow { flex-shrink: 0; }
         @media (max-width: 640px) {
           .dash-arrow { display: none; }
+          .today-reflection-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
         }
         @media (max-width: 480px) {
           .app-title { font-size: 22px !important; line-height: 1.08; letter-spacing: -0.035em !important; }
@@ -8821,7 +8822,7 @@ function GlowUpTracker() {
           );
         })()}
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8, marginBottom: 14 }}>
+        <div className="today-reflection-grid" style={{ display: "grid", gridTemplateColumns: weeklyIntentionText ? "repeat(2, minmax(0, 1fr))" : "1fr", gap: 8, marginBottom: 14 }}>
         {weeklyIntentionText && <div style={{ marginBottom: 0, padding: "10px 12px", borderRadius: 12, background: "#F9F1FC", border: "1px solid #E6D4F2" }}>
           <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "center", gap: 8 }}>
             <div style={{ fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#8E4EAA" }}>📮 PLUSHPOST</div>
