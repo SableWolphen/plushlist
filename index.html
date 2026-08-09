@@ -1696,6 +1696,7 @@ function GlowUpTracker() {
   const newTaskNameInputRef = React.useRef(null);
   const restoreFileInputRef = React.useRef(null);
   const [todayCardIndex, setTodayCardIndex] = useState(0);
+  const [todayExtrasOpen, setTodayExtrasOpen] = useState(false);
   const [taskListCollapsed, setTaskListCollapsed] = useState(true);
   const [weekCardIndex, setWeekCardIndex] = useState(() => {
     try {
@@ -6976,6 +6977,13 @@ function GlowUpTracker() {
         </div>
 
         {user && babyMode && dashboard === "today" && (
+          <div style={{ marginBottom: 14, display: "flex", justifyContent: "flex-end" }}>
+            <button type="button" onClick={() => setTodayExtrasOpen((open) => !open)} aria-expanded={todayExtrasOpen} style={{ padding: "6px 11px", borderRadius: 999, border: "1px solid #E6D4F2", background: "#FFFFFFAA", color: "#8C6B9E", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>
+              {todayExtrasOpen ? "🧸 Hide nursery greeting" : "🧸 Show nursery greeting"}
+            </button>
+          </div>
+        )}
+        {user && babyMode && dashboard === "today" && todayExtrasOpen && (
           <NurseryNook
             outfit={selectedOutfit}
             mood={mascotMood}
@@ -6983,16 +6991,13 @@ function GlowUpTracker() {
             onOpenCloset={() => setCollectionOpen(true)}
           />
         )}
-        {user && babyMode && dashboard === "today" && arrivalRitualVisible && (
-          <div style={{ position: "relative" }}>
-            <BabyArrivalRitual
-              comfortItemName={trackerProfile?.comfort_item_name?.trim() || ""}
-              onShowTinyThing={() => setTodayCardIndex(1)}
-              onSoftDay={() => selectDayType("soft")}
-              onShowPlanner={() => setTodayCardIndex(1)}
-            />
-            <button type="button" onClick={() => setArrivalRitualVisible(false)} style={{ position: "absolute", top: 8, right: 8, padding: "4px 7px", borderRadius: 8, border: "1px solid #E6BCEB", background: "#FFFFFFCC", color: "#9A62AB", fontWeight: 800, fontSize: 10, cursor: "pointer" }}>Tuck away</button>
-          </div>
+        {user && babyMode && dashboard === "today" && todayExtrasOpen && (
+          <BabyArrivalRitual
+            comfortItemName={trackerProfile?.comfort_item_name?.trim() || ""}
+            onShowTinyThing={() => setTodayCardIndex(1)}
+            onSoftDay={() => selectDayType("soft")}
+            onShowPlanner={() => setTodayCardIndex(1)}
+          />
         )}
 
         {user && (betaBannerDismissed ? (
