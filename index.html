@@ -2022,6 +2022,7 @@ function GlowUpTracker() {
     baby_voice: "motherly",
     beta_banner_dismissed: false,
     last_seen_changelog: "",
+    task_group_order: [],
     is_supporter: false,
     onboarding_reason: null,
     colorblind_mode: false,
@@ -3578,6 +3579,31 @@ function GlowUpTracker() {
       .filter(Boolean);
     return Array.from(new Set([...sectionsForSelectedList, ...sectionsFromOtherLists]));
   };
+  const existingTaskGroups = Array.from(new Set(trackerTasks.map((task) => task.section).filter(Boolean)));
+  const taskGroupOrder = [
+    ...(Array.isArray(preferences.task_group_order) ? preferences.task_group_order : []).filter((section) => existingTaskGroups.includes(section)),
+    ...existingTaskGroups.filter((section) => !preferences.task_group_order?.includes(section)),
+  ];
+  const moveTaskGroup = async (section, direction, visibleSections = taskGroupOrder) => {
+    const visibleIndex = visibleSections.indexOf(section);
+    const targetSection = visibleSections[visibleIndex + direction];
+    const currentIndex = taskGroupOrder.indexOf(section);
+    const targetIndex = taskGroupOrder.indexOf(targetSection);
+    if (!user || currentIndex < 0 || targetIndex < 0) return;
+    const nextOrder = [...taskGroupOrder];
+    [nextOrder[currentIndex], nextOrder[targetIndex]] = [nextOrder[targetIndex], nextOrder[currentIndex]];
+    const previousOrder = Array.isArray(preferences.task_group_order) ? preferences.task_group_order : [];
+    setPreferences((current) => ({ ...current, task_group_order: nextOrder }));
+    const { error } = await supabase.from("app_preferences").upsert({
+      user_id: user.id,
+      task_group_order: nextOrder,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id" });
+    if (error) {
+      setPreferences((current) => ({ ...current, task_group_order: previousOrder }));
+      setTaskMessage("Couldn't save that group order. Nothing changed.");
+    }
+  };
   const sectionIsOptional = (dayId, section) => {
     const matchingTasks = trackerTasks.filter((item) => item.day_id === dayId && item.section === section);
     return matchingTasks.length
@@ -4584,6 +4610,7 @@ function GlowUpTracker() {
       baby_voice: nextPreferences.baby_voice === "fatherly" ? "fatherly" : "motherly",
       beta_banner_dismissed: !!nextPreferences.beta_banner_dismissed,
       onboarding_reason: nextPreferences.onboarding_reason || null,
+      task_group_order: Array.isArray(nextPreferences.task_group_order) ? nextPreferences.task_group_order : [],
       last_seen_changelog: nextPreferences.last_seen_changelog || "",
       updated_at: new Date().toISOString(),
     };
@@ -5589,12 +5616,9 @@ function GlowUpTracker() {
       if (a.day_id !== b.day_id) return a.day_id === "daily" ? -1 : b.day_id === "daily" ? 1 : 0;
       return a.sort_order - b.sort_order;
     });
-  // Keep every saved section contiguous on the Today/preview list. A section
-  // such as "MY TASKS" can contain both true every-day rows and rows scheduled
-  // only for this weekday; the old daily-first sort split those into two
-  // visually identical headings. Preserve the first-seen section order while
-  // keeping each section's own task order intact.
-  const taskSectionOrder = new Map();
+  // Keep every saved section contiguous and honor the user's saved group order.
+  // New groups that have not been positioned yet retain their first-seen order.
+  const taskSectionOrder = new Map(taskGroupOrder.map((section, index) => [section, index]));
   scheduledTasksForView.forEach((task) => {
     const sectionKey = task.section || "MY TASKS";
     if (!taskSectionOrder.has(sectionKey)) taskSectionOrder.set(sectionKey, taskSectionOrder.size);
@@ -9627,6 +9651,7 @@ function GlowUpTracker() {
                   : dailyCheckIn.soft_day || dailyCheckIn.day_type === "soft"
                     ? rows.filter((r) => !r.isBonus)
                     : rows;
+              const visibleGroupOrder = Array.from(new Set(visibleRows.map((row) => row.section).filter(Boolean)));
               const incompleteRows = visibleRows.filter((r) => !viewDone[r.key] || recentlyCompletedKeys.includes(r.key));
               const completedRows = visibleRows.filter((r) => viewDone[r.key] && !recentlyCompletedKeys.includes(r.key));
               const renderRow = (r) => {
@@ -9641,8 +9666,14 @@ function GlowUpTracker() {
                 return (
                   <div key={r.key}>
                     {header && (
-                      <div style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 700, margin: "12px 2px 6px", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}>
-                        {header.toUpperCase()}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, margin: "12px 2px 6px", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}>
+                        <span style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 700 }}>{header.toUpperCase()}</span>
+                        {!isFutureView && !isHistoricalView && visibleGroupOrder.length > 1 && (
+                          <span style={{ display: "flex", gap: 3 }}>
+                            <button type="button" disabled={visibleGroupOrder.indexOf(r.section) === 0} onClick={() => moveTaskGroup(r.section, -1, visibleGroupOrder)} aria-label={`Move ${header} group earlier`} title="Move group earlier" style={{ width: 26, height: 26, minHeight: 26, padding: 0, borderRadius: 8, border: "1px solid #E7D2E8", background: "rgba(255,255,255,.55)", color: day.accent, opacity: visibleGroupOrder.indexOf(r.section) === 0 ? .3 : 1, fontWeight: 900, cursor: visibleGroupOrder.indexOf(r.section) === 0 ? "default" : "pointer" }}>↑</button>
+                            <button type="button" disabled={visibleGroupOrder.indexOf(r.section) === visibleGroupOrder.length - 1} onClick={() => moveTaskGroup(r.section, 1, visibleGroupOrder)} aria-label={`Move ${header} group later`} title="Move group later" style={{ width: 26, height: 26, minHeight: 26, padding: 0, borderRadius: 8, border: "1px solid #E7D2E8", background: "rgba(255,255,255,.55)", color: day.accent, opacity: visibleGroupOrder.indexOf(r.section) === visibleGroupOrder.length - 1 ? .3 : 1, fontWeight: 900, cursor: visibleGroupOrder.indexOf(r.section) === visibleGroupOrder.length - 1 ? "default" : "pointer" }}>↓</button>
+                          </span>
+                        )}
                       </div>
                     )}
                     <div

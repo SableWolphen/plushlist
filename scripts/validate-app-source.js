@@ -67,6 +67,8 @@ const requiredRegressionMarkers = [
   'const startPointerTaskDrag = (event, taskKey, taskLabel) => {',
   'data-plushlife-task-drag-scope',
   'const sectionsFromOtherLists = trackerTasks',
+  'const moveTaskGroup = async (section, direction, visibleSections = taskGroupOrder) => {',
+  'aria-label={`Move ${header} group earlier`}',
 ];
 
 for (const marker of requiredRegressionMarkers) {
