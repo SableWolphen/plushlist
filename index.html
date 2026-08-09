@@ -4033,6 +4033,7 @@ function GlowUpTracker() {
     if (!drag) return;
     if (drag.activationTimer) clearTimeout(drag.activationTimer);
     if (drag.autoScrollFrame) cancelAnimationFrame(drag.autoScrollFrame);
+    (drag.wiggleAnimations || []).forEach((animation) => animation.cancel());
     drag.preview?.remove();
     drag.placeholder?.remove();
     if (drag.row) {
@@ -4123,6 +4124,17 @@ function GlowUpTracker() {
       overflow: drag.row.style.overflow, pointerEvents: drag.row.style.pointerEvents,
     };
     Object.assign(drag.row.style, { height: "0px", minHeight: "0px", margin: "0px", padding: "0px", borderWidth: "0px", opacity: "0", overflow: "hidden", pointerEvents: "none" });
+    drag.wiggleAnimations = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+      ? []
+      : taskDropRows(drag.scope)
+        .filter((row) => row !== drag.row)
+        .map((row, index) => row.animate(
+          [
+            { translate: "-1px 0", rotate: "-0.12deg" },
+            { translate: "1px 0", rotate: "0.12deg" },
+          ],
+          { duration: 180, iterations: Infinity, direction: "alternate", easing: "ease-in-out", delay: -(index % 4) * 35 }
+        ));
     const preview = document.createElement("div");
     preview.setAttribute("role", "status");
     preview.style.cssText = `position:fixed;z-index:9999;width:${Math.min(rect.width, 330)}px;box-sizing:border-box;padding:11px 13px;border:1px solid #E6D4F2;border-radius:12px;background:#FFFCFE;color:#5B4B6B;box-shadow:0 16px 34px rgba(66,42,78,.28);pointer-events:none;font-family:inherit;line-height:1.35`;
@@ -4152,7 +4164,7 @@ function GlowUpTracker() {
     const drag = {
       pointerId: event.pointerId, handle: event.currentTarget, row, scope: row.closest("[data-plushlife-task-drag-scope]") || document, taskKey, label: taskLabel,
       startX: event.clientX, startY: event.clientY, lastX: event.clientX, lastY: event.clientY,
-      active: false, destinationSignature: null, targetSection: null, targetKey: null, autoScrollFrame: null, activationTimer: null,
+      active: false, destinationSignature: null, targetSection: null, targetKey: null, autoScrollFrame: null, activationTimer: null, wiggleAnimations: [],
     };
     taskPointerDragRef.current = drag;
     if (event.pointerType === "touch" || event.pointerType === "pen") {
