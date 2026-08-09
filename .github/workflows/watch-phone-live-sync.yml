@@ -1,0 +1,58 @@
+name: Patch phone watch live sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/watch-phone-live-sync.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Add realtime daily progress listener
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'index.html';
+          let src = fs.readFileSync(path, 'utf8');
+          if (src.includes('plushlife-watch-progress-')) {
+            console.log('Realtime watch sync already present.');
+            process.exit(0);
+          }
+          const anchor = `        setSyncStatus("ready");\n      });\n    return () => { active = false; };\n  }, [user?.id, period.date]);\n\n  useEffect(() => {`;
+          if (!src.includes(anchor)) throw new Error('Could not locate daily progress loading hook');
+          const realtime = `        setSyncStatus("ready");\n      });\n    return () => { active = false; };\n  }, [user?.id, period.date]);\n\n  // Keep the phone UI in step with changes made from a connected watch.\n  // The watch writes the same daily_progress row as the phone, and Realtime\n  // updates the visible checklist without making the user refresh the app.\n  useEffect(() => {\n    if (!user?.id) return;\n    const channel = supabase\n      .channel(\`plushlife-watch-progress-\${user.id}-\${period.date}\`)\n      .on(\"postgres_changes\", {\n        event: \"*\",\n        schema: \"public\",\n        table: \"daily_progress\",\n        filter: \`user_id=eq.\${user.id}\`,\n      }, (payload) => {\n        const next = payload?.new;\n        if (!next || next.progress_date !== period.date) return;\n        const completedKeys = Array.isArray(next.completed_keys) ? next.completed_keys : [];\n        setDone(Object.fromEntries(completedKeys.map((key) => [key, true])));\n        setWeeklyHistory((entries) => [\n          ...entries.filter((entry) => entry.progress_date !== period.date),\n          { progress_date: period.date, completed_keys: completedKeys },\n        ]);\n        setHabitHistory((entries) => [\n          ...entries.filter((entry) => entry.progress_date !== period.date),\n          { progress_date: period.date, completed_keys: completedKeys, updated_at: next.updated_at || new Date().toISOString() },\n        ]);\n        setLastSyncedAt(next.updated_at || new Date().toISOString());\n        setSyncStatus(\"ready\");\n      })\n      .subscribe();\n    return () => { supabase.removeChannel(channel); };\n  }, [user?.id, period.date]);\n\n  useEffect(() => {`;
+          src = src.replace(anchor, realtime);
+          fs.writeFileSync(path, src);
+          NODE
+      - name: Install dependencies
+        run: npm ci
+      - name: Run full PlushLife tests
+        run: npm test
+      - name: Verify realtime hook
+        run: |
+          grep -q 'plushlife-watch-progress-' index.html
+          grep -q 'postgres_changes' index.html
+          grep -q 'daily_progress' index.html
+      - name: Commit phone sync patch
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'No phone sync changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Update phone tasks live from watch'
+          git push origin HEAD:main
