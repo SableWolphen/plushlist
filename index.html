@@ -920,7 +920,7 @@ const SLEEP_TOOLS = [
   { id: "phone_pause", icon: "📵", title: "Help me leave my phone", steps: ["Set a two-minute timer.", "Place the phone beyond arm's reach when it ends.", "Choose one quiet replacement: stretch, breathe, or listen.", "You can return tomorrow. Nothing needs your attention tonight."] },
 ];
 const SOUNDSCAPES = [
-  { id: "rain", icon: "🌧️", label: "Rain" },
+  { id: "thunderstorm", icon: "⛈️", label: "Thunderstorm" },
   { id: "ocean", icon: "🌊", label: "Ocean" },
   { id: "white_noise", icon: "📻", label: "White Noise" },
   { id: "calm_tone", icon: "🎵", label: "Calm Tone" },
@@ -978,7 +978,13 @@ function makeRainNoiseBuffer(ctx) {
 
 function stopSoundscape() {
   if (!soundscapeNodes) return;
-  const { source, filter, gain, extraOscillators } = soundscapeNodes;
+  const { source, filter, gain, extraOscillators, audio } = soundscapeNodes;
+  if (audio) {
+    try { audio.pause(); } catch (_error) {}
+    try { audio.currentTime = 0; } catch (_error) {}
+    soundscapeNodes = null;
+    return;
+  }
   try { source.stop(); } catch (_error) {}
   source.disconnect();
   if (filter) filter.disconnect();
@@ -992,6 +998,17 @@ function stopSoundscape() {
 
 function startSoundscape(id, volume) {
   stopSoundscape();
+  if (id === "thunderstorm") {
+    const audio = new Audio("./assets/thunderstorm.mp3?v=2");
+    audio.loop = true;
+    audio.preload = "auto";
+    audio.volume = volume;
+    soundscapeNodes = { audio };
+    audio.play().catch(() => {
+      if (soundscapeNodes?.audio === audio) soundscapeNodes = null;
+    });
+    return;
+  }
   const ctx = ensureSoundscapeAudioContext();
   const gain = ctx.createGain();
   gain.gain.value = volume;
@@ -1049,7 +1066,8 @@ function startSoundscape(id, volume) {
 }
 
 function setSoundscapeVolume(volume) {
-  if (soundscapeNodes) soundscapeNodes.gain.gain.value = volume;
+  if (soundscapeNodes?.audio) soundscapeNodes.audio.volume = volume;
+  else if (soundscapeNodes?.gain) soundscapeNodes.gain.gain.value = volume;
 }
 
 const WEEKDAY_IDS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
@@ -3904,6 +3922,7 @@ function GlowUpTracker() {
   };
 
   const taskDragKeyRef = React.useRef(null);
+  const taskDragPointerRef = React.useRef(null);
 
   const reorderTrackerTask = async (sourceKey, targetKey) => {
     if (!sourceKey || !targetKey || sourceKey === targetKey) return;
@@ -4003,6 +4022,22 @@ function GlowUpTracker() {
     const targetSection = taskTarget?.getAttribute("data-plushlife-task-drop-section") || groupTarget?.getAttribute("data-plushlife-task-drop-section") || null;
     taskDragKeyRef.current = null;
     if (targetSection) moveTaskToSection(sourceKey, targetSection, targetKey);
+  };
+
+  const moveTouchTaskDrag = (event) => {
+    const drag = taskDragPointerRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) >= 6) drag.moved = true;
+  };
+
+  const endTouchTaskDrag = (event, fallbackKey) => {
+    const drag = taskDragPointerRef.current;
+    taskDragPointerRef.current = null;
+    const sourceKey = taskDragKeyRef.current || fallbackKey;
+    taskDragKeyRef.current = null;
+    try { event.currentTarget.releasePointerCapture?.(event.pointerId); } catch (_error) {}
+    if (drag?.moved) finishTouchTaskDrag(event, sourceKey);
   };
 
   const startEditingTask = (task) => {
@@ -7457,7 +7492,7 @@ function GlowUpTracker() {
                     {SOUNDSCAPES.map((sound) => {
                       const active = soundscapePlaying === sound.id;
                       return (
-                        <button key={sound.id} type="button" onClick={() => toggleSoundscape(sound.id)} style={{ padding: "10px 8px", borderRadius: 12, border: active ? "2px solid #93A9F5" : "1px solid #3B4A85", background: active ? "#93A9F533" : "#2E3A6B99", color: "#DCE3FA", textAlign: "center", fontWeight: 800, fontSize: 12, cursor: "pointer" }}>
+                        <button key={sound.id} type="button" data-plushlife-soundscape-id={sound.id} onClick={() => toggleSoundscape(sound.id)} style={{ padding: "10px 8px", borderRadius: 12, border: active ? "2px solid #93A9F5" : "1px solid #3B4A85", background: active ? "#93A9F533" : "#2E3A6B99", color: "#DCE3FA", textAlign: "center", fontWeight: 800, fontSize: 12, cursor: "pointer" }}>
                           <div style={{ fontSize: 20 }}>{sound.icon}</div>
                           <div style={{ marginTop: 3 }}>{active ? "⏸ Playing" : sound.label}</div>
                         </button>
@@ -8566,7 +8601,7 @@ function GlowUpTracker() {
                               const sourceKey = event.dataTransfer.getData("text/plain");
                               moveTaskToSection(sourceKey, section, task.task_key);
                             } : undefined}
-                            style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", padding: "9px 10px", borderRadius: 11, background: "#FFFFFFD9", border: isTaskPausedOnDate(task, period.date) ? "1px solid #E9C96E" : "1px solid #DDEBE7" }}
+                            style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", padding: "9px 10px", borderRadius: 11, background: "#FFFFFFD9", border: isTaskPausedOnDate(task, period.date) ? "1px solid #E9C96E" : "1px solid #DDEBE7", userSelect: "none", WebkitUserSelect: "none" }}
                           >
                             {!isSearching && <button
                               type="button"
@@ -8582,15 +8617,21 @@ function GlowUpTracker() {
                               onDragEnd={() => { taskDragKeyRef.current = null; }}
                               onPointerDown={(event) => {
                                 if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
+                                event.preventDefault();
+                                event.stopPropagation();
                                 taskDragKeyRef.current = task.task_key;
+                                taskDragPointerRef.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, moved: false };
                                 event.currentTarget.setPointerCapture?.(event.pointerId);
                               }}
+                              onPointerMove={moveTouchTaskDrag}
                               onPointerUp={(event) => {
                                 if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
-                                finishTouchTaskDrag(event, taskDragKeyRef.current || task.task_key);
+                                endTouchTaskDrag(event, task.task_key);
                               }}
-                              onPointerCancel={() => { taskDragKeyRef.current = null; }}
-                              style={{ flex: "0 0 auto", width: 34, height: 34, padding: 0, borderRadius: 9, border: "1px solid #D6C3E6", background: "#FBF7FD", color: "#76558A", fontWeight: 900, fontSize: 16, lineHeight: 1, cursor: "grab", touchAction: "none" }}
+                              onPointerCancel={() => { taskDragKeyRef.current = null; taskDragPointerRef.current = null; }}
+                              onContextMenu={(event) => event.preventDefault()}
+                              onSelect={(event) => event.preventDefault()}
+                              style={{ flex: "0 0 auto", width: 42, height: 42, padding: 0, borderRadius: 10, border: "1px solid #D6C3E6", background: "#FBF7FD", color: "#76558A", fontWeight: 900, fontSize: 18, lineHeight: 1, cursor: "grab", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}
                             >⋮⋮</button>}
                             <div style={{ flex: "1 1 160px", minWidth: 0 }}>
                               <div style={{ fontSize: 12.5, fontWeight: 900, color: "#5B4B6B", overflowWrap: "anywhere" }}><HabitTypeIcon task={task} />{task.task}{isTaskPausedOnDate(task, period.date) && <span style={{ marginLeft: 6, padding: "2px 7px", borderRadius: 999, background: "#FFFBF2", color: "#A56D14", fontSize: 10, fontWeight: 900 }}>⏸ PAUSED{task.paused_until ? ` UNTIL ${task.paused_until}` : ""}</span>}</div>

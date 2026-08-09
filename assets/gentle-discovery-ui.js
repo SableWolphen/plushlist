@@ -184,6 +184,10 @@
   document.addEventListener("click", (event) => {
     const button = event.target && event.target.closest && event.target.closest("button");
     if (!button) return;
+    if (button.dataset.plushlifeSoundscapeId) {
+      stopThunderstorm();
+      return;
+    }
     const text = cleanText(button.textContent).toLowerCase();
     if (text === "rain" || text === "thunderstorm") {
       event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation();
