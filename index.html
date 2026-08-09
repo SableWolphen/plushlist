@@ -446,38 +446,98 @@ function BabyArrivalRitual({ comfortItemName, onShowTinyThing, onSoftDay, onShow
   );
 }
 
-function MamasCorner({ incompleteTasks, onConfirmTask, caregiverName = "Mommy", parentVoice = "motherly" }) {
+function MamasCorner({ userId, incompleteTasks, onConfirmTask, caregiverName = "Mommy", parentVoice = "motherly" }) {
   const [open, setOpen] = React.useState(false);
   const [draft, setDraft] = React.useState("");
   const [sending, setSending] = React.useState(false);
+  const [historyLoading, setHistoryLoading] = React.useState(false);
   const [error, setError] = React.useState("");
   const [taskToConfirm, setTaskToConfirm] = React.useState(null);
   const [lastTaskAsked, setLastTaskAsked] = React.useState(null);
-  const [messages, setMessages] = React.useState(() => [{ role: "assistant", content: "Hi baby. I’m your PlushLife AI comfort companion. What feels most important to say right now?" }]);
+  const [threadId, setThreadId] = React.useState(null);
+  const [historyLoaded, setHistoryLoaded] = React.useState(false);
+  const messagesEndRef = React.useRef(null);
+  const freshMessages = () => [{ role: "assistant", content: `Hi baby. I’m your PlushLife AI ${caregiverName.toLowerCase()} companion. What feels most important to say right now?` }];
+  const [messages, setMessages] = React.useState(freshMessages);
   const conversationStarters = [
     "Just chat with me",
     "Tell me a cozy story",
     "Let’s play pretend",
     "I need to vent",
   ];
-  const checkInOnTasks = () => {
+  const cleanSavedMessages = (value) => Array.isArray(value) ? value.slice(-100).flatMap((message) => {
+    if (!message || !["user", "assistant"].includes(message.role) || typeof message.content !== "string") return [];
+    const content = message.content.trim().slice(0, 1200);
+    return content ? [{ role: message.role, content }] : [];
+  }) : [];
+  const saveThread = async (nextMessages, targetThreadId = threadId) => {
+    if (!userId || !targetThreadId) return;
+    const { error: saveError } = await supabase.from("mommy_chat_threads").update({ messages: cleanSavedMessages(nextMessages), caregiver_voice: parentVoice, updated_at: new Date().toISOString() }).eq("id", targetThreadId).eq("user_id", userId);
+    if (saveError) throw saveError;
+  };
+  const createFreshThread = async () => {
+    const initial = freshMessages();
+    const { data, error: createError } = await supabase.from("mommy_chat_threads").insert({ user_id: userId, caregiver_voice: parentVoice, title: `${caregiverName}'s cozy chat`, messages: initial }).select("id").single();
+    if (createError) throw createError;
+    setThreadId(data.id);
+    setMessages(initial);
+    setDraft("");
+    setError("");
+    setTaskToConfirm(null);
+    setLastTaskAsked(null);
+    return data.id;
+  };
+  React.useEffect(() => {
+    if (!open || !userId || historyLoaded) return;
+    let cancelled = false;
+    (async () => {
+      setHistoryLoading(true);
+      setError("");
+      try {
+        const { data, error: loadError } = await supabase.from("mommy_chat_threads").select("id, messages").eq("user_id", userId).order("updated_at", { ascending: false }).limit(1).maybeSingle();
+        if (loadError) throw loadError;
+        if (cancelled) return;
+        if (data?.id) {
+          const restored = cleanSavedMessages(data.messages);
+          setThreadId(data.id);
+          setMessages(restored.length ? restored : freshMessages());
+        } else {
+          await createFreshThread();
+        }
+        if (!cancelled) setHistoryLoaded(true);
+      } catch (loadError) {
+        if (!cancelled) setError(`Your private chat history could not load: ${loadError.message || "please try again."}`);
+      } finally {
+        if (!cancelled) setHistoryLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [open, userId, historyLoaded]);
+  React.useEffect(() => {
+    if (open) messagesEndRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+  }, [open, messages, sending]);
+  const checkInOnTasks = async () => {
     const task = (incompleteTasks || [])[0];
-    if (!task || sending) return;
+    if (!task || sending || historyLoading) return;
     setTaskToConfirm(null);
     setLastTaskAsked(task);
     setError("");
-    setMessages((current) => [...current, { role: "assistant", content: `Okay, baby — I see “${task.label}” is still waiting. Did you get it done, or would you like to make it tiny together?` }]);
+    const nextMessages = [...messages, { role: "assistant", content: `Okay, baby — I see “${task.label}” is still waiting. Did you get it done, or would you like to make it tiny together?` }];
+    setMessages(nextMessages);
+    try { await saveThread(nextMessages); } catch (saveError) { setError(`That message is visible here, but could not be saved: ${saveError.message}`); }
   };
   const send = async (messageOverride = null, options = {}) => {
     const text = (typeof messageOverride === "string" ? messageOverride : draft).trim();
     if (!text || sending) return;
     const confirmsLastTask = !!lastTaskAsked && /\b(?:yes|yeah|yep|yup|done|finished|i did(?: that| it)?|i think i did(?: that| it)?|pretty sure|probably)\b/i.test(text);
     if (confirmsLastTask) {
-      setMessages((current) => [...current, { role: "user", content: text }, { role: "assistant", content: `That sounds like a real win, baby. Shall I tuck “${lastTaskAsked.label}” into your done list?` }]);
+      const confirmedMessages = [...messages, { role: "user", content: text }, { role: "assistant", content: `That sounds like a real win, baby. Shall I tuck “${lastTaskAsked.label}” into your done list?` }];
+      setMessages(confirmedMessages);
       setDraft("");
       setError("");
       setTaskToConfirm(lastTaskAsked);
       setLastTaskAsked(null);
+      try { await saveThread(confirmedMessages); } catch (saveError) { setError(`That reply is visible here, but could not be saved: ${saveError.message}`); }
       return;
     }
     const nextMessages = [...messages, { role: "user", content: text }];
@@ -495,7 +555,9 @@ function MamasCorner({ incompleteTasks, onConfirmTask, caregiverName = "Mommy", 
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.reply) throw new Error(result.error || "No reply yet.");
-      setMessages((current) => [...current, { role: "assistant", content: result.reply }]);
+      const repliedMessages = [...nextMessages, { role: "assistant", content: result.reply }];
+      setMessages(repliedMessages);
+      await saveThread(repliedMessages);
       const completedLanguage = /\b(?:i(?:'ve| have)?|we(?:'ve| have)?)\s+(?:did|finished|completed|checked off|took care of)|\b(?:all done|done with|finished with|completed)\b/i.test(text);
       const confirmsAskedTask = !!lastTaskAsked && /^\s*(?:yes|yeah|yep|yup|i did|done|finished)\b/i.test(text);
       if (completedLanguage || confirmsAskedTask) {
@@ -521,28 +583,35 @@ function MamasCorner({ incompleteTasks, onConfirmTask, caregiverName = "Mommy", 
   };
   return (
     <section className="mamas-corner" aria-label={`${caregiverName}'s Corner`}>
-      <button type="button" className="mamas-corner-header" onClick={() => setOpen((current) => !current)} aria-expanded={open}>
+      <button type="button" className="mamas-corner-header" onClick={() => setOpen(true)} aria-expanded={open}>
         <span><span className="mamas-corner-kicker">🍼 PRIVATE {caregiverName.toUpperCase()}’S CORNER</span><span className="mamas-corner-title">{parentVoice === "motherly" ? "Ultra Mommy chat" : "Chat about anything"}</span></span>
-        <span aria-hidden="true">{open ? "⌃" : "›"}</span>
+        <span aria-hidden="true">›</span>
       </button>
-      {!open && <div className="mamas-corner-summary">Chat, vent, ask questions, make up stories, or get gentle help. This conversation stays only in the current app session.</div>}
-      {open && <div className="mamas-corner-body">
-        <p className="mamas-corner-note">This is a fictional AI companion, not a person, Guardian, clinician, or emergency service. Talk casually about whatever is on your mind, or ask for cozy support. Resetting starts a blank conversation.</p>
+      <div className="mamas-corner-summary">Open your private, saved chat and continue where you left off.</div>
+      {open && <div className="mamas-private-window" role="dialog" aria-modal="true" aria-label={`Private ${caregiverName}'s Corner chat`}>
+        <div className="mamas-private-card">
+        <div className="mamas-private-header"><div><span className="mamas-corner-kicker">🍼 PRIVATE {caregiverName.toUpperCase()}’S CORNER</span><span className="mamas-corner-title">{parentVoice === "motherly" ? "Ultra Mommy chat" : "Cozy private chat"}</span></div><button type="button" onClick={() => setOpen(false)} aria-label={`Close ${caregiverName}'s Corner`}>Close</button></div>
+        <div className="mamas-corner-body">
+        <p className="mamas-corner-note">Saved privately to your signed-in profile so you can continue later. Guardians cannot see this chat. This is a fictional AI companion, not a person, clinician, or emergency service.</p>
         <div className="mamas-messages" aria-live="polite">
+          {historyLoading && <div className="mamas-message">Opening your private chat…</div>}
           {messages.map((message, index) => <div key={`${message.role}-${index}`} className={message.role === "user" ? "mamas-message mamas-message-user" : "mamas-message"}>{message.content}</div>)}
           {sending && <div className="mamas-message">{caregiverName} is thinking…</div>}
+          <div ref={messagesEndRef} />
         </div>
         {error && <div className="mamas-corner-error" role="alert">{error}</div>}
         {messages.length === 1 && <div className="mamas-starters" aria-label="Conversation starters">
-          {conversationStarters.map((starter) => <button key={starter} type="button" onClick={() => send(starter)} disabled={sending}>{starter}</button>)}
+          {conversationStarters.map((starter) => <button key={starter} type="button" onClick={() => send(starter)} disabled={sending || historyLoading}>{starter}</button>)}
         </div>}
         {taskToConfirm && <div className="mamas-task-confirm"><div>Did you want {caregiverName} to check off <strong>{taskToConfirm.label}</strong>?</div><div><button type="button" onClick={() => { onConfirmTask(taskToConfirm.key); setTaskToConfirm(null); setLastTaskAsked(null); }}>✓ Yes, tuck it in</button><button type="button" onClick={() => setTaskToConfirm(null)}>Not yet</button></div></div>}
-        <button type="button" className="mamas-task-checkin" onClick={checkInOnTasks} disabled={sending || !(incompleteTasks || []).length}>{(incompleteTasks || []).length ? `🧸 ${caregiverName}, check in on my tasks` : "🧸 Everything is tucked in"}</button>
+        <button type="button" className="mamas-task-checkin" onClick={checkInOnTasks} disabled={sending || historyLoading || !(incompleteTasks || []).length}>{(incompleteTasks || []).length ? `🧸 ${caregiverName}, check in on my tasks` : "🧸 Everything is tucked in"}</button>
         <div className="mamas-compose">
           <textarea value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); send(); } }} maxLength="1200" placeholder={`Tell ${caregiverName} what is going on…`} aria-label={`Message ${caregiverName}'s Corner`} rows="2" />
-          <button type="button" onClick={send} disabled={!draft.trim() || sending}>{sending ? "Thinking…" : "Send"}</button>
+          <button type="button" onClick={send} disabled={!draft.trim() || sending || historyLoading}>{sending ? "Thinking…" : "Send"}</button>
         </div>
-        <button type="button" className="mamas-reset" onClick={() => { setMessages([{ role: "assistant", content: "Fresh start, baby. What feels most important right now?" }]); setDraft(""); setError(""); }} disabled={sending}>Start a fresh chat</button>
+        <button type="button" className="mamas-reset" onClick={async () => { setHistoryLoading(true); try { await createFreshThread(); } catch (createError) { setError(`A fresh chat could not be created: ${createError.message}`); } finally { setHistoryLoading(false); } }} disabled={sending || historyLoading}>Start a fresh chat</button>
+        </div>
+        </div>
       </div>}
     </section>
   );
@@ -1406,6 +1475,7 @@ const RESTORABLE_DATA_TABLES = [
   { payloadKey: "weekly_intentions", table: "weekly_intentions", onConflict: "user_id,week_start" },
   { payloadKey: "task_completion_history", table: "tracker_progress", onConflict: "user_id,task_key" },
   { payloadKey: "care_session_history", table: "care_session_logs", stripId: true },
+  { payloadKey: "private_mommy_chats", table: "mommy_chat_threads", onConflict: "id" },
   { payloadKey: "profile", table: "tracker_profiles", onConflict: "user_id", single: true },
   { payloadKey: "preferences", table: "app_preferences", onConflict: "user_id", single: true },
   { payloadKey: "achievements", table: "user_achievements", onConflict: "user_id", single: true },
@@ -5292,7 +5362,7 @@ function GlowUpTracker() {
       const [
         profileRes, prefsRes, tasksRes, schedulesRes, notesRes, dailyRes, checkInsRes, careRes, pathsRes,
         supportRequestsRes, achievementsRes, restDaysRes, weeklyIntentionRes, weeklyIntentionsRes, taskCompletionRes,
-        caregiverLinksRes, supportNotesRes, supportRewardsRes, taskSuggestionsRes,
+        caregiverLinksRes, supportNotesRes, supportRewardsRes, taskSuggestionsRes, mommyChatsRes,
       ] = await Promise.all([
         supabase.from("tracker_profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("app_preferences").select("*").eq("user_id", user.id).maybeSingle(),
@@ -5313,6 +5383,7 @@ function GlowUpTracker() {
         supabase.from("support_notes").select("*").or(`owner_user_id.eq.${user.id},caregiver_user_id.eq.${user.id}`),
         supabase.from("support_rewards").select("*").or(`owner_user_id.eq.${user.id},caregiver_user_id.eq.${user.id}`),
         supabase.from("task_suggestions").select("*").or(`owner_user_id.eq.${user.id},caregiver_user_id.eq.${user.id}`),
+        supabase.from("mommy_chat_threads").select("*").eq("user_id", user.id),
       ]);
       const payload = {
         exported_at: new Date().toISOString(),
@@ -5336,6 +5407,7 @@ function GlowUpTracker() {
         guardian_notes: supportNotesRes.data || [],
         guardian_rewards: supportRewardsRes.data || [],
         guardian_task_suggestions: taskSuggestionsRes.data || [],
+        private_mommy_chats: mommyChatsRes.data || [],
       };
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -7019,6 +7091,12 @@ function GlowUpTracker() {
         .mamas-corner-kicker { font-size: 9.5px; letter-spacing: .12em; font-weight: 900; color: #A057B5; }
         .mamas-corner-title { margin-top: 2px; font-size: 14px; font-weight: 900; color: #68446F; }
         .mamas-corner-summary { padding: 0 12px 11px; color: #856B8B; font-size: 11px; line-height: 1.4; }
+        .mamas-private-window { position: fixed; inset: 0; z-index: 120; display: flex; align-items: stretch; justify-content: center; padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); background: rgba(48,35,57,.58); backdrop-filter: blur(8px); }
+        .mamas-private-card { display: flex; width: min(620px, 100%); min-height: 0; flex-direction: column; overflow: hidden; border: 1px solid #D8B8E3; border-radius: 22px; background: linear-gradient(160deg,#FFF9FD,#F4EEFF 62%,#EDF9FF); box-shadow: 0 24px 70px rgba(43,25,53,.35); }
+        .mamas-private-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 14px; border-bottom: 1px solid #E7D3EC; background: rgba(255,255,255,.72); }
+        .mamas-private-header button { min-height: 36px; padding: 7px 12px; border: 1px solid #D9B8E8; border-radius: 11px; background: white; color: #80548E; font-weight: 900; cursor: pointer; }
+        .mamas-private-card .mamas-corner-body { display: flex; min-height: 0; flex: 1; flex-direction: column; padding: 12px; }
+        .mamas-private-card .mamas-messages { min-height: 180px; max-height: none; flex: 1; }
         .mamas-corner-body { padding: 0 11px 11px; }
         .mamas-corner-note { margin: 0 0 8px; color: #866C8E; font-size: 10px; line-height: 1.42; }
         .mamas-messages { display: grid; gap: 7px; max-height: 260px; overflow-y: auto; padding: 8px; border: 1px solid #E9D4EF; border-radius: 13px; background: rgba(255,255,255,.65); }
@@ -7870,7 +7948,7 @@ function GlowUpTracker() {
             <details open={careExtraSupportOpen} onToggle={(event) => setCareExtraSupportOpen(event.currentTarget.open)} style={{ borderRadius: 14, border: "1px solid #E6D4F2", background: "#FFFFFF99", padding: "10px 12px" }}>
               <summary style={{ color: "#76558A", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>More cozy support</summary>
               <div style={{ marginTop: 10, display: "grid", gap: 12 }}>
-            {isMamaCornerProfile && <MamasCorner caregiverName={babyCaregiverName} parentVoice={preferences.baby_voice === "fatherly" ? "fatherly" : "motherly"} incompleteTasks={rows.filter((row) => !viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => toggle(taskKey)} />}
+            {isMamaCornerProfile && <MamasCorner userId={user.id} caregiverName={babyCaregiverName} parentVoice={preferences.baby_voice === "fatherly" ? "fatherly" : "motherly"} incompleteTasks={rows.filter((row) => !viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => toggle(taskKey)} />}
 
               </div>
             </details>
