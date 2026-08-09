@@ -73,6 +73,8 @@ const requiredRegressionMarkers = [
   'const hasStarLampAndBasket = activityDays >= 10;',
   'function littleSpaceTaskLabel(label) {',
   'Let\'s take care of “${task}” together, one tiny step at a time',
+  'Let\'s help the clothes get clean and cozy',
+  'Let\'s take care of one important money step',
   '🧸 MY LITTLE JOBS',
 ];
 
