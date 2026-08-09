@@ -7017,8 +7017,8 @@ function GlowUpTracker() {
           </div>}
         </div>
 
-        {user && babyMode && dashboard === "today" && (
-          <div style={{ marginBottom: 14, display: "flex", justifyContent: "flex-end" }}>
+        {user && babyMode && dashboard === "today" && !betaBannerDismissed && (
+          <div style={{ marginBottom: 14, display: "flex", justifyContent: "flex-start" }}>
             <button type="button" onClick={() => setTodayExtrasOpen((open) => !open)} aria-expanded={todayExtrasOpen} style={{ padding: "6px 11px", borderRadius: 999, border: "1px solid #E6D4F2", background: "#FFFFFFAA", color: "#8C6B9E", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>
               {todayExtrasOpen ? "🧸 Hide nursery greeting" : "🧸 Show nursery greeting"}
             </button>
@@ -7042,7 +7042,8 @@ function GlowUpTracker() {
         )}
 
         {user && (betaBannerDismissed ? (
-          <div style={{ marginBottom: 16, display: "flex", justifyContent: "flex-end" }}>
+          <div style={{ marginBottom: 16, display: "flex", justifyContent: "flex-start", gap: 7, flexWrap: "wrap" }}>
+            {babyMode && dashboard === "today" && <button type="button" onClick={() => setTodayExtrasOpen((open) => !open)} aria-expanded={todayExtrasOpen} style={{ padding: "6px 11px", borderRadius: 999, border: "1px solid #E6D4F2", background: "#FFFFFFAA", color: "#8C6B9E", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>{todayExtrasOpen ? "🧸 Hide nursery greeting" : "🧸 Show nursery greeting"}</button>}
             <button type="button" onClick={goToFeedback} title="This is an early test build" style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 999, border: "1px solid #B9DCF6", background: "#EAF4FF99", color: "#2D6BB5", fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>🧪 Test build · Feedback</button>
           </div>
         ) : (
@@ -8777,7 +8778,7 @@ function GlowUpTracker() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8, marginBottom: 14 }}>
         {weeklyIntentionText && <div style={{ marginBottom: 0, padding: "10px 12px", borderRadius: 12, background: "#F9F1FC", border: "1px solid #E6D4F2" }}>
           <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "center", gap: 8 }}>
-            <div style={{ fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#8E4EAA" }}>📮 THIS WEEK</div>
+            <div style={{ fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#8E4EAA" }}>📮 PLUSHPOST</div>
             {!weeklyIntentionEditing && (
               <button type="button" onClick={() => { setWeeklyIntentionDraft(weeklyIntentionText); setWeeklyIntentionEditing(true); }} style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer", flexShrink: 0 }}>{weeklyIntentionText ? "✏️ Edit" : "＋ Add one"}</button>
             )}
