@@ -1461,15 +1461,31 @@ function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, setShow
         @keyframes demoPop { 0% { transform:scale(.88);opacity:0 } 65% { transform:scale(1.05);opacity:1 } 100% { transform:scale(1);opacity:1 } }
         @keyframes demoSparkle { 0%,100% { transform:rotate(-8deg) scale(1) } 50% { transform:rotate(8deg) scale(1.18) } }
         .plush-feature-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:22px }
+        .landing-nav-links { display:flex;align-items:center;gap:18px }
+        .landing-nav-link { color:#6E5A82;text-decoration:none;font-size:13px;font-weight:800 }
+        .landing-nav-link:hover { color:#B95FCE }
+        .landing-benefit-strip { display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:900px;margin:18px auto 0;padding:0 20px }
+        .landing-benefit-pill { display:flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:8px 12px;border:1px solid #F0D9EE;border-radius:999px;background:rgba(255,255,255,.76);color:#6E5A82;font-size:12px;font-weight:900;box-shadow:0 10px 28px -24px rgba(90,50,110,.45) }
+        .landing-feature-card { position:relative;overflow:hidden;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease }
+        .landing-feature-card:hover { transform:translateY(-3px);border-color:#DDB3E5 !important;box-shadow:0 20px 38px -22px rgba(90,50,110,.34) !important }
+        .landing-feature-tag { display:inline-flex;align-items:center;min-height:27px;padding:3px 10px;border-radius:999px;background:#F9E7F7;color:#9A4EAD;font-size:10.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase }
+        .landing-how-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:16px }
         .landing-demo-task:hover { border-color:#D9A6E3 !important; transform:translateY(-1px) }
         .landing-demo-task:focus-visible { outline:3px solid #E7B8F0;outline-offset:2px }
-        @media(max-width:800px){.plush-feature-grid{grid-template-columns:1fr}}
+        @media(max-width:800px){.plush-feature-grid,.landing-how-grid{grid-template-columns:1fr}.landing-benefit-strip{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:560px){.landing-nav-links{display:none}.landing-benefit-strip{grid-template-columns:1fr 1fr;gap:7px;padding:0 14px}.landing-benefit-pill{border-radius:15px;font-size:11px;padding:7px}.landing-signin-row{flex-direction:column}.landing-signin-row button{width:100%}}
       `}</style>
       <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "26px 28px", maxWidth: 1080, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "'Baloo 2',sans-serif", fontSize: 22, fontWeight: 800 }}>
           <span style={{ width: 34, height: 34, borderRadius: "50%", background: colors.orchid, boxShadow: "inset 0 0 0 8px #F2D8F5" }} /> PlushLife
         </div>
-        <button onClick={() => setShowSignIn(true)} style={{ background: colors.plum, color: "white", border: 0, padding: "10px 20px", borderRadius: 999, fontWeight: 800, cursor: "pointer" }}>Start free</button>
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <div className="landing-nav-links">
+            <a className="landing-nav-link" href="#landing-features">Features</a>
+            <a className="landing-nav-link" href="#landing-how">How it helps</a>
+          </div>
+          <button onClick={() => setShowSignIn(true)} style={{ background: colors.plum, color: "white", border: 0, padding: "10px 20px", borderRadius: 999, fontWeight: 800, cursor: "pointer" }}>Start free</button>
+        </div>
       </nav>
 
       <section style={{ padding: "40px 28px 20px", textAlign: "center" }}>
@@ -1485,11 +1501,11 @@ function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, setShow
           <div style={{ maxWidth: 480, margin: "22px auto 0", padding: 16, borderRadius: 18, background: "rgba(255,255,255,.86)", border: `1px solid ${colors.line}`, boxShadow: "0 18px 38px -24px rgba(90,50,110,.35)" }}>
             <div style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 20, fontWeight: 800 }}>Create or open your private tracker</div>
             <div style={{ marginTop: 3, fontSize: 13, color: colors.soft }}>We’ll email you a secure one-time sign-in code.</div>
-            <div style={{ display: "flex", gap: 8, marginTop: 11 }}>
+            <div className="landing-signin-row" style={{ display: "flex", gap: 8, marginTop: 11 }}>
               <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" aria-label="Email address" style={{ flex: 1, minWidth: 0, padding: "11px 12px", borderRadius: 11, border: `1px solid ${colors.line}`, fontSize: 14 }} />
               <button onClick={sendSignInLink} disabled={codeCooldown > 0} style={{ padding: "11px 14px", borderRadius: 11, border: 0, background: colors.orchid, color: "white", fontWeight: 800, cursor: codeCooldown > 0 ? "not-allowed" : "pointer", opacity: codeCooldown > 0 ? 0.55 : 1 }}>{codeCooldown > 0 ? `Wait ${codeCooldown}s` : "Send code"}</button>
             </div>
-            <div style={{ display: "flex", gap: 8, marginTop: 9 }}>
+            <div className="landing-signin-row" style={{ display: "flex", gap: 8, marginTop: 9 }}>
               <input inputMode="numeric" autoComplete="one-time-code" value={otpCode} onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, "").slice(0, 8))} placeholder="Email code" aria-label="Email sign-in code" style={{ flex: 1, minWidth: 0, padding: "11px 12px", borderRadius: 11, border: `1px solid ${colors.line}`, fontSize: 16, letterSpacing: "0.16em" }} />
               <button onClick={verifySignInCode} style={{ padding: "11px 14px", borderRadius: 11, border: `1px solid ${colors.orchid}`, background: "white", color: colors.orchid, fontWeight: 800, cursor: "pointer" }}>Sign in</button>
             </div>
@@ -1519,6 +1535,13 @@ function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, setShow
           <ellipse cx="75" cy="168" rx="16" ry="10" fill="#FCEFFB" stroke={colors.orchid} strokeWidth="3"/><ellipse cx="125" cy="168" rx="16" ry="10" fill="#FCEFFB" stroke={colors.orchid} strokeWidth="3"/>
         </svg>
       </section>
+
+      <div aria-label="PlushLife benefits" className="landing-benefit-strip">
+        <div className="landing-benefit-pill"><span aria-hidden="true">🌤️</span> Adapts to your energy</div>
+        <div className="landing-benefit-pill"><span aria-hidden="true">🛟</span> Help when overwhelmed</div>
+        <div className="landing-benefit-pill"><span aria-hidden="true">🔒</span> Private by design</div>
+        <div className="landing-benefit-pill"><span aria-hidden="true">💜</span> No guilt or streak loss</div>
+      </div>
 
       <section aria-label="Interactive PlushLife demo" style={{ padding: "22px 20px 70px", display: "grid", justifyItems: "center" }}>
         <div style={{ textAlign: "center", marginBottom: 14 }}>
@@ -1568,21 +1591,46 @@ function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, setShow
       <section id="landing-features" style={{ padding: "20px 28px 80px", maxWidth: 1080, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 44 }}>
           <h2 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: "clamp(28px,4vw,38px)", margin: "0 0 10px" }}>Everything soft, in one place</h2>
-          <p style={{ color: colors.soft, fontSize: 16 }}>Your routines, feelings, care tools, and trusted support—without guilt or paywalls.</p>
+          <p style={{ color: colors.soft, fontSize: 16 }}>Real tools for planning, hard moments, reflection, and support—without guilt or paywalls.</p>
         </div>
         <div className="plush-feature-grid">
           {[
-            ["🌤️","A list that changes with your capacity","Choose a Full, Soft, Tiny, or Recovery Day. Each habit can have a smaller version, so caring for yourself still counts when energy is low."],
-            ["♥","Help for the moment you’re in","Use short grounding tools, sleep support, and guided PlushPaths—then privately note what helped so suggestions improve over time."],
-            ["📅","Patterns you can actually use","Mood and energy check-ins appear in your calendar. PlushLife can gently notice patterns and offer changes, but never diagnoses you or edits your list without permission."],
-            ["💛","A trusted person, if you want one","Invite a Guardian to gently check in — they see only what you allow, can send an encouraging note, and never anything more."],
-            ["🌱","Progress that never gets taken away","Celebrate showing up, reflecting, choosing a Tiny Day, or returning after a break. A missed day never erases what you've already earned."],
-            ["🎯","One thing at a time","When a full list feels like too much, Focus Mode shows just your next step — bigger, calmer, one decision instead of ten."],
-          ].map(([icon,title,text]) => (
-            <div key={title} style={{ background: "white", border: `1px solid ${colors.line}`, borderRadius: 24, padding: "30px 26px", boxShadow: "0 12px 30px -18px rgba(90,50,110,.2)" }}>
-              <span style={{ fontSize: 34 }}>{icon}</span><h3 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 20, margin: "14px 0 10px" }}>{title}</h3><p style={{ color: colors.soft, fontSize: 14.5, lineHeight: 1.6, margin: 0 }}>{text}</p>
+            ["🌤️","PlushList + Capacity Modes","A plan that meets you where you are","Choose a Full, Soft, Tiny, or Recovery Day. Smaller versions of habits mean caring for yourself still counts when energy is low."],
+            ["🛟","PlushCare + PlushRescue","Support for the moment you’re in","Open quick grounding tools, calming care, sleep support, and guided PlushPaths when everything feels like too much."],
+            ["📓","Check-ins + PlushJournal","Understand your days gently","Notice moods, energy, wins, and hard moments in one private place. Look back for useful patterns without judgment or diagnosis."],
+            ["📅","Schedule + Progress","Turn intentions into a doable day","Bring routines, habits, self-care, and workouts together. See what is next and celebrate progress without losing it after a missed day."],
+            ["🎯","Focus Mode","One calm step at a time","When a full list feels overwhelming, Focus Mode shows just the next step—larger, quieter, and easier to begin."],
+            ["💛","Guardian Support","Invite support on your terms","A trusted person can check in and send encouragement. You decide what they can see, and you can pause or remove access anytime."],
+          ].map(([icon,tag,title,text]) => (
+            <div className="landing-feature-card" key={title} style={{ background: "white", border: `1px solid ${colors.line}`, borderRadius: 24, padding: "27px 26px", boxShadow: "0 12px 30px -18px rgba(90,50,110,.2)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}><span style={{ fontSize: 34 }}>{icon}</span><span className="landing-feature-tag">{tag}</span></div><h3 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 20, margin: "14px 0 10px" }}>{title}</h3><p style={{ color: colors.soft, fontSize: 14.5, lineHeight: 1.6, margin: 0 }}>{text}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section id="landing-how" style={{ padding: "0 28px 80px", maxWidth: 980, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 30 }}>
+          <div style={{ color: colors.orchid, fontSize: 11, fontWeight: 900, letterSpacing: ".13em" }}>HOW PLUSHLIFE HELPS</div>
+          <h2 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: "clamp(27px,4vw,36px)", margin: "7px 0 9px" }}>Less pressure. More useful support.</h2>
+          <p style={{ color: colors.soft, fontSize: 15.5, maxWidth: 600, margin: "0 auto", lineHeight: 1.6 }}>You do not have to build a perfect routine before PlushLife can help.</p>
+        </div>
+        <div className="landing-how-grid">
+          {[
+            ["1","Check in","Tell PlushLife how you feel and how much capacity you have today."],
+            ["2","Choose what fits","Keep the full plan or soften it to the smallest steps that still support you."],
+            ["3","Notice what helps","Reflect, celebrate progress, and carry useful patterns into tomorrow."],
+          ].map(([number,title,text]) => (
+            <div key={number} style={{ background: "rgba(255,255,255,.78)", border: `1px solid ${colors.line}`, borderRadius: 22, padding: "24px 22px", textAlign: "center" }}>
+              <div style={{ width: 36, height: 36, display: "grid", placeItems: "center", margin: "0 auto 12px", borderRadius: 999, background: colors.orchid, color: "white", fontFamily: "'Baloo 2',sans-serif", fontWeight: 900 }}>{number}</div>
+              <h3 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 19, margin: "0 0 7px" }}>{title}</h3>
+              <p style={{ color: colors.soft, fontSize: 13.5, lineHeight: 1.55, margin: 0 }}>{text}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{ textAlign: "center", marginTop: 26 }}>
+          <button onClick={() => { setShowSignIn(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} style={{ background: colors.orchid, color: "white", border: 0, padding: "13px 26px", borderRadius: 999, fontWeight: 900, fontSize: 15, cursor: "pointer", boxShadow: "0 12px 24px -10px rgba(185,95,206,.55)" }}>Start with one small step</button>
+          <div style={{ marginTop: 8, color: colors.soft, fontSize: 11.5 }}>Enter your email and we’ll send a one-time code. No password needed.</div>
         </div>
       </section>
 
