@@ -25,8 +25,17 @@ async function sha256(value: string) {
 }
 
 function pairingCode() {
-  const bytes = crypto.getRandomValues(new Uint8Array(8));
-  return [...bytes].map((byte) => CODE_ALPHABET[byte % CODE_ALPHABET.length]).join("");
+  const alphabetLength = CODE_ALPHABET.length;
+  const maxUnbiased = Math.floor(256 / alphabetLength) * alphabetLength;
+  const chars: string[] = [];
+
+  while (chars.length < 8) {
+    const byte = crypto.getRandomValues(new Uint8Array(1))[0];
+    if (byte >= maxUnbiased) continue;
+    chars.push(CODE_ALPHABET[byte % alphabetLength]);
+  }
+
+  return chars.join("");
 }
 
 function validDate(value: unknown): value is string {
