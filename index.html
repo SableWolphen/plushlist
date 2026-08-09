@@ -539,7 +539,24 @@ function MamasCorner({ incompleteTasks, onConfirmTask, caregiverName = "Mommy", 
   );
 }
 
-function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, comfortItemName, onOpenJournal, onSoftDay }) {
+function littleSpaceTaskLabel(label) {
+  const task = String(label || "").trim();
+  const lower = task.toLowerCase();
+  if (/brush.*teeth|teeth.*brush/.test(lower)) return "Make my teeth sparkly";
+  if (/drink.*water|water bottle|hydrate/.test(lower)) return "Take some little sips";
+  if (/medicine|medication|vitamin/.test(lower)) return "Take my helping medicine";
+  if (/breakfast/.test(lower)) return "Have my cozy breakfast";
+  if (/lunch/.test(lower)) return "Have my cozy lunch";
+  if (/dinner|supper/.test(lower)) return "Have my cozy dinner";
+  if (/shower|bath|wash up|wash-up/.test(lower)) return "Get fresh and cozy";
+  if (/clothes|dress|get dressed/.test(lower)) return "Pick my comfy clothes";
+  if (/tidy|clean|put away/.test(lower)) return "Make one tiny spot cozy";
+  if (/stretch|exercise|workout|walk|running|\brun\b/.test(lower)) return "Move my body a little";
+  if (/prepare.*tomorrow|plan.*tomorrow/.test(lower)) return "Get one tiny thing ready for tomorrow";
+  return `My little job: ${task}`;
+}
+
+function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, comfortItemName, littleJobs, onCompleteTask, onOpenJournal, onSoftDay }) {
   const [windDown, setWindDown] = React.useState([false, false, false]);
   const [comfortOpen, setComfortOpen] = React.useState(null);
   const [open, setOpen] = React.useState(false);
@@ -591,8 +608,19 @@ function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays
         </div>
       </div>
       <div className="baby-comfort">
-        <div className="baby-section-label">🧼 COZY LITTLE ROUTINES</div>
-        <div className="baby-wind-down-copy">Morning snuggles · Wash-up · Snack & water · Bedtime nest. Use the ones that help; none are a test.</div>
+        <div className="baby-section-label">🧸 MY LITTLE JOBS</div>
+        <div className="baby-wind-down-copy">Your real tasks, made softer for Little Space. Tap one when it is tucked in.</div>
+        <div className="baby-little-jobs">
+          {(littleJobs || []).slice(0, 5).map((task) => {
+            const cozyLabel = littleSpaceTaskLabel(task.label);
+            return <button key={task.key} type="button" onClick={() => onCompleteTask(task.key)} aria-label={`Complete ${task.label}`}>
+              <span className="baby-little-job-check" aria-hidden="true">○</span>
+              <span><strong>{cozyLabel}</strong>{cozyLabel !== task.label && <small>{task.label}</small>}</span>
+            </button>;
+          })}
+        </div>
+        {!(littleJobs || []).length && <div className="baby-comfort-note">Everything is tucked in. You can rest now. 🧸</div>}
+        {(littleJobs || []).length > 5 && <div className="baby-wind-down-copy">And {(littleJobs || []).length - 5} more little {(littleJobs || []).length - 5 === 1 ? "job" : "jobs"} waiting below.</div>}
         {comfortItemName && <div className="baby-comfort-note">🧸 {comfortItemName} can be part of any cozy routine today.</div>}
       </div>
       <button type="button" className="baby-journal-prompt" onClick={onOpenJournal}>📖 Put one little thought in PlushJournal <span>›</span></button>
@@ -6760,6 +6788,12 @@ function GlowUpTracker() {
         .baby-mode .baby-wind-down-copy { margin-top: 4px; color: #7A6888; font-size: 11.5px; line-height: 1.42; }
         .baby-mode .baby-wind-down-steps, .baby-mode .baby-comfort-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
         .baby-mode .baby-step, .baby-mode .baby-comfort-actions button { min-height: 32px; padding: 6px 8px; border: 1px solid #DCC2E7; border-radius: 11px; background: #FFFFFFC8; color: #795686; font-size: 11px; font-weight: 800; cursor: pointer; }
+        .baby-mode .baby-little-jobs { display: grid; gap: 6px; margin-top: 8px; }
+        .baby-mode .baby-little-jobs button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 42px; padding: 7px 9px; border: 1px solid #DCC2E7; border-radius: 12px; background: #FFFFFFC8; color: #684F75; cursor: pointer; text-align: left; }
+        .baby-mode .baby-little-jobs button > span:last-child { min-width: 0; }
+        .baby-mode .baby-little-jobs strong { display: block; font-size: 11.5px; line-height: 1.3; }
+        .baby-mode .baby-little-jobs small { display: block; margin-top: 2px; color: #927C9E; font-size: 9.5px; line-height: 1.25; }
+        .baby-mode .baby-little-job-check { flex: 0 0 auto; color: #B768C9; font-size: 20px; line-height: 1; }
         .baby-mode .baby-step-done { border-color: #9FDFC9; background: #E9FFF5; color: #348462; text-decoration: line-through; }
         .baby-mode .baby-wind-down-finished, .baby-mode .baby-comfort-note { margin-top: 8px; padding: 8px 10px; border-radius: 11px; background: #FFF0FA; color: #7A4E83; font-size: 11.5px; font-weight: 800; line-height: 1.42; }
         .baby-mode .baby-comfort-note { background: #F0FBFF; color: #4E7185; }
@@ -7630,6 +7664,8 @@ function GlowUpTracker() {
                 activityDays={activityDaysTotal}
                 careDays={careDaysTotal}
                 comfortItemName={trackerProfile?.comfort_item_name?.trim() || ""}
+                littleJobs={rows.filter((row) => !viewDone[row.key] && !row.isBonus)}
+                onCompleteTask={(taskKey) => toggle(taskKey)}
                 onOpenJournal={() => { setPrivateNoteDraft(privateNote); setJournalQuickOpen(true); }}
                 onSoftDay={() => selectDayType("soft")}
               />
