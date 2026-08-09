@@ -1,0 +1,9 @@
+{
+  "name": "plushlife-zepp",
+  "version": "0.1.0",
+  "private": true,
+  "zeppos": true,
+  "devDependencies": {
+    "@zeppos/device-types": "^3.0.0"
+  }
+}
