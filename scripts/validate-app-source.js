@@ -92,7 +92,7 @@ const requiredRegressionMarkers = [
   "📝 Open today's PlushJournal",
   'const openTodayJournal = async () => {',
   'week: "PlushCalendar"',
-  'goToDashboard("today");',
+  'setJournalQuickOpen(true);',
   '📖 PLUSHJOURNAL HISTORY',
   'journalHistoryExpanded ? reflectionHistory.length : 5',
   '📮 PLUSHWEEK HISTORY',

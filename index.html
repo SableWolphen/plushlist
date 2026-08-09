@@ -5531,7 +5531,6 @@ function GlowUpTracker() {
     setPrivateNoteMessage(error ? "Couldn't load today's private note." : "");
     setPrivateNoteEditing(false);
     setDailyJournalPromptOpen(false);
-    goToDashboard("today");
     setJournalQuickOpen(true);
   };
   const reflectionMonthDate = new Date(`${reflectionCalendarMonth}-01T12:00:00Z`);
@@ -8145,8 +8144,8 @@ function GlowUpTracker() {
           <ToolPanel title="Help" onClose={() => setHelpOpen(false)}>
           <div style={{ marginBottom: 18, padding: 16, borderRadius: 18, background: "#FFFDF4", border: "1px solid #E9C96E", boxShadow: "0 8px 22px rgba(166,109,20,.08)" }}>
             <div style={{ display: "grid", gap: 7, marginTop: 9, fontSize: 12.5, lineHeight: 1.45, color: "#5B4B6B" }}>
-              <div><strong>DAILY:</strong> shows today’s everyday tasks and today’s schedule.</div>
-              <div><strong>MON–SUN:</strong> lets you preview or change a particular day.</div>
+              <div><strong>{babyMode ? "NURSERY" : "TODAY"}:</strong> shows today’s everyday tasks and today’s schedule.</div>
+              <div><strong>{babyMode ? "PLUSHCALENDAR" : "CALENDAR"}:</strong> lets you preview or change a particular day.</div>
               <div><strong>Required:</strong> counts toward your main score. <strong>Bonus:</strong> is optional and never lowers it.</div>
               <div><strong>Guardian (in Profile):</strong> is where you invite, pause, or remove a trusted guardian, and where you view anyone you support.</div>
               <div><strong>People I Support:</strong> read-only. You can encourage, but you can't check off or change someone else's tasks, and their private reflections are never shown to you.</div>
@@ -9501,6 +9500,27 @@ function GlowUpTracker() {
         )}
 
         <>
+        {journalQuickOpen && (!dailyJournalPromptOpen || autoPopupToShow === "daily_journal") && (
+          <ToolPanel title={dailyJournalPromptOpen ? "Your daily PlushJournal prompt" : "PlushJournal"} onClose={() => { setJournalQuickOpen(false); setDailyJournalPromptOpen(false); setPrivateNoteEditing(false); }}>
+            <div style={{ padding: "15px 16px", borderRadius: 16, background: "rgba(255,255,255,0.28)", border: "1px solid #E6D4F2" }}>
+              <div style={{ marginBottom: 4, fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#A65DC1" }}>JOURNAL FOR {new Date(`${journalQuickOpenDate}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" }).toUpperCase()}</div>
+              <div style={{ fontStyle: "italic", lineHeight: 1.5, fontSize: 12.5, color: "#8C6B9E" }}>{journalDisplayedPrompt}</div>
+              {privateNoteEditing ? <>
+                <textarea value={privateNoteDraft} onChange={(event) => setPrivateNoteDraft(event.target.value)} maxLength={5000} aria-label="Private reflection" placeholder="Only you can read this." style={{ width: "100%", boxSizing: "border-box", minHeight: 120, marginTop: 8, padding: 10, borderRadius: 10, border: "1px solid #D9B8E8", resize: "vertical" }} />
+                <div style={{ display: "flex", gap: 7, marginTop: 7 }}>
+                  <button type="button" onClick={savePrivateNote} style={{ padding: "7px 11px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save</button>
+                  <button type="button" onClick={() => setPrivateNoteEditing(false)} style={{ padding: "7px 11px", borderRadius: 9, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, cursor: "pointer" }}>Cancel</button>
+                </div>
+              </> : (
+                <>
+                  <div style={{ marginTop: 9, whiteSpace: "pre-wrap", lineHeight: 1.6, fontSize: 13, color: privateNote ? "#5B4B6B" : "#9A86A7" }}>{privateNote || "Nothing written for this day yet — only you can ever read it."}</div>
+                  <button type="button" onClick={() => setPrivateNoteEditing(true)} style={{ marginTop: 10, padding: "7px 11px", borderRadius: 9, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{privateNote ? "Edit" : "Add one"}</button>
+                </>
+              )}
+              {privateNoteMessage && <div role="status" aria-live="polite" style={{ marginTop: 8, fontSize: 11.5, color: "#8C6B9E" }}>{privateNoteMessage}</div>}
+            </div>
+          </ToolPanel>
+        )}
         {dashboard === "today" && <>
         {returnGapDays >= 2 && !returnBannerDismissed && (
           <div style={{ marginBottom: 18, padding: "15px 16px", borderRadius: 16, background: "#FFF9E9", border: "1px solid #F0D99E" }}>
@@ -10060,28 +10080,6 @@ function GlowUpTracker() {
           </ToolPanel>
         )}
 
-        {journalQuickOpen && (!dailyJournalPromptOpen || autoPopupToShow === "daily_journal") && (
-          <ToolPanel title={dailyJournalPromptOpen ? "Your daily PlushJournal prompt" : "PlushJournal"} onClose={() => { setJournalQuickOpen(false); setDailyJournalPromptOpen(false); setPrivateNoteEditing(false); }}>
-            <div style={{ padding: "15px 16px", borderRadius: 16, background: "rgba(255,255,255,0.28)", border: "1px solid #E6D4F2" }}>
-              <div style={{ marginBottom: 4, fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#A65DC1" }}>JOURNAL FOR {new Date(`${journalQuickOpenDate}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" }).toUpperCase()}</div>
-              <div style={{ fontStyle: "italic", lineHeight: 1.5, fontSize: 12.5, color: "#8C6B9E" }}>{journalDisplayedPrompt}</div>
-              {privateNoteEditing ? <>
-                <textarea value={privateNoteDraft} onChange={(event) => setPrivateNoteDraft(event.target.value)} maxLength={5000} aria-label="Private reflection" placeholder="Only you can read this." style={{ width: "100%", boxSizing: "border-box", minHeight: 120, marginTop: 8, padding: 10, borderRadius: 10, border: "1px solid #D9B8E8", resize: "vertical" }} />
-                <div style={{ display: "flex", gap: 7, marginTop: 7 }}>
-                  <button type="button" onClick={savePrivateNote} style={{ padding: "7px 11px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save</button>
-                  <button type="button" onClick={() => setPrivateNoteEditing(false)} style={{ padding: "7px 11px", borderRadius: 9, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, cursor: "pointer" }}>Cancel</button>
-                </div>
-              </> : (
-                <>
-                  <div style={{ marginTop: 9, whiteSpace: "pre-wrap", lineHeight: 1.6, fontSize: 13, color: privateNote ? "#5B4B6B" : "#9A86A7" }}>{privateNote || "Nothing written for this day yet — only you can ever read it."}</div>
-                  <button type="button" onClick={() => setPrivateNoteEditing(true)} style={{ marginTop: 10, padding: "7px 11px", borderRadius: 9, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{privateNote ? "Edit" : "Add one"}</button>
-                </>
-              )}
-              {privateNoteMessage && <div role="status" aria-live="polite" style={{ marginTop: 8, fontSize: 11.5, color: "#8C6B9E" }}>{privateNoteMessage}</div>}
-            </div>
-          </ToolPanel>
-        )}
-
         </>}
 
         {dashboard === "week" && <>
@@ -10195,7 +10193,7 @@ function GlowUpTracker() {
           ) : <div style={{ marginTop: 10, padding: "10px 11px", borderRadius: 11, background: "#FBF7FD", color: "#927C9E", fontSize: 12 }}>Your first saved PlushJournal entry will appear here.</div>}
         </details>
         <details style={{ marginBottom: 18, padding: 14, borderRadius: 16, background: "#FFFFFF99", border: "1px solid #D9C8EA" }}>
-          <summary style={{ cursor: "pointer", color: "#8E4EAA", fontSize: 11, letterSpacing: "0.14em", fontWeight: 900 }}>📮 PLUSHWEEK HISTORY <span style={{ float: "right", color: "#A65DC1" }}>{weeklyIntentionHistory.length} weeks</span></summary>
+          <summary style={{ cursor: "pointer", color: "#8E4EAA", fontSize: 11, letterSpacing: "0.14em", fontWeight: 900 }}>📮 PLUSHWEEK HISTORY <span style={{ float: "right", color: "#A65DC1" }}>{weeklyIntentionHistory.length} {weeklyIntentionHistory.length === 1 ? "week" : "weeks"}</span></summary>
           <div style={{ marginTop: 7, fontSize: 11.5, color: "#8C6B9E" }}>Your saved weekly intentions, newest first.</div>
           {weeklyIntentionHistory.length ? <div style={{ display: "grid", gap: 7, marginTop: 10 }}>
             {weeklyIntentionHistory.slice(0, weeklyIntentionHistoryExpanded ? weeklyIntentionHistory.length : 5).map((entry) => {
