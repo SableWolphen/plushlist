@@ -1,0 +1,100 @@
+name: Closed testing Version 43
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-publish:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release-43]')
+    runs-on: ubuntu-latest
+    env:
+      HAS_PLAY_SECRET: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android API 36
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run app tests
+        run: npm test
+
+      - name: Build www/ and sync Android
+        run: npm run android:sync
+
+      - name: Set release version
+        working-directory: android/app
+        run: |
+          sed -i "s/versionCode 1/versionCode 43/" build.gradle
+          sed -i 's/versionName "1.0"/versionName "1.0.43"/' build.gradle
+
+      - name: Decode signing keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
+
+      - name: Build signed AAB
+        working-directory: android
+        env:
+          PLUSHLIFE_KEYSTORE_PATH: release.keystore
+          PLUSHLIFE_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          PLUSHLIFE_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          PLUSHLIFE_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          PLUSHLIFE_GIT_SHA: ${{ github.sha }}
+        run: ./gradlew bundleRelease
+
+      - name: Validate signed AAB
+        run: |
+          curl --fail --location --silent --show-error \
+            --output bundletool.jar \
+            https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
+          java -jar bundletool.jar validate --bundle=android/app/build/outputs/bundle/release/app-release.aab
+          test "$(java -jar bundletool.jar dump manifest --bundle=android/app/build/outputs/bundle/release/app-release.aab --xpath=/manifest/uses-sdk/@android:targetSdkVersion)" = "36"
+          keytool -printcert -jarfile android/app/build/outputs/bundle/release/app-release.aab | grep 'Owner: CN=PlushLife Upload'
+
+      - name: Verify Thunderstorm recording is bundled
+        run: |
+          test -s www/assets/thunderstorm.mp3
+          grep -q 'thunderstorm.mp3' www/assets/gentle-discovery-ui.js
+
+      - name: Remove decoded keystore
+        if: always()
+        run: rm -f android/app/release.keystore
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-release-43
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+      - name: Publish to Google Play closed testing
+        if: env.HAS_PLAY_SECRET == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.PlushLife
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: alpha
+          status: completed
