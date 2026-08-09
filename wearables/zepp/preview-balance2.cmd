@@ -1,6 +1,9 @@
 @echo off
 setlocal
+title PlushLife Balance 2 Preview
 cd /d "%~dp0"
+
+if exist "%ProgramFiles%\nodejs\node.exe" set "PATH=%ProgramFiles%\nodejs;%PATH%"
 
 where node >nul 2>&1
 if errorlevel 1 (
@@ -9,8 +12,11 @@ if errorlevel 1 (
   exit /b 1
 )
 
-call npm.cmd ci
-if errorlevel 1 goto :failed
+if not exist "node_modules\@zeppos\zeus-cli\package.json" (
+  echo Preparing the Zepp preview tools. This is only needed the first time...
+  call npm.cmd ci
+  if errorlevel 1 goto :failed
+)
 
 if /i "%~1"=="--check" (
   call node scripts\run-zeus.js --help

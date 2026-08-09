@@ -5,7 +5,7 @@
   "zeppos": true,
   "scripts": {
     "build": "node scripts/run-zeus.js build",
-    "preview": "node scripts/run-zeus.js preview"
+    "preview": "node scripts/run-zeus.js preview --target \"Amazfit Balance 2\""
   },
   "devDependencies": {
     "@zeppos/device-types": "3.0.0",
