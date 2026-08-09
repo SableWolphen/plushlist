@@ -3923,6 +3923,7 @@ function GlowUpTracker() {
 
   const taskDragKeyRef = React.useRef(null);
   const taskDragPointerRef = React.useRef(null);
+  const taskCardTouchDragRef = React.useRef(null);
 
   const reorderTrackerTask = async (sourceKey, targetKey) => {
     if (!sourceKey || !targetKey || sourceKey === targetKey) return;
@@ -4013,9 +4014,9 @@ function GlowUpTracker() {
     setTaskMessage(sourceSection === targetSection ? "Task moved ✨" : `Moved to ${targetSection} ✨`);
   };
 
-  const finishTouchTaskDrag = (event, sourceKey) => {
+  const finishTouchTaskDrag = (clientX, clientY, sourceKey) => {
     if (!sourceKey) return;
-    const hit = document.elementFromPoint(event.clientX, event.clientY);
+    const hit = document.elementFromPoint(clientX, clientY);
     const taskTarget = hit?.closest?.("[data-plushlife-task-drop-key]");
     const groupTarget = hit?.closest?.("[data-plushlife-task-drop-section]");
     const targetKey = taskTarget?.getAttribute("data-plushlife-task-drop-key") || null;
@@ -4037,7 +4038,72 @@ function GlowUpTracker() {
     const sourceKey = taskDragKeyRef.current || fallbackKey;
     taskDragKeyRef.current = null;
     try { event.currentTarget.releasePointerCapture?.(event.pointerId); } catch (_error) {}
-    if (drag?.moved) finishTouchTaskDrag(event, sourceKey);
+    if (drag?.moved) finishTouchTaskDrag(event.clientX, event.clientY, sourceKey);
+  };
+
+  const startTaskCardTouchDrag = (event, taskKey) => {
+    if (event.touches.length !== 1 || event.target.closest("button,select,input,a")) return;
+    const touch = event.touches[0];
+    const row = event.currentTarget;
+    const drag = {
+      taskKey,
+      row,
+      startX: touch.clientX,
+      startY: touch.clientY,
+      lastX: touch.clientX,
+      lastY: touch.clientY,
+      active: false,
+      timer: null,
+    };
+    drag.timer = setTimeout(() => {
+      drag.active = true;
+      taskDragKeyRef.current = taskKey;
+      row.dataset.plushlifeTouchDragging = "true";
+      row.style.transform = "scale(.985)";
+      row.style.boxShadow = "0 0 0 3px rgba(185,95,206,.28)";
+      if (navigator.vibrate) navigator.vibrate(20);
+    }, 180);
+    taskCardTouchDragRef.current = drag;
+  };
+
+  const moveTaskCardTouchDrag = (event) => {
+    const drag = taskCardTouchDragRef.current;
+    if (!drag || event.touches.length !== 1) return;
+    const touch = event.touches[0];
+    drag.lastX = touch.clientX;
+    drag.lastY = touch.clientY;
+    const distance = Math.hypot(touch.clientX - drag.startX, touch.clientY - drag.startY);
+    if (!drag.active && distance > 8) {
+      clearTimeout(drag.timer);
+      taskCardTouchDragRef.current = null;
+      return;
+    }
+    if (drag.active) event.preventDefault();
+  };
+
+  const endTaskCardTouchDrag = (event) => {
+    const drag = taskCardTouchDragRef.current;
+    if (!drag) return;
+    clearTimeout(drag.timer);
+    taskCardTouchDragRef.current = null;
+    delete drag.row.dataset.plushlifeTouchDragging;
+    drag.row.style.transform = "";
+    drag.row.style.boxShadow = "";
+    if (!drag.active) return;
+    event.preventDefault();
+    const touch = event.changedTouches[0];
+    finishTouchTaskDrag(touch?.clientX ?? drag.lastX, touch?.clientY ?? drag.lastY, drag.taskKey);
+  };
+
+  const cancelTaskCardTouchDrag = () => {
+    const drag = taskCardTouchDragRef.current;
+    if (!drag) return;
+    clearTimeout(drag.timer);
+    delete drag.row.dataset.plushlifeTouchDragging;
+    drag.row.style.transform = "";
+    drag.row.style.boxShadow = "";
+    taskCardTouchDragRef.current = null;
+    taskDragKeyRef.current = null;
   };
 
   const startEditingTask = (task) => {
@@ -8571,7 +8637,7 @@ function GlowUpTracker() {
                 }, new Map());
               return (
                 <div style={{ display: "grid", gap: 10, marginTop: 11 }}>
-                  {!isSearching && <div style={{ padding: "8px 10px", borderRadius: 10, background: "#F8F2FB", border: "1px solid #E6D4F2", color: "#76558A", fontSize: 11.5, lineHeight: 1.45 }}>↕️ <strong>Press and drag the ⋮⋮ handle</strong> to move a task into another group or change its order. Changes save automatically.</div>}
+                  {!isSearching && <div style={{ padding: "8px 10px", borderRadius: 10, background: "#F8F2FB", border: "1px solid #E6D4F2", color: "#76558A", fontSize: 11.5, lineHeight: 1.45 }}>↕️ <strong>Press and hold a task, then drag it</strong> to another group or position. You can also use the ⋮⋮ handle. Changes save automatically.</div>}
                   {[...groupedTasks.entries()].map(([section, sectionTasks]) => (
                     <section
                       key={section}
@@ -8601,7 +8667,12 @@ function GlowUpTracker() {
                               const sourceKey = event.dataTransfer.getData("text/plain");
                               moveTaskToSection(sourceKey, section, task.task_key);
                             } : undefined}
-                            style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", padding: "9px 10px", borderRadius: 11, background: "#FFFFFFD9", border: isTaskPausedOnDate(task, period.date) ? "1px solid #E9C96E" : "1px solid #DDEBE7", userSelect: "none", WebkitUserSelect: "none" }}
+                            onTouchStart={!isSearching ? (event) => startTaskCardTouchDrag(event, task.task_key) : undefined}
+                            onTouchMove={!isSearching ? moveTaskCardTouchDrag : undefined}
+                            onTouchEnd={!isSearching ? endTaskCardTouchDrag : undefined}
+                            onTouchCancel={!isSearching ? cancelTaskCardTouchDrag : undefined}
+                            onContextMenu={!isSearching ? (event) => event.preventDefault() : undefined}
+                            style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", padding: "9px 10px", borderRadius: 11, background: "#FFFFFFD9", border: isTaskPausedOnDate(task, period.date) ? "1px solid #E9C96E" : "1px solid #DDEBE7", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none", transition: "transform .12s ease, box-shadow .12s ease" }}
                           >
                             {!isSearching && <button
                               type="button"
