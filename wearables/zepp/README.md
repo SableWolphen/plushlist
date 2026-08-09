@@ -1,6 +1,6 @@
 # PlushLife for Zepp OS
 
-The first real Zepp target is **Amazfit Balance 2** (480×480 round display, Zepp OS 5 / API_LEVEL 4.2). The app targets all three published Balance 2 deviceSource variants: `9568512`, `9568513`, and `9568515`.
+The first real Zepp target is **Amazfit Balance 2** (480×480 round display, Zepp OS 5 / API_LEVEL 4.2). Its v3 screen target (`r` / `w480`) covers all three published Balance 2 deviceSource variants: `9568512`, `9568513`, and `9568515`.
 
 Current watch screens:
 - Check-in: mood + energy saved locally on the watch.
@@ -13,21 +13,20 @@ The initial build is intentionally offline-first. It does not modify the phone a
 
 ## Build
 
-Install Node.js and the official Zeus CLI, then run from this folder:
+Install Node.js, then run from this folder:
 
 ```bash
-npm install
-npm install -g @zeppos/zeus-cli
-zeus build
+npm ci
+npm run build
 ```
 
-GitHub Actions also builds a `.zab` artifact through `.github/workflows/zepp-balance2-build.yml`.
+The project pins the verified official Zeus CLI release locally. The `.zab` is written to `dist/`. GitHub Actions also builds and uploads it through `.github/workflows/zepp-balance2-build.yml`.
 
 ## Install on a real Balance 2
 
 1. In the Zepp phone app, enable Developer Mode: **Profile → Settings → About → tap the Zepp logo seven times**.
-2. Install the Zeus CLI on a computer and run `zeus login` once with the Zepp/Open Platform account used for development.
-3. From `wearables/zepp`, run `zeus preview`.
+2. From `wearables/zepp`, run `npm ci`, then `npm run preview`.
+3. Complete the one-time Zepp/Open Platform login when Zeus opens it.
 4. Zeus displays a QR code.
 5. In Zepp Developer Mode, open **Scan** and scan that QR code while the Balance 2 is connected.
 

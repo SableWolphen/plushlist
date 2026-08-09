@@ -25,14 +25,11 @@ jobs:
 
       - name: Install Zepp dependencies
         working-directory: wearables/zepp
-        run: npm install
-
-      - name: Install Zeus CLI
-        run: npm install --global @zeppos/zeus-cli
+        run: npm ci
 
       - name: Build Balance 2 ZAB
         working-directory: wearables/zepp
-        run: zeus build
+        run: npm run build
 
       - name: Find built ZAB
         run: |

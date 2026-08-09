@@ -8,6 +8,7 @@
       "code": 1,
       "name": "0.1.0"
     },
+    "icon": "icon.png",
     "vender": "SableWolphen",
     "description": "Gentle PlushLife companion for Amazfit Balance 2"
   },
@@ -19,8 +20,7 @@
       "compatible": "3.0",
       "target": "4.2",
       "minVersion": "3.0"
-    },
-    "type": "0"
+    }
   },
   "targets": {
     "common": {
