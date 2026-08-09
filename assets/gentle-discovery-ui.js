@@ -172,31 +172,47 @@
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return;
     const ctx = new Ctx();
-    const master = ctx.createGain(); master.gain.value = 0.34; master.connect(ctx.destination);
-    const buffer = ctx.createBuffer(1, ctx.sampleRate * 8, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < data.length; i += 1) data[i] = (Math.random() * 2 - 1) * 0.45;
-    const rain = ctx.createBufferSource(); rain.buffer = buffer; rain.loop = true;
-    const rainFilter = ctx.createBiquadFilter(); rainFilter.type = "highpass"; rainFilter.frequency.value = 650;
-    rain.connect(rainFilter); rainFilter.connect(master); rain.start();
-    const nodes = [rain, rainFilter, master], timers = [];
+    const master = ctx.createGain(); master.gain.value = 0.42; master.connect(ctx.destination);
+    // Layered, filtered noise reads as rain much more naturally than a bare
+    // high-passed hiss. A quieter low layer gives it the sound of rain beyond
+    // a window; the brighter layer provides individual droplets.
+    const rainBuffer = ctx.createBuffer(1, ctx.sampleRate * 12, ctx.sampleRate);
+    const rainData = rainBuffer.getChannelData(0);
+    let brown = 0;
+    for (let i = 0; i < rainData.length; i += 1) {
+      brown = (brown + (Math.random() * 2 - 1) * 0.055) / 1.045;
+      rainData[i] = brown * 2.2 + (Math.random() * 2 - 1) * 0.16;
+    }
+    const rain = ctx.createBufferSource(); rain.buffer = rainBuffer; rain.loop = true;
+    const rainLow = ctx.createBiquadFilter(); rainLow.type = "bandpass"; rainLow.frequency.value = 1150; rainLow.Q.value = 0.55;
+    const rainHigh = ctx.createBiquadFilter(); rainHigh.type = "highpass"; rainHigh.frequency.value = 2300;
+    const rainLowGain = ctx.createGain(); rainLowGain.gain.value = 0.22;
+    const rainHighGain = ctx.createGain(); rainHighGain.gain.value = 0.075;
+    rain.connect(rainLow); rainLow.connect(rainLowGain); rainLowGain.connect(master);
+    rain.connect(rainHigh); rainHigh.connect(rainHighGain); rainHighGain.connect(master); rain.start();
+    const nodes = [rain, rainLow, rainHigh, rainLowGain, rainHighGain, master], timers = [];
     const rumble = () => {
       if (!thunder) return;
-      const osc = ctx.createOscillator(), gain = ctx.createGain(), filter = ctx.createBiquadFilter();
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(62 + Math.random() * 28, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(28, ctx.currentTime + 2.4);
-      filter.type = "lowpass"; filter.frequency.value = 130;
-      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.7, ctx.currentTime + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 2.8);
-      osc.connect(filter); filter.connect(gain); gain.connect(master); osc.start(); osc.stop(ctx.currentTime + 3);
-      nodes.push(osc, filter, gain);
-      timers.push(setTimeout(rumble, 5000 + Math.random() * 9000));
+      const seconds = 4.8;
+      const thunderBuffer = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate);
+      const thunderData = thunderBuffer.getChannelData(0);
+      for (let i = 0; i < thunderData.length; i += 1) {
+        const t = i / ctx.sampleRate;
+        const crack = t < 0.13 ? (1 - t / 0.13) * (Math.random() * 2 - 1) * 0.78 : 0;
+        const rolling = Math.exp(-t * 0.78) * (Math.random() * 2 - 1) * 0.52;
+        const lowRoll = Math.sin(t * (48 + Math.sin(t * 2.3) * 13) * Math.PI * 2) * Math.exp(-t * 1.05) * 0.24;
+        thunderData[i] = crack + rolling + lowRoll;
+      }
+      const strike = ctx.createBufferSource(); strike.buffer = thunderBuffer;
+      const filter = ctx.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 780;
+      const gain = ctx.createGain(); gain.gain.value = 0.92;
+      strike.connect(filter); filter.connect(gain); gain.connect(master); strike.start();
+      nodes.push(strike, filter, gain);
+      timers.push(setTimeout(rumble, 8500 + Math.random() * 11000));
     };
     thunder = { ctx, nodes, timers, button };
     button.dataset.plushlifeThunderstormActive = "true";
-    timers.push(setTimeout(rumble, 900));
+    timers.push(setTimeout(rumble, 1700 + Math.random() * 1800));
   }
 
   document.addEventListener("click", (event) => {
