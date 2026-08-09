@@ -9413,30 +9413,7 @@ function GlowUpTracker() {
           );
         })()}
 
-        <div className="today-reflection-grid" style={{ display: "grid", gridTemplateColumns: weeklyIntentionText ? "repeat(2, minmax(0, 1fr))" : "1fr", gap: 8, marginBottom: 14 }}>
-        {weeklyIntentionText && <div style={{ marginBottom: 0, padding: "10px 12px", borderRadius: 12, background: "#F9F1FC", border: "1px solid #E6D4F2" }}>
-          <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "center", gap: 8 }}>
-            <div style={{ fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#8E4EAA" }}>📮 PLUSHPOST</div>
-            {!weeklyIntentionEditing && (
-              <button type="button" onClick={() => { setWeeklyIntentionDraft(weeklyIntentionText); setWeeklyIntentionEditing(true); }} style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer", flexShrink: 0 }}>{weeklyIntentionText ? "✏️ Edit" : "＋ Add one"}</button>
-            )}
-          </div>
-          {weeklyIntentionEditing ? (
-            <>
-              <textarea value={weeklyIntentionDraft} onChange={(event) => setWeeklyIntentionDraft(event.target.value)} maxLength={2000} placeholder="Example: Be a little gentler with myself this week." style={{ width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 8, padding: 10, borderRadius: 10, border: "1px solid #D9B8E8", resize: "vertical" }} />
-              <div style={{ display: "flex", gap: 7, marginTop: 8 }}>
-                <button type="button" onClick={saveWeeklyIntentionEdit} style={{ padding: "7px 11px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save</button>
-                <button type="button" onClick={() => { setWeeklyIntentionEditing(false); setWeeklyIntentionMessage(""); }} style={{ padding: "7px 11px", borderRadius: 9, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, cursor: "pointer" }}>Cancel</button>
-              </div>
-              {weeklyIntentionMessage && <div style={{ marginTop: 6, fontSize: 11.5, color: "#8C6B9E" }}>{weeklyIntentionMessage}</div>}
-            </>
-          ) : weeklyIntentionText ? (
-            <div style={{ marginTop: 6, fontSize: 13.5, lineHeight: 1.5, color: "#6B5A7D", whiteSpace: "pre-wrap" }}>{weeklyIntentionText}</div>
-          ) : (
-            <div style={{ marginTop: 6, fontSize: 12.5, lineHeight: 1.5, color: "#8C6B9E" }}>You haven't set one for this week yet.</div>
-          )}
-        </div>}
-
+        <div style={{ marginBottom: 14 }}>
         {!isFutureView && (
           <button type="button" onClick={openJournalForSelectedDate} style={{ width: "100%", textAlign: "left", display: "block", padding: "13px 14px", borderRadius: 14, border: "1px solid #E3C9EC", background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", cursor: "pointer", marginBottom: 0 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
@@ -10296,9 +10273,10 @@ function GlowUpTracker() {
         {progressView === "overview" && <>
         <div style={{ marginBottom: 12, padding: "11px 12px", borderRadius: 12, background: "#F9F1FC", border: "1px solid #E6D4F2" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-            <div style={{ fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#8E4EAA" }}>📮 PLUSHPOST · THIS WEEK</div>
+            <div style={{ fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#8E4EAA" }}>📮 WEEKLY INTENTION</div>
             {!weeklyIntentionEditing && <button type="button" onClick={() => { setWeeklyIntentionDraft(weeklyIntentionText); setWeeklyIntentionEditing(true); }} style={{ padding: "5px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>{weeklyIntentionText ? "Edit" : "Add one"}</button>}
           </div>
+          <div style={{ marginTop: 4, fontSize: 10.5, color: "#927C9E" }}>Weekly planning and Sunday follow-up · separate from PlushJournal</div>
           {weeklyIntentionEditing ? <>
             <textarea value={weeklyIntentionDraft} onChange={(event) => setWeeklyIntentionDraft(event.target.value)} maxLength={2000} placeholder="Example: Be a little gentler with myself this week." style={{ width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 8, padding: 10, borderRadius: 10, border: "1px solid #D9B8E8", resize: "vertical" }} />
             <div style={{ display: "flex", gap: 7, marginTop: 7 }}><button type="button" onClick={saveWeeklyIntentionEdit} style={{ padding: "7px 11px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save</button><button type="button" onClick={() => setWeeklyIntentionEditing(false)} style={{ padding: "7px 11px", borderRadius: 9, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, cursor: "pointer" }}>Cancel</button></div>
