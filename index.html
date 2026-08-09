@@ -1857,6 +1857,10 @@ function GlowUpTracker() {
   const [scheduleDraft, setScheduleDraft] = useState({ entries: [] });
   const [scheduleMessage, setScheduleMessage] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [arrivalRitualVisible, setArrivalRitualVisible] = useState(true);
+  const [careExtraSupportOpen, setCareExtraSupportOpen] = useState(false);
+  const [habitGardenOpen, setHabitGardenOpen] = useState(false);
+  const [progressDetailsOpen, setProgressDetailsOpen] = useState(false);
   const [preferences, setPreferences] = useState({
     notifications_enabled: false,
     reminder_times: ["08:00", "12:30", "17:30", "20:30"],
@@ -4931,15 +4935,20 @@ function GlowUpTracker() {
     if (!user || targetDate > period.date) return;
     if (targetDate !== period.date) {
       const dateDoneKeys = targetDate === selectedProgressDate
-        ? historicalDoneKeys
-        : new Set((weeklyHistory.find((entry) => entry.progress_date === targetDate)?.completed_keys) || []);
+        ? new Set(longHistoryByDate.get(targetDate) || historicalDoneKeys)
+        : new Set((longHistoryByDate.get(targetDate) || weeklyHistory.find((entry) => entry.progress_date === targetDate)?.completed_keys || []));
       const nextKeys = new Set(dateDoneKeys);
       if (nextKeys.has(key)) nextKeys.delete(key);
       else { nextKeys.add(key); triggerCelebrate(key); }
       const completedKeys = [...nextKeys];
       const previousHistory = [...weeklyHistory];
+      const previousLongHistory = [...longHistory];
       const previousHabitHistory = [...habitHistory];
       setWeeklyHistory((entries) => [
+        ...entries.filter((entry) => entry.progress_date !== targetDate),
+        { progress_date: targetDate, completed_keys: completedKeys },
+      ]);
+      setLongHistory((entries) => [
         ...entries.filter((entry) => entry.progress_date !== targetDate),
         { progress_date: targetDate, completed_keys: completedKeys },
       ]);
@@ -4962,6 +4971,7 @@ function GlowUpTracker() {
             return;
           }
           setWeeklyHistory(previousHistory);
+          setLongHistory(previousLongHistory);
           setHabitHistory(previousHabitHistory);
           setSyncStatus("error");
           return;
@@ -5220,6 +5230,13 @@ function GlowUpTracker() {
   const habitTasks = trackerTasks
     .filter((task) => habitTypeForTask(task) !== "regular")
     .map((task) => ({ ...task, habitType: habitTypeForTask(task), stats: habitStatsForTask(task) }));
+  const habitGardenTotalCheckIns = habitTasks.reduce((total, task) => total + task.stats.total, 0);
+  const habitGardenGrowthPct = habitTasks.length
+    ? Math.round(habitTasks.reduce((total, task) => {
+      const nextCount = task.stats.nextReward?.count;
+      return total + (nextCount ? Math.min(100, (task.stats.total / nextCount) * 100) : 100);
+    }, 0) / habitTasks.length)
+    : 0;
   const bestBuildHabitStreak = Math.max(
     0,
     ...habitTasks.filter((task) => task.habitType === "build").map((task) => task.stats.best)
@@ -5584,6 +5601,37 @@ function GlowUpTracker() {
     todayDailyCoreKeys.every((key) => completedKeysForToday.has(key));
 
   const longHistoryByDate = new Map(longHistory.map((entry) => [entry.progress_date, new Set(entry.completed_keys || [])]));
+  const markPastTasksDone = async (date, taskKeys) => {
+    if (!user || date >= period.date || taskKeys.length === 0) return;
+    const alreadyDone = new Set(longHistoryByDate.get(date) || []);
+    const missingKeys = taskKeys.filter((key) => !alreadyDone.has(key));
+    if (missingKeys.length === 0) return;
+    if (!window.confirm(`Mark these ${missingKeys.length} activities as done for ${new Date(`${date}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}? You can still uncheck any one afterward.`)) return;
+    const completedKeys = [...new Set([...alreadyDone, ...taskKeys])];
+    const previousHistory = [...weeklyHistory];
+    const previousLongHistory = [...longHistory];
+    const previousHabitHistory = [...habitHistory];
+    const entry = { progress_date: date, completed_keys: completedKeys };
+    setWeeklyHistory((entries) => [...entries.filter((item) => item.progress_date !== date), entry]);
+    setLongHistory((entries) => [...entries.filter((item) => item.progress_date !== date), entry]);
+    setHabitHistory((entries) => [...entries.filter((item) => item.progress_date !== date), entry]);
+    setSyncStatus("syncing");
+    const { error } = await supabase.from("daily_progress").upsert({
+      user_id: user.id,
+      progress_date: date,
+      completed_keys: completedKeys,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id,progress_date" });
+    if (error) {
+      setWeeklyHistory(previousHistory);
+      setLongHistory(previousLongHistory);
+      setHabitHistory(previousHabitHistory);
+      setSyncStatus(navigator.onLine ? "error" : "offline");
+      return;
+    }
+    setSyncStatus("ready");
+    setLastSyncedAt(new Date().toISOString());
+  };
   const dayCompletionPct = (date) => {
     if (date > period.date) return null;
     const requiredKeys = requiredKeysForDate(date);
@@ -6356,6 +6404,15 @@ function GlowUpTracker() {
                 {babyMode ? "Mommy's gentle guess" : "PlushLife's gentle guess"}: <strong>{DAY_TYPES.find(([value]) => value === dailyCheckIn.day_type)?.[2] || "Full"} Day</strong> · {CAPACITY_LABELS[dailyCheckIn.capacity]} capacity · {ENERGY_LEVELS.find(([value]) => value === dailyCheckIn.energy)?.[2] || "Steady"} energy
               </div>
             )}
+            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#4C8FE8", fontWeight: 900 }}>CHOOSE TODAY'S PLAN</div>
+            <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#6B7C99" }}>Pick the size of day you actually have. This changes task versions, never what you have already earned.</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(88px,1fr))", gap: 7, marginTop: 7 }}>
+              {DAY_TYPES.map(([value, emoji, label, description]) => (
+                <button key={value} type="button" onClick={() => selectDayType(value)} aria-pressed={dailyCheckIn.day_type === value} title={description} style={{ padding: "8px 5px", borderRadius: 11, border: dailyCheckIn.day_type === value ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: dailyCheckIn.day_type === value ? "#EAF4FF" : "white", cursor: "pointer" }}>
+                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ fontSize: 10.5, fontWeight: 900, color: "#4C6F98" }}>{label}</div>
+                </button>
+              ))}
+            </div>
             <button type="button" onClick={() => setCheckInCustomizeOpen((open) => !open)} aria-expanded={checkInCustomizeOpen} style={{ marginTop: 12, width: "100%", padding: "8px 11px", borderRadius: 11, border: "1px solid #D9B8E8", background: "rgba(255,255,255,.72)", color: "#75428C", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>
               {checkInCustomizeOpen ? "Hide extra options" : "Customize today · optional"} {checkInCustomizeOpen ? "⌃" : "⌄"}
             </button>
@@ -6365,14 +6422,6 @@ function GlowUpTracker() {
               {ENERGY_LEVELS.map(([value, emoji, label]) => (
                 <button key={value} type="button" onClick={() => saveDailyCheckIn({ energy: value })} aria-pressed={dailyCheckIn.energy === value} style={{ padding: "8px 4px", borderRadius: 11, border: dailyCheckIn.energy === value ? "2px solid #318C79" : "1px solid #CFE8E1", background: dailyCheckIn.energy === value ? "#EAF8F4" : "white", cursor: "pointer" }}>
                   <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ fontSize: 10, fontWeight: 800, color: "#5E766F" }}>{label}</div>
-                </button>
-              ))}
-            </div>
-            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#4C8FE8", fontWeight: 900 }}>WHAT KIND OF DAY DO YOU NEED?</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(88px,1fr))", gap: 7, marginTop: 7 }}>
-              {DAY_TYPES.map(([value, emoji, label, description]) => (
-                <button key={value} type="button" onClick={() => selectDayType(value)} aria-pressed={dailyCheckIn.day_type === value} title={description} style={{ padding: "8px 5px", borderRadius: 11, border: dailyCheckIn.day_type === value ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: dailyCheckIn.day_type === value ? "#EAF4FF" : "white", cursor: "pointer" }}>
-                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ fontSize: 10.5, fontWeight: 900, color: "#4C6F98" }}>{label}</div>
                 </button>
               ))}
             </div>
@@ -7028,6 +7077,9 @@ function GlowUpTracker() {
               {careMessage && <div aria-live="polite" style={{ marginTop: 10, padding: "9px 11px", borderRadius: 10, background: "#FFFFFFB8", color: "#5E766F", fontSize: 11.5, lineHeight: 1.5 }}>{careMessage}</div>}
             </div>
 
+            <details open={careExtraSupportOpen} onToggle={(event) => setCareExtraSupportOpen(event.currentTarget.open)} style={{ borderRadius: 14, border: "1px solid #E6D4F2", background: "#FFFFFF99", padding: "10px 12px" }}>
+              <summary style={{ color: "#76558A", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>More cozy support</summary>
+              <div style={{ marginTop: 10, display: "grid", gap: 12 }}>
             {isMamaCornerProfile && <MamasCorner incompleteTasks={rows.filter((row) => !viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => toggle(taskKey)} />}
 
             {babyMode && (
@@ -7042,6 +7094,8 @@ function GlowUpTracker() {
                 onSoftDay={() => selectDayType("soft")}
               />
             )}
+              </div>
+            </details>
 
             <div role="tablist" aria-label="Care library" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 7, padding: 6, borderRadius: 15, background: "#FFFFFF99", border: "1px solid #E6D4F2" }}>
               {[["quick", "🌿", "PlushCalm"], ["paths", "🗺️", "PlushPaths"], ["sleep", "🌙", "PlushSleep"]].map(([value, icon, label]) => (
@@ -8004,19 +8058,22 @@ function GlowUpTracker() {
           <div style={{ marginBottom: 14, padding: 16, borderRadius: 16, background: "#F7FCFA", border: "1px solid #CFE8E1" }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: "#318C79" }}>STARTER PACKS · ADD A GENTLE HEAD START</div>
             <div style={{ marginTop: 5, fontSize: 11.5, lineHeight: 1.45, color: "#6B7F78" }}>Add a pack whenever you want. It only adds missing every-day tasks — your current list stays exactly as it is.</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 7, marginTop: 10 }}>
-              {TEMPLATE_PACKS.map((pack) => {
-                const selected = starterPackId === pack.id;
-                return <button key={pack.id} type="button" aria-pressed={selected} onClick={() => { setStarterPackId(pack.id); setStarterPackMessage(""); }} style={{ minWidth: 0, padding: "9px 7px", borderRadius: 11, border: selected ? "2px solid #318C79" : "1px solid #CFE8E1", background: selected ? "#E8F7F1" : "white", color: selected ? "#236B5D" : "#5E766F", fontWeight: 900, fontSize: 11, lineHeight: 1.3, cursor: "pointer" }}>
-                  <span style={{ display: "block", fontSize: 17 }}>{pack.emoji}</span>{pack.label}
-                </button>;
-              })}
-            </div>
             {(() => {
               const selectedPack = TEMPLATE_PACKS.find((pack) => pack.id === starterPackId) || TEMPLATE_PACKS[0];
+              const existingTaskNames = new Set(trackerTasks.filter((item) => item.day_id === "daily" && !item.archived_at).map((item) => item.task.trim().toLocaleLowerCase()));
+              const missingTasks = selectedPack.tasks.filter((item) => !existingTaskNames.has(item.task.trim().toLocaleLowerCase()));
               return <>
-                <div style={{ marginTop: 8, fontSize: 11, lineHeight: 1.45, color: "#6B7F78" }}>{selectedPack.tasks.map((item) => item.task).join(" · ")}</div>
-                <button type="button" onClick={addStarterPack} style={{ marginTop: 9, padding: "8px 12px", borderRadius: 10, border: 0, background: "#318C79", color: "white", fontWeight: 900, cursor: "pointer" }}>Add {selectedPack.label}</button>
+                <label style={{ display: "block", marginTop: 11, fontSize: 11, fontWeight: 900, color: "#3E746A" }}>
+                  Choose a starter pack
+                  <select aria-label="Choose a starter pack" value={starterPackId} onChange={(event) => { setStarterPackId(event.target.value); setStarterPackMessage(""); }} style={{ width: "100%", marginTop: 5, padding: "10px 11px", borderRadius: 10, border: "1px solid #9ED8CB", background: "white", color: "#285F55", fontWeight: 800, fontSize: 12.5 }}>
+                    {TEMPLATE_PACKS.map((pack) => <option key={pack.id} value={pack.id}>{pack.emoji} {pack.label}</option>)}
+                  </select>
+                </label>
+                <div style={{ marginTop: 10, padding: "10px 11px", borderRadius: 11, background: "white", border: "1px solid #D6EEE7" }}>
+                  <div style={{ fontSize: 11, fontWeight: 900, color: "#318C79" }}>{missingTasks.length ? `This will add ${missingTasks.length} missing ${missingTasks.length === 1 ? "task" : "tasks"}` : "You already have every task in this pack"}</div>
+                  {missingTasks.length > 0 && <div style={{ marginTop: 6, display: "grid", gap: 4, fontSize: 11.5, lineHeight: 1.35, color: "#5E766F" }}>{missingTasks.map((item) => <div key={item.task}>○ {item.task}</div>)}</div>}
+                </div>
+                <button type="button" disabled={missingTasks.length === 0} onClick={addStarterPack} style={{ marginTop: 9, padding: "8px 12px", borderRadius: 10, border: 0, background: missingTasks.length ? "#318C79" : "#AFC8C1", color: "white", fontWeight: 900, cursor: missingTasks.length ? "pointer" : "not-allowed" }}>Add {selectedPack.label}</button>
               </>;
             })()}
             {starterPackMessage && <div role={starterPackMessage.includes("Couldn't") ? "alert" : "status"} aria-live="polite" style={{ marginTop: 8, fontSize: 11.5, lineHeight: 1.45, color: starterPackMessage.includes("Couldn't") ? "#B24D65" : "#318C79", fontWeight: 700 }}>{starterPackMessage}</div>}
@@ -8641,7 +8698,7 @@ function GlowUpTracker() {
           return (
             <>
             <FeatureTip id="one_next_step" text="This is your One Next Step — just the single most useful thing to do right now, so you don't have to look at everything at once." />
-            <div style={{ marginBottom: 14, padding: "13px 14px", borderRadius: 15, background: `${day.accent}10`, border: `1px solid ${day.accent}88` }}>
+            <div style={{ marginBottom: 8, padding: "13px 14px", borderRadius: 15, background: `${day.accent}10`, border: `1px solid ${day.accent}88` }}>
               <div style={{ fontSize: 10.5, letterSpacing: "0.12em", fontWeight: 900, color: day.accent }}>{babyMode ? "🍼 ONE TINY THING" : "🎯 NEXT STEP"}</div>
               <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "#5B4B6B" }}>{nextStepTask.sourceTask && <HabitTypeIcon task={nextStepTask.sourceTask} />}{nextStepTask.label}</div>
               {nextStepHint?.key === nextStepTask.key && (
@@ -8949,15 +9006,25 @@ function GlowUpTracker() {
                       </div>
                     )}
                   </div>
-                  <button type="button" onClick={() => setFocusModeShowAll(true)} style={{ marginTop: 10, padding: "7px 11px", borderRadius: 9, border: "1px solid #E6D4F2", background: "white", color: "#8C6B9E", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>Show full list instead</button>
                 </div>
               );
-            })() : taskListCollapsed ? (
-              <button type="button" onClick={() => setTaskListCollapsed(false)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 14px", borderRadius: 13, border: `1px solid ${day.accent}55`, background: "white", cursor: "pointer", textAlign: "left" }}>
-                <span style={{ fontWeight: 800, fontSize: 13.5, color: "#5B4B6B" }}>📋 See today's full list</span>
-                <span style={{ fontWeight: 900, fontSize: 12.5, color: day.accent }}>{requiredDoneCount}/{requiredRows.length} done ›</span>
-              </button>
-            ) : (
+            })() : taskListCollapsed ? (() => {
+              const pendingRows = rows.filter((r) => !viewDone[r.key] && !(r.sourceTask && isTaskPausedOnDate(r.sourceTask, period.date)));
+              const requiredPendingRows = pendingRows.filter((r) => !r.isBonus);
+              const previewRows = (requiredPendingRows.length ? requiredPendingRows : pendingRows).slice(0, 3);
+              const pendingCount = pendingRows.length;
+              return (
+                <button type="button" onClick={() => setTaskListCollapsed(false)} style={{ width: "100%", display: "block", padding: "13px 14px", borderRadius: 13, border: `1px solid ${day.accent}55`, background: "white", cursor: "pointer", textAlign: "left" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontWeight: 900, fontSize: 13.5, color: "#5B4B6B" }}>📋 {pendingCount ? `${pendingCount} task${pendingCount === 1 ? "" : "s"} still waiting` : "Today's tasks"}</span>
+                    <span style={{ fontWeight: 900, fontSize: 12.5, color: day.accent, whiteSpace: "nowrap" }}>See full list ›</span>
+                  </div>
+                  {previewRows.length > 0 && <div style={{ marginTop: 8, display: "grid", gap: 4 }}>
+                    {previewRows.map((r) => <div key={r.key} style={{ fontSize: 12, color: "#6B5A7D", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>○ {r.sourceTask && <HabitTypeIcon task={r.sourceTask} />}{r.label}</div>)}
+                  </div>}
+                </button>
+              );
+            })() : (
               <>
                 <button type="button" onClick={() => setTaskListCollapsed(true)} style={{ marginBottom: 10, padding: "7px 11px", borderRadius: 9, border: "1px solid #E6D4F2", background: "white", color: "#8C6B9E", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>▾ Collapse list</button>
                 {preferences.focus_mode && (
@@ -9224,6 +9291,8 @@ function GlowUpTracker() {
               return <button key={date} type="button" disabled={isFutureDate} title={calendarTitle || undefined} aria-label={calendarTitle ? `${number}: ${calendarTitle}` : String(number)} onClick={() => {
                 if (isFutureDate) return;
                 setSelectedProgressDate(date);
+                setDayViewDate(date);
+                setWeekCardIndex(2);
                 if (date === period.date) setActive("daily");
                 if (hasReflection && !checkIn) setReflectionViewerDate(date);
                 if (checkIn) setCheckInViewerDate(date);
@@ -9343,14 +9412,18 @@ function GlowUpTracker() {
           const groupedTasks = ["Morning", "Afternoon", "Evening", "Anytime"]
             .map((group) => ({ group, tasks: previewTasks.filter((task) => timeBucket(task) === group) }))
             .filter((entry) => entry.tasks.length > 0);
+          const completedForViewedDay = longHistoryByDate.get(dayViewDate) || new Set();
+          const catchUpTasks = !isFuture && dayViewDate !== period.date
+            ? previewTasks.filter((task) => !isTaskPausedOnDate(task, dayViewDate) && !completedForViewedDay.has(task.task_key))
+            : [];
           return (
             <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.5)", border: "1px solid #E6D4F2", boxShadow: "0 8px 24px rgba(183,143,224,0.10)" }}>
               <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "#A65DC1", fontWeight: 800 }}>📆 DAY VIEW</div>
               <div style={{ marginTop: 4, fontSize: 11.5, color: "#8C6B9E" }}>Jump to any date — past days show what actually happened, future days show what's planned.</div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12, flexWrap: "wrap" }}>
-                <button type="button" aria-label="Previous day" onClick={() => { const next = offsetDate(dayViewDate, -1); setDayViewDate(next); setSelectedProgressDate(next); if (next === period.date) setActive("daily"); }} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #DCC9E8", background: "white", color: "#8E4EAA", cursor: "pointer" }}>←</button>
-                <input type="date" value={dayViewDate} max={offsetDate(period.date, 365)} onChange={(event) => { const next = event.target.value || period.date; setDayViewDate(next); setSelectedProgressDate(next); if (next === period.date) setActive("daily"); }} style={{ padding: "6px 8px", borderRadius: 8, border: "1px solid #DCC9E8", fontSize: 12.5 }} />
-                <button type="button" aria-label="Next day" onClick={() => { const next = offsetDate(dayViewDate, 1); setDayViewDate(next); setSelectedProgressDate(next); if (next === period.date) setActive("daily"); }} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #DCC9E8", background: "white", color: "#8E4EAA", cursor: "pointer" }}>→</button>
+                <button type="button" aria-label="Previous day" onClick={() => { const next = offsetDate(dayViewDate, -1); setDayViewDate(next); setSelectedProgressDate(next); setReflectionCalendarMonth(next.slice(0, 7)); if (next === period.date) setActive("daily"); }} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #DCC9E8", background: "white", color: "#8E4EAA", cursor: "pointer" }}>←</button>
+                <input type="date" value={dayViewDate} max={offsetDate(period.date, 365)} onChange={(event) => { const next = event.target.value || period.date; setDayViewDate(next); setSelectedProgressDate(next); setReflectionCalendarMonth(next.slice(0, 7)); if (next === period.date) setActive("daily"); }} style={{ padding: "6px 8px", borderRadius: 8, border: "1px solid #DCC9E8", fontSize: 12.5 }} />
+                <button type="button" aria-label="Next day" onClick={() => { const next = offsetDate(dayViewDate, 1); setDayViewDate(next); setSelectedProgressDate(next); setReflectionCalendarMonth(next.slice(0, 7)); if (next === period.date) setActive("daily"); }} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #DCC9E8", background: "white", color: "#8E4EAA", cursor: "pointer" }}>→</button>
                 {dayViewDate !== period.date && <button type="button" onClick={() => { setDayViewDate(period.date); setSelectedProgressDate(period.date); setActive("daily"); }} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #DCC9E8", background: "white", color: "#8E4EAA", fontWeight: 800, fontSize: 11, cursor: "pointer" }}>Today</button>}
               </div>
               <div style={{ marginTop: 10, fontSize: 14, fontWeight: 900, color: "#5B4B6B" }}>
@@ -9358,6 +9431,7 @@ function GlowUpTracker() {
                 {isRestDay && !isFuture ? " · 🌴 Resting" : pct !== null ? ` · ${pct}% complete` : isFuture ? " · Planned" : ""}
               </div>
               {checkIn && <div style={{ marginTop: 6, fontSize: 12, color: "#8C6B9E" }}>{moodOption ? `Feeling ${moodOption[2]}` : ""}</div>}
+              {catchUpTasks.length > 0 && <button type="button" onClick={() => markPastTasksDone(dayViewDate, catchUpTasks.map((task) => task.task_key))} style={{ marginTop: 10, width: "100%", padding: "9px 11px", borderRadius: 10, border: "1px solid #A9DCCD", background: "#F4FFF9", color: "#318C79", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>✓ Catch up: mark {catchUpTasks.length} remaining {catchUpTasks.length === 1 ? "activity" : "activities"} as done</button>}
               {!dayViewExpanded ? (
                 <button type="button" onClick={() => setDayViewExpanded(true)} style={{ marginTop: 12, width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#5B4B6B", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>
                   <span>📋 {previewTasks.length} {previewTasks.length === 1 ? "activity" : "activities"}</span>
@@ -9384,13 +9458,14 @@ function GlowUpTracker() {
                         // about it; future ones say "Planned".
                         const label = paused ? "⏸ Paused" : isFuture ? "Planned" : isDone ? "✓ Done" : isToday ? "" : "Missed";
                         return (
-                          <div key={task.task_key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "7px 10px", borderRadius: 9, background: "#FFFFFFAA", border: "1px solid #EADDE2", fontSize: 12, color: "#5B4B6B" }}>
-                            <span>
+                          <label key={task.task_key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "7px 10px", borderRadius: 9, background: "#FFFFFFAA", border: "1px solid #EADDE2", fontSize: 12, color: "#5B4B6B", cursor: isFuture || paused ? "default" : "pointer" }}>
+                            <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                              {!isFuture && !paused && <input type="checkbox" checked={isDone} onChange={() => toggle(task.task_key, dayViewDate)} aria-label={`Mark ${task.task} done for ${dayViewDate}`} />}
                               <HabitTypeIcon task={task} />
                               {taskIsOptional(task) ? "⭐ " : ""}{task.task}
                             </span>
                             {label && <span style={{ fontSize: 10.5, fontWeight: 800, color: paused ? "#9A6918" : isDone ? "#318C79" : "#B0576B" }}>{label}</span>}
-                          </div>
+                          </label>
                         );
                       })}
                     </div>
@@ -9410,7 +9485,13 @@ function GlowUpTracker() {
             <div style={{ marginTop: 5, fontSize: 12, lineHeight: 1.5, color: "#5E766F" }}>
               Habits you are building grow here, and habits you are breaking count as caring wins too. A reset never takes away a badge you already earned.
             </div>
-            <div style={{ display: "grid", gap: 8, marginTop: 11 }}>
+            <div style={{ marginTop: 10, padding: "9px 10px", borderRadius: 11, background: "#FFFFFFB8", border: "1px solid #D7EEE2" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline", color: "#4D746A" }}><strong style={{ fontSize: 11.5 }}>Growing toward your next rewards</strong><strong style={{ fontSize: 13 }}>{habitGardenGrowthPct}%</strong></div>
+              <div style={{ height: 7, marginTop: 6, overflow: "hidden", borderRadius: 99, background: "#E2F3EA" }}><div style={{ width: `${habitGardenGrowthPct}%`, height: "100%", borderRadius: 99, background: "linear-gradient(90deg,#4DD0B0,#4C8FE8)", transition: "width .4s ease" }} /></div>
+              <div style={{ marginTop: 5, fontSize: 10.5, color: "#6B8A82" }}>{habitGardenTotalCheckIns} caring {habitGardenTotalCheckIns === 1 ? "check-in" : "check-ins"} across {habitTasks.length} {habitTasks.length === 1 ? "habit" : "habits"}.</div>
+            </div>
+            <button type="button" onClick={() => setHabitGardenOpen((open) => !open)} aria-expanded={habitGardenOpen} style={{ marginTop: 10, padding: "6px 9px", borderRadius: 8, border: "1px solid #A9DFC4", background: "white", color: "#318C79", fontWeight: 900, fontSize: 10.5, cursor: "pointer" }}>{habitGardenOpen ? "Hide garden details" : `View ${habitTasks.length} habits`}</button>
+            {habitGardenOpen && <div style={{ display: "grid", gap: 8, marginTop: 11 }}>
               {habitTasks.map((habit) => {
                 const nextCount = habit.stats.nextReward?.count;
                 const progressPct = nextCount ? Math.min(100, Math.round((habit.stats.total / nextCount) * 100)) : 100;
@@ -9460,7 +9541,7 @@ function GlowUpTracker() {
                 </div>
                 );
               })}
-            </div>
+            </div>}
           </div>
         )}
 
@@ -9547,7 +9628,7 @@ function GlowUpTracker() {
               );
             })()}
           </div>
-          <div style={{ display: hasWeeklyActivity ? "grid" : "none", gridTemplateColumns: preferences.gentle_streaks ? "repeat(2, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))", gap: 8, marginTop: 12 }}>
+          <div style={{ display: hasWeeklyActivity && progressDetailsOpen ? "grid" : "none", gridTemplateColumns: preferences.gentle_streaks ? "repeat(2, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))", gap: 8, marginTop: 12 }}>
             <div style={{ padding: "10px 8px", borderRadius: 12, textAlign: "center", background: "#FFF8FC" }}>
               <div style={{ fontSize: 17, fontWeight: 900, color: "#A65DC1" }}>{weeklyEssentialPct}%</div>
               <div style={{ marginTop: 2, fontSize: 10.5, color: "#8C6B9E" }}>ESSENTIALS</div>
@@ -9565,10 +9646,10 @@ function GlowUpTracker() {
               <div style={{ marginTop: 2, fontSize: 10.5, color: "#8C6B9E" }}>CARING DAYS</div>
             </div>}
           </div>
-          {hasWeeklyActivity && <div style={{ marginTop: 10, fontSize: 11.5, lineHeight: 1.45, color: "#8C6B9E" }}>
+          {hasWeeklyActivity && progressDetailsOpen && <div style={{ marginTop: 10, fontSize: 11.5, lineHeight: 1.45, color: "#8C6B9E" }}>
             Bonus items are celebrated separately, so they never lower your essentials score. 💛
           </div>}
-          {hasWeeklyActivity && <div style={{ marginTop: 9, padding: "9px 10px", borderRadius: 10, background: "#FFFFFF99", fontSize: 11.5, lineHeight: 1.45, color: "#6B5A7D" }}>
+          {hasWeeklyActivity && progressDetailsOpen && <div style={{ marginTop: 9, padding: "9px 10px", borderRadius: 10, background: "#FFFFFF99", fontSize: 11.5, lineHeight: 1.45, color: "#6B5A7D" }}>
             <strong>Gentle weekly review:</strong> {weeklyEssentialDone} essentials and {weeklyBonusDone} bonus wins completed across {caringDays} caring {caringDays === 1 ? "day" : "days"}. A missed day never erases the care you gave yourself.
           </div>}
           {false && <div style={{ marginTop: 9, padding: "12px", borderRadius: 12, background: "#F5FBF8", border: "1px solid #CFE8E1", color: "#526F67" }}>
@@ -9596,7 +9677,7 @@ function GlowUpTracker() {
               </div>
             </div>
           )}
-          {patternInsightCards.length > 0 && (() => {
+          {progressDetailsOpen && patternInsightCards.length > 0 && (() => {
             const card = patternInsightCards[insightCardIndex % patternInsightCards.length];
             return (
               <div key={card.key} style={{ marginTop: 9, padding: "11px 12px", borderRadius: 12, background: card.background, border: `1px solid ${card.border}`, fontSize: 11.5, lineHeight: 1.5, color: card.color }}>
@@ -9624,11 +9705,13 @@ function GlowUpTracker() {
               )}
             </div>
           )}
-          <button type="button" onClick={goWriteWeeklyIntention} style={{ marginTop: 9, width: "100%", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#A65DC1", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>📝 Set next week's intention</button>
-          <button type="button" onClick={() => setShareCardOpen(true)} style={{ marginTop: 8, width: "100%", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#A65DC1", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>📸 Share my week</button>
+          <button type="button" onClick={goWriteWeeklyIntention} style={{ display: progressDetailsOpen ? undefined : "none", marginTop: 9, width: "100%", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#A65DC1", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>📝 Set next week's intention</button>
+          <button type="button" onClick={() => setShareCardOpen(true)} style={{ display: progressDetailsOpen ? undefined : "none", marginTop: 8, width: "100%", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#A65DC1", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>📸 Share my week</button>
         </div>
 
-        <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.5)", border: "1px solid #E6D4F2", boxShadow: "0 8px 24px rgba(183,143,224,0.10)" }}>
+        <button type="button" onClick={() => setProgressDetailsOpen((open) => !open)} aria-expanded={progressDetailsOpen} style={{ width: "100%", margin: "-6px 0 14px", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{progressDetailsOpen ? "Hide full progress" : "See full progress"}</button>
+
+        <div style={{ display: progressDetailsOpen ? undefined : "none", marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.5)", border: "1px solid #E6D4F2", boxShadow: "0 8px 24px rgba(183,143,224,0.10)" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
             <div>
               <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "#A65DC1", fontWeight: 800 }}>{new Date(`${currentMonthKey}-01T12:00:00`).toLocaleDateString("en-US", { month: "long" }).toUpperCase()} SO FAR</div>
