@@ -25,7 +25,7 @@ The project pins the verified official Zeus CLI release locally. The `.zab` is w
 ## Install on a real Balance 2
 
 1. In the Zepp phone app, enable Developer Mode: **Profile → Settings → About → tap the Zepp logo seven times**.
-2. From `wearables/zepp`, run `npm ci`, then `npm run preview`.
+2. On Windows, double-click `preview-balance2.cmd`. On macOS/Linux, run `npm ci`, then `npm run preview` from `wearables/zepp`.
 3. Complete the one-time Zepp/Open Platform login when Zeus opens it.
 4. Zeus displays a QR code.
 5. In Zepp Developer Mode, open **Scan** and scan that QR code while the Balance 2 is connected.
