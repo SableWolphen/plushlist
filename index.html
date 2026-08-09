@@ -585,7 +585,7 @@ function littleSpaceTaskLabel(label) {
   return `Let's take care of “${task}” together, one tiny step at a time`;
 }
 
-function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, caregiverName, comfortItemName, littleJobs, onCompleteTask, onManageTasks, onOpenJournal, onSoftDay }) {
+function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, caregiverName, comfortItemName, littleJobs, onCompleteTask, onManageTasks, onOpenJournal }) {
   const [windDown, setWindDown] = React.useState([false, false, false]);
   const [comfortOpen, setComfortOpen] = React.useState(null);
   const [open, setOpen] = React.useState(true);
@@ -629,13 +629,6 @@ function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays
           {comfortTools.map((tool) => <button key={tool.id} type="button" onClick={() => setComfortOpen((current) => current === tool.id ? null : tool.id)} aria-expanded={comfortOpen === tool.id}>{tool.label}</button>)}
         </div>
         {comfortOpen && <div className="baby-comfort-note">{comfortTools.find((tool) => tool.id === comfortOpen)?.text}</div>}
-      </div>
-      <div className="baby-comfort">
-        <div className="baby-section-label">🧸 BIG FEELINGS TRANSLATOR</div>
-        <div className="baby-wind-down-copy">Big feelings are allowed. Pick one and let today become extra small.</div>
-        <div className="baby-comfort-actions">
-          {["😟 Scared", "😤 Grumpy", "😢 Weepy", "🫠 Too much"].map((label) => <button key={label} type="button" onClick={onSoftDay}>{label}</button>)}
-        </div>
       </div>
       <div className="baby-comfort">
         <div className="baby-section-label">🧸 MY LITTLE JOBS</div>
@@ -1948,6 +1941,7 @@ function GlowUpTracker() {
   const [habitHistory, setHabitHistory] = useState([]);
   const [selectedProgressDate, setSelectedProgressDate] = useState(() => trackerPeriod().date);
   const [reflectionDates, setReflectionDates] = useState([]);
+  const [reflectionHistory, setReflectionHistory] = useState([]);
   const [reflectionCalendarMonth, setReflectionCalendarMonth] = useState(() => trackerPeriod().date.slice(0, 7));
   const [reflectionViewerDate, setReflectionViewerDate] = useState(null);
   const [checkInViewerDate, setCheckInViewerDate] = useState(null);
@@ -3586,16 +3580,19 @@ function GlowUpTracker() {
   useEffect(() => {
     if (!user) {
       setReflectionDates([]);
+      setReflectionHistory([]);
       return;
     }
     let alive = true;
     supabase
       .from("private_notes")
-      .select("note_date")
+      .select("note_date, body, prompt, updated_at")
       .eq("user_id", user.id)
+      .order("note_date", { ascending: false })
       .then(({ data, error }) => {
         if (!alive || error) return;
         setReflectionDates((data || []).map((note) => note.note_date));
+        setReflectionHistory(data || []);
       });
     return () => { alive = false; };
   }, [user]);
@@ -3642,6 +3639,11 @@ function GlowUpTracker() {
     setReflectionDates((dates) => privateNoteDraft.trim() ? Array.from(new Set([...dates, journalQuickOpenDate])) : dates.filter((date) => date !== journalQuickOpenDate));
     setPrivateNote(privateNoteDraft);
     setPrivateNotePrompt(journalPromptToSave || "");
+    setReflectionHistory((entries) => {
+      const nextEntry = { note_date: journalQuickOpenDate, body: privateNoteDraft, prompt: journalPromptToSave, updated_at: new Date().toISOString() };
+      if (!privateNoteDraft.trim()) return entries.filter((entry) => entry.note_date !== journalQuickOpenDate);
+      return [nextEntry, ...entries.filter((entry) => entry.note_date !== journalQuickOpenDate)].sort((a, b) => b.note_date.localeCompare(a.note_date));
+    });
     setPrivateNoteEditing(false);
     setPrivateNoteMessage("");
   };
@@ -9599,7 +9601,6 @@ function GlowUpTracker() {
             onCompleteTask={(taskKey) => toggle(taskKey)}
             onManageTasks={() => openTaskManager(dayIdForDate(period.date))}
             onOpenJournal={openJournalForSelectedDate}
-            onSoftDay={() => selectDayType("soft")}
           />
         )}
 
@@ -10050,6 +10051,21 @@ function GlowUpTracker() {
             More
             <span style={{ width: 12, height: 12, borderRadius: 3, background: "#8FD4B8", display: "inline-block", marginLeft: 8 }} /> 🌴 Resting
           </div>
+        </div>
+        <div style={{ marginBottom: 18, padding: 16, borderRadius: 18, background: "#FFFFFF99", border: "1px solid #D9C8EA" }}>
+          <div style={{ fontSize: 11, letterSpacing: "0.14em", fontWeight: 900, color: "#8E4EAA" }}>📖 PLUSHJOURNAL HISTORY</div>
+          <div style={{ marginTop: 4, fontSize: 11.5, color: "#8C6B9E" }}>Your private dated reflections, newest first.</div>
+          {reflectionHistory.length ? (
+            <div style={{ display: "grid", gap: 7, marginTop: 10 }}>
+              {reflectionHistory.slice(0, 10).map((entry) => (
+                <button key={entry.note_date} type="button" onClick={() => setReflectionViewerDate(entry.note_date)} style={{ width: "100%", padding: "10px 11px", borderRadius: 11, border: "1px solid #E6D4F2", background: "#FFF9FD", color: "#5B4B6B", cursor: "pointer", textAlign: "left" }}>
+                  <span style={{ display: "block", fontSize: 10.5, fontWeight: 900, color: "#A65DC1" }}>{new Date(`${entry.note_date}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}</span>
+                  <span style={{ display: "block", marginTop: 3, fontSize: 11.5, fontStyle: "italic", color: "#806B8D" }}>{entry.prompt || "Original question unavailable"}</span>
+                  <span style={{ display: "block", marginTop: 4, fontSize: 12.5, lineHeight: 1.4 }}>{entry.body.length > 120 ? `${entry.body.slice(0, 120).trim()}…` : entry.body}</span>
+                </button>
+              ))}
+            </div>
+          ) : <div style={{ marginTop: 10, padding: "10px 11px", borderRadius: 11, background: "#FBF7FD", color: "#927C9E", fontSize: 12 }}>Your first saved PlushJournal entry will appear here.</div>}
         </div>
         </>}
 

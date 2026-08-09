@@ -44,7 +44,7 @@ const requiredRegressionMarkers = [
   'const MOTHERLY_NICKNAMES = [',
   'function NurseryNook({ outfit, mood, activityDays, onOpenCloset })',
   'MY LITTLE NURSERY',
-  'function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, caregiverName, comfortItemName, littleJobs, onCompleteTask, onManageTasks, onOpenJournal, onSoftDay })',
+  'function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, caregiverName, comfortItemName, littleJobs, onCompleteTask, onManageTasks, onOpenJournal })',
   'LITTLE CARE CORNER',
   'BEDTIME WIND-DOWN',
   'Today’s little-win sticker: Super Cozy Helper',
@@ -58,7 +58,6 @@ const requiredRegressionMarkers = [
   'LITTLE SPACE ARRIVAL',
   'NURSERY KEEPSAKE WALL',
   'BEDTIME NEST',
-  'BIG FEELINGS TRANSLATOR',
   'MY LITTLE JOBS',
   'function MamasCorner({ incompleteTasks, onConfirmTask, caregiverName = "Mommy", parentVoice = "motherly" })',
   'PRIVATE {caregiverName.toUpperCase()}’S CORNER',
@@ -91,6 +90,8 @@ const requiredRegressionMarkers = [
   'Your daily PlushJournal prompt',
   "📝 Open today's PlushJournal",
   'const openTodayJournal = async () => {',
+  '📖 PLUSHJOURNAL HISTORY',
+  'reflectionHistory.slice(0, 10)',
 ];
 
 for (const marker of requiredRegressionMarkers) {
@@ -103,6 +104,7 @@ const prohibitedRegressionMarkers = [
   'startTaskCardTouchDrag',
   'draggable={draggableTodayTask}',
   'draggable="true"',
+  'BIG FEELINGS TRANSLATOR',
 ];
 
 for (const marker of prohibitedRegressionMarkers) {
