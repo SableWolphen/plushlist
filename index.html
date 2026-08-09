@@ -2589,7 +2589,7 @@ function GlowUpTracker() {
     setSupportAchievements(achievementsResult.data || null);
     setOwnerIsRestingToday(!!restResult.data);
     if (isSupportAdult && targetOwnerId !== user?.id && user?.email) {
-      supabase.from("caregiver_links").update({ last_viewed_at: new Date().toISOString() }).eq("owner_user_id", targetOwnerId).ilike("caregiver_email", user.email).then(() => {});
+      supabase.rpc("touch_caregiver_link_viewed", { p_owner_user_id: targetOwnerId }).then(() => {});
     }
     if (notesResult.error || rewardsResult.error || progressResult.error || historyResult.error || tasksResult.error || suggestionsResult.error) {
       setSupportMessage("Some guardian information couldn't be refreshed.");
