@@ -5475,6 +5475,19 @@ function GlowUpTracker() {
     setPrivateNoteMessage("");
     setJournalQuickOpen(true);
   };
+  const openTodayJournal = async () => {
+    if (!user) return;
+    const { data, error } = await supabase.from("private_notes").select("body, prompt").eq("user_id", user.id).eq("note_date", period.date).maybeSingle();
+    const body = error ? "" : (data?.body || "");
+    setPrivateNote(body);
+    setPrivateNotePrompt(error ? "" : (data?.prompt || ""));
+    setJournalQuickOpenDate(period.date);
+    setPrivateNoteDraft(body);
+    setPrivateNoteMessage(error ? "Couldn't load today's private note." : "");
+    setPrivateNoteEditing(false);
+    setDailyJournalPromptOpen(false);
+    setJournalQuickOpen(true);
+  };
   const reflectionMonthDate = new Date(`${reflectionCalendarMonth}-01T12:00:00Z`);
   const reflectionMonthStart = (reflectionMonthDate.getUTCDay() + 6) % 7;
   const reflectionMonthDays = new Date(Date.UTC(reflectionMonthDate.getUTCFullYear(), reflectionMonthDate.getUTCMonth() + 1, 0)).getUTCDate();
@@ -9945,6 +9958,7 @@ function GlowUpTracker() {
         </>}
 
         {dashboard === "week" && <>
+        <button type="button" onClick={openTodayJournal} style={{ width: "100%", marginBottom: 9, padding: "10px 12px", borderRadius: 12, border: "1px solid #D9B8E8", background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", color: "#8E4EAA", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>📝 Open today's PlushJournal</button>
         <div style={{ display: "flex", gap: 6, marginBottom: 8, alignItems: "center" }}>
           <button type="button" aria-label="Previous view" onClick={() => setWeekCardIndex((index) => (index + 2) % 3)} style={{ padding: "7px 9px", borderRadius: 10, border: "1px solid #E6D4F2", background: "#FFFFFFAA", color: "#A65DC1", fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>‹</button>
           <div role="tablist" aria-label="Calendar view" style={{ flex: 1, display: "flex", gap: 4, padding: 4, borderRadius: 12, background: "#F0E4F7" }}>

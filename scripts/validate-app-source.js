@@ -89,6 +89,8 @@ const requiredRegressionMarkers = [
   '📮 PLUSHWEEK',
   'plushlife-journal-prompt-${user.id}-${period.date}',
   'Your daily PlushJournal prompt',
+  "📝 Open today's PlushJournal",
+  'const openTodayJournal = async () => {',
 ];
 
 for (const marker of requiredRegressionMarkers) {
