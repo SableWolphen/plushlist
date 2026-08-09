@@ -1,3 +1,4 @@
+// Store artwork generator; the .cjs extension keeps it outside the Zeus app bundle.
 const path = require('node:path')
 const sharp = require('sharp')
 
