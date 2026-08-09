@@ -81,7 +81,7 @@ const requiredRegressionMarkers = [
   'const [journalQuickOpenDate, setJournalQuickOpenDate] = useState(() => trackerPeriod().date);',
   '.select("body, prompt")',
   'prompt: journalPromptToSave',
-  'The question was not saved with this older entry.',
+  'reflectionViewerPrompt || reflectionPromptForDay(dayIdForDate(reflectionViewerDate)',
   'JOURNAL FOR {new Date(`${journalQuickOpenDate}T12:00:00Z`)',
   '📮 PLUSHWEEK · WEEKLY INTENTION',
   'Weekly planning and Sunday follow-up · separate from PlushJournal',
