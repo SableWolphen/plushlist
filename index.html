@@ -7081,7 +7081,7 @@ function GlowUpTracker() {
           }} style={{ flex: 1, display: "grid", gridTemplateColumns: `repeat(${dashboardItems.length}, minmax(0, 1fr))`, gap: 6, minWidth: 0 }}>
             {dashboardItems.map((item) => {
               const on = item.id === dashboard;
-              const displayLabel = babyMode ? ({ today: "Nursery", week: "My Week", care: "Comfort", progress: "My Growth", guardian: "Guardian" }[item.id] || item.label) : item.label;
+              const displayLabel = babyMode ? ({ today: "Nursery", week: "PlushWeek", care: "PlushCare", progress: "PlushGrowth", guardian: "Guardian" }[item.id] || item.label) : item.label;
               return <button key={item.id} id={`dashboard-tab-${item.id}`} role="tab" aria-selected={on} onClick={() => goToDashboard(item.id)} style={{ position: "relative", minHeight: 52, padding: "7px 3px", borderRadius: 13, border: on ? `2px solid ${item.accent}` : "2px solid #F3D9EC", background: on ? `${item.accent}22` : "#FFFFFF", color: on ? item.accent : "#8C6B9E", fontWeight: 900, fontSize: displayLabel.length > 10 ? 9.5 : 11, lineHeight: 1.15, overflowWrap: "break-word", wordBreak: "break-word", cursor: "pointer" }}>
                 <span style={{ display: "block", fontSize: 16, marginBottom: 2 }} aria-hidden="true">{item.icon}</span>{displayLabel}
               </button>;
@@ -9606,7 +9606,7 @@ function GlowUpTracker() {
 
         {dashboard === "progress" && <>
         <div role="tablist" aria-label="Progress views" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 6, marginBottom: 12, padding: 5, borderRadius: 14, background: "#F3E8FA", border: "1px solid #E6D4F2" }}>
-          {[{ id: "overview", label: "Overview", icon: "📊" }, { id: "story", label: "Care Story", icon: "📖" }, { id: "areas", label: "Care Areas", icon: "🪴" }].map((item) => {
+          {[{ id: "overview", label: "PlushView", icon: "📊" }, { id: "story", label: "PlushStory", icon: "📖" }, { id: "areas", label: "PlushSpaces", icon: "🪴" }].map((item) => {
             const selected = progressView === item.id;
             return <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} style={{ minWidth: 0, padding: "8px 4px", borderRadius: 10, border: selected ? "2px solid #A65DC1" : "1px solid transparent", background: selected ? "white" : "transparent", color: selected ? "#7A3D93" : "#8C6B9E", fontSize: 10.5, fontWeight: 900, cursor: "pointer" }}>{item.icon} {item.label}</button>;
           })}
@@ -9614,7 +9614,7 @@ function GlowUpTracker() {
         {progressView === "overview" && <>
         <div style={{ marginBottom: 12, padding: "11px 12px", borderRadius: 12, background: "#F9F1FC", border: "1px solid #E6D4F2" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-            <div style={{ fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#8E4EAA" }}>📮 THIS WEEK'S INTENTION</div>
+            <div style={{ fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#8E4EAA" }}>📮 PLUSHPOST · THIS WEEK</div>
             {!weeklyIntentionEditing && <button type="button" onClick={() => { setWeeklyIntentionDraft(weeklyIntentionText); setWeeklyIntentionEditing(true); }} style={{ padding: "5px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>{weeklyIntentionText ? "Edit" : "Add one"}</button>}
           </div>
           {weeklyIntentionEditing ? <>
@@ -9632,7 +9632,7 @@ function GlowUpTracker() {
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
             <div>
               <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "#A65DC1", fontWeight: 800 }}>THIS WEEK · MON–SUN</div>
-              <div style={{ marginTop: 4, fontSize: 19, color: "#5B4B6B", fontWeight: 800 }}>Whole-week progress ✨</div>
+              <div style={{ marginTop: 4, fontSize: 19, color: "#5B4B6B", fontWeight: 800 }}>PlushGrowth ✨</div>
             </div>
             <div style={{ fontSize: 27, color: "#A65DC1", fontWeight: 900 }}>{weeklyOverallPct}%</div>
           </div>
@@ -9750,7 +9750,7 @@ function GlowUpTracker() {
           })()}
           {hasWeeklyActivity && weeklyHighlights && (
             <div style={{ marginTop: 9, padding: "11px 12px", borderRadius: 12, background: "#FFF9FD", border: "1px solid #F0D5E8", fontSize: 11.5, lineHeight: 1.6, color: "#6B5A7D" }}>
-              <strong>🌟 This week's highlights:</strong>
+              <strong>🌟 Plush highlights:</strong>
               {weeklyHighlights.mostConsistent && (
                 <div style={{ marginTop: 4 }}>Most consistent routine: <strong><HabitTypeIcon task={weeklyHighlights.mostConsistent.task} />{weeklyHighlights.mostConsistent.task.task}</strong> ({weeklyHighlights.mostConsistent.count} of {datesThroughToday(period).length} days)</div>
               )}
@@ -9766,7 +9766,7 @@ function GlowUpTracker() {
           <button type="button" onClick={() => setShareCardOpen(true)} style={{ display: progressDetailsOpen ? undefined : "none", marginTop: 8, width: "100%", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#A65DC1", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>📸 Share my week</button>
         </div>
 
-        <button type="button" onClick={() => setProgressDetailsOpen((open) => !open)} aria-expanded={progressDetailsOpen} style={{ width: "100%", margin: "-6px 0 14px", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{progressDetailsOpen ? "Hide full progress" : "See full progress"}</button>
+        <button type="button" onClick={() => setProgressDetailsOpen((open) => !open)} aria-expanded={progressDetailsOpen} style={{ width: "100%", margin: "-6px 0 14px", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{progressDetailsOpen ? "Hide PlushGrowth details" : "Open PlushGrowth"}</button>
 
         <div style={{ display: progressDetailsOpen ? undefined : "none", marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.5)", border: "1px solid #E6D4F2", boxShadow: "0 8px 24px rgba(183,143,224,0.10)" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
