@@ -1470,10 +1470,13 @@ function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, setShow
         .landing-feature-card:hover { transform:translateY(-3px);border-color:#DDB3E5 !important;box-shadow:0 20px 38px -22px rgba(90,50,110,.34) !important }
         .landing-feature-tag { display:inline-flex;align-items:center;min-height:27px;padding:3px 10px;border-radius:999px;background:#F9E7F7;color:#9A4EAD;font-size:10.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase }
         .landing-how-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:16px }
+        .landing-difference-grid { display:grid;grid-template-columns:1fr 1fr;gap:1px;overflow:hidden;border:1px solid #EED8ED;border-radius:22px;background:#EED8ED;box-shadow:0 20px 45px -28px rgba(90,50,110,.36) }
+        .landing-difference-cell { min-height:86px;padding:18px 20px;background:rgba(255,255,255,.92) }
+        .landing-difference-cell.plush { background:linear-gradient(135deg,#FFF7FD,#F1FCF8) }
         .landing-demo-task:hover { border-color:#D9A6E3 !important; transform:translateY(-1px) }
         .landing-demo-task:focus-visible { outline:3px solid #E7B8F0;outline-offset:2px }
         @media(max-width:800px){.plush-feature-grid,.landing-how-grid{grid-template-columns:1fr}.landing-benefit-strip{grid-template-columns:repeat(2,1fr)}}
-        @media(max-width:560px){.landing-nav-links{display:none}.landing-benefit-strip{grid-template-columns:1fr 1fr;gap:7px;padding:0 14px}.landing-benefit-pill{border-radius:15px;font-size:11px;padding:7px}.landing-signin-row{flex-direction:column}.landing-signin-row button{width:100%}}
+        @media(max-width:560px){.landing-nav-links{display:none}.landing-benefit-strip{grid-template-columns:1fr 1fr;gap:7px;padding:0 14px}.landing-benefit-pill{border-radius:15px;font-size:11px;padding:7px}.landing-signin-row{flex-direction:column}.landing-signin-row button{width:100%}.landing-difference-cell{min-height:96px;padding:15px 13px}}
       `}</style>
       <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "26px 28px", maxWidth: 1080, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "'Baloo 2',sans-serif", fontSize: 22, fontWeight: 800 }}>
@@ -1481,17 +1484,17 @@ function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, setShow
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <div className="landing-nav-links">
+            <a className="landing-nav-link" href="#landing-difference">Why it’s different</a>
             <a className="landing-nav-link" href="#landing-features">Features</a>
-            <a className="landing-nav-link" href="#landing-how">How it helps</a>
           </div>
           <button onClick={() => setShowSignIn(true)} style={{ background: colors.plum, color: "white", border: 0, padding: "10px 20px", borderRadius: 999, fontWeight: 800, cursor: "pointer" }}>Start free</button>
         </div>
       </nav>
 
       <section style={{ padding: "40px 28px 20px", textAlign: "center" }}>
-        <span style={{ display: "inline-block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", color: colors.orchid, background: "#F9E4F7", padding: "6px 16px", borderRadius: 999, marginBottom: 22 }}>FOR SOFT DAYS AND STRUCTURED ONES</span>
+        <span style={{ display: "inline-block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", color: colors.orchid, background: "#F9E4F7", padding: "6px 16px", borderRadius: 999, marginBottom: 22 }}>ROUTINES · SELF-CARE · SUPPORT</span>
         <h1 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: "clamp(38px,6vw,64px)", fontWeight: 800, lineHeight: 1.05, margin: "0 0 18px" }}>Care that fits<br/><span style={{ color: colors.orchid }}>the day you’re having.</span></h1>
-        <p style={{ fontSize: 18, color: colors.soft, maxWidth: 570, margin: "0 auto 30px", lineHeight: 1.6 }}>PlushLife is a private habit and self-care companion. Your PlushList can stay full, become softer, or shrink to the tiny essentials—and every care feature is free.</p>
+        <p style={{ fontSize: 18, color: colors.soft, maxWidth: 650, margin: "0 auto 30px", lineHeight: 1.6 }}>PlushLife brings your schedule, habits, self-care, check-ins, journal, and trusted support into one private daily companion. Unlike a rigid checklist, it adapts to the energy you actually have.</p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <button onClick={() => setShowSignIn(true)} style={{ background: colors.orchid, color: "white", border: 0, padding: "15px 30px", borderRadius: 999, fontWeight: 800, fontSize: 16, cursor: "pointer", boxShadow: "0 12px 24px -10px rgba(185,95,206,.6)" }}>Start your list</button>
           <button onClick={() => document.getElementById("landing-features")?.scrollIntoView({ behavior: "smooth" })} style={{ background: "transparent", color: colors.plum, border: `2px solid ${colors.line}`, padding: "13px 26px", borderRadius: 999, fontWeight: 800, fontSize: 16, cursor: "pointer" }}>See how it works</button>
@@ -1543,7 +1546,27 @@ function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, setShow
         <div className="landing-benefit-pill"><span aria-hidden="true">💜</span> No guilt or streak loss</div>
       </div>
 
-      <section aria-label="Interactive PlushLife demo" style={{ padding: "22px 20px 70px", display: "grid", justifyItems: "center" }}>
+      <section id="landing-difference" style={{ padding: "68px 20px 34px", maxWidth: 920, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ color: colors.orchid, fontSize: 11, fontWeight: 900, letterSpacing: ".13em" }}>WHY PLUSHLIFE FEELS DIFFERENT</div>
+          <h2 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: "clamp(28px,4vw,38px)", margin: "7px 0 9px" }}>Built for real capacity—not perfect streaks.</h2>
+          <p style={{ color: colors.soft, fontSize: 15.5, maxWidth: 640, margin: "0 auto", lineHeight: 1.6 }}>Many trackers measure whether you followed the plan. PlushLife also helps you make a plan that still fits when life changes.</p>
+        </div>
+        <div className="landing-difference-grid" role="table" aria-label="How PlushLife differs from many routine trackers">
+          <div className="landing-difference-cell" role="columnheader"><div style={{ color: colors.soft, fontSize: 11, fontWeight: 900, letterSpacing: ".1em" }}>MANY ROUTINE TRACKERS</div><div style={{ marginTop: 6, fontWeight: 900 }}>The plan stays the same every day</div></div>
+          <div className="landing-difference-cell plush" role="columnheader"><div style={{ color: colors.orchid, fontSize: 11, fontWeight: 900, letterSpacing: ".1em" }}>PLUSHLIFE</div><div style={{ marginTop: 6, fontWeight: 900 }}>Full, Soft, Tiny, and Recovery Days</div></div>
+          {[
+            ["A missed day can feel like starting over","Returning counts, and earned progress stays yours"],
+            ["Planning and coping tools live in separate places","Schedule, check-ins, Focus, and PlushRescue work together"],
+            ["Support can mean sharing too much—or going alone","A Guardian sees only what you choose to share"],
+          ].flatMap(([usual,plush], index) => [
+            <div className="landing-difference-cell" role="cell" key={`usual-${index}`}><div style={{ color: colors.soft, fontSize: 13.5, lineHeight: 1.5 }}>{usual}</div></div>,
+            <div className="landing-difference-cell plush" role="cell" key={`plush-${index}`}><div style={{ color: colors.plum, fontSize: 13.5, fontWeight: 800, lineHeight: 1.5 }}>✓ {plush}</div></div>,
+          ])}
+        </div>
+      </section>
+
+      <section aria-label="Interactive PlushLife demo" style={{ padding: "34px 20px 70px", display: "grid", justifyItems: "center" }}>
         <div style={{ textAlign: "center", marginBottom: 14 }}>
           <div style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 24, fontWeight: 800 }}>Try a tiny PlushLife 💛</div>
           <div style={{ marginTop: 3, color: colors.soft, fontSize: 13.5 }}>Tap the sample tasks. This demo doesn’t save anything.</div>
