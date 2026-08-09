@@ -522,7 +522,7 @@ function MamasCorner({ incompleteTasks, onConfirmTask, caregiverName = "Mommy", 
   return (
     <section className="mamas-corner" aria-label={`${caregiverName}'s Corner`}>
       <button type="button" className="mamas-corner-header" onClick={() => setOpen((current) => !current)} aria-expanded={open}>
-        <span><span className="mamas-corner-kicker">🍼 PRIVATE {caregiverName.toUpperCase()}’S CORNER</span><span className="mamas-corner-title">Chat about anything</span></span>
+        <span><span className="mamas-corner-kicker">🍼 PRIVATE {caregiverName.toUpperCase()}’S CORNER</span><span className="mamas-corner-title">{parentVoice === "motherly" ? "Ultra Mommy chat" : "Chat about anything"}</span></span>
         <span aria-hidden="true">{open ? "⌃" : "›"}</span>
       </button>
       {!open && <div className="mamas-corner-summary">Chat, vent, ask questions, make up stories, or get gentle help. This conversation stays only in the current app session.</div>}
