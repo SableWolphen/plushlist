@@ -5488,6 +5488,7 @@ function GlowUpTracker() {
     setPrivateNoteMessage(error ? "Couldn't load today's private note." : "");
     setPrivateNoteEditing(false);
     setDailyJournalPromptOpen(false);
+    goToDashboard("today");
     setJournalQuickOpen(true);
   };
   const reflectionMonthDate = new Date(`${reflectionCalendarMonth}-01T12:00:00Z`);
@@ -7702,7 +7703,7 @@ function GlowUpTracker() {
           }} style={{ flex: 1, display: "grid", gridTemplateColumns: `repeat(${dashboardItems.length}, minmax(0, 1fr))`, gap: 6, minWidth: 0 }}>
             {dashboardItems.map((item) => {
               const on = item.id === dashboard;
-              const displayLabel = babyMode ? ({ today: "Nursery", week: "PlushWeek", care: "PlushCare", progress: "PlushGrowth", guardian: "Guardian" }[item.id] || item.label) : item.label;
+              const displayLabel = babyMode ? ({ today: "Nursery", week: "PlushCalendar", care: "PlushCare", progress: "PlushGrowth", guardian: "Guardian" }[item.id] || item.label) : item.label;
               return <button key={item.id} id={`dashboard-tab-${item.id}`} role="tab" aria-selected={on} onClick={() => goToDashboard(item.id)} style={{ position: "relative", minHeight: 52, padding: "7px 3px", borderRadius: 13, border: on ? `2px solid ${item.accent}` : "2px solid #F3D9EC", background: on ? `${item.accent}22` : "#FFFFFF", color: on ? item.accent : "#8C6B9E", fontWeight: 900, fontSize: displayLabel.length > 10 ? 9.5 : 11, lineHeight: 1.15, overflowWrap: "break-word", wordBreak: "break-word", cursor: "pointer" }}>
                 <span style={{ display: "block", fontSize: 16, marginBottom: 2 }} aria-hidden="true">{item.icon}</span>{displayLabel}
               </button>;
