@@ -8720,7 +8720,7 @@ function GlowUpTracker() {
         })()}
 
         {weeklyIntentionText && <div style={{ marginBottom: 12, padding: "10px 12px", borderRadius: 12, background: "#F9F1FC", border: "1px solid #E6D4F2" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+          <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "center", gap: 8 }}>
             <div style={{ fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#8E4EAA" }}>📮 THIS WEEK</div>
             {!weeklyIntentionEditing && (
               <button type="button" onClick={() => { setWeeklyIntentionDraft(weeklyIntentionText); setWeeklyIntentionEditing(true); }} style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer", flexShrink: 0 }}>{weeklyIntentionText ? "✏️ Edit" : "＋ Add one"}</button>
