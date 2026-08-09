@@ -5,8 +5,8 @@
     "appName": "PlushLife",
     "appType": "app",
     "version": {
-      "code": 1,
-      "name": "0.1.0"
+      "code": 2,
+      "name": "0.2.0"
     },
     "icon": "icon.png",
     "vender": "SableWolphen",
@@ -28,11 +28,15 @@
         "page": {
           "pages": [
             "pages/index",
+            "pages/tasks",
             "pages/checkin",
             "pages/rescue",
             "pages/focus",
             "pages/calm"
           ]
+        },
+        "app-side": {
+          "path": "app-side/index"
         }
       },
       "platforms": [

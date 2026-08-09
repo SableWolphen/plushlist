@@ -3,13 +3,23 @@
 The first real Zepp target is **Amazfit Balance 2** (480×480 round display, Zepp OS 5 / API_LEVEL 4.2). Its v3 screen target (`r` / `w480`) covers all three published Balance 2 deviceSource variants: `9568512`, `9568513`, and `9568515`.
 
 Current watch screens:
+- My tasks: pairs to a signed-in PlushLife account and syncs today's tasks and check-offs through the Zepp phone app.
 - Check-in: mood + energy saved locally on the watch.
 - PlushTinyStep: one immediate gentle next action.
 - PlushRescue: quick low-friction care actions.
 - PlushFocus: start/stop a gentle focus block.
 - Calm: short breathing/calm screen.
 
-The initial build is intentionally offline-first. It does not modify the phone app or Supabase data yet. Phone/cloud sync will be added after the real-watch preview is proven stable.
+Check-in, Tiny Step, Rescue, Focus, and Calm remain available without an account. Task sync requires the Zepp phone app to have network access.
+
+## Connect to PlushLife
+
+1. Open **My tasks** on the watch. The watch shows an eight-character code.
+2. On the phone, sign in to PlushLife (website or Google Play app).
+3. Open **Settings → Connect Watch**, enter the code, and tap **Connect**.
+4. Tap **I connected it** on the watch.
+
+The code expires after 15 minutes. PlushLife credentials never go to the watch; it receives a separate revocable device credential. A person without an account is prompted to create one on the phone first.
 
 ## Build
 
