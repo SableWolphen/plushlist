@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "product": "PlushLife Wearables",
+  "principles": [
+    "one decision at a time",
+    "large touch targets",
+    "minimal typing",
+    "offline first",
+    "phone owns complex setup"
+  ],
+  "features": [
+    {"id":"check_in","title":"Mood + energy check-in","priority":1,"offline":true},
+    {"id":"today","title":"Today's next tasks","priority":1,"offline":true},
+    {"id":"tiny_step","title":"PlushTinyStep","priority":1,"offline":true},
+    {"id":"rescue","title":"PlushRescue","priority":1,"offline":true},
+    {"id":"focus","title":"PlushFocus timer","priority":1,"offline":true},
+    {"id":"calm","title":"Breathing / calming tool","priority":1,"offline":true},
+    {"id":"glance","title":"Glanceable progress surface","priority":1,"offline":true}
+  ],
+  "phoneOnly": ["long_journal","account_management","guardian_setup","backup_restore","detailed_schedule_editing"],
+  "sync": {
+    "strategy":"queue-local-actions-then-reconcile",
+    "conflictPolicy":"server-authoritative-for-account-state; newest-user-action-for-watch-events"
+  }
+}
