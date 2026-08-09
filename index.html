@@ -4031,6 +4031,7 @@ function GlowUpTracker() {
 
   const clearPointerTaskDrag = (drag) => {
     if (!drag) return;
+    if (drag.activationTimer) clearTimeout(drag.activationTimer);
     if (drag.autoScrollFrame) cancelAnimationFrame(drag.autoScrollFrame);
     drag.preview?.remove();
     drag.placeholder?.remove();
@@ -4148,11 +4149,18 @@ function GlowUpTracker() {
     event.stopPropagation();
     window.getSelection?.()?.removeAllRanges();
     event.currentTarget.setPointerCapture?.(event.pointerId);
-    taskPointerDragRef.current = {
+    const drag = {
       pointerId: event.pointerId, handle: event.currentTarget, row, scope: row.closest("[data-plushlife-task-drag-scope]") || document, taskKey, label: taskLabel,
       startX: event.clientX, startY: event.clientY, lastX: event.clientX, lastY: event.clientY,
-      active: false, destinationSignature: null, targetSection: null, targetKey: null, autoScrollFrame: null,
+      active: false, destinationSignature: null, targetSection: null, targetKey: null, autoScrollFrame: null, activationTimer: null,
     };
+    taskPointerDragRef.current = drag;
+    if (event.pointerType === "touch" || event.pointerType === "pen") {
+      drag.activationTimer = setTimeout(() => {
+        drag.activationTimer = null;
+        if (taskPointerDragRef.current === drag) activatePointerTaskDrag(drag);
+      }, 140);
+    }
   };
 
   const movePointerTaskDrag = (event) => {
@@ -4161,7 +4169,7 @@ function GlowUpTracker() {
     event.preventDefault();
     drag.lastX = event.clientX;
     drag.lastY = event.clientY;
-    if (!drag.active && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) >= 5) activatePointerTaskDrag(drag);
+    if (!drag.active && !drag.activationTimer && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) >= 7) activatePointerTaskDrag(drag);
     if (drag.active) placeTaskPlaceholder(drag, event.clientX, event.clientY);
   };
 
@@ -8751,7 +8759,7 @@ function GlowUpTracker() {
                               onPointerCancel={cancelPointerTaskDrag}
                               onContextMenu={(event) => event.preventDefault()}
                               onSelect={(event) => event.preventDefault()}
-                              style={{ flex: "0 0 auto", width: 42, height: 42, padding: 0, borderRadius: 10, border: "1px solid #D6C3E6", background: "#FBF7FD", color: "#76558A", fontWeight: 900, fontSize: 18, lineHeight: 1, cursor: "grab", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}
+                              style={{ flex: "0 0 auto", width: 30, height: 34, minHeight: 34, padding: 0, borderRadius: 8, border: "1px solid #D6C3E6", background: "#FBF7FD", color: "#76558A", fontWeight: 900, fontSize: 15, lineHeight: 1, cursor: "grab", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}
                             >⋮⋮</button>}
                             <div style={{ flex: "1 1 160px", minWidth: 0 }}>
                               <div style={{ fontSize: 12.5, fontWeight: 900, color: "#5B4B6B", overflowWrap: "anywhere" }}><HabitTypeIcon task={task} />{task.task}{isTaskPausedOnDate(task, period.date) && <span style={{ marginLeft: 6, padding: "2px 7px", borderRadius: 999, background: "#FFFBF2", color: "#A56D14", fontSize: 10, fontWeight: 900 }}>⏸ PAUSED{task.paused_until ? ` UNTIL ${task.paused_until}` : ""}</span>}</div>
@@ -9652,7 +9660,7 @@ function GlowUpTracker() {
                           onPointerCancel={cancelPointerTaskDrag}
                           onContextMenu={(event) => event.preventDefault()}
                           onSelect={(event) => event.preventDefault()}
-                          style={{ flex: "0 0 auto", width: 36, height: 36, padding: 0, borderRadius: 9, border: "1px solid #E7D2E8", background: "rgba(255,255,255,.42)", color: "#9A86A7", fontSize: 17, fontWeight: 900, lineHeight: 1, cursor: "grab", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}
+                          style={{ flex: "0 0 auto", width: 28, height: 32, minHeight: 32, padding: 0, borderRadius: 8, border: "1px solid #E7D2E8", background: "rgba(255,255,255,.42)", color: "#9A86A7", fontSize: 14, fontWeight: 900, lineHeight: 1, cursor: "grab", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}
                         >⋮⋮</button>}
                         <span onClick={(e) => { e.stopPropagation(); if (!isFutureView) toggle(r.key); }}
                           role="checkbox"
