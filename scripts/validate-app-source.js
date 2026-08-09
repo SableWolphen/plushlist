@@ -86,6 +86,7 @@ const requiredRegressionMarkers = [
   '📮 PLUSHWEEK · WEEKLY INTENTION',
   'Weekly planning and Sunday follow-up · separate from PlushJournal',
   '📮 PLUSHWEEK',
+  'What do I want to carry with me this week?',
   'plushlife-journal-prompt-${user.id}-${period.date}',
   'Your daily PlushJournal prompt',
   "📝 Open today's PlushJournal",
