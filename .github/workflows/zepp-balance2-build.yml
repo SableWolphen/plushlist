@@ -1,0 +1,48 @@
+name: Build Zepp Balance 2 app
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - 'wearables/zepp/**'
+      - '.github/workflows/zepp-balance2-build.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Install Zepp dependencies
+        working-directory: wearables/zepp
+        run: npm install
+
+      - name: Install Zeus CLI
+        run: npm install --global @zeppos/zeus-cli
+
+      - name: Build Balance 2 ZAB
+        working-directory: wearables/zepp
+        run: zeus build
+
+      - name: Find built ZAB
+        run: |
+          find wearables/zepp -type f -name '*.zab' -print
+          test -n "$(find wearables/zepp -type f -name '*.zab' -print -quit)"
+
+      - name: Upload Balance 2 app
+        uses: actions/upload-artifact@v7
+        with:
+          name: plushlife-balance2-zab
+          path: wearables/zepp/**/*.zab
+          if-no-files-found: error
+          retention-days: 30
