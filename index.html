@@ -4042,7 +4042,7 @@ function GlowUpTracker() {
   };
 
   const startTaskCardTouchDrag = (event, taskKey) => {
-    if (event.touches.length !== 1 || event.target.closest("button,select,input,a")) return;
+    if (event.touches.length !== 1 || event.target.closest("button,select,input,a,[role='checkbox']")) return;
     const touch = event.touches[0];
     const row = event.currentTarget;
     const drag = {
@@ -9565,6 +9565,7 @@ function GlowUpTracker() {
                 const isMovable = r.sourceTask?.schedule_type === "once" && !checked && !isFutureView;
                 const expandable = !!(r.how || r.why) || isMovable;
                 const expanded = openRow === r.key;
+                const draggableTodayTask = !!r.sourceTask && !checked && !isFutureView && !isHistoricalView;
                 return (
                   <div key={r.key}>
                     {header && (
@@ -9572,10 +9573,31 @@ function GlowUpTracker() {
                         {header.toUpperCase()}
                       </div>
                     )}
-                    <div style={{ marginBottom: 6, borderRadius: 12,
+                    <div
+                      data-plushlife-task-drop-key={draggableTodayTask ? r.sourceTask.task_key : undefined}
+                      data-plushlife-task-drop-section={draggableTodayTask ? r.sourceTask.section : undefined}
+                      draggable={draggableTodayTask}
+                      onDragStart={draggableTodayTask ? (event) => {
+                        taskDragKeyRef.current = r.sourceTask.task_key;
+                        event.dataTransfer.effectAllowed = "move";
+                        event.dataTransfer.setData("text/plain", r.sourceTask.task_key);
+                      } : undefined}
+                      onDragOver={draggableTodayTask ? (event) => { event.preventDefault(); event.dataTransfer.dropEffect = "move"; } : undefined}
+                      onDrop={draggableTodayTask ? (event) => {
+                        event.preventDefault();
+                        const sourceKey = event.dataTransfer.getData("text/plain");
+                        moveTaskToSection(sourceKey, r.sourceTask.section, r.sourceTask.task_key);
+                      } : undefined}
+                      onDragEnd={() => { taskDragKeyRef.current = null; }}
+                      onTouchStart={draggableTodayTask ? (event) => startTaskCardTouchDrag(event, r.sourceTask.task_key) : undefined}
+                      onTouchMove={draggableTodayTask ? moveTaskCardTouchDrag : undefined}
+                      onTouchEnd={draggableTodayTask ? endTaskCardTouchDrag : undefined}
+                      onTouchCancel={draggableTodayTask ? cancelTaskCardTouchDrag : undefined}
+                      onContextMenu={draggableTodayTask ? (event) => event.preventDefault() : undefined}
+                      style={{ marginBottom: 6, borderRadius: 12,
                       border: "1px solid " + (checked ? day.accent + "66" : "#F3D9EC"),
                       background: checked ? day.accent + "1A" : "rgba(255,255,255,0.25)",
-                      overflow: "hidden" }}>
+                      overflow: "hidden", userSelect: draggableTodayTask ? "none" : undefined, WebkitUserSelect: draggableTodayTask ? "none" : undefined, WebkitTouchCallout: draggableTodayTask ? "none" : undefined, transition: "transform .12s ease, box-shadow .12s ease" }}>
                       <div onClick={() => { if (isFutureView) return; expandable ? setOpenRow(expanded ? null : r.key) : toggle(r.key); }}
                         role={expandable ? "button" : undefined}
                         aria-expanded={expandable ? expanded : undefined}
@@ -9586,6 +9608,7 @@ function GlowUpTracker() {
                           if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenRow(expanded ? null : r.key); }
                         } : undefined}
                         style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 12px", cursor: isFutureView ? "not-allowed" : "pointer", opacity: isFutureView ? 0.62 : 1 }}>
+                        {draggableTodayTask && <span aria-hidden="true" title="Press and hold to move" style={{ flexShrink: 0, color: "#9A86A7", fontSize: 17, fontWeight: 900, lineHeight: 1, cursor: "grab", touchAction: "none", userSelect: "none", WebkitUserSelect: "none" }}>⋮⋮</span>}
                         <span onClick={(e) => { e.stopPropagation(); if (!isFutureView) toggle(r.key); }}
                           role="checkbox"
                           aria-checked={checked}
