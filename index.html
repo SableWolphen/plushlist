@@ -410,8 +410,9 @@ function PlushMascot({ outfit = MASCOT_OUTFITS[0], size = 150, celebrating = fal
 }
 
 function NurseryNook({ outfit, mood, activityDays, onOpenCloset }) {
+  const hasStarLampAndBasket = activityDays >= 10;
   return (
-    <button type="button" className="nursery-nook" onClick={onOpenCloset} aria-label="Open your mascot closet">
+    <button type="button" className="nursery-nook" onClick={onOpenCloset} aria-label={`Open your mascot closet${hasStarLampAndBasket ? "; nursery includes a soft star lamp and toy basket" : ""}`}>
       <span className="nursery-nook-label">MY LITTLE NURSERY</span>
       <span className="nursery-cloud nursery-cloud-left" aria-hidden="true">☁️</span>
       <span className="nursery-cloud nursery-cloud-right" aria-hidden="true">☁️</span>
@@ -419,8 +420,13 @@ function NurseryNook({ outfit, mood, activityDays, onOpenCloset }) {
         <span className="nursery-mobile-bar">⌒</span>
         <span>⭐</span><span>🌙</span><span>💜</span>
       </span>
-      <span className="nursery-toy nursery-toy-left" aria-hidden="true">🧸</span>
-      <span className="nursery-toy nursery-toy-right" aria-hidden="true">🍼</span>
+      {hasStarLampAndBasket ? <>
+        <span className="nursery-toy nursery-toy-left nursery-star-lamp" aria-hidden="true"><span>⭐</span><span>│</span></span>
+        <span className="nursery-toy nursery-toy-right nursery-toy-basket" aria-hidden="true"><span>🧸</span><span>🧺</span></span>
+      </> : <>
+        <span className="nursery-toy nursery-toy-left" aria-hidden="true">🧸</span>
+        <span className="nursery-toy nursery-toy-right" aria-hidden="true">🍼</span>
+      </>}
       <span className="nursery-mascot"><PlushMascot outfit={outfit} size={106} mood={mood} activityDays={activityDays} /></span>
       <span className="nursery-nook-caption">Tap to visit your closet</span>
     </button>
@@ -440,7 +446,7 @@ function BabyArrivalRitual({ comfortItemName, onShowTinyThing, onSoftDay, onShow
   );
 }
 
-function MamasCorner({ incompleteTasks, onConfirmTask }) {
+function MamasCorner({ incompleteTasks, onConfirmTask, caregiverName = "Mommy", parentVoice = "motherly" }) {
   const [open, setOpen] = React.useState(false);
   const [draft, setDraft] = React.useState("");
   const [sending, setSending] = React.useState(false);
@@ -479,7 +485,7 @@ function MamasCorner({ incompleteTasks, onConfirmTask }) {
       const response = await fetch("/api/mamas-corner", {
         method: "POST",
         headers: { "content-type": "application/json", authorization: `Bearer ${session?.access_token || ""}` },
-        body: JSON.stringify({ messages: nextMessages, unfinishedTasks: (incompleteTasks || []).slice(0, 6).map((task) => task.label).filter(Boolean), taskCheckIn: !!options.taskCheckIn }),
+        body: JSON.stringify({ messages: nextMessages, unfinishedTasks: (incompleteTasks || []).slice(0, 6).map((task) => task.label).filter(Boolean), taskCheckIn: !!options.taskCheckIn, parentVoice }),
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.reply) throw new Error(result.error || "No reply yet.");
@@ -502,15 +508,15 @@ function MamasCorner({ incompleteTasks, onConfirmTask }) {
     } catch (requestError) {
       setMessages((current) => current.slice(0, -1));
       setDraft(text);
-      setError(requestError.message || "Mama’s Corner could not reply just yet.");
+      setError(requestError.message || `${caregiverName}’s Corner could not reply just yet.`);
     } finally {
       setSending(false);
     }
   };
   return (
-    <section className="mamas-corner" aria-label="Mama's Corner">
+    <section className="mamas-corner" aria-label={`${caregiverName}'s Corner`}>
       <button type="button" className="mamas-corner-header" onClick={() => setOpen((current) => !current)} aria-expanded={open}>
-        <span><span className="mamas-corner-kicker">🍼 PRIVATE MAMA’S CORNER</span><span className="mamas-corner-title">Talk through one little thing</span></span>
+        <span><span className="mamas-corner-kicker">🍼 PRIVATE {caregiverName.toUpperCase()}’S CORNER</span><span className="mamas-corner-title">Talk through one little thing</span></span>
         <span aria-hidden="true">{open ? "⌃" : "›"}</span>
       </button>
       {!open && <div className="mamas-corner-summary">A gentle AI chat just for this profile. Nothing is saved after you close it.</div>}
@@ -518,13 +524,13 @@ function MamasCorner({ incompleteTasks, onConfirmTask }) {
         <p className="mamas-corner-note">This is an AI comfort companion, not a person, Guardian, clinician, or emergency service. It sends this chat and up to six unfinished task names to PlushLife’s private AI service to reply; closing or resetting it clears this device’s chat.</p>
         <div className="mamas-messages" aria-live="polite">
           {messages.map((message, index) => <div key={`${message.role}-${index}`} className={message.role === "user" ? "mamas-message mamas-message-user" : "mamas-message"}>{message.content}</div>)}
-          {sending && <div className="mamas-message">Mama is thinking…</div>}
+          {sending && <div className="mamas-message">{caregiverName} is thinking…</div>}
         </div>
         {error && <div className="mamas-corner-error" role="alert">{error}</div>}
-        {taskToConfirm && <div className="mamas-task-confirm"><div>Did you want Mama to check off <strong>{taskToConfirm.label}</strong>?</div><div><button type="button" onClick={() => { onConfirmTask(taskToConfirm.key); setTaskToConfirm(null); setLastTaskAsked(null); }}>✓ Yes, tuck it in</button><button type="button" onClick={() => setTaskToConfirm(null)}>Not yet</button></div></div>}
-        <button type="button" className="mamas-task-checkin" onClick={checkInOnTasks} disabled={sending || !(incompleteTasks || []).length}>{(incompleteTasks || []).length ? "🧸 Mama, check in on my tasks" : "🧸 Everything is tucked in"}</button>
+        {taskToConfirm && <div className="mamas-task-confirm"><div>Did you want {caregiverName} to check off <strong>{taskToConfirm.label}</strong>?</div><div><button type="button" onClick={() => { onConfirmTask(taskToConfirm.key); setTaskToConfirm(null); setLastTaskAsked(null); }}>✓ Yes, tuck it in</button><button type="button" onClick={() => setTaskToConfirm(null)}>Not yet</button></div></div>}
+        <button type="button" className="mamas-task-checkin" onClick={checkInOnTasks} disabled={sending || !(incompleteTasks || []).length}>{(incompleteTasks || []).length ? `🧸 ${caregiverName}, check in on my tasks` : "🧸 Everything is tucked in"}</button>
         <div className="mamas-compose">
-          <textarea value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); send(); } }} maxLength="1200" placeholder="Tell Mama what is going on…" aria-label="Message Mama's Corner" rows="2" />
+          <textarea value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); send(); } }} maxLength="1200" placeholder={`Tell ${caregiverName} what is going on…`} aria-label={`Message ${caregiverName}'s Corner`} rows="2" />
           <button type="button" onClick={send} disabled={!draft.trim() || sending}>{sending ? "Thinking…" : "Send"}</button>
         </div>
         <button type="button" className="mamas-reset" onClick={() => { setMessages([{ role: "assistant", content: "Fresh start, baby. What feels most important right now?" }]); setDraft(""); setError(""); }} disabled={sending}>Start a fresh chat</button>
@@ -1175,22 +1181,22 @@ const THEME_VOICE = {
     testNotifBodyDiscreet: "A check-in is ready for you.",
   },
   baby_motherly: {
-    dayComplete: "All your little jobs are done, sweet baby. Mama is so, so proud of you! 🧸✨",
-    celebrationTitles: ["Look at my clever little one go! Mama's so proud! 🎉", "All the little jobs are done—Mama's beaming! 🍼", "Such a good try, sweetheart. You did it! ✨"],
-    nurturingSome: (count) => `You already did ${count} ${count === 1 ? "little thing" : "little things"} today, little one. Mama noticed, and she's proud of you. 🧸`,
-    nurturingNone: "No rush, little one. We can make today very small—just one tiny thing when you're ready. Mama's right here. 🍼",
-    welcomeBack: (days) => `It's been ${days} sleeps, little one. You don't need to explain a thing—Mama's just happy to see you. We can start with one tiny step. 🧸`,
-    testNotifTitle: "A little hello from Mama 🍼",
+    dayComplete: "All your little jobs are done, sweet baby. Mommy is so, so proud of you! 🧸✨",
+    celebrationTitles: ["Look at my clever little one go! Mommy's so proud! 🎉", "All the little jobs are done—Mommy's beaming! 🍼", "Such a good try, sweetheart. You did it! ✨"],
+    nurturingSome: (count) => `You already did ${count} ${count === 1 ? "little thing" : "little things"} today, little one. Mommy noticed, and she's proud of you. 🧸`,
+    nurturingNone: "No rush, little one. We can make today very small—just one tiny thing when you're ready. Mommy's right here. 🍼",
+    welcomeBack: (days) => `It's been ${days} sleeps, little one. You don't need to explain a thing—Mommy's just happy to see you. We can start with one tiny step. 🧸`,
+    testNotifTitle: "A little hello from Mommy 🍼",
     testNotifBody: "Just a gentle check-in, sweetheart. Come back whenever you feel ready. 🧸",
     testNotifBodyDiscreet: "A gentle check-in is waiting for you.",
   },
   baby_fatherly: {
-    dayComplete: "All done, kiddo — Dad's proud of you! 🍼✨",
-    celebrationTitles: ["Atta kid! You did it! Dad's so proud! 🎉", "Every task, all done! Dad's beaming! 🍼", "Look at you go, kiddo! Dad's so happy! ✨"],
-    nurturingSome: (count) => `You already did ${count} ${count === 1 ? "thing" : "things"} today, kiddo! Dad's proud of you! 🧸`,
-    nurturingNone: "It's okay to go slow, buddy. Just one little thing when you're ready — Dad's right here. 🍼",
-    welcomeBack: (days) => `It's been ${days} sleeps, kiddo. No worries at all — Dad's just glad you're back. Come do one little thing whenever you want. 🧸`,
-    testNotifTitle: "Hi kiddo, it's Dad 🍼",
+    dayComplete: "All done, kiddo — Daddy's proud of you! 🍼✨",
+    celebrationTitles: ["Atta kid! You did it! Daddy's so proud! 🎉", "Every task, all done! Daddy's beaming! 🍼", "Look at you go, kiddo! Daddy's so happy! ✨"],
+    nurturingSome: (count) => `You already did ${count} ${count === 1 ? "thing" : "things"} today, kiddo! Daddy's proud of you! 🧸`,
+    nurturingNone: "It's okay to go slow, buddy. Just one little thing when you're ready — Daddy's right here. 🍼",
+    welcomeBack: (days) => `It's been ${days} sleeps, kiddo. No worries at all — Daddy's just glad you're back. Come do one little thing whenever you want. 🧸`,
+    testNotifTitle: "Hi kiddo, it's Daddy 🍼",
     testNotifBody: "Just checking on you, buddy. Come say hi whenever you're ready. 🧸",
     testNotifBodyDiscreet: "A gentle check-in is waiting for you.",
   },
@@ -6604,18 +6610,19 @@ function GlowUpTracker() {
   }
 
   const themeKey = babyMode ? (preferences.baby_voice === "fatherly" ? "baby_fatherly" : "baby_motherly") : dinoTheme ? "dino" : "warm";
+  const babyCaregiverName = preferences.baby_voice === "fatherly" ? "Daddy" : "Mommy";
   const selectedMotherlyNickname = MOTHERLY_NICKNAMES[
     [...period.date].reduce((sum, character) => sum + character.charCodeAt(0), 0) % MOTHERLY_NICKNAMES.length
   ];
   const baseVoice = THEME_VOICE[themeKey];
   const voice = themeKey === "baby_motherly" ? {
     ...baseVoice,
-    dayComplete: `All your little jobs are done, ${selectedMotherlyNickname}. Mama is so, so proud of you! 🧸✨`,
-    celebrationTitles: [`Look at you go, ${selectedMotherlyNickname}! Mama's so proud! 🎉`, `All the little jobs are done—Mama's beaming, ${selectedMotherlyNickname}! 🍼`, `Such a good try, ${selectedMotherlyNickname}. You did it! ✨`],
-    nurturingSome: (count) => `You already did ${count} ${count === 1 ? "little thing" : "little things"} today, ${selectedMotherlyNickname}. Mama noticed, and she's proud of you. 🧸`,
-    nurturingNone: `No rush, ${selectedMotherlyNickname}. We can make today very small—just one tiny thing when you're ready. Mama's right here. 🍼`,
-    welcomeBack: (days) => `It's been ${days} sleeps, ${selectedMotherlyNickname}. You don't need to explain a thing—Mama's just happy to see you. We can start with one tiny step. 🧸`,
-    testNotifTitle: `A little hello for ${selectedMotherlyNickname} from Mama 🍼`,
+    dayComplete: `All your little jobs are done, ${selectedMotherlyNickname}. Mommy is so, so proud of you! 🧸✨`,
+    celebrationTitles: [`Look at you go, ${selectedMotherlyNickname}! Mommy's so proud! 🎉`, `All the little jobs are done—Mommy's beaming, ${selectedMotherlyNickname}! 🍼`, `Such a good try, ${selectedMotherlyNickname}. You did it! ✨`],
+    nurturingSome: (count) => `You already did ${count} ${count === 1 ? "little thing" : "little things"} today, ${selectedMotherlyNickname}. Mommy noticed, and she's proud of you. 🧸`,
+    nurturingNone: `No rush, ${selectedMotherlyNickname}. We can make today very small—just one tiny thing when you're ready. Mommy's right here. 🍼`,
+    welcomeBack: (days) => `It's been ${days} sleeps, ${selectedMotherlyNickname}. You don't need to explain a thing—Mommy's just happy to see you. We can start with one tiny step. 🧸`,
+    testNotifTitle: `A little hello for ${selectedMotherlyNickname} from Mommy 🍼`,
     testNotifBody: `Just a gentle check-in, ${selectedMotherlyNickname}. Come back whenever you feel ready. 🧸`,
   } : baseVoice;
   const comfortItemName = trackerProfile?.comfort_item_name?.trim() || "a comfort item";
@@ -6723,6 +6730,12 @@ function GlowUpTracker() {
         .baby-mode .nursery-toy { position: absolute; z-index: 2; bottom: 16px; font-size: 25px; filter: drop-shadow(0 3px 3px rgba(103,68,127,.15)); }
         .baby-mode .nursery-toy-left { left: 13%; }
         .baby-mode .nursery-toy-right { right: 13%; }
+        .baby-mode .nursery-star-lamp { display: grid; justify-items: center; gap: 0; color: #A96E5C; line-height: .62; filter: drop-shadow(0 0 7px rgba(255,209,102,.72)); }
+        .baby-mode .nursery-star-lamp span:first-child { font-size: 26px; }
+        .baby-mode .nursery-star-lamp span:last-child { font-size: 21px; font-weight: 900; }
+        .baby-mode .nursery-toy-basket { display: grid; justify-items: center; line-height: .65; }
+        .baby-mode .nursery-toy-basket span:first-child { z-index: 1; margin-bottom: -3px; font-size: 17px; }
+        .baby-mode .nursery-toy-basket span:last-child { font-size: 27px; }
         .baby-mode .nursery-mascot { position: relative; z-index: 1; display: flex; justify-content: center; padding-top: 12px; }
         .baby-mode .nursery-nook-caption { position: absolute; z-index: 3; right: 14px; bottom: 10px; color: #9A62AB; font-size: 10px; font-weight: 800; }
         .baby-mode .baby-arrival-ritual { margin: 0 0 12px; padding: 12px 13px; border: 1px solid #E7BFE9; border-radius: 17px; background: linear-gradient(135deg,#FFF8FD,#F4EDFF 60%,#E8F9FF); box-shadow: 0 7px 17px rgba(166,93,193,.10); }
@@ -6907,7 +6920,7 @@ function GlowUpTracker() {
           <div onClick={(event) => event.stopPropagation()} style={{ width: "min(100%, 520px)", maxHeight: "min(88vh,760px)", overflowY: "auto", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
-                <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>{babyMode ? "🍼 MOMMY CHECK-IN" : "🎯 TODAY'S CHECK-IN"}</div>
+                <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>{babyMode ? `🍼 ${babyCaregiverName.toUpperCase()} CHECK-IN` : "🎯 TODAY'S CHECK-IN"}</div>
                 <div id="checkin-popup-title" style={{ marginTop: 4, fontSize: 19, fontWeight: 900, color: "#75428C" }}>{babyMode ? "How does my little self feel?" : "How are you today?"}</div>
                 {babyMode && <div style={{ marginTop: 5, color: "#8C6B9E", fontSize: 11.5, lineHeight: 1.45 }}>You can pick one feeling, and we will make today soft enough to hold.</div>}
                 {babyMode && trackerProfile?.comfort_item_name?.trim() && <div style={{ marginTop: 6, padding: "6px 8px", borderRadius: 9, background: "#FFF8E8", color: "#806536", fontSize: 10.5, fontWeight: 800 }}>🧸 Is {trackerProfile.comfort_item_name.trim()} nearby?</div>}
@@ -6915,7 +6928,7 @@ function GlowUpTracker() {
               <button type="button" onClick={() => { setCheckInPopupOpen(false); setCheckInPopupDismissedToday(true); }} aria-label="Close" style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>✕</button>
             </div>
             <div style={{ marginTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-              <div style={{ fontSize: 10.5, letterSpacing: "0.12em", color: "#8E4EAA", fontWeight: 900 }}>{babyMode ? "TELL MOMMY YOUR FEELING" : "HOW DO YOU FEEL?"}</div>
+              <div style={{ fontSize: 10.5, letterSpacing: "0.12em", color: "#8E4EAA", fontWeight: 900 }}>{babyMode ? `TELL ${babyCaregiverName.toUpperCase()} YOUR FEELING` : "HOW DO YOU FEEL?"}</div>
               <button type="button" onClick={() => setCheckInMoreMoodsOpen((open) => !open)} style={{ padding: "4px 8px", borderRadius: 999, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>{checkInMoreMoodsOpen ? "Fewer" : "More feelings"}</button>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginTop: 7 }}>
@@ -6927,7 +6940,7 @@ function GlowUpTracker() {
             </div>
             {dailyCheckIn.mood && dailyCheckIn.capacity && (
               <div style={{ marginTop: 9, padding: "8px 10px", borderRadius: 10, background: "#F7ECFB", color: "#6B5A7D", fontSize: 11.5, lineHeight: 1.4 }}>
-                {babyMode ? "Mommy's gentle guess" : "PlushLife's gentle guess"}: <strong>{DAY_TYPES.find(([value]) => value === dailyCheckIn.day_type)?.[2] || "Full"} Day</strong> · {CAPACITY_LABELS[dailyCheckIn.capacity]} capacity · {ENERGY_LEVELS.find(([value]) => value === dailyCheckIn.energy)?.[2] || "Steady"} energy
+                {babyMode ? `${babyCaregiverName}'s gentle guess` : "PlushLife's gentle guess"}: <strong>{DAY_TYPES.find(([value]) => value === dailyCheckIn.day_type)?.[2] || "Full"} Day</strong> · {CAPACITY_LABELS[dailyCheckIn.capacity]} capacity · {ENERGY_LEVELS.find(([value]) => value === dailyCheckIn.energy)?.[2] || "Steady"} energy
               </div>
             )}
             <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#4C8FE8", fontWeight: 900 }}>CHOOSE TODAY'S PLAN</div>
@@ -7592,7 +7605,7 @@ function GlowUpTracker() {
             <div style={{ padding: 18, borderRadius: 20, background: "linear-gradient(145deg,#F2FFFB,#FFF7FC)", border: "1px solid #BFE5D2", boxShadow: "0 8px 24px rgba(49,140,121,.09)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10, flexWrap: "wrap" }}>
                 <div><div style={{ fontSize: 11, letterSpacing: ".15em", color: "#318C79", fontWeight: 900 }}>{babyMode ? "🧸 LITTLE COMFORT CORNER" : "♥ PLUSHCARE"}</div><div style={{ marginTop: 4, fontSize: 20, color: "#4F405C", fontWeight: 900 }}>{babyMode ? "What does my little self need?" : "What would help right now?"}</div></div>
-                <button type="button" onClick={() => setCheckInPopupOpen(true)} style={{ padding: "7px 10px", borderRadius: 10, border: "1px solid #73B7A8", background: "white", color: "#318C79", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>{babyMode ? "Mommy Check-In" : "Update check-in"}</button>
+                <button type="button" onClick={() => setCheckInPopupOpen(true)} style={{ padding: "7px 10px", borderRadius: 10, border: "1px solid #73B7A8", background: "white", color: "#318C79", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>{babyMode ? `${babyCaregiverName} Check-In` : "Update check-in"}</button>
               </div>
               <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.5, color: "#607A73" }}>{babyMode ? "Pick a feeling, and we will make everything smaller and softer together." : "Choose what is happening. PlushLife will offer one short tool and one realistic next step."}</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 8, marginTop: 12 }}>
@@ -7607,7 +7620,7 @@ function GlowUpTracker() {
             <details open={careExtraSupportOpen} onToggle={(event) => setCareExtraSupportOpen(event.currentTarget.open)} style={{ borderRadius: 14, border: "1px solid #E6D4F2", background: "#FFFFFF99", padding: "10px 12px" }}>
               <summary style={{ color: "#76558A", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>More cozy support</summary>
               <div style={{ marginTop: 10, display: "grid", gap: 12 }}>
-            {isMamaCornerProfile && <MamasCorner incompleteTasks={rows.filter((row) => !viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => toggle(taskKey)} />}
+            {isMamaCornerProfile && <MamasCorner caregiverName={babyCaregiverName} parentVoice={preferences.baby_voice === "fatherly" ? "fatherly" : "motherly"} incompleteTasks={rows.filter((row) => !viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => toggle(taskKey)} />}
 
             {babyMode && (
               <BabyModeCareSuite

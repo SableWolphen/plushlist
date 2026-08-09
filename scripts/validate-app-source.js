@@ -40,7 +40,7 @@ const requiredRegressionMarkers = [
   'AMBIENT THEME',
   'appearanceTheme !== "soft"',
   'Ambient themes never recolor content.',
-  'A little hello from Mama 🍼',
+  'A little hello from Mommy 🍼',
   'const MOTHERLY_NICKNAMES = [',
   'function NurseryNook({ outfit, mood, activityDays, onOpenCloset })',
   'MY LITTLE NURSERY',
@@ -60,8 +60,8 @@ const requiredRegressionMarkers = [
   'BEDTIME NEST',
   'BIG FEELINGS TRANSLATOR',
   'COZY LITTLE ROUTINES',
-  'function MamasCorner({ incompleteTasks, onConfirmTask })',
-  'PRIVATE MAMA’S CORNER',
+  'function MamasCorner({ incompleteTasks, onConfirmTask, caregiverName = "Mommy", parentVoice = "motherly" })',
+  'PRIVATE {caregiverName.toUpperCase()}’S CORNER',
   'const isMamaCornerProfile = (user?.email || "").trim().toLowerCase() === "johnston.alexander.k@gmail.com";',
   'const taskPointerDragRef = React.useRef(null);',
   'const startPointerTaskDrag = (event, taskKey, taskLabel) => {',
@@ -69,6 +69,8 @@ const requiredRegressionMarkers = [
   'const sectionsFromOtherLists = trackerTasks',
   'const moveTaskGroup = async (section, direction, visibleSections = taskGroupOrder) => {',
   'aria-label={`Move ${header} group earlier`}',
+  'const babyCaregiverName = preferences.baby_voice === "fatherly" ? "Daddy" : "Mommy";',
+  'const hasStarLampAndBasket = activityDays >= 10;',
 ];
 
 for (const marker of requiredRegressionMarkers) {
