@@ -1,9 +1,17 @@
 {
   "name": "plushlife-zepp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "zeppos": true,
+  "scripts": {
+    "build": "node scripts/run-zeus.js build",
+    "preview": "node scripts/run-zeus.js preview --target \"Amazfit Balance 2\""
+  },
   "devDependencies": {
-    "@zeppos/device-types": "^3.0.0"
+    "@zeppos/device-types": "3.0.0",
+    "@zeppos/zeus-cli": "1.9.3"
+  },
+  "dependencies": {
+    "@zeppos/zml": "^0.0.43"
   }
 }

@@ -1,13 +1,14 @@
 {
   "configVersion": "v3",
   "app": {
-    "appId": 10990001,
+    "appId": 1122959,
     "appName": "PlushLife",
     "appType": "app",
     "version": {
-      "code": 1,
-      "name": "0.1.0"
+      "code": 2,
+      "name": "0.2.0"
     },
+    "icon": "icon.png",
     "vender": "SableWolphen",
     "description": "Gentle PlushLife companion for Amazfit Balance 2"
   },
@@ -19,8 +20,7 @@
       "compatible": "3.0",
       "target": "4.2",
       "minVersion": "3.0"
-    },
-    "type": "0"
+    }
   },
   "targets": {
     "common": {
@@ -28,11 +28,15 @@
         "page": {
           "pages": [
             "pages/index",
+            "pages/tasks",
             "pages/checkin",
             "pages/rescue",
             "pages/focus",
             "pages/calm"
           ]
+        },
+        "app-side": {
+          "path": "app-side/index"
         }
       },
       "platforms": [
