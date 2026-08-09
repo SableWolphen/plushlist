@@ -4041,12 +4041,50 @@ function GlowUpTracker() {
     if (drag?.moved) finishTouchTaskDrag(event.clientX, event.clientY, sourceKey);
   };
 
-  const startTaskCardTouchDrag = (event, taskKey) => {
+  const clearTaskDragVisual = (drag) => {
+    drag?.preview?.remove();
+    if (drag?.target) {
+      drag.target.style.outline = "";
+      drag.target.style.outlineOffset = "";
+    }
+  };
+
+  const updateTaskDragVisual = (drag, clientX, clientY) => {
+    if (!drag?.preview) return;
+    drag.preview.style.left = `${Math.min(clientX + 16, window.innerWidth - 230)}px`;
+    drag.preview.style.top = `${Math.max(12, clientY - 72)}px`;
+    const hit = document.elementFromPoint(clientX, clientY);
+    const taskTarget = hit?.closest?.("[data-plushlife-task-drop-key]");
+    const sectionTarget = hit?.closest?.("[data-plushlife-task-drop-section]");
+    const target = taskTarget || sectionTarget;
+    if (drag.target !== target) {
+      if (drag.target) {
+        drag.target.style.outline = "";
+        drag.target.style.outlineOffset = "";
+      }
+      drag.target = target;
+      if (target && target !== drag.row) {
+        target.style.outline = "3px solid #B95FCE";
+        target.style.outlineOffset = "2px";
+      }
+    }
+    const targetLabel = taskTarget?.getAttribute("data-plushlife-task-drop-label");
+    const targetSection = target?.getAttribute("data-plushlife-task-drop-section");
+    const destination = targetLabel && taskTarget !== drag.row
+      ? `Place before ${targetLabel}`
+      : targetSection
+        ? `Move to ${targetSection}`
+        : "Drag to a task or group";
+    drag.preview.textContent = `Moving ${drag.label}\n${destination}`;
+  };
+
+  const startTaskCardTouchDrag = (event, taskKey, taskLabel) => {
     if (event.touches.length !== 1 || event.target.closest("button,select,input,a,[role='checkbox']")) return;
     const touch = event.touches[0];
     const row = event.currentTarget;
     const drag = {
       taskKey,
+      label: taskLabel,
       row,
       startX: touch.clientX,
       startY: touch.clientY,
@@ -4061,6 +4099,12 @@ function GlowUpTracker() {
       row.dataset.plushlifeTouchDragging = "true";
       row.style.transform = "scale(.985)";
       row.style.boxShadow = "0 0 0 3px rgba(185,95,206,.28)";
+      const preview = document.createElement("div");
+      preview.setAttribute("role", "status");
+      preview.style.cssText = "position:fixed;z-index:9999;width:210px;box-sizing:border-box;padding:9px 11px;border-radius:12px;background:#4A3A5C;color:white;box-shadow:0 12px 28px rgba(50,32,60,.3);pointer-events:none;font-family:inherit;font-size:12px;font-weight:800;line-height:1.45;white-space:pre-line";
+      document.body.appendChild(preview);
+      drag.preview = preview;
+      updateTaskDragVisual(drag, drag.lastX, drag.lastY);
       if (navigator.vibrate) navigator.vibrate(20);
     }, 180);
     taskCardTouchDragRef.current = drag;
@@ -4078,7 +4122,10 @@ function GlowUpTracker() {
       taskCardTouchDragRef.current = null;
       return;
     }
-    if (drag.active) event.preventDefault();
+    if (drag.active) {
+      event.preventDefault();
+      updateTaskDragVisual(drag, touch.clientX, touch.clientY);
+    }
   };
 
   const endTaskCardTouchDrag = (event) => {
@@ -4092,6 +4139,7 @@ function GlowUpTracker() {
     if (!drag.active) return;
     event.preventDefault();
     const touch = event.changedTouches[0];
+    clearTaskDragVisual(drag);
     finishTouchTaskDrag(touch?.clientX ?? drag.lastX, touch?.clientY ?? drag.lastY, drag.taskKey);
   };
 
@@ -4102,6 +4150,7 @@ function GlowUpTracker() {
     delete drag.row.dataset.plushlifeTouchDragging;
     drag.row.style.transform = "";
     drag.row.style.boxShadow = "";
+    clearTaskDragVisual(drag);
     taskCardTouchDragRef.current = null;
     taskDragKeyRef.current = null;
   };
@@ -8659,6 +8708,7 @@ function GlowUpTracker() {
                           <div
                             key={task.task_key}
                             data-plushlife-task-drop-key={task.task_key}
+                            data-plushlife-task-drop-label={task.task}
                             data-plushlife-task-drop-section={section}
                             onDragOver={!isSearching ? (event) => { event.preventDefault(); event.stopPropagation(); event.dataTransfer.dropEffect = "move"; } : undefined}
                             onDrop={!isSearching ? (event) => {
@@ -8667,7 +8717,7 @@ function GlowUpTracker() {
                               const sourceKey = event.dataTransfer.getData("text/plain");
                               moveTaskToSection(sourceKey, section, task.task_key);
                             } : undefined}
-                            onTouchStart={!isSearching ? (event) => startTaskCardTouchDrag(event, task.task_key) : undefined}
+                            onTouchStart={!isSearching ? (event) => startTaskCardTouchDrag(event, task.task_key, task.task) : undefined}
                             onTouchMove={!isSearching ? moveTaskCardTouchDrag : undefined}
                             onTouchEnd={!isSearching ? endTaskCardTouchDrag : undefined}
                             onTouchCancel={!isSearching ? cancelTaskCardTouchDrag : undefined}
@@ -9575,6 +9625,7 @@ function GlowUpTracker() {
                     )}
                     <div
                       data-plushlife-task-drop-key={draggableTodayTask ? r.sourceTask.task_key : undefined}
+                      data-plushlife-task-drop-label={draggableTodayTask ? r.label : undefined}
                       data-plushlife-task-drop-section={draggableTodayTask ? r.sourceTask.section : undefined}
                       draggable={draggableTodayTask}
                       onDragStart={draggableTodayTask ? (event) => {
@@ -9589,7 +9640,7 @@ function GlowUpTracker() {
                         moveTaskToSection(sourceKey, r.sourceTask.section, r.sourceTask.task_key);
                       } : undefined}
                       onDragEnd={() => { taskDragKeyRef.current = null; }}
-                      onTouchStart={draggableTodayTask ? (event) => startTaskCardTouchDrag(event, r.sourceTask.task_key) : undefined}
+                      onTouchStart={draggableTodayTask ? (event) => startTaskCardTouchDrag(event, r.sourceTask.task_key, r.label) : undefined}
                       onTouchMove={draggableTodayTask ? moveTaskCardTouchDrag : undefined}
                       onTouchEnd={draggableTodayTask ? endTaskCardTouchDrag : undefined}
                       onTouchCancel={draggableTodayTask ? cancelTaskCardTouchDrag : undefined}
