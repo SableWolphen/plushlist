@@ -1,0 +1,36 @@
+name: Task drag diagnostic
+
+on:
+  push:
+    branches: [feature/task-group-drag-drop]
+    paths:
+      - 'index.html'
+      - '.github/workflows/task-drag-diagnostic.yml'
+      - 'scripts/**'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Show drag/drop task snippets
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const src = fs.readFileSync('index.html','utf8');
+          for (const needle of ['reorderTrackerTask', 'onDragStart', 'onDrop', 'draggedTask']) {
+            let from = 0;
+            console.log(`\n===== ${needle} =====`);
+            while (true) {
+              const i = src.indexOf(needle, from);
+              if (i < 0) break;
+              console.log(src.slice(Math.max(0,i-900), Math.min(src.length,i+1800)));
+              console.log('\n---');
+              from = i + needle.length;
+            }
+          }
+          NODE
