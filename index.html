@@ -3924,6 +3924,7 @@ function GlowUpTracker() {
   const taskDragKeyRef = React.useRef(null);
   const taskDragPointerRef = React.useRef(null);
   const taskCardTouchDragRef = React.useRef(null);
+  const nativeTaskDragEnabled = !(navigator.maxTouchPoints > 0 || window.matchMedia?.("(pointer: coarse)").matches);
 
   const reorderTrackerTask = async (sourceKey, targetKey) => {
     if (!sourceKey || !targetKey || sourceKey === targetKey) return;
@@ -8728,7 +8729,7 @@ function GlowUpTracker() {
                           >
                             {!isSearching && <button
                               type="button"
-                              draggable="true"
+                              draggable={nativeTaskDragEnabled}
                               aria-label={`Drag ${task.task} to another group`}
                               title="Drag to move"
                               onClick={(event) => event.preventDefault()}
@@ -9629,7 +9630,7 @@ function GlowUpTracker() {
                       data-plushlife-task-drop-key={draggableTodayTask ? r.sourceTask.task_key : undefined}
                       data-plushlife-task-drop-label={draggableTodayTask ? r.label : undefined}
                       data-plushlife-task-drop-section={draggableTodayTask ? r.sourceTask.section : undefined}
-                      draggable={draggableTodayTask}
+                      draggable={draggableTodayTask && nativeTaskDragEnabled}
                       onDragStart={draggableTodayTask ? (event) => {
                         taskDragKeyRef.current = r.sourceTask.task_key;
                         event.dataTransfer.effectAllowed = "move";

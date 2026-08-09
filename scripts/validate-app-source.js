@@ -63,6 +63,8 @@ const requiredRegressionMarkers = [
   'function MamasCorner({ incompleteTasks, onConfirmTask })',
   'PRIVATE MAMA’S CORNER',
   'const isMamaCornerProfile = (user?.email || "").trim().toLowerCase() === "johnston.alexander.k@gmail.com";',
+  'const nativeTaskDragEnabled = !(navigator.maxTouchPoints > 0 || window.matchMedia?.("(pointer: coarse)").matches);',
+  'draggable={draggableTodayTask && nativeTaskDragEnabled}',
 ];
 
 for (const marker of requiredRegressionMarkers) {
