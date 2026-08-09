@@ -1,105 +1,58 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import base64
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
-INDEX = ROOT / "index.html"
+GENTLE = ROOT / "assets" / "gentle-discovery-ui.js"
 SW = ROOT / "service-worker.js"
 VALIDATOR = ROOT / "scripts" / "validate-static-deployment.js"
 ASSETS = ROOT / "assets"
 PARTS = sorted(ASSETS.glob("thunderstorm-upload-part-*.b64"))
 
-if len(PARTS) != 7:
-    raise SystemExit(f"Expected 7 thunderstorm upload parts, found {len(PARTS)}")
+if len(PARTS) != 10:
+    raise SystemExit(f"Expected 10 thunderstorm upload parts, found {len(PARTS)}")
 
 payload = "".join(part.read_text().strip() for part in PARTS)
 audio = base64.b64decode(payload, validate=True)
-if len(audio) < 50000:
+if len(audio) < 150000:
     raise SystemExit("Decoded thunderstorm audio is unexpectedly small")
 (ASSETS / "thunderstorm.mp3").write_bytes(audio)
 
-text = INDEX.read_text()
-
-old = '''const SOUNDSCAPES = [
-  { id: "rain", icon: "🌧️", label: "Rain" },
-  { id: "ocean", icon: "🌊", label: "Ocean" },
-  { id: "white_noise", icon: "📻", label: "White Noise" },
-  { id: "calm_tone", icon: "🎵", label: "Calm Tone" },
-];'''
-new = '''const SOUNDSCAPES = [
-  { id: "rain", icon: "🌧️", label: "Rain" },
-  { id: "thunderstorm", icon: "⛈️", label: "Thunderstorm" },
-  { id: "ocean", icon: "🌊", label: "Ocean" },
-  { id: "white_noise", icon: "📻", label: "White Noise" },
-  { id: "calm_tone", icon: "🎵", label: "Calm Tone" },
-];'''
-if old not in text:
-    raise SystemExit("Could not locate SOUNDSCAPES list")
-text = text.replace(old, new, 1)
-
-old = '''// Ambient sound is generated on the fly with the Web Audio API rather than
-// shipping recorded audio files — no licensing to track, nothing to
-// download, and it still works offline once the page has loaded.
-let soundscapeAudioCtx = null;
-let soundscapeNodes = null;'''
-new = '''// Most ambient sounds are generated on the fly with Web Audio. Thunderstorm
-// uses the user-supplied recording in assets/thunderstorm.mp3 and is cached
-// with the rest of the app shell so it can keep working offline.
-let soundscapeAudioCtx = null;
-let soundscapeNodes = null;
-let soundscapeFileAudio = null;'''
-if old not in text:
-    raise SystemExit("Could not locate soundscape audio state")
-text = text.replace(old, new, 1)
-
-old = '''function stopSoundscape() {
-  if (!soundscapeNodes) return;
-  const { source, filter, gain, extraOscillators } = soundscapeNodes;'''
-new = '''function stopSoundscape() {
-  if (soundscapeFileAudio) {
-    try { soundscapeFileAudio.pause(); } catch (_error) {}
-    try { soundscapeFileAudio.currentTime = 0; } catch (_error) {}
-    soundscapeFileAudio = null;
+text = GENTLE.read_text()
+pattern = re.compile(
+    r"  let thunder = null;\n  function stopThunderstorm\(\) \{.*?\n  \}\n\n  document\.addEventListener\(\"click\"",
+    re.S,
+)
+replacement = '''  let thunder = null;
+  function stopThunderstorm() {
+    if (!thunder) return;
+    const { audio, button } = thunder;
+    try { audio.pause(); } catch (_) {}
+    try { audio.currentTime = 0; } catch (_) {}
+    thunder = null;
+    if (button) delete button.dataset.plushlifeThunderstormActive;
+    document.querySelectorAll('[data-plushlife-thunderstorm-active="true"]').forEach((node) => delete node.dataset.plushlifeThunderstormActive);
   }
-  if (!soundscapeNodes) return;
-  const { source, filter, gain, extraOscillators } = soundscapeNodes;'''
-if old not in text:
-    raise SystemExit("Could not locate stopSoundscape")
-text = text.replace(old, new, 1)
 
-old = '''function startSoundscape(id, volume) {
-  stopSoundscape();
-  const ctx = ensureSoundscapeAudioContext();'''
-new = '''function startSoundscape(id, volume) {
-  stopSoundscape();
-  if (id === "thunderstorm") {
+  function startThunderstorm(button) {
+    stopThunderstorm();
     const audio = new Audio("./assets/thunderstorm.mp3");
     audio.loop = true;
     audio.preload = "auto";
-    audio.volume = Math.max(0, Math.min(1, Number(volume) || 0));
-    soundscapeFileAudio = audio;
+    audio.volume = 0.48;
+    thunder = { audio, button };
+    button.dataset.plushlifeThunderstormActive = "true";
     audio.play().catch(() => {
-      if (soundscapeFileAudio === audio) soundscapeFileAudio = null;
+      if (thunder && thunder.audio === audio) stopThunderstorm();
     });
-    return;
   }
-  const ctx = ensureSoundscapeAudioContext();'''
-if old not in text:
-    raise SystemExit("Could not locate startSoundscape")
-text = text.replace(old, new, 1)
 
-old = '''function setSoundscapeVolume(volume) {
-  if (soundscapeNodes) soundscapeNodes.gain.gain.value = volume;
-}'''
-new = '''function setSoundscapeVolume(volume) {
-  const safeVolume = Math.max(0, Math.min(1, Number(volume) || 0));
-  if (soundscapeFileAudio) soundscapeFileAudio.volume = safeVolume;
-  if (soundscapeNodes) soundscapeNodes.gain.gain.value = safeVolume;
-}'''
-if old not in text:
-    raise SystemExit("Could not locate setSoundscapeVolume")
-text = text.replace(old, new, 1)
-INDEX.write_text(text)
+  document.addEventListener("click"'''
+text, count = pattern.subn(replacement, text, count=1)
+if count != 1:
+    raise SystemExit("Could not locate the existing procedural Thunderstorm player")
+GENTLE.write_text(text)
 
 sw = SW.read_text()
 if '"./assets/thunderstorm.mp3"' not in sw:
@@ -117,4 +70,4 @@ VALIDATOR.write_text(validator)
 for part in PARTS:
     part.unlink()
 
-print(f"Installed Thunderstorm sound ({len(audio)} bytes) and wired it into PlushLife.")
+print(f"Installed the uploaded Thunderstorm recording ({len(audio)} bytes).")
