@@ -1,4 +1,4 @@
-import { createWidget, widget, align } from '@zos/ui'
+import { createWidget, widget, align, prop } from '@zos/ui'
 import { LocalStorage } from '@zos/storage'
 
 const storage = new LocalStorage()
@@ -14,8 +14,8 @@ Page({
   build() {
     text('How are you feeling?', 50, 32)
     const status = createWidget(widget.TEXT, { x: 40, y: 365, w: 400, h: 70, color: 0xe9d8ff, text_size: 22, align_h: align.CENTER_H, align_v: align.CENTER_V, text: 'Tap a mood, then energy.' })
-    const setMood = (value) => { storage.setItem('mood', value); status.setProperty(1, `Mood: ${value}`) }
-    const setEnergy = (value) => { storage.setItem('energy', value); status.setProperty(1, `Energy: ${value} ✓`) }
+    const setMood = (value) => { storage.setItem('mood', value); status.setProperty(prop.TEXT, `Mood: ${value}`) }
+    const setEnergy = (value) => { storage.setItem('energy', value); status.setProperty(prop.TEXT, `Energy: ${value} ✓`) }
     btn('😊 Good', 50, 125, () => setMood('Good'))
     btn('😐 Okay', 250, 125, () => setMood('Okay'))
     btn('😟 Rough', 50, 205, () => setMood('Rough'))
