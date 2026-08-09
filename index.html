@@ -1952,6 +1952,7 @@ function GlowUpTracker() {
   const [reflectionViewerDate, setReflectionViewerDate] = useState(null);
   const [checkInViewerDate, setCheckInViewerDate] = useState(null);
   const [reflectionViewerNote, setReflectionViewerNote] = useState("");
+  const [reflectionViewerPrompt, setReflectionViewerPrompt] = useState("");
   const [reflectionViewerLoading, setReflectionViewerLoading] = useState(false);
   const [supportViewMode, setSupportViewMode] = useState("mine");
   const [supportLinks, setSupportLinks] = useState([]);
@@ -2005,8 +2006,10 @@ function GlowUpTracker() {
   const [onboardingMode, setOnboardingMode] = useState(null);
   const [onboardingMessage, setOnboardingMessage] = useState("");
   const [privateNote, setPrivateNote] = useState("");
+  const [privateNotePrompt, setPrivateNotePrompt] = useState("");
   const [privateNoteEditing, setPrivateNoteEditing] = useState(false);
   const [journalQuickOpen, setJournalQuickOpen] = useState(false);
+  const [journalQuickOpenDate, setJournalQuickOpenDate] = useState(() => trackerPeriod().date);
   const [calmQuickOpen, setCalmQuickOpen] = useState(false);
   const [privateNoteDraft, setPrivateNoteDraft] = useState("");
   const [lastWeekReflection, setLastWeekReflection] = useState("");
@@ -3035,11 +3038,12 @@ function GlowUpTracker() {
     if (!user) return;
     let alive = true;
     setPrivateNote("");
+    setPrivateNotePrompt("");
     setPrivateNoteMessage("");
     setPrivateNoteEditing(false);
     supabase
       .from("private_notes")
-      .select("body")
+      .select("body, prompt")
       .eq("user_id", user.id)
       .eq("note_date", selectedProgressDate)
       .maybeSingle()
@@ -3050,6 +3054,7 @@ function GlowUpTracker() {
           return;
         }
         setPrivateNote(data?.body || "");
+        setPrivateNotePrompt(data?.prompt || "");
       });
     return () => { alive = false; };
   }, [user, selectedProgressDate]);
@@ -3596,15 +3601,17 @@ function GlowUpTracker() {
     let alive = true;
     setReflectionViewerLoading(true);
     setReflectionViewerNote("");
+    setReflectionViewerPrompt("");
     supabase
       .from("private_notes")
-      .select("body")
+      .select("body, prompt")
       .eq("user_id", user.id)
       .eq("note_date", reflectionViewerDate)
       .maybeSingle()
       .then(({ data }) => {
         if (!alive) return;
         setReflectionViewerNote(data?.body || "");
+        setReflectionViewerPrompt(data?.prompt || "");
         setReflectionViewerLoading(false);
       });
     return () => { alive = false; };
@@ -3612,23 +3619,25 @@ function GlowUpTracker() {
 
   const savePrivateNote = async () => {
     if (!user) return;
-    if (selectedProgressDate > period.date) {
+    if (journalQuickOpenDate > period.date) {
       setPrivateNoteMessage("Reflections unlock on that day.");
       return;
     }
     setPrivateNoteMessage("Saving privately…");
     const { error } = await supabase.from("private_notes").upsert({
       user_id: user.id,
-      note_date: selectedProgressDate,
+      note_date: journalQuickOpenDate,
       body: privateNoteDraft,
+      prompt: journalPromptToSave,
       updated_at: new Date().toISOString(),
     }, { onConflict: "user_id,note_date" });
     if (error) {
       setPrivateNoteMessage("Couldn't save your private reflection.");
       return;
     }
-    setReflectionDates((dates) => privateNoteDraft.trim() ? Array.from(new Set([...dates, selectedProgressDate])) : dates.filter((date) => date !== selectedProgressDate));
+    setReflectionDates((dates) => privateNoteDraft.trim() ? Array.from(new Set([...dates, journalQuickOpenDate])) : dates.filter((date) => date !== journalQuickOpenDate));
     setPrivateNote(privateNoteDraft);
+    setPrivateNotePrompt(journalPromptToSave || "");
     setPrivateNoteEditing(false);
     setPrivateNoteMessage("");
   };
@@ -5453,6 +5462,15 @@ function GlowUpTracker() {
     setFocusSuggestionKey(null);
   };
   const reflectionPrompt = reflectionPromptForDay(day.id, selectedProgressDate, day.reflect);
+  const journalQuickPrompt = reflectionPromptForDay(dayIdForDate(journalQuickOpenDate), journalQuickOpenDate, "What would you like to reflect on?");
+  const journalDisplayedPrompt = privateNote ? (privateNotePrompt || "The question was not saved with this older entry.") : journalQuickPrompt;
+  const journalPromptToSave = privateNotePrompt || (!privateNote ? journalQuickPrompt : null);
+  const openJournalForSelectedDate = () => {
+    setJournalQuickOpenDate(selectedProgressDate);
+    setPrivateNoteDraft(privateNote);
+    setPrivateNoteMessage("");
+    setJournalQuickOpen(true);
+  };
   const reflectionMonthDate = new Date(`${reflectionCalendarMonth}-01T12:00:00Z`);
   const reflectionMonthStart = (reflectionMonthDate.getUTCDay() + 6) % 7;
   const reflectionMonthDays = new Date(Date.UTC(reflectionMonthDate.getUTCFullYear(), reflectionMonthDate.getUTCMonth() + 1, 0)).getUTCDate();
@@ -8629,7 +8647,7 @@ function GlowUpTracker() {
               <div style={{ marginTop: 12, padding: 11, borderRadius: 12, background: "#F7F0FB", border: "1px solid #DEC8EA" }}>
                 <div style={{ fontSize: 10.5, letterSpacing: "0.12em", fontWeight: 900, color: "#A65DC1" }}>QUESTION</div>
                 <div style={{ marginTop: 4, fontStyle: "italic", lineHeight: 1.5, color: "#6D5A7C" }}>
-                  {reflectionPromptForDay(dayIdForDate(reflectionViewerDate), reflectionViewerDate, "What would you like to reflect on?")}
+                  {reflectionViewerPrompt || "The question was not saved with this older entry."}
                 </div>
               </div>
               <div style={{ marginTop: 9, whiteSpace: "pre-wrap", lineHeight: 1.6, color: "#5B4B6B", padding: 13, borderRadius: 12, background: "#FFF8FD", border: "1px solid #E8CCE8" }}>
@@ -9420,15 +9438,15 @@ function GlowUpTracker() {
         </div>}
 
         {!isFutureView && (
-          <button type="button" onClick={() => { setPrivateNoteDraft(privateNote); setJournalQuickOpen(true); }} style={{ width: "100%", textAlign: "left", display: "block", padding: "13px 14px", borderRadius: 14, border: "1px solid #E3C9EC", background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", cursor: "pointer", marginBottom: 0 }}>
+          <button type="button" onClick={openJournalForSelectedDate} style={{ width: "100%", textAlign: "left", display: "block", padding: "13px 14px", borderRadius: 14, border: "1px solid #E3C9EC", background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", cursor: "pointer", marginBottom: 0 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.12em", fontWeight: 900, color: "#A65DC1" }}>📝 PLUSHJOURNAL</div>
               <span style={{ color: "#A65DC1", fontWeight: 900 }}>›</span>
             </div>
             {privateNote ? (
               <div style={{ marginTop: 7 }}>
-                <div style={{ fontSize: 9.5, letterSpacing: "0.08em", fontWeight: 900, color: "#9A6BAD" }}>TODAY'S PROMPT</div>
-                <div style={{ marginTop: 3, fontSize: 12.5, lineHeight: 1.45, color: "#6B5A7D", fontStyle: "italic" }}>{reflectionPrompt}</div>
+                <div style={{ fontSize: 9.5, letterSpacing: "0.08em", fontWeight: 900, color: "#9A6BAD" }}>SAVED PROMPT</div>
+                <div style={{ marginTop: 3, fontSize: 12.5, lineHeight: 1.45, color: "#6B5A7D", fontStyle: "italic" }}>{privateNotePrompt || "The question was not saved with this older entry."}</div>
                 <div style={{ marginTop: 8, fontSize: 9.5, letterSpacing: "0.08em", fontWeight: 900, color: "#9A6BAD" }}>YOU WROTE</div>
                 <div style={{ marginTop: 3, fontSize: 12.5, lineHeight: 1.5, color: "#5B4B6B" }}>{privateNote.length > 180 ? `${privateNote.slice(0, 180).trim()}…` : privateNote}</div>
                 <div style={{ marginTop: 7, fontSize: 11, fontWeight: 900, color: "#A65DC1" }}>View entry →</div>
@@ -9580,7 +9598,7 @@ function GlowUpTracker() {
             littleJobs={rows.filter((row) => !viewDone[row.key])}
             onCompleteTask={(taskKey) => toggle(taskKey)}
             onManageTasks={() => openTaskManager(dayIdForDate(period.date))}
-            onOpenJournal={() => { setPrivateNoteDraft(privateNote); setJournalQuickOpen(true); }}
+            onOpenJournal={openJournalForSelectedDate}
             onSoftDay={() => selectDayType("soft")}
           />
         )}
@@ -9918,7 +9936,8 @@ function GlowUpTracker() {
         {journalQuickOpen && (
           <ToolPanel title="PlushJournal" onClose={() => { setJournalQuickOpen(false); setPrivateNoteEditing(false); }}>
             <div style={{ padding: "15px 16px", borderRadius: 16, background: "rgba(255,255,255,0.28)", border: "1px solid #E6D4F2" }}>
-              <div style={{ fontStyle: "italic", lineHeight: 1.5, fontSize: 12.5, color: "#8C6B9E" }}>{reflectionPrompt}</div>
+              <div style={{ marginBottom: 4, fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#A65DC1" }}>JOURNAL FOR {new Date(`${journalQuickOpenDate}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" }).toUpperCase()}</div>
+              <div style={{ fontStyle: "italic", lineHeight: 1.5, fontSize: 12.5, color: "#8C6B9E" }}>{journalDisplayedPrompt}</div>
               {privateNoteEditing ? <>
                 <textarea value={privateNoteDraft} onChange={(event) => setPrivateNoteDraft(event.target.value)} maxLength={5000} aria-label="Private reflection" placeholder="Only you can read this." style={{ width: "100%", boxSizing: "border-box", minHeight: 120, marginTop: 8, padding: 10, borderRadius: 10, border: "1px solid #D9B8E8", resize: "vertical" }} />
                 <div style={{ display: "flex", gap: 7, marginTop: 7 }}>
