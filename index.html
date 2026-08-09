@@ -2483,6 +2483,38 @@ function GlowUpTracker() {
     return () => { active = false; };
   }, [user?.id, period.date]);
 
+  // Keep the phone UI in step with changes made from a connected watch.
+  // The watch writes the same daily_progress row as the phone, and Realtime
+  // updates the visible checklist without making the user refresh the app.
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`plushlife-watch-progress-${user.id}-${period.date}`)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "daily_progress",
+        filter: `user_id=eq.${user.id}`,
+      }, (payload) => {
+        const next = payload?.new;
+        if (!next || next.progress_date !== period.date) return;
+        const completedKeys = Array.isArray(next.completed_keys) ? next.completed_keys : [];
+        setDone(Object.fromEntries(completedKeys.map((key) => [key, true])));
+        setWeeklyHistory((entries) => [
+          ...entries.filter((entry) => entry.progress_date !== period.date),
+          { progress_date: period.date, completed_keys: completedKeys },
+        ]);
+        setHabitHistory((entries) => [
+          ...entries.filter((entry) => entry.progress_date !== period.date),
+          { progress_date: period.date, completed_keys: completedKeys, updated_at: next.updated_at || new Date().toISOString() },
+        ]);
+        setLastSyncedAt(next.updated_at || new Date().toISOString());
+        setSyncStatus("ready");
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, period.date]);
+
   useEffect(() => {
     if (!user) {
       setWeeklyHistory([]);
