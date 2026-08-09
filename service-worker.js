@@ -1,4 +1,4 @@
-const CACHE_NAME = "plushlife-v56";
+const CACHE_NAME = "plushlife-v57";
 const APP_SHELL = [
   "./",
   "./login.html",

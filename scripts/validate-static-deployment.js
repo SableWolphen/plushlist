@@ -41,8 +41,8 @@ function read(relativePath) {
 
 if (fs.existsSync(path.join(ROOT, "service-worker.js"))) {
   const serviceWorker = read("service-worker.js");
-  if (!serviceWorker.includes('const CACHE_NAME = "plushlife-v56"')) {
-    failures.push("Service worker cache is not set to plushlife-v56.");
+  if (!serviceWorker.includes('const CACHE_NAME = "plushlife-v57"')) {
+    failures.push("Service worker cache is not set to plushlife-v57.");
   }
   for (const shellFile of ["login.html", "oauth.html", "support.html", "account-deletion.html", "assets/cloudflare-primary.js", "assets/plush-guide.js"]) {
     if (!serviceWorker.includes(`./${shellFile}`)) failures.push(`Service worker app shell does not include ${shellFile}.`);
