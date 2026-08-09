@@ -1,4 +1,4 @@
-name: Closed testing Version 44
+name: Automatic Google Play closed testing
 
 on:
   workflow_dispatch: {}
@@ -8,9 +8,12 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: google-play-alpha
+  cancel-in-progress: false
+
 jobs:
   build-and-publish:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release-44]')
     runs-on: ubuntu-latest
     env:
       HAS_PLAY_SECRET: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
@@ -44,11 +47,13 @@ jobs:
       - name: Build www/ and sync Android
         run: npm run android:sync
 
-      - name: Set release version
+      - name: Set automatic release version
         working-directory: android/app
         run: |
-          sed -i "s/versionCode 1/versionCode 44/" build.gradle
-          sed -i 's/versionName "1.0"/versionName "1.0.44"/' build.gradle
+          VERSION_CODE=$((43 + GITHUB_RUN_NUMBER))
+          echo "Publishing versionCode ${VERSION_CODE} / versionName 1.0.${VERSION_CODE}"
+          sed -i "s/versionCode 1/versionCode ${VERSION_CODE}/" build.gradle
+          sed -i "s/versionName \"1.0\"/versionName \"1.0.${VERSION_CODE}\"/" build.gradle
 
       - name: Decode signing keystore
         run: |
@@ -73,10 +78,10 @@ jobs:
           test "$(java -jar bundletool.jar dump manifest --bundle=android/app/build/outputs/bundle/release/app-release.aab --xpath=/manifest/uses-sdk/@android:targetSdkVersion)" = "36"
           keytool -printcert -jarfile android/app/build/outputs/bundle/release/app-release.aab | grep 'Owner: CN=PlushLife Upload'
 
-      - name: Verify watch live sync is bundled
+      - name: Verify current PlushLife features are bundled
         run: |
-          grep -q 'plushlife-watch-progress-' www/index.html
-          grep -q 'postgres_changes' www/index.html
+          grep -q 'plushlife-watch-progress-' www/assets/app.bundle.js
+          grep -q 'postgres_changes' www/assets/app.bundle.js
           test -s www/assets/thunderstorm.mp3
 
       - name: Remove decoded keystore
@@ -86,7 +91,7 @@ jobs:
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v7
         with:
-          name: app-release-44
+          name: app-release-auto-${{ github.run_number }}
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
