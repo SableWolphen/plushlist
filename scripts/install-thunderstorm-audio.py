@@ -1,23 +1,15 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import base64
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
 GENTLE = ROOT / "assets" / "gentle-discovery-ui.js"
+AUDIO = ROOT / "assets" / "thunderstorm.mp3"
 SW = ROOT / "service-worker.js"
 VALIDATOR = ROOT / "scripts" / "validate-static-deployment.js"
-ASSETS = ROOT / "assets"
-PARTS = sorted(ASSETS.glob("thunderstorm-upload-part-*.b64"))
 
-if len(PARTS) != 10:
-    raise SystemExit(f"Expected 10 thunderstorm upload parts, found {len(PARTS)}")
-
-payload = "".join(part.read_text().strip() for part in PARTS)
-audio = base64.b64decode(payload, validate=True)
-if len(audio) < 150000:
-    raise SystemExit("Decoded thunderstorm audio is unexpectedly small")
-(ASSETS / "thunderstorm.mp3").write_bytes(audio)
+if not AUDIO.exists() or AUDIO.stat().st_size < 100000:
+    raise SystemExit("Thunderstorm recording was not downloaded correctly")
 
 text = GENTLE.read_text()
 pattern = re.compile(
@@ -67,7 +59,4 @@ validator = validator.replace('Service worker cache is not set to plushlife-v60.
 validator = validator.replace('["login.html", "oauth.html", "support.html", "account-deletion.html", "assets/cloudflare-primary.js", "assets/plush-guide.js"]', '["login.html", "oauth.html", "support.html", "account-deletion.html", "assets/cloudflare-primary.js", "assets/plush-guide.js", "assets/thunderstorm.mp3"]')
 VALIDATOR.write_text(validator)
 
-for part in PARTS:
-    part.unlink()
-
-print(f"Installed the uploaded Thunderstorm recording ({len(audio)} bytes).")
+print(f"Installed the Thunderstorm recording ({AUDIO.stat().st_size} bytes).")
