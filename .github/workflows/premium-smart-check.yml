@@ -1,0 +1,31 @@
+name: Premium smart validation
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - feature/premium-smart-personalization
+    paths:
+      - 'assets/premium-smart.js'
+      - 'assets/entitlements.js'
+      - 'scripts/test-premium-smart.js'
+      - 'package.json'
+      - '.github/workflows/premium-smart-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci
+      - name: Run full PlushLife tests
+        run: npm test
