@@ -2034,6 +2034,8 @@ function GlowUpTracker() {
   const [watchPairingCode, setWatchPairingCode] = useState("");
   const [watchPairingMessage, setWatchPairingMessage] = useState("");
   const [watchPairingBusy, setWatchPairingBusy] = useState(false);
+  const [localWatchSyncBusy, setLocalWatchSyncBusy] = useState(false);
+  const [localWatchSyncMessage, setLocalWatchSyncMessage] = useState("");
   const [nativeBuildInfo, setNativeBuildInfo] = useState(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -2290,6 +2292,15 @@ function GlowUpTracker() {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    // Lets the local watch-sync server (Android only, see
+    // android/.../watchsync/) know whether there's currently a signed-in
+    // account to attach a new watch pairing to. Never sends a password or
+    // token — just the account id, same "the watch never sees your
+    // credentials" guarantee the existing cloud pairing already makes.
+    window.Capacitor?.Plugins?.WatchSyncBridge?.setSignedInUser({ userId: user?.id || null }).catch(() => {});
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user) return;
@@ -4486,6 +4497,27 @@ function GlowUpTracker() {
     setSettingsMessage(error ? "Those settings couldn't be saved." : "Settings saved privately ✨");
   };
 
+  // Opt-in, Android-only companion to connectWatch() above. Unlike the cloud
+  // pairing flow, this needs no code: it opens a short window during which
+  // the watch's own next attempt to reach this exact phone (loopback only,
+  // never a real network) is trusted automatically, since only a watch
+  // already Bluetooth-paired to this specific device could possibly reach
+  // it at all. Cloud pairing above is untouched and keeps working the same
+  // way regardless of whether this is ever used.
+  const startLocalWatchSync = async () => {
+    const WatchSyncBridge = window.Capacitor?.Plugins?.WatchSyncBridge;
+    if (!WatchSyncBridge || !user || localWatchSyncBusy) return;
+    setLocalWatchSyncBusy(true);
+    setLocalWatchSyncMessage("Open PlushLife on your watch now — you have 2 minutes.");
+    try {
+      await WatchSyncBridge.startPairingMode();
+    } catch (_error) {
+      setLocalWatchSyncMessage("Couldn't enable instant local sync on this device.");
+    } finally {
+      setLocalWatchSyncBusy(false);
+    }
+  };
+
   const connectWatch = async () => {
     if (!user || watchPairingBusy) return;
     const code = watchPairingCode.toUpperCase().replace(/[^A-Z0-9]/g, "");
@@ -5696,6 +5728,78 @@ function GlowUpTracker() {
       tasks: rows.slice(0, 3).map((row) => ({ label: row.label, done: !!viewDone[row.key] })),
     }).catch((error) => console.error("[widget] updateWidget failed:", error));
   }, [user?.id, selectedProgressDate, period.date, dailyCheckIn.day_type, pct, weeklyOverallPct, JSON.stringify(rows.slice(0, 3).map((row) => [row.key, row.label, !!viewDone[row.key]]))]);
+
+  // Applies one watch-originated task change to Supabase. Mirrors the exact
+  // upsert shape the existing cloud watch-sync Edge Function already uses
+  // (both daily_progress.completed_keys and tracker_progress), so this is
+  // additive to — not a divergence from — how a watch completion has always
+  // been written. Kept as a small standalone function rather than reusing
+  // the local toggle() closure, so a reconciliation triggered from a
+  // background/reconnect path can never race or conflict with it.
+  const applyWatchTaskUpdate = async (taskKey, completed, date) => {
+    if (!user) return;
+    const { data: existingRow } = await supabase
+      .from("daily_progress")
+      .select("completed_keys")
+      .eq("user_id", user.id)
+      .eq("progress_date", date)
+      .maybeSingle();
+    const completedKeys = new Set(existingRow?.completed_keys || []);
+    if (completed) completedKeys.add(taskKey); else completedKeys.delete(taskKey);
+    const updatedAt = new Date().toISOString();
+    await Promise.all([
+      supabase.from("daily_progress").upsert(
+        { user_id: user.id, progress_date: date, completed_keys: [...completedKeys], updated_at: updatedAt },
+        { onConflict: "user_id,progress_date" }),
+      supabase.from("tracker_progress").upsert(
+        { user_id: user.id, task_key: taskKey, completed, updated_at: updatedAt },
+        { onConflict: "user_id,task_key" }),
+    ]);
+  };
+
+  // Drains anything the watch recorded locally while this device's local
+  // sync server handled it directly (app closed, or briefly offline) up to
+  // Supabase, the moment the app is next open to do it. The local write
+  // already happened instantly and for free; this is only about keeping
+  // Supabase — the actual source of truth — eventually consistent with it.
+  useEffect(() => {
+    const WatchSyncBridge = window.Capacitor?.Plugins?.WatchSyncBridge;
+    if (!WatchSyncBridge || !user) return;
+    let active = true;
+    const reconcile = async () => {
+      try {
+        const { changes } = await WatchSyncBridge.getPendingChanges();
+        if (!active || !changes?.length) return;
+        for (const change of changes) {
+          await applyWatchTaskUpdate(change.taskKey, change.completed, change.date);
+        }
+        await WatchSyncBridge.markSynced({ ids: changes.map((change) => change.id) });
+        if (active && changes.some((change) => change.date === period.date)) syncNow();
+      } catch (_error) {
+        // Best-effort — the same unsynced rows are simply retried next time.
+      }
+    };
+    reconcile();
+    const onVisible = () => { if (document.visibilityState === "visible") reconcile(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { active = false; document.removeEventListener("visibilitychange", onVisible); };
+  }, [user?.id]);
+
+  // Instant UI feedback for the case the app happens to already be open
+  // when the watch tap arrives — WatchSyncService (native) fires this the
+  // moment it accepts a /complete call, so there's no need to wait for the
+  // next visibilitychange reconciliation pass above.
+  useEffect(() => {
+    const WatchSyncBridge = window.Capacitor?.Plugins?.WatchSyncBridge;
+    if (!WatchSyncBridge || !user) return;
+    const listenerPromise = WatchSyncBridge.addListener("watchTaskUpdated", async (event) => {
+      try {
+        await applyWatchTaskUpdate(event.taskKey, event.completed, event.date);
+        if (event.date === period.date) syncNow();
+      } catch (_error) {}
+    });
+    return () => { listenerPromise.then((handle) => handle.remove()).catch(() => {}); };
+  }, [user?.id, period.date]);
 
   const previousWeekHistoryByDate = new Map(previousWeekHistory.map((entry) => [entry.progress_date, new Set(entry.completed_keys || [])]));
   let previousWeekDone = 0;
@@ -7958,6 +8062,15 @@ function GlowUpTracker() {
             {watchPairingMessage && <div role="status" style={{ marginTop: 8, fontSize: 11.5, lineHeight: 1.4, color: watchPairingMessage.startsWith("Your watch") ? "#21705F" : "#8C6B9E", fontWeight: 700 }}>{watchPairingMessage}</div>}
             <div style={{ marginTop: 7, fontSize: 10.5, lineHeight: 1.4, color: "#6B7C78" }}>If you do not have a PlushLife account yet, create one on this phone first. Your account password is never sent to the watch.</div>
           </div>
+
+          {window.Capacitor?.isNativePlatform?.() && window.Capacitor?.Plugins?.WatchSyncBridge && (
+            <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "#F2FFFB", border: "1px solid #B9E5D9" }}>
+              <div style={{ fontSize: 12, fontWeight: 900, color: "#318C79" }}>⚡ INSTANT LOCAL SYNC (THIS PHONE)</div>
+              <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#6B7C78" }}>Optional. Once enabled, a task tick on your watch updates this phone the moment it happens, over Bluetooth only — no code to enter, no internet needed for the tap itself. Your watch still falls back to the normal connection above whenever this phone app isn't running.</div>
+              <button type="button" disabled={localWatchSyncBusy} onClick={startLocalWatchSync} style={{ marginTop: 10, padding: "9px 13px", borderRadius: 9, border: 0, background: localWatchSyncBusy ? "#91BEB2" : "#318C79", color: "white", fontWeight: 900, cursor: localWatchSyncBusy ? "wait" : "pointer" }}>{localWatchSyncBusy ? "Waiting for watch…" : "Enable instant local sync"}</button>
+              {localWatchSyncMessage && <div role="status" style={{ marginTop: 8, fontSize: 11.5, lineHeight: 1.4, color: "#8C6B9E", fontWeight: 700 }}>{localWatchSyncMessage}</div>}
+            </div>
+          )}
 
           <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "#FFF8FD", border: "1px solid #E8CCE8" }}>
             <div style={{ fontSize: 12, fontWeight: 900, color: "#8E4EAA" }}>🧸 PROFILE</div>

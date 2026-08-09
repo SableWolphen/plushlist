@@ -53,6 +53,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(WidgetBridgePlugin.class);
         registerPlugin(NotificationPermissionPlugin.class);
         registerPlugin(BuildInfoPlugin.class);
+        registerPlugin(WatchSyncBridgePlugin.class);
         super.onCreate(savedInstanceState);
         // Belt-and-suspenders: confirmed via a real device screenshot that a
         // native black title bar (showing title_activity_main, "PlushLife")

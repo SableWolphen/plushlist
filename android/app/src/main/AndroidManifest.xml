@@ -48,8 +48,18 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/plushlife_widget_info" />
         </receiver>
+
+        <!-- Loopback-only local HTTP server for instant watch sync (see
+             watchsync/). Never exported — nothing outside this process
+             starts it directly, only WatchSyncBridgePlugin does. -->
+        <service
+            android:name=".watchsync.WatchSyncService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 </manifest>

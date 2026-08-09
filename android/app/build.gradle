@@ -103,6 +103,10 @@ dependencies {
     // the device's own background auto-update job, which is what silently
     // left devices on a stale build after past releases.
     implementation "com.google.android.play:app-update:$playAppUpdateVersion"
+    // Tiny (~30KB), free, MIT-licensed embedded HTTP server used only to
+    // accept loopback (127.0.0.1) requests from the Zepp/Amazfit watch app's
+    // side-service — see android/app/src/main/java/com/PlushLife/watchsync/.
+    implementation "org.nanohttpd:nanohttpd:2.3.1"
 }
 
 apply from: 'capacitor.build.gradle'
