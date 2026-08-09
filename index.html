@@ -585,10 +585,11 @@ function littleSpaceTaskLabel(label) {
   return `Let's take care of “${task}” together, one tiny step at a time`;
 }
 
-function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, caregiverName, comfortItemName, littleJobs, onCompleteTask, onOpenJournal, onSoftDay }) {
+function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, caregiverName, comfortItemName, littleJobs, onCompleteTask, onManageTasks, onOpenJournal, onSoftDay }) {
   const [windDown, setWindDown] = React.useState([false, false, false]);
   const [comfortOpen, setComfortOpen] = React.useState(null);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
+  const [littleJobsExpanded, setLittleJobsExpanded] = React.useState(false);
   const stickers = ["🌈 Rainbow try", "⭐ Brave little star", "🧸 Cozy helper", "🫧 Bubble break", "🌼 Gentle grower"];
   const sticker = stickers[(todayDone + activityDays) % stickers.length];
   const nurseryLevel = activityDays >= 365 ? "a whole yearlight room, filled with keepsakes" : activityDays >= 150 ? "a cozy reading nook and an aurora night-light" : activityDays >= 75 ? "a starry ceiling and a storybook shelf" : activityDays >= 45 ? "a soft star lamp, toy basket, and a tiny plant" : activityDays >= 21 ? "a storybook shelf and rainy-day coat hook" : activityDays >= 10 ? "a soft star lamp and toy basket" : activityDays >= 3 ? "a little cloud mobile" : "a cozy blanket and one tiny teddy";
@@ -640,7 +641,7 @@ function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays
         <div className="baby-section-label">🧸 MY LITTLE JOBS</div>
         <div className="baby-wind-down-copy">{caregiverName} made your real tasks softer for Little Space. Tap one when it is tucked in.</div>
         <div className="baby-little-jobs">
-          {(littleJobs || []).slice(0, 5).map((task) => {
+          {(littleJobs || []).slice(0, littleJobsExpanded ? undefined : 5).map((task) => {
             const cozyLabel = littleSpaceTaskLabel(task.label);
             return <button key={task.key} type="button" onClick={() => onCompleteTask(task.key)} aria-label={`Complete ${task.label}`}>
               <span className="baby-little-job-check" aria-hidden="true">○</span>
@@ -649,7 +650,8 @@ function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays
           })}
         </div>
         {!(littleJobs || []).length && <div className="baby-comfort-note">Everything is tucked in. You can rest now. 🧸</div>}
-        {(littleJobs || []).length > 5 && <div className="baby-wind-down-copy">And {(littleJobs || []).length - 5} more little {(littleJobs || []).length - 5 === 1 ? "job" : "jobs"} waiting below.</div>}
+        {(littleJobs || []).length > 5 && <button type="button" className="baby-little-jobs-toggle" onClick={() => setLittleJobsExpanded((expanded) => !expanded)}>{littleJobsExpanded ? "Show fewer little jobs" : `Show all ${(littleJobs || []).length} little jobs`}</button>}
+        {onManageTasks && <button type="button" className="baby-little-jobs-toggle" onClick={onManageTasks}>✏️ Change my little jobs</button>}
         {comfortItemName && <div className="baby-comfort-note">🧸 {comfortItemName} can be part of any cozy routine today.</div>}
       </div>
       <button type="button" className="baby-journal-prompt" onClick={onOpenJournal}>📖 Put one little thought in PlushJournal <span>›</span></button>
@@ -6558,6 +6560,9 @@ function GlowUpTracker() {
   }, [user?.id, dashboard, supportViewMode]);
 
   const babyMode = preferences.nickname_style === "baby";
+  useEffect(() => {
+    if (babyMode) setTodayCardIndex(1);
+  }, [babyMode]);
   const dinoTheme = !!preferences.dino_theme;
   const selectedAppearanceTheme = APPEARANCE_THEMES.find((theme) => theme.id === appearanceTheme) || APPEARANCE_THEMES[0];
   const selectAppearanceTheme = (themeId) => {
@@ -6822,6 +6827,7 @@ function GlowUpTracker() {
         .baby-mode .baby-little-jobs button > span:last-child { min-width: 0; }
         .baby-mode .baby-little-jobs strong { display: block; font-size: 11.5px; line-height: 1.3; }
         .baby-mode .baby-little-jobs small { display: block; margin-top: 2px; color: #927C9E; font-size: 9.5px; line-height: 1.25; }
+        .baby-mode .baby-little-jobs-toggle { width: 100%; min-height: 34px; margin-top: 7px; padding: 6px 9px; border: 1px solid #DCC2E7; border-radius: 11px; background: #FFFFFFA8; color: #8E4EAA; font-size: 10.5px; font-weight: 900; cursor: pointer; }
         .baby-mode .baby-little-job-check { flex: 0 0 auto; color: #B768C9; font-size: 20px; line-height: 1; }
         .baby-mode .baby-step-done { border-color: #9FDFC9; background: #E9FFF5; color: #348462; text-decoration: line-through; }
         .baby-mode .baby-wind-down-finished, .baby-mode .baby-comfort-note { margin-top: 8px; padding: 8px 10px; border-radius: 11px; background: #FFF0FA; color: #7A4E83; font-size: 11.5px; font-weight: 800; line-height: 1.42; }
@@ -7685,21 +7691,6 @@ function GlowUpTracker() {
               <div style={{ marginTop: 10, display: "grid", gap: 12 }}>
             {isMamaCornerProfile && <MamasCorner caregiverName={babyCaregiverName} parentVoice={preferences.baby_voice === "fatherly" ? "fatherly" : "motherly"} incompleteTasks={rows.filter((row) => !viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => toggle(taskKey)} />}
 
-            {babyMode && (
-              <BabyModeCareSuite
-                date={period.date}
-                todayDone={todayRequiredDone}
-                todayTotal={todayRequiredKeys.length}
-                activityDays={activityDaysTotal}
-                careDays={careDaysTotal}
-                caregiverName={babyCaregiverName}
-                comfortItemName={trackerProfile?.comfort_item_name?.trim() || ""}
-                littleJobs={rows.filter((row) => !viewDone[row.key] && !row.isBonus)}
-                onCompleteTask={(taskKey) => toggle(taskKey)}
-                onOpenJournal={() => { setPrivateNoteDraft(privateNote); setJournalQuickOpen(true); }}
-                onSoftDay={() => selectDayType("soft")}
-              />
-            )}
               </div>
             </details>
 
@@ -9455,7 +9446,7 @@ function GlowUpTracker() {
 
         <div role="tablist" aria-label="Today view" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, marginBottom: 9, padding: 4, borderRadius: 12, background: "#FFFFFF99", border: "1px solid #EADCEC" }}>
           <button role="tab" aria-selected={todayCardIndex === 0} type="button" onClick={() => setTodayCardIndex(0)} style={{ padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 0 ? `${day.accent}22` : "transparent", color: todayCardIndex === 0 ? day.accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>🗓 Schedule</button>
-          <button role="tab" aria-selected={todayCardIndex === 1} type="button" onClick={() => setTodayCardIndex(1)} style={{ padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 1 ? `${day.accent}22` : "transparent", color: todayCardIndex === 1 ? day.accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>✓ Tasks</button>
+          <button role="tab" aria-selected={todayCardIndex === 1} type="button" onClick={() => setTodayCardIndex(1)} style={{ padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 1 ? `${day.accent}22` : "transparent", color: todayCardIndex === 1 ? day.accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{babyMode ? "🧸 Little Jobs" : "✓ Tasks"}</button>
         </div>
         {todayCardIndex === 1 && (
           <>
@@ -9544,7 +9535,7 @@ function GlowUpTracker() {
           </button>
         </div>
         )}
-        {dailyCheckIn.day_type !== "rest" && (() => {
+        {dailyCheckIn.day_type !== "rest" && !babyMode && (() => {
           // A small glance at what still needs doing, so leading with the
           // schedule doesn't mean losing sight of today's tasks entirely.
           const habitRowsToday = rows.filter((r) => r.habitType !== "regular");
@@ -9577,7 +9568,24 @@ function GlowUpTracker() {
         })()}
         </>}
 
-        {todayCardIndex === 1 && !isFutureView && rows.length > 0 && dailyCheckIn.day_type !== "rest" && (focusHelperOpen || !nextStepTask) && (
+        {todayCardIndex === 1 && babyMode && !isFutureView && !isHistoricalView && dailyCheckIn.day_type !== "rest" && (
+          <BabyModeCareSuite
+            date={period.date}
+            todayDone={todayRequiredDone}
+            todayTotal={todayRequiredKeys.length}
+            activityDays={activityDaysTotal}
+            careDays={careDaysTotal}
+            caregiverName={babyCaregiverName}
+            comfortItemName={trackerProfile?.comfort_item_name?.trim() || ""}
+            littleJobs={rows.filter((row) => !viewDone[row.key])}
+            onCompleteTask={(taskKey) => toggle(taskKey)}
+            onManageTasks={() => openTaskManager(dayIdForDate(period.date))}
+            onOpenJournal={() => { setPrivateNoteDraft(privateNote); setJournalQuickOpen(true); }}
+            onSoftDay={() => selectDayType("soft")}
+          />
+        )}
+
+        {todayCardIndex === 1 && !babyMode && !isFutureView && rows.length > 0 && dailyCheckIn.day_type !== "rest" && (focusHelperOpen || !nextStepTask) && (
           // Suppressed (unless already open) whenever the One Next Step card
           // above is already showing this same single-task suggestion — no
           // point offering "pick one thing for me" right under a card that's
@@ -9615,7 +9623,7 @@ function GlowUpTracker() {
             )}
           </div>
         )}
-        {todayCardIndex === 1 && rows.length > 0 && (
+        {todayCardIndex === 1 && rows.length > 0 && (!babyMode || isFutureView || isHistoricalView || selectedTaskViewIsRest) && (
           <div style={{ marginBottom: 14, padding: 14, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: "1px solid #E6D4F2" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 4 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 800 }}>{selectedTaskViewIsRest ? "REST DAY" : isFutureView ? `${selectedTaskDateLabel.toUpperCase()} TASKS` : isHistoricalView ? `${selectedTaskDateLabel.toUpperCase()} HISTORY` : "TODAY'S TASKS"}</div>
@@ -9862,7 +9870,7 @@ function GlowUpTracker() {
             ))}
           </div>
         )}
-        {todayCardIndex === 1 && rows.length === 0 && (
+        {todayCardIndex === 1 && rows.length === 0 && !babyMode && (
           <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.5)", border: "1px dashed #C9B3DC", textAlign: "center", color: "#8C6B9E", fontSize: 12.5 }}>
             <div>No tasks for today yet. Build a list that fits your day. 🧸</div>
             <button type="button" onClick={() => openTaskManager(dayIdForDate(period.date))} style={{ marginTop: 10, padding: "8px 12px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>＋ Add today’s tasks</button>

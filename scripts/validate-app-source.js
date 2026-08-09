@@ -44,7 +44,7 @@ const requiredRegressionMarkers = [
   'const MOTHERLY_NICKNAMES = [',
   'function NurseryNook({ outfit, mood, activityDays, onOpenCloset })',
   'MY LITTLE NURSERY',
-  'function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, caregiverName, comfortItemName, littleJobs, onCompleteTask, onOpenJournal, onSoftDay })',
+  'function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, caregiverName, comfortItemName, littleJobs, onCompleteTask, onManageTasks, onOpenJournal, onSoftDay })',
   'LITTLE CARE CORNER',
   'BEDTIME WIND-DOWN',
   'Today’s little-win sticker: Super Cozy Helper',
@@ -76,6 +76,9 @@ const requiredRegressionMarkers = [
   'Let\'s help the clothes get clean and cozy',
   'Let\'s take care of one important money step',
   '🧸 MY LITTLE JOBS',
+  '{babyMode ? "🧸 Little Jobs" : "✓ Tasks"}',
+  'littleJobs={rows.filter((row) => !viewDone[row.key])}',
+  '✏️ Change my little jobs',
 ];
 
 for (const marker of requiredRegressionMarkers) {
