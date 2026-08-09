@@ -1473,9 +1473,16 @@ function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, setShow
         .landing-difference-grid { display:grid;grid-template-columns:1fr 1fr;gap:1px;overflow:hidden;border:1px solid #EED8ED;border-radius:22px;background:#EED8ED;box-shadow:0 20px 45px -28px rgba(90,50,110,.36) }
         .landing-difference-cell { min-height:86px;padding:18px 20px;background:rgba(255,255,255,.92) }
         .landing-difference-cell.plush { background:linear-gradient(135deg,#FFF7FD,#F1FCF8) }
+        .landing-device-stage { display:flex;align-items:center;justify-content:center;gap:clamp(20px,5vw,64px);padding:34px 24px;border:1px solid #EED8ED;border-radius:32px;background:radial-gradient(circle at 18% 16%,#F9DDF3 0,transparent 38%),radial-gradient(circle at 86% 82%,#DCF6EE 0,transparent 40%),rgba(255,255,255,.66);box-shadow:0 28px 60px -36px rgba(77,47,94,.42) }
+        .landing-phone { width:270px;padding:10px;border-radius:37px;background:#493A59;box-shadow:0 24px 45px -25px rgba(52,37,62,.65) }
+        .landing-phone-screen { min-height:510px;overflow:hidden;border-radius:29px;background:linear-gradient(165deg,#FCE6F6,#EEF9F5 60%,#FFF7E5);padding:16px 14px;color:#4A3A5C }
+        .landing-watch-wrap { display:grid;justify-items:center;gap:13px }
+        .landing-watch-strap { width:118px;height:54px;border-radius:24px;background:linear-gradient(90deg,#362B41,#5B4969,#362B41) }
+        .landing-watch { width:232px;height:232px;margin:-22px 0;border:12px solid #40344A;border-radius:50%;background:#16131A;box-shadow:0 24px 48px -24px rgba(52,37,62,.72);display:grid;place-items:center }
+        .landing-watch-screen { width:196px;height:196px;box-sizing:border-box;overflow:hidden;border-radius:50%;background:radial-gradient(circle at 50% 5%,#F7DDF2,#F8F1F8 56%,#DFF5ED);padding:28px 25px;text-align:center;color:#4A3A5C }
         .landing-demo-task:hover { border-color:#D9A6E3 !important; transform:translateY(-1px) }
         .landing-demo-task:focus-visible { outline:3px solid #E7B8F0;outline-offset:2px }
-        @media(max-width:800px){.plush-feature-grid,.landing-how-grid{grid-template-columns:1fr}.landing-benefit-strip{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:800px){.plush-feature-grid,.landing-how-grid{grid-template-columns:1fr}.landing-benefit-strip{grid-template-columns:repeat(2,1fr)}.landing-device-stage{flex-direction:column;gap:48px}.landing-phone{width:min(270px,100%)}}
         @media(max-width:560px){.landing-nav-links{display:none}.landing-benefit-strip{grid-template-columns:1fr 1fr;gap:7px;padding:0 14px}.landing-benefit-pill{border-radius:15px;font-size:11px;padding:7px}.landing-signin-row{flex-direction:column}.landing-signin-row button{width:100%}.landing-difference-cell{min-height:96px;padding:15px 13px}}
       `}</style>
       <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "26px 28px", maxWidth: 1080, margin: "0 auto" }}>
@@ -1564,6 +1571,52 @@ function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, setShow
             <div className="landing-difference-cell plush" role="cell" key={`plush-${index}`}><div style={{ color: colors.plum, fontSize: 13.5, fontWeight: 800, lineHeight: 1.5 }}>✓ {plush}</div></div>,
           ])}
         </div>
+      </section>
+
+      <section aria-labelledby="landing-devices-title" style={{ padding: "46px 20px 54px", maxWidth: 920, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ color: colors.orchid, fontSize: 11, fontWeight: 900, letterSpacing: ".13em" }}>PLUSHLIFE THROUGHOUT YOUR DAY</div>
+          <h2 id="landing-devices-title" style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: "clamp(28px,4vw,38px)", margin: "7px 0 9px" }}>The full picture on your phone. Gentle help on your wrist.</h2>
+          <p style={{ color: colors.soft, fontSize: 15.5, maxWidth: 650, margin: "0 auto", lineHeight: 1.6 }}>Plan and reflect in the PlushLife app, then use the Amazfit companion for quick check-ins, Tiny Steps, Focus, and PlushRescue when reaching for your phone feels like too much.</p>
+        </div>
+        <div className="landing-device-stage">
+          <div>
+            <div className="landing-phone" aria-label="Example PlushLife phone screen">
+              <div className="landing-phone-screen">
+                <div style={{ width: 64, height: 6, margin: "0 auto 14px", borderRadius: 999, background: "#D5B9D7" }} />
+                <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: ".14em", color: colors.orchid }}>MY PLUSHLIFE · SUNDAY</div>
+                <div style={{ marginTop: 4, fontFamily: "'Baloo 2',sans-serif", fontSize: 20, fontWeight: 900 }}>A gentle little day 💜</div>
+                <div style={{ marginTop: 11, padding: "10px 11px", borderRadius: 13, background: "rgba(255,255,255,.88)", border: "1px solid #E8D2E8", fontSize: 11.5, fontWeight: 900 }}>🎯 Check-in · Soft Day</div>
+                <div style={{ display: "flex", gap: 7, marginTop: 10 }}>
+                  <div style={{ flex: 1, padding: "10px", borderRadius: 13, background: "rgba(255,255,255,.82)", border: "1px solid #E8D2E8" }}><div style={{ fontSize: 8.5, fontWeight: 900, color: colors.orchid }}>PLUSHJOURNAL</div><div style={{ marginTop: 5, fontSize: 10.5, lineHeight: 1.35 }}>What would make today feel kinder?</div></div>
+                  <div style={{ flex: 1, padding: "10px", borderRadius: 13, background: "rgba(255,255,255,.82)", border: "1px solid #E8D2E8" }}><div style={{ fontSize: 8.5, fontWeight: 900, color: colors.mint }}>PROGRESS</div><div style={{ marginTop: 5, fontSize: 19, fontWeight: 900 }}>2 / 4</div><div style={{ fontSize: 8.5, color: colors.soft }}>gentle steps</div></div>
+                </div>
+                <div style={{ marginTop: 13, fontSize: 9, fontWeight: 900, letterSpacing: ".12em", color: colors.soft }}>TODAY</div>
+                {[["✓","Drink water",true],["✓","Morning medicine",true],["","Ten-minute tidy",false],["","Prepare for tomorrow",false]].map(([mark,label,done]) => (
+                  <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 7, padding: "9px", borderRadius: 11, background: "rgba(255,255,255,.9)", border: "1px solid #E8D2E8", color: done ? colors.soft : colors.plum, fontSize: 10.5, fontWeight: 800, textDecoration: done ? "line-through" : "none" }}><span style={{ width: 17, height: 17, display: "grid", placeItems: "center", borderRadius: 6, background: done ? colors.mint : "transparent", border: `2px solid ${done ? colors.mint : "#D1B8D3"}`, color: "white", fontSize: 9 }}>{mark}</span>{label}</div>
+                ))}
+                <div style={{ marginTop: 12, padding: "9px", borderRadius: 999, background: "linear-gradient(90deg,#B95FCE,#8A6DE0)", color: "white", textAlign: "center", fontSize: 10.5, fontWeight: 900 }}>🧸 Open PlushRescue</div>
+              </div>
+            </div>
+            <div style={{ marginTop: 13, textAlign: "center", fontSize: 12, color: colors.soft, fontWeight: 800 }}>Plan · Reflect · See patterns</div>
+          </div>
+          <div className="landing-watch-wrap">
+            <div className="landing-watch-strap" />
+            <div className="landing-watch" aria-label="Example PlushLife Amazfit watch screen">
+              <div className="landing-watch-screen">
+                <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: ".12em", color: colors.orchid }}>PLUSHLIFE</div>
+                <div style={{ marginTop: 4, fontFamily: "'Baloo 2',sans-serif", fontSize: 17, fontWeight: 900 }}>How are you?</div>
+                <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 8 }}><span style={{ padding: "7px 9px", borderRadius: 999, background: "white", fontSize: 15 }}>😌</span><span style={{ padding: "7px 9px", borderRadius: 999, background: colors.orchid, boxShadow: "0 5px 12px rgba(185,95,206,.28)", fontSize: 15 }}>🙂</span><span style={{ padding: "7px 9px", borderRadius: 999, background: "white", fontSize: 15 }}>😣</span></div>
+                <div style={{ marginTop: 9, fontSize: 10.5, fontWeight: 900 }}>Okay · Soft</div>
+                <div style={{ marginTop: 8, padding: "7px 10px", borderRadius: 999, background: "#4A3A5C", color: "white", fontSize: 9.5, fontWeight: 900 }}>Tiny Step → water</div>
+                <div style={{ marginTop: 6, color: colors.orchid, fontSize: 9, fontWeight: 900 }}>🛟 Rescue</div>
+              </div>
+            </div>
+            <div className="landing-watch-strap" />
+            <div style={{ marginTop: 12, textAlign: "center", fontSize: 12, color: colors.soft, fontWeight: 800 }}>Check in · Focus · Get support</div>
+          </div>
+        </div>
+        <div style={{ marginTop: 12, textAlign: "center", color: colors.soft, fontSize: 10.5 }}>Illustrative product preview. Watch features and availability may vary by supported device.</div>
       </section>
 
       <section aria-label="Interactive PlushLife demo" style={{ padding: "34px 20px 70px", display: "grid", justifyItems: "center" }}>
