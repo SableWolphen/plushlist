@@ -2,11 +2,19 @@ import { BaseSideService } from '@zeppos/zml/base-side'
 
 const ENDPOINT = 'https://pvitdhixycegmcovapyh.supabase.co/functions/v1/watch-sync'
 
+function secureRandomSegment() {
+  const bytes = new Uint8Array(8)
+  globalThis.crypto.getRandomValues(bytes)
+  let value = ''
+  for (let i = 0; i < bytes.length; i += 1) value += bytes[i].toString(16).padStart(2, '0')
+  return value
+}
+
 function getSecret(storage) {
   let secret = storage.getItem('plushlife_watch_secret')
   if (!secret) {
     secret = `${Date.now()}-`
-    for (let index = 0; index < 8; index += 1) secret += `${Math.random().toString(36).slice(2)}-`
+    for (let index = 0; index < 8; index += 1) secret += `${secureRandomSegment()}-`
     storage.setItem('plushlife_watch_secret', secret)
   }
   return secret
