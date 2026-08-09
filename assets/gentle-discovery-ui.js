@@ -160,59 +160,25 @@
   let thunder = null;
   function stopThunderstorm() {
     if (!thunder) return;
-    thunder.timers.forEach(clearTimeout);
-    thunder.nodes.forEach((node) => { try { node.stop?.(); } catch (_) {} try { node.disconnect?.(); } catch (_) {} });
-    try { thunder.ctx.close(); } catch (_) {}
+    const { audio, button } = thunder;
+    try { audio.pause(); } catch (_) {}
+    try { audio.currentTime = 0; } catch (_) {}
     thunder = null;
+    if (button) delete button.dataset.plushlifeThunderstormActive;
     document.querySelectorAll('[data-plushlife-thunderstorm-active="true"]').forEach((node) => delete node.dataset.plushlifeThunderstormActive);
   }
 
   function startThunderstorm(button) {
     stopThunderstorm();
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) return;
-    const ctx = new Ctx();
-    const master = ctx.createGain(); master.gain.value = 0.42; master.connect(ctx.destination);
-    // Layered, filtered noise reads as rain much more naturally than a bare
-    // high-passed hiss. A quieter low layer gives it the sound of rain beyond
-    // a window; the brighter layer provides individual droplets.
-    const rainBuffer = ctx.createBuffer(1, ctx.sampleRate * 12, ctx.sampleRate);
-    const rainData = rainBuffer.getChannelData(0);
-    let brown = 0;
-    for (let i = 0; i < rainData.length; i += 1) {
-      brown = (brown + (Math.random() * 2 - 1) * 0.055) / 1.045;
-      rainData[i] = brown * 2.2 + (Math.random() * 2 - 1) * 0.16;
-    }
-    const rain = ctx.createBufferSource(); rain.buffer = rainBuffer; rain.loop = true;
-    const rainLow = ctx.createBiquadFilter(); rainLow.type = "bandpass"; rainLow.frequency.value = 1150; rainLow.Q.value = 0.55;
-    const rainHigh = ctx.createBiquadFilter(); rainHigh.type = "highpass"; rainHigh.frequency.value = 2300;
-    const rainLowGain = ctx.createGain(); rainLowGain.gain.value = 0.22;
-    const rainHighGain = ctx.createGain(); rainHighGain.gain.value = 0.075;
-    rain.connect(rainLow); rainLow.connect(rainLowGain); rainLowGain.connect(master);
-    rain.connect(rainHigh); rainHigh.connect(rainHighGain); rainHighGain.connect(master); rain.start();
-    const nodes = [rain, rainLow, rainHigh, rainLowGain, rainHighGain, master], timers = [];
-    const rumble = () => {
-      if (!thunder) return;
-      const seconds = 4.8;
-      const thunderBuffer = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate);
-      const thunderData = thunderBuffer.getChannelData(0);
-      for (let i = 0; i < thunderData.length; i += 1) {
-        const t = i / ctx.sampleRate;
-        const crack = t < 0.13 ? (1 - t / 0.13) * (Math.random() * 2 - 1) * 0.78 : 0;
-        const rolling = Math.exp(-t * 0.78) * (Math.random() * 2 - 1) * 0.52;
-        const lowRoll = Math.sin(t * (48 + Math.sin(t * 2.3) * 13) * Math.PI * 2) * Math.exp(-t * 1.05) * 0.24;
-        thunderData[i] = crack + rolling + lowRoll;
-      }
-      const strike = ctx.createBufferSource(); strike.buffer = thunderBuffer;
-      const filter = ctx.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 780;
-      const gain = ctx.createGain(); gain.gain.value = 0.92;
-      strike.connect(filter); filter.connect(gain); gain.connect(master); strike.start();
-      nodes.push(strike, filter, gain);
-      timers.push(setTimeout(rumble, 8500 + Math.random() * 11000));
-    };
-    thunder = { ctx, nodes, timers, button };
+    const audio = new Audio("./assets/thunderstorm.mp3");
+    audio.loop = true;
+    audio.preload = "auto";
+    audio.volume = 0.48;
+    thunder = { audio, button };
     button.dataset.plushlifeThunderstormActive = "true";
-    timers.push(setTimeout(rumble, 1700 + Math.random() * 1800));
+    audio.play().catch(() => {
+      if (thunder && thunder.audio === audio) stopThunderstorm();
+    });
   }
 
   document.addEventListener("click", (event) => {
