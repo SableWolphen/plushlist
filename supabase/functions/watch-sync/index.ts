@@ -7,6 +7,13 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 const CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+const WATCH_GROUPS = [
+  { id: "morning", label: "Morning" },
+  { id: "habits", label: "Habits" },
+  { id: "evening", label: "Evening" },
+  { id: "night", label: "Night" },
+  { id: "extras", label: "Extras" },
+] as const;
 const CORS_HEADERS = {
   "access-control-allow-origin": "*",
   "access-control-allow-headers": "authorization, content-type",
@@ -59,6 +66,28 @@ function taskOccursToday(task: Record<string, any>, date: string, dayId: string)
   if (task.schedule_type === "range" && ((task.start_date && date < task.start_date) || (task.end_date && date > task.end_date))) return false;
   const scheduleDays = Array.isArray(task.schedule_days) ? task.schedule_days : [];
   return scheduleDays.length ? scheduleDays.includes(dayId) : task.day_id === "daily" || task.day_id === dayId;
+}
+
+function watchGroupForTask(task: Record<string, any>) {
+  const section = String(task.section || "").trim().toLowerCase();
+  if (task.is_bonus || /\b(extra|extras|bonus|optional)\b/.test(section)) return "extras";
+  if (/\b(morning|breakfast|wake|wake-up|am)\b/.test(section)) return "morning";
+  if (/\b(night|bed|bedtime|sleep|wind[ -]?down)\b/.test(section)) return "night";
+  if (/\b(evening|dinner|pm)\b/.test(section)) return "evening";
+  if (/\b(habit|habits|routine|routines|daily|every day|everyday)\b/.test(section)) return "habits";
+  return "habits";
+}
+
+function smartGroupForHour(hour: number) {
+  if (hour >= 5 && hour < 12) return "morning";
+  if (hour >= 17 && hour < 21) return "evening";
+  if (hour >= 21 || hour < 5) return "night";
+  return "habits";
+}
+
+function normalizedLimit(value: unknown) {
+  const number = Math.floor(Number(value) || 3);
+  return Math.min(5, Math.max(1, number));
 }
 
 Deno.serve(async (req) => {
@@ -119,24 +148,64 @@ Deno.serve(async (req) => {
     const date = body?.date;
     const dayId = String(body?.day_id || "").toLowerCase();
     if (!validDate(date) || !["mon", "tue", "wed", "thu", "fri", "sat", "sun"].includes(dayId)) {
-      return json({ error: "Invalid local date" }, 400);
+      return json({ error: "Invalid phone-local date" }, 400);
     }
 
     if (action === "sync") {
       const [{ data: tasks, error: taskError }, { data: progress, error: progressError }] = await Promise.all([
-        admin.from("tracker_tasks").select("task_key,day_id,task,detail,sort_order,is_bonus,schedule_type,start_date,end_date,one_time_date,schedule_days,archived_at,paused_since,paused_until").eq("user_id", pairing.user_id).order("is_bonus").order("sort_order"),
+        admin.from("tracker_tasks").select("task_key,day_id,section,task,detail,sort_order,is_bonus,schedule_type,start_date,end_date,one_time_date,schedule_days,archived_at,paused_since,paused_until").eq("user_id", pairing.user_id).order("is_bonus").order("sort_order"),
         admin.from("daily_progress").select("completed_keys").eq("user_id", pairing.user_id).eq("progress_date", date).maybeSingle(),
       ]);
       if (taskError) throw taskError;
       if (progressError) throw progressError;
+
       const completed = new Set(Array.isArray(progress?.completed_keys) ? progress.completed_keys : []);
-      const todayTasks = (tasks || []).filter((task) => taskOccursToday(task, date, dayId)).slice(0, 8).map((task) => ({
+      const todayTasks = (tasks || [])
+        .filter((task) => taskOccursToday(task, date, dayId))
+        .map((task) => ({ ...task, watch_group: watchGroupForTask(task) }));
+
+      const groups = WATCH_GROUPS
+        .map((group) => ({ ...group, count: todayTasks.filter((task) => task.watch_group === group.id).length }))
+        .filter((group) => group.count > 0);
+
+      const requestedGroup = String(body?.group || "").toLowerCase();
+      const phoneHour = Math.min(23, Math.max(0, Math.floor(Number(body?.phone_hour) || 0)));
+      const smartGroup = smartGroupForHour(phoneHour);
+      const availableIds = new Set(groups.map((group) => group.id));
+      const fallbackOrder = [smartGroup, "habits", "morning", "evening", "night", "extras"];
+      const activeGroup = availableIds.has(requestedGroup)
+        ? requestedGroup
+        : fallbackOrder.find((group) => availableIds.has(group)) || smartGroup;
+
+      const limit = normalizedLimit(body?.limit);
+      const groupTasks = todayTasks.filter((task) => task.watch_group === activeGroup);
+      const maxOffset = Math.max(0, Math.floor((Math.max(1, groupTasks.length) - 1) / limit) * limit);
+      const requestedOffset = Math.max(0, Math.floor(Number(body?.offset) || 0));
+      const offset = Math.min(requestedOffset, maxOffset);
+      const page = groupTasks.slice(offset, offset + limit).map((task) => ({
         key: task.task_key,
         label: task.task,
         detail: task.detail || "",
+        section: task.section || "My tasks",
+        group: task.watch_group,
         completed: completed.has(task.task_key),
       }));
-      return json({ connected: true, date, tasks: todayTasks });
+
+      return json({
+        connected: true,
+        date,
+        day_id: dayId,
+        phone_time: String(body?.phone_time || ""),
+        phone_hour: phoneHour,
+        timezone_offset_minutes: Number(body?.timezone_offset_minutes) || 0,
+        active_group: activeGroup,
+        groups,
+        offset,
+        limit,
+        total: groupTasks.length,
+        has_more: offset + limit < groupTasks.length,
+        tasks: page,
+      });
     }
 
     if (action === "complete") {
@@ -156,7 +225,7 @@ Deno.serve(async (req) => {
       ]);
       if (legacy.error) throw legacy.error;
       if (daily.error) throw daily.error;
-      return json({ connected: true, task_key: taskKey, completed: body.completed });
+      return json({ connected: true, task_key: taskKey, completed: body.completed, date, updated_at: updatedAt });
     }
 
     return json({ error: "Unknown action" }, 400);
