@@ -542,21 +542,30 @@ function MamasCorner({ incompleteTasks, onConfirmTask, caregiverName = "Mommy", 
 function littleSpaceTaskLabel(label) {
   const task = String(label || "").trim();
   const lower = task.toLowerCase();
-  if (/brush.*teeth|teeth.*brush/.test(lower)) return "Make my teeth sparkly";
-  if (/drink.*water|water bottle|hydrate/.test(lower)) return "Take some little sips";
-  if (/medicine|medication|vitamin/.test(lower)) return "Take my helping medicine";
-  if (/breakfast/.test(lower)) return "Have my cozy breakfast";
-  if (/lunch/.test(lower)) return "Have my cozy lunch";
-  if (/dinner|supper/.test(lower)) return "Have my cozy dinner";
-  if (/shower|bath|wash up|wash-up/.test(lower)) return "Get fresh and cozy";
-  if (/clothes|dress|get dressed/.test(lower)) return "Pick my comfy clothes";
-  if (/tidy|clean|put away/.test(lower)) return "Make one tiny spot cozy";
-  if (/stretch|exercise|workout|walk|running|\brun\b/.test(lower)) return "Move my body a little";
-  if (/prepare.*tomorrow|plan.*tomorrow/.test(lower)) return "Get one tiny thing ready for tomorrow";
-  return `My little job: ${task}`;
+  const restAfter = (pattern) => task.match(pattern)?.[1]?.trim().replace(/[.!?]+$/, "") || "";
+  if (/brush.*teeth|teeth.*brush/.test(lower)) return "Let's make those teeth sparkly";
+  if (/drink.*water|water bottle|hydrate/.test(lower)) return "Let's take some little sips";
+  if (/medicine|medication|vitamin/.test(lower)) return "Let's take the helping medicine";
+  if (/breakfast/.test(lower)) return "Let's have a cozy breakfast";
+  if (/lunch/.test(lower)) return "Let's have a cozy lunch";
+  if (/dinner|supper/.test(lower)) return "Let's have a cozy dinner";
+  if (/shower|bath|wash up|wash-up/.test(lower)) return "Let's get fresh and cozy";
+  if (/clothes|dress|get dressed/.test(lower)) return "Let's pick some comfy clothes";
+  if (/tidy|clean|put away/.test(lower)) return "Let's make one tiny spot cozy";
+  if (/stretch|exercise|workout|walk|running|\brun\b/.test(lower)) return "Let's move our body a little";
+  if (/prepare.*tomorrow|plan.*tomorrow/.test(lower)) return "Let's get one tiny thing ready for tomorrow";
+  if (/^(?:email|e-mail|message|text)\s+/i.test(task)) return `Let's send one little message: ${restAfter(/^(?:email|e-mail|message|text)\s+(.+)$/i)}`;
+  if (/^call\s+/i.test(task)) return `Let's make one little call to ${restAfter(/^call\s+(.+)$/i)}`;
+  if (/^charge\s+/i.test(task)) return `Let's tuck ${restAfter(/^charge\s+(.+)$/i)} in for a charge`;
+  if (/^(?:finish|complete)\s+/i.test(task)) return `Let's do one small part of ${restAfter(/^(?:finish|complete)\s+(.+)$/i)}`;
+  if (/^read\s+/i.test(task)) return `Let's read a little bit of ${restAfter(/^read\s+(.+)$/i)}`;
+  if (/^write\s+/i.test(task)) return `Let's write a tiny bit of ${restAfter(/^write\s+(.+)$/i)}`;
+  if (/^(?:put|place)\s+/i.test(task)) return `Let's help ${restAfter(/^(?:put|place)\s+(.+)$/i)} get to its spot`;
+  if (/^(?:make|cook|prepare)\s+/i.test(task)) return `Let's make ${restAfter(/^(?:make|cook|prepare)\s+(.+)$/i)} together, one little step at a time`;
+  return `Let's take care of “${task}” together, one tiny step at a time`;
 }
 
-function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, comfortItemName, littleJobs, onCompleteTask, onOpenJournal, onSoftDay }) {
+function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, caregiverName, comfortItemName, littleJobs, onCompleteTask, onOpenJournal, onSoftDay }) {
   const [windDown, setWindDown] = React.useState([false, false, false]);
   const [comfortOpen, setComfortOpen] = React.useState(null);
   const [open, setOpen] = React.useState(false);
@@ -609,7 +618,7 @@ function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays
       </div>
       <div className="baby-comfort">
         <div className="baby-section-label">🧸 MY LITTLE JOBS</div>
-        <div className="baby-wind-down-copy">Your real tasks, made softer for Little Space. Tap one when it is tucked in.</div>
+        <div className="baby-wind-down-copy">{caregiverName} made your real tasks softer for Little Space. Tap one when it is tucked in.</div>
         <div className="baby-little-jobs">
           {(littleJobs || []).slice(0, 5).map((task) => {
             const cozyLabel = littleSpaceTaskLabel(task.label);
@@ -7663,6 +7672,7 @@ function GlowUpTracker() {
                 todayTotal={todayRequiredKeys.length}
                 activityDays={activityDaysTotal}
                 careDays={careDaysTotal}
+                caregiverName={babyCaregiverName}
                 comfortItemName={trackerProfile?.comfort_item_name?.trim() || ""}
                 littleJobs={rows.filter((row) => !viewDone[row.key] && !row.isBonus)}
                 onCompleteTask={(taskKey) => toggle(taskKey)}

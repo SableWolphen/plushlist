@@ -44,7 +44,7 @@ const requiredRegressionMarkers = [
   'const MOTHERLY_NICKNAMES = [',
   'function NurseryNook({ outfit, mood, activityDays, onOpenCloset })',
   'MY LITTLE NURSERY',
-  'function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, comfortItemName, littleJobs, onCompleteTask, onOpenJournal, onSoftDay })',
+  'function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, caregiverName, comfortItemName, littleJobs, onCompleteTask, onOpenJournal, onSoftDay })',
   'LITTLE CARE CORNER',
   'BEDTIME WIND-DOWN',
   'Today’s little-win sticker: Super Cozy Helper',
@@ -72,6 +72,7 @@ const requiredRegressionMarkers = [
   'const babyCaregiverName = preferences.baby_voice === "fatherly" ? "Daddy" : "Mommy";',
   'const hasStarLampAndBasket = activityDays >= 10;',
   'function littleSpaceTaskLabel(label) {',
+  'Let\'s take care of “${task}” together, one tiny step at a time',
   '🧸 MY LITTLE JOBS',
 ];
 
