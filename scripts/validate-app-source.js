@@ -63,11 +63,26 @@ const requiredRegressionMarkers = [
   'function MamasCorner({ incompleteTasks, onConfirmTask })',
   'PRIVATE MAMA’S CORNER',
   'const isMamaCornerProfile = (user?.email || "").trim().toLowerCase() === "johnston.alexander.k@gmail.com";',
+  'const taskPointerDragRef = React.useRef(null);',
+  'const startPointerTaskDrag = (event, taskKey, taskLabel) => {',
+  'data-plushlife-task-drag-scope',
 ];
 
 for (const marker of requiredRegressionMarkers) {
   if (!match[1].includes(marker)) {
     throw new Error(`Missing onboarding/weekly-intention regression marker: ${marker}`);
+  }
+}
+
+const prohibitedRegressionMarkers = [
+  'startTaskCardTouchDrag',
+  'draggable={draggableTodayTask}',
+  'draggable="true"',
+];
+
+for (const marker of prohibitedRegressionMarkers) {
+  if (match[1].includes(marker)) {
+    throw new Error(`Found obsolete native/card-wide drag marker: ${marker}`);
   }
 }
 
