@@ -84,8 +84,11 @@ const requiredRegressionMarkers = [
   'prompt: journalPromptToSave',
   'The question was not saved with this older entry.',
   'JOURNAL FOR {new Date(`${journalQuickOpenDate}T12:00:00Z`)',
-  '📮 WEEKLY INTENTION',
+  '📮 PLUSHWEEK · WEEKLY INTENTION',
   'Weekly planning and Sunday follow-up · separate from PlushJournal',
+  '📮 PLUSHWEEK',
+  'plushlife-journal-prompt-${user.id}-${period.date}',
+  'Your daily PlushJournal prompt',
 ];
 
 for (const marker of requiredRegressionMarkers) {

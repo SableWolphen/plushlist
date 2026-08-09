@@ -2007,8 +2007,10 @@ function GlowUpTracker() {
   const [onboardingMessage, setOnboardingMessage] = useState("");
   const [privateNote, setPrivateNote] = useState("");
   const [privateNotePrompt, setPrivateNotePrompt] = useState("");
+  const [privateNoteLoaded, setPrivateNoteLoaded] = useState(false);
   const [privateNoteEditing, setPrivateNoteEditing] = useState(false);
   const [journalQuickOpen, setJournalQuickOpen] = useState(false);
+  const [dailyJournalPromptOpen, setDailyJournalPromptOpen] = useState(false);
   const [journalQuickOpenDate, setJournalQuickOpenDate] = useState(() => trackerPeriod().date);
   const [calmQuickOpen, setCalmQuickOpen] = useState(false);
   const [privateNoteDraft, setPrivateNoteDraft] = useState("");
@@ -3002,6 +3004,7 @@ function GlowUpTracker() {
   useEffect(() => {
     if (!user) { setLongHistory([]); return; }
     let alive = true;
+    setPrivateNoteLoaded(false);
     const monthStart = `${reflectionCalendarMonth}-01`;
     const monthStartDate = new Date(`${monthStart}T12:00:00Z`);
     const monthEnd = new Date(Date.UTC(monthStartDate.getUTCFullYear(), monthStartDate.getUTCMonth() + 1, 0)).toISOString().slice(0, 10);
@@ -3055,6 +3058,7 @@ function GlowUpTracker() {
         }
         setPrivateNote(data?.body || "");
         setPrivateNotePrompt(data?.prompt || "");
+        setPrivateNoteLoaded(true);
       });
     return () => { alive = false; };
   }, [user, selectedProgressDate]);
@@ -6581,6 +6585,22 @@ function GlowUpTracker() {
   useEffect(() => {
     if (babyMode) setTodayCardIndex(1);
   }, [babyMode]);
+  useEffect(() => {
+    if (!user?.id || !preferences.onboarding_complete || !privateNoteLoaded || privateNote) return;
+    if (!dailyCheckIn.capacity && !checkInPopupDismissedToday) return;
+    const promptKey = `plushlife-journal-prompt-${user.id}-${period.date}`;
+    if (window.localStorage.getItem(promptKey) === "seen") return;
+    const timer = window.setTimeout(() => {
+      window.localStorage.setItem(promptKey, "seen");
+      setJournalQuickOpenDate(period.date);
+      setPrivateNoteDraft("");
+      setPrivateNoteMessage("");
+      setPrivateNoteEditing(true);
+      setDailyJournalPromptOpen(true);
+      setJournalQuickOpen(true);
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [user?.id, preferences.onboarding_complete, privateNoteLoaded, privateNote, dailyCheckIn.capacity, checkInPopupDismissedToday, period.date]);
   const dinoTheme = !!preferences.dino_theme;
   const selectedAppearanceTheme = APPEARANCE_THEMES.find((theme) => theme.id === appearanceTheme) || APPEARANCE_THEMES[0];
   const selectAppearanceTheme = (themeId) => {
@@ -6714,6 +6734,7 @@ function GlowUpTracker() {
     if (introIntentionOpen) return "intro_intention";
     if (celebrationOpen) return "celebration";
     if (checkInPopupOpen) return "check_in";
+    if (dailyJournalPromptOpen) return "daily_journal";
     if (notificationNudgeOpen) return "notification_nudge";
     return null;
   })();
@@ -9413,30 +9434,19 @@ function GlowUpTracker() {
           );
         })()}
 
-        <div style={{ marginBottom: 14 }}>
-        {!isFutureView && (
-          <button type="button" onClick={openJournalForSelectedDate} style={{ width: "100%", textAlign: "left", display: "block", padding: "13px 14px", borderRadius: 14, border: "1px solid #E3C9EC", background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", cursor: "pointer", marginBottom: 0 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.12em", fontWeight: 900, color: "#A65DC1" }}>📝 PLUSHJOURNAL</div>
-              <span style={{ color: "#A65DC1", fontWeight: 900 }}>›</span>
+        <div style={{ marginBottom: 14, padding: "13px 14px", borderRadius: 15, background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", border: "1px solid #E3C9EC" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+            <div>
+              <div style={{ fontSize: 11, letterSpacing: "0.12em", fontWeight: 900, color: "#A65DC1" }}>📮 PLUSHWEEK</div>
+              <div style={{ marginTop: 3, fontSize: 10.5, color: "#927C9E" }}>My weekly intention · Monday through Sunday</div>
             </div>
-            {privateNote ? (
-              <div style={{ marginTop: 7 }}>
-                <div style={{ fontSize: 9.5, letterSpacing: "0.08em", fontWeight: 900, color: "#9A6BAD" }}>SAVED PROMPT</div>
-                <div style={{ marginTop: 3, fontSize: 12.5, lineHeight: 1.45, color: "#6B5A7D", fontStyle: "italic" }}>{privateNotePrompt || "The question was not saved with this older entry."}</div>
-                <div style={{ marginTop: 8, fontSize: 9.5, letterSpacing: "0.08em", fontWeight: 900, color: "#9A6BAD" }}>YOU WROTE</div>
-                <div style={{ marginTop: 3, fontSize: 12.5, lineHeight: 1.5, color: "#5B4B6B" }}>{privateNote.length > 180 ? `${privateNote.slice(0, 180).trim()}…` : privateNote}</div>
-                <div style={{ marginTop: 7, fontSize: 11, fontWeight: 900, color: "#A65DC1" }}>View entry →</div>
-              </div>
-            ) : (
-              <div style={{ marginTop: 7 }}>
-                <div style={{ fontSize: 9.5, letterSpacing: "0.08em", fontWeight: 900, color: "#9A6BAD" }}>TODAY'S PROMPT</div>
-                <div style={{ marginTop: 3, fontSize: 13, lineHeight: 1.5, color: "#6B5A7D", fontStyle: "italic" }}>{reflectionPrompt}</div>
-                <div style={{ marginTop: 7, fontSize: 11, fontWeight: 900, color: "#A65DC1" }}>Write about this →</div>
-              </div>
-            )}
-          </button>
-        )}
+            {!weeklyIntentionEditing && <button type="button" onClick={() => { setWeeklyIntentionDraft(weeklyIntentionText); setWeeklyIntentionEditing(true); }} style={{ padding: "5px 9px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>{weeklyIntentionText ? "Edit" : "Add one"}</button>}
+          </div>
+          {weeklyIntentionEditing ? <>
+            <textarea value={weeklyIntentionDraft} onChange={(event) => setWeeklyIntentionDraft(event.target.value)} maxLength={2000} placeholder="What do I want to carry with me this week?" style={{ width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 8, padding: 10, borderRadius: 10, border: "1px solid #D9B8E8", resize: "vertical" }} />
+            <div style={{ display: "flex", gap: 7, marginTop: 7 }}><button type="button" onClick={saveWeeklyIntentionEdit} style={{ padding: "7px 11px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save PlushWeek</button><button type="button" onClick={() => setWeeklyIntentionEditing(false)} style={{ padding: "7px 11px", borderRadius: 9, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, cursor: "pointer" }}>Cancel</button></div>
+            {weeklyIntentionMessage && <div style={{ marginTop: 6, fontSize: 11.5, color: "#8C6B9E" }}>{weeklyIntentionMessage}</div>}
+          </> : <div style={{ marginTop: 9, fontSize: 13.5, lineHeight: 1.5, color: weeklyIntentionText ? "#5B4B6B" : "#9A86A7", whiteSpace: "pre-wrap" }}>{weeklyIntentionText || "No intention yet. Choose one gentle direction for this week."}</div>}
         </div>
 
         <div role="tablist" aria-label="Today view" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, marginBottom: 9, padding: 4, borderRadius: 12, background: "#FFFFFF99", border: "1px solid #EADCEC" }}>
@@ -9910,8 +9920,8 @@ function GlowUpTracker() {
           </ToolPanel>
         )}
 
-        {journalQuickOpen && (
-          <ToolPanel title="PlushJournal" onClose={() => { setJournalQuickOpen(false); setPrivateNoteEditing(false); }}>
+        {journalQuickOpen && (!dailyJournalPromptOpen || autoPopupToShow === "daily_journal") && (
+          <ToolPanel title={dailyJournalPromptOpen ? "Your daily PlushJournal prompt" : "PlushJournal"} onClose={() => { setJournalQuickOpen(false); setDailyJournalPromptOpen(false); setPrivateNoteEditing(false); }}>
             <div style={{ padding: "15px 16px", borderRadius: 16, background: "rgba(255,255,255,0.28)", border: "1px solid #E6D4F2" }}>
               <div style={{ marginBottom: 4, fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#A65DC1" }}>JOURNAL FOR {new Date(`${journalQuickOpenDate}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" }).toUpperCase()}</div>
               <div style={{ fontStyle: "italic", lineHeight: 1.5, fontSize: 12.5, color: "#8C6B9E" }}>{journalDisplayedPrompt}</div>
@@ -10273,7 +10283,7 @@ function GlowUpTracker() {
         {progressView === "overview" && <>
         <div style={{ marginBottom: 12, padding: "11px 12px", borderRadius: 12, background: "#F9F1FC", border: "1px solid #E6D4F2" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-            <div style={{ fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#8E4EAA" }}>📮 WEEKLY INTENTION</div>
+            <div style={{ fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "#8E4EAA" }}>📮 PLUSHWEEK · WEEKLY INTENTION</div>
             {!weeklyIntentionEditing && <button type="button" onClick={() => { setWeeklyIntentionDraft(weeklyIntentionText); setWeeklyIntentionEditing(true); }} style={{ padding: "5px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>{weeklyIntentionText ? "Edit" : "Add one"}</button>}
           </div>
           <div style={{ marginTop: 4, fontSize: 10.5, color: "#927C9E" }}>Weekly planning and Sunday follow-up · separate from PlushJournal</div>
