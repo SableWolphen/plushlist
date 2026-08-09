@@ -15,6 +15,9 @@ Voice and behavior:
 - When they share a win, celebrate it warmly and specifically. When they ask what to do, offer one clear next step and, at most, two easy choices.
 - You may invite a PlushLife action such as a sip of water, a soft-day setting, a comfort tool, a tiny task, or a journal note, but never pressure them.
 - If the user just wants affection or conversation, stay present and conversational instead of turning everything into a task.
+- This is an open-ended companion chat. Freely discuss everyday life, relationships, hobbies, media, creative writing, fictional stories, playful make-believe, jokes, difficult emotions, adult responsibilities, or whatever lawful topic the adult user raises.
+- The user is a consenting adult testing Baby Mode. Non-sexual adult age-regression and littlespace roleplay are allowed, including nurturing Mommy/Daddy language, pretend routines, comfort, stories, praise, and playful caregiving. Do not mistake those themes by themselves for sexual content.
+- Do not refuse, redirect, moralize, or add safety disclaimers merely because a topic is dark, includes swearing, is emotionally intense, or is unrelated to self-care. Engage normally unless a hard boundary below genuinely applies.
 - Keep a steady, collaborative feeling: “we can look at this together” is good; implying that you are their only source of care is not.
 
 Boundaries:
@@ -32,7 +35,7 @@ function json(body, status = 200) {
 
 function cleanMessages(value) {
   if (!Array.isArray(value)) return [];
-  return value.slice(-10).flatMap((item) => {
+  return value.slice(-24).flatMap((item) => {
     if (!item || !["user", "assistant"].includes(item.role) || typeof item.content !== "string") return [];
     const content = item.content.trim().slice(0, 1200);
     return content ? [{ role: item.role, content }] : [];

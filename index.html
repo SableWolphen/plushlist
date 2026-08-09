@@ -454,6 +454,12 @@ function MamasCorner({ incompleteTasks, onConfirmTask, caregiverName = "Mommy", 
   const [taskToConfirm, setTaskToConfirm] = React.useState(null);
   const [lastTaskAsked, setLastTaskAsked] = React.useState(null);
   const [messages, setMessages] = React.useState(() => [{ role: "assistant", content: "Hi baby. I’m your PlushLife AI comfort companion. What feels most important to say right now?" }]);
+  const conversationStarters = [
+    "Just chat with me",
+    "Tell me a cozy story",
+    "Let’s play pretend",
+    "I need to vent",
+  ];
   const checkInOnTasks = () => {
     const task = (incompleteTasks || [])[0];
     if (!task || sending) return;
@@ -516,17 +522,20 @@ function MamasCorner({ incompleteTasks, onConfirmTask, caregiverName = "Mommy", 
   return (
     <section className="mamas-corner" aria-label={`${caregiverName}'s Corner`}>
       <button type="button" className="mamas-corner-header" onClick={() => setOpen((current) => !current)} aria-expanded={open}>
-        <span><span className="mamas-corner-kicker">🍼 PRIVATE {caregiverName.toUpperCase()}’S CORNER</span><span className="mamas-corner-title">Talk through one little thing</span></span>
+        <span><span className="mamas-corner-kicker">🍼 PRIVATE {caregiverName.toUpperCase()}’S CORNER</span><span className="mamas-corner-title">Chat about anything</span></span>
         <span aria-hidden="true">{open ? "⌃" : "›"}</span>
       </button>
-      {!open && <div className="mamas-corner-summary">A gentle AI chat just for this profile. Nothing is saved after you close it.</div>}
+      {!open && <div className="mamas-corner-summary">Chat, vent, ask questions, make up stories, or get gentle help. This conversation stays only in the current app session.</div>}
       {open && <div className="mamas-corner-body">
-        <p className="mamas-corner-note">This is an AI comfort companion, not a person, Guardian, clinician, or emergency service. It sends this chat and up to six unfinished task names to PlushLife’s private AI service to reply; closing or resetting it clears this device’s chat.</p>
+        <p className="mamas-corner-note">This is a fictional AI companion, not a person, Guardian, clinician, or emergency service. Talk casually about whatever is on your mind, or ask for cozy support. Resetting starts a blank conversation.</p>
         <div className="mamas-messages" aria-live="polite">
           {messages.map((message, index) => <div key={`${message.role}-${index}`} className={message.role === "user" ? "mamas-message mamas-message-user" : "mamas-message"}>{message.content}</div>)}
           {sending && <div className="mamas-message">{caregiverName} is thinking…</div>}
         </div>
         {error && <div className="mamas-corner-error" role="alert">{error}</div>}
+        {messages.length === 1 && <div className="mamas-starters" aria-label="Conversation starters">
+          {conversationStarters.map((starter) => <button key={starter} type="button" onClick={() => send(starter)} disabled={sending}>{starter}</button>)}
+        </div>}
         {taskToConfirm && <div className="mamas-task-confirm"><div>Did you want {caregiverName} to check off <strong>{taskToConfirm.label}</strong>?</div><div><button type="button" onClick={() => { onConfirmTask(taskToConfirm.key); setTaskToConfirm(null); setLastTaskAsked(null); }}>✓ Yes, tuck it in</button><button type="button" onClick={() => setTaskToConfirm(null)}>Not yet</button></div></div>}
         <button type="button" className="mamas-task-checkin" onClick={checkInOnTasks} disabled={sending || !(incompleteTasks || []).length}>{(incompleteTasks || []).length ? `🧸 ${caregiverName}, check in on my tasks` : "🧸 Everything is tucked in"}</button>
         <div className="mamas-compose">
@@ -7015,6 +7024,9 @@ function GlowUpTracker() {
         .mamas-messages { display: grid; gap: 7px; max-height: 260px; overflow-y: auto; padding: 8px; border: 1px solid #E9D4EF; border-radius: 13px; background: rgba(255,255,255,.65); }
         .mamas-message { max-width: 88%; padding: 8px 10px; border-radius: 12px 12px 12px 4px; background: #FFF0FA; color: #644E70; font-size: 12px; line-height: 1.45; white-space: pre-wrap; }
         .mamas-message-user { justify-self: end; border-radius: 12px 12px 4px 12px; background: #EAF5FF; color: #45677D; }
+        .mamas-starters { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .mamas-starters button { padding: 7px 9px; border: 1px solid #DABEE4; border-radius: 999px; background: #FFFFFFC9; color: #80548E; font-size: 10.5px; font-weight: 900; cursor: pointer; }
+        .mamas-starters button:disabled { opacity: .55; cursor: not-allowed; }
         .mamas-compose { display: flex; gap: 7px; align-items: end; margin-top: 8px; }
         .mamas-compose textarea { flex: 1; resize: vertical; padding: 8px 9px; border: 1px solid #DABEE4; background: white; color: #5B4B6B; font: inherit; font-size: 12px; line-height: 1.35; }
         .mamas-compose button { padding: 9px 10px; border: 0; background: #B768C9; color: white; font-weight: 900; cursor: pointer; }
