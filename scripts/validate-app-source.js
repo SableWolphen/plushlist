@@ -94,7 +94,9 @@ const requiredRegressionMarkers = [
   'week: "PlushCalendar"',
   'goToDashboard("today");',
   '📖 PLUSHJOURNAL HISTORY',
-  'reflectionHistory.slice(0, 10)',
+  'journalHistoryExpanded ? reflectionHistory.length : 5',
+  '📮 PLUSHWEEK HISTORY',
+  'weeklyIntentionHistoryExpanded ? weeklyIntentionHistory.length : 5',
 ];
 
 for (const marker of requiredRegressionMarkers) {

@@ -1942,6 +1942,7 @@ function GlowUpTracker() {
   const [selectedProgressDate, setSelectedProgressDate] = useState(() => trackerPeriod().date);
   const [reflectionDates, setReflectionDates] = useState([]);
   const [reflectionHistory, setReflectionHistory] = useState([]);
+  const [journalHistoryExpanded, setJournalHistoryExpanded] = useState(false);
   const [reflectionCalendarMonth, setReflectionCalendarMonth] = useState(() => trackerPeriod().date.slice(0, 7));
   const [reflectionViewerDate, setReflectionViewerDate] = useState(null);
   const [checkInViewerDate, setCheckInViewerDate] = useState(null);
@@ -2010,6 +2011,8 @@ function GlowUpTracker() {
   const [privateNoteDraft, setPrivateNoteDraft] = useState("");
   const [lastWeekReflection, setLastWeekReflection] = useState("");
   const [weeklyIntentionText, setWeeklyIntentionText] = useState("");
+  const [weeklyIntentionHistory, setWeeklyIntentionHistory] = useState([]);
+  const [weeklyIntentionHistoryExpanded, setWeeklyIntentionHistoryExpanded] = useState(false);
   const [weeklyIntentionEditing, setWeeklyIntentionEditing] = useState(false);
   const [weeklyIntentionDraft, setWeeklyIntentionDraft] = useState("");
   const [weeklyIntentionMessage, setWeeklyIntentionMessage] = useState("");
@@ -3085,17 +3088,18 @@ function GlowUpTracker() {
   }, [user, selectedProgressDate]);
 
   useEffect(() => {
-    if (!user) { setWeeklyIntentionText(""); return; }
+    if (!user) { setWeeklyIntentionText(""); setWeeklyIntentionHistory([]); return; }
     let alive = true;
     supabase
       .from("weekly_intentions")
-      .select("body")
+      .select("week_start, body, updated_at")
       .eq("user_id", user.id)
-      .eq("week_start", period.weekStart)
-      .maybeSingle()
+      .order("week_start", { ascending: false })
       .then(({ data }) => {
         if (!alive) return;
-        setWeeklyIntentionText(data?.body || "");
+        const entries = (data || []).filter((entry) => entry.body?.trim());
+        setWeeklyIntentionHistory(entries);
+        setWeeklyIntentionText(entries.find((entry) => entry.week_start === period.weekStart)?.body || "");
       });
     return () => { alive = false; };
   }, [user, period.weekStart]);
@@ -3115,6 +3119,11 @@ function GlowUpTracker() {
       return;
     }
     setWeeklyIntentionText(text);
+    setWeeklyIntentionHistory((entries) => {
+      if (!text) return entries.filter((entry) => entry.week_start !== period.weekStart);
+      const nextEntry = { week_start: period.weekStart, body: text, updated_at: new Date().toISOString() };
+      return [nextEntry, ...entries.filter((entry) => entry.week_start !== period.weekStart)].sort((a, b) => b.week_start.localeCompare(a.week_start));
+    });
     setWeeklyIntentionEditing(false);
     setWeeklyIntentionMessage("");
   };
@@ -3177,6 +3186,7 @@ function GlowUpTracker() {
       return;
     }
     setWeeklyIntentionText(text);
+    setWeeklyIntentionHistory((entries) => [{ week_start: period.weekStart, body: text, updated_at: new Date().toISOString() }, ...entries.filter((entry) => entry.week_start !== period.weekStart)].sort((a, b) => b.week_start.localeCompare(a.week_start)));
     await dismissIntroIntention(true);
   };
 
@@ -4916,6 +4926,7 @@ function GlowUpTracker() {
         softError = "Your space is saved, but your weekly intention couldn't be saved yet — you can add it again from PlushCalendar.";
       } else {
         setWeeklyIntentionText(weeklyIntention);
+        setWeeklyIntentionHistory((entries) => [{ week_start: period.weekStart, body: weeklyIntention, updated_at: new Date().toISOString() }, ...entries.filter((entry) => entry.week_start !== period.weekStart)].sort((a, b) => b.week_start.localeCompare(a.week_start)));
       }
     }
     const reasonProfile = onboardingReason ? ONBOARDING_REASON_PROFILES[onboardingReason] : null;
@@ -10167,21 +10178,37 @@ function GlowUpTracker() {
             <span style={{ width: 12, height: 12, borderRadius: 3, background: "#8FD4B8", display: "inline-block", marginLeft: 8 }} /> 🌴 Resting
           </div>
         </div>
-        <div style={{ marginBottom: 18, padding: 16, borderRadius: 18, background: "#FFFFFF99", border: "1px solid #D9C8EA" }}>
-          <div style={{ fontSize: 11, letterSpacing: "0.14em", fontWeight: 900, color: "#8E4EAA" }}>📖 PLUSHJOURNAL HISTORY</div>
-          <div style={{ marginTop: 4, fontSize: 11.5, color: "#8C6B9E" }}>Your private dated reflections, newest first.</div>
+        <details style={{ marginBottom: 10, padding: 14, borderRadius: 16, background: "#FFFFFF99", border: "1px solid #D9C8EA" }}>
+          <summary style={{ cursor: "pointer", color: "#8E4EAA", fontSize: 11, letterSpacing: "0.14em", fontWeight: 900 }}>📖 PLUSHJOURNAL HISTORY <span style={{ float: "right", color: "#A65DC1" }}>{reflectionHistory.length} entries</span></summary>
+          <div style={{ marginTop: 7, fontSize: 11.5, color: "#8C6B9E" }}>Your private dated reflections, newest first.</div>
           {reflectionHistory.length ? (
             <div style={{ display: "grid", gap: 7, marginTop: 10 }}>
-              {reflectionHistory.slice(0, 10).map((entry) => (
+              {reflectionHistory.slice(0, journalHistoryExpanded ? reflectionHistory.length : 5).map((entry) => (
                 <button key={entry.note_date} type="button" onClick={() => setReflectionViewerDate(entry.note_date)} style={{ width: "100%", padding: "10px 11px", borderRadius: 11, border: "1px solid #E6D4F2", background: "#FFF9FD", color: "#5B4B6B", cursor: "pointer", textAlign: "left" }}>
                   <span style={{ display: "block", fontSize: 10.5, fontWeight: 900, color: "#A65DC1" }}>{new Date(`${entry.note_date}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}</span>
                   <span style={{ display: "block", marginTop: 3, fontSize: 11.5, fontStyle: "italic", color: "#806B8D" }}>{entry.prompt || "Original question unavailable"}</span>
                   <span style={{ display: "block", marginTop: 4, fontSize: 12.5, lineHeight: 1.4 }}>{entry.body.length > 120 ? `${entry.body.slice(0, 120).trim()}…` : entry.body}</span>
                 </button>
               ))}
+              {reflectionHistory.length > 5 && <button type="button" onClick={() => setJournalHistoryExpanded((expanded) => !expanded)} style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, cursor: "pointer" }}>{journalHistoryExpanded ? "Show fewer entries" : `Show all ${reflectionHistory.length} entries`}</button>}
             </div>
           ) : <div style={{ marginTop: 10, padding: "10px 11px", borderRadius: 11, background: "#FBF7FD", color: "#927C9E", fontSize: 12 }}>Your first saved PlushJournal entry will appear here.</div>}
-        </div>
+        </details>
+        <details style={{ marginBottom: 18, padding: 14, borderRadius: 16, background: "#FFFFFF99", border: "1px solid #D9C8EA" }}>
+          <summary style={{ cursor: "pointer", color: "#8E4EAA", fontSize: 11, letterSpacing: "0.14em", fontWeight: 900 }}>📮 PLUSHWEEK HISTORY <span style={{ float: "right", color: "#A65DC1" }}>{weeklyIntentionHistory.length} weeks</span></summary>
+          <div style={{ marginTop: 7, fontSize: 11.5, color: "#8C6B9E" }}>Your saved weekly intentions, newest first.</div>
+          {weeklyIntentionHistory.length ? <div style={{ display: "grid", gap: 7, marginTop: 10 }}>
+            {weeklyIntentionHistory.slice(0, weeklyIntentionHistoryExpanded ? weeklyIntentionHistory.length : 5).map((entry) => {
+              const weekEnd = offsetDate(entry.week_start, 6);
+              return <div key={entry.week_start} style={{ padding: "10px 11px", borderRadius: 11, border: "1px solid #E6D4F2", background: "#FFF9FD", color: "#5B4B6B" }}>
+                <div style={{ fontSize: 10.5, fontWeight: 900, color: "#A65DC1" }}>{new Date(`${entry.week_start}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })} – {new Date(`${weekEnd}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}</div>
+                <div style={{ marginTop: 3, fontSize: 11.5, fontStyle: "italic", color: "#806B8D" }}>What do I want to carry with me this week?</div>
+                <div style={{ marginTop: 4, fontSize: 12.5, lineHeight: 1.4, whiteSpace: "pre-wrap" }}>{entry.body}</div>
+              </div>;
+            })}
+            {weeklyIntentionHistory.length > 5 && <button type="button" onClick={() => setWeeklyIntentionHistoryExpanded((expanded) => !expanded)} style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, cursor: "pointer" }}>{weeklyIntentionHistoryExpanded ? "Show fewer weeks" : `Show all ${weeklyIntentionHistory.length} weeks`}</button>}
+          </div> : <div style={{ marginTop: 10, padding: "10px 11px", borderRadius: 11, background: "#FBF7FD", color: "#927C9E", fontSize: 12 }}>Your first saved PlushWeek intention will appear here.</div>}
+        </details>
         </>}
 
         {weekCardIndex === 1 && (() => {
