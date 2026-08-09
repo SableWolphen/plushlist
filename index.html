@@ -3929,10 +3929,11 @@ function GlowUpTracker() {
     if (!sourceKey || !targetKey || sourceKey === targetKey) return;
     const source = trackerTasks.find((item) => item.task_key === sourceKey);
     const target = trackerTasks.find((item) => item.task_key === targetKey);
-    if (!source || !target || source.day_id !== target.day_id || source.section !== target.section) return;
+    if (!source || !target || source.section !== target.section) return;
+    if (!taskIsScheduledForDate(source, selectedProgressDate) || !taskIsScheduledForDate(target, selectedProgressDate)) return;
     const originalTasks = [...trackerTasks];
     const sectionTasks = trackerTasks
-      .filter((item) => item.day_id === source.day_id && item.section === source.section)
+      .filter((item) => item.section === source.section && taskIsScheduledForDate(item, selectedProgressDate))
       .sort((a, b) => a.sort_order - b.sort_order || a.task_key.localeCompare(b.task_key));
     const fromIndex = sectionTasks.findIndex((item) => item.task_key === sourceKey);
     const toIndex = sectionTasks.findIndex((item) => item.task_key === targetKey);
@@ -3963,7 +3964,8 @@ function GlowUpTracker() {
     if (!sourceKey || !targetSection) return;
     const source = trackerTasks.find((item) => item.task_key === sourceKey);
     const target = targetKey ? trackerTasks.find((item) => item.task_key === targetKey) : null;
-    if (!source || (target && target.day_id !== source.day_id)) return;
+    if (!source) return;
+    if (target && (!taskIsScheduledForDate(source, selectedProgressDate) || !taskIsScheduledForDate(target, selectedProgressDate))) return;
     if (target && target.section !== targetSection) return;
     if (source.section === targetSection && targetKey && sourceKey !== targetKey) {
       await reorderTrackerTask(sourceKey, targetKey);
@@ -3974,10 +3976,10 @@ function GlowUpTracker() {
     const originalTasks = [...trackerTasks];
     const sourceSection = source.section;
     const sourceRemaining = trackerTasks
-      .filter((item) => item.day_id === source.day_id && item.section === sourceSection && item.task_key !== sourceKey)
+      .filter((item) => item.section === sourceSection && item.task_key !== sourceKey && taskIsScheduledForDate(item, selectedProgressDate))
       .sort((a, b) => Number(a.sort_order) - Number(b.sort_order) || a.task_key.localeCompare(b.task_key));
     const targetTasks = trackerTasks
-      .filter((item) => item.day_id === source.day_id && item.section === targetSection && item.task_key !== sourceKey)
+      .filter((item) => item.section === targetSection && item.task_key !== sourceKey && taskIsScheduledForDate(item, selectedProgressDate))
       .sort((a, b) => Number(a.sort_order) - Number(b.sort_order) || a.task_key.localeCompare(b.task_key));
     const insertionIndex = targetKey
       ? Math.max(0, targetTasks.findIndex((item) => item.task_key === targetKey))
