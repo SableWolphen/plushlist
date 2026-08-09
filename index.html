@@ -1851,11 +1851,14 @@ function GlowUpTracker() {
   const [pendingTaskDelete, setPendingTaskDelete] = useState(null);
   const [taskHelpDraft, setTaskHelpDraft] = useState(null);
   const [personalSchedules, setPersonalSchedules] = useState([]);
+  const [scheduleExceptions, setScheduleExceptions] = useState([]);
   const [manageSchedule, setManageSchedule] = useState(false);
   const [scheduleEditDayId, setScheduleEditDayId] = useState(null);
   const [copyToDayIds, setCopyToDayIds] = useState([]);
   const [scheduleDraft, setScheduleDraft] = useState({ entries: [] });
+  const [scheduleExceptionDraft, setScheduleExceptionDraft] = useState({ start_date: "", end_date: "", entries: [] });
   const [scheduleMessage, setScheduleMessage] = useState("");
+  const [scheduleExceptionMessage, setScheduleExceptionMessage] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [arrivalRitualVisible, setArrivalRitualVisible] = useState(true);
   const [careExtraSupportOpen, setCareExtraSupportOpen] = useState(false);
@@ -2273,8 +2276,9 @@ function GlowUpTracker() {
       supabase.from("tracker_profiles").select("display_name, show_personal_schedule, account_type, comfort_item_name, guardian_read_only").eq("user_id", user.id).maybeSingle(),
       supabase.from("tracker_tasks").select("task_key, day_id, section, task, detail, sort_order, is_bonus, schedule_type, start_date, end_date, one_time_date, why_note, soft_label, tiny_label, estimated_minutes, essential_on_low_capacity, archived_at, archive_reason, schedule_days, reminder_time, paused_since, paused_until, pause_reason").eq("user_id", user.id).order("sort_order"),
       supabase.from("tracker_schedules").select("day_id, label, wake, morning, work, workout, home, entries").eq("user_id", user.id).order("day_id"),
+      supabase.from("schedule_exceptions").select("id, start_date, end_date, entries").eq("user_id", user.id).order("start_date"),
       supabase.from("task_snoozes").select("task_key, snoozed_until").eq("user_id", user.id).gt("snoozed_until", new Date().toISOString()),
-    ]).then(async ([dailyResult, legacyResult, profileResult, tasksResult, schedulesResult, snoozesResult]) => {
+    ]).then(async ([dailyResult, legacyResult, profileResult, tasksResult, schedulesResult, exceptionsResult, snoozesResult]) => {
         if (!active) return;
 
         // Tasks/profile/schedule are loaded in the same round trip as today's
@@ -2289,7 +2293,8 @@ function GlowUpTracker() {
         setTrackerTasks(tasksResult.data || []);
         setTaskSnoozes(snoozesResult.data || []);
         setPersonalSchedules(schedulesResult.data || []);
-        if (profileResult.error || tasksResult.error || schedulesResult.error || snoozesResult.error) setTaskMessage("Couldn't load your private tracker.");
+        setScheduleExceptions(exceptionsResult.data || []);
+        if (profileResult.error || tasksResult.error || schedulesResult.error || exceptionsResult.error || snoozesResult.error) setTaskMessage("Couldn't load your private tracker.");
 
         if (dailyResult.error || legacyResult.error) {
           setSyncStatus("error");
@@ -3954,6 +3959,36 @@ function GlowUpTracker() {
     setScheduleDraft((draft) => ({ entries: draft.entries.filter((entry) => entry.id !== id) }));
   };
 
+  const addScheduleExceptionEntry = () => {
+    setScheduleExceptionDraft((draft) => ({ ...draft, entries: [...draft.entries, { id: crypto.randomUUID(), time: "", text: "" }] }));
+  };
+  const updateScheduleExceptionEntry = (id, patch) => {
+    setScheduleExceptionDraft((draft) => ({ ...draft, entries: draft.entries.map((entry) => entry.id === id ? { ...entry, ...patch } : entry) }));
+  };
+  const removeScheduleExceptionEntry = (id) => {
+    setScheduleExceptionDraft((draft) => ({ ...draft, entries: draft.entries.filter((entry) => entry.id !== id) }));
+  };
+  const saveScheduleException = async () => {
+    const startDate = scheduleExceptionDraft.start_date || period.date;
+    const endDate = scheduleExceptionDraft.end_date || startDate;
+    const entries = scheduleExceptionDraft.entries.filter((entry) => entry.time || (entry.text || "").trim()).map((entry) => ({ time: entry.time || "", text: (entry.text || "").trim() }));
+    if (endDate < startDate) { setScheduleExceptionMessage("Choose an end date on or after the start date."); return; }
+    if (!entries.length) { setScheduleExceptionMessage("Add at least one extra schedule item first."); return; }
+    setScheduleExceptionMessage("Saving temporary extras…");
+    const row = { user_id: user.id, start_date: startDate, end_date: endDate, entries, updated_at: new Date().toISOString() };
+    const { data, error } = await supabase.from("schedule_exceptions").insert(row).select("id, start_date, end_date, entries").single();
+    if (error) { setScheduleExceptionMessage(`Couldn't save those extras: ${error.message}`); return; }
+    setScheduleExceptions((items) => [...items, data]);
+    setScheduleExceptionDraft({ start_date: period.date, end_date: period.date, entries: [] });
+    setScheduleExceptionMessage("Temporary extras saved — your usual schedule stays underneath. ✨");
+  };
+  const deleteScheduleException = async (id) => {
+    const { error } = await supabase.from("schedule_exceptions").delete().eq("id", id).eq("user_id", user.id);
+    if (error) { setScheduleExceptionMessage(`Couldn't remove that exception: ${error.message}`); return; }
+    setScheduleExceptions((items) => items.filter((item) => item.id !== id));
+    setScheduleExceptionMessage("Temporary extras removed.");
+  };
+
   const clearPersonalSchedule = async () => {
     if (!window.confirm("Clear this day's schedule? Your checklist tasks will stay.")) return;
     const { error } = await supabase.from("tracker_schedules").delete().eq("user_id", user.id).eq("day_id", scheduleEditingDayId);
@@ -4871,6 +4906,10 @@ function GlowUpTracker() {
   const reflectionMonthDays = new Date(Date.UTC(reflectionMonthDate.getUTCFullYear(), reflectionMonthDate.getUTCMonth() + 1, 0)).getUTCDate();
   const reflectionDateSet = new Set(reflectionDates);
   const selectedSchedule = personalSchedules.find((item) => item.day_id === scheduleDayId) || null;
+  const selectedScheduleDate = isHistoricalView ? selectedProgressDate : period.date;
+  const selectedScheduleExceptionEntries = scheduleExceptions
+    .filter((item) => item.start_date <= selectedScheduleDate && item.end_date >= selectedScheduleDate)
+    .flatMap((item) => (item.entries || []).map((entry) => ({ ...entry, isException: true })));
   const historicalEntry = weeklyHistory.find((entry) => entry.progress_date === selectedProgressDate);
   const historicalDoneKeys = new Set(historicalEntry?.completed_keys || []);
   const viewDone = isHistoricalView
@@ -4886,6 +4925,8 @@ function GlowUpTracker() {
   useEffect(() => {
     if (!manageSchedule) return;
     setScheduleEditDayId(scheduleDayId);
+    setScheduleExceptionDraft((draft) => draft.start_date ? draft : { ...draft, start_date: period.date, end_date: period.date });
+    setScheduleExceptionMessage("");
   }, [manageSchedule]);
 
   useEffect(() => {
@@ -8317,6 +8358,20 @@ function GlowUpTracker() {
             </div>
             {scheduleMessage && <div style={{ marginTop: 8, fontSize: 12, color: "#8C6B9E" }}>{scheduleMessage}</div>}
           </div>
+          <div style={{ marginBottom: 18, padding: 16, borderRadius: 16, background: "#F3FBF7", border: "1px solid #B9E0D0" }}>
+            <div style={{ fontSize: 12, fontWeight: 900, color: "#318C79" }}>✨ TEMPORARY SCHEDULE EXTRAS</div>
+            <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#52746E" }}>Add extra items for one day or a date range. Your usual weekly schedule stays exactly as it is.</div>
+            <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+              <label style={{ fontSize: 11, fontWeight: 800, color: "#52746E" }}>Starts<input type="date" value={scheduleExceptionDraft.start_date} onChange={(event) => setScheduleExceptionDraft((draft) => ({ ...draft, start_date: event.target.value, end_date: draft.end_date && draft.end_date < event.target.value ? event.target.value : draft.end_date }))} style={{ display: "block", marginTop: 4, padding: 8, borderRadius: 9, border: "1px solid #B9E0D0" }} /></label>
+              <label style={{ fontSize: 11, fontWeight: 800, color: "#52746E" }}>Ends<input type="date" value={scheduleExceptionDraft.end_date} min={scheduleExceptionDraft.start_date} onChange={(event) => setScheduleExceptionDraft((draft) => ({ ...draft, end_date: event.target.value }))} style={{ display: "block", marginTop: 4, padding: 8, borderRadius: 9, border: "1px solid #B9E0D0" }} /></label>
+            </div>
+            <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+              {scheduleExceptionDraft.entries.map((entry) => <div key={entry.id} style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}><input type="time" value={entry.time} onChange={(event) => updateScheduleExceptionEntry(entry.id, { time: event.target.value })} aria-label="Extra item time" style={{ padding: 8, borderRadius: 9, border: "1px solid #B9E0D0" }} /><input value={entry.text} onChange={(event) => updateScheduleExceptionEntry(entry.id, { text: event.target.value })} maxLength={300} placeholder="Extra plan for these dates…" aria-label="Extra item description" style={{ flex: "1 1 150px", minWidth: 0, padding: 8, borderRadius: 9, border: "1px solid #B9E0D0" }} /><button type="button" onClick={() => removeScheduleExceptionEntry(entry.id)} aria-label="Remove this extra item" style={{ padding: "6px 8px", borderRadius: 8, border: "1px solid #F0B8C4", background: "white", color: "#C45D74", fontWeight: 900, cursor: "pointer" }}>✕</button></div>)}
+            </div>
+            <div style={{ display: "flex", gap: 7, marginTop: 10, flexWrap: "wrap" }}><button type="button" onClick={addScheduleExceptionEntry} style={{ padding: "8px 11px", borderRadius: 9, border: "1px dashed #318C79", background: "white", color: "#318C79", fontWeight: 800, cursor: "pointer" }}>＋ Add an extra item</button><button type="button" onClick={saveScheduleException} style={{ padding: "8px 11px", borderRadius: 9, border: 0, background: "#318C79", color: "white", fontWeight: 900, cursor: "pointer" }}>Save temporary extras</button></div>
+            {scheduleExceptionMessage && <div role="status" style={{ marginTop: 8, fontSize: 11.5, color: "#52746E", fontWeight: 700 }}>{scheduleExceptionMessage}</div>}
+            {scheduleExceptions.length > 0 && <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #CFE8E1" }}><div style={{ fontSize: 10.5, fontWeight: 900, color: "#318C79" }}>SAVED TEMPORARY EXTRAS</div>{scheduleExceptions.map((item) => <div key={item.id} style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", marginTop: 7, padding: "8px 9px", borderRadius: 9, background: "white", fontSize: 11.5, color: "#52746E" }}><span>{item.start_date === item.end_date ? item.start_date : `${item.start_date} – ${item.end_date}`} · {(item.entries || []).map((entry) => entry.text).filter(Boolean).join(" · ")}</span><button type="button" onClick={() => deleteScheduleException(item.id)} style={{ border: 0, background: "transparent", color: "#C45D74", fontWeight: 900, cursor: "pointer" }}>Remove</button></div>)}</div>}
+          </div>
           </ToolPanel>
         )}
 
@@ -8818,24 +8873,25 @@ function GlowUpTracker() {
           style={{ touchAction: "pan-y" }}>
         {todayCardIndex === 0 && <>
         {/* Personal schedule */}
-        {selectedSchedule ? (
+        {selectedSchedule || selectedScheduleExceptionEntries.length > 0 ? (
         <div style={{ marginBottom: 14, padding: 14, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: `1px solid ${day.accent}44` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 800 }}>🗓️ {selectedSchedule.label.toUpperCase()} SCHEDULE</div>
+            <div style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 800 }}>🗓️ {(selectedSchedule?.label || DAYS.find((item) => item.id === scheduleDayId)?.title || "TODAY").toUpperCase()} SCHEDULE</div>
             <button type="button" onClick={() => setManageSchedule((open) => !open)} style={{ padding: "7px 10px", borderRadius: 9, border: "1px solid #4C8FE855", background: manageSchedule ? "#EAF4FF" : "#FFFFFFAA", color: "#4C8FE8", fontWeight: 800, fontSize: 12, cursor: "pointer" }}>
               🗓️ {manageSchedule ? "Done changing schedule" : "Change schedule"}
             </button>
           </div>
           {(() => {
-            const displayEntries = selectedSchedule.entries?.length
+            const baseEntries = selectedSchedule?.entries?.length
               ? selectedSchedule.entries
               : legacyScheduleToEntries(selectedSchedule);
+            const displayEntries = [...baseEntries, ...selectedScheduleExceptionEntries].sort((a, b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")));
             return displayEntries.length > 0 ? (
           <div style={{ display: "grid", gap: 5, marginTop: 10 }}>
                 {displayEntries.map((entry, index) => (
-                  <div key={index} style={{ display: "grid", gridTemplateColumns: entry.time ? "70px 1fr" : "1fr", alignItems: "center", gap: 7, padding: "8px 9px", borderRadius: 9, background: "#FFFFFF99", border: "1px solid #EFE3F3" }}>
+                  <div key={index} style={{ display: "grid", gridTemplateColumns: entry.time ? "70px 1fr" : "1fr", alignItems: "center", gap: 7, padding: "8px 9px", borderRadius: 9, background: entry.isException ? "#EEF9F5" : "#FFFFFF99", border: entry.isException ? "1px solid #B9E0D0" : "1px solid #EFE3F3" }}>
                     {entry.time && <span style={{ fontSize: 13, color: day.accent, fontWeight: 900 }}>{formatTime12(entry.time)}</span>}
-                    <span style={{ fontSize: 12.5, lineHeight: 1.35, color: "#5B4B6B", fontWeight: 600 }}>{entry.text}</span>
+                    <span style={{ fontSize: 12.5, lineHeight: 1.35, color: "#5B4B6B", fontWeight: 600 }}>{entry.isException && <span style={{ marginRight: 5, color: "#318C79", fontSize: 10, fontWeight: 900 }}>EXTRA</span>}{entry.text}</span>
                   </div>
                 ))}
               </div>
