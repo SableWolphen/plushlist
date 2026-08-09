@@ -16,14 +16,14 @@
   ],
   "runtime": {
     "apiVersion": {
-      "compatible": "3.0.0",
-      "target": "4.2.0",
-      "minVersion": "3.0.0"
+      "compatible": "3.0",
+      "target": "4.2",
+      "minVersion": "3.0"
     },
     "type": "0"
   },
   "targets": {
-    "balance-2": {
+    "common": {
       "module": {
         "page": {
           "pages": [
@@ -36,9 +36,7 @@
         }
       },
       "platforms": [
-        { "name": "Amazfit Balance 2", "deviceSource": 9568512 },
-        { "name": "Amazfit Balance 2", "deviceSource": 9568513 },
-        { "name": "Amazfit Balance 2", "deviceSource": 9568515 }
+        { "st": "r", "sr": "w480" }
       ],
       "designWidth": 480
     }
