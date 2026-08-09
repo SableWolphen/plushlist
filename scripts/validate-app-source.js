@@ -66,6 +66,7 @@ const requiredRegressionMarkers = [
   'const taskPointerDragRef = React.useRef(null);',
   'const startPointerTaskDrag = (event, taskKey, taskLabel) => {',
   'data-plushlife-task-drag-scope',
+  'const sectionsFromOtherLists = trackerTasks',
 ];
 
 for (const marker of requiredRegressionMarkers) {

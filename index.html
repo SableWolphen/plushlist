@@ -3568,12 +3568,15 @@ function GlowUpTracker() {
   };
 
   const taskSectionsForDay = (dayId) => {
-    return Array.from(new Set(
-      trackerTasks
-        .filter((item) => item.day_id === dayId)
-        .map((item) => item.section)
-        .filter(Boolean)
-    ));
+    const sectionsForSelectedList = trackerTasks
+      .filter((item) => item.day_id === dayId)
+      .map((item) => item.section)
+      .filter(Boolean);
+    const sectionsFromOtherLists = trackerTasks
+      .filter((item) => item.day_id !== dayId)
+      .map((item) => item.section)
+      .filter(Boolean);
+    return Array.from(new Set([...sectionsForSelectedList, ...sectionsFromOtherLists]));
   };
   const sectionIsOptional = (dayId, section) => {
     const matchingTasks = trackerTasks.filter((item) => item.day_id === dayId && item.section === section);
