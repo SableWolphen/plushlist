@@ -44,7 +44,7 @@ const requiredRegressionMarkers = [
   'const MOTHERLY_NICKNAMES = [',
   'function NurseryNook({ outfit, mood, activityDays, onOpenCloset })',
   'MY LITTLE NURSERY',
-  'function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, comfortItemName, onOpenJournal, onSoftDay })',
+  'function BabyModeCareSuite({ date, todayDone, todayTotal, activityDays, careDays, comfortItemName, littleJobs, onCompleteTask, onOpenJournal, onSoftDay })',
   'LITTLE CARE CORNER',
   'BEDTIME WIND-DOWN',
   'Today’s little-win sticker: Super Cozy Helper',
@@ -59,7 +59,7 @@ const requiredRegressionMarkers = [
   'NURSERY KEEPSAKE WALL',
   'BEDTIME NEST',
   'BIG FEELINGS TRANSLATOR',
-  'COZY LITTLE ROUTINES',
+  'MY LITTLE JOBS',
   'function MamasCorner({ incompleteTasks, onConfirmTask, caregiverName = "Mommy", parentVoice = "motherly" })',
   'PRIVATE {caregiverName.toUpperCase()}’S CORNER',
   'const isMamaCornerProfile = (user?.email || "").trim().toLowerCase() === "johnston.alexander.k@gmail.com";',
@@ -71,6 +71,8 @@ const requiredRegressionMarkers = [
   'aria-label={`Move ${header} group earlier`}',
   'const babyCaregiverName = preferences.baby_voice === "fatherly" ? "Daddy" : "Mommy";',
   'const hasStarLampAndBasket = activityDays >= 10;',
+  'function littleSpaceTaskLabel(label) {',
+  '🧸 MY LITTLE JOBS',
 ];
 
 for (const marker of requiredRegressionMarkers) {
