@@ -5512,8 +5512,8 @@ function GlowUpTracker() {
   };
   const reflectionPrompt = reflectionPromptForDay(day.id, selectedProgressDate, day.reflect);
   const journalQuickPrompt = reflectionPromptForDay(dayIdForDate(journalQuickOpenDate), journalQuickOpenDate, "What would you like to reflect on?");
-  const journalDisplayedPrompt = privateNote ? (privateNotePrompt || "The question was not saved with this older entry.") : journalQuickPrompt;
-  const journalPromptToSave = privateNotePrompt || (!privateNote ? journalQuickPrompt : null);
+  const journalDisplayedPrompt = privateNotePrompt || journalQuickPrompt;
+  const journalPromptToSave = privateNotePrompt || journalQuickPrompt;
   const openJournalForSelectedDate = () => {
     setJournalQuickOpenDate(selectedProgressDate);
     setPrivateNoteDraft(privateNote);
@@ -8808,7 +8808,7 @@ function GlowUpTracker() {
               <div style={{ marginTop: 12, padding: 11, borderRadius: 12, background: "#F7F0FB", border: "1px solid #DEC8EA" }}>
                 <div style={{ fontSize: 10.5, letterSpacing: "0.12em", fontWeight: 900, color: "#A65DC1" }}>QUESTION</div>
                 <div style={{ marginTop: 4, fontStyle: "italic", lineHeight: 1.5, color: "#6D5A7C" }}>
-                  {reflectionViewerPrompt || "The question was not saved with this older entry."}
+                  {reflectionViewerPrompt || reflectionPromptForDay(dayIdForDate(reflectionViewerDate), reflectionViewerDate, "What would you like to reflect on?")}
                 </div>
               </div>
               <div style={{ marginTop: 9, whiteSpace: "pre-wrap", lineHeight: 1.6, color: "#5B4B6B", padding: 13, borderRadius: 12, background: "#FFF8FD", border: "1px solid #E8CCE8" }}>
@@ -10186,7 +10186,7 @@ function GlowUpTracker() {
               {reflectionHistory.slice(0, journalHistoryExpanded ? reflectionHistory.length : 5).map((entry) => (
                 <button key={entry.note_date} type="button" onClick={() => setReflectionViewerDate(entry.note_date)} style={{ width: "100%", padding: "10px 11px", borderRadius: 11, border: "1px solid #E6D4F2", background: "#FFF9FD", color: "#5B4B6B", cursor: "pointer", textAlign: "left" }}>
                   <span style={{ display: "block", fontSize: 10.5, fontWeight: 900, color: "#A65DC1" }}>{new Date(`${entry.note_date}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}</span>
-                  <span style={{ display: "block", marginTop: 3, fontSize: 11.5, fontStyle: "italic", color: "#806B8D" }}>{entry.prompt || "Original question unavailable"}</span>
+                  <span style={{ display: "block", marginTop: 3, fontSize: 11.5, fontStyle: "italic", color: "#806B8D" }}>{entry.prompt || reflectionPromptForDay(dayIdForDate(entry.note_date), entry.note_date, "What would you like to reflect on?")}</span>
                   <span style={{ display: "block", marginTop: 4, fontSize: 12.5, lineHeight: 1.4 }}>{entry.body.length > 120 ? `${entry.body.slice(0, 120).trim()}…` : entry.body}</span>
                 </button>
               ))}
