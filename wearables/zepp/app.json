@@ -5,8 +5,8 @@
     "appName": "PlushLife",
     "appType": "app",
     "version": {
-      "code": 2,
-      "name": "0.2.0"
+      "code": 3,
+      "name": "0.3.0"
     },
     "icon": "icon.png",
     "vender": "SableWolphen",
