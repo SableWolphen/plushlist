@@ -903,10 +903,10 @@ const TEMPLATE_PACKS = [
 
 const ALL = [DAILY, ...DAYS];
 const DASHBOARDS = [
-  { id: "today", label: "Home", icon: "☀️", accent: "#C77DD6" },
-  { id: "week", label: "Calendar", icon: "📅", accent: "#4C8FE8" },
-  { id: "care", label: "Care", icon: "♥", accent: "#318C79" },
-  { id: "progress", label: "Progress", icon: "📈", accent: "#8E4EAA" },
+  { id: "today", label: "PlushHome", icon: "☀️", accent: "#C77DD6" },
+  { id: "week", label: "PlushCalendar", icon: "📅", accent: "#4C8FE8" },
+  { id: "care", label: "PlushCare", icon: "♥", accent: "#318C79" },
+  { id: "progress", label: "PlushGrowth", icon: "📈", accent: "#8E4EAA" },
 ];
 
 const CHECKIN_MOODS = [
@@ -7945,13 +7945,14 @@ function GlowUpTracker() {
               {careMessage && <div aria-live="polite" style={{ marginTop: 10, padding: "9px 11px", borderRadius: 10, background: "#FFFFFFB8", color: "#5E766F", fontSize: 11.5, lineHeight: 1.5 }}>{careMessage}</div>}
             </div>
 
+            {isMamaCornerProfile && (
             <details open={careExtraSupportOpen} onToggle={(event) => setCareExtraSupportOpen(event.currentTarget.open)} style={{ borderRadius: 14, border: "1px solid #E6D4F2", background: "#FFFFFF99", padding: "10px 12px" }}>
               <summary style={{ color: "#76558A", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>More cozy support</summary>
               <div style={{ marginTop: 10, display: "grid", gap: 12 }}>
-            {isMamaCornerProfile && <MamasCorner userId={user.id} caregiverName={babyCaregiverName} parentVoice={preferences.baby_voice === "fatherly" ? "fatherly" : "motherly"} incompleteTasks={rows.filter((row) => !viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => toggle(taskKey)} />}
-
+                <MamasCorner userId={user.id} caregiverName={babyCaregiverName} parentVoice={preferences.baby_voice === "fatherly" ? "fatherly" : "motherly"} incompleteTasks={rows.filter((row) => !viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => toggle(taskKey)} />
               </div>
             </details>
+            )}
 
             <div role="tablist" aria-label="Care library" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 7, padding: 6, borderRadius: 15, background: "#FFFFFF99", border: "1px solid #E6D4F2" }}>
               {[["quick", "🌿", "PlushCalm"], ["paths", "🗺️", "PlushPaths"], ["sleep", "🌙", "PlushSleep"]].map(([value, icon, label]) => (
@@ -8252,7 +8253,7 @@ function GlowUpTracker() {
                 ["What happens if I miss a day?", "Nothing is lost. Care days and activity days are lifetime totals, so they never reset. Every badge and outfit you've earned stays yours forever."],
                 ["What's the difference between Required and Bonus tasks?", "Required tasks count toward your daily percentage. Bonus tasks are extras — completing them never lowers your score, and skipping them never counts against you."],
                 ["What are Full, Soft, Tiny, and Recovery Days?", "They are four ways to size today around your real capacity. Full shows your usual versions, Soft uses gentler versions and hides bonuses, Tiny keeps the smallest essentials, and Recovery helps you restart without a backlog."],
-                ["How do mood and energy patterns work?", "Your check-ins stay private and appear in your Progress calendar. With pattern suggestions on, PlushLife may notice a repeated day-of-week pattern and offer a small routine change. It never diagnoses you, assumes a cause, or changes anything without your approval."],
+                ["How do mood and energy patterns work?", "Your check-ins stay private and appear in your PlushGrowth calendar. With pattern suggestions on, PlushLife may notice a repeated day-of-week pattern and offer a small routine change. It never diagnoses you, assumes a cause, or changes anything without your approval."],
                 ["Is PlushCare free?", "Yes. PlushCare, PlushPaths, PlushSleep, mood and energy tracking, adaptive habits, accessibility tools, and Guardian support are all free right now."],
                 ["What is PlushFocus?", "Instead of your full checklist, PlushFocus shows just your next task, one at a time — good for when a long list feels like too many decisions."],
                 ["Who can see my private reflections?", "Only you, always. They're never shown to a Guardian, never included in any shared summary, and stored separately from anything else."],
@@ -10160,7 +10161,7 @@ function GlowUpTracker() {
               <div style={{ marginTop: 14, paddingTop: 13, borderTop: "1px solid #F3D9EC" }}>
                 <button type="button" onClick={() => { setCalmQuickOpen(false); setCareSection("quick"); goToDashboard("care"); }} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 13px", borderRadius: 12, border: "1px solid #E6D4F2", background: "rgba(255,255,255,0.55)", color: "#6B5A7D", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>
                   <span>🧰 Open the Comfort Toolkit</span>
-                  <span style={{ color: "#C77DD6" }}>on the Care tab ›</span>
+                  <span style={{ color: "#C77DD6" }}>on the PlushCare tab ›</span>
                 </button>
               </div>
               <div style={{ marginTop: 10, fontSize: 13.5, fontStyle: "italic", color: "#C77DD6" }}>
