@@ -4757,6 +4757,10 @@ function GlowUpTracker() {
     } finally {
       supabase.auth.stopAutoRefresh();
       window.localStorage.removeItem(SUPABASE_AUTH_STORAGE_KEY);
+      // Otherwise a different profile signing in next on this same device
+      // would briefly see this profile's task labels still on the home
+      // screen widget, left over from before it's overwritten with theirs.
+      window.Capacitor?.Plugins?.WidgetBridge?.clearWidget().catch(() => {});
       window.location.replace(window.location.origin + window.location.pathname);
     }
   };
@@ -5524,6 +5528,7 @@ function GlowUpTracker() {
     }
     await supabase.auth.signOut({ scope: "local" });
     window.localStorage.removeItem(SUPABASE_AUTH_STORAGE_KEY);
+    window.Capacitor?.Plugins?.WidgetBridge?.clearWidget().catch(() => {});
     window.location.replace(window.location.origin + window.location.pathname);
   };
 
