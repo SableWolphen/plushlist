@@ -2455,8 +2455,14 @@ function GlowUpTracker() {
     supabase.from("app_preferences").select("*").eq("user_id", user.id).maybeSingle().then(({ data, error }) => {
       if (!active) return;
       if (data) setPreferences((current) => ({ ...current, ...data, dark_mode: false, reminder_times: Array.isArray(data.reminder_times) ? data.reminder_times : current.reminder_times }));
-      if (!data || !data.onboarding_complete) setOnboardingStep(1);
+      // A failed fetch also leaves `data` null, same as a genuinely new
+      // account with no preferences row yet — those aren't the same thing.
+      // Reopening onboarding for an already-onboarded user just because
+      // this one request hit a transient network blip would be wrong, so
+      // only treat "no row" as "needs onboarding" when the fetch actually
+      // succeeded.
       if (error) setSettingsMessage("Your preferences couldn't be loaded yet.");
+      else if (!data || !data.onboarding_complete) setOnboardingStep(1);
       // Keep the stored timezone in sync with this device's actual local timezone,
       // so scheduled notifications are bucketed (morning/midday/evening/night)
       // against real local time instead of a hardcoded fallback.
