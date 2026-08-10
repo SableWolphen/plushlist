@@ -1057,9 +1057,24 @@ const SLEEP_TOOLS = [
 ];
 const SOUNDSCAPES = [
   { id: "thunderstorm", icon: "⛈️", label: "Thunderstorm" },
-  { id: "ocean", icon: "🌊", label: "Ocean" },
+  { id: "rain", icon: "🌧️", label: "Gentle Rain" },
+  { id: "ocean", icon: "🌊", label: "Ocean Waves" },
+  { id: "forest", icon: "🍃", label: "Forest Breeze" },
   { id: "white_noise", icon: "📻", label: "White Noise" },
   { id: "calm_tone", icon: "🎵", label: "Calm Tone" },
+];
+
+const GENTLE_AFFIRMATIONS = [
+  "You are doing better than you give yourself credit for.",
+  "Resting is taking care of yourself, not giving up.",
+  "Your productivity does not determine your worth.",
+  "Small steps forward are still progress.",
+  "It is okay to do things slowly and gently today.",
+  "You do not have to finish everything to deserve peace.",
+  "Taking a break when overwhelmed is a smart, caring choice.",
+  "Be kind to yourself — you are learning as you go.",
+  "Partial effort still counts as real care.",
+  "Your peace of mind matters more than perfection."
 ];
 
 // Ambient sound is generated on the fly with the Web Audio API rather than
@@ -1180,6 +1195,18 @@ function startSoundscape(id, volume) {
   if (id === "rain") {
     filter.type = "highpass";
     filter.frequency.value = 900;
+  } else if (id === "forest") {
+    filter.type = "bandpass";
+    filter.frequency.value = 650;
+    filter.Q.value = 1.8;
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 0.08;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = 220;
+    lfo.connect(lfoGain);
+    lfoGain.connect(filter.frequency);
+    lfo.start();
+    extraOscillators.push(lfo);
   } else if (id === "ocean") {
     filter.type = "lowpass";
     filter.frequency.value = 400;
@@ -2183,6 +2210,7 @@ function GlowUpTracker() {
   const [watchPairingBusy, setWatchPairingBusy] = useState(false);
   const [localWatchSyncBusy, setLocalWatchSyncBusy] = useState(false);
   const [localWatchSyncMessage, setLocalWatchSyncMessage] = useState("");
+  const [widgetSyncMsg, setWidgetSyncMsg] = useState("");
   const [nativeBuildInfo, setNativeBuildInfo] = useState(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -6059,9 +6087,9 @@ function GlowUpTracker() {
       dayType: `${(dailyCheckIn.day_type || "full").replace(/^./, (letter) => letter.toUpperCase())} Day · ${pct}%`,
       progress: pct,
       weeklyProgress: weeklyOverallPct,
-      tasks: rows.slice(0, 3).map((row) => ({ label: row.label, done: !!viewDone[row.key] })),
+      tasks: rows.slice(0, 4).map((row) => ({ label: row.label, done: !!viewDone[row.key] })),
     }).catch((error) => console.error("[widget] updateWidget failed:", error));
-  }, [user?.id, selectedProgressDate, period.date, dailyCheckIn.day_type, pct, weeklyOverallPct, JSON.stringify(rows.slice(0, 3).map((row) => [row.key, row.label, !!viewDone[row.key]]))]);
+  }, [user?.id, selectedProgressDate, period.date, dailyCheckIn.day_type, pct, weeklyOverallPct, JSON.stringify(rows.slice(0, 4).map((row) => [row.key, row.label, !!viewDone[row.key]]))]);
 
   // Applies one watch-originated task change to Supabase. Mirrors the exact
   // upsert shape the existing cloud watch-sync Edge Function already uses
@@ -8051,6 +8079,12 @@ function GlowUpTracker() {
                     </div>
                   )}
                 </div>
+                <div style={{ position: "relative", marginTop: 14, paddingTop: 13, borderTop: "1px solid #3B4A85" }}>
+                  <div style={{ fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#93A9F5" }}>✨ GENTLE REMINDER</div>
+                  <div style={{ marginTop: 6, padding: "12px 14px", borderRadius: 14, background: "rgba(147, 169, 245, 0.12)", border: "1px dashed #4E5E9E", color: "#E0E7FD", fontSize: 13, fontStyle: "italic", lineHeight: 1.45, textAlign: "center" }}>
+                    "{GENTLE_AFFIRMATIONS[Math.floor((new Date().getDate() + (new Date().getMonth() * 31)) % GENTLE_AFFIRMATIONS.length)]}"
+                  </div>
+                </div>
               </div>;
             })()}
 
@@ -8437,6 +8471,97 @@ function GlowUpTracker() {
               {localWatchSyncMessage && <div role="status" style={{ marginTop: 8, fontSize: 11.5, lineHeight: 1.4, color: "#8C6B9E", fontWeight: 700 }}>{localWatchSyncMessage}</div>}
             </div>
           )}
+
+          <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "linear-gradient(145deg, #FFF8FD, #F4EEFF 60%, #EDF9FF)", border: "1px solid #E3C9EC", boxShadow: "0 6px 18px rgba(166,93,193,0.1)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ fontSize: 12, fontWeight: 900, color: "#8E4EAA" }}>📱 HOME SCREEN WIDGET</div>
+              <span style={{ fontSize: 10.5, fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: "#E8D5F0", color: "#7B3E96" }}>Android & Web</span>
+            </div>
+            <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#7A6485" }}>
+              Keep your daily care steps and progress right on your phone's home screen.
+            </div>
+
+            <div style={{ marginTop: 12, padding: 14, borderRadius: 18, background: "#FFF8FC", border: "1px solid #E3C9EC", boxShadow: "0 4px 12px rgba(0,0,0,0.04)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 900, color: "#8E4EAA" }}>PlushLife 🌸</span>
+                <span style={{ fontSize: 10, fontWeight: 900, color: "#A65DC1", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  {(dailyCheckIn.day_type || "full")} day · {pct}%
+                </span>
+              </div>
+
+              {rows.slice(0, 4).length > 0 ? (
+                <div style={{ display: "grid", gap: 5, marginBottom: 10 }}>
+                  {rows.slice(0, 4).map((r) => {
+                    const done = !!viewDone[r.key];
+                    return (
+                      <div key={r.key} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: done ? "#8C7A97" : "#5B4B6B", textDecoration: done ? "line-through" : "none", fontWeight: 700 }}>
+                        <span style={{ color: done ? "#3A9B7A" : "#B783CD", fontWeight: 900 }}>{done ? "✓" : "○"}</span>
+                        <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div style={{ fontSize: 12, fontWeight: 800, color: "#5B4B6B", marginBottom: 10 }}>
+                  {dailyCheckIn.day_type === "rest" ? "Resting counts today 🌸" : "Open PlushLife for one caring step 💕"}
+                </div>
+              )}
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, paddingTop: 8, borderTop: "1px solid #F0E3F3" }}>
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9.5, fontWeight: 900, color: "#8C6B9E", marginBottom: 3 }}>
+                    <span>TODAY</span>
+                    <span style={{ color: "#A65DC1" }}>{pct}%</span>
+                  </div>
+                  <div style={{ height: 6, width: "100%", background: "#EADCF0", borderRadius: 999, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${pct}%`, background: "#A65DC1", borderRadius: 999, transition: "width 0.3s ease" }} />
+                  </div>
+                </div>
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9.5, fontWeight: 900, color: "#8C6B9E", marginBottom: 3 }}>
+                    <span>WEEK</span>
+                    <span style={{ color: "#4C8FE8" }}>{weeklyOverallPct}%</span>
+                  </div>
+                  <div style={{ height: 6, width: "100%", background: "#DCE9FA", borderRadius: 999, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${weeklyOverallPct}%`, background: "#4C8FE8", borderRadius: 999, transition: "width 0.3s ease" }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap", alignItems: "center" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  document.dispatchEvent(new CustomEvent("plushlife-widget-sync"));
+                  const WidgetBridge = window.Capacitor?.Plugins?.WidgetBridge;
+                  if (WidgetBridge) {
+                    const nextTask = rows.find((row) => !row.isBonus && !viewDone[row.key]) || rows.find((row) => !row.isBonus);
+                    WidgetBridge.updateWidget({
+                      nextTask: dailyCheckIn.day_type === "rest" ? "Resting counts today" : (nextTask?.label || "Today's caring steps are complete"),
+                      dayType: `${(dailyCheckIn.day_type || "full").replace(/^./, (letter) => letter.toUpperCase())} Day · ${pct}%`,
+                      progress: pct,
+                      weeklyProgress: weeklyOverallPct,
+                      tasks: rows.slice(0, 4).map((row) => ({ label: row.label, done: !!viewDone[row.key] })),
+                    }).catch(() => {});
+                  }
+                  setWidgetSyncMsg("Widget synced! 💕");
+                  setTimeout(() => setWidgetSyncMsg(""), 3000);
+                }}
+                style={{ padding: "8px 13px", borderRadius: 10, border: 0, background: "#8E4EAA", color: "white", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}
+              >
+                🔄 Sync Widget Now
+              </button>
+              {widgetSyncMsg && <span style={{ fontSize: 11.5, fontWeight: 800, color: "#3A9B7A" }}>{widgetSyncMsg}</span>}
+            </div>
+
+            <div style={{ marginTop: 10, padding: 10, borderRadius: 11, background: "rgba(255,255,255,0.7)", fontSize: 10.5, lineHeight: 1.45, color: "#7B6888" }}>
+              <strong>How to add to Android Home Screen:</strong><br/>
+              1. Long-press an empty space on your phone home screen.<br/>
+              2. Tap <strong>Widgets</strong> and scroll to <strong>PlushLife</strong>.<br/>
+              3. Drag the widget to your home screen!
+            </div>
+          </div>
 
           <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "#FFF8FD", border: "1px solid #E8CCE8" }}>
             <div style={{ fontSize: 12, fontWeight: 900, color: "#8E4EAA" }}>🧸 PROFILE</div>
