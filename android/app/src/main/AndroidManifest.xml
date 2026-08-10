@@ -51,15 +51,22 @@
 
         <!-- Loopback-only local HTTP server for instant watch sync (see
              watchsync/). Never exported — nothing outside this process
-             starts it directly, only WatchSyncBridgePlugin does. -->
+             starts it directly, only WatchSyncBridgePlugin does.
+             Temporarily disabled: declaring FOREGROUND_SERVICE_DATA_SYNC
+             requires a Play Console policy declaration (description + demo
+             video) that hasn't been submitted yet. Re-enable by restoring
+             this <service> block, the two uses-permission lines below, and
+             the registerPlugin(WatchSyncBridgePlugin.class) call in
+             MainActivity.java once that declaration is in place.
         <service
             android:name=".watchsync.WatchSyncService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+        -->
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> -->
+    <!-- <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" /> -->
 </manifest>

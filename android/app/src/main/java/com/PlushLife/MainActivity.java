@@ -53,7 +53,14 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(WidgetBridgePlugin.class);
         registerPlugin(NotificationPermissionPlugin.class);
         registerPlugin(BuildInfoPlugin.class);
-        registerPlugin(WatchSyncBridgePlugin.class);
+        // Temporarily disabled along with the FOREGROUND_SERVICE_DATA_SYNC
+        // permission and <service> entry in AndroidManifest.xml — Google
+        // Play requires a policy declaration (description + demo video)
+        // for that permission that hasn't been submitted yet. The web app's
+        // own watch-sync code already checks for this plugin's presence
+        // before calling it, so leaving it unregistered safely turns the
+        // whole feature off without touching any other code.
+        // registerPlugin(WatchSyncBridgePlugin.class);
         super.onCreate(savedInstanceState);
         // Belt-and-suspenders: confirmed via a real device screenshot that a
         // native black title bar (showing title_activity_main, "PlushLife")
