@@ -389,16 +389,39 @@ its own module since phase 6). `HELP_ME_NOW_OPTIONS` passed as a prop
 `onClose` prop on this one, unlike every `ToolPanel` slice — dashboard
 tabs don't have a close button, just an `open` gate.
 
+Also done: `dashboard === "progress"`
+(`src/components/progress-panel.jsx` — `ProgressPanel`), the tenth
+phase 7 slice (~246 lines, ~45 props). "PlushGrowth": weekly/monthly
+trend charts, the weekly-intention editor, and three sub-views
+(overview/story/areas) covering care story, care areas, and
+PlushInsights pattern cards. `HabitTypeIcon` imported directly from
+`./shared.jsx`; `datesThroughToday` read from
+`window.PlushLifeSchedule` inside the new file. `TREND_WEEKS`/
+`TREND_MONTHS` passed as props (plain literals in `app-source.jsx`).
+
+One real mistake caught and fixed during this extraction, worth
+recording: the original block's outer wrapper was
+`{dashboard === "progress" && <>...</>}` — a JSX fragment holding
+multiple sibling elements, not just a truthiness-guard parenthesis
+like the `care` block had. The first draft of the extraction script
+stripped the `<>`/`</>` along with the condition, which would have
+produced a component trying to `return` multiple sibling elements with
+no wrapper — a real JSX error, not a subtle behavioral bug, so it
+surfaced immediately as a build failure and got fixed before
+proceeding. Recorded here because it's a concrete reminder that "same
+extraction pattern" still needs the actual wrapper shape checked each
+time, not assumed from the previous slice.
+
 Remaining:
 
-- `dashboard === "progress"` and `dashboard === "week"` — sibling
-  dashboard-tab views to `care`, same extraction pattern, not yet
-  scoped for size/prop count.
+- `dashboard === "week"` — sibling dashboard-tab view, same extraction
+  pattern, not yet scoped for size/prop count. Check its outer wrapper
+  shape (parenthesis vs. fragment) before assuming either way, per the
+  note above.
 - `dashboard === "today"` — the default, most complex view (~530
   lines), and the one most likely to actually be `GlowUpTracker`'s
-  irreducible core once the other three tabs are out of the way. Worth
-  a fresh look once `progress` and `week` are done, rather than
-  assuming either way in advance.
+  irreducible core once `week` is out of the way. Worth a fresh look
+  once `week` is done, rather than assuming either way in advance.
 
 After each phase: `npm test` must pass, `npm run web:sync` must succeed,
 and the compiled bundle should be spot-checked with `node --check`. Phase
