@@ -39,6 +39,13 @@ const movedModulesText = movedModuleFiles
 const searchableSource = appSource + componentsSource + movedModulesText;
 
 const requiredRegressionMarkers = [
+  // WEEKDAY_PRESET_IDS/WEEKEND_PRESET_IDS are exported by
+  // assets/plush-schedule.js but were missing from app-source.jsx's
+  // top-level destructuring of window.PlushLifeSchedule — a real bug
+  // (ReferenceError at runtime, not caught by esbuild since bare
+  // identifier references aren't statically checked) discovered while
+  // extracting the "Change my tasks" panel in module split phase 7.
+  'WEEKDAY_PRESET_IDS,\n  WEEKEND_PRESET_IDS,\n} = window.PlushLifeSchedule;',
   'const [onboardingMode, setOnboardingMode] = useState(null);',
   'onboardingMode === "supporter"',
   '.from("weekly_intentions")',
