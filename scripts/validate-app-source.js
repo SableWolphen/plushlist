@@ -4,12 +4,16 @@ const esbuild = require("esbuild");
 
 // module split phase 5: the app source is no longer an inline
 // <script id="app-source"> block in index.html — it's src/app-source.jsx,
-// which imports src/components/shared.jsx (see scripts/sync-www.js). Bundle
-// it the same way sync-www.js does as the "compiles successfully" check.
+// which imports files under src/components/ (see scripts/sync-www.js).
+// Bundle it the same way sync-www.js does as the "compiles successfully"
+// check.
 const appSourcePath = path.join(__dirname, "..", "src", "app-source.jsx");
-const sharedComponentsPath = path.join(__dirname, "..", "src", "components", "shared.jsx");
+const componentsDir = path.join(__dirname, "..", "src", "components");
 const appSource = fs.readFileSync(appSourcePath, "utf8");
-const sharedComponentsSource = fs.readFileSync(sharedComponentsPath, "utf8");
+const componentsSource = fs.readdirSync(componentsDir)
+  .filter((file) => file.endsWith(".jsx"))
+  .map((file) => fs.readFileSync(path.join(componentsDir, file), "utf8"))
+  .join("");
 
 esbuild.buildSync({
   entryPoints: [appSourcePath],
@@ -23,15 +27,16 @@ esbuild.buildSync({
 // Some regression markers below cover content that has since moved out of
 // the inline app-source block into the assets/plush-*.js modules (mascot
 // outfits, appearance themes, small pure helpers, schedule/date/task
-// utilities, billing provider, etc.) and, as of phase 5, into
-// src/components/shared.jsx (ToolPanel, HabitTypeIcon) — check markers
-// against all of them so a marker still passes if its content moved rather
-// than disappeared.
+// utilities, billing provider, etc.) and, as of phases 5-6, into
+// src/components/*.jsx (ToolPanel, HabitTypeIcon, PlushMascot, NurseryNook,
+// AppLoadingScreen, BabyArrivalRitual, MamasCorner, BabyModeCareSuite,
+// LandingPage) — check markers against all of them so a marker still passes
+// if its content moved rather than disappeared.
 const movedModuleFiles = ["plush-content.js", "plush-helpers.js", "plush-schedule.js", "plush-billing.js"];
 const movedModulesText = movedModuleFiles
   .map((file) => fs.readFileSync(path.join(__dirname, "..", "assets", file), "utf8"))
   .join("");
-const searchableSource = appSource + sharedComponentsSource + movedModulesText;
+const searchableSource = appSource + componentsSource + movedModulesText;
 
 const requiredRegressionMarkers = [
   'const [onboardingMode, setOnboardingMode] = useState(null);',
@@ -80,7 +85,7 @@ const requiredRegressionMarkers = [
   'NURSERY KEEPSAKE WALL',
   'BEDTIME NEST',
   'MY LITTLE JOBS',
-  'function MamasCorner({ userId, incompleteTasks, onConfirmTask, caregiverName = "Mommy", parentVoice = "motherly" })',
+  'function MamasCorner({ userId, incompleteTasks, onConfirmTask, caregiverName = "Mommy", parentVoice = "motherly", supabase })',
   'supabase.from("mommy_chat_threads")',
   'className="mamas-private-window" role="dialog" aria-modal="true"',
   'PRIVATE {caregiverName.toUpperCase()}’S CORNER',

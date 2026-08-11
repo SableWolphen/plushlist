@@ -55,10 +55,11 @@ Roughly 6-7 phases total, decided when phase 1 shipped:
    (step 2), retiring the runtime Babel-in-browser compile entirely.
 5. **Done** — first real component extraction: `ToolPanel` and
    `HabitTypeIcon` (`src/components/shared.jsx`).
-6. Extract other self-contained components (`PlushMascot`, `NurseryNook`,
-   `BabyArrivalRitual`, `MamasCorner`, `BabyModeCareSuite`,
-   `AppLoadingScreen`, `LandingPage`, `GlowUpTracker`'s smaller
-   subcomponents)
+6. **Done** — extracted the other self-contained components:
+   `PlushMascot`, `NurseryNook`, `AppLoadingScreen`
+   (`src/components/mascot.jsx`); `BabyArrivalRitual`, `MamasCorner`,
+   `BabyModeCareSuite` (`src/components/baby-mode.jsx`); `LandingPage`
+   (`src/components/landing.jsx`).
 7. Split the root `App` component itself — the hardest part, likely more
    than one phase on its own once its actual state-sharing shape is clear
 
@@ -112,6 +113,36 @@ Roughly 6-7 phases total, decided when phase 1 shipped:
   than importing `plush-schedule.js` directly, so esbuild doesn't bundle
   that module's content a second time on top of the separate `<script>`
   tag that already loads it.
+- **`src/components/mascot.jsx`** (phase 6) — `PlushMascot`,
+  `NurseryNook`, `AppLoadingScreen` (the two latter both render
+  `PlushMascot`). Reads `MASCOT_OUTFITS` (`window.PlushLifeContent`) and
+  `mascotGrowthStageForDays` (`window.PlushLifeHelpers`) at module scope,
+  same pattern as `app-source.jsx` itself.
+- **`src/components/baby-mode.jsx`** (phase 6) — `BabyArrivalRitual`,
+  `MamasCorner`, `BabyModeCareSuite` (plus the unexported helper
+  `littleSpaceTaskLabel`, used only by `BabyModeCareSuite`). `MamasCorner`
+  needed one real code change to extract cleanly: it used to close over
+  the module-level `supabase` client declared at the top of the old
+  monolithic `app-source` block; now that it lives in its own file, it
+  takes `supabase` as a prop instead, passed down from
+  `src/app-source.jsx`'s `GlowUpTracker` (which still owns the one
+  `supabase` client instance) at its call site. Same client, same auth
+  session — just threaded explicitly instead of implicitly via closure.
+- **`src/components/landing.jsx`** (phase 6) — `LandingPage`, the
+  signed-out marketing page. Fully self-contained aside from the
+  sign-in-form props `GlowUpTracker` already passed it.
+
+Verified phase 6 the same way as phase 5: `npm test` (including
+`validate-app-source.js`'s regression markers, updated for the two
+components whose call sites changed), `npm run web:sync`, `node --check`
+on the output, plus a tokenized diff between the pre- and post-phase-6
+bundle. The only real differences were the intentional `supabase` prop on
+`MamasCorner` and esbuild automatically renaming a handful of duplicate
+top-level `const` bindings (e.g. `MASCOT_OUTFITS` → `MASCOT_OUTFITS2`)
+where both `app-source.jsx` and a new component file independently
+destructure the same `window.PlushLifeXxx` global — both bindings read
+the identical underlying value, so this is a safe, automatic
+disambiguation, not a behavior change.
 
 ## Candidate remaining pure-logic (not scoped)
 
@@ -179,15 +210,13 @@ and Babel-compile the inline `<script id="app-source">` block from
 checks its regression markers against `src/app-source.jsx` +
 `src/components/shared.jsx` + the `assets/plush-*.js` modules combined.
 
-## Candidate component phases (phase 6+)
+## Candidate component phases (phase 7)
 
-- Fairly self-contained components: `PlushMascot`, `NurseryNook`,
-  `BabyArrivalRitual`, `MamasCorner`, `BabyModeCareSuite`,
-  `AppLoadingScreen`, `LandingPage`.
 - The root `App` component (`GlowUpTracker`) — holds nearly all state;
   splitting it safely needs a real decision on how state gets shared
   across the split pieces (context, prop drilling, or something else)
-  before it's attempted.
+  before it's attempted. This is the last piece of `src/app-source.jsx`
+  after phases 5-6; everything else self-contained has already moved out.
 
 After each phase: `npm test` must pass, `npm run web:sync` must succeed,
 and the compiled bundle should be spot-checked with `node --check`.
