@@ -39,9 +39,8 @@ Roughly 6-7 phases total, decided when phase 1 shipped:
 
 1. **Done** — static content/data (`assets/plush-content.js`)
 2. **Done** — small pure helpers (`assets/plush-helpers.js`)
-3. Any remaining pure logic found on a deeper audit (Supabase
-   query-shaping helpers, etc.) — fold into a phase if there's enough of
-   it, otherwise skip
+3. **Done** — date/schedule/task utilities and the billing-provider
+   placeholder (`assets/plush-schedule.js`, `assets/plush-billing.js`)
 4. Adopt a bundler (esbuild) so components can be split — the one
    phase that's an architecture decision, not just an extraction
 5. Extract the self-contained comfort-tool interactive widgets
@@ -70,13 +69,34 @@ Roughly 6-7 phases total, decided when phase 1 shipped:
   - One more regression marker (`const MOTHERLY_NICKNAMES = [`) moved
     with it — `validate-app-source.js` now checks all three files
     together.
+- **`assets/plush-schedule.js`** — 23 pure date/schedule/task-shape
+  functions (`isQuietTime`, `taskIsOptional`, `scheduleLabelForTask`,
+  `reflectionPromptForDay`, `trackerPeriod`, `dayIdForDate`,
+  `pathOfTheWeekId`, `dateForDayId`, `formatTime12`, `parseTime24`,
+  `splitScheduleField`, `legacyScheduleToEntries`, `habitTypeForTask`,
+  `cleanTaskDetail`, `encodeTaskDetail`, `offsetDate`, `monthKeyOffset`,
+  `daysInCalendarMonth`, `datesInMonthThrough`, `daysBetweenDates`,
+  `taskOccursOn`, `taskIsScheduledForDate`, `datesThroughToday`) plus
+  their supporting constants (`WEEKDAY_PRESET_IDS`, `WEEKEND_PRESET_IDS`,
+  `WEEKDAY_IDS`, `HABIT_META_PATTERN`, `REFLECTION_PROMPT_ROTATIONS`).
+  Depends on `plush-content.js` (`DAYS`, `PLUSH_PATHS`),
+  `plush-helpers.js` (`OPTIONAL_SECTION_MARKERS`), and the existing
+  `care-upgrades.js` (`taskTargetsDate`).
+  - Caught a real bug during extraction: `OPTIONAL_SECTION_MARKERS`
+    actually lives in `plush-helpers.js` (phase 2), not
+    `plush-content.js` — the first draft of this module destructured it
+    from the wrong dependency, which `npm test` caught immediately as a
+    `Cannot read properties of undefined` crash in `taskIsOptional`.
+- **`assets/plush-billing.js`** — `getBillingProvider` and
+  `GooglePlayBillingProvider` (the inert Play Billing architecture
+  placeholder — every method still just throws).
 
-## Candidate remaining pure-logic (phase 3, not started)
+## Candidate remaining pure-logic (not scoped)
 
-A deeper audit is still needed to find any other standalone pure
-functions scattered further into the file (not just near the top) —
-things with no JSX and no closure over component state, the same shape
-as what's already moved. Not yet scoped.
+A deeper audit could still find other standalone pure functions further
+into the file — this phase covered everything reachable from the top
+third of `app-source`, not a full sweep. Worth another pass later, but
+not blocking anything else.
 
 ## Phase 4 — bundler decision (not started)
 
