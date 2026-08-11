@@ -60,17 +60,17 @@ Roughly 6-7 phases total, decided when phase 1 shipped:
    (`src/components/mascot.jsx`); `BabyArrivalRitual`, `MamasCorner`,
    `BabyModeCareSuite` (`src/components/baby-mode.jsx`); `LandingPage`
    (`src/components/landing.jsx`).
-7. **In progress** — splitting the root `App` component (`GlowUpTracker`)
+7. **Done** — splitting the root `App` component (`GlowUpTracker`)
    itself, which still holds nearly all state. State-sharing decision:
    **explicit prop drilling**, not context — each extracted piece takes
    exactly the state values/setters/handlers its body reads as named
    props, the same pattern already proven by `MamasCorner`'s `supabase`
    prop in phase 6. No reducer rewrite, no context providers; `GlowUpTracker`
-   remains the single owner of all state. First slice done: the four
-   smallest, most clearly-bounded `ToolPanel` modals
-   (`src/components/info-panels.jsx`). This is the hardest, highest-risk
-   phase — see the dedicated section below for what's done and what's
-   deliberately still deferred.
+   remains the single owner of all state. All fifteen `ToolPanel` modals
+   and all four `dashboard === "x"` tab views (`care`, `progress`, `week`,
+   `today`) are now extracted — twelve slices total. See the dedicated
+   section below for the full breakdown and the one small piece
+   deliberately left in place.
 
 ## Done
 
@@ -433,13 +433,47 @@ const in `app-source.jsx`, same as it was for `MoodViewer`) passed as a
 prop, which for the same reason got renamed to `CHECKIN_MOODS2` inside
 the new file. `HabitTypeIcon` imported directly from `./shared.jsx`.
 
-Remaining:
+Also done: `dashboard === "today"` (`src/components/today-panel.jsx` —
+`TodayPanel`), the twelfth phase 7 slice, the last of the four
+dashboard-tab views, and the largest single slice of the whole module
+split (555 lines, 96 props). Read through fully before touching it, as
+asked, rather than assumed either way — the honest finding is that it is
+**not** `GlowUpTracker`'s irreducible core after all. It's the same
+conditional-render shape as `care`/`progress`/`week` (a
+`{dashboard === "today" && <>...</>}` fragment driven entirely by parent
+state and handlers), just the biggest one: the return-gap/gentle-heads-up/
+resting-today banners, the One Next Step card, the PlushWeek weekly-
+intention widget, the Schedule/Tasks tab bar with its own swipe handling,
+the personal-schedule card, the habits-today preview, `BabyModeCareSuite`
+for baby-mode profiles, the "pick one thing for me" focus helper, the full
+task list (focus mode, collapsed/expanded, drag-to-reorder, section
+grouping, pause/resume, move-to-tomorrow), and the "if I feel
+overwhelmed" button + `CalmPanel` invocation that turned out to live
+inside this fragment too, not beside it as first assumed while reading —
+worth calling out as another instance of "check the actual boundary, not
+what seems logical from the outside."
+`dayIdForDate`/`offsetDate`/`legacyScheduleToEntries`/`formatTime12` read
+from `window.PlushLifeSchedule`, `DAYS` from `window.PlushLifeContent`,
+both inside the new file. `FeatureTip` (a small component defined inline
+inside `GlowUpTracker`, not a module export) passed as a prop, matching
+the existing `RewardsPanel` call site's precedent for the same value.
+`HabitTypeIcon` imported from `./shared.jsx`, `BabyModeCareSuite` from
+`./baby-mode.jsx`, `CalmPanel` from `./info-panels.jsx`.
 
-- `dashboard === "today"` — the default, most complex view (~530
-  lines), and the one most likely to actually be `GlowUpTracker`'s
-  irreducible core now that `care`, `progress`, and `week` are all out
-  of the way. Next: a fresh, honest read-through rather than assuming
-  either way in advance.
+Not extracted, and intentionally left as-is: a small `dashboard ===
+"today"`-only check-in shortcut bar (~11 lines, a few props) sits
+textually *before* `TodayPanel`'s call site, separated from it by
+`CarePanel` and a run of always-mounted modal invocations
+(`ProfilePanel`, `MoodViewer`, etc.) — it was already called out as a
+separate small thing back when the four dashboard tabs were first
+discovered, not an oversight here. Left in `app-source.jsx` since it
+isn't contiguous with the main view and isn't worth a thirteenth slice
+for ~11 lines.
+
+Phase 7 (all fifteen `ToolPanel` modals plus all four dashboard-tab
+views) is done. Remaining candidates for any future module-split work
+are whatever's left directly inside `GlowUpTracker`'s body outside these
+extracted sections — not scoped here since nothing further was asked for.
 
 After each phase: `npm test` must pass, `npm run web:sync` must succeed,
 and the compiled bundle should be spot-checked with `node --check`. Phase
