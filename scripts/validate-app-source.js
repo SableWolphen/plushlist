@@ -13,13 +13,15 @@ Babel.transform(match[1], {
 });
 
 // Some regression markers below cover content that has since moved out of
-// the inline app-source block into assets/plush-content.js and
-// assets/plush-helpers.js (mascot outfits, appearance themes, small pure
-// helpers, etc.) — check markers against all three so a marker still
-// passes if its content moved rather than disappeared.
-const plushContent = fs.readFileSync(path.join(__dirname, "..", "assets", "plush-content.js"), "utf8");
-const plushHelpers = fs.readFileSync(path.join(__dirname, "..", "assets", "plush-helpers.js"), "utf8");
-const searchableSource = match[1] + plushContent + plushHelpers;
+// the inline app-source block into the assets/plush-*.js modules (mascot
+// outfits, appearance themes, small pure helpers, schedule/date/task
+// utilities, billing provider, etc.) — check markers against all of them
+// so a marker still passes if its content moved rather than disappeared.
+const movedModuleFiles = ["plush-content.js", "plush-helpers.js", "plush-schedule.js", "plush-billing.js"];
+const movedModulesText = movedModuleFiles
+  .map((file) => fs.readFileSync(path.join(__dirname, "..", "assets", file), "utf8"))
+  .join("");
+const searchableSource = match[1] + movedModulesText;
 
 const requiredRegressionMarkers = [
   'const [onboardingMode, setOnboardingMode] = useState(null);',
