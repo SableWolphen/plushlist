@@ -257,9 +257,18 @@ and a tokenized bundle diff confirming the only differences were the
 intentional `setXOpen(false)` → `onClose()` substitutions and each new
 call site's explicit prop list.
 
+Also done: `Change my schedule`
+(`src/components/schedule-editor-panel.jsx` — `ScheduleEditorPanel`).
+~20 props (schedule-editing state and handlers), no local-derived-state
+complications, `DAYS` read from `window.PlushLifeContent` the same way
+as the previous slice's globals. One naming wrinkle worth documenting:
+the panel reads a derived value `scheduleEditingDayId` (`=
+scheduleEditDayId || scheduleDayId`, defined once in `GlowUpTracker`),
+not the raw `scheduleEditDayId` state — passed through by its derived
+name, unchanged.
+
 Remaining, roughly in order of increasing size/risk:
 
-- `Change my schedule` (~70 lines) — moderate size, self-contained.
 - `Rewards` (~130 lines) — needs `FeatureTip` and `BADGE_DEFS`, both
   currently defined *inside* `GlowUpTracker` as closures over other
   state (`BADGE_DEFS` alone closes over a dozen-plus state variables via
