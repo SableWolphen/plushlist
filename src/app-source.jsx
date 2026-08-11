@@ -2173,7 +2173,7 @@ function GlowUpTracker() {
     if (!user || !task) return;
     const copy = {
       user_id: user.id,
-      task_key: `copy-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      task_key: `copy-${Date.now()}-${window.crypto.getRandomValues(new Uint32Array(1))[0].toString(36).slice(0, 5)}`,
       day_id: task.day_id,
       section: task.section,
       task: `${task.task} (copy)`.slice(0, 180),
