@@ -298,11 +298,28 @@ safe: both the declaration and every reference within that one callback
 were renamed together and consistently, with zero leakage into other
 scopes.
 
+Also done: `Settings` (`src/components/settings-panel.jsx` —
+`SettingsPanel`), the second of the "big four" and the largest by prop
+count so far: ~317 lines, ~58 props (60 including `open`/`onClose`).
+Covers watch pairing, local Bluetooth sync, home-screen widget sync,
+profile name/comfort item, appearance/theme, notifications, rest days,
+experience toggles, feedback, data export/restore/deletion, and account
+management (email change, sign-out, account deletion) — a genuinely
+wide cross-section of `GlowUpTracker`'s state, all still purely
+mechanical prop-passing, no logic changes. `APPEARANCE_THEMES` read
+from `window.PlushLifeContent`, same as everywhere else. Tokenized diff
+showed the same two now-familiar esbuild auto-rename patterns: a
+top-level `const` collision (`APPEARANCE_THEMES` → `APPEARANCE_THEMES2`)
+and a nested-scope collision (a local `const done` inside a `.map()`
+callback → `done2`) — both confirmed safe the same way as previous
+slices (consistent renaming of every reference within the same scope,
+zero leakage elsewhere).
+
 Remaining, roughly in order of increasing size/risk:
 
-- The remaining three of the "big four": `Settings`, `Change my tasks`,
-  and the inline Guardian/support panel (250-320 lines each, touching
-  large swaths of state).
+- The remaining two of the "big four": `Change my tasks` and the inline
+  Guardian/support panel (250-320 lines each, touching large swaths of
+  state).
 - The always-in-tree "today" dashboard view itself (not a `ToolPanel`) —
   the biggest remaining piece, and the one most likely to need something
   beyond pure prop drilling (it's arguably `GlowUpTracker`'s actual
