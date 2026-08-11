@@ -238,15 +238,27 @@ checks its regression markers against `src/app-source.jsx` +
 
 `GlowUpTracker` is a `<ToolPanel>`-heavy component: roughly 15 modal
 sections gated by their own `xOpen` boolean, plus one large
-always-in-tree "today" view. The four smallest modals are done (see
-`src/components/info-panels.jsx` above). Remaining, roughly in order of
-increasing size/risk:
+always-in-tree "today" view. Done so far: the four smallest modals
+(`src/components/info-panels.jsx`) and the five smallish viewers with
+local derived state (`src/components/viewer-panels.jsx` — `MoodViewer`,
+`CarePathViewer`, `SleepToolViewer`, `JournalReflectionViewer`,
+`DailyJournalPanel`). The viewer-panels extraction kept each panel's
+inline IIFE-computed locals (`entry`/`mood`/`energy` lookups, path
+progress math) inside the new component rather than trying to hoist them
+out — only the panel's inputs became props, not its internal shape.
+`PLUSH_PATHS`/`SLEEP_TOOLS`/`reflectionPromptForDay`/`dayIdForDate`
+weren't passed as props at all — they're read from
+`window.PlushLifeContent`/`window.PlushLifeSchedule` directly inside the
+new file, the same globals `app-source.jsx` itself already reads, so
+esbuild renames the duplicate top-level bindings automatically (same
+safe pattern as `MASCOT_OUTFITS` → `MASCOT_OUTFITS2` in phase 6).
+Verified the same way: `npm test`, `npm run web:sync`, `node --check`,
+and a tokenized bundle diff confirming the only differences were the
+intentional `setXOpen(false)` → `onClose()` substitutions and each new
+call site's explicit prop list.
 
-- Smallish viewers with local derived state (need the IIFE body that
-  computes their local consts moved with them, not just the JSX):
-  `PlushMood` check-in viewer, the PlushPaths care-path viewer, the
-  PlushSleep tool viewer, the `PlushJournal` reflection viewer, the daily
-  `PlushJournal` quick-open panel.
+Remaining, roughly in order of increasing size/risk:
+
 - `Change my schedule` (~70 lines) — moderate size, self-contained.
 - `Rewards` (~130 lines) — needs `FeatureTip` and `BADGE_DEFS`, both
   currently defined *inside* `GlowUpTracker` as closures over other
