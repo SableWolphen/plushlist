@@ -412,16 +412,34 @@ proceeding. Recorded here because it's a concrete reminder that "same
 extraction pattern" still needs the actual wrapper shape checked each
 time, not assumed from the previous slice.
 
+Also done: `dashboard === "week"` (`src/components/week-panel.jsx` —
+`WeekPanel`), the eleventh phase 7 slice (378 lines, 46 props).
+"PlushCalendar": the today's-journal shortcut button, the Month/Week/Day
+tab bar with swipe navigation, the monthly progress-calendar heatmap and
+its PlushJournal/PlushWeek history `<details>` sections (Month view), the
+7-day strip with a future-day task preview (Week view), the single-day
+drill-down with time-of-day task grouping and a catch-up action (Day
+view), and the Habit Garden & Rewards streak summary. Its outer wrapper
+was also `{dashboard === "week" && <>...</>}` — a fragment, like
+`progress`, not a parenthesis like `care` — confirmed before extracting
+this time rather than assumed, per the lesson above.
+`offsetDate`/`dayIdForDate`/`reflectionPromptForDay`/
+`taskIsScheduledForDate`/`taskIsOptional` read from
+`window.PlushLifeSchedule` inside the new file (esbuild renamed all five
+to a `2` suffix in the bundle, since other already-extracted files
+destructure the same names from the same UMD module — the standard,
+confirmed-safe collision pattern). `CHECKIN_MOODS` (a plain top-level
+const in `app-source.jsx`, same as it was for `MoodViewer`) passed as a
+prop, which for the same reason got renamed to `CHECKIN_MOODS2` inside
+the new file. `HabitTypeIcon` imported directly from `./shared.jsx`.
+
 Remaining:
 
-- `dashboard === "week"` — sibling dashboard-tab view, same extraction
-  pattern, not yet scoped for size/prop count. Check its outer wrapper
-  shape (parenthesis vs. fragment) before assuming either way, per the
-  note above.
 - `dashboard === "today"` — the default, most complex view (~530
   lines), and the one most likely to actually be `GlowUpTracker`'s
-  irreducible core once `week` is out of the way. Worth a fresh look
-  once `week` is done, rather than assuming either way in advance.
+  irreducible core now that `care`, `progress`, and `week` are all out
+  of the way. Next: a fresh, honest read-through rather than assuming
+  either way in advance.
 
 After each phase: `npm test` must pass, `npm run web:sync` must succeed,
 and the compiled bundle should be spot-checked with `node --check`. Phase
