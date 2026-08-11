@@ -345,14 +345,36 @@ panel's own `open` prop genuinely shadows an inner callback's `open`
 parameter (`setImportOpen(open => !open)`), which esbuild relabeled to
 `open2` — a pure toggler, unaffected either way.
 
-Remaining, roughly in order of increasing size/risk:
+Also done: the inline Guardian/support panel
+(`src/components/guardian-panel.jsx` — `GuardianPanel`), the last of
+the "big four" and the largest slice by prop count (~324 lines, ~92
+props). Covers both roles of the Guardian relationship in one
+component: managing Guardians who support you, and viewing/supporting
+someone you're a Guardian for — progress display, encouraging notes,
+rewards, task suggestions, per-Guardian permissions, and care
+agreements. `DAYS`/`COMFORT_TOOLS` read from `window.PlushLifeContent`,
+`formatRelativeTime` from `window.PlushLifeHelpers`, `daysBetweenDates`
+from `window.PlushLifeSchedule`, all inside the new file.
+`GUARDIAN_ROLE_PRESETS` passed as a prop (a plain literal in
+`app-source.jsx`, not a window global) — its name collided with
+`app-source.jsx`'s own top-level `const` of the same name, so esbuild
+renamed the prop's uses inside the new file to `GUARDIAN_ROLE_PRESETS2`,
+same safe pattern as `SUPPORTER_FEATURES_ENABLED`/
+`FREE_TASK_LIMIT_PER_DAY` in the `TasksPanel` slice.
 
-- The last of the "big four": the inline Guardian/support panel
-  (250-320 lines, touching large swaths of state).
+**The "big four" are done.** All fifteen `<ToolPanel>` sections that
+used to live inline in `GlowUpTracker` have been extracted across
+phase 7's eight slices.
+
+Remaining:
+
 - The always-in-tree "today" dashboard view itself (not a `ToolPanel`) —
-  the biggest remaining piece, and the one most likely to need something
-  beyond pure prop drilling (it's arguably `GlowUpTracker`'s actual
-  irreducible core, not a candidate for further extraction).
+  the last piece of `src/app-source.jsx`, and the one most likely to
+  need something beyond pure prop drilling. It's arguably
+  `GlowUpTracker`'s actual irreducible core — the component that holds
+  nearly all state to begin with — rather than a further extraction
+  candidate. Worth a fresh, deliberate look rather than assuming it
+  decomposes the same way the modals did.
 
 After each phase: `npm test` must pass, `npm run web:sync` must succeed,
 and the compiled bundle should be spot-checked with `node --check`. Phase
