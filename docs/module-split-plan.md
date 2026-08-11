@@ -1,11 +1,18 @@
 # Module split — plan and progress
 
-`index.html` is ~795KB / 11,000 lines, almost all of it inside one
-`<script id="app-source" type="text/plain">` block that gets transpiled at
+`index.html` used to be ~795KB / 11,000 lines, almost all of it inside one
+`<script id="app-source" type="text/plain">` block that got transpiled at
 runtime (GitHub Pages) or precompiled by `scripts/sync-www.js` (Android,
-Cloudflare). That's the thing being incrementally split up. See the
-"Checkpoints" section of `CLAUDE.md` — this is deliberately being done in
-small, separately-verified phases, not as one pass.
+Cloudflare). As of phase 4 step 2, that inline block is gone: the app
+source lives at `src/app-source.jsx`, and `scripts/sync-www.js` bundles it
+with esbuild (real `import`/`export` resolution, not a single-file
+transform) into `assets/app.bundle.js` for all three deploy targets —
+Android, Cloudflare, and GitHub Pages alike. `index.html` now just loads
+that bundle via `<script src="./assets/app.bundle.js"></script>`, same as
+the other precompiled UMD modules in `assets/`. That monolithic file is
+the thing being incrementally split up. See the "Checkpoints" section of
+`CLAUDE.md` — this is deliberately being done in small,
+separately-verified phases, not as one pass.
 
 ## The pattern
 
@@ -25,13 +32,15 @@ Follow the convention `assets/entitlements.js` already established:
   (`SITE_DIRECTORIES = ["assets"]`), so new files there need no build
   changes to reach Android/Cloudflare.
 
-**Important limitation:** this pattern only works for plain JS — data,
-constants, pure functions. It does **not** work for React components,
-because files loaded this way run as-is in the browser with no JSX
-transform. Splitting out actual components (`PlushMascot`,
-`BubbleWrapInteractive`, etc.) needs a real bundler (esbuild is the
-likely choice — it does JSX + ESM in one step) and is a bigger, separate
-decision per the Checkpoints list. Not started.
+**Important limitation:** the `assets/xxx.js` UMD pattern above only works
+for plain JS — data, constants, pure functions. It does **not** work for
+React components, because files loaded this way run as-is in the browser
+with no JSX transform. Splitting out actual components needs a real
+bundler — esbuild, adopted in phase 4 — and a different pattern: an ES
+module under `src/` (JSX allowed) that `src/app-source.jsx` `import`s
+directly, resolved and bundled at build time rather than loaded as a
+separate `<script>` tag. See `src/components/shared.jsx` (phase 5) for the
+first example.
 
 ## Phase count
 
@@ -41,13 +50,15 @@ Roughly 6-7 phases total, decided when phase 1 shipped:
 2. **Done** — small pure helpers (`assets/plush-helpers.js`)
 3. **Done** — date/schedule/task utilities and the billing-provider
    placeholder (`assets/plush-schedule.js`, `assets/plush-billing.js`)
-4. **Partly done** — adopted esbuild as the bundler in
-   `scripts/sync-www.js` (Android/Cloudflare build path). GitHub Pages
-   unification and actual component extraction are still pending — see
-   below.
-5. Extract the self-contained comfort-tool interactive widgets
+4. **Done** — adopted esbuild as the bundler in `scripts/sync-www.js`
+   (step 1), then unified GitHub Pages onto the same precompiled bundle
+   (step 2), retiring the runtime Babel-in-browser compile entirely.
+5. **Done** — first real component extraction: `ToolPanel` and
+   `HabitTypeIcon` (`src/components/shared.jsx`).
 6. Extract other self-contained components (`PlushMascot`, `NurseryNook`,
-   `MamasCorner`, `BabyModeCareSuite`, `LandingPage`, `ToolPanel`)
+   `BabyArrivalRitual`, `MamasCorner`, `BabyModeCareSuite`,
+   `AppLoadingScreen`, `LandingPage`, `GlowUpTracker`'s smaller
+   subcomponents)
 7. Split the root `App` component itself — the hardest part, likely more
    than one phase on its own once its actual state-sharing shape is clear
 
@@ -92,6 +103,15 @@ Roughly 6-7 phases total, decided when phase 1 shipped:
 - **`assets/plush-billing.js`** — `getBillingProvider` and
   `GooglePlayBillingProvider` (the inert Play Billing architecture
   placeholder — every method still just throws).
+- **`src/components/shared.jsx`** (phase 5) — `ToolPanel` (the
+  modal/dialog wrapper used throughout the app) and `HabitTypeIcon`.
+  First real component extraction — an ES module with JSX that
+  `src/app-source.jsx` `import`s and esbuild bundles in, not a
+  `window.PlushLifeXxx` global. `HabitTypeIcon` still reads
+  `habitTypeForTask` off `window.PlushLifeSchedule` at call time rather
+  than importing `plush-schedule.js` directly, so esbuild doesn't bundle
+  that module's content a second time on top of the separate `<script>`
+  tag that already loads it.
 
 ## Candidate remaining pure-logic (not scoped)
 
@@ -126,32 +146,48 @@ values, resolved by setting esbuild's `charset: "utf8"` to match
 Babel's literal-character output). No other differences existed
 anywhere in the file.
 
-**Step 2, not started:** unify GitHub Pages onto the same precompiled
-bundle Android/Cloudflare use. This becomes *necessary*, not optional,
-the moment phase 5 moves any real component's JSX into a separate file
-— GitHub Pages' raw `index.html` would otherwise be missing that
-component's code entirely, since it no longer runs through a build
-step. Needs `.github/workflows/deploy-pages.yml` to build via
-`sync-www.js`/esbuild before publishing, instead of its current plain
-file copy. This is the part that actually changes live, user-facing
-deploy behavior (see Checkpoints in `CLAUDE.md`) and deserves its own
-careful pass with its own verification, ideally exercised alongside the
-first real component extraction (phase 5) rather than done blind ahead
-of it.
+**Step 2, done:** unified GitHub Pages onto the same precompiled bundle
+Android/Cloudflare use. This became *necessary*, not optional, once phase
+5 moved real component JSX (`ToolPanel`, `HabitTypeIcon`) into a separate
+file — GitHub Pages' raw `index.html` would otherwise be missing that
+code entirely, since it no longer ran through a build step. Concretely:
+the inline `<script id="app-source">` block and the runtime
+`Babel.transform()` call were removed from `index.html` entirely, replaced
+with `<script src="./assets/app.bundle.js"></script>` (same as the other
+precompiled UMD modules); `scripts/sync-www.js`'s `compileAppSource()`
+switched from `esbuild.transformSync()` on inline HTML text to
+`esbuild.buildSync()` with a real entry point (`src/app-source.jsx`),
+resolving `import`s instead of transforming a single blob; and
+`.github/workflows/deploy-pages.yml` now runs `npm run web:sync` and
+publishes the resulting `www/` directory (bundle + vendored
+React/ReactDOM/Supabase + everything else) instead of hand-assembling
+`_site/` with `cp`.
 
-## Candidate component phases (blocked on phase 4 step 2)
+This is a real, deliberate tradeoff worth naming: GitHub Pages'
+`index.html` was previously "an independently deployable backup" that
+worked with zero build step, pure insurance if the Android/Cloudflare
+build pipeline ever broke. That property is gone now that all three
+targets share one precompiled bundle — a broken build breaks all three
+the same way. Accepted as the cost of being able to split out real
+components at all; `@babel/standalone` (no longer used anywhere) was
+removed as a dependency in the same phase.
 
-- Comfort-tool interactive widgets: `BubbleWrapInteractive`,
-  `WorryJarInteractive`, `SensoryTapInteractive`, `DoodlePadInteractive`,
-  `PerspectiveFlipCardsInteractive`, `BoundaryScriptsInteractive`,
-  `DecompressionBufferInteractive`, `SensoryComfortInteractive` — already
-  self-contained (props in, no reach into outer app state), best next
-  real components to extract.
-- Other fairly self-contained components: `PlushMascot`, `NurseryNook`,
-  `MamasCorner`, `BabyModeCareSuite`, `LandingPage`, `ToolPanel`.
-- The root `App` component — holds nearly all state; splitting it safely
-  needs a real decision on how state gets shared across the split pieces
-  (context, prop drilling, or something else) before it's attempted.
+`scripts/validate-app-source.js` changed accordingly: it used to extract
+and Babel-compile the inline `<script id="app-source">` block from
+`index.html`; it now `esbuild.buildSync()`s `src/app-source.jsx` directly
+(catching import/resolution errors, not just JSX syntax errors) and
+checks its regression markers against `src/app-source.jsx` +
+`src/components/shared.jsx` + the `assets/plush-*.js` modules combined.
+
+## Candidate component phases (phase 6+)
+
+- Fairly self-contained components: `PlushMascot`, `NurseryNook`,
+  `BabyArrivalRitual`, `MamasCorner`, `BabyModeCareSuite`,
+  `AppLoadingScreen`, `LandingPage`.
+- The root `App` component (`GlowUpTracker`) — holds nearly all state;
+  splitting it safely needs a real decision on how state gets shared
+  across the split pieces (context, prop drilling, or something else)
+  before it's attempted.
 
 After each phase: `npm test` must pass, `npm run web:sync` must succeed,
 and the compiled bundle should be spot-checked with `node --check`.
