@@ -276,12 +276,33 @@ directly from `./mascot.jsx` (it's already its own module since phase
 6) rather than passed as a prop; `MASCOT_OUTFITS` read from
 `window.PlushLifeContent` inside the new file, same as everywhere else.
 
+Also done: `Admin` (`src/components/admin-panel.jsx` — `AdminPanel`),
+the first of the "big four" and the largest extraction to date (~250
+lines, ~26 props). Owner-only tooling: site stats, feature usage,
+onboarding funnel, Supporter status grant/revoke, Google Play review
+account management, feedback inbox, error logs, and the dev-only
+PlushPlus entitlement preview. `SUPPORTER_FEATURES_ENABLED` — a plain
+`false` literal in `app-source.jsx`, not a window global — is passed as
+a prop rather than duplicated, so there stays exactly one source of
+truth for that billing gate (see `CLAUDE.md`'s Checkpoints).
+`window.PlushLifeEntitlements` is read directly since it's already a
+global. The tokenized bundle diff surfaced a new variant of esbuild's
+auto-renaming this size finally triggered: a nested local `const pct`
+inside one of `AdminPanel`'s `.map()` callbacks got renamed to `pct2`,
+not because of any real collision (it's function-scoped, genuinely
+independent of the several other `const pct` declarations still elsewhere
+in `GlowUpTracker`) but because esbuild's bundler renames defensively
+across file boundaries at any scope depth, not just top-level `const`s
+like the earlier `MASCOT_OUTFITS` → `MASCOT_OUTFITS2` cases. Confirmed
+safe: both the declaration and every reference within that one callback
+were renamed together and consistently, with zero leakage into other
+scopes.
+
 Remaining, roughly in order of increasing size/risk:
 
-- The big four, each 250-320 lines and touching large swaths of state:
-  `Settings`, `Admin`, `Change my tasks`, and the inline Guardian/support
-  panel. These are the ones that actually justify phase 7's "hardest
-  part" reputation — save for dedicated passes, not a blind batch.
+- The remaining three of the "big four": `Settings`, `Change my tasks`,
+  and the inline Guardian/support panel (250-320 lines each, touching
+  large swaths of state).
 - The always-in-tree "today" dashboard view itself (not a `ToolPanel`) —
   the biggest remaining piece, and the one most likely to need something
   beyond pure prop drilling (it's arguably `GlowUpTracker`'s actual
