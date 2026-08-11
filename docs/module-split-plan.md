@@ -315,11 +315,40 @@ callback → `done2`) — both confirmed safe the same way as previous
 slices (consistent renaming of every reference within the same scope,
 zero leakage elsewhere).
 
+Also done: while cataloguing free variables for `Change my tasks`,
+found and fixed a real, pre-existing bug unrelated to the module split:
+`WEEKDAY_PRESET_IDS`/`WEEKEND_PRESET_IDS` are exported by
+`assets/plush-schedule.js` (since phase 3) but were never added to
+`app-source.jsx`'s top-level destructuring of
+`window.PlushLifeSchedule` — a `ReferenceError` at runtime whenever the
+"specific days" weekday/weekend preset buttons rendered (add-task form
+or edit-task modal, with the default weekly schedule type). Shipped as
+its own isolated PR before continuing the extraction, with a new
+regression marker in `validate-app-source.js` so this class of bug
+(export exists, consuming file's destructure missed it) can't silently
+reappear.
+
+Also done: `Change my tasks` (`src/components/tasks-panel.jsx` —
+`TasksPanel`), the third of the "big four" and the largest slice yet by
+prop count (~277 lines, ~80 props). Task creation (natural-language
+schedule parsing, starter packs, bulk import) plus the
+editable/draggable task list. The edit-task modal, delete-confirmation
+dialog, and ask-for-help modal are separate always-in-tree overlays
+elsewhere in `GlowUpTracker`, not inside this `ToolPanel`, so only the
+setters/handlers that open them needed to move, not the modals
+themselves. `DAYS`/`TEMPLATE_PACKS` read from
+`window.PlushLifeContent`; `WEEKDAY_PRESET_IDS`/`WEEKEND_PRESET_IDS`/
+`scheduleLabelForTask` read from `window.PlushLifeSchedule`, both
+inside the new file. Tokenized diff showed the usual top-level and
+nested-scope auto-renames, plus a new (still harmless) case: the
+panel's own `open` prop genuinely shadows an inner callback's `open`
+parameter (`setImportOpen(open => !open)`), which esbuild relabeled to
+`open2` — a pure toggler, unaffected either way.
+
 Remaining, roughly in order of increasing size/risk:
 
-- The remaining two of the "big four": `Change my tasks` and the inline
-  Guardian/support panel (250-320 lines each, touching large swaths of
-  state).
+- The last of the "big four": the inline Guardian/support panel
+  (250-320 lines, touching large swaths of state).
 - The always-in-tree "today" dashboard view itself (not a `ToolPanel`) —
   the biggest remaining piece, and the one most likely to need something
   beyond pure prop drilling (it's arguably `GlowUpTracker`'s actual
