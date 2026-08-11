@@ -21,7 +21,15 @@ public class WidgetBridgePlugin extends Plugin {
         "var clean=function(v){return String(v||'').replace(/\\s+/g,' ').trim();};" +
         "var visible=function(n){return !!(n&&n.getClientRects&&n.getClientRects().length);};" +
         "var rows=function(){var out=[];document.querySelectorAll('input[type=checkbox],[role=checkbox],button[aria-pressed]').forEach(function(c){" +
-        "if(!visible(c)||c.closest('#plushlife-gentle-panel'))return;" +
+        // Settings and every other overlay (task manager, template picker,
+        // etc.) share the ToolPanel component, which renders as
+        // role="dialog" on top of the dashboard while the dashboard itself
+        // stays mounted underneath. Without this exclusion, opening Settings
+        // and tapping anything nearby re-scrapes the whole page and picks up
+        // the appearance theme buttons and Baby Mode/Dino Theme checkboxes
+        // (they match the exact same selector) as if they were today's
+        // tasks, overwriting the widget with garbage.
+        "if(!visible(c)||c.closest('#plushlife-gentle-panel')||c.closest('[role=dialog]'))return;" +
         "var r=c.closest('li,article,[data-task-key],[class*=task-row],[class*=task-card]')||c.parentElement;" +
         "if(r&&visible(r)&&out.indexOf(r)<0)out.push(r);});return out;};" +
         "var isDone=function(c){return !!(c&&(c.checked||c.getAttribute('aria-checked')==='true'||c.getAttribute('aria-pressed')==='true'));};" +
