@@ -1,5 +1,11 @@
 # Audit: current PlushLife vs. the product vision
 
+> **ARCHIVED.** This audit is what prompted archiving
+> `plushlife-product-vision.md` in the first place — it shows a prior
+> session treating that doc as a live spec and beginning to execute
+> against it. Kept here as a historical record only, not as a queue of
+> approved next steps.
+
 Comparing `docs/plushlife-product-vision.md` against the app as it exists
 today (`index.html`, `database/`). This is phase 1 of that document's own
 recommended rollout order — read-only, no code changed for this audit.

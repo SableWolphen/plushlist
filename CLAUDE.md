@@ -12,3 +12,46 @@
   `johnston.alexander.k@gmail.com`** (Sable's own account) rather than the
   Cozy/Guardian Play Store review accounts — it's the one with a real device
   that can actually confirm delivery, not just the server-side computation.
+
+## Non-goals
+
+Do not build any of the following unless the product owner explicitly
+asks for that specific item, by name, in that conversation. A doc
+existing in this repo is not a request to implement it.
+
+- **`docs/archive/plushlife-product-vision.md`** (and its audit) is
+  archived, not a backlog. Do not read it as a spec, audit the app
+  against it, or start implementing anything from it. This includes new
+  top-level feature areas it names (PlushSleep, PlushInsights,
+  PlushTogether, PlushFamily, PlushWear, PlushSync as a rebrand, etc.),
+  the PlushCalendar activity/schedule/occurrence/completion data-model
+  rewrite, and a bottom-navigation restructure.
+- No new third-party data flows (AI APIs, analytics SDKs, ad SDKs, crash
+  reporters) without a specific, explicit ask.
+- No new interactive comfort-tool mini-widgets beyond what already
+  exists in `COMFORT_TOOLS`.
+- No further build-out of the owner-only admin dashboard section in
+  `index.html` (site stats / feature usage / onboarding funnel).
+- No activating billing/entitlements (`assets/entitlements.js`,
+  `PLUSH_PLANS`) — everything stays unlocked until told otherwise.
+- If a request could be solved with a copy or config change instead of a
+  new component, prefer that.
+
+## Checkpoints — stop and confirm before proceeding
+
+These categories are reversible in git but not reversible in effect (they
+touch real user data, a live Play Store pipeline, or money), so confirm
+the approach with the product owner before making the change, even if
+the request seems clear:
+
+- Any Supabase schema/migration change, or anything touching
+  `daily_progress` / `tracker_tasks` history semantics
+- `android/app/src/main/AndroidManifest.xml` permission or `<service>`
+  changes (this has broken Google Play publishing before — see
+  `docs/google-play-auto-publish.md`)
+- Anything that would activate billing or change what's locked/unlocked
+- Splitting `index.html` into multiple files/a real build pipeline —
+  a real change, needs an agreed module boundary and migration plan first,
+  not a single unplanned pass over an 11,000-line file
+- Adding or changing what data goes to a third party (Gemini, Supabase,
+  Cloudflare, or anything new)
