@@ -67,6 +67,8 @@ const {
   taskOccursOn,
   taskIsScheduledForDate,
   datesThroughToday,
+  WEEKDAY_PRESET_IDS,
+  WEEKEND_PRESET_IDS,
 } = window.PlushLifeSchedule;
 const { getBillingProvider } = window.PlushLifeBilling;
 
