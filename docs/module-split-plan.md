@@ -366,15 +366,39 @@ same safe pattern as `SUPPORTER_FEATURES_ENABLED`/
 used to live inline in `GlowUpTracker` have been extracted across
 phase 7's eight slices.
 
+**Correction to the "only 'today' remains" framing above:** a closer
+look found `GlowUpTracker`'s render body isn't one monolithic
+always-in-tree section — it's actually five separate blocks switched on
+`dashboard === "x"` (`today`, `care`, `week`, `progress`, plus a small
+`today`-only check-in bar), the same conditional-render shape as the
+`ToolPanel`s, just without a boolean `xOpen` state and without an
+`onClose`. The exact same prop-drilling extraction technique applies
+directly. This reopens real, tractable work rather than leaving only
+an "irreducible core" to write up.
+
+Also done: `dashboard === "care"` (`src/components/care-panel.jsx` —
+`CarePanel`), the ninth phase 7 slice and the first dashboard-tab view
+extracted (~123 lines, ~31 props). Quick comfort tools, PlushPaths,
+PlushSleep + soundscapes, and (for the one profile that has it) Mama's
+Corner. `COMFORT_TOOLS`/`PLUSH_PATHS`/`SLEEP_TOOLS`/`SOUNDSCAPES`/
+`GENTLE_AFFIRMATIONS` read from `window.PlushLifeContent`;
+`pathOfTheWeekId` from `window.PlushLifeSchedule` — both inside the new
+file. `MamasCorner` imported directly from `./baby-mode.jsx` (already
+its own module since phase 6). `HELP_ME_NOW_OPTIONS` passed as a prop
+(a plain literal in `app-source.jsx`, not a window global). No
+`onClose` prop on this one, unlike every `ToolPanel` slice — dashboard
+tabs don't have a close button, just an `open` gate.
+
 Remaining:
 
-- The always-in-tree "today" dashboard view itself (not a `ToolPanel`) —
-  the last piece of `src/app-source.jsx`, and the one most likely to
-  need something beyond pure prop drilling. It's arguably
-  `GlowUpTracker`'s actual irreducible core — the component that holds
-  nearly all state to begin with — rather than a further extraction
-  candidate. Worth a fresh, deliberate look rather than assuming it
-  decomposes the same way the modals did.
+- `dashboard === "progress"` and `dashboard === "week"` — sibling
+  dashboard-tab views to `care`, same extraction pattern, not yet
+  scoped for size/prop count.
+- `dashboard === "today"` — the default, most complex view (~530
+  lines), and the one most likely to actually be `GlowUpTracker`'s
+  irreducible core once the other three tabs are out of the way. Worth
+  a fresh look once `progress` and `week` are done, rather than
+  assuming either way in advance.
 
 After each phase: `npm test` must pass, `npm run web:sync` must succeed,
 and the compiled bundle should be spot-checked with `node --check`. Phase
