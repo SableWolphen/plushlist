@@ -1,483 +1,76 @@
-# Module split — plan and progress
+# Module split — plan and current state
 
-`index.html` used to be ~795KB / 11,000 lines, almost all of it inside one
-`<script id="app-source" type="text/plain">` block that got transpiled at
-runtime (GitHub Pages) or precompiled by `scripts/sync-www.js` (Android,
-Cloudflare). As of phase 4 step 2, that inline block is gone: the app
-source lives at `src/app-source.jsx`, and `scripts/sync-www.js` bundles it
-with esbuild (real `import`/`export` resolution, not a single-file
-transform) into `assets/app.bundle.js` for all three deploy targets —
-Android, Cloudflare, and GitHub Pages alike. `index.html` now just loads
-that bundle via `<script src="./assets/app.bundle.js"></script>`, same as
-the other precompiled UMD modules in `assets/`. That monolithic file is
-the thing being incrementally split up. See the "Checkpoints" section of
-`CLAUDE.md` — this is deliberately being done in small,
-separately-verified phases, not as one pass.
+The PlushLife web app used to keep almost all application code in one very large inline script in `index.html`. The module split moved that code into testable modules and React component files while keeping the existing product behavior and state ownership intact.
 
-## The pattern
+See `PROJECT_GUIDELINES.md` for the current collaboration rules and checkpoints. The module split described here is already approved; any new database, billing, Android permission/service, third-party-data, or major deploy-pipeline change still requires a separate product-owner decision.
 
-Follow the convention `assets/entitlements.js` already established:
+## Current architecture
 
-- A UMD-style wrapper: `module.exports` for Node (so it's testable with
-  plain `require()`), `window.PlushLifeXxx` for the browser.
-- Loaded via a `<script src="./assets/xxx.js"></script>` tag in
-  `index.html`, **before** the `app-source` block, so its
-  `window.PlushLifeXxx` global exists by the time the app script runs.
-- Consumed from `app-source` with a single destructuring line —
-  `const { A, B, C } = window.PlushLifeXxx;` — so call sites elsewhere in
-  the file don't need to change at all.
-- A matching `scripts/test-xxx.js` that `require()`s the module directly,
-  wired into the `test` script in `package.json`.
-- `scripts/sync-www.js` already copies the whole `assets/` directory
-  (`SITE_DIRECTORIES = ["assets"]`), so new files there need no build
-  changes to reach Android/Cloudflare.
+- `src/app-source.jsx` is the application entry point.
+- `scripts/sync-www.js` bundles the app with esbuild into `assets/app.bundle.js`.
+- Android, Cloudflare, and GitHub Pages all use the same precompiled bundle.
+- Plain data and pure helpers that do not need JSX remain in `assets/` modules exposed through `window.PlushLife*` globals.
+- React components live under `src/components/` and are imported normally by `src/app-source.jsx`.
+- `GlowUpTracker` remains the owner of application state. Extracted components receive the state values, setters, and handlers they need through explicit props; the refactor did not introduce a reducer/context rewrite.
 
-**Important limitation:** the `assets/xxx.js` UMD pattern above only works
-for plain JS — data, constants, pure functions. It does **not** work for
-React components, because files loaded this way run as-is in the browser
-with no JSX transform. Splitting out actual components needs a real
-bundler — esbuild, adopted in phase 4 — and a different pattern: an ES
-module under `src/` (JSX allowed) that `src/app-source.jsx` `import`s
-directly, resolved and bundled at build time rather than loaded as a
-separate `<script>` tag. See `src/components/shared.jsx` (phase 5) for the
-first example.
+## Completed phases
 
-## Phase count
+1. **Static content/data** — `assets/plush-content.js`
+2. **Pure helpers** — `assets/plush-helpers.js`
+3. **Date/schedule/task helpers and billing placeholder** — `assets/plush-schedule.js`, `assets/plush-billing.js`
+4. **Build pipeline** — moved compilation to esbuild and unified all deploy targets on the same generated bundle
+5. **Shared components** — `src/components/shared.jsx` (`ToolPanel`, `HabitTypeIcon`)
+6. **Self-contained app components** — mascot, baby-mode, loading, and landing components
+7. **Root-component decomposition** — extracted all modal/tool panels plus all four main dashboard views from `GlowUpTracker`
 
-Roughly 6-7 phases total, decided when phase 1 shipped:
+## Phase 7 result
 
-1. **Done** — static content/data (`assets/plush-content.js`)
-2. **Done** — small pure helpers (`assets/plush-helpers.js`)
-3. **Done** — date/schedule/task utilities and the billing-provider
-   placeholder (`assets/plush-schedule.js`, `assets/plush-billing.js`)
-4. **Done** — adopted esbuild as the bundler in `scripts/sync-www.js`
-   (step 1), then unified GitHub Pages onto the same precompiled bundle
-   (step 2), retiring the runtime Babel-in-browser compile entirely.
-5. **Done** — first real component extraction: `ToolPanel` and
-   `HabitTypeIcon` (`src/components/shared.jsx`).
-6. **Done** — extracted the other self-contained components:
-   `PlushMascot`, `NurseryNook`, `AppLoadingScreen`
-   (`src/components/mascot.jsx`); `BabyArrivalRitual`, `MamasCorner`,
-   `BabyModeCareSuite` (`src/components/baby-mode.jsx`); `LandingPage`
-   (`src/components/landing.jsx`).
-7. **Done** — splitting the root `App` component (`GlowUpTracker`)
-   itself, which still holds nearly all state. State-sharing decision:
-   **explicit prop drilling**, not context — each extracted piece takes
-   exactly the state values/setters/handlers its body reads as named
-   props, the same pattern already proven by `MamasCorner`'s `supabase`
-   prop in phase 6. No reducer rewrite, no context providers; `GlowUpTracker`
-   remains the single owner of all state. All fifteen `ToolPanel` modals
-   and all four `dashboard === "x"` tab views (`care`, `progress`, `week`,
-   `today`) are now extracted — twelve slices total. See the dedicated
-   section below for the full breakdown and the one small piece
-   deliberately left in place.
+Phase 7 is complete. The large UI sections that previously lived inline inside `GlowUpTracker` are now separated into component modules, including:
 
-## Done
+- `src/components/info-panels.jsx`
+- `src/components/viewer-panels.jsx`
+- `src/components/schedule-editor-panel.jsx`
+- `src/components/rewards-panel.jsx`
+- `src/components/admin-panel.jsx`
+- `src/components/settings-panel.jsx`
+- `src/components/tasks-panel.jsx`
+- `src/components/guardian-panel.jsx`
+- `src/components/care-panel.jsx`
+- `src/components/progress-panel.jsx`
+- `src/components/week-panel.jsx`
+- `src/components/today-panel.jsx`
 
-- **`assets/plush-content.js`** — `MASCOT_OUTFITS`, `APPEARANCE_THEMES`,
-  `MASCOT_GROWTH_STAGES`, `DAYS`, `TEMPLATE_PACKS`, `DASHBOARDS`,
-  `PLUSH_PATHS`, `SLEEP_TOOLS`, `SOUNDSCAPES`, `GENTLE_AFFIRMATIONS`,
-  `COMFORT_TOOLS`. ~225 lines moved out of `index.html`.
-  - Two of `scripts/validate-app-source.js`'s regression markers
-    (`const APPEARANCE_THEMES = [`, `Rainy-Day Coat`, `yearlight-crown`)
-    referenced content that moved — the check now searches the
-    concatenation of the app-source block and `plush-content.js` instead
-    of only the former.
-- **`assets/plush-helpers.js`** — `formatRelativeTime`,
-  `MOTHERLY_NICKNAMES`, `OPTIONAL_SECTION_MARKERS`,
-  `urlBase64ToUint8Array`, `mascotGrowthStageForDays`. The last of these
-  depends on `MASCOT_GROWTH_STAGES` from `plush-content.js`; the module
-  `require()`s it directly in Node and reads `window.PlushLifeContent` in
-  the browser (safe because `plush-content.js` always loads first).
-  - One more regression marker (`const MOTHERLY_NICKNAMES = [`) moved
-    with it — `validate-app-source.js` now checks all three files
-    together.
-- **`assets/plush-schedule.js`** — 23 pure date/schedule/task-shape
-  functions (`isQuietTime`, `taskIsOptional`, `scheduleLabelForTask`,
-  `reflectionPromptForDay`, `trackerPeriod`, `dayIdForDate`,
-  `pathOfTheWeekId`, `dateForDayId`, `formatTime12`, `parseTime24`,
-  `splitScheduleField`, `legacyScheduleToEntries`, `habitTypeForTask`,
-  `cleanTaskDetail`, `encodeTaskDetail`, `offsetDate`, `monthKeyOffset`,
-  `daysInCalendarMonth`, `datesInMonthThrough`, `daysBetweenDates`,
-  `taskOccursOn`, `taskIsScheduledForDate`, `datesThroughToday`) plus
-  their supporting constants (`WEEKDAY_PRESET_IDS`, `WEEKEND_PRESET_IDS`,
-  `WEEKDAY_IDS`, `HABIT_META_PATTERN`, `REFLECTION_PROMPT_ROTATIONS`).
-  Depends on `plush-content.js` (`DAYS`, `PLUSH_PATHS`),
-  `plush-helpers.js` (`OPTIONAL_SECTION_MARKERS`), and the existing
-  `care-upgrades.js` (`taskTargetsDate`).
-  - Caught a real bug during extraction: `OPTIONAL_SECTION_MARKERS`
-    actually lives in `plush-helpers.js` (phase 2), not
-    `plush-content.js` — the first draft of this module destructured it
-    from the wrong dependency, which `npm test` caught immediately as a
-    `Cannot read properties of undefined` crash in `taskIsOptional`.
-- **`assets/plush-billing.js`** — `getBillingProvider` and
-  `GooglePlayBillingProvider` (the inert Play Billing architecture
-  placeholder — every method still just throws).
-- **`src/components/shared.jsx`** (phase 5) — `ToolPanel` (the
-  modal/dialog wrapper used throughout the app) and `HabitTypeIcon`.
-  First real component extraction — an ES module with JSX that
-  `src/app-source.jsx` `import`s and esbuild bundles in, not a
-  `window.PlushLifeXxx` global. `HabitTypeIcon` still reads
-  `habitTypeForTask` off `window.PlushLifeSchedule` at call time rather
-  than importing `plush-schedule.js` directly, so esbuild doesn't bundle
-  that module's content a second time on top of the separate `<script>`
-  tag that already loads it.
-- **`src/components/mascot.jsx`** (phase 6) — `PlushMascot`,
-  `NurseryNook`, `AppLoadingScreen` (the two latter both render
-  `PlushMascot`). Reads `MASCOT_OUTFITS` (`window.PlushLifeContent`) and
-  `mascotGrowthStageForDays` (`window.PlushLifeHelpers`) at module scope,
-  same pattern as `app-source.jsx` itself.
-- **`src/components/baby-mode.jsx`** (phase 6) — `BabyArrivalRitual`,
-  `MamasCorner`, `BabyModeCareSuite` (plus the unexported helper
-  `littleSpaceTaskLabel`, used only by `BabyModeCareSuite`). `MamasCorner`
-  needed one real code change to extract cleanly: it used to close over
-  the module-level `supabase` client declared at the top of the old
-  monolithic `app-source` block; now that it lives in its own file, it
-  takes `supabase` as a prop instead, passed down from
-  `src/app-source.jsx`'s `GlowUpTracker` (which still owns the one
-  `supabase` client instance) at its call site. Same client, same auth
-  session — just threaded explicitly instead of implicitly via closure.
-- **`src/components/landing.jsx`** (phase 6) — `LandingPage`, the
-  signed-out marketing page. Fully self-contained aside from the
-  sign-in-form props `GlowUpTracker` already passed it.
+The Today extraction was the final large dashboard slice. One small today-only check-in shortcut remains inline in `app-source.jsx` because it is separate from the main Today fragment and is too small to justify another component by itself.
 
-Verified phase 6 the same way as phase 5: `npm test` (including
-`validate-app-source.js`'s regression markers, updated for the two
-components whose call sites changed), `npm run web:sync`, `node --check`
-on the output, plus a tokenized diff between the pre- and post-phase-6
-bundle. The only real differences were the intentional `supabase` prop on
-`MamasCorner` and esbuild automatically renaming a handful of duplicate
-top-level `const` bindings (e.g. `MASCOT_OUTFITS` → `MASCOT_OUTFITS2`)
-where both `app-source.jsx` and a new component file independently
-destructure the same `window.PlushLifeXxx` global — both bindings read
-the identical underlying value, so this is a safe, automatic
-disambiguation, not a behavior change.
-- **`src/components/info-panels.jsx`** (phase 7, first slice) —
-  `ProfilePanel`, `SafetyPanel`, `HelpPanel`, `CalmPanel`: the four
-  smallest, most clearly-bounded `ToolPanel` modals that used to be
-  inline `{xOpen && (<ToolPanel ...>...)}` blocks directly in
-  `GlowUpTracker`'s render body. Each now takes `open`/`onClose` as
-  explicit props (replacing the inline `{xOpen && (...)}` guard and the
-  closed-over `setXOpen` calls, respectively) plus whatever other
-  state/handlers its body reads, passed by name from `GlowUpTracker`'s
-  call site — pure prop drilling, no new state indirection.
-  `GlowUpTracker` still owns `profileOpen`/`safetyOpen`/`helpOpen`/
-  `calmQuickOpen` and every other piece of state; only the JSX moved.
-  Verified with the same tokenized bundle diff technique as phase 6: the
-  only real differences were the `setXOpen(false)` → `onClose()`
-  substitutions and the new explicit prop lists at each call site — no
-  missing or extra logic.
+## Extraction pattern
 
-## Candidate remaining pure-logic (not scoped)
+For plain JavaScript modules in `assets/`:
 
-A deeper audit could still find other standalone pure functions further
-into the file — this phase covered everything reachable from the top
-third of `app-source`, not a full sweep. Worth another pass later, but
-not blocking anything else.
+- Use the existing UMD-style pattern (`module.exports` in Node/tests, `window.PlushLifeXxx` in the browser).
+- Keep modules focused on data, constants, or pure functions.
+- Add/update direct Node tests where appropriate.
 
-## Phase 4 — bundler decision
+For React components under `src/components/`:
 
-**Step 1, done:** `scripts/sync-www.js`'s `compileAppSource()` now uses
-`esbuild.transformSync()` (loader `jsx`, classic runtime — `React`
-stays a global, not an ES import — `minifyWhitespace` only, `charset:
-"utf8"`) instead of `@babel/standalone`'s `Babel.transform()`. This
-only replaces the *compiler*, not the pipeline shape — it still
-transforms the same single monolithic `app-source` block into
-`assets/app.bundle.js`, same as before. No component has moved to a
-separate file yet, so GitHub Pages' raw `index.html` (still served
-as-is, still doing its own runtime Babel-in-browser compile of the same
-unmodified block) needed no changes and remains completely untouched by
-this step.
+- Import them from `src/app-source.jsx` so esbuild resolves and bundles them.
+- Keep `GlowUpTracker` as the state owner unless there is a separate, explicit reason to change state architecture.
+- Pass existing state/handlers as named props rather than duplicating state or introducing a context provider solely for extraction.
+- Read existing `window.PlushLifeContent`, `window.PlushLifeSchedule`, and related globals inside a component when that matches the established module pattern.
 
-Verified equivalence rigorously, not just "tests still pass": built the
-same source with both the old Babel path and the new esbuild path,
-tokenized and diffed the two compiled outputs. Every single difference
-across the entire ~650KB file fell into three known-safe categories —
-`/*#__PURE__*/` annotation comments (dev/tooling hints, inert at
-runtime, which esbuild doesn't emit), leading-zero numeric literal
-formatting (`0.23` vs `.23`, identical values), and Unicode escape
-representation (`💤` vs literal `💤`, identical string
-values, resolved by setting esbuild's `charset: "utf8"` to match
-Babel's literal-character output). No other differences existed
-anywhere in the file.
+## Verification standard
 
-**Step 2, done:** unified GitHub Pages onto the same precompiled bundle
-Android/Cloudflare use. This became *necessary*, not optional, once phase
-5 moved real component JSX (`ToolPanel`, `HabitTypeIcon`) into a separate
-file — GitHub Pages' raw `index.html` would otherwise be missing that
-code entirely, since it no longer ran through a build step. Concretely:
-the inline `<script id="app-source">` block and the runtime
-`Babel.transform()` call were removed from `index.html` entirely, replaced
-with `<script src="./assets/app.bundle.js"></script>` (same as the other
-precompiled UMD modules); `scripts/sync-www.js`'s `compileAppSource()`
-switched from `esbuild.transformSync()` on inline HTML text to
-`esbuild.buildSync()` with a real entry point (`src/app-source.jsx`),
-resolving `import`s instead of transforming a single blob; and
-`.github/workflows/deploy-pages.yml` now runs `npm run web:sync` and
-publishes the resulting `www/` directory (bundle + vendored
-React/ReactDOM/Supabase + everything else) instead of hand-assembling
-`_site/` with `cp`.
+Each extraction slice was checked with the same basic safety bar:
 
-This is a real, deliberate tradeoff worth naming: GitHub Pages'
-`index.html` was previously "an independently deployable backup" that
-worked with zero build step, pure insurance if the Android/Cloudflare
-build pipeline ever broke. That property is gone now that all three
-targets share one precompiled bundle — a broken build breaks all three
-the same way. Accepted as the cost of being able to split out real
-components at all; `@babel/standalone` (no longer used anywhere) was
-removed as a dependency in the same phase.
+- `npm test`
+- `npm run web:sync`
+- `node --check www/assets/app.bundle.js`
+- build/import smoke checks when needed
+- tokenized bundle-diff review for behavior-preserving moves, including expected esbuild identifier renaming across bundled files
 
-`scripts/validate-app-source.js` changed accordingly: it used to extract
-and Babel-compile the inline `<script id="app-source">` block from
-`index.html`; it now `esbuild.buildSync()`s `src/app-source.jsx` directly
-(catching import/resolution errors, not just JSX syntax errors) and
-checks its regression markers against `src/app-source.jsx` +
-`src/components/shared.jsx` + the `assets/plush-*.js` modules combined.
+Several refactor slices also exposed real pre-existing bugs (for example missing schedule-helper imports). Those fixes were isolated and verified rather than hidden inside unrelated moves.
 
-## Phase 7 remaining work
+## What remains
 
-`GlowUpTracker` is a `<ToolPanel>`-heavy component: roughly 15 modal
-sections gated by their own `xOpen` boolean, plus one large
-always-in-tree "today" view. Done so far: the four smallest modals
-(`src/components/info-panels.jsx`) and the five smallish viewers with
-local derived state (`src/components/viewer-panels.jsx` — `MoodViewer`,
-`CarePathViewer`, `SleepToolViewer`, `JournalReflectionViewer`,
-`DailyJournalPanel`). The viewer-panels extraction kept each panel's
-inline IIFE-computed locals (`entry`/`mood`/`energy` lookups, path
-progress math) inside the new component rather than trying to hoist them
-out — only the panel's inputs became props, not its internal shape.
-`PLUSH_PATHS`/`SLEEP_TOOLS`/`reflectionPromptForDay`/`dayIdForDate`
-weren't passed as props at all — they're read from
-`window.PlushLifeContent`/`window.PlushLifeSchedule` directly inside the
-new file, the same globals `app-source.jsx` itself already reads, so
-esbuild renames the duplicate top-level bindings automatically (same
-safe pattern as `MASCOT_OUTFITS` → `MASCOT_OUTFITS2` in phase 6).
-Verified the same way: `npm test`, `npm run web:sync`, `node --check`,
-and a tokenized bundle diff confirming the only differences were the
-intentional `setXOpen(false)` → `onClose()` substitutions and each new
-call site's explicit prop list.
+The planned module split itself is finished. Future work should now be driven by product needs, bugs, performance, maintainability, or clearly demonstrated component boundaries — not by a goal of splitting files for its own sake.
 
-Also done: `Change my schedule`
-(`src/components/schedule-editor-panel.jsx` — `ScheduleEditorPanel`).
-~20 props (schedule-editing state and handlers), no local-derived-state
-complications, `DAYS` read from `window.PlushLifeContent` the same way
-as the previous slice's globals. One naming wrinkle worth documenting:
-the panel reads a derived value `scheduleEditingDayId` (`=
-scheduleEditDayId || scheduleDayId`, defined once in `GlowUpTracker`),
-not the raw `scheduleEditDayId` state — passed through by its derived
-name, unchanged.
-
-Also done: `Rewards` (`src/components/rewards-panel.jsx` —
-`RewardsPanel`). Confirmed the plan above: `FeatureTip` and `BADGE_DEFS`
-passed through as plain props, unmodified, since both are just
-references to whatever `GlowUpTracker` computed that render — extracting
-this didn't require touching either closure. `PlushMascot` is imported
-directly from `./mascot.jsx` (it's already its own module since phase
-6) rather than passed as a prop; `MASCOT_OUTFITS` read from
-`window.PlushLifeContent` inside the new file, same as everywhere else.
-
-Also done: `Admin` (`src/components/admin-panel.jsx` — `AdminPanel`),
-the first of the "big four" and the largest extraction to date (~250
-lines, ~26 props). Owner-only tooling: site stats, feature usage,
-onboarding funnel, Supporter status grant/revoke, Google Play review
-account management, feedback inbox, error logs, and the dev-only
-PlushPlus entitlement preview. `SUPPORTER_FEATURES_ENABLED` — a plain
-`false` literal in `app-source.jsx`, not a window global — is passed as
-a prop rather than duplicated, so there stays exactly one source of
-truth for that billing gate (see `CLAUDE.md`'s Checkpoints).
-`window.PlushLifeEntitlements` is read directly since it's already a
-global. The tokenized bundle diff surfaced a new variant of esbuild's
-auto-renaming this size finally triggered: a nested local `const pct`
-inside one of `AdminPanel`'s `.map()` callbacks got renamed to `pct2`,
-not because of any real collision (it's function-scoped, genuinely
-independent of the several other `const pct` declarations still elsewhere
-in `GlowUpTracker`) but because esbuild's bundler renames defensively
-across file boundaries at any scope depth, not just top-level `const`s
-like the earlier `MASCOT_OUTFITS` → `MASCOT_OUTFITS2` cases. Confirmed
-safe: both the declaration and every reference within that one callback
-were renamed together and consistently, with zero leakage into other
-scopes.
-
-Also done: `Settings` (`src/components/settings-panel.jsx` —
-`SettingsPanel`), the second of the "big four" and the largest by prop
-count so far: ~317 lines, ~58 props (60 including `open`/`onClose`).
-Covers watch pairing, local Bluetooth sync, home-screen widget sync,
-profile name/comfort item, appearance/theme, notifications, rest days,
-experience toggles, feedback, data export/restore/deletion, and account
-management (email change, sign-out, account deletion) — a genuinely
-wide cross-section of `GlowUpTracker`'s state, all still purely
-mechanical prop-passing, no logic changes. `APPEARANCE_THEMES` read
-from `window.PlushLifeContent`, same as everywhere else. Tokenized diff
-showed the same two now-familiar esbuild auto-rename patterns: a
-top-level `const` collision (`APPEARANCE_THEMES` → `APPEARANCE_THEMES2`)
-and a nested-scope collision (a local `const done` inside a `.map()`
-callback → `done2`) — both confirmed safe the same way as previous
-slices (consistent renaming of every reference within the same scope,
-zero leakage elsewhere).
-
-Also done: while cataloguing free variables for `Change my tasks`,
-found and fixed a real, pre-existing bug unrelated to the module split:
-`WEEKDAY_PRESET_IDS`/`WEEKEND_PRESET_IDS` are exported by
-`assets/plush-schedule.js` (since phase 3) but were never added to
-`app-source.jsx`'s top-level destructuring of
-`window.PlushLifeSchedule` — a `ReferenceError` at runtime whenever the
-"specific days" weekday/weekend preset buttons rendered (add-task form
-or edit-task modal, with the default weekly schedule type). Shipped as
-its own isolated PR before continuing the extraction, with a new
-regression marker in `validate-app-source.js` so this class of bug
-(export exists, consuming file's destructure missed it) can't silently
-reappear.
-
-Also done: `Change my tasks` (`src/components/tasks-panel.jsx` —
-`TasksPanel`), the third of the "big four" and the largest slice yet by
-prop count (~277 lines, ~80 props). Task creation (natural-language
-schedule parsing, starter packs, bulk import) plus the
-editable/draggable task list. The edit-task modal, delete-confirmation
-dialog, and ask-for-help modal are separate always-in-tree overlays
-elsewhere in `GlowUpTracker`, not inside this `ToolPanel`, so only the
-setters/handlers that open them needed to move, not the modals
-themselves. `DAYS`/`TEMPLATE_PACKS` read from
-`window.PlushLifeContent`; `WEEKDAY_PRESET_IDS`/`WEEKEND_PRESET_IDS`/
-`scheduleLabelForTask` read from `window.PlushLifeSchedule`, both
-inside the new file. Tokenized diff showed the usual top-level and
-nested-scope auto-renames, plus a new (still harmless) case: the
-panel's own `open` prop genuinely shadows an inner callback's `open`
-parameter (`setImportOpen(open => !open)`), which esbuild relabeled to
-`open2` — a pure toggler, unaffected either way.
-
-Also done: the inline Guardian/support panel
-(`src/components/guardian-panel.jsx` — `GuardianPanel`), the last of
-the "big four" and the largest slice by prop count (~324 lines, ~92
-props). Covers both roles of the Guardian relationship in one
-component: managing Guardians who support you, and viewing/supporting
-someone you're a Guardian for — progress display, encouraging notes,
-rewards, task suggestions, per-Guardian permissions, and care
-agreements. `DAYS`/`COMFORT_TOOLS` read from `window.PlushLifeContent`,
-`formatRelativeTime` from `window.PlushLifeHelpers`, `daysBetweenDates`
-from `window.PlushLifeSchedule`, all inside the new file.
-`GUARDIAN_ROLE_PRESETS` passed as a prop (a plain literal in
-`app-source.jsx`, not a window global) — its name collided with
-`app-source.jsx`'s own top-level `const` of the same name, so esbuild
-renamed the prop's uses inside the new file to `GUARDIAN_ROLE_PRESETS2`,
-same safe pattern as `SUPPORTER_FEATURES_ENABLED`/
-`FREE_TASK_LIMIT_PER_DAY` in the `TasksPanel` slice.
-
-**The "big four" are done.** All fifteen `<ToolPanel>` sections that
-used to live inline in `GlowUpTracker` have been extracted across
-phase 7's eight slices.
-
-**Correction to the "only 'today' remains" framing above:** a closer
-look found `GlowUpTracker`'s render body isn't one monolithic
-always-in-tree section — it's actually five separate blocks switched on
-`dashboard === "x"` (`today`, `care`, `week`, `progress`, plus a small
-`today`-only check-in bar), the same conditional-render shape as the
-`ToolPanel`s, just without a boolean `xOpen` state and without an
-`onClose`. The exact same prop-drilling extraction technique applies
-directly. This reopens real, tractable work rather than leaving only
-an "irreducible core" to write up.
-
-Also done: `dashboard === "care"` (`src/components/care-panel.jsx` —
-`CarePanel`), the ninth phase 7 slice and the first dashboard-tab view
-extracted (~123 lines, ~31 props). Quick comfort tools, PlushPaths,
-PlushSleep + soundscapes, and (for the one profile that has it) Mama's
-Corner. `COMFORT_TOOLS`/`PLUSH_PATHS`/`SLEEP_TOOLS`/`SOUNDSCAPES`/
-`GENTLE_AFFIRMATIONS` read from `window.PlushLifeContent`;
-`pathOfTheWeekId` from `window.PlushLifeSchedule` — both inside the new
-file. `MamasCorner` imported directly from `./baby-mode.jsx` (already
-its own module since phase 6). `HELP_ME_NOW_OPTIONS` passed as a prop
-(a plain literal in `app-source.jsx`, not a window global). No
-`onClose` prop on this one, unlike every `ToolPanel` slice — dashboard
-tabs don't have a close button, just an `open` gate.
-
-Also done: `dashboard === "progress"`
-(`src/components/progress-panel.jsx` — `ProgressPanel`), the tenth
-phase 7 slice (~246 lines, ~45 props). "PlushGrowth": weekly/monthly
-trend charts, the weekly-intention editor, and three sub-views
-(overview/story/areas) covering care story, care areas, and
-PlushInsights pattern cards. `HabitTypeIcon` imported directly from
-`./shared.jsx`; `datesThroughToday` read from
-`window.PlushLifeSchedule` inside the new file. `TREND_WEEKS`/
-`TREND_MONTHS` passed as props (plain literals in `app-source.jsx`).
-
-One real mistake caught and fixed during this extraction, worth
-recording: the original block's outer wrapper was
-`{dashboard === "progress" && <>...</>}` — a JSX fragment holding
-multiple sibling elements, not just a truthiness-guard parenthesis
-like the `care` block had. The first draft of the extraction script
-stripped the `<>`/`</>` along with the condition, which would have
-produced a component trying to `return` multiple sibling elements with
-no wrapper — a real JSX error, not a subtle behavioral bug, so it
-surfaced immediately as a build failure and got fixed before
-proceeding. Recorded here because it's a concrete reminder that "same
-extraction pattern" still needs the actual wrapper shape checked each
-time, not assumed from the previous slice.
-
-Also done: `dashboard === "week"` (`src/components/week-panel.jsx` —
-`WeekPanel`), the eleventh phase 7 slice (378 lines, 46 props).
-"PlushCalendar": the today's-journal shortcut button, the Month/Week/Day
-tab bar with swipe navigation, the monthly progress-calendar heatmap and
-its PlushJournal/PlushWeek history `<details>` sections (Month view), the
-7-day strip with a future-day task preview (Week view), the single-day
-drill-down with time-of-day task grouping and a catch-up action (Day
-view), and the Habit Garden & Rewards streak summary. Its outer wrapper
-was also `{dashboard === "week" && <>...</>}` — a fragment, like
-`progress`, not a parenthesis like `care` — confirmed before extracting
-this time rather than assumed, per the lesson above.
-`offsetDate`/`dayIdForDate`/`reflectionPromptForDay`/
-`taskIsScheduledForDate`/`taskIsOptional` read from
-`window.PlushLifeSchedule` inside the new file (esbuild renamed all five
-to a `2` suffix in the bundle, since other already-extracted files
-destructure the same names from the same UMD module — the standard,
-confirmed-safe collision pattern). `CHECKIN_MOODS` (a plain top-level
-const in `app-source.jsx`, same as it was for `MoodViewer`) passed as a
-prop, which for the same reason got renamed to `CHECKIN_MOODS2` inside
-the new file. `HabitTypeIcon` imported directly from `./shared.jsx`.
-
-Also done: `dashboard === "today"` (`src/components/today-panel.jsx` —
-`TodayPanel`), the twelfth phase 7 slice, the last of the four
-dashboard-tab views, and the largest single slice of the whole module
-split (555 lines, 96 props). Read through fully before touching it, as
-asked, rather than assumed either way — the honest finding is that it is
-**not** `GlowUpTracker`'s irreducible core after all. It's the same
-conditional-render shape as `care`/`progress`/`week` (a
-`{dashboard === "today" && <>...</>}` fragment driven entirely by parent
-state and handlers), just the biggest one: the return-gap/gentle-heads-up/
-resting-today banners, the One Next Step card, the PlushWeek weekly-
-intention widget, the Schedule/Tasks tab bar with its own swipe handling,
-the personal-schedule card, the habits-today preview, `BabyModeCareSuite`
-for baby-mode profiles, the "pick one thing for me" focus helper, the full
-task list (focus mode, collapsed/expanded, drag-to-reorder, section
-grouping, pause/resume, move-to-tomorrow), and the "if I feel
-overwhelmed" button + `CalmPanel` invocation that turned out to live
-inside this fragment too, not beside it as first assumed while reading —
-worth calling out as another instance of "check the actual boundary, not
-what seems logical from the outside."
-`dayIdForDate`/`offsetDate`/`legacyScheduleToEntries`/`formatTime12` read
-from `window.PlushLifeSchedule`, `DAYS` from `window.PlushLifeContent`,
-both inside the new file. `FeatureTip` (a small component defined inline
-inside `GlowUpTracker`, not a module export) passed as a prop, matching
-the existing `RewardsPanel` call site's precedent for the same value.
-`HabitTypeIcon` imported from `./shared.jsx`, `BabyModeCareSuite` from
-`./baby-mode.jsx`, `CalmPanel` from `./info-panels.jsx`.
-
-Not extracted, and intentionally left as-is: a small `dashboard ===
-"today"`-only check-in shortcut bar (~11 lines, a few props) sits
-textually *before* `TodayPanel`'s call site, separated from it by
-`CarePanel` and a run of always-mounted modal invocations
-(`ProfilePanel`, `MoodViewer`, etc.) — it was already called out as a
-separate small thing back when the four dashboard tabs were first
-discovered, not an oversight here. Left in `app-source.jsx` since it
-isn't contiguous with the main view and isn't worth a thirteenth slice
-for ~11 lines.
-
-Phase 7 (all fifteen `ToolPanel` modals plus all four dashboard-tab
-views) is done. Remaining candidates for any future module-split work
-are whatever's left directly inside `GlowUpTracker`'s body outside these
-extracted sections — not scoped here since nothing further was asked for.
-
-After each phase: `npm test` must pass, `npm run web:sync` must succeed,
-and the compiled bundle should be spot-checked with `node --check`. Phase
-7 additionally gets a tokenized diff between the pre/post bundle each
-time, since prop-drilling extractions are easy to get subtly wrong
-(missing a prop, a stale closure) in ways `npm test`'s regression markers
-won't catch.
+Before any additional structural refactor, prefer the smallest change that solves the concrete problem and keep the current build/deploy behavior stable unless a new pipeline change is explicitly approved.
