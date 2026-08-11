@@ -4,7 +4,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const Babel = require("@babel/standalone");
+const esbuild = require("esbuild");
 
 const ROOT = path.join(__dirname, "..");
 const WWW = path.join(ROOT, "www");
@@ -61,10 +61,18 @@ function copyDirectory(source, destination) {
 function compileAppSource(source) {
   const sourceMatch = source.match(/<script id="app-source" type="text\/plain">([\s\S]*?)<\/script>/);
   if (!sourceMatch) throw new Error("Could not find the PlushLife app source in index.html");
-  const compiled = Babel.transform(sourceMatch[1], {
-    presets: [["react", { runtime: "classic" }]],
-    filename: "app.bundle.js",
-    compact: true,
+  // esbuild replaces the previous @babel/standalone Babel.transform() call
+  // here (module split phase 4 — see docs/module-split-plan.md). Same JSX
+  // shape as before: classic runtime (React.createElement, not the
+  // automatic jsx-runtime import), since the app loads React as a global
+  // via a <script> tag, not an ES import. Whitespace-only minification
+  // (not full identifier renaming) to keep this swap behaviorally as
+  // close to the previous Babel compact:true output as possible.
+  const compiled = esbuild.transformSync(sourceMatch[1], {
+    loader: "jsx",
+    jsx: "transform",
+    minifyWhitespace: true,
+    charset: "utf8",
   }).code;
   // Runtime Babel previously used Function(compiled), which gave the app its
   // own scope. Keep that boundary in the production bundle so names such as

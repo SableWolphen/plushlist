@@ -41,8 +41,10 @@ Roughly 6-7 phases total, decided when phase 1 shipped:
 2. **Done** — small pure helpers (`assets/plush-helpers.js`)
 3. **Done** — date/schedule/task utilities and the billing-provider
    placeholder (`assets/plush-schedule.js`, `assets/plush-billing.js`)
-4. Adopt a bundler (esbuild) so components can be split — the one
-   phase that's an architecture decision, not just an extraction
+4. **Partly done** — adopted esbuild as the bundler in
+   `scripts/sync-www.js` (Android/Cloudflare build path). GitHub Pages
+   unification and actual component extraction are still pending — see
+   below.
 5. Extract the self-contained comfort-tool interactive widgets
 6. Extract other self-contained components (`PlushMascot`, `NurseryNook`,
    `MamasCorner`, `BabyModeCareSuite`, `LandingPage`, `ToolPanel`)
@@ -98,19 +100,46 @@ into the file — this phase covered everything reachable from the top
 third of `app-source`, not a full sweep. Worth another pass later, but
 not blocking anything else.
 
-## Phase 4 — bundler decision (not started)
+## Phase 4 — bundler decision
 
-The comfort-tool widgets and every other real component are blocked on
-this. Recommendation: esbuild — does JSX + ESM in one step, minimal
-config, and can replace `scripts/sync-www.js`'s custom
-Babel-string-manipulation precompilation for Android/Cloudflare *and*
-give GitHub Pages the same precompiled bundle instead of its current
-runtime Babel-in-browser compile, unifying all three deploy targets onto
-one build step. This is a real pipeline change (see Checkpoints in
-`CLAUDE.md`) and needs its own dedicated, carefully-verified pass — not
-something to fold into a data-extraction phase.
+**Step 1, done:** `scripts/sync-www.js`'s `compileAppSource()` now uses
+`esbuild.transformSync()` (loader `jsx`, classic runtime — `React`
+stays a global, not an ES import — `minifyWhitespace` only, `charset:
+"utf8"`) instead of `@babel/standalone`'s `Babel.transform()`. This
+only replaces the *compiler*, not the pipeline shape — it still
+transforms the same single monolithic `app-source` block into
+`assets/app.bundle.js`, same as before. No component has moved to a
+separate file yet, so GitHub Pages' raw `index.html` (still served
+as-is, still doing its own runtime Babel-in-browser compile of the same
+unmodified block) needed no changes and remains completely untouched by
+this step.
 
-## Candidate component phases (blocked on phase 4)
+Verified equivalence rigorously, not just "tests still pass": built the
+same source with both the old Babel path and the new esbuild path,
+tokenized and diffed the two compiled outputs. Every single difference
+across the entire ~650KB file fell into three known-safe categories —
+`/*#__PURE__*/` annotation comments (dev/tooling hints, inert at
+runtime, which esbuild doesn't emit), leading-zero numeric literal
+formatting (`0.23` vs `.23`, identical values), and Unicode escape
+representation (`💤` vs literal `💤`, identical string
+values, resolved by setting esbuild's `charset: "utf8"` to match
+Babel's literal-character output). No other differences existed
+anywhere in the file.
+
+**Step 2, not started:** unify GitHub Pages onto the same precompiled
+bundle Android/Cloudflare use. This becomes *necessary*, not optional,
+the moment phase 5 moves any real component's JSX into a separate file
+— GitHub Pages' raw `index.html` would otherwise be missing that
+component's code entirely, since it no longer runs through a build
+step. Needs `.github/workflows/deploy-pages.yml` to build via
+`sync-www.js`/esbuild before publishing, instead of its current plain
+file copy. This is the part that actually changes live, user-facing
+deploy behavior (see Checkpoints in `CLAUDE.md`) and deserves its own
+careful pass with its own verification, ideally exercised alongside the
+first real component extraction (phase 5) rather than done blind ahead
+of it.
+
+## Candidate component phases (blocked on phase 4 step 2)
 
 - Comfort-tool interactive widgets: `BubbleWrapInteractive`,
   `WorryJarInteractive`, `SensoryTapInteractive`, `DoodlePadInteractive`,
