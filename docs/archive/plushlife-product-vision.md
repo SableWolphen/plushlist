@@ -1,5 +1,12 @@
 # PlushLife — Complete Product Vision and App Behavior
 
+> **ARCHIVED — not an active spec.** Moved out of `docs/` on 2026-08-11
+> because a prior session read this as live instructions and started
+> building against it (see `plushlife-vision-audit.md` in this folder).
+> Nothing in this document should be built without the product owner
+> explicitly asking for that specific item first. See `CLAUDE.md` for the
+> current non-goals list.
+
 This is the master product specification for PlushLife, provided in full
 by the product owner. It describes the target Plush Ecosystem naming,
 navigation, feature behavior, data-model principles, and rollout approach
