@@ -525,13 +525,13 @@ function MamasCorner({ userId, incompleteTasks, onConfirmTask, caregiverName = "
   return (
     <section className="mamas-corner" aria-label={`${caregiverName}'s Corner`}>
       <button type="button" className="mamas-corner-header" onClick={() => setOpen(true)} aria-expanded={open}>
-        <span><span className="mamas-corner-kicker">🍼 PRIVATE {caregiverName.toUpperCase()}’S CORNER</span><span className="mamas-corner-title">{parentVoice === "motherly" ? "Ultra Mommy chat" : "Chat about anything"}</span></span>
+        <span><span className="mamas-corner-kicker">🍼 PRIVATE {caregiverName.toUpperCase()}’S CORNER</span><span className="mamas-corner-title">Cozy private chat</span></span>
         <span aria-hidden="true">›</span>
       </button>
       <div className="mamas-corner-summary">Open your private, saved chat and continue where you left off.</div>
       {open && <div className="mamas-private-window" role="dialog" aria-modal="true" aria-label={`Private ${caregiverName}'s Corner chat`}>
         <div className="mamas-private-card">
-        <div className="mamas-private-header"><div><span className="mamas-corner-kicker">🍼 PRIVATE {caregiverName.toUpperCase()}’S CORNER</span><span className="mamas-corner-title">{parentVoice === "motherly" ? "Ultra Mommy chat" : "Cozy private chat"}</span></div><button type="button" onClick={() => setOpen(false)} aria-label={`Close ${caregiverName}'s Corner`}>Close</button></div>
+        <div className="mamas-private-header"><div><span className="mamas-corner-kicker">🍼 PRIVATE {caregiverName.toUpperCase()}’S CORNER</span><span className="mamas-corner-title">Cozy private chat</span></div><button type="button" onClick={() => setOpen(false)} aria-label={`Close ${caregiverName}'s Corner`}>Close</button></div>
         <div className="mamas-corner-body">
         <p className="mamas-corner-note">Saved privately to your signed-in profile so you can continue later. Guardians cannot see this chat. This is a fictional AI companion, not a person, clinician, or emergency service.</p>
         <div className="mamas-messages" aria-live="polite">
