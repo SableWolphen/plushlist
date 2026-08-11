@@ -1,27 +1,37 @@
 const fs = require("fs");
 const path = require("path");
-const Babel = require("@babel/standalone");
+const esbuild = require("esbuild");
 
-const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
-const match = html.match(/<script id="app-source" type="text\/plain">([\s\S]*?)<\/script>/);
+// module split phase 5: the app source is no longer an inline
+// <script id="app-source"> block in index.html — it's src/app-source.jsx,
+// which imports src/components/shared.jsx (see scripts/sync-www.js). Bundle
+// it the same way sync-www.js does as the "compiles successfully" check.
+const appSourcePath = path.join(__dirname, "..", "src", "app-source.jsx");
+const sharedComponentsPath = path.join(__dirname, "..", "src", "components", "shared.jsx");
+const appSource = fs.readFileSync(appSourcePath, "utf8");
+const sharedComponentsSource = fs.readFileSync(sharedComponentsPath, "utf8");
 
-if (!match) throw new Error("Could not find the PlushLife app source in index.html");
-
-Babel.transform(match[1], {
-  presets: [["react", { runtime: "classic" }]],
-  filename: "index.html",
+esbuild.buildSync({
+  entryPoints: [appSourcePath],
+  bundle: true,
+  write: false,
+  format: "iife",
+  loader: { ".jsx": "jsx" },
+  jsx: "transform",
 });
 
 // Some regression markers below cover content that has since moved out of
 // the inline app-source block into the assets/plush-*.js modules (mascot
 // outfits, appearance themes, small pure helpers, schedule/date/task
-// utilities, billing provider, etc.) — check markers against all of them
-// so a marker still passes if its content moved rather than disappeared.
+// utilities, billing provider, etc.) and, as of phase 5, into
+// src/components/shared.jsx (ToolPanel, HabitTypeIcon) — check markers
+// against all of them so a marker still passes if its content moved rather
+// than disappeared.
 const movedModuleFiles = ["plush-content.js", "plush-helpers.js", "plush-schedule.js", "plush-billing.js"];
 const movedModulesText = movedModuleFiles
   .map((file) => fs.readFileSync(path.join(__dirname, "..", "assets", file), "utf8"))
   .join("");
-const searchableSource = match[1] + movedModulesText;
+const searchableSource = appSource + sharedComponentsSource + movedModulesText;
 
 const requiredRegressionMarkers = [
   'const [onboardingMode, setOnboardingMode] = useState(null);',
@@ -126,7 +136,7 @@ const prohibitedRegressionMarkers = [
 ];
 
 for (const marker of prohibitedRegressionMarkers) {
-  if (match[1].includes(marker)) {
+  if (appSource.includes(marker)) {
     throw new Error(`Found obsolete native/card-wide drag marker: ${marker}`);
   }
 }

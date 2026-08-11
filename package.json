@@ -21,7 +21,6 @@
     "@capacitor/status-bar": "8.0.3"
   },
   "devDependencies": {
-    "@babel/standalone": "^7.26.4",
     "@capacitor/cli": "8.5.0",
     "@supabase/supabase-js": "^2.57.0",
     "esbuild": "^0.28.2",
