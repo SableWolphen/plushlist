@@ -12,6 +12,13 @@ Babel.transform(match[1], {
   filename: "index.html",
 });
 
+// Some regression markers below cover content that has since moved out of
+// the inline app-source block into assets/plush-content.js (mascot
+// outfits, appearance themes, etc.) — check markers against both so a
+// marker still passes if its content moved rather than disappeared.
+const plushContent = fs.readFileSync(path.join(__dirname, "..", "assets", "plush-content.js"), "utf8");
+const searchableSource = match[1] + plushContent;
+
 const requiredRegressionMarkers = [
   'const [onboardingMode, setOnboardingMode] = useState(null);',
   'onboardingMode === "supporter"',
@@ -102,7 +109,7 @@ const requiredRegressionMarkers = [
 ];
 
 for (const marker of requiredRegressionMarkers) {
-  if (!match[1].includes(marker)) {
+  if (!searchableSource.includes(marker)) {
     throw new Error(`Missing onboarding/weekly-intention regression marker: ${marker}`);
   }
 }
