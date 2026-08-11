@@ -60,8 +60,17 @@ Roughly 6-7 phases total, decided when phase 1 shipped:
    (`src/components/mascot.jsx`); `BabyArrivalRitual`, `MamasCorner`,
    `BabyModeCareSuite` (`src/components/baby-mode.jsx`); `LandingPage`
    (`src/components/landing.jsx`).
-7. Split the root `App` component itself — the hardest part, likely more
-   than one phase on its own once its actual state-sharing shape is clear
+7. **In progress** — splitting the root `App` component (`GlowUpTracker`)
+   itself, which still holds nearly all state. State-sharing decision:
+   **explicit prop drilling**, not context — each extracted piece takes
+   exactly the state values/setters/handlers its body reads as named
+   props, the same pattern already proven by `MamasCorner`'s `supabase`
+   prop in phase 6. No reducer rewrite, no context providers; `GlowUpTracker`
+   remains the single owner of all state. First slice done: the four
+   smallest, most clearly-bounded `ToolPanel` modals
+   (`src/components/info-panels.jsx`). This is the hardest, highest-risk
+   phase — see the dedicated section below for what's done and what's
+   deliberately still deferred.
 
 ## Done
 
@@ -143,6 +152,21 @@ where both `app-source.jsx` and a new component file independently
 destructure the same `window.PlushLifeXxx` global — both bindings read
 the identical underlying value, so this is a safe, automatic
 disambiguation, not a behavior change.
+- **`src/components/info-panels.jsx`** (phase 7, first slice) —
+  `ProfilePanel`, `SafetyPanel`, `HelpPanel`, `CalmPanel`: the four
+  smallest, most clearly-bounded `ToolPanel` modals that used to be
+  inline `{xOpen && (<ToolPanel ...>...)}` blocks directly in
+  `GlowUpTracker`'s render body. Each now takes `open`/`onClose` as
+  explicit props (replacing the inline `{xOpen && (...)}` guard and the
+  closed-over `setXOpen` calls, respectively) plus whatever other
+  state/handlers its body reads, passed by name from `GlowUpTracker`'s
+  call site — pure prop drilling, no new state indirection.
+  `GlowUpTracker` still owns `profileOpen`/`safetyOpen`/`helpOpen`/
+  `calmQuickOpen` and every other piece of state; only the JSX moved.
+  Verified with the same tokenized bundle diff technique as phase 6: the
+  only real differences were the `setXOpen(false)` → `onClose()`
+  substitutions and the new explicit prop lists at each call site — no
+  missing or extra logic.
 
 ## Candidate remaining pure-logic (not scoped)
 
@@ -210,13 +234,38 @@ and Babel-compile the inline `<script id="app-source">` block from
 checks its regression markers against `src/app-source.jsx` +
 `src/components/shared.jsx` + the `assets/plush-*.js` modules combined.
 
-## Candidate component phases (phase 7)
+## Phase 7 remaining work
 
-- The root `App` component (`GlowUpTracker`) — holds nearly all state;
-  splitting it safely needs a real decision on how state gets shared
-  across the split pieces (context, prop drilling, or something else)
-  before it's attempted. This is the last piece of `src/app-source.jsx`
-  after phases 5-6; everything else self-contained has already moved out.
+`GlowUpTracker` is a `<ToolPanel>`-heavy component: roughly 15 modal
+sections gated by their own `xOpen` boolean, plus one large
+always-in-tree "today" view. The four smallest modals are done (see
+`src/components/info-panels.jsx` above). Remaining, roughly in order of
+increasing size/risk:
+
+- Smallish viewers with local derived state (need the IIFE body that
+  computes their local consts moved with them, not just the JSX):
+  `PlushMood` check-in viewer, the PlushPaths care-path viewer, the
+  PlushSleep tool viewer, the `PlushJournal` reflection viewer, the daily
+  `PlushJournal` quick-open panel.
+- `Change my schedule` (~70 lines) — moderate size, self-contained.
+- `Rewards` (~130 lines) — needs `FeatureTip` and `BADGE_DEFS`, both
+  currently defined *inside* `GlowUpTracker` as closures over other
+  state (`BADGE_DEFS` alone closes over a dozen-plus state variables via
+  its `check()` functions). Passable as props without modification since
+  they're just references, but this is where prop-drilling starts
+  costing real readability — worth a second look before extracting.
+- The big four, each 250-320 lines and touching large swaths of state:
+  `Settings`, `Admin`, `Change my tasks`, and the inline Guardian/support
+  panel. These are the ones that actually justify phase 7's "hardest
+  part" reputation — save for dedicated passes, not a blind batch.
+- The always-in-tree "today" dashboard view itself (not a `ToolPanel`) —
+  the biggest remaining piece, and the one most likely to need something
+  beyond pure prop drilling (it's arguably `GlowUpTracker`'s actual
+  irreducible core, not a candidate for further extraction).
 
 After each phase: `npm test` must pass, `npm run web:sync` must succeed,
-and the compiled bundle should be spot-checked with `node --check`.
+and the compiled bundle should be spot-checked with `node --check`. Phase
+7 additionally gets a tokenized diff between the pre/post bundle each
+time, since prop-drilling extractions are easy to get subtly wrong
+(missing a prop, a stale closure) in ways `npm test`'s regression markers
+won't catch.
