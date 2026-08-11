@@ -267,14 +267,17 @@ scheduleEditDayId || scheduleDayId`, defined once in `GlowUpTracker`),
 not the raw `scheduleEditDayId` state — passed through by its derived
 name, unchanged.
 
+Also done: `Rewards` (`src/components/rewards-panel.jsx` —
+`RewardsPanel`). Confirmed the plan above: `FeatureTip` and `BADGE_DEFS`
+passed through as plain props, unmodified, since both are just
+references to whatever `GlowUpTracker` computed that render — extracting
+this didn't require touching either closure. `PlushMascot` is imported
+directly from `./mascot.jsx` (it's already its own module since phase
+6) rather than passed as a prop; `MASCOT_OUTFITS` read from
+`window.PlushLifeContent` inside the new file, same as everywhere else.
+
 Remaining, roughly in order of increasing size/risk:
 
-- `Rewards` (~130 lines) — needs `FeatureTip` and `BADGE_DEFS`, both
-  currently defined *inside* `GlowUpTracker` as closures over other
-  state (`BADGE_DEFS` alone closes over a dozen-plus state variables via
-  its `check()` functions). Passable as props without modification since
-  they're just references, but this is where prop-drilling starts
-  costing real readability — worth a second look before extracting.
 - The big four, each 250-320 lines and touching large swaths of state:
   `Settings`, `Admin`, `Change my tasks`, and the inline Guardian/support
   panel. These are the ones that actually justify phase 7's "hardest
