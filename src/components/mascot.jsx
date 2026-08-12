@@ -3,20 +3,24 @@
 const { MASCOT_OUTFITS } = window.PlushLifeContent;
 const { mascotGrowthStageForDays } = window.PlushLifeHelpers;
 
-export function PlushMascot({ outfit = MASCOT_OUTFITS[0], size = 150, celebrating = false, mood = "neutral", activityDays = 0 }) {
+const ACCESSORY_POSITIONS = {
+  bow: { left: "24%", top: "9%" },
+  glasses: { left: "50%", top: "38%", transform: "translateX(-50%)" },
+  cape: { left: "80%", top: "54%" },
+  party: { left: "68%", top: "1%" },
+};
+const DEFAULT_ACCESSORY_POSITION = { left: "50%", top: "1%", transform: "translateX(-50%)" };
+const SPARKLE_LEFT = [6, 88, 12, 82];
+const SPARKLE_TOP = [4, 8, 78, 74];
+
+export const PlushMascot = React.memo(function PlushMascot({ outfit = MASCOT_OUTFITS[0], size = 150, celebrating = false, mood = "neutral", activityDays = 0 }) {
   const accessorySize = Math.round(size * 0.23);
-  const ACCESSORY_POSITIONS = {
-    bow: { left: "24%", top: "9%" },
-    glasses: { left: "50%", top: "38%", transform: "translateX(-50%)" },
-    cape: { left: "80%", top: "54%" },
-    party: { left: "68%", top: "1%" },
-  };
-  const accessoryPos = ACCESSORY_POSITIONS[outfit.id] || { left: "50%", top: "1%", transform: "translateX(-50%)" };
+  const accessoryPos = ACCESSORY_POSITIONS[outfit.id] || DEFAULT_ACCESSORY_POSITION;
   const growth = mascotGrowthStageForDays(activityDays);
   return (
     <div className={celebrating ? "plush-mascot mascot-celebrating" : "plush-mascot"} style={{ width: size, height: size, position: "relative", borderRadius: "50%", boxShadow: growth.glow }}>
       {growth.sparkles.map((sparkle, index) => (
-        <span key={index} aria-hidden="true" style={{ position: "absolute", fontSize: Math.round(size * 0.16), left: `${[6, 88, 12, 82][index % 4]}%`, top: `${[4, 8, 78, 74][index % 4]}%`, pointerEvents: "none" }}>{sparkle}</span>
+        <span key={index} aria-hidden="true" style={{ position: "absolute", fontSize: Math.round(size * 0.16), left: `${SPARKLE_LEFT[index % 4]}%`, top: `${SPARKLE_TOP[index % 4]}%`, pointerEvents: "none" }}>{sparkle}</span>
       ))}
       <svg viewBox="0 0 240 220" role="img" aria-label={`PlushLife mascot wearing ${outfit.name}, looking ${mood}`} style={{ width: "100%", height: "100%", display: "block" }}>
         <path d="M184 72 C222 43 233 63 222 91 C214 112 202 127 187 139" fill="none" stroke="#FFA510" strokeWidth="17" strokeLinecap="round" />
@@ -60,7 +64,7 @@ export function PlushMascot({ outfit = MASCOT_OUTFITS[0], size = 150, celebratin
       )}
     </div>
   );
-}
+});
 
 export function NurseryNook({ outfit, mood, activityDays, onOpenCloset }) {
   const hasStarLampAndBasket = activityDays >= 10;
@@ -92,11 +96,14 @@ export function AppLoadingScreen() {
       <style>{`
         @keyframes appLoadingBob { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-8px) } }
         @keyframes appLoadingFade { 0%,100% { opacity:0.55 } 50% { opacity:1 } }
+        @media (prefers-reduced-motion: reduce) {
+          .app-loading-mascot, .app-loading-label { animation: none !important; }
+        }
       `}</style>
-      <div style={{ animation: "appLoadingBob 1.6s ease-in-out infinite" }}>
+      <div className="app-loading-mascot" style={{ animation: "appLoadingBob 1.6s ease-in-out infinite" }}>
         <PlushMascot size={84} />
       </div>
-      <div style={{ fontSize: 13.5, fontWeight: 800, color: "#8574A0", letterSpacing: "0.02em", animation: "appLoadingFade 1.6s ease-in-out infinite" }}>Loading your PlushLife…</div>
+      <div className="app-loading-label" style={{ fontSize: 13.5, fontWeight: 800, color: "#8574A0", letterSpacing: "0.02em", animation: "appLoadingFade 1.6s ease-in-out infinite" }}>Loading your PlushLife…</div>
     </div>
   );
 }
