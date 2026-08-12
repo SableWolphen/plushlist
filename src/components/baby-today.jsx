@@ -100,19 +100,24 @@ export function BabyToday({
         </div>
       </section>
 
-      <BabyModeCareSuite
-        date={period?.date || ""}
-        todayDone={rows.filter((row) => !!viewDone[row.key] && !row.isBonus).length}
-        todayTotal={rows.filter((row) => !row.isBonus).length}
-        activityDays={activityDaysTotal}
-        careDays={careDaysTotal}
-        caregiverName={babyCaregiverName}
-        comfortItemName={comfortItem}
-        littleJobs={waiting}
-        onCompleteTask={toggle}
-        onManageTasks={openTaskManager}
-        onOpenJournal={openJournalForSelectedDate}
-      />
+      <details style={{ borderRadius: 17, background: "rgba(255,255,255,.72)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
+        <summary style={{ listStyle: "none", padding: "13px 14px", color: "#76558A", fontWeight: 900, cursor: "pointer" }}>🧸 Need a little help?</summary>
+        <div style={{ padding: "0 10px 10px" }}>
+          <BabyModeCareSuite
+            date={period?.date || ""}
+            todayDone={rows.filter((row) => !!viewDone[row.key] && !row.isBonus).length}
+            todayTotal={rows.filter((row) => !row.isBonus).length}
+            activityDays={activityDaysTotal}
+            careDays={careDaysTotal}
+            caregiverName={babyCaregiverName}
+            comfortItemName={comfortItem}
+            littleJobs={waiting}
+            onCompleteTask={toggle}
+            onManageTasks={openTaskManager}
+            onOpenJournal={openJournalForSelectedDate}
+          />
+        </div>
+      </details>
 
       <section style={{ borderRadius: 17, background: "rgba(255,255,255,.72)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
         <button type="button" onClick={() => setShowMore((value) => !value)} aria-expanded={showMore} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "13px 14px", border: 0, background: "transparent", color: "#76558A", fontWeight: 900, cursor: "pointer" }}>
