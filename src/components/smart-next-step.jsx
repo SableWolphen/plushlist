@@ -1,3 +1,5 @@
+import { hasGoldFeature } from "../plush-gold.js";
+
 const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 
 function readHabitState() {
@@ -40,8 +42,9 @@ export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckI
   }, []);
 
   return React.useMemo(() => {
+    const goldSmart = hasGoldFeature("smart_next_step");
     const state = readHabitState();
-    const engine = state.meta?.__background_engine || {};
+    const engine = goldSmart ? (state.meta?.__background_engine || {}) : {};
     const profiles = engine.habitProfiles || {};
     const date = String(period?.date || new Date().toISOString().slice(0, 10)).slice(0, 10);
     const focusHabitId = String(state.meta?.focus_habit_id || "");
@@ -64,22 +67,24 @@ export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckI
       if (isEssential(row)) { score += 26; reasons.push("it is one of today's essentials"); }
       if (row.key === fallbackKey) score += 14;
 
-      if (profile.stability === "Recovering") { score += 20; reasons.push("it is rebuilding after a rough patch"); }
-      else if (profile.stability === "Fragile") { score += 15; reasons.push("it could use a little support"); }
-      else if (profile.stability === "New") score += 5;
+      if (goldSmart) {
+        if (profile.stability === "Recovering") { score += 20; reasons.push("it is rebuilding after a rough patch"); }
+        else if (profile.stability === "Fragile") { score += 15; reasons.push("it could use a little support"); }
+        else if (profile.stability === "New") score += 5;
 
-      if (profile.preferredPeriod && profile.confidence !== "learning") {
-        if (profile.preferredPeriod === nowPeriod) { score += 16; reasons.push(`this is usually a good ${nowPeriod} habit for you`); }
-        else score -= 4;
+        if (profile.preferredPeriod && profile.confidence !== "learning") {
+          if (profile.preferredPeriod === nowPeriod) { score += 16; reasons.push(`this is usually a good ${nowPeriod} habit for you`); }
+          else score -= 4;
+        }
+
+        const minutes = estimatedMinutes(row);
+        if (lowCapacity && minutes > 0 && minutes <= 10) { score += 12; reasons.push("it is a smaller lift for your current energy"); }
+        if (lowCapacity && smallerVersion(row)) { score += 8; reasons.push("it has a gentler version ready"); }
+        if (lowCapacity && minutes >= 30) score -= 12;
+
+        if (profile.dominantMissReason === "bad_timing" && profile.preferredPeriod && profile.preferredPeriod !== nowPeriod) score -= 10;
+        if (profile.confidence === "strong" && profile.completionRate >= 85 && profile.stability === "Stable") score -= 3;
       }
-
-      const minutes = estimatedMinutes(row);
-      if (lowCapacity && minutes > 0 && minutes <= 10) { score += 12; reasons.push("it is a smaller lift for your current energy"); }
-      if (lowCapacity && smallerVersion(row)) { score += 8; reasons.push("it has a gentler version ready"); }
-      if (lowCapacity && minutes >= 30) score -= 12;
-
-      if (profile.dominantMissReason === "bad_timing" && profile.preferredPeriod && profile.preferredPeriod !== nowPeriod) score -= 10;
-      if (profile.confidence === "strong" && profile.completionRate >= 85 && profile.stability === "Stable") score -= 3;
 
       return { row, score, reasons };
     }).sort((a, b) => b.score - a.score);
