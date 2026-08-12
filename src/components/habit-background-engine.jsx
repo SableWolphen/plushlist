@@ -1,3 +1,5 @@
+import { hasGoldFeature } from "../plush-gold.js";
+
 const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 const ENGINE_KEY = "__background_engine";
 const RESILIENCE_KEY = "__resilience";
@@ -154,13 +156,14 @@ function experimentResults(state, profiles, today) {
 }
 
 export function HabitBackgroundEngine({ open, rows = [], viewDone = {}, period, dailyCheckIn = {} }) {
+  const goldBackground = hasGoldFeature("adaptive_habit_coaching") || hasGoldFeature("recovery_intelligence");
   const previousDoneRef = React.useRef({});
   const lastSignatureRef = React.useRef("");
   const timerRef = React.useRef(null);
   const today = dateKey(period?.date);
 
   React.useEffect(() => {
-    if (!open || !validDate(today)) return;
+    if (!goldBackground || !open || !validDate(today)) return;
     const compactRows = (rows || []).filter((row)=>!row?.isBonus && habitId(row));
     const currentDone = Object.fromEntries(compactRows.map((row)=>[row.key, !!viewDone?.[row.key]]));
     const signature = JSON.stringify({
@@ -218,7 +221,7 @@ export function HabitBackgroundEngine({ open, rows = [], viewDone = {}, period, 
       writeState(next);
     }, 450);
     return () => { if (timerRef.current) window.clearTimeout(timerRef.current); };
-  }, [open, today, rows, viewDone, dailyCheckIn?.energy, dailyCheckIn?.capacity, dailyCheckIn?.mood]);
+  }, [goldBackground, open, today, rows, viewDone, dailyCheckIn?.energy, dailyCheckIn?.capacity, dailyCheckIn?.mood]);
 
   React.useEffect(() => {
     const hydrate = () => { lastSignatureRef.current = ""; };
