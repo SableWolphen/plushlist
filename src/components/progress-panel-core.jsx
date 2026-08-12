@@ -13,7 +13,34 @@
 // not touched by this move.
 import { HabitTypeIcon } from "./shared.jsx";
 
-export function ProgressPanel({ open, progressView, setProgressView, weeklyIntentionEditing, setWeeklyIntentionEditing, weeklyIntentionDraft, setWeeklyIntentionDraft, weeklyIntentionText, saveWeeklyIntentionEdit, hasWeeklyActivity, goToDashboard, weeklyOverallPct, weekOverWeekDelta, preferences, weeklyEssentialPct, weeklyOverallDone, weeklyOverallPossible, weeklyBonusDone, caringDays, weeklyEssentialDone, careStory, careAreas, openTaskManager, patternInsightCards, insightCardIndex, setInsightCardIndex, weeklyHighlights, period, goWriteWeeklyIntention, setShareCardOpen, progressDetailsOpen, setProgressDetailsOpen, TREND_WEEKS, TREND_MONTHS, currentMonthKey, monthlyOverallPct, monthOverMonthDelta, monthlyTrendPoints, tappedTrendMonth, setTappedTrendMonth, monthlyMostConsistent, currentMonthDates, weeklyTrendPoints, tappedTrendWeek, setTappedTrendWeek }) {
+function HabitGardenCard({ habitTasks, habitGardenGrowthPct, habitGardenTotalCheckIns, habitGardenOpen, setHabitGardenOpen }) {
+  if (!habitTasks?.length) return null;
+  return <div style={{ marginBottom: 18, padding: 16, borderRadius: 18, background: "#F2FFF8CC", border: "1px solid #BFE5D2" }}>
+    <div style={{ fontSize: 11, letterSpacing: "0.14em", fontWeight: 900, color: "#318C79" }}>🌱 HABIT GARDEN & REWARDS</div>
+    <div style={{ marginTop: 5, fontSize: 12, lineHeight: 1.5, color: "#5E766F" }}>Your habit progress and earned rewards live here in PlushGrowth.</div>
+    <div style={{ marginTop: 10, padding: "9px 10px", borderRadius: 11, background: "#FFFFFFB8", border: "1px solid #D7EEE2" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline", color: "#4D746A" }}><strong style={{ fontSize: 11.5 }}>Growing toward your next rewards</strong><strong style={{ fontSize: 13 }}>{habitGardenGrowthPct}%</strong></div>
+      <div style={{ height: 7, marginTop: 6, overflow: "hidden", borderRadius: 99, background: "#E2F3EA" }}><div style={{ width: `${habitGardenGrowthPct}%`, height: "100%", borderRadius: 99, background: "linear-gradient(90deg,#4DD0B0,#4C8FE8)", transition: "width .4s ease" }} /></div>
+      <div style={{ marginTop: 5, fontSize: 10.5, color: "#6B8A82" }}>{habitGardenTotalCheckIns} caring {habitGardenTotalCheckIns === 1 ? "check-in" : "check-ins"} across {habitTasks.length} {habitTasks.length === 1 ? "habit" : "habits"}.</div>
+    </div>
+    <button type="button" onClick={() => setHabitGardenOpen((open) => !open)} aria-expanded={habitGardenOpen} style={{ marginTop: 10, padding: "6px 9px", borderRadius: 8, border: "1px solid #A9DFC4", background: "white", color: "#318C79", fontWeight: 900, fontSize: 10.5, cursor: "pointer" }}>{habitGardenOpen ? "Hide garden details" : `View ${habitTasks.length} habits`}</button>
+    {habitGardenOpen && <div style={{ display: "grid", gap: 8, marginTop: 11 }}>{habitTasks.map((habit) => {
+      const nextCount = habit.stats.nextReward?.count;
+      const progressPct = nextCount ? Math.min(100, Math.round((habit.stats.total / nextCount) * 100)) : 100;
+      const remaining = nextCount ? Math.max(0, nextCount - habit.stats.total) : 0;
+      return <div key={habit.task_key} style={{ padding: "10px 11px", borderRadius: 12, background: "#FFFFFFB8", border: "1px solid #D7EEE2" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ fontSize: 13.5, fontWeight: 900, color: "#4F405C" }}>{habit.habitType === "build" ? "🌱" : "🍂"} {habit.task}</div>
+          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}><span style={{ padding: "3px 7px", borderRadius: 999, background: habit.habitType === "build" ? "#EAF4FF" : "#FFF3E4", color: habit.habitType === "build" ? "#4C8FE8" : "#B4761D", fontSize: 9.5, fontWeight: 800 }}>{habit.habitType === "build" ? "Building" : "Breaking"}</span>{habit.stats.current > 0 && <span style={{ padding: "4px 7px", borderRadius: 999, background: "#FFF3E4", color: "#B4761D", fontSize: 10.5, fontWeight: 900 }}>🔥 {habit.stats.current}-day streak</span>}<span style={{ padding: "4px 7px", borderRadius: 999, background: "#E7F7EF", color: "#318C79", fontSize: 10.5, fontWeight: 900 }}>{habit.stats.total} total</span></div>
+        </div>
+        {habit.stats.earnedReward && <div style={{ marginTop: 5, fontSize: 11.5, color: "#6B7E78" }}>Earned: {habit.stats.earnedReward.badge} {habit.stats.earnedReward.label}</div>}
+        {habit.stats.nextReward && <><div style={{ marginTop: 6, fontSize: 11.5, color: "#6B7E78" }}>Next: {habit.stats.nextReward.badge} {habit.stats.nextReward.label} — {remaining === 0 ? "almost there!" : `${remaining} more ${remaining === 1 ? "check-in" : "check-ins"}`}</div><div style={{ height: 6, background: "#E2F3EA", borderRadius: 4, marginTop: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${progressPct}%`, background: habit.habitType === "build" ? "#4C8FE8" : "#D4A017", borderRadius: 4 }} /></div></>}
+      </div>;
+    })}</div>}
+  </div>;
+}
+
+export function ProgressPanel({ open, progressView, setProgressView, weeklyIntentionEditing, setWeeklyIntentionEditing, weeklyIntentionDraft, setWeeklyIntentionDraft, weeklyIntentionText, saveWeeklyIntentionEdit, hasWeeklyActivity, goToDashboard, weeklyOverallPct, weekOverWeekDelta, preferences, weeklyEssentialPct, weeklyOverallDone, weeklyOverallPossible, weeklyBonusDone, caringDays, weeklyEssentialDone, careStory, careAreas, openTaskManager, patternInsightCards, insightCardIndex, setInsightCardIndex, weeklyHighlights, period, goWriteWeeklyIntention, setShareCardOpen, progressDetailsOpen, setProgressDetailsOpen, TREND_WEEKS, TREND_MONTHS, currentMonthKey, monthlyOverallPct, monthOverMonthDelta, monthlyTrendPoints, tappedTrendMonth, setTappedTrendMonth, monthlyMostConsistent, currentMonthDates, weeklyTrendPoints, tappedTrendWeek, setTappedTrendWeek, habitTasks, habitGardenGrowthPct, habitGardenTotalCheckIns, habitGardenOpen, setHabitGardenOpen }) {
   if (!open) return null;
   const { datesThroughToday } = window.PlushLifeSchedule;
   return (
@@ -180,7 +207,7 @@ export function ProgressPanel({ open, progressView, setProgressView, weeklyInten
           <button type="button" onClick={() => setShareCardOpen(true)} style={{ display: progressDetailsOpen ? undefined : "none", marginTop: 8, width: "100%", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#A65DC1", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>📸 Share my week</button>
         </div>
 
-        <button type="button" onClick={() => setProgressDetailsOpen((open) => !open)} aria-expanded={progressDetailsOpen} style={{ width: "100%", margin: "-6px 0 14px", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{progressDetailsOpen ? "Hide PlushGrowth details" : "Open PlushGrowth"}</button>
+        <button type="button" onClick={() => setProgressDetailsOpen((open) => !open)} aria-expanded={progressDetailsOpen} style={{ width: "100%", margin: "-6px 0 14px", padding: "9px 12px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{progressDetailsOpen ? "Hide monthly details" : "Show monthly details"}</button>
 
         <div style={{ display: progressDetailsOpen ? undefined : "none", marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.5)", border: "1px solid #E6D4F2", boxShadow: "0 8px 24px rgba(183,143,224,0.10)" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
@@ -245,6 +272,7 @@ export function ProgressPanel({ open, progressView, setProgressView, weeklyInten
             </div>
           )}
         </div>
+        <HabitGardenCard habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} />
         </>}
         {progressView === "story" && (
           <div style={{ marginBottom: 18, padding: 16, borderRadius: 18, background: "#F5FBF8", border: "1px solid #CFE8E1", boxShadow: "0 8px 24px rgba(77,132,112,.08)", color: "#526F67" }}>

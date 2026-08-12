@@ -18,7 +18,6 @@ export function WeekPanel({ open, openTodayJournal, weekCardIndex, setWeekCardIn
   <>
         <button type="button" onClick={openTodayJournal} style={{ width: "100%", marginBottom: 9, padding: "10px 12px", borderRadius: 12, border: "1px solid #D9B8E8", background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", color: "#8E4EAA", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>📝 Open today's PlushJournal</button>
         <div style={{ display: "flex", gap: 6, marginBottom: 8, alignItems: "center" }}>
-          <button type="button" aria-label="Previous view" onClick={() => setWeekCardIndex((index) => (index + 2) % 3)} style={{ padding: "7px 9px", borderRadius: 10, border: "1px solid #E6D4F2", background: "#FFFFFFAA", color: "#A65DC1", fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>‹</button>
           <div role="tablist" aria-label="Calendar view" style={{ flex: 1, display: "flex", gap: 4, padding: 4, borderRadius: 12, background: "#F0E4F7" }}>
             {[
               [0, "📅 Month"],
@@ -28,7 +27,6 @@ export function WeekPanel({ open, openTodayJournal, weekCardIndex, setWeekCardIn
               <button key={index} type="button" role="tab" aria-selected={weekCardIndex === index} onClick={() => setWeekCardIndex(index)} style={{ flex: 1, minWidth: 0, padding: "7px 4px", borderRadius: 9, border: "none", background: weekCardIndex === index ? "white" : "transparent", color: weekCardIndex === index ? "#7E3D99" : "#8C6B9E", fontWeight: 800, fontSize: 11.5, cursor: "pointer", boxShadow: weekCardIndex === index ? "0 1px 4px rgba(126,61,153,.18)" : "none" }}>{cardLabel}</button>
             ))}
           </div>
-          <button type="button" aria-label="Next view" onClick={() => setWeekCardIndex((index) => (index + 1) % 3)} style={{ padding: "7px 9px", borderRadius: 10, border: "1px solid #E6D4F2", background: "#FFFFFFAA", color: "#A65DC1", fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>›</button>
         </div>
         <div
           onTouchStart={(event) => { event.stopPropagation(); weekSwipeStartX.current = event.touches[0]?.clientX ?? null; weekSwipeStartY.current = event.touches[0]?.clientY ?? null; }}
@@ -307,7 +305,7 @@ export function WeekPanel({ open, openTodayJournal, weekCardIndex, setWeekCardIn
         })()}
         </div>
 
-        {!isHistoricalView && habitTasks.length > 0 && (
+        {false && !isHistoricalView && habitTasks.length > 0 && (
           <div style={{ marginBottom: 18, padding: 16, borderRadius: 18, background: "#F2FFF8CC", border: "1px solid #BFE5D2" }}>
             <div style={{ fontSize: 11, letterSpacing: "0.14em", fontWeight: 900, color: "#318C79" }}>🌱 HABIT GARDEN & REWARDS</div>
             <div style={{ marginTop: 5, fontSize: 12, lineHeight: 1.5, color: "#5E766F" }}>

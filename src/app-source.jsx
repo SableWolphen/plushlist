@@ -912,7 +912,7 @@ function GlowUpTracker() {
   const pickEasierSuggestion = (taskKey) => setNextStepHint({ key: taskKey, text: MAKE_IT_EASIER_SUGGESTIONS[Math.floor(Math.random() * MAKE_IT_EASIER_SUGGESTIONS.length)] });
 
   const [betaBannerDismissed, setBetaBannerDismissed] = useState(() => {
-    try { return window.localStorage.getItem("plushlist-beta-banner-dismissed") === "1"; } catch (_error) { return false; }
+    try { return window.localStorage.getItem("plushlist-beta-banner-dismissed") !== "0"; } catch (_error) { return true; }
   });
   const dismissBetaBanner = () => {
     setBetaBannerDismissed(true);
@@ -4994,6 +4994,15 @@ function GlowUpTracker() {
   // personal without asking anyone to classify themselves.
   const careAreas = (() => {
     const areas = new Map();
+    const normalizeArea = (rawLabel) => {
+      const cleaned = String(rawLabel || "Everyday care").trim() || "Everyday care";
+      const words = cleaned.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+      if (/^mornings?$/.test(words)) return { key: "morning", label: "☀️ Mornings" };
+      if (/^afternoons?$/.test(words)) return { key: "afternoon", label: "🕒 Afternoon" };
+      if (/^evenings?$/.test(words)) return { key: "evening", label: "🌆 Evenings" };
+      if (/^my tasks?$/.test(words)) return { key: "my-tasks", label: "My tasks" };
+      return { key: words || cleaned.toLowerCase(), label: cleaned };
+    };
     datesThroughToday(period).forEach((date) => {
       const completed = date === period.date
         ? new Set(Object.keys(done).filter((key) => done[key]))
@@ -5001,11 +5010,11 @@ function GlowUpTracker() {
       trackerTasks
         .filter((task) => !task.archived_at && !taskIsOptional(task) && taskIsScheduledForDate(task, date) && !isTaskPausedOnDate(task, date))
         .forEach((task) => {
-          const label = (task.section || "Everyday care").trim() || "Everyday care";
-          const area = areas.get(label) || { label, done: 0, possible: 0 };
+          const normalized = normalizeArea(task.section);
+          const area = areas.get(normalized.key) || { label: normalized.label, done: 0, possible: 0 };
           area.possible += 1;
           if (completed.has(task.task_key)) area.done += 1;
-          areas.set(label, area);
+          areas.set(normalized.key, area);
         });
     });
     return [...areas.values()]
@@ -6567,7 +6576,7 @@ function GlowUpTracker() {
 
         <WeekPanel open={dashboard === "week"} openTodayJournal={openTodayJournal} weekCardIndex={weekCardIndex} setWeekCardIndex={setWeekCardIndex} weekSwipeStartX={weekSwipeStartX} weekSwipeStartY={weekSwipeStartY} reflectionCalendarMonth={reflectionCalendarMonth} setReflectionCalendarMonth={setReflectionCalendarMonth} reflectionMonthDate={reflectionMonthDate} reflectionMonthStart={reflectionMonthStart} reflectionMonthDays={reflectionMonthDays} reflectionDateSet={reflectionDateSet} dailyCheckInHistory={dailyCheckInHistory} restDatesSet={restDatesSet} selectedProgressDate={selectedProgressDate} setSelectedProgressDate={setSelectedProgressDate} dayCompletionPct={dayCompletionPct} setDayViewDate={setDayViewDate} setActive={setActive} setReflectionViewerDate={setReflectionViewerDate} setCheckInViewerDate={setCheckInViewerDate} reflectionHistory={reflectionHistory} journalHistoryExpanded={journalHistoryExpanded} setJournalHistoryExpanded={setJournalHistoryExpanded} weeklyIntentionHistory={weeklyIntentionHistory} weeklyIntentionHistoryExpanded={weeklyIntentionHistoryExpanded} setWeeklyIntentionHistoryExpanded={setWeeklyIntentionHistoryExpanded} period={period} calendarWeekOffset={calendarWeekOffset} setCalendarWeekOffset={setCalendarWeekOffset} calendarWeekPreviewDate={calendarWeekPreviewDate} setCalendarWeekPreviewDate={setCalendarWeekPreviewDate} trackerTasks={trackerTasks} dayViewDate={dayViewDate} dayViewExpanded={dayViewExpanded} setDayViewExpanded={setDayViewExpanded} longHistoryByDate={longHistoryByDate} isTaskPausedOnDate={isTaskPausedOnDate} markPastTasksDone={markPastTasksDone} done={done} toggle={toggle} isHistoricalView={isHistoricalView} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} CHECKIN_MOODS={CHECKIN_MOODS} />
 
-        <ProgressPanel open={dashboard === "progress"} progressView={progressView} setProgressView={setProgressView} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} hasWeeklyActivity={hasWeeklyActivity} goToDashboard={goToDashboard} weeklyOverallPct={weeklyOverallPct} weekOverWeekDelta={weekOverWeekDelta} preferences={preferences} weeklyEssentialPct={weeklyEssentialPct} weeklyOverallDone={weeklyOverallDone} weeklyOverallPossible={weeklyOverallPossible} weeklyBonusDone={weeklyBonusDone} caringDays={caringDays} weeklyEssentialDone={weeklyEssentialDone} careStory={careStory} careAreas={careAreas} openTaskManager={openTaskManager} patternInsightCards={patternInsightCards} insightCardIndex={insightCardIndex} setInsightCardIndex={setInsightCardIndex} weeklyHighlights={weeklyHighlights} period={period} goWriteWeeklyIntention={goWriteWeeklyIntention} setShareCardOpen={setShareCardOpen} progressDetailsOpen={progressDetailsOpen} setProgressDetailsOpen={setProgressDetailsOpen} TREND_WEEKS={TREND_WEEKS} TREND_MONTHS={TREND_MONTHS} currentMonthKey={currentMonthKey} monthlyOverallPct={monthlyOverallPct} monthOverMonthDelta={monthOverMonthDelta} monthlyTrendPoints={monthlyTrendPoints} tappedTrendMonth={tappedTrendMonth} setTappedTrendMonth={setTappedTrendMonth} monthlyMostConsistent={monthlyMostConsistent} currentMonthDates={currentMonthDates} weeklyTrendPoints={weeklyTrendPoints} tappedTrendWeek={tappedTrendWeek} setTappedTrendWeek={setTappedTrendWeek} />
+        <ProgressPanel open={dashboard === "progress"} progressView={progressView} setProgressView={setProgressView} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} hasWeeklyActivity={hasWeeklyActivity} goToDashboard={goToDashboard} weeklyOverallPct={weeklyOverallPct} weekOverWeekDelta={weekOverWeekDelta} preferences={preferences} weeklyEssentialPct={weeklyEssentialPct} weeklyOverallDone={weeklyOverallDone} weeklyOverallPossible={weeklyOverallPossible} weeklyBonusDone={weeklyBonusDone} caringDays={caringDays} weeklyEssentialDone={weeklyEssentialDone} careStory={careStory} careAreas={careAreas} openTaskManager={openTaskManager} patternInsightCards={patternInsightCards} insightCardIndex={insightCardIndex} setInsightCardIndex={setInsightCardIndex} weeklyHighlights={weeklyHighlights} period={period} goWriteWeeklyIntention={goWriteWeeklyIntention} setShareCardOpen={setShareCardOpen} progressDetailsOpen={progressDetailsOpen} setProgressDetailsOpen={setProgressDetailsOpen} TREND_WEEKS={TREND_WEEKS} TREND_MONTHS={TREND_MONTHS} currentMonthKey={currentMonthKey} monthlyOverallPct={monthlyOverallPct} monthOverMonthDelta={monthOverMonthDelta} monthlyTrendPoints={monthlyTrendPoints} tappedTrendMonth={tappedTrendMonth} setTappedTrendMonth={setTappedTrendMonth} monthlyMostConsistent={monthlyMostConsistent} currentMonthDates={currentMonthDates} weeklyTrendPoints={weeklyTrendPoints} tappedTrendWeek={tappedTrendWeek} setTappedTrendWeek={setTappedTrendWeek} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} />
 
         </>
           </>
