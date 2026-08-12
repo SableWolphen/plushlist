@@ -71,44 +71,50 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
           return (
             <>
             <FeatureTip id="one_next_step" text="This is your One Next Step — just the single most useful thing to do right now, so you don't have to look at everything at once." />
-            <div style={{ marginBottom: 8, padding: "13px 14px", borderRadius: 15, background: `${day.accent}10`, border: `1px solid ${day.accent}88` }}>
-              <div style={{ fontSize: 10.5, letterSpacing: "0.12em", fontWeight: 900, color: day.accent }}>{babyMode ? "🍼 ONE TINY THING" : "🎯 NEXT STEP"}</div>
-              <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "#5B4B6B" }}>{nextStepTask.sourceTask && <HabitTypeIcon task={nextStepTask.sourceTask} />}{nextStepTask.label}</div>
-              {nextStepReason && <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#806B8D" }}>{nextStepReason}</div>}
+            <div data-plushlife-compact-card="next-step" style={{ marginBottom: 8, padding: "9px 11px", borderRadius: 13, background: day.accent + "10", border: "1px solid " + day.accent + "88" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 9.5, letterSpacing: "0.12em", fontWeight: 900, color: day.accent }}>{babyMode ? "🍼 ONE TINY THING" : "🎯 NEXT STEP"}</div>
+                  <div style={{ marginTop: 2, fontSize: 15, lineHeight: 1.25, fontWeight: 850, color: "#5B4B6B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nextStepTask.sourceTask && <HabitTypeIcon task={nextStepTask.sourceTask} />}{nextStepTask.label}</div>
+                </div>
+                <button type="button" onClick={() => toggle(nextStepTask.key)} style={{ minHeight: 34, padding: "6px 10px", borderRadius: 9, border: 0, background: day.accent, color: "white", fontWeight: 900, fontSize: 11.5, cursor: "pointer", flexShrink: 0 }}>✓ Done</button>
+              </div>
+              {nextStepReason && <div title={nextStepReason} style={{ marginTop: 3, fontSize: 10.5, lineHeight: 1.35, color: "#806B8D", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nextStepReason}</div>}
               {nextStepHint?.key === nextStepTask.key && (
-                <div style={{ marginTop: 8, padding: "9px 11px", borderRadius: 10, background: "white", fontSize: 12.5, color: "#6B5A7D" }}>
+                <div style={{ marginTop: 6, padding: "7px 9px", borderRadius: 9, background: "white", fontSize: 11.5, color: "#6B5A7D" }}>
                   🌱 {nextStepHint.text}
-                  <button type="button" onClick={() => toggle(nextStepTask.key)} style={{ display: "block", marginTop: 7, padding: "6px 10px", borderRadius: 8, border: `1px solid ${day.accent}55`, background: `${day.accent}14`, color: day.accent, fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>✓ Did the smaller version — that counts</button>
+                  <button type="button" onClick={() => toggle(nextStepTask.key)} style={{ display: "block", marginTop: 5, padding: "5px 8px", borderRadius: 8, border: "1px solid " + day.accent + "55", background: day.accent + "14", color: day.accent, fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>✓ Smaller version counts</button>
                 </div>
               )}
-              <div style={{ display: "flex", gap: 6, marginTop: 9, flexWrap: "wrap" }}>
-                <button type="button" onClick={() => toggle(nextStepTask.key)} style={{ padding: "8px 12px", borderRadius: 10, border: 0, background: day.accent, color: "white", fontWeight: 900, fontSize: 12.5, cursor: "pointer" }}>✓ Done</button>
-                <button type="button" onClick={() => pickEasierSuggestion(nextStepTask.key)} style={{ padding: "8px 12px", borderRadius: 10, border: `1px solid ${day.accent}55`, background: "white", color: day.accent, fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>🌱 Make it easier</button>
-                <button type="button" onClick={() => setNextStepMoreOpen((open) => !open)} aria-expanded={nextStepMoreOpen} aria-label="More next-step choices" style={{ padding: "8px 11px", borderRadius: 10, border: "1px solid #D8C8E2", background: "white", color: "#8C6B9E", fontWeight: 900, fontSize: 12.5, cursor: "pointer" }}>•••</button>
+              <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 6 }}>
+                <button type="button" onClick={() => pickEasierSuggestion(nextStepTask.key)} style={{ minHeight: 32, padding: "5px 8px", borderRadius: 9, border: "1px solid " + day.accent + "55", background: "white", color: day.accent, fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>🌱 Make easier</button>
+                <button type="button" onClick={() => setNextStepMoreOpen((open) => !open)} aria-expanded={nextStepMoreOpen} aria-label="More next-step choices" style={{ minWidth: 34, minHeight: 32, padding: "5px 8px", borderRadius: 9, border: "1px solid #D8C8E2", background: "white", color: "#8C6B9E", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>•••</button>
               </div>
-              {nextStepMoreOpen && <div style={{ display: "flex", gap: 6, marginTop: 7, flexWrap: "wrap" }}>
-                <button type="button" onClick={() => { setNextStepSkipped((keys) => [...keys, nextStepTask.key]); setNextStepMoreOpen(false); }} style={{ padding: "7px 10px", borderRadius: 9, border: `1px solid ${day.accent}55`, background: "white", color: day.accent, fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>Pick another</button>
-                <button type="button" onClick={() => { setNextStepDismissedToday(true); setNextStepMoreOpen(false); }} style={{ padding: "7px 10px", borderRadius: 9, border: "1px solid #D8C8E2", background: "white", color: "#8C6B9E", fontWeight: 700, fontSize: 11.5, cursor: "pointer" }}>Hide for today</button>
+              {nextStepMoreOpen && <div style={{ display: "flex", gap: 5, marginTop: 6, flexWrap: "wrap" }}>
+                <button type="button" onClick={() => { setNextStepSkipped((keys) => [...keys, nextStepTask.key]); setNextStepMoreOpen(false); }} style={{ padding: "6px 9px", borderRadius: 9, border: "1px solid " + day.accent + "55", background: "white", color: day.accent, fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>Pick another</button>
+                <button type="button" onClick={() => { setNextStepDismissedToday(true); setNextStepMoreOpen(false); }} style={{ padding: "6px 9px", borderRadius: 9, border: "1px solid #D8C8E2", background: "white", color: "#8C6B9E", fontWeight: 700, fontSize: 10.5, cursor: "pointer" }}>Hide for today</button>
               </div>}
             </div>
             </>
           );
         })()}
 
-        <div style={{ marginBottom: 14, padding: "13px 14px", borderRadius: 15, background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", border: "1px solid #E3C9EC" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-            <div>
-              <div style={{ fontSize: 11, letterSpacing: "0.12em", fontWeight: 900, color: "#A65DC1" }}>📮 PLUSHWEEK</div>
-              <div style={{ marginTop: 3, fontSize: 10.5, color: "#927C9E" }}>My weekly intention · Monday through Sunday</div>
+        <div data-plushlife-compact-card="plushweek" style={{ marginBottom: 9, padding: "8px 10px", borderRadius: 13, background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", border: "1px solid #E3C9EC" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                <div style={{ fontSize: 9.5, letterSpacing: "0.12em", fontWeight: 900, color: "#A65DC1" }}>📮 PLUSHWEEK</div>
+                {!weeklyIntentionEditing && <button type="button" onClick={() => { setWeeklyIntentionDraft(weeklyIntentionText); setWeeklyIntentionEditing(true); }} style={{ minHeight: 30, padding: "4px 6px", border: 0, background: "transparent", color: "#8E4EAA", fontWeight: 900, fontSize: 10.5, cursor: "pointer", flexShrink: 0 }}>{weeklyIntentionText ? "Edit" : "Add"}</button>}
+              </div>
+              {!weeklyIntentionEditing && <div style={{ marginTop: 1, fontSize: 12.5, lineHeight: 1.3, color: weeklyIntentionText ? "#5B4B6B" : "#9A86A7", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{weeklyIntentionText || "Set one gentle direction for this week"}</div>}
             </div>
-            {!weeklyIntentionEditing && <button type="button" onClick={() => { setWeeklyIntentionDraft(weeklyIntentionText); setWeeklyIntentionEditing(true); }} style={{ padding: "5px 9px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>{weeklyIntentionText ? "Edit" : "Add one"}</button>}
           </div>
-          <div style={{ marginTop: 9, fontSize: 12.5, lineHeight: 1.45, color: "#806B8D", fontStyle: "italic" }}>What do I want to carry with me this week?</div>
-          {weeklyIntentionEditing ? <>
-            <textarea value={weeklyIntentionDraft} onChange={(event) => setWeeklyIntentionDraft(event.target.value)} maxLength={2000} placeholder="What do I want to carry with me this week?" style={{ width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 8, padding: 10, borderRadius: 10, border: "1px solid #D9B8E8", resize: "vertical" }} />
-            <div style={{ display: "flex", gap: 7, marginTop: 7 }}><button type="button" onClick={saveWeeklyIntentionEdit} style={{ padding: "7px 11px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save PlushWeek</button><button type="button" onClick={() => setWeeklyIntentionEditing(false)} style={{ padding: "7px 11px", borderRadius: 9, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, cursor: "pointer" }}>Cancel</button></div>
-            {weeklyIntentionMessage && <div style={{ marginTop: 6, fontSize: 11.5, color: "#8C6B9E" }}>{weeklyIntentionMessage}</div>}
-          </> : <div style={{ marginTop: 9, fontSize: 13.5, lineHeight: 1.5, color: weeklyIntentionText ? "#5B4B6B" : "#9A86A7", whiteSpace: "pre-wrap" }}>{weeklyIntentionText || "No intention yet. Choose one gentle direction for this week."}</div>}
+          {weeklyIntentionEditing && <>
+            <div style={{ marginTop: 4, fontSize: 10.5, lineHeight: 1.35, color: "#806B8D", fontStyle: "italic" }}>What do I want to carry with me this week?</div>
+            <textarea value={weeklyIntentionDraft} onChange={(event) => setWeeklyIntentionDraft(event.target.value)} maxLength={2000} placeholder="What do I want to carry with me this week?" style={{ width: "100%", boxSizing: "border-box", minHeight: 64, marginTop: 6, padding: 8, borderRadius: 9, border: "1px solid #D9B8E8", resize: "vertical" }} />
+            <div style={{ display: "flex", gap: 6, marginTop: 6 }}><button type="button" onClick={saveWeeklyIntentionEdit} style={{ padding: "6px 9px", borderRadius: 8, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save</button><button type="button" onClick={() => setWeeklyIntentionEditing(false)} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, cursor: "pointer" }}>Cancel</button></div>
+            {weeklyIntentionMessage && <div style={{ marginTop: 5, fontSize: 10.5, color: "#8C6B9E" }}>{weeklyIntentionMessage}</div>}
+          </>}
         </div>
 
         <div role="tablist" aria-label="Today view" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, marginBottom: 9, padding: 4, borderRadius: 12, background: "#FFFFFF99", border: "1px solid #EADCEC" }}>
