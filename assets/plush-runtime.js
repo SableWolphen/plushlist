@@ -175,7 +175,7 @@
     if (!root) return;
     var recorded = false;
     var check = function () {
-      if (recorded || !root.firstElementChild) return;
+      if (recorded || !root.firstElementChild || root.firstElementChild.id === "plush-boot-shell") return;
       recorded = true;
       recordMetric("first-app-render", now());
     };
@@ -186,6 +186,21 @@
       if (recorded) observer.disconnect();
     });
     observer.observe(root, { childList: true, subtree: true });
+  }
+
+  function installFirstInteractionMetric() {
+    var recorded = false;
+    var record = function (event) {
+      if (recorded) return;
+      var target = event.target;
+      if (target && target.closest && target.closest("#plush-boot-shell")) return;
+      recorded = true;
+      recordMetric("first-user-interaction", now(), event.type);
+      document.removeEventListener("pointerdown", record, true);
+      document.removeEventListener("keydown", record, true);
+    };
+    document.addEventListener("pointerdown", record, true);
+    document.addEventListener("keydown", record, true);
   }
 
   function installLazyPanelMetrics() {
@@ -276,9 +291,11 @@
   };
 
   mark("runtime-ready");
+  if (document.getElementById("plush-boot-shell")) recordMetric("boot-shell-ready", now());
   installPolishStyles();
   installObservers();
   installFirstRenderMetric();
+  installFirstInteractionMetric();
   installLazyPanelMetrics();
   installCompletionHaptics();
 
