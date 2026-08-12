@@ -1,0 +1,35 @@
+name: Performance branch validation
+
+on:
+  push:
+    branches:
+      - performance-code-splitting
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+      - name: Build split production site
+        run: npm run web:sync
+      - name: Verify lazy chunks
+        run: |
+          test -f www/assets/app.bundle.js
+          test -d www/assets/chunks
+          count=$(find www/assets/chunks -type f -name '*.js' | wc -l)
+          echo "Lazy chunks: $count"
+          test "$count" -ge 5
+          grep -q 'type="module" src="./assets/app.bundle.js"' www/index.html
