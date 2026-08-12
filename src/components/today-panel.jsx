@@ -23,33 +23,14 @@ export function TodayPanel(props) {
     ...(props.recentlyCompletedKeys || []),
     ...crossedOffKeys,
   ]));
-  const habitRows = (props.rows || []).filter((row) => !row?.isBonus);
-  const completedHabits = habitRows.filter((row) => !!props.viewDone?.[row.key]).length;
-  const habitPercent = habitRows.length ? Math.round((completedHabits / habitRows.length) * 100) : 0;
-
   return (
     <>
-      <HabitCoach {...props} />
-      <section style={{ marginBottom: 14, padding: "12px 13px", borderRadius: 17, border: "1px solid #CFE8E1", background: "linear-gradient(145deg,#F4FBF9,#FFFDFC)" }}>
-        <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#318C79" }}>🔎 HABIT INSIGHTS</div>
-        <div style={{ marginTop: 4, fontSize: 13.5, fontWeight: 900, color: "#4F405C" }}>
-          {habitRows.length ? `${completedHabits} of ${habitRows.length} habits complete today` : "Your patterns will appear here"}
-        </div>
-        <div style={{ marginTop: 3, fontSize: 11.5, lineHeight: 1.45, color: "#607A73" }}>
-          {habitRows.length ? `${habitPercent}% complete. Keep the next step small and useful.` : "Add a habit when you are ready; PlushLife will learn what works over time."}
-        </div>
-        <button type="button" onClick={() => props.goToDashboard?.("progress")} style={{ marginTop: 8, padding: "7px 10px", borderRadius: 9, border: "1px solid #B9DDD4", background: "white", color: "#318C79", fontSize: 11.5, fontWeight: 900, cursor: "pointer" }}>See habit insights</button>
-      </section>
-      <details style={{ marginBottom: 14, borderRadius: 17, border: "1px solid #E6D4F2", background: "#FFFDFC", overflow: "hidden" }}>
-        <summary style={{ padding: "12px 13px", cursor: "pointer", color: "#76558A", fontSize: 13.5, fontWeight: 900 }}>
-          ⚙️ Advanced habit tools
-          <span style={{ display: "block", marginTop: 3, color: "#8C7A98", fontSize: 11, fontWeight: 500 }}>Coaching, rescue tools, experiments, reminders and routine settings</span>
-        </summary>
-        <div style={{ padding: "0 10px 1px" }}>
+      <HabitCoach {...props}>
+        <div style={{ paddingTop: 4, borderTop: "1px solid #EDE3F2" }}>
           <HabitRetentionTools {...props} />
           <HabitResilienceSuite {...props} />
         </div>
-      </details>
+      </HabitCoach>
       <TodayPanelCore {...props} recentlyCompletedKeys={visibleCompletedKeys} />
       <DailyCompanion {...props} />
     </>

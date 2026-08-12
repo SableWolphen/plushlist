@@ -164,7 +164,7 @@ function cardButton(active = false) {
   };
 }
 
-export function HabitCoach({ open, rows = [], viewDone = {}, period, nextStepTask, toggle, openTaskManager, selectDayType, setEssentialsPickerOpen, returnGapDays = 0, goToDashboard, setCareSection }) {
+export function HabitCoach({ open, rows = [], viewDone = {}, period, nextStepTask, toggle, openTaskManager, selectDayType, setEssentialsPickerOpen, returnGapDays = 0, goToDashboard, setCareSection, children }) {
   const date = dayKey(period?.date);
   const [state, setState] = React.useState(() => safeRead());
   const [expanded, setExpanded] = React.useState(false);
@@ -237,20 +237,20 @@ export function HabitCoach({ open, rows = [], viewDone = {}, period, nextStepTas
         </div>
         <div style={{ display: "flex", gap: 6, marginTop: 9, flexWrap: "wrap" }}>
           <button type="button" onClick={() => setAnchorPicker((value) => !value)} style={cardButton(!!anchorRow)}>{anchorRow ? "Change anchor" : "Choose anchor"}</button>
-          <button type="button" onClick={() => setExpanded((value) => !value)} aria-expanded={expanded} style={cardButton(expanded)}>🧠 {expanded ? "Close Habit Lab" : "Open Habit Lab"}</button>
+          <button type="button" onClick={() => setExpanded((value) => !value)} aria-expanded={expanded} style={cardButton(expanded)}>⚙️ {expanded ? "Close habit tools" : "Habit tools"}</button>
         </div>
         {anchorPicker && <div style={{ display: "grid", gap: 6, marginTop: 8, padding: 9, borderRadius: 11, background: "#FBF7FC" }}>
           {currentRows.slice(0, 14).map((row) => <button key={habitId(row)} type="button" onClick={() => setAnchor(habitId(row))} style={{ ...cardButton(habitId(row) === anchorId), textAlign: "left" }}>{viewDone?.[row.key] ? "✓ " : ""}{habitLabel(row)}</button>)}
           {!currentRows.length && <div style={{ fontSize: 11.5, color: "#8C6B9E" }}>Add a habit first, then you can make it today’s anchor.</div>}
         </div>}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 7, marginTop: 9 }}>
-          <input value={goalDraft} onChange={(event) => setGoalDraft(event.target.value)} maxLength={140} placeholder="Optional goal of the day" style={{ minWidth: 0, padding: "8px 9px", borderRadius: 9, border: "1px solid #E0D1E8", background: "white", color: "#5B4B6B" }} />
-          <button type="button" onClick={saveGoal} style={cardButton(false)}>Save</button>
-        </div>
         {state.goals?.[date] && <div style={{ marginTop: 6, fontSize: 11.5, color: "#76558A" }}>✨ Today’s goal: <strong>{state.goals[date]}</strong></div>}
       </div>
 
       {expanded && <div style={{ borderTop: "1px solid #EDE3F2", padding: "12px 14px 14px", display: "grid", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 7 }}>
+          <input value={goalDraft} onChange={(event) => setGoalDraft(event.target.value)} maxLength={140} placeholder="Optional goal of the day" style={{ minWidth: 0, padding: "8px 9px", borderRadius: 9, border: "1px solid #E0D1E8", background: "white", color: "#5B4B6B" }} />
+          <button type="button" onClick={saveGoal} style={cardButton(false)}>Save</button>
+        </div>
         {returnGapDays >= 2 && <div style={{ padding: 11, borderRadius: 12, background: "#FFF9E9", border: "1px solid #F0D99E", color: "#6B5A3D" }}>
           <div style={{ fontSize: 11.5, fontWeight: 900 }}>🧸 Recovery Mode</div>
           <div style={{ marginTop: 3, fontSize: 11.5, lineHeight: 1.45 }}>No backlog. Pick the easiest way back into your habits.</div>
@@ -336,6 +336,7 @@ export function HabitCoach({ open, rows = [], viewDone = {}, period, nextStepTas
           <button type="button" onClick={() => goToDashboard?.("progress")} style={cardButton(false)}>📊 Open Weekly Habit Review</button>
           <button type="button" onClick={() => { setCareSection?.("quick"); goToDashboard?.("care"); }} style={cardButton(false)}>♥ Support tools</button>
         </div>
+        {children}
       </div>}
     </section>
   );
