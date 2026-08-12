@@ -171,20 +171,24 @@ export function CompactAnchor({ open, rows = [], viewDone = {}, period, toggle }
   };
 
   return (
-    <section id="plushlife-focus-habit" style={{ marginBottom: 12, padding: "12px 13px", borderRadius: 16, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.82)" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-        <span aria-hidden="true" style={{ fontSize: 18 }}>🎯</span>
+    <section id="plushlife-focus-habit" data-plushlife-compact-card="focus-habit" style={{ marginBottom: 8, padding: "8px 10px", borderRadius: 13, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.82)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span aria-hidden="true" style={{ fontSize: 16, flexShrink: 0 }}>🎯</span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 10.5, letterSpacing: ".11em", fontWeight: 900, color: "#A65DC1" }}>FOCUS HABIT</div>
-          <div style={{ marginTop: 2, fontSize: 13.5, lineHeight: 1.35, fontWeight: 900, color: "#4F405C" }}>{focusLabel || "Choose one habit you really want to work on"}</div>
-          {focusId && !focusRow && <div style={{ marginTop: 3, fontSize: 10.5, color: "#8C6B9E" }}>Not scheduled today — it is still your Focus Habit.</div>}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+            <div style={{ fontSize: 9.5, letterSpacing: ".11em", fontWeight: 900, color: "#A65DC1" }}>FOCUS HABIT</div>
+            <button type="button" onClick={() => setPickerOpen((value) => !value)} aria-expanded={pickerOpen} style={{ border: 0, background: "transparent", color: "#8E4EAA", fontWeight: 900, fontSize: 10.5, padding: "5px 4px", minHeight: 30, cursor: "pointer", flexShrink: 0 }}>{focusId ? "Change" : "Choose"}</button>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 1 }}>
+            <div style={{ flex: 1, minWidth: 0, fontSize: 12.5, lineHeight: 1.3, fontWeight: 900, color: "#4F405C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{focusLabel || "Choose one habit you really want to work on"}</div>
+            {focusRow && !viewDone?.[focusRow.key] && <button type="button" onClick={() => toggle?.(focusRow.key)} style={{ border: 0, borderRadius: 999, background: "#A65DC1", color: "white", fontWeight: 900, fontSize: 10.5, padding: "5px 8px", minHeight: 30, cursor: "pointer", flexShrink: 0 }}>✓ Done</button>}
+            {focusRow && viewDone?.[focusRow.key] && <span style={{ borderRadius: 999, background: "#E9F7F2", color: "#318C79", fontSize: 10.5, padding: "4px 7px", fontWeight: 900, flexShrink: 0 }}>✓ Done</span>}
+          </div>
+          {focusId && !focusRow && <div style={{ marginTop: 2, fontSize: 9.5, color: "#8C6B9E" }}>Not scheduled today · still your Focus Habit</div>}
         </div>
-        {focusRow && !viewDone?.[focusRow.key] && <button type="button" onClick={() => toggle?.(focusRow.key)} style={{ ...buttonStyle, border: 0, background: "#A65DC1", color: "white", flexShrink: 0 }}>✓ Done</button>}
-        {focusRow && viewDone?.[focusRow.key] && <span style={{ fontSize: 11, color: "#318C79", fontWeight: 900, flexShrink: 0 }}>✓ Done</span>}
       </div>
-      <button type="button" onClick={() => setPickerOpen((value) => !value)} aria-expanded={pickerOpen} style={{ ...buttonStyle, marginTop: 8, minHeight: 40, padding: "7px 10px" }}>{focusId ? "Change focus habit" : "Choose Focus Habit"}</button>
-      {pickerOpen && <div style={{ display: "grid", gap: 6, marginTop: 8, paddingTop: 8, borderTop: "1px solid #EEE3F2" }}>
-        <div style={{ fontSize: 10.5, lineHeight: 1.4, color: "#8C6B9E" }}>Only habits are shown here — regular tasks, meals, schedules, and check-ins stay out of this list.</div>
+      {pickerOpen && <div style={{ display: "grid", gap: 6, marginTop: 7, paddingTop: 7, borderTop: "1px solid #EEE3F2" }}>
+        <div style={{ fontSize: 10, lineHeight: 1.35, color: "#8C6B9E" }}>Only habits are shown here — regular tasks, meals, schedules, and check-ins stay out of this list.</div>
         {habitRows.slice(0, 14).map((row) => <button key={habitId(row)} type="button" onClick={() => chooseFocusHabit(row)} style={{ ...buttonStyle, textAlign: "left", background: habitId(row) === focusId ? "#FAF0FD" : "white" }}>{viewDone?.[row.key] ? "✓ " : ""}{habitLabel(row)}</button>)}
         {!habitRows.length && <div style={{ fontSize: 11.5, color: "#8C6B9E" }}>You do not have a habit scheduled today yet. Mark a task as “Build a habit” or “Reduce a habit,” then it can become your Focus Habit.</div>}
       </div>}
