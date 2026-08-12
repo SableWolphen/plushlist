@@ -40,7 +40,7 @@ const searchableSource = (appSource + componentsSource + movedModulesText).repla
 
 const requiredRegressionMarkers = [
   'required task${pendingCount === 1 ? "" : "s"} still waiting',
-  'optional bonus ${bonusPendingCount === 1 ? "task" : "tasks"} available',
+  'optional bonus {bonusPendingCount === 1 ? "task" : "tasks"} available',
   'if (/^mornings?$/.test(words)) return { key: "morning", label: "☀️ Mornings" };',
   'Show monthly details',
   'Your habit progress and earned rewards live here in PlushGrowth.',
