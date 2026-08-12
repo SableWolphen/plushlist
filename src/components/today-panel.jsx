@@ -2,7 +2,8 @@ import { TodayPanel as TodayPanelCore } from "./today-panel-core.jsx";
 import { DailyCompanion } from "./daily-companion.jsx";
 import { BabyToday } from "./baby-today.jsx";
 import { HabitCoach } from "./habit-intelligence.jsx";
-import { HabitRetentionTools, LowScreenToday, useLowScreenMode } from "./habit-retention.jsx";
+import { HabitRetentionTools, useLowScreenMode } from "./habit-retention.jsx";
+import { LowScreenToday } from "./low-screen-today.jsx";
 import { HabitResilienceSuite } from "./habit-resilience.jsx";
 
 const COMPLETED_LINGER_MS = 2600;
