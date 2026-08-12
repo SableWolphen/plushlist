@@ -16,6 +16,14 @@ function replaceOnce(label, from, to) {
   source = source.slice(0, first) + to + source.slice(first + from.length);
 }
 
+function replaceAfter(label, anchor, from, to) {
+  const anchorIndex = source.indexOf(anchor);
+  if (anchorIndex < 0) throw new Error(`${label}: anchor not found`);
+  const first = source.indexOf(from, anchorIndex + anchor.length);
+  if (first < 0) throw new Error(`${label}: source pattern not found after anchor`);
+  source = source.slice(0, first) + to + source.slice(first + from.length);
+}
+
 replaceOnce(
   "warm cache helpers",
   'const SUPABASE_AUTH_STORAGE_KEY = "sb-pvitdhixycegmcovapyh-auth-token";\n',
@@ -28,8 +36,9 @@ replaceOnce(
   `    let active = true;\n    const warmCache = readWarmStartCache(user.id, period.date);\n    if (warmCache) {\n      setDone(warmCache.done || {});\n      setTrackerProfile(warmCache.profile || null);\n      setDisplayNameDraft(warmCache.profile?.display_name || "");\n      setComfortItemDraft(warmCache.profile?.comfort_item_name || "");\n      setTrackerTasks(warmCache.tasks || []);\n      setTaskSnoozes(warmCache.snoozes || []);\n      setPersonalSchedules(warmCache.schedules || []);\n      setScheduleExceptions(warmCache.exceptions || []);\n      try { window.PlushLifeRuntime?.metric("warm-cache-hydrated", performance.now(), String(warmCache.tasks?.length || 0) + " tasks"); } catch (_error) {}\n    } else {\n      setDone({});\n    }\n    setSyncStatus("syncing");\n    Promise.all([`
 );
 
-replaceOnce(
+replaceAfter(
   "persist warm cache after server load",
+  `        const hasDatedProgress = Boolean(dailyResult.data);`,
   `        setDone(Object.fromEntries(completedKeys.map((key) => [key, true])));\n        setWeeklyHistory((entries) => [\n          ...entries.filter((entry) => entry.progress_date !== period.date),\n          { progress_date: period.date, completed_keys: completedKeys },\n        ]);`,
   `        const serverDone = Object.fromEntries(completedKeys.map((key) => [key, true]));\n        setDone(serverDone);\n        setWeeklyHistory((entries) => [\n          ...entries.filter((entry) => entry.progress_date !== period.date),\n          { progress_date: period.date, completed_keys: completedKeys },\n        ]);\n        writeWarmStartCache(user.id, period.date, {\n          done: serverDone,\n          profile: profileResult.data || null,\n          tasks: tasksResult.data || [],\n          snoozes: snoozesResult.data || [],\n          schedules: schedulesResult.data || [],\n          exceptions: exceptionsResult.data || [],\n        });\n        try { window.PlushLifeRuntime?.metric("tracker-sync-ready", performance.now(), String((tasksResult.data || []).length) + " tasks"); } catch (_error) {}`
 );
