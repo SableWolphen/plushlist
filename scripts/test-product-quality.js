@@ -38,6 +38,7 @@ const checks = [
   [!today.includes("HabitRetentionTools") && !today.includes("HabitResilienceSuite"), "advanced habit tool suites stay off Today"],
   [anchor.includes("TODAY'S ANCHOR") && !anchor.includes("HABIT ASSIST") && !anchor.includes("HABIT RESILIENCE"), "compact anchor stays focused"],
   [today.includes("useSmartNextStep") && smartNextStep.includes("profile.preferredPeriod") && smartNextStep.includes("profile.stability") && smartNextStep.includes("anchorId"), "One Next Step quietly ranks anchor, timing, stability and capacity"],
+  [today.includes("smartNextStepHidden ? null") && today.includes("setSmartNextStepHidden(Boolean(hidden))"), "Hide for today suppresses the smart next-step card immediately"],
   [todayCore.includes("nextStepReason") && todayCore.includes("No catching up. We're only looking at today."), "Today explains smart next-step choices and keeps comeback language guilt-free"],
   [todayCore.includes("Resume normally") && todayCore.includes("Essentials only") && todayCore.includes("Lighter routine"), "returning users get clear restart choices"],
   [today.includes("LazyHabitBackgroundEngine") && today.includes("requestIdleCallback"), "quiet habit engine loads after the first paint"],
