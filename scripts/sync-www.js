@@ -138,11 +138,11 @@ export function ${exportName}(props) {
   };
 }
 
-function compileAppSource() {
+async function compileAppSource() {
   // The app entry remains the critical Today/startup path. Heavy dashboard and
   // management panels are turned into dynamic imports by the plugin above, so
   // esbuild can emit independent chunks that are fetched only when needed.
-  const result = esbuild.buildSync({
+  const result = await esbuild.build({
     entryPoints: [APP_SOURCE_ENTRY],
     bundle: true,
     write: true,
@@ -199,7 +199,7 @@ function prepareHtml(file, source) {
   return content;
 }
 
-function main() {
+async function main() {
   rimraf(WWW);
   fs.mkdirSync(VENDOR, { recursive: true });
 
@@ -223,7 +223,7 @@ function main() {
     if (copyDirectory(path.join(ROOT, directory), path.join(WWW, directory))) copiedDirectories += 1;
   }
 
-  const bundleStats = compileAppSource();
+  const bundleStats = await compileAppSource();
 
   let missingVendorFiles = false;
   for (const { src, dest } of VENDOR_FILES) {
@@ -240,4 +240,7 @@ function main() {
   console.log(`www/ synced (${copiedFiles} files, ${copiedDirectories} directories, ${VENDOR_FILES.length} vendored scripts, ${bundleStats.emittedFiles} app outputs, ${bundleStats.chunkCount} lazy chunks).`);
 }
 
-main();
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
