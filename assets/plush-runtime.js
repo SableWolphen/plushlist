@@ -10,6 +10,7 @@
   var longTaskCount = 0;
   var longTaskDuration = 0;
   var firstContentfulPaint = null;
+  var lazyStarts = Object.create(null);
 
   function now() {
     return Math.round((performance && performance.now ? performance.now() : Date.now()) * 10) / 10;
@@ -156,6 +157,62 @@
     }, true);
   }
 
+  function installPolishStyles() {
+    if (document.getElementById("plush-runtime-polish")) return;
+    var style = document.createElement("style");
+    style.id = "plush-runtime-polish";
+    style.textContent = "@keyframes plushSkeletonPulse{0%,100%{opacity:.52}50%{opacity:1}}" +
+      ".plush-lazy-skeleton{position:relative;margin:10px 0 16px;padding:18px;border-radius:16px;border:1px solid #eadcf2;background:rgba(255,255,255,.72);overflow:hidden}" +
+      ".plush-lazy-skeleton__title,.plush-lazy-skeleton__line{height:12px;border-radius:999px;background:linear-gradient(90deg,#eadcf2,#f7effb,#eadcf2);animation:plushSkeletonPulse 1.15s ease-in-out infinite}" +
+      ".plush-lazy-skeleton__title{width:42%;height:16px}.plush-lazy-skeleton__line{margin-top:11px;width:88%}.plush-lazy-skeleton__line--short{width:64%}" +
+      ".plush-lazy-skeleton__label{display:block;margin-top:12px;font-size:11px;font-weight:800;color:#8c6b9e}" +
+      "@media(prefers-reduced-motion:reduce){.plush-lazy-skeleton__title,.plush-lazy-skeleton__line{animation:none}}";
+    document.head.appendChild(style);
+  }
+
+  function installFirstRenderMetric() {
+    var root = document.getElementById("root");
+    if (!root) return;
+    var recorded = false;
+    var check = function () {
+      if (recorded || !root.firstElementChild) return;
+      recorded = true;
+      recordMetric("first-app-render", now());
+    };
+    check();
+    if (recorded || typeof MutationObserver !== "function") return;
+    var observer = new MutationObserver(function () {
+      check();
+      if (recorded) observer.disconnect();
+    });
+    observer.observe(root, { childList: true, subtree: true });
+  }
+
+  function installLazyPanelMetrics() {
+    if (typeof MutationObserver !== "function") return;
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        Array.prototype.forEach.call(mutation.addedNodes || [], function (node) {
+          if (!node || node.nodeType !== 1) return;
+          var skeleton = node.matches && node.matches(".plush-lazy-skeleton") ? node : node.querySelector && node.querySelector(".plush-lazy-skeleton");
+          if (!skeleton) return;
+          var panel = skeleton.getAttribute("data-panel") || "panel";
+          lazyStarts[panel] = now();
+        });
+        Array.prototype.forEach.call(mutation.removedNodes || [], function (node) {
+          if (!node || node.nodeType !== 1) return;
+          var skeleton = node.matches && node.matches(".plush-lazy-skeleton") ? node : node.querySelector && node.querySelector(".plush-lazy-skeleton");
+          if (!skeleton) return;
+          var panel = skeleton.getAttribute("data-panel") || "panel";
+          if (lazyStarts[panel] == null) return;
+          recordMetric("lazy-panel-open", now() - lazyStarts[panel], panel);
+          delete lazyStarts[panel];
+        });
+      });
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  }
+
   function installObservers() {
     if (typeof PerformanceObserver !== "function") return;
     try {
@@ -219,7 +276,10 @@
   };
 
   mark("runtime-ready");
+  installPolishStyles();
   installObservers();
+  installFirstRenderMetric();
+  installLazyPanelMetrics();
   installCompletionHaptics();
 
   if (document.readyState === "complete") {
