@@ -1,0 +1,234 @@
+(function () {
+  "use strict";
+
+  if (window.PlushLifeRuntime) return;
+
+  var METRICS_KEY = "plushlife_runtime_metrics_v1";
+  var ERRORS_KEY = "plushlife_runtime_errors_v1";
+  var MAX_METRICS = 40;
+  var MAX_ERRORS = 20;
+  var longTaskCount = 0;
+  var longTaskDuration = 0;
+  var firstContentfulPaint = null;
+
+  function now() {
+    return Math.round((performance && performance.now ? performance.now() : Date.now()) * 10) / 10;
+  }
+
+  function safeRead(key) {
+    try {
+      var value = localStorage.getItem(key);
+      return value ? JSON.parse(value) : [];
+    } catch (_error) {
+      return [];
+    }
+  }
+
+  function safeWrite(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (_error) {}
+  }
+
+  function pushRing(key, value, limit) {
+    var items = safeRead(key);
+    if (!Array.isArray(items)) items = [];
+    items.push(value);
+    if (items.length > limit) items = items.slice(items.length - limit);
+    safeWrite(key, items);
+  }
+
+  function sanitizeText(value) {
+    return String(value || "")
+      .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[email]")
+      .replace(/https?:\/\/[^\s)]+/gi, "[url]")
+      .replace(/\b[0-9a-f]{8}-[0-9a-f-]{27,}\b/gi, "[id]")
+      .slice(0, 180);
+  }
+
+  function relativeSource(source) {
+    try {
+      if (!source) return "";
+      var url = new URL(source, location.href);
+      return url.origin === location.origin ? url.pathname.split("/").slice(-2).join("/") : "external";
+    } catch (_error) {
+      return "";
+    }
+  }
+
+  function recordMetric(name, value, detail) {
+    var entry = {
+      name: String(name),
+      value: Math.round(Number(value || 0) * 10) / 10,
+      at: Date.now(),
+    };
+    if (detail) entry.detail = detail;
+    pushRing(METRICS_KEY, entry, MAX_METRICS);
+    try {
+      document.dispatchEvent(new CustomEvent("plushlife-performance", { detail: entry }));
+    } catch (_error) {}
+    return entry;
+  }
+
+  function recordError(kind, message, source, line, column) {
+    var entry = {
+      kind: String(kind || "error"),
+      message: sanitizeText(message),
+      source: relativeSource(source),
+      line: Number(line || 0),
+      column: Number(column || 0),
+      at: Date.now(),
+    };
+    pushRing(ERRORS_KEY, entry, MAX_ERRORS);
+    return entry;
+  }
+
+  function mark(name) {
+    if (!performance || typeof performance.mark !== "function") return;
+    try { performance.mark("plushlife:" + name); } catch (_error) {}
+  }
+
+  function measure(name, startName, endName) {
+    if (!performance || typeof performance.measure !== "function") return null;
+    try {
+      var entry = performance.measure(
+        "plushlife:" + name,
+        startName ? "plushlife:" + startName : undefined,
+        endName ? "plushlife:" + endName : undefined
+      );
+      recordMetric(name, entry.duration);
+      return entry.duration;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  function connectionAllowsPrefetch() {
+    var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!connection) return true;
+    if (connection.saveData) return false;
+    return !/^(slow-)?2g$/i.test(connection.effectiveType || "");
+  }
+
+  function addModulePreload(href) {
+    if (!href || document.querySelector('link[data-plush-prefetch="' + href.replace(/"/g, "") + '"]')) return;
+    var link = document.createElement("link");
+    link.rel = "modulepreload";
+    link.href = href;
+    link.setAttribute("data-plush-prefetch", href);
+    document.head.appendChild(link);
+  }
+
+  function prefetchLikelyPanels() {
+    if (!connectionAllowsPrefetch() || document.visibilityState === "hidden") return Promise.resolve([]);
+    return fetch("./assets/prefetch-manifest.json", { cache: "force-cache" })
+      .then(function (response) { return response.ok ? response.json() : []; })
+      .then(function (files) {
+        if (!Array.isArray(files)) return [];
+        files.slice(0, 3).forEach(addModulePreload);
+        recordMetric("idle-prefetch-count", Math.min(files.length, 3));
+        return files;
+      })
+      .catch(function () { return []; });
+  }
+
+  function scheduleIdlePrefetch() {
+    var run = function () { prefetchLikelyPanels(); };
+    if (typeof requestIdleCallback === "function") {
+      requestIdleCallback(run, { timeout: 3500 });
+    } else {
+      setTimeout(run, 1600);
+    }
+  }
+
+  function haptic(kind) {
+    if (!window.Capacitor || typeof navigator.vibrate !== "function") return false;
+    var pattern = kind === "success" ? [10, 30, 16] : kind === "soft" ? 8 : 12;
+    try { return navigator.vibrate(pattern); } catch (_error) { return false; }
+  }
+
+  function installCompletionHaptics() {
+    document.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("button") : null;
+      if (!button || button.disabled) return;
+      var label = (button.getAttribute("aria-label") || button.textContent || "").trim();
+      if (/^(✓\s*)?(done|did the smaller version)/i.test(label) || /mark .* complete/i.test(label)) haptic("success");
+    }, true);
+  }
+
+  function installObservers() {
+    if (typeof PerformanceObserver !== "function") return;
+    try {
+      var paintObserver = new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (entry) {
+          if (entry.name === "first-contentful-paint" && firstContentfulPaint == null) {
+            firstContentfulPaint = entry.startTime;
+            recordMetric("first-contentful-paint", entry.startTime);
+          }
+        });
+      });
+      paintObserver.observe({ type: "paint", buffered: true });
+    } catch (_error) {}
+
+    try {
+      var longTaskObserver = new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (entry) {
+          longTaskCount += 1;
+          longTaskDuration += entry.duration;
+        });
+      });
+      longTaskObserver.observe({ type: "longtask", buffered: true });
+    } catch (_error) {}
+  }
+
+  function recordNavigationMetrics() {
+    var nav = performance && performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
+    if (nav) {
+      recordMetric("response-start", nav.responseStart);
+      recordMetric("dom-content-loaded", nav.domContentLoadedEventEnd);
+      recordMetric("window-load", nav.loadEventEnd || now());
+    }
+    if (longTaskCount) {
+      recordMetric("long-task-count", longTaskCount);
+      recordMetric("long-task-total", longTaskDuration);
+    }
+  }
+
+  window.addEventListener("error", function (event) {
+    recordError("error", event.message, event.filename, event.lineno, event.colno);
+  });
+  window.addEventListener("unhandledrejection", function (event) {
+    var reason = event.reason;
+    recordError("promise", reason && reason.message ? reason.message : reason, "", 0, 0);
+  });
+
+  window.PlushLifeRuntime = {
+    mark: mark,
+    measure: measure,
+    metric: recordMetric,
+    haptic: haptic,
+    prefetchLikelyPanels: prefetchLikelyPanels,
+    metrics: function () { return safeRead(METRICS_KEY); },
+    errors: function () { return safeRead(ERRORS_KEY); },
+    clearDiagnostics: function () {
+      try {
+        localStorage.removeItem(METRICS_KEY);
+        localStorage.removeItem(ERRORS_KEY);
+      } catch (_error) {}
+    },
+  };
+
+  mark("runtime-ready");
+  installObservers();
+  installCompletionHaptics();
+
+  if (document.readyState === "complete") {
+    recordNavigationMetrics();
+    scheduleIdlePrefetch();
+  } else {
+    window.addEventListener("load", function () {
+      recordNavigationMetrics();
+      scheduleIdlePrefetch();
+    }, { once: true });
+  }
+})();
