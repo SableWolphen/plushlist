@@ -28,6 +28,8 @@ jobs:
           grep -q 'Set up a habit in plain English' src/components/habit-retention.jsx
           grep -q 'Better completion states' src/components/habit-retention.jsx
           grep -q 'Anchor Habit' android/app/src/main/java/com/PlushLife/WidgetBridgePlugin.java
+      - name: Prepare Capacitor Android
+        run: npx cap sync android
       - name: Compile Android Java
         run: |
           cd android
