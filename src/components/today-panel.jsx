@@ -81,6 +81,7 @@ function BackgroundIntelligence(props) {
 export function TodayPanel(props) {
   const lowScreen = useLowScreenMode();
   const readinessReportedRef = React.useRef(false);
+  const [smartNextStepHidden, setSmartNextStepHidden] = React.useState(false);
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
   const recentlyCompletedKeys = Array.from(new Set([
     ...(props.recentlyCompletedKeys || []),
@@ -94,13 +95,24 @@ export function TodayPanel(props) {
     fallbackTask: props.nextStepTask,
     recentlyCompletedKeys,
   });
+
+  React.useEffect(() => {
+    setSmartNextStepHidden(false);
+  }, [props.period?.date]);
+
+  const setNextStepDismissedToday = (hidden) => {
+    props.setNextStepDismissedToday?.(hidden);
+    setSmartNextStepHidden(Boolean(hidden));
+  };
+
   const modeProps = {
     ...props,
     toggle: unifiedToggle,
     recentlyCompletedKeys,
     completedLingerKeys: lingerKeys,
-    nextStepTask: smartNextStep.task || props.nextStepTask,
-    nextStepReason: smartNextStep.reason,
+    nextStepTask: smartNextStepHidden ? null : (smartNextStep.task || props.nextStepTask),
+    nextStepReason: smartNextStepHidden ? "" : smartNextStep.reason,
+    setNextStepDismissedToday,
   };
   const liveRegion = <div aria-live="polite" aria-atomic="true" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>{announcement}</div>;
   const backgroundEngine = <BackgroundIntelligence {...modeProps} />;
