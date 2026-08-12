@@ -39,6 +39,9 @@ const movedModulesText = movedModuleFiles
 const searchableSource = (appSource + componentsSource + movedModulesText).replace(/\r\n/g, "\n");
 
 const requiredRegressionMarkers = [
+  'export function HabitGrowthTools({ rows = [], period, openTaskManager })',
+  'Longer-term habit planning lives here instead of in today’s tools.',
+  '<HabitGrowthTools rows={habitTasks} period={period} openTaskManager={openTaskManager} />',
   'required task${pendingCount === 1 ? "" : "s"} still waiting',
   'optional bonus {bonusPendingCount === 1 ? "task" : "tasks"} available',
   'if (/^mornings?$/.test(words)) return { key: "morning", label: "☀️ Mornings" };',
