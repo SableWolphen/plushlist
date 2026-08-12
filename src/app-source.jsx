@@ -14,6 +14,7 @@ import { CarePanel } from "./components/care-panel.jsx";
 import { ProgressPanel } from "./components/progress-panel.jsx";
 import { WeekPanel } from "./components/week-panel.jsx";
 import { TodayPanel } from "./components/today-panel.jsx";
+import { createDeviceBackup, scheduleAutomaticDeviceBackup } from "./device-backup.js";
 
 const { useState, useEffect } = React;
 const supabase = window.supabase.createClient(
@@ -584,6 +585,8 @@ function GlowUpTracker() {
   const [active, setActive] = useState(() => dayIdForDate(trackerPeriod().date));
   const [dashboard, setDashboard] = useState("today");
   const [appearanceTheme, setAppearanceTheme] = useState("soft");
+  const [deviceBackupStatus, setDeviceBackupStatus] = useState({ exists: false, savedAt: null });
+  const [deviceBackupBusy, setDeviceBackupBusy] = useState(false);
   const [progressView, setProgressView] = useState("overview");
   const swipeStartX = React.useRef(null);
   const swipeStartY = React.useRef(null);
@@ -5569,6 +5572,30 @@ function GlowUpTracker() {
     return () => window.clearTimeout(timer);
   }, [badgeCelebration]);
 
+  const refreshDeviceBackup = React.useCallback(async () => {
+    if (!user?.id || deviceBackupBusy) return;
+    setDeviceBackupBusy(true);
+    try {
+      const status = await createDeviceBackup(supabase, user);
+      setDeviceBackupStatus(status);
+      setSettingsMessage("On-device backup updated. Your cloud copy was left untouched.");
+    } catch (_error) {
+      setSettingsMessage("Could not refresh the on-device backup. Your cloud data is still safe.");
+    } finally {
+      setDeviceBackupBusy(false);
+    }
+  }, [user?.id, deviceBackupBusy]);
+
+  useEffect(() => {
+    if (!user?.id || !online) return undefined;
+    return scheduleAutomaticDeviceBackup({
+      supabase,
+      user,
+      online,
+      onStatus: setDeviceBackupStatus,
+    });
+  }, [user?.id, online]);
+
   useEffect(() => {
     if (!user) return;
     let alive = true;
@@ -5576,7 +5603,6 @@ function GlowUpTracker() {
       if (!alive) return;
       supabase.from("user_presence").upsert({
         user_id: user.id,
-        email: user.email || null,
         last_active_at: new Date().toISOString(),
       }, { onConflict: "user_id" }).then(() => {});
     };
@@ -6618,7 +6644,7 @@ function GlowUpTracker() {
 
         <RewardsPanel open={collectionOpen} onClose={() => setCollectionOpen(false)} FeatureTip={FeatureTip} selectedOutfit={selectedOutfit} mascotMood={mascotMood} activityDaysTotal={activityDaysTotal} preferences={preferences} mascotGrowth={mascotGrowth} careDaysTotal={careDaysTotal} unlockedOutfits={unlockedOutfits} earnedBadgeIdSet={earnedBadgeIdSet} BADGE_DEFS={BADGE_DEFS} unlockedIdSet={unlockedIdSet} mascotRequirementProgress={mascotRequirementProgress} saveMascotCollection={saveMascotCollection} mascotCollection={mascotCollection} savedBestStreak={savedBestStreak} collectionTab={collectionTab} setCollectionTab={setCollectionTab} winsJarEntries={winsJarEntries} />
 
-        <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} watchPairingCode={watchPairingCode} setWatchPairingCode={setWatchPairingCode} connectWatch={connectWatch} watchPairingBusy={watchPairingBusy} watchPairingMessage={watchPairingMessage} localWatchSyncBusy={localWatchSyncBusy} startLocalWatchSync={startLocalWatchSync} localWatchSyncMessage={localWatchSyncMessage} dailyCheckIn={dailyCheckIn} pct={pct} rows={rows} viewDone={viewDone} weeklyOverallPct={weeklyOverallPct} widgetSyncMsg={widgetSyncMsg} setWidgetSyncMsg={setWidgetSyncMsg} displayNameDraft={displayNameDraft} setDisplayNameDraft={setDisplayNameDraft} saveDisplayName={saveDisplayName} comfortItemDraft={comfortItemDraft} setComfortItemDraft={setComfortItemDraft} saveComfortItem={saveComfortItem} preferences={preferences} appearanceTheme={appearanceTheme} selectAppearanceTheme={selectAppearanceTheme} dinoTheme={dinoTheme} updatePreference={updatePreference} enableNotifications={enableNotifications} smartReminderSuggestion={smartReminderSuggestion} restDatesSet={restDatesSet} toggleRestToday={toggleRestToday} period={period} restRangeDraft={restRangeDraft} setRestRangeDraft={setRestRangeDraft} saveRestRange={saveRestRange} restDates={restDates} savePreferences={savePreferences} feedbackText={feedbackText} setFeedbackText={setFeedbackText} submitFeedback={submitFeedback} feedbackMessage={feedbackMessage} exportMyData={exportMyData} restoreFileInputRef={restoreFileInputRef} restoreFromBackup={restoreFromBackup} deleteAllCheckIns={deleteAllCheckIns} deleteAllReflections={deleteAllReflections} user={user} online={online} syncStatus={syncStatus} lastSyncedAt={lastSyncedAt} syncNow={syncNow} emailChangeDraft={emailChangeDraft} setEmailChangeDraft={setEmailChangeDraft} requestEmailChange={requestEmailChange} signingOut={signingOut} handleSignOut={handleSignOut} signOutOtherDevices={signOutOtherDevices} deleteMyAccount={deleteMyAccount} settingsMessage={settingsMessage} />
+        <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} watchPairingCode={watchPairingCode} setWatchPairingCode={setWatchPairingCode} connectWatch={connectWatch} watchPairingBusy={watchPairingBusy} watchPairingMessage={watchPairingMessage} localWatchSyncBusy={localWatchSyncBusy} startLocalWatchSync={startLocalWatchSync} localWatchSyncMessage={localWatchSyncMessage} dailyCheckIn={dailyCheckIn} pct={pct} rows={rows} viewDone={viewDone} weeklyOverallPct={weeklyOverallPct} widgetSyncMsg={widgetSyncMsg} setWidgetSyncMsg={setWidgetSyncMsg} displayNameDraft={displayNameDraft} setDisplayNameDraft={setDisplayNameDraft} saveDisplayName={saveDisplayName} comfortItemDraft={comfortItemDraft} setComfortItemDraft={setComfortItemDraft} saveComfortItem={saveComfortItem} preferences={preferences} appearanceTheme={appearanceTheme} selectAppearanceTheme={selectAppearanceTheme} dinoTheme={dinoTheme} updatePreference={updatePreference} enableNotifications={enableNotifications} smartReminderSuggestion={smartReminderSuggestion} restDatesSet={restDatesSet} toggleRestToday={toggleRestToday} period={period} restRangeDraft={restRangeDraft} setRestRangeDraft={setRestRangeDraft} saveRestRange={saveRestRange} restDates={restDates} savePreferences={savePreferences} feedbackText={feedbackText} setFeedbackText={setFeedbackText} submitFeedback={submitFeedback} feedbackMessage={feedbackMessage} exportMyData={exportMyData} restoreFileInputRef={restoreFileInputRef} restoreFromBackup={restoreFromBackup} deleteAllCheckIns={deleteAllCheckIns} deleteAllReflections={deleteAllReflections} user={user} online={online} syncStatus={syncStatus} lastSyncedAt={lastSyncedAt} syncNow={syncNow} emailChangeDraft={emailChangeDraft} setEmailChangeDraft={setEmailChangeDraft} requestEmailChange={requestEmailChange} signingOut={signingOut} handleSignOut={handleSignOut} signOutOtherDevices={signOutOtherDevices} deleteMyAccount={deleteMyAccount} deviceBackupStatus={deviceBackupStatus} refreshDeviceBackup={refreshDeviceBackup} deviceBackupBusy={deviceBackupBusy} settingsMessage={settingsMessage} />
 
         <AdminPanel open={isAdminUser && adminOpen} onClose={() => setAdminOpen(false)} loadAdminData={loadAdminData} adminMessage={adminMessage} adminStats={adminStats} adminOnline={adminOnline} adminFunnel={adminFunnel} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} supporterEmailDraft={supporterEmailDraft} setSupporterEmailDraft={setSupporterEmailDraft} setSupporterStatus={setSupporterStatus} supporterGrantMessage={supporterGrantMessage} reviewAccountRole={reviewAccountRole} setReviewAccountRole={setReviewAccountRole} reviewAccountEmail={reviewAccountEmail} setReviewAccountEmail={setReviewAccountEmail} reviewAccountPassword={reviewAccountPassword} setReviewAccountPassword={setReviewAccountPassword} createOrUpdateReviewAccount={createOrUpdateReviewAccount} reviewAccountMessage={reviewAccountMessage} adminFeedback={adminFeedback} resolveFeedback={resolveFeedback} adminErrors={adminErrors} clearAllErrors={clearAllErrors} devPreviewPlan={devPreviewPlan} setDevPreviewPlan={setDevPreviewPlan} />
 

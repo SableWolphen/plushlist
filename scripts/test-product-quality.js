@@ -24,12 +24,17 @@ const appSource = read("src/app-source.jsx");
 const runtime = read("assets/plush-runtime.js");
 const syncWww = read("scripts/sync-www.js");
 const packageJson = read("package.json");
+const deviceBackup = read("src/device-backup.js");
 const goldAccess = read("src/plush-gold.js");
 const goldPreview = read("src/components/plush-gold-preview.jsx");
 const landing = read("src/components/landing.jsx");
 const loginPage = read("login.html");
 
 const checks = [
+  [deviceBackup.includes("indexedDB") && deviceBackup.includes("DEVICE_BACKUP_TABLES") && deviceBackup.includes("cloudDataDeleted: false"), "on-device backup is additive and never deletes cloud data"],
+  [deviceBackup.includes("caregiver_links") === false && deviceBackup.includes("push_subscriptions") === false && deviceBackup.includes("supporter_payments") === false, "device backup excludes relationship, push-token and payment rows"],
+  [appSource.includes("scheduleAutomaticDeviceBackup") && appSource.includes("refreshDeviceBackup") && !appSource.includes("email: user.email || null"), "app creates device backups and minimizes presence data"],
+  [settings.includes("On-device backup") && settings.includes("Nothing is deleted from the cloud automatically"), "Privacy & Data explains lossless device backup behavior"],
   [landing.includes("PlushLife Free") && landing.includes("Plush Gold") && landing.includes("FREE PREVIEW"), "signed-out landing compares Free and Gold"],
   [loginPage.includes("PlushLife Free") && loginPage.includes("Plush Gold") && loginPage.includes("FREE PREVIEW"), "dedicated login page compares Free and Gold"],
   [landing.includes("No payment is required right now") && loginPage.includes("No payment required right now"), "login tier comparison clearly keeps Gold free during preview"],

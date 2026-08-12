@@ -104,7 +104,7 @@ function formatSyncStatus(online, syncStatus, lastSyncedAt) {
   try { return `Synced ${new Date(lastSyncedAt).toLocaleString()}`; } catch (_error) { return "Synced"; }
 }
 
-export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairingCode, connectWatch, watchPairingBusy, watchPairingMessage, localWatchSyncBusy, startLocalWatchSync, localWatchSyncMessage, dailyCheckIn, pct, rows, viewDone, weeklyOverallPct, widgetSyncMsg, setWidgetSyncMsg, displayNameDraft, setDisplayNameDraft, saveDisplayName, comfortItemDraft, setComfortItemDraft, saveComfortItem, preferences, appearanceTheme, selectAppearanceTheme, dinoTheme, updatePreference, enableNotifications, smartReminderSuggestion, restDatesSet, toggleRestToday, period, restRangeDraft, setRestRangeDraft, saveRestRange, restDates, feedbackText, setFeedbackText, submitFeedback, feedbackMessage, exportMyData, restoreFileInputRef, restoreFromBackup, deleteAllCheckIns, deleteAllReflections, user, online, syncStatus, lastSyncedAt, syncNow, emailChangeDraft, setEmailChangeDraft, requestEmailChange, signingOut, handleSignOut, signOutOtherDevices, deleteMyAccount, settingsMessage }) {
+export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairingCode, connectWatch, watchPairingBusy, watchPairingMessage, localWatchSyncBusy, startLocalWatchSync, localWatchSyncMessage, dailyCheckIn, pct, rows, viewDone, weeklyOverallPct, widgetSyncMsg, setWidgetSyncMsg, displayNameDraft, setDisplayNameDraft, saveDisplayName, comfortItemDraft, setComfortItemDraft, saveComfortItem, preferences, appearanceTheme, selectAppearanceTheme, dinoTheme, updatePreference, enableNotifications, smartReminderSuggestion, restDatesSet, toggleRestToday, period, restRangeDraft, setRestRangeDraft, saveRestRange, restDates, feedbackText, setFeedbackText, submitFeedback, feedbackMessage, exportMyData, restoreFileInputRef, restoreFromBackup, deleteAllCheckIns, deleteAllReflections, user, online, syncStatus, lastSyncedAt, syncNow, emailChangeDraft, setEmailChangeDraft, requestEmailChange, signingOut, handleSignOut, signOutOtherDevices, deleteMyAccount, deviceBackupStatus, refreshDeviceBackup, deviceBackupBusy, settingsMessage }) {
   const [section, setSection] = React.useState("home");
   const [search, setSearch] = React.useState("");
   const { APPEARANCE_THEMES } = window.PlushLifeContent;
@@ -331,6 +331,19 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
     <>
       <DetailHeader title="Privacy & Data" onBack={() => setSection("home")} />
       <SectionTitle icon="🔐" title="Your data stays yours" description="Backup, restore, or remove specific categories." />
+      <Card style={{ background: "#F5FBF9", borderColor: "#CFE7DF" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 13.5, fontWeight: 900, color: "#347865" }}>📱 On-device backup</div>
+            <div style={{ marginTop: 4, color: "#6E817B", fontSize: 11.5, lineHeight: 1.45 }}>PlushLife keeps a second copy of your independently restorable data on this device. Cloud sync stays on so a new phone can still recover your account.</div>
+            <div style={{ marginTop: 6, color: "#56756C", fontSize: 11, fontWeight: 800 }}>
+              {deviceBackupStatus?.savedAt ? ("Last saved " + new Date(deviceBackupStatus.savedAt).toLocaleString()) : deviceBackupStatus?.unavailable ? "On-device backup unavailable on this device" : "Waiting for the first on-device backup"}
+            </div>
+          </div>
+          <button type="button" disabled={deviceBackupBusy} onClick={refreshDeviceBackup} style={{ ...secondaryButton, color: "#347865", flexShrink: 0, opacity: deviceBackupBusy ? .65 : 1 }}>{deviceBackupBusy ? "Saving…" : "Back up now"}</button>
+        </div>
+        <div style={{ marginTop: 9, padding: "8px 9px", borderRadius: 10, background: "rgba(255,255,255,.7)", color: "#71857F", fontSize: 10.8, lineHeight: 1.45 }}>Nothing is deleted from the cloud automatically. Relationship, payment, push-token, and device-pairing records are deliberately not copied into the restorable device backup.</div>
+      </Card>
       <Card style={{ background: "#F8FBFF", borderColor: "#D9E9F6" }}>
         <div style={{ fontSize: 13.5, fontWeight: 900, color: "#3F78B8" }}>🔒 We will never sell your data. Ever.</div>
         <div style={{ marginTop: 4, color: "#6985A3", fontSize: 11.5, lineHeight: 1.45 }}>No data brokers and no sale of your habits, moods, or reflections.</div>
