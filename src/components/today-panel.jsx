@@ -49,7 +49,11 @@ function BackgroundIntelligence(props) {
     }
     let cancelled = false;
     let handle = null;
-    const show = () => { if (!cancelled) setReady(true); };
+    const show = () => {
+      if (cancelled) return;
+      try { window.PlushLifeRuntime?.metric("background-intelligence-start", performance.now()); } catch (_error) {}
+      setReady(true);
+    };
     if (typeof window.requestIdleCallback === "function") handle = window.requestIdleCallback(show, { timeout: 1800 });
     else handle = window.setTimeout(show, 900);
     return () => {
@@ -64,6 +68,7 @@ function BackgroundIntelligence(props) {
 
 export function TodayPanel(props) {
   const lowScreen = useLowScreenMode();
+  const readinessReportedRef = React.useRef(false);
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
   const recentlyCompletedKeys = Array.from(new Set([
     ...(props.recentlyCompletedKeys || []),
@@ -72,6 +77,16 @@ export function TodayPanel(props) {
   const modeProps = { ...props, toggle: unifiedToggle, recentlyCompletedKeys, completedLingerKeys: lingerKeys };
   const liveRegion = <div aria-live="polite" aria-atomic="true" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>{announcement}</div>;
   const backgroundEngine = <BackgroundIntelligence {...modeProps} />;
+
+  React.useEffect(() => {
+    if (!props.open || readinessReportedRef.current) return;
+    readinessReportedRef.current = true;
+    const report = () => {
+      try { window.PlushLifeRuntime?.metric("today-interactive", performance.now(), `${props.rows?.length || 0} rows`); } catch (_error) {}
+    };
+    if (typeof window.requestAnimationFrame === "function") window.requestAnimationFrame(report);
+    else report();
+  }, [props.open, props.rows?.length]);
 
   if (!props.open) return null;
   if (props.babyMode) return <>{backgroundEngine}{liveRegion}<React.Suspense fallback={null}><LazyBabyToday {...modeProps} /></React.Suspense></>;
