@@ -24,6 +24,20 @@ function FirstDaysGuide({ activityDaysTotal = 0, rows = [], viewDone = {}, goToD
   );
 }
 
+function LowScreenJustCompleted({ rows = [], viewDone = {}, lingerKeys = [], toggle }) {
+  const lingering = new Set(lingerKeys || []);
+  const completed = rows.filter((row) => !row.isBonus && !!viewDone?.[row.key] && lingering.has(row.key));
+  if (!completed.length) return null;
+  return (
+    <section aria-label="Just completed" style={{ margin: "-4px 0 10px", padding: 10, borderRadius: 14, border: "1px solid #D8E7E2", background: "#F7FCFA" }}>
+      <div style={{ fontSize: 10.5, letterSpacing: ".11em", fontWeight: 900, color: "#4D8174" }}>✓ JUST COMPLETED</div>
+      <div style={{ display: "grid", gap: 6, marginTop: 7 }}>
+        {completed.map((task) => <button key={task.key} type="button" onClick={() => toggle?.(task.key)} aria-label={`Mark ${task.label} incomplete`} style={{ minHeight: 44, display: "grid", gridTemplateColumns: "24px 1fr", gap: 8, alignItems: "center", padding: "8px 9px", borderRadius: 11, border: "1px solid #D7E8E3", background: "white", color: "#748A84", textAlign: "left", cursor: "pointer" }}><span aria-hidden="true" style={{ width: 22, height: 22, borderRadius: "50%", background: "#4D9A86", color: "white", display: "grid", placeItems: "center", fontWeight: 900 }}>✓</span><span style={{ fontSize: 12.5, lineHeight: 1.35, fontWeight: 800, textDecoration: "line-through" }}>{task.label}</span></button>)}
+      </div>
+    </section>
+  );
+}
+
 export function TodayPanel(props) {
   const lowScreen = useLowScreenMode();
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
@@ -41,6 +55,7 @@ export function TodayPanel(props) {
       <>
         {liveRegion}
         <LowScreenToday {...modeProps} />
+        <LowScreenJustCompleted rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} />
         <CompletedTaskArea rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} compact />
       </>
     );
