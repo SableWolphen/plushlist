@@ -3,6 +3,7 @@ const SUPABASE_URL = "https://pvitdhixycegmcovapyh.supabase.co";
 const SUPABASE_KEY = "sb_publishable_SScDCEHovc68ITiEUu6lCg_mHPe2oaI";
 const FIRST_SEEN_KEY = "plushlife:companion:first-seen:v1";
 const HISTORY_KEY = "plushlife:companion:history:v1";
+const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 const SYNCED_DAYS = 45;
 
 function safeJson(value, fallback = null) {
@@ -85,10 +86,11 @@ function localCompanionState() {
     if (Object.keys(day).length) days[date] = day;
   }
   return {
-    version: 1,
+    version: 2,
     first_seen: storageJson(FIRST_SEEN_KEY, "") || "",
     history: storageJson(HISTORY_KEY, []).slice(0, SYNCED_DAYS),
     days,
+    habit_coach: storageJson(HABIT_STATE_KEY, {}),
     updated_at: new Date().toISOString(),
   };
 }
@@ -100,6 +102,36 @@ function mergeHistory(cloud = [], local = []) {
   return [...byDate.values()].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, SYNCED_DAYS);
 }
 
+function mergeHabitHistory(cloud = {}, local = {}) {
+  const merged = { ...cloud };
+  for (const [date, localDay] of Object.entries(local || {})) merged[date] = { ...(cloud?.[date] || {}), ...(localDay || {}) };
+  return merged;
+}
+
+function mergeHabitCoach(cloud = {}, local = {}) {
+  const cloudExperiments = Array.isArray(cloud?.experiments) ? cloud.experiments : [];
+  const localExperiments = Array.isArray(local?.experiments) ? local.experiments : [];
+  const experiments = new Map();
+  for (const item of cloudExperiments) if (item?.id) experiments.set(item.id, item);
+  for (const item of localExperiments) if (item?.id) experiments.set(item.id, { ...(experiments.get(item.id) || {}), ...item });
+  const cloudPaths = cloud?.paths && typeof cloud.paths === "object" ? cloud.paths : {};
+  const localPaths = local?.paths && typeof local.paths === "object" ? local.paths : {};
+  const active = localPaths.active || cloudPaths.active || null;
+  const completed = [...new Set([...(cloudPaths.completed || []), ...(localPaths.completed || [])])];
+  return {
+    version: 1,
+    anchors: { ...(cloud?.anchors || {}), ...(local?.anchors || {}) },
+    goals: { ...(cloud?.goals || {}), ...(local?.goals || {}) },
+    meta: { ...(cloud?.meta || {}), ...(local?.meta || {}) },
+    experiments: [...experiments.values()].slice(-40),
+    paths: { ...cloudPaths, ...localPaths, active, completed },
+    reviews: { ...(cloud?.reviews || {}), ...(local?.reviews || {}) },
+    history: mergeHabitHistory(cloud?.history || {}, local?.history || {}),
+    recovery: { ...(cloud?.recovery || {}), ...(local?.recovery || {}) },
+    updated_at: new Date().toISOString(),
+  };
+}
+
 function mergeState(cloud = {}, local = {}) {
   const cloudDays = cloud?.days && typeof cloud.days === "object" ? cloud.days : {};
   const localDays = local?.days && typeof local.days === "object" ? local.days : {};
@@ -109,10 +141,11 @@ function mergeState(cloud = {}, local = {}) {
   }
   const candidates = [cloud?.first_seen, local?.first_seen].filter(Boolean).sort();
   return {
-    version: 1,
+    version: 2,
     first_seen: candidates[0] || "",
     history: mergeHistory(cloud?.history || [], local?.history || []),
     days,
+    habit_coach: mergeHabitCoach(cloud?.habit_coach || {}, local?.habit_coach || {}),
     updated_at: new Date().toISOString(),
   };
 }
@@ -125,6 +158,10 @@ function hydrateLocal(state) {
     if (day && Object.prototype.hasOwnProperty.call(day, "gentle_done")) storageSet(`plushlife:gentle-day:${date}`, day.gentle_done || {});
     if (day && Object.prototype.hasOwnProperty.call(day, "wind_down")) storageSet(`plushlife:wind-down:${date}`, day.wind_down || {});
     if (day && Object.prototype.hasOwnProperty.call(day, "support_need")) storageSet(`plushlife:support-need:${date}`, day.support_need || "");
+  }
+  if (state.habit_coach && typeof state.habit_coach === "object") {
+    storageSet(HABIT_STATE_KEY, state.habit_coach);
+    try { window.dispatchEvent(new CustomEvent("plushlife:habit-coach-hydrated")); } catch (_error) {}
   }
 }
 

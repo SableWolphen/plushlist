@@ -1,5 +1,6 @@
 import { HabitTypeIcon } from "./shared.jsx";
 import { BabyModeCareSuite } from "./baby-mode.jsx";
+import { BabyHabitAnchor } from "./habit-intelligence.jsx";
 
 const softButton = {
   padding: "10px 12px",
@@ -70,6 +71,8 @@ export function BabyToday({
           <button type="button" onClick={openCare} style={{ ...softButton, padding: "8px 10px", fontSize: 11.5 }}>♥ I need comfort</button>
         </div>
       </section>
+
+      <BabyHabitAnchor open={open} rows={rows} viewDone={viewDone} period={period} toggle={toggle} />
 
       {resting && <section style={{ padding: "11px 13px", borderRadius: 15, background: "#EEF9F6", border: "1px solid #BFE5D2", color: "#3E746A" }}>
         <div style={{ fontWeight: 900, fontSize: 12.5 }}>🌴 Today is a rest day.</div>
