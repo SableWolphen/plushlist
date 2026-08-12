@@ -220,8 +220,6 @@ export function HabitCoach({ open, rows = [], viewDone = {}, period, nextStepTas
   const smartReason = smartRow ? (habitId(smartRow) === anchorId ? "It is your Anchor Habit today." : smartMeta.stackAfter && viewDone?.[rowById.get(smartMeta.stackAfter)?.key] ? "The habit you stacked it after is already done." : isEssential(smartRow) ? "It is one of your essentials." : "It is a useful next win from today’s remaining habits.") : "Everything important on today’s list is already handled.";
 
   const currentExperiment = selectedRow ? state.experiments?.find((item) => item.habitId === habitId(selectedRow) && item.status !== "ended" && item.ends >= date) : null;
-  const activePath = state.paths?.active ? PATHS.find((path) => path.id === state.paths.active.id) : null;
-  const activeStep = activePath ? Math.min(Number(state.paths.active.step || 0), activePath.steps.length - 1) : 0;
 
   return (
     <section style={{ marginBottom: 14, borderRadius: 17, background: "linear-gradient(145deg,#FFFDFC,#F8F4FF)", border: "1px solid #E6D4F2", overflow: "hidden", boxShadow: "0 7px 22px rgba(118,85,138,.06)" }}>
@@ -304,34 +302,6 @@ export function HabitCoach({ open, rows = [], viewDone = {}, period, nextStepTas
           </div>
         </details>
 
-        <details style={{ borderRadius: 12, border: "1px solid #E6D4F2", background: "white", overflow: "hidden" }}>
-          <summary style={{ padding: "10px 11px", fontSize: 11.5, fontWeight: 900, color: "#76558A", cursor: "pointer" }}>🗺 PlushPaths · guided habit journeys</summary>
-          <div style={{ padding: "0 11px 11px" }}>
-            {activePath ? <div style={{ padding: 10, borderRadius: 10, background: "#FAF6FC" }}>
-              <div style={{ fontWeight: 900, color: "#5B4B6B" }}>{activePath.emoji} {activePath.name}</div>
-              <div style={{ marginTop: 4, fontSize: 11.5, color: "#806B8D" }}>Step {activeStep + 1} of {activePath.steps.length}</div>
-              <div style={{ marginTop: 6, fontSize: 13, fontWeight: 850, color: "#5B4B6B" }}>{activePath.steps[activeStep]}</div>
-              <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
-                {activeStep < activePath.steps.length - 1 ? <button type="button" onClick={() => save((current) => ({ ...current, paths: { ...(current.paths || {}), active: { ...current.paths.active, step: activeStep + 1 } } }))} style={cardButton(false)}>I’m ready for the next step</button> : <button type="button" onClick={() => save((current) => ({ ...current, paths: { ...(current.paths || {}), completed: [...(current.paths?.completed || []), activePath.id], active: null } }))} style={cardButton(false)}>Finish this path ✨</button>}
-                <button type="button" onClick={() => openTaskManager?.()} style={cardButton(false)}>Add or edit a matching habit</button>
-                <button type="button" onClick={() => save((current) => ({ ...current, paths: { ...(current.paths || {}), active: null } }))} style={cardButton(false)}>Pause path</button>
-              </div>
-            </div> : <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 7 }}>
-              {PATHS.map((path) => <button key={path.id} type="button" onClick={() => save((current) => ({ ...current, paths: { ...(current.paths || {}), active: { id: path.id, step: 0, started: date } } }))} style={{ ...cardButton(false), textAlign: "left", minHeight: 55 }}>{path.emoji} {path.name}</button>)}
-            </div>}
-          </div>
-        </details>
-
-        <details style={{ borderRadius: 12, border: "1px solid #E6D4F2", background: "white", overflow: "hidden" }}>
-          <summary style={{ padding: "10px 11px", fontSize: 11.5, fontWeight: 900, color: "#76558A", cursor: "pointer" }}>🌿 Life areas</summary>
-          <div style={{ padding: "0 11px 11px", display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {AREAS.map((area) => {
-              const count = currentRows.filter((row) => state.meta?.[habitId(row)]?.area === area).length;
-              return <span key={area} style={{ padding: "6px 8px", borderRadius: 999, background: count ? "#F4ECF8" : "#F8F6F9", color: count ? "#76558A" : "#A08FA9", fontSize: 10.5, fontWeight: 800 }}>{area} · {count}</span>;
-            })}
-          </div>
-        </details>
-
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           <button type="button" onClick={() => goToDashboard?.("progress")} style={cardButton(false)}>📊 Open Weekly Habit Review</button>
           <button type="button" onClick={() => { setCareSection?.("quick"); goToDashboard?.("care"); }} style={cardButton(false)}>♥ Support tools</button>
@@ -340,6 +310,51 @@ export function HabitCoach({ open, rows = [], viewDone = {}, period, nextStepTas
       </div>}
     </section>
   );
+}
+
+export function HabitGrowthTools({ rows = [], period, openTaskManager }) {
+  const [state, setState] = React.useState(() => safeRead());
+  React.useEffect(() => {
+    const refresh = () => setState(safeRead());
+    window.addEventListener("plushlife:habit-coach-updated", refresh);
+    window.addEventListener("plushlife:habit-coach-hydrated", refresh);
+    return () => {
+      window.removeEventListener("plushlife:habit-coach-updated", refresh);
+      window.removeEventListener("plushlife:habit-coach-hydrated", refresh);
+    };
+  }, []);
+  const save = (updater) => setState((current) => safeWrite(typeof updater === "function" ? updater(current) : updater));
+  const date = dayKey(period?.date);
+  const currentRows = (rows || []).filter((row) => !row?.archived_at && !row?.isBonus);
+  const activePath = state.paths?.active ? PATHS.find((path) => path.id === state.paths.active.id) : null;
+  const activeStep = activePath ? Math.min(Number(state.paths.active.step || 0), activePath.steps.length - 1) : 0;
+  return <section style={{ marginBottom: 18, padding: 14, borderRadius: 18, background: "linear-gradient(145deg,#FFFDFC,#F8F4FF)", border: "1px solid #E6D4F2" }}>
+    <div style={{ fontSize: 10.5, letterSpacing: ".13em", fontWeight: 900, color: "#A65DC1" }}>🧭 HABIT GROWTH</div>
+    <div style={{ marginTop: 4, fontSize: 13.5, fontWeight: 900, color: "#4F405C" }}>Journeys and life areas</div>
+    <div style={{ marginTop: 3, fontSize: 11, color: "#806B8D" }}>Longer-term habit planning lives here instead of in today’s tools.</div>
+    <div style={{ display: "grid", gap: 9, marginTop: 10 }}>
+      <details style={{ borderRadius: 12, border: "1px solid #E6D4F2", background: "white", overflow: "hidden" }}>
+        <summary style={{ padding: "10px 11px", fontSize: 11.5, fontWeight: 900, color: "#76558A", cursor: "pointer" }}>🗺 PlushPaths · guided habit journeys</summary>
+        <div style={{ padding: "0 11px 11px" }}>{activePath ? <div style={{ padding: 10, borderRadius: 10, background: "#FAF6FC" }}>
+          <div style={{ fontWeight: 900, color: "#5B4B6B" }}>{activePath.emoji} {activePath.name}</div>
+          <div style={{ marginTop: 4, fontSize: 11.5, color: "#806B8D" }}>Step {activeStep + 1} of {activePath.steps.length}</div>
+          <div style={{ marginTop: 6, fontSize: 13, fontWeight: 850, color: "#5B4B6B" }}>{activePath.steps[activeStep]}</div>
+          <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+            {activeStep < activePath.steps.length - 1 ? <button type="button" onClick={() => save((current) => ({ ...current, paths: { ...(current.paths || {}), active: { ...current.paths.active, step: activeStep + 1 } } }))} style={cardButton(false)}>I’m ready for the next step</button> : <button type="button" onClick={() => save((current) => ({ ...current, paths: { ...(current.paths || {}), completed: [...(current.paths?.completed || []), activePath.id], active: null } }))} style={cardButton(false)}>Finish this path ✨</button>}
+            <button type="button" onClick={() => openTaskManager?.()} style={cardButton(false)}>Add or edit a matching habit</button>
+            <button type="button" onClick={() => save((current) => ({ ...current, paths: { ...(current.paths || {}), active: null } }))} style={cardButton(false)}>Pause path</button>
+          </div>
+        </div> : <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 7 }}>{PATHS.map((path) => <button key={path.id} type="button" onClick={() => save((current) => ({ ...current, paths: { ...(current.paths || {}), active: { id: path.id, step: 0, started: date } } }))} style={{ ...cardButton(false), textAlign: "left", minHeight: 55 }}>{path.emoji} {path.name}</button>)}</div>}</div>
+      </details>
+      <details style={{ borderRadius: 12, border: "1px solid #E6D4F2", background: "white", overflow: "hidden" }}>
+        <summary style={{ padding: "10px 11px", fontSize: 11.5, fontWeight: 900, color: "#76558A", cursor: "pointer" }}>🌿 Life areas</summary>
+        <div style={{ padding: "0 11px 11px", display: "flex", gap: 6, flexWrap: "wrap" }}>{AREAS.map((area) => {
+          const count = currentRows.filter((row) => state.meta?.[habitId(row)]?.area === area).length;
+          return <span key={area} style={{ padding: "6px 8px", borderRadius: 999, background: count ? "#F4ECF8" : "#F8F6F9", color: count ? "#76558A" : "#A08FA9", fontSize: 10.5, fontWeight: 800 }}>{area} · {count}</span>;
+        })}</div>
+      </details>
+    </div>
+  </section>;
 }
 
 export function BabyHabitAnchor({ open, rows = [], viewDone = {}, period, toggle }) {

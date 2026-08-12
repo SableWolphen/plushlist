@@ -12,6 +12,7 @@
 // the separate "story"/"areas" tabs below them) — left exactly as-is,
 // not touched by this move.
 import { HabitTypeIcon } from "./shared.jsx";
+import { HabitGrowthTools } from "./habit-intelligence.jsx";
 
 function HabitGardenCard({ habitTasks, habitGardenGrowthPct, habitGardenTotalCheckIns, habitGardenOpen, setHabitGardenOpen }) {
   if (!habitTasks?.length) return null;
@@ -273,6 +274,7 @@ export function ProgressPanel({ open, progressView, setProgressView, weeklyInten
           )}
         </div>
         <HabitGardenCard habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} />
+        <HabitGrowthTools rows={habitTasks} period={period} openTaskManager={openTaskManager} />
         </>}
         {progressView === "story" && (
           <div style={{ marginBottom: 18, padding: 16, borderRadius: 18, background: "#F5FBF8", border: "1px solid #CFE8E1", boxShadow: "0 8px 24px rgba(77,132,112,.08)", color: "#526F67" }}>
