@@ -1,8 +1,10 @@
 import { HabitTypeIcon } from "./shared.jsx";
 import { BabyModeCareSuite } from "./baby-mode.jsx";
 import { BabyHabitAnchor } from "./habit-intelligence.jsx";
+import { CompletedTaskArea } from "./completed-task-flow.jsx";
 
 const softButton = {
+  minHeight: 44,
   padding: "10px 12px",
   borderRadius: 13,
   border: "1px solid #E2CDEB",
@@ -24,6 +26,8 @@ export function BabyToday({
   toggleRestToday,
   rows = [],
   viewDone = {},
+  recentlyCompletedKeys = [],
+  completedLingerKeys = [],
   openTaskManager,
   openJournalForSelectedDate,
   activityDaysTotal = 0,
@@ -39,9 +43,9 @@ export function BabyToday({
   if (!open) return null;
 
   const allLittleJobs = rows.filter((row) => !row.isBonus);
-  const waiting = allLittleJobs.filter((row) => !viewDone[row.key]);
+  const lingering = new Set(recentlyCompletedKeys || []);
+  const waiting = allLittleJobs.filter((row) => !viewDone[row.key] || lingering.has(row.key));
   const visible = showAllLittleJobs ? waiting : waiting.slice(0, 4);
-  const tuckedIn = allLittleJobs.filter((row) => !!viewDone[row.key]);
   const resting = restDatesSet?.has?.(period?.date);
   const comfortItem = trackerProfile?.comfort_item || trackerProfile?.comfort_item_name || "";
 
@@ -49,6 +53,21 @@ export function BabyToday({
     setCareSection?.("quick");
     goToDashboard?.("care");
   };
+
+  const littleJobStyle = (done) => ({
+    minHeight: 48,
+    display: "grid",
+    gridTemplateColumns: "24px 1fr",
+    gap: 8,
+    alignItems: "center",
+    padding: "11px 12px",
+    borderRadius: 13,
+    border: "1px solid #E2D5E8",
+    background: done ? "#FAF6FC" : "white",
+    color: done ? "#A081AD" : "#5B4B6B",
+    textAlign: "left",
+    cursor: "pointer",
+  });
 
   return (
     <div className="baby-today-simple" style={{ display: "grid", gap: 13, marginBottom: 18 }}>
@@ -87,33 +106,22 @@ export function BabyToday({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
           <div>
             <div style={{ fontSize: 11, letterSpacing: ".13em", fontWeight: 900, color: "#A65DC1" }}>🧸 LITTLE JOBS</div>
-            <div style={{ marginTop: 3, fontSize: 11.5, color: "#8C6B9E" }}>Only a few at a time. Finished jobs stay crossed off below.</div>
+            <div style={{ marginTop: 3, fontSize: 11.5, color: "#8C6B9E" }}>Finished jobs cross off here first, then tuck into Completed Today.</div>
           </div>
           <div style={{ fontSize: 11, fontWeight: 900, color: "#8C6B9E" }}>{Math.round(Number(pct) || 0)}%</div>
         </div>
         <div style={{ display: "grid", gap: 7, marginTop: 10 }}>
-          {visible.map((task) => (
-            <button key={task.key} type="button" onClick={() => toggle(task.key)} style={{ display: "grid", gridTemplateColumns: "24px 1fr", gap: 8, alignItems: "center", padding: "11px 12px", borderRadius: 13, border: "1px solid #E2D5E8", background: "white", color: "#5B4B6B", textAlign: "left", cursor: "pointer" }}>
-              <span aria-hidden="true" style={{ width: 22, height: 22, borderRadius: "50%", border: "2px solid #B67AC8", display: "grid", placeItems: "center" }}>○</span>
-              <span style={{ fontSize: 13, lineHeight: 1.35, fontWeight: 850 }}>{task.label}</span>
-            </button>
-          ))}
+          {visible.map((task) => {
+            const doneNow = !!viewDone[task.key];
+            return <button key={task.key} type="button" onClick={() => toggle(task.key)} aria-label={doneNow ? `Mark ${task.label} incomplete` : `Mark ${task.label} complete`} style={littleJobStyle(doneNow)}>
+              <span aria-hidden="true" style={{ width: 22, height: 22, borderRadius: "50%", border: doneNow ? 0 : "2px solid #B67AC8", background: doneNow ? "#B67AC8" : "transparent", color: "white", display: "grid", placeItems: "center", fontWeight: 900 }}>{doneNow ? "✓" : "○"}</span>
+              <span style={{ fontSize: 13, lineHeight: 1.35, fontWeight: 850, textDecoration: doneNow ? "line-through" : "none" }}>{task.label}</span>
+            </button>;
+          })}
           {!visible.length && <div style={{ padding: "12px 2px", color: "#806B8D", fontSize: 12.5 }}>All tucked in. 💜</div>}
         </div>
 
-        {tuckedIn.length > 0 && (
-          <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #EEE3F2" }}>
-            <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#9A7BA7" }}>✓ TUCKED IN TODAY</div>
-            <div style={{ display: "grid", gap: 6, marginTop: 8 }}>
-              {tuckedIn.map((task) => (
-                <button key={task.key} type="button" onClick={() => toggle(task.key)} aria-label={`Mark ${task.label} incomplete`} style={{ display: "grid", gridTemplateColumns: "24px 1fr", gap: 8, alignItems: "center", padding: "9px 10px", borderRadius: 12, border: "1px solid #E7D8ED", background: "#FAF6FC", color: "#A081AD", textAlign: "left", cursor: "pointer" }}>
-                  <span aria-hidden="true" style={{ width: 22, height: 22, borderRadius: "50%", background: "#B67AC8", color: "white", display: "grid", placeItems: "center", fontWeight: 900 }}>✓</span>
-                  <span style={{ fontSize: 12.5, lineHeight: 1.35, fontWeight: 800, textDecoration: "line-through" }}>{task.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        <CompletedTaskArea rows={allLittleJobs} viewDone={viewDone} lingerKeys={completedLingerKeys} toggle={toggle} title="Completed today" compact />
 
         <div style={{ display: "flex", gap: 7, marginTop: 10, flexWrap: "wrap" }}>
           {waiting.length > 4 && <button type="button" aria-expanded={showAllLittleJobs} onClick={() => setShowAllLittleJobs((expanded) => !expanded)} style={softButton}>{showAllLittleJobs ? "Show fewer little jobs" : `Show all ${waiting.length} little jobs`}</button>}
@@ -122,26 +130,14 @@ export function BabyToday({
       </section>
 
       <details style={{ borderRadius: 17, background: "rgba(255,255,255,.72)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
-        <summary style={{ listStyle: "none", padding: "13px 14px", color: "#76558A", fontWeight: 900, cursor: "pointer" }}>🧸 Need a little help?</summary>
+        <summary style={{ listStyle: "none", minHeight: 44, padding: "13px 14px", color: "#76558A", fontWeight: 900, cursor: "pointer" }}>🧸 Need a little help?</summary>
         <div style={{ padding: "0 10px 10px" }}>
-          <BabyModeCareSuite
-            date={period?.date || ""}
-            todayDone={rows.filter((row) => !!viewDone[row.key] && !row.isBonus).length}
-            todayTotal={rows.filter((row) => !row.isBonus).length}
-            activityDays={activityDaysTotal}
-            careDays={careDaysTotal}
-            caregiverName={babyCaregiverName}
-            comfortItemName={comfortItem}
-            littleJobs={waiting}
-            onCompleteTask={toggle}
-            onManageTasks={openTaskManager}
-            onOpenJournal={openJournalForSelectedDate}
-          />
+          <BabyModeCareSuite date={period?.date || ""} todayDone={rows.filter((row) => !!viewDone[row.key] && !row.isBonus).length} todayTotal={rows.filter((row) => !row.isBonus).length} activityDays={activityDaysTotal} careDays={careDaysTotal} caregiverName={babyCaregiverName} comfortItemName={comfortItem} littleJobs={waiting.filter((row) => !viewDone[row.key])} onCompleteTask={toggle} onManageTasks={openTaskManager} onOpenJournal={openJournalForSelectedDate} />
         </div>
       </details>
 
       <section style={{ borderRadius: 17, background: "rgba(255,255,255,.72)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
-        <button type="button" onClick={() => setShowMore((value) => !value)} aria-expanded={showMore} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "13px 14px", border: 0, background: "transparent", color: "#76558A", fontWeight: 900, cursor: "pointer" }}>
+        <button type="button" onClick={() => setShowMore((value) => !value)} aria-expanded={showMore} style={{ width: "100%", minHeight: 48, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "13px 14px", border: 0, background: "transparent", color: "#76558A", fontWeight: 900, cursor: "pointer" }}>
           <span>🗝 More for grown-up me</span><span aria-hidden="true">{showMore ? "▾" : "›"}</span>
         </button>
         {showMore && <div style={{ padding: "0 12px 12px", display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 7 }}>
