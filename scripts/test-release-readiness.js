@@ -19,7 +19,7 @@ const gates = [
   [today.includes("LazyBabyToday") && today.includes("LazyLowScreenToday"), "alternate Today modes remain lazy-loaded"],
   [app.includes("WARM_START_CACHE_VERSION") && app.includes("setSyncStatus(\"syncing\")"), "warm start still reconciles against server state"],
   [app.includes("navigator.onLine") || app.includes("online"), "offline-aware state remains present"],
-  [shared.includes("role=\"dialog\"") || shared.includes('role="dialog"'), "dialogs keep accessible dialog semantics"],
+  [shared.includes('role={inline ? "region" : "dialog"}') && shared.includes('aria-modal={inline ? undefined : "true"}'), "dialogs keep accessible dialog semantics"],
   [shared.includes("previousActive") && shared.includes("firstFocusable"), "modal focus enters and restores correctly"],
   [settings.includes("Privacy & Data") && settings.includes("Restore from backup") && settings.includes("Delete all check-ins"), "data recovery and deletion controls remain reachable"],
   [index.includes('backButton') && index.includes('KeyboardEvent("keydown", { key: "Escape" })'), "Android back button continues to close app panels"],
