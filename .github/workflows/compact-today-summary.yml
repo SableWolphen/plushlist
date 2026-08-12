@@ -1,0 +1,33 @@
+name: Compact Today summary
+on:
+  push:
+    branches:
+      - compact-today-summary
+permissions:
+  contents: write
+jobs:
+  compact-and-validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: compact-today-summary
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: node scripts/apply-compact-today-summary.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run web:sync
+      - name: Remove temporary migration files
+        run: |
+          rm scripts/apply-compact-today-summary.js
+          rm .github/workflows/compact-today-summary.yml
+      - name: Commit validated redesign
+        run: |
+          git config user.name "SableWolphen"
+          git config user.email "johnston.alexander.k@gmail.com"
+          git add src/components/compact-anchor.jsx src/components/today-panel-core.jsx scripts/test-product-quality.js scripts/apply-compact-today-summary.js .github/workflows/compact-today-summary.yml
+          git commit -m "Compact Today summary cards"
+          git push origin compact-today-summary
