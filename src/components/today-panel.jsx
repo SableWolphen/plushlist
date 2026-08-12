@@ -6,6 +6,24 @@ import { HabitRetentionTools, LowScreenToday, useLowScreenMode } from "./habit-r
 import { HabitResilienceSuite } from "./habit-resilience.jsx";
 import { CompletedTaskArea, useCompletedTaskFlow } from "./completed-task-flow.jsx";
 
+function FirstDaysGuide({ activityDaysTotal = 0, rows = [], viewDone = {}, goToDashboard, openTaskManager }) {
+  if (activityDaysTotal >= 3) return null;
+  const required = rows.filter((row) => !row.isBonus);
+  const completed = required.filter((row) => !!viewDone?.[row.key]).length;
+  const step = completed > 0 ? 3 : required.length > 0 ? 2 : 1;
+  return (
+    <section aria-label="Getting started" style={{ marginBottom: 14, padding: 14, borderRadius: 17, border: "1px solid #D7E8E3", background: "linear-gradient(145deg,#F5FCF9,#FFF9FD)" }}>
+      <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#38816F" }}>🌱 YOUR FIRST FEW DAYS</div>
+      <div style={{ marginTop: 4, fontSize: 15, fontWeight: 900, color: "#4F405C" }}>{step === 1 ? "Start with just a few habits" : step === 2 ? "Pick one thing that matters today" : "Nice — now let PlushLife learn what works"}</div>
+      <div style={{ marginTop: 5, fontSize: 11.5, lineHeight: 1.5, color: "#71857F" }}>{step === 1 ? "Three useful habits are plenty. You can always add more after they feel stable." : step === 2 ? "Use Today’s Anchor as the one habit that makes the day count, even if the rest changes." : "Keep checking things off normally. After a few real days, Habit Insights becomes more specific instead of guessing."}</div>
+      <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 9 }}>
+        {step === 1 && <button type="button" onClick={() => openTaskManager?.()} style={{ minHeight: 44, padding: "8px 11px", borderRadius: 10, border: 0, background: "#38816F", color: "white", fontWeight: 900, cursor: "pointer" }}>Add my first habits</button>}
+        {step === 3 && <button type="button" onClick={() => goToDashboard?.("progress")} style={{ minHeight: 44, padding: "8px 11px", borderRadius: 10, border: "1px solid #BFDCD3", background: "white", color: "#38816F", fontWeight: 900, cursor: "pointer" }}>See what PlushLife learns</button>}
+      </div>
+    </section>
+  );
+}
+
 export function TodayPanel(props) {
   const lowScreen = useLowScreenMode();
   const { unifiedToggle, lingerKeys } = useCompletedTaskFlow(props.toggle, props.viewDone);
@@ -28,6 +46,7 @@ export function TodayPanel(props) {
 
   return (
     <>
+      <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
       <HabitCoach {...modeProps}>
         <div style={{ paddingTop: 4, borderTop: "1px solid #EDE3F2" }}>
           <HabitRetentionTools {...modeProps} />
