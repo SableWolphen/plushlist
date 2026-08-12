@@ -35,11 +35,12 @@ export function BabyToday({
   pct = 0,
 }) {
   const [showMore, setShowMore] = React.useState(false);
+  const [showAllLittleJobs, setShowAllLittleJobs] = React.useState(false);
   if (!open) return null;
 
   const allLittleJobs = rows.filter((row) => !row.isBonus);
   const waiting = allLittleJobs.filter((row) => !viewDone[row.key]);
-  const visible = waiting.slice(0, 4);
+  const visible = showAllLittleJobs ? waiting : waiting.slice(0, 4);
   const tuckedIn = allLittleJobs.filter((row) => !!viewDone[row.key]);
   const resting = restDatesSet?.has?.(period?.date);
   const comfortItem = trackerProfile?.comfort_item || trackerProfile?.comfort_item_name || "";
@@ -115,7 +116,7 @@ export function BabyToday({
         )}
 
         <div style={{ display: "flex", gap: 7, marginTop: 10, flexWrap: "wrap" }}>
-          {waiting.length > 4 && <button type="button" onClick={() => openTaskManager?.()} style={softButton}>Show all {waiting.length} little jobs</button>}
+          {waiting.length > 4 && <button type="button" aria-expanded={showAllLittleJobs} onClick={() => setShowAllLittleJobs((expanded) => !expanded)} style={softButton}>{showAllLittleJobs ? "Show fewer little jobs" : `Show all ${waiting.length} little jobs`}</button>}
           <button type="button" onClick={() => openTaskManager?.()} style={softButton}>✏️ Change my little jobs</button>
         </div>
       </section>
