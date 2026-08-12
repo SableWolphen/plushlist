@@ -37,8 +37,10 @@ export function BabyToday({
   const [showMore, setShowMore] = React.useState(false);
   if (!open) return null;
 
-  const waiting = rows.filter((row) => !viewDone[row.key] && !row.isBonus);
+  const allLittleJobs = rows.filter((row) => !row.isBonus);
+  const waiting = allLittleJobs.filter((row) => !viewDone[row.key]);
   const visible = waiting.slice(0, 4);
+  const tuckedIn = allLittleJobs.filter((row) => !!viewDone[row.key]);
   const resting = restDatesSet?.has?.(period?.date);
   const comfortItem = trackerProfile?.comfort_item || trackerProfile?.comfort_item_name || "";
 
@@ -84,7 +86,7 @@ export function BabyToday({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
           <div>
             <div style={{ fontSize: 11, letterSpacing: ".13em", fontWeight: 900, color: "#A65DC1" }}>🧸 LITTLE JOBS</div>
-            <div style={{ marginTop: 3, fontSize: 11.5, color: "#8C6B9E" }}>Only a few at a time. No giant list.</div>
+            <div style={{ marginTop: 3, fontSize: 11.5, color: "#8C6B9E" }}>Only a few at a time. Finished jobs stay crossed off below.</div>
           </div>
           <div style={{ fontSize: 11, fontWeight: 900, color: "#8C6B9E" }}>{Math.round(Number(pct) || 0)}%</div>
         </div>
@@ -97,6 +99,21 @@ export function BabyToday({
           ))}
           {!visible.length && <div style={{ padding: "12px 2px", color: "#806B8D", fontSize: 12.5 }}>All tucked in. 💜</div>}
         </div>
+
+        {tuckedIn.length > 0 && (
+          <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #EEE3F2" }}>
+            <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#9A7BA7" }}>✓ TUCKED IN TODAY</div>
+            <div style={{ display: "grid", gap: 6, marginTop: 8 }}>
+              {tuckedIn.map((task) => (
+                <button key={task.key} type="button" onClick={() => toggle(task.key)} aria-label={`Mark ${task.label} incomplete`} style={{ display: "grid", gridTemplateColumns: "24px 1fr", gap: 8, alignItems: "center", padding: "9px 10px", borderRadius: 12, border: "1px solid #E7D8ED", background: "#FAF6FC", color: "#A081AD", textAlign: "left", cursor: "pointer" }}>
+                  <span aria-hidden="true" style={{ width: 22, height: 22, borderRadius: "50%", background: "#B67AC8", color: "white", display: "grid", placeItems: "center", fontWeight: 900 }}>✓</span>
+                  <span style={{ fontSize: 12.5, lineHeight: 1.35, fontWeight: 800, textDecoration: "line-through" }}>{task.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div style={{ display: "flex", gap: 7, marginTop: 10, flexWrap: "wrap" }}>
           {waiting.length > 4 && <button type="button" onClick={() => openTaskManager?.()} style={softButton}>Show all {waiting.length} little jobs</button>}
           <button type="button" onClick={() => openTaskManager?.()} style={softButton}>✏️ Change my little jobs</button>
