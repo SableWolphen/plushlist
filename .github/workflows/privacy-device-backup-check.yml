@@ -1,0 +1,33 @@
+name: Privacy device backup validation
+on:
+  push:
+    branches:
+      - privacy-device-backup-hardening
+permissions:
+  contents: write
+jobs:
+  validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: privacy-device-backup-hardening
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: node scripts/apply-privacy-device-backup.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run web:sync
+      - name: Remove temporary patch files
+        run: |
+          rm scripts/apply-privacy-device-backup.js
+          rm .github/workflows/privacy-device-backup-check.yml
+      - name: Commit validated privacy changes
+        run: |
+          git config user.name "SableWolphen"
+          git config user.email "johnston.alexander.k@gmail.com"
+          git add src/app-source.jsx src/components/organized-settings.jsx src/device-backup.js scripts/test-product-quality.js database/2026-08-12-security-definer-rpc-hardening.sql scripts/apply-privacy-device-backup.js .github/workflows/privacy-device-backup-check.yml
+          git commit -m "Add lossless on-device backup and privacy hardening"
+          git push origin privacy-device-backup-hardening
