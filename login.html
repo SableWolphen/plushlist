@@ -25,15 +25,69 @@
         #fff8fc;
     }
     main {
-      width: min(100%, 470px);
+      width: min(100%, 760px);
       padding: 26px;
       border: 1px solid #f0d9ee;
       border-radius: 24px;
-      background: rgba(255,255,255,.9);
+      background: rgba(255,255,255,.92);
       box-shadow: 0 18px 45px -25px rgba(90,50,110,.35);
     }
     h1 { margin: 0; text-align: center; font-size: 27px; }
-    .intro { margin: 8px 0 22px; text-align: center; color: #8574a0; line-height: 1.5; }
+    .intro { margin: 8px 0 16px; text-align: center; color: #8574a0; line-height: 1.5; }
+    .preview-note {
+      margin: 0 auto 16px;
+      max-width: 620px;
+      padding: 9px 12px;
+      border: 1px solid #ead7b0;
+      border-radius: 12px;
+      background: #fff9e9;
+      color: #7a6537;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.45;
+      font-weight: 750;
+    }
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .plan {
+      padding: 14px;
+      border: 1px solid #eadfed;
+      border-radius: 16px;
+      background: rgba(255,255,255,.82);
+    }
+    .plan.gold {
+      border-color: #e3c774;
+      background: linear-gradient(145deg,#fffdf4,#fff8fc);
+      box-shadow: inset 0 0 0 1px #f7e6a8;
+    }
+    .plan-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .plan-name { font-size: 15px; font-weight: 900; color: #554365; }
+    .badge {
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: #eef8f4;
+      color: #38816f;
+      font-size: 9.5px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .gold .badge { background: #fff3c9; color: #8a6a16; }
+    .plan-sub { margin-top: 4px; color: #8a7895; font-size: 11.5px; line-height: 1.4; }
+    .plan ul { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+    .plan li { position: relative; padding-left: 18px; color: #695879; font-size: 11.5px; line-height: 1.35; }
+    .plan li::before { content: "✓"; position: absolute; left: 0; color: #3b8d79; font-weight: 900; }
+    .gold li::before { color: #b58a20; }
+    .auth {
+      max-width: 470px;
+      margin: 0 auto;
+      padding-top: 2px;
+    }
+    .auth-title { margin: 0 0 4px; text-align: center; font-size: 14px; font-weight: 900; color: #604c71; }
+    .auth-sub { margin: 0 0 12px; text-align: center; color: #8a7895; font-size: 11.5px; }
     label { display: block; margin: 14px 0 6px; font-size: 13px; font-weight: 800; }
     input {
       width: 100%;
@@ -64,35 +118,78 @@
     .back { display: block; margin-top: 17px; text-align: center; color: #8574a0; font-size: 13px; }
     .legal { margin-top: 18px; padding-top: 14px; border-top: 1px solid #f0d9ee; text-align: center; color: #8574a0; font-size: 11px; line-height: 1.7; }
     .legal a { color: #9c5fb5; }
+    @media (max-width: 640px) {
+      body { padding: 12px; align-items: start; }
+      main { padding: 20px 16px; margin: 8px 0; border-radius: 20px; }
+      .plans { grid-template-columns: 1fr; }
+      .plan { padding: 12px; }
+    }
   </style>
 </head>
 <body>
   <main>
     <h1>Welcome to PlushLife 💛</h1>
-    <p class="intro">Enter your email, then use the one-time code we send you.</p>
+    <p class="intro">Build habits that survive real life — with a gentle free core and deeper Plush Gold intelligence.</p>
 
-    <label for="email">Email address</label>
-    <input id="email" type="email" autocomplete="email" placeholder="you@example.com">
-    <button id="send" type="button">Send my code</button>
+    <div class="preview-note">✨ During testing, Plush Gold is included free for everyone. No purchase or subscription is required right now.</div>
 
-    <label for="code">Email code</label>
-    <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter the code">
-    <button id="verify" class="secondary" type="button">Sign in</button>
+    <section class="plans" aria-label="PlushLife Free and Plush Gold comparison">
+      <article class="plan">
+        <div class="plan-title">
+          <div class="plan-name">🧸 PlushLife Free</div>
+          <span class="badge">CORE</span>
+        </div>
+        <div class="plan-sub">Everything you need to plan your day and build habits gently.</div>
+        <ul>
+          <li>Habits, tasks, Focus Habit, and Today</li>
+          <li>Check-ins, basic reminders, and progress</li>
+          <li>Baby Mode, Low Screen Time, and accessibility tools</li>
+          <li>Rest days, recovery-friendly completion, and core support</li>
+        </ul>
+      </article>
 
-    <div id="message" role="status"></div>
-    <a class="back" href="#" id="togglePassword">Have a password instead?</a>
-    <div id="passwordSection" style="display:none">
-      <label for="password">Password</label>
-      <input id="password" type="password" autocomplete="current-password" placeholder="Your password">
-      <button id="passwordSignIn" class="secondary" type="button">Sign in with password</button>
-    </div>
-    <a class="back" href="./">Back to PlushLife</a>
-    <div class="legal">
-      <div>© 2026 Sable Johnston · PlushLife™ · All rights reserved.</div>
-      <a href="./legal.html#privacy">Privacy</a> ·
-      <a href="./legal.html#terms">Terms</a> ·
-      <a href="./legal.html#about">About</a> ·
-      <a href="./support.html">Support</a>
+      <article class="plan gold">
+        <div class="plan-title">
+          <div class="plan-name">✨ Plush Gold</div>
+          <span class="badge">FREE PREVIEW</span>
+        </div>
+        <div class="plan-sub">A deeper layer that learns what works for you and helps your routines adapt.</div>
+        <ul>
+          <li>Advanced PlushGrowth insights and longer-term patterns</li>
+          <li>Smarter Next Step ranking and adaptive habit coaching</li>
+          <li>Recovery, comeback, planning, and reminder intelligence</li>
+          <li>Habit experiments and enhanced history protection</li>
+        </ul>
+      </article>
+    </section>
+
+    <div class="auth">
+      <div class="auth-title">Sign in or create your account</div>
+      <div class="auth-sub">Enter your email, then use the one-time code we send you.</div>
+
+      <label for="email">Email address</label>
+      <input id="email" type="email" autocomplete="email" placeholder="you@example.com">
+      <button id="send" type="button">Send my code</button>
+
+      <label for="code">Email code</label>
+      <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter the code">
+      <button id="verify" class="secondary" type="button">Sign in</button>
+
+      <div id="message" role="status"></div>
+      <a class="back" href="#" id="togglePassword">Have a password instead?</a>
+      <div id="passwordSection" style="display:none">
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" placeholder="Your password">
+        <button id="passwordSignIn" class="secondary" type="button">Sign in with password</button>
+      </div>
+      <a class="back" href="./">Back to PlushLife</a>
+      <div class="legal">
+        <div>© 2026 Sable Johnston · PlushLife™ · All rights reserved.</div>
+        <a href="./legal.html#privacy">Privacy</a> ·
+        <a href="./legal.html#terms">Terms</a> ·
+        <a href="./legal.html#about">About</a> ·
+        <a href="./support.html">Support</a>
+      </div>
     </div>
   </main>
 
@@ -205,4 +302,3 @@
   </script>
 </body>
 </html>
-
