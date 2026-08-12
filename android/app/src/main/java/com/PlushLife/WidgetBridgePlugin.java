@@ -21,43 +21,29 @@ public class WidgetBridgePlugin extends Plugin {
         "var clean=function(v){return String(v||'').replace(/\\s+/g,' ').trim();};" +
         "var visible=function(n){return !!(n&&n.getClientRects&&n.getClientRects().length);};" +
         "var rows=function(){var out=[];document.querySelectorAll('input[type=checkbox],[role=checkbox],button[aria-pressed]').forEach(function(c){" +
-        // Settings and every other overlay (task manager, template picker,
-        // etc.) share the ToolPanel component, which renders as
-        // role="dialog" on top of the dashboard while the dashboard itself
-        // stays mounted underneath. Without this exclusion, opening Settings
-        // and tapping anything nearby re-scrapes the whole page and picks up
-        // the appearance theme buttons and Baby Mode/Dino Theme checkboxes
-        // (they match the exact same selector) as if they were today's
-        // tasks, overwriting the widget with garbage.
         "if(!visible(c)||c.closest('#plushlife-gentle-panel')||c.closest('[role=dialog]'))return;" +
         "var r=c.closest('li,article,[data-task-key],[class*=task-row],[class*=task-card]')||c.parentElement;" +
         "if(r&&visible(r)&&out.indexOf(r)<0)out.push(r);});return out;};" +
         "var isDone=function(c){return !!(c&&(c.checked||c.getAttribute('aria-checked')==='true'||c.getAttribute('aria-pressed')==='true'));};" +
+        "var coach=function(){try{return JSON.parse(localStorage.getItem('plushlife:habit-coach:v1')||'{}')||{};}catch(e){return {};}};" +
         "var sync=function(){try{var plugin=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.WidgetBridge;if(!plugin)return;" +
-        // The signed-out landing page's demo checklist ("Drink some water",
-        // etc.) uses the exact same button[aria-pressed] shape as a real
-        // task row, and its sample tasks would otherwise get scraped and
-        // shown in the widget as if they belonged to the signed-in user.
-        // This tablist only exists once the authenticated dashboard is
-        // actually rendered, so it's a reliable "there is a signed-in
-        // profile on screen right now" check.
         "if(!document.querySelector('[aria-label=\"PlushLife dashboards\"]'))return;" +
         "var all=rows(),doneCount=0,tasks=[];all.forEach(function(r){var c=r.querySelector('input[type=checkbox],[role=checkbox],button[aria-pressed]');var done=isDone(c);if(done)doneCount++;" +
-        "if(tasks.length<3){var label=clean(r.textContent).replace(/^(✓|○|✔|☐|☑)\\s*/, '').slice(0,90);if(label)tasks.push({label:label,done:done});}});" +
-        "var progress=all.length?Math.round(doneCount*100/all.length):0;var next=tasks.filter(function(t){return !t.done;})[0];" +
-        "plugin.updateWidget({dayType:'Today',nextTask:next?next.label:'Open PlushLife for one caring step',progress:progress,weeklyProgress:progress,tasks:tasks}).catch(function(){});" +
+        "if(tasks.length<8){var label=clean(r.textContent).replace(/^(✓|○|✔|☐|☑)\\s*/, '').slice(0,90);if(label)tasks.push({label:label,done:done});}});" +
+        "var progress=all.length?Math.round(doneCount*100/all.length):0;var state=coach();var today=new Date().toISOString().slice(0,10);var anchorId=state.anchors&&state.anchors[today];var anchorLabel=anchorId&&state.history&&state.history[today]&&state.history[today][anchorId]&&state.history[today][anchorId].label;var goal=state.goals&&state.goals[today];" +
+        "if(anchorLabel){var idx=tasks.findIndex(function(t){return clean(t.label).toLowerCase().indexOf(clean(anchorLabel).toLowerCase())>=0;});var anchorTask=idx>=0?tasks.splice(idx,1)[0]:{label:anchorLabel,done:false};tasks.unshift(anchorTask);}" +
+        "tasks=tasks.slice(0,3);var next=tasks.filter(function(t){return !t.done;})[0];var header=goal?('Goal · '+clean(goal).slice(0,42)):(anchorLabel?'Anchor Habit':'Today');" +
+        "plugin.updateWidget({dayType:header,nextTask:next?next.label:(anchorLabel?('Anchor complete · '+anchorLabel):'Open PlushLife for one caring step'),progress:progress,weeklyProgress:progress,tasks:tasks}).catch(function(){});" +
         "}catch(e){}};" +
         "var queued=false;var queue=function(){if(queued)return;queued=true;setTimeout(function(){queued=false;sync();},250);};" +
         "document.addEventListener('change',queue,true);document.addEventListener('click',queue,true);document.addEventListener('plushlife-widget-sync',queue);" +
+        "window.addEventListener('plushlife:habit-coach-updated',queue);window.addEventListener('plushlife:habit-coach-hydrated',queue);" +
         "document.addEventListener('visibilitychange',function(){if(!document.hidden)queue();});" +
         "window.addEventListener('load',queue);window.addEventListener('pageshow',queue);setInterval(sync,30000);queue();" +
         "})();";
 
     @Override
     public void load() {
-        // The app is a Capacitor WebView. Install a small, idempotent bridge in
-        // the rendered app so the native widget receives the same visible task
-        // state whenever tasks change, the app resumes, or a periodic refresh runs.
         getBridge().getWebView().postDelayed(() ->
             getBridge().getWebView().evaluateJavascript(INSTALL_WIDGET_SYNC_SCRIPT, null), 1200);
         getBridge().getWebView().postDelayed(() ->
@@ -89,7 +75,6 @@ public class WidgetBridgePlugin extends Plugin {
                     label = task.optString("label", "");
                     done = task.optBoolean("done", false);
                 } catch (JSONException ignored) {
-                    // Leave this row blank if the entry cannot be read.
                 }
             }
             editor.putString("task" + i + "Label", label);
@@ -104,11 +89,6 @@ public class WidgetBridgePlugin extends Plugin {
         call.resolve(result);
     }
 
-    // Called on sign-out so a second profile signing in on the same device
-    // never briefly sees the previous profile's task labels on the home
-    // screen widget — without this, whatever was last written stays in
-    // SharedPreferences (and rendered) until the newly signed-in profile's
-    // own data happens to overwrite it.
     @PluginMethod
     public void clearWidget(PluginCall call) {
         getContext()
