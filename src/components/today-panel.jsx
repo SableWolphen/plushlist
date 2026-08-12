@@ -3,6 +3,7 @@ import { DailyCompanion } from "./daily-companion.jsx";
 import { BabyToday } from "./baby-today.jsx";
 import { HabitCoach } from "./habit-intelligence.jsx";
 import { HabitRetentionTools, LowScreenToday, useLowScreenMode } from "./habit-retention.jsx";
+import { HabitResilienceSuite } from "./habit-resilience.jsx";
 
 export function TodayPanel(props) {
   const lowScreen = useLowScreenMode();
@@ -13,6 +14,7 @@ export function TodayPanel(props) {
     <>
       <HabitCoach {...props} />
       <HabitRetentionTools {...props} />
+      <HabitResilienceSuite {...props} />
       <TodayPanelCore {...props} />
       <DailyCompanion {...props} />
     </>
