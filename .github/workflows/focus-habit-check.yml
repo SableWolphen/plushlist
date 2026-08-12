@@ -1,0 +1,16 @@
+name: Focus Habit validation
+on:
+  push:
+    branches:
+      - focus-habit-onboarding
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test
+      - run: npm run web:sync
