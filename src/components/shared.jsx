@@ -10,25 +10,29 @@
 const { useEffect } = React;
 
 export function ToolPanel({ title, onClose, children, inline = false, hideClose = false }) {
-  // onClose is a fresh arrow function on every parent render, so it can't be
-  // in the effect's deps — that would toggle document.body.style.overflow
-  // off and back on every time something inside the panel triggers a
-  // re-render (e.g. tapping a button), which on Android WebView can wedge
-  // the in-progress scroll/touch gesture until the app is restarted.
   const onCloseRef = React.useRef(onClose);
+  const panelRef = React.useRef(null);
   onCloseRef.current = onClose;
 
   useEffect(() => {
     if (inline) return undefined;
+    const previousActive = document.activeElement;
     const closeOnEscape = (event) => {
       if (event.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", closeOnEscape);
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    window.setTimeout(() => {
+      const firstFocusable = panelRef.current?.querySelector?.("button, input, select, textarea, [tabindex]:not([tabindex='-1'])");
+      firstFocusable?.focus?.({ preventScroll: true });
+    }, 0);
     return () => {
       document.removeEventListener("keydown", closeOnEscape);
       document.body.style.overflow = previousOverflow;
+      if (previousActive && typeof previousActive.focus === "function") {
+        window.setTimeout(() => previousActive.focus({ preventScroll: true }), 0);
+      }
     };
   }, [inline]);
 
@@ -47,6 +51,7 @@ export function ToolPanel({ title, onClose, children, inline = false, hideClose 
       }}
     >
       <div
+        ref={panelRef}
         onMouseDown={(event) => event.stopPropagation()}
         style={inline ? {
           width: "100%", borderRadius: 22, background: "#FFF9FD", border: "1px solid #E8D5EF",
@@ -64,7 +69,7 @@ export function ToolPanel({ title, onClose, children, inline = false, hideClose 
         }}>
           <div style={{ fontSize: 15, fontWeight: 900, color: "#5B4B6B" }}>{title}</div>
           {!hideClose && <button type="button" onClick={onClose} aria-label={`Close ${title}`} style={{
-            minWidth: 44, minHeight: 38, padding: "7px 11px", borderRadius: 11, border: "1px solid #D9C5E2",
+            minWidth: 44, minHeight: 44, padding: "7px 11px", borderRadius: 11, border: "1px solid #D9C5E2",
             background: "white", color: "#7A598C", fontWeight: 900, cursor: "pointer",
           }}>{inline ? "Back to tracker" : "Close"}</button>}
         </div>
