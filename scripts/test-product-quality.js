@@ -13,7 +13,12 @@ const shared = read("src/components/shared.jsx");
 const anchor = read("src/components/compact-anchor.jsx");
 const background = read("src/components/habit-background-engine.jsx");
 const companion = read("src/components/daily-companion.jsx");
+const companionSync = read("src/components/companion-cloud-sync.jsx");
 const lowScreenMode = read("src/components/low-screen-mode.jsx");
+const appSource = read("src/app-source.jsx");
+const runtime = read("assets/plush-runtime.js");
+const syncWww = read("scripts/sync-www.js");
+const packageJson = read("package.json");
 
 const checks = [
   [completed.includes("COMPLETED_LINGER_MS = 2600"), "completed tasks linger before moving"],
@@ -28,6 +33,7 @@ const checks = [
   [anchor.includes("TODAY'S ANCHOR") && !anchor.includes("HABIT ASSIST") && !anchor.includes("HABIT RESILIENCE"), "compact anchor stays focused"],
   [today.includes("LazyHabitBackgroundEngine") && today.includes("requestIdleCallback"), "quiet habit engine loads after the first paint"],
   [today.includes('import("./baby-today.jsx")') && today.includes('import("./habit-retention.jsx")'), "optional Today modes are code-split"],
+  [today.includes("today-interactive") && today.includes("background-intelligence-start"), "Today records usable and background-work timing separately"],
   [companion.includes('import("./daily-companion-core.jsx")') && !companion.includes('import { DailyCompanion as DailyCompanionCore }'), "collapsed companion keeps its heavy core out of startup"],
   [lowScreenMode.includes("__retention") && !lowScreenMode.includes("HabitRetentionTools"), "low-screen detection stays lightweight"],
   [background.includes("dominantMissReason") && background.includes("preferredHour") && background.includes("stability"), "background engine learns friction, timing and stability"],
@@ -35,6 +41,13 @@ const checks = [
   [background.includes("crossPatterns") && background.includes("experimentResults"), "background engine evaluates cross-patterns and experiments"],
   [background.includes("maintenanceDue") && background.includes("MAX_EVENTS") && background.includes("450"), "background engine prunes, maintains and throttles work"],
   [progress.includes("Why PlushLife thinks this:"), "habit insights explain their evidence"],
+  [progress.includes("LazyWeeklyHabitReview") && progress.includes("insightsOpen"), "deep PlushGrowth tools wait until Habit Insights is opened"],
+  [companionSync.includes("FALLBACK_SYNC_MS = 120000") && companionSync.includes("plushlife:habit-coach-updated") && !companionSync.includes("12000)"), "companion sync is event-driven instead of frequent polling"],
+  [appSource.includes("WARM_START_CACHE_VERSION = 1") && appSource.includes("warm-cache-hydrated") && appSource.includes("tracker-sync-ready"), "signed-in warm starts hydrate locally before server refresh"],
+  [appSource.includes("React.useMemo(() => new Map") && appSource.includes("requiredKeysCache = new Map"), "history maps and repeated schedule lookups avoid redundant render work"],
+  [runtime.includes("first-user-interaction") && runtime.includes("boot-shell-ready") && runtime.includes("first-app-render"), "local diagnostics separate boot, app render and first interaction"],
+  [syncWww.includes("plush-boot-shell") && syncWww.includes("Critical app entry:"), "production build provides an instant boot shell and reports critical bundle size"],
+  [packageJson.includes("check-bundle-budget.js"), "production sync enforces the permanent bundle budget"],
   [shared.includes("previousActive") && shared.includes("firstFocusable"), "dialogs restore and manage keyboard focus"],
   [shared.includes("minHeight: 44"), "shared dialog action meets minimum touch target"],
   [shared.includes("Simple Layout reduces ambient theme effects"), "Simple Layout/theme interaction is explained"],
