@@ -1,8 +1,10 @@
 const DB_NAME = "plushlife-device-backup";
 const DB_VERSION = 1;
 const STORE_NAME = "backups";
-const BACKUP_VERSION = 1;
+const BACKUP_VERSION = 2;
 const AUTO_BACKUP_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+const BACKUP_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
+const MAX_DEVICE_SNAPSHOTS = 3;
 
 // Only user-owned, independently restorable data belongs in the automatic
 // device backup. Relationship/device-token/payment records remain cloud-side
@@ -43,6 +45,21 @@ function openDatabase() {
   });
 }
 
+async function getBackupRecord(userId) {
+  if (!userId) return null;
+  const db = await openDatabase();
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readonly");
+      const request = tx.objectStore(STORE_NAME).get(String(userId));
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error("Could not read on-device backup."));
+    });
+  } finally {
+    db.close();
+  }
+}
+
 async function putBackup(record) {
   const db = await openDatabase();
   try {
@@ -57,23 +74,98 @@ async function putBackup(record) {
   }
 }
 
-export async function getDeviceBackupStatus(userId) {
-  if (!userId) return { exists: false, savedAt: null };
-  try {
-    const db = await openDatabase();
-    const record = await new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, "readonly");
-      const request = tx.objectStore(STORE_NAME).get(String(userId));
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error || new Error("Could not read on-device backup."));
-    });
-    db.close();
-    return record
-      ? { exists: true, savedAt: record.savedAt || null, version: record.version || 0 }
-      : { exists: false, savedAt: null };
-  } catch (_error) {
-    return { exists: false, savedAt: null, unavailable: true };
+function normalizeSnapshots(record) {
+  if (!record) return [];
+  if (Array.isArray(record.snapshots)) return record.snapshots.filter(Boolean);
+  if (record.payload && record.savedAt) {
+    return [{
+      version: record.version || 1,
+      savedAt: record.savedAt,
+      payload: record.payload,
+      checksum: record.checksum || null,
+    }];
   }
+  return [];
+}
+
+function payloadLooksValid(payload) {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return false;
+  return DEVICE_BACKUP_TABLES.every(([key]) => Array.isArray(payload[key]));
+}
+
+function stablePayloadText(payload) {
+  const ordered = {};
+  for (const [key] of DEVICE_BACKUP_TABLES) ordered[key] = Array.isArray(payload?.[key]) ? payload[key] : [];
+  return JSON.stringify(ordered);
+}
+
+async function checksumPayload(payload) {
+  try {
+    if (!window.crypto?.subtle || typeof TextEncoder === "undefined") return null;
+    const bytes = new TextEncoder().encode(stablePayloadText(payload));
+    const digest = await window.crypto.subtle.digest("SHA-256", bytes);
+    return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  } catch (_error) {
+    return null;
+  }
+}
+
+function rowCounts(payload) {
+  return Object.fromEntries(DEVICE_BACKUP_TABLES.map(([key]) => [key, Array.isArray(payload?.[key]) ? payload[key].length : 0]));
+}
+
+export async function getDeviceBackupStatus(userId) {
+  if (!userId) return { exists: false, savedAt: null, verified: false, snapshotCount: 0 };
+  try {
+    const record = await getBackupRecord(userId);
+    const snapshots = normalizeSnapshots(record);
+    const latest = snapshots[0] || null;
+    if (!latest) return { exists: false, savedAt: null, verified: false, snapshotCount: 0 };
+    const savedTime = new Date(latest.savedAt || 0).getTime();
+    const stale = !Number.isFinite(savedTime) || Date.now() - savedTime > BACKUP_STALE_AFTER_MS;
+    return {
+      exists: true,
+      savedAt: latest.savedAt || null,
+      version: latest.version || record?.version || 0,
+      verified: record?.lastVerifiedChecksum === latest.checksum && !!latest.checksum,
+      verifiedAt: record?.verifiedAt || null,
+      snapshotCount: snapshots.length,
+      stale,
+      counts: rowCounts(latest.payload),
+    };
+  } catch (_error) {
+    return { exists: false, savedAt: null, verified: false, snapshotCount: 0, unavailable: true };
+  }
+}
+
+export async function verifyDeviceBackup(userId) {
+  if (!userId) return { ok: false, reason: "Sign in before verifying a backup." };
+  const record = await getBackupRecord(userId);
+  const snapshots = normalizeSnapshots(record);
+  const latest = snapshots[0] || null;
+  if (!latest) return { ok: false, reason: "No on-device backup exists yet." };
+  if (!payloadLooksValid(latest.payload)) return { ok: false, reason: "The latest on-device backup is incomplete." };
+
+  const checksum = await checksumPayload(latest.payload);
+  if (latest.checksum && checksum && latest.checksum !== checksum) {
+    return { ok: false, reason: "The latest on-device backup failed its integrity check." };
+  }
+
+  const verifiedAt = new Date().toISOString();
+  await putBackup({
+    ...record,
+    userId: String(userId),
+    snapshots,
+    verifiedAt,
+    lastVerifiedChecksum: checksum || latest.checksum || null,
+  });
+  return {
+    ok: true,
+    savedAt: latest.savedAt,
+    verifiedAt,
+    snapshotCount: snapshots.length,
+    counts: rowCounts(latest.payload),
+  };
 }
 
 export async function createDeviceBackup(supabase, user) {
@@ -86,17 +178,39 @@ export async function createDeviceBackup(supabase, user) {
   }));
 
   const savedAt = new Date().toISOString();
+  const payload = Object.fromEntries(results);
+  const checksum = await checksumPayload(payload);
+  const previous = await getBackupRecord(user.id).catch(() => null);
+  const previousSnapshots = normalizeSnapshots(previous);
+  const snapshots = [
+    { version: BACKUP_VERSION, savedAt, payload, checksum },
+    ...previousSnapshots.filter((item) => item?.savedAt !== savedAt),
+  ].slice(0, MAX_DEVICE_SNAPSHOTS);
+
   const record = {
     userId: String(user.id),
     version: BACKUP_VERSION,
     savedAt,
-    payload: Object.fromEntries(results),
+    payload,
+    checksum,
+    snapshots,
+    verifiedAt: checksum ? savedAt : null,
+    lastVerifiedChecksum: checksum,
   };
   await putBackup(record);
   try {
     window.dispatchEvent(new CustomEvent("plushlife:device-backup-updated", { detail: { savedAt } }));
   } catch (_error) {}
-  return { exists: true, savedAt, version: BACKUP_VERSION };
+  return {
+    exists: true,
+    savedAt,
+    version: BACKUP_VERSION,
+    verified: !!checksum,
+    verifiedAt: checksum ? savedAt : null,
+    snapshotCount: snapshots.length,
+    stale: false,
+    counts: rowCounts(payload),
+  };
 }
 
 export function scheduleAutomaticDeviceBackup({ supabase, user, online = true, onStatus }) {
@@ -137,5 +251,7 @@ export const DEVICE_BACKUP_POLICY = Object.freeze({
   version: BACKUP_VERSION,
   automatic: true,
   maxAgeMs: AUTO_BACKUP_MAX_AGE_MS,
+  staleAfterMs: BACKUP_STALE_AFTER_MS,
+  maxSnapshots: MAX_DEVICE_SNAPSHOTS,
   cloudDataDeleted: false,
 });

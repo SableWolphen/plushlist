@@ -104,7 +104,7 @@ function formatSyncStatus(online, syncStatus, lastSyncedAt) {
   try { return `Synced ${new Date(lastSyncedAt).toLocaleString()}`; } catch (_error) { return "Synced"; }
 }
 
-export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairingCode, connectWatch, watchPairingBusy, watchPairingMessage, localWatchSyncBusy, startLocalWatchSync, localWatchSyncMessage, dailyCheckIn, pct, rows, viewDone, weeklyOverallPct, widgetSyncMsg, setWidgetSyncMsg, displayNameDraft, setDisplayNameDraft, saveDisplayName, comfortItemDraft, setComfortItemDraft, saveComfortItem, preferences, appearanceTheme, selectAppearanceTheme, dinoTheme, updatePreference, enableNotifications, smartReminderSuggestion, restDatesSet, toggleRestToday, period, restRangeDraft, setRestRangeDraft, saveRestRange, restDates, feedbackText, setFeedbackText, submitFeedback, feedbackMessage, exportMyData, restoreFileInputRef, restoreFromBackup, deleteAllCheckIns, deleteAllReflections, user, online, syncStatus, lastSyncedAt, syncNow, emailChangeDraft, setEmailChangeDraft, requestEmailChange, signingOut, handleSignOut, signOutOtherDevices, deleteMyAccount, deviceBackupStatus, refreshDeviceBackup, deviceBackupBusy, settingsMessage }) {
+export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairingCode, connectWatch, watchPairingBusy, watchPairingMessage, localWatchSyncBusy, startLocalWatchSync, localWatchSyncMessage, dailyCheckIn, pct, rows, viewDone, weeklyOverallPct, widgetSyncMsg, setWidgetSyncMsg, displayNameDraft, setDisplayNameDraft, saveDisplayName, comfortItemDraft, setComfortItemDraft, saveComfortItem, preferences, appearanceTheme, selectAppearanceTheme, dinoTheme, updatePreference, enableNotifications, smartReminderSuggestion, restDatesSet, toggleRestToday, period, restRangeDraft, setRestRangeDraft, saveRestRange, restDates, feedbackText, setFeedbackText, submitFeedback, feedbackMessage, exportMyData, restoreFileInputRef, restoreFromBackup, deleteAllCheckIns, deleteAllReflections, user, online, syncStatus, lastSyncedAt, syncNow, emailChangeDraft, setEmailChangeDraft, requestEmailChange, signingOut, handleSignOut, signOutOtherDevices, deleteMyAccount, deviceBackupStatus, refreshDeviceBackup, deviceBackupBusy, verifyDeviceBackupNow, deviceBackupVerifyBusy, settingsMessage }) {
   const [section, setSection] = React.useState("home");
   const [search, setSearch] = React.useState("");
   const { APPEARANCE_THEMES } = window.PlushLifeContent;
@@ -336,13 +336,17 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 13.5, fontWeight: 900, color: "#347865" }}>📱 On-device backup</div>
             <div style={{ marginTop: 4, color: "#6E817B", fontSize: 11.5, lineHeight: 1.45 }}>PlushLife keeps a second copy of your independently restorable data on this device. Cloud sync stays on so a new phone can still recover your account.</div>
-            <div style={{ marginTop: 6, color: "#56756C", fontSize: 11, fontWeight: 800 }}>
-              {deviceBackupStatus?.savedAt ? ("Last saved " + new Date(deviceBackupStatus.savedAt).toLocaleString()) : deviceBackupStatus?.unavailable ? "On-device backup unavailable on this device" : "Waiting for the first on-device backup"}
+            <div style={{ marginTop: 6, color: deviceBackupStatus?.stale ? "#A56D14" : "#56756C", fontSize: 11, fontWeight: 800 }}>
+              {deviceBackupStatus?.savedAt ? (deviceBackupStatus.stale ? "Backup needs refreshing · last saved " : "Last saved ") + new Date(deviceBackupStatus.savedAt).toLocaleString() : deviceBackupStatus?.unavailable ? "On-device backup unavailable on this device" : "Waiting for the first on-device backup"}
             </div>
+            {deviceBackupStatus?.exists && <div style={{ marginTop: 3, color: "#71857F", fontSize: 10.5, lineHeight: 1.4 }}>{deviceBackupStatus.verified ? "✓ Latest backup verified" : "Verification recommended"} · Recovery snapshots: {deviceBackupStatus.snapshotCount || 1}/3</div>}
           </div>
-          <button type="button" disabled={deviceBackupBusy} onClick={refreshDeviceBackup} style={{ ...secondaryButton, color: "#347865", flexShrink: 0, opacity: deviceBackupBusy ? .65 : 1 }}>{deviceBackupBusy ? "Saving…" : "Back up now"}</button>
+          <div style={{ display: "grid", gap: 6, flexShrink: 0 }}>
+            <button type="button" disabled={deviceBackupBusy} onClick={refreshDeviceBackup} style={{ ...secondaryButton, color: "#347865", opacity: deviceBackupBusy ? .65 : 1 }}>{deviceBackupBusy ? "Saving…" : "Back up now"}</button>
+            <button type="button" disabled={deviceBackupVerifyBusy || !deviceBackupStatus?.exists} onClick={verifyDeviceBackupNow} style={{ ...secondaryButton, color: "#3F78B8", opacity: (deviceBackupVerifyBusy || !deviceBackupStatus?.exists) ? .55 : 1 }}>{deviceBackupVerifyBusy ? "Verifying…" : "Verify backup"}</button>
+          </div>
         </div>
-        <div style={{ marginTop: 9, padding: "8px 9px", borderRadius: 10, background: "rgba(255,255,255,.7)", color: "#71857F", fontSize: 10.8, lineHeight: 1.45 }}>Nothing is deleted from the cloud automatically. Relationship, payment, push-token, and device-pairing records are deliberately not copied into the restorable device backup.</div>
+        <div style={{ marginTop: 9, padding: "8px 9px", borderRadius: 10, background: "rgba(255,255,255,.7)", color: "#71857F", fontSize: 10.8, lineHeight: 1.45 }}>PlushLife keeps up to 3 recent recovery snapshots on this device. Nothing is deleted from the cloud automatically. Relationship, payment, push-token, and device-pairing records are deliberately not copied into the restorable device backup.</div>
       </Card>
       <Card style={{ background: "#F8FBFF", borderColor: "#D9E9F6" }}>
         <div style={{ fontSize: 13.5, fontWeight: 900, color: "#3F78B8" }}>🔒 We will never sell your data. Ever.</div>

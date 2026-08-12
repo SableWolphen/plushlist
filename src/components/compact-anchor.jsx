@@ -177,11 +177,11 @@ export function CompactAnchor({ open, rows = [], viewDone = {}, period, toggle }
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
             <div style={{ fontSize: 9.5, letterSpacing: ".11em", fontWeight: 900, color: "#A65DC1" }}>FOCUS HABIT</div>
-            <button type="button" onClick={() => setPickerOpen((value) => !value)} aria-expanded={pickerOpen} style={{ border: 0, background: "transparent", color: "#8E4EAA", fontWeight: 900, fontSize: 10.5, padding: "5px 4px", minHeight: 30, cursor: "pointer", flexShrink: 0 }}>{focusId ? "Change" : "Choose"}</button>
+            <button type="button" onClick={() => setPickerOpen((value) => !value)} aria-expanded={pickerOpen} style={{ border: 0, background: "transparent", color: "#8E4EAA", fontWeight: 900, fontSize: 10.5, padding: "12px 4px", minHeight: 44, margin: "-7px 0", cursor: "pointer", flexShrink: 0 }}>{focusId ? "Change" : "Choose"}</button>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 1 }}>
             <div style={{ flex: 1, minWidth: 0, fontSize: 12.5, lineHeight: 1.3, fontWeight: 900, color: "#4F405C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{focusLabel || "Choose one habit you really want to work on"}</div>
-            {focusRow && !viewDone?.[focusRow.key] && <button type="button" onClick={() => toggle?.(focusRow.key)} style={{ border: 0, borderRadius: 999, background: "#A65DC1", color: "white", fontWeight: 900, fontSize: 10.5, padding: "5px 8px", minHeight: 30, cursor: "pointer", flexShrink: 0 }}>✓ Done</button>}
+            {focusRow && !viewDone?.[focusRow.key] && <button type="button" onClick={() => toggle?.(focusRow.key)} style={{ border: 0, borderRadius: 999, background: "#A65DC1", color: "white", fontWeight: 900, fontSize: 10.5, padding: "12px 8px", minHeight: 44, margin: "-7px 0", cursor: "pointer", flexShrink: 0 }}>✓ Done</button>}
             {focusRow && viewDone?.[focusRow.key] && <span style={{ borderRadius: 999, background: "#E9F7F2", color: "#318C79", fontSize: 10.5, padding: "4px 7px", fontWeight: 900, flexShrink: 0 }}>✓ Done</span>}
           </div>
           {focusId && !focusRow && <div style={{ marginTop: 2, fontSize: 9.5, color: "#8C6B9E" }}>Not scheduled today · still your Focus Habit</div>}
