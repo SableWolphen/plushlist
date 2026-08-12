@@ -1,0 +1,25 @@
+name: Habit health validation
+
+on:
+  push:
+    branches:
+      - habit-health-progress
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run web:sync
+      - name: Verify Habit Health integration
+        run: |
+          test -f src/components/habit-health.jsx
+          test -f src/components/progress-panel-core.jsx
+          grep -q 'HabitHealth' src/components/progress-panel.jsx
+          grep -q 'Consistency without punishing broken streaks' src/components/habit-health.jsx
