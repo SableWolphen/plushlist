@@ -1,4 +1,4 @@
-const CACHE_NAME = "plushlife-v62";
+const CACHE_NAME = "plushlife-v63";
 const APP_SHELL = [
   "./",
   "./login.html",
@@ -9,6 +9,10 @@ const APP_SHELL = [
   "./manifest.webmanifest",
   "./assets/care-upgrades.js",
   "./assets/entitlements.js",
+  "./assets/plush-content.js",
+  "./assets/plush-helpers.js",
+  "./assets/plush-schedule.js",
+  "./assets/plush-billing.js",
   "./assets/gentle-discovery-ui.js",
   "./assets/plushlife-completion.js",
   "./assets/cloudflare-primary.js",
@@ -32,6 +36,30 @@ function privateTrackerUrl(candidate) {
   } catch (_error) {
     return PRIVATE_TRACKER_URL;
   }
+}
+
+function refreshCachedRequest(request) {
+  return fetch(request)
+    .then((response) => {
+      if (response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+      }
+      return response;
+    });
+}
+
+function staleWhileRevalidate(event) {
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      const refresh = refreshCachedRequest(event.request).catch(() => null);
+      if (cached) {
+        event.waitUntil(refresh);
+        return cached;
+      }
+      return refresh.then((response) => response || Response.error());
+    })
+  );
 }
 
 self.addEventListener("install", (event) => {
@@ -96,18 +124,8 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (sameOrigin && event.request.destination === "script") {
-    event.respondWith(
-      fetch(event.request, { cache: "no-store" })
-        .then((response) => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          }
-          return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
+  if (sameOrigin && ["script", "style", "image", "font", "audio", "manifest"].includes(event.request.destination)) {
+    staleWhileRevalidate(event);
     return;
   }
 
