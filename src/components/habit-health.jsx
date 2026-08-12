@@ -14,7 +14,7 @@ export function HabitHealth({ weeklyOverallPct = 0, weeklyEssentialPct = 0, cari
     <section style={{ marginBottom: 12, borderRadius: 17, border: "1px solid #CFE8E1", background: "linear-gradient(145deg,#F3FFFB,#FFFAFD)", overflow: "hidden", boxShadow: "0 6px 20px rgba(49,140,121,.07)" }}>
       <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr auto", gap: 10, alignItems: "center", padding: "13px 14px", border: 0, background: "transparent", textAlign: "left", cursor: "pointer" }}>
         <span>
-          <span style={{ display: "block", fontSize: 10.5, letterSpacing: ".13em", fontWeight: 900, color: "#318C79" }}>🌱 HABIT HEALTH</span>
+          <span style={{ display: "block", fontSize: 10.5, letterSpacing: ".13em", fontWeight: 900, color: "#318C79" }}>📊 THIS WEEK</span>
           <span style={{ display: "block", marginTop: 3, fontSize: 14.5, fontWeight: 900, color: "#4F405C" }}>{rhythm} · {weeklyOverallPct}% this week</span>
           <span style={{ display: "block", marginTop: 2, fontSize: 11.5, lineHeight: 1.4, color: "#71857F" }}>Consistency without punishing broken streaks.</span>
         </span>
