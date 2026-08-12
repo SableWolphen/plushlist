@@ -1,15 +1,21 @@
 import { ProgressPanel as ProgressPanelCore } from "./progress-panel-core.jsx";
 import { HabitHealth } from "./habit-health.jsx";
-import { WeeklyHabitReview } from "./habit-intelligence.jsx";
-import { WhatWorksForMe } from "./habit-retention.jsx";
-import { ResilienceProgress } from "./habit-resilience.jsx";
+
+const LazyWeeklyHabitReview = React.lazy(() => import("./habit-intelligence.jsx").then((module) => ({ default: module.WeeklyHabitReview })));
+const LazyWhatWorksForMe = React.lazy(() => import("./habit-retention.jsx").then((module) => ({ default: module.WhatWorksForMe })));
+const LazyResilienceProgress = React.lazy(() => import("./habit-resilience.jsx").then((module) => ({ default: module.ResilienceProgress })));
+
+function InsightToolsFallback() {
+  return <div role="status" style={{ padding: "12px 10px", color: "#71857F", fontSize: 11.5 }}>Loading deeper habit insights…</div>;
+}
 
 export function ProgressPanel(props) {
+  const [insightsOpen, setInsightsOpen] = React.useState(false);
   if (!props.open) return null;
   return (
     <>
       <section className="habit-insights-card" style={{ marginBottom: 14, borderRadius: 18, border: "1px solid #CFE8E1", background: "linear-gradient(145deg,#F4FBF9,#FFF9FD)", overflow: "hidden", boxShadow: "0 7px 22px rgba(49,140,121,.08)" }}>
-        <details>
+        <details onToggle={(event) => setInsightsOpen(event.currentTarget.open)}>
           <summary style={{ minHeight: 48, padding: "14px 15px", cursor: "pointer", color: "#3E746A", listStyle: "none" }}>
             <span style={{ display: "block", fontSize: 10.5, letterSpacing: ".13em", fontWeight: 900 }}>🌱 HABIT INSIGHTS</span>
             <span style={{ display: "block", marginTop: 3, fontSize: 15, fontWeight: 900, color: "#4F405C" }}>What is working and what to try next</span>
@@ -28,9 +34,13 @@ export function ProgressPanel(props) {
               goToDashboard={props.goToDashboard}
               openTaskManager={props.openTaskManager}
             />
-            <WeeklyHabitReview open={props.open} openTaskManager={props.openTaskManager} goToDashboard={props.goToDashboard} />
-            <WhatWorksForMe open={props.open} openTaskManager={props.openTaskManager} />
-            <ResilienceProgress open={props.open} openTaskManager={props.openTaskManager} />
+            {insightsOpen && (
+              <React.Suspense fallback={<InsightToolsFallback />}>
+                <LazyWeeklyHabitReview open={props.open} openTaskManager={props.openTaskManager} goToDashboard={props.goToDashboard} />
+                <LazyWhatWorksForMe open={props.open} openTaskManager={props.openTaskManager} />
+                <LazyResilienceProgress open={props.open} openTaskManager={props.openTaskManager} />
+              </React.Suspense>
+            )}
           </div>
         </details>
         <style>{`.habit-insights-sections > section { margin: 0 !important; border: 0 !important; border-top: 1px solid #E5EDE9 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; } .habit-insights-sections > section:first-of-type { border-top: 0 !important; }`}</style>

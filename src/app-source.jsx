@@ -28,6 +28,35 @@ const supabase = window.supabase.createClient(
   }
 );
 const SUPABASE_AUTH_STORAGE_KEY = "sb-pvitdhixycegmcovapyh-auth-token";
+const WARM_START_CACHE_VERSION = 1;
+const WARM_START_CACHE_MAX_AGE_MS = 2 * 60 * 60 * 1000;
+
+function warmStartCacheKey(userId, date) {
+  return `plushlife:warm-start:v1:${userId}:${date}`;
+}
+
+function readWarmStartCache(userId, date) {
+  if (!userId || !date) return null;
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(warmStartCacheKey(userId, date)) || "null");
+    if (!parsed || parsed.version !== WARM_START_CACHE_VERSION || parsed.date !== date) return null;
+    if (!Number.isFinite(parsed.savedAt) || Date.now() - parsed.savedAt > WARM_START_CACHE_MAX_AGE_MS) return null;
+    if (!Array.isArray(parsed.tasks) || !Array.isArray(parsed.schedules) || !Array.isArray(parsed.exceptions) || !Array.isArray(parsed.snoozes)) return null;
+    if (!parsed.done || typeof parsed.done !== "object" || Array.isArray(parsed.done)) return null;
+    return parsed;
+  } catch (_error) {
+    return null;
+  }
+}
+
+function writeWarmStartCache(userId, date, value) {
+  if (!userId || !date) return;
+  try {
+    window.localStorage.setItem(warmStartCacheKey(userId, date), JSON.stringify({
+      version: WARM_START_CACHE_VERSION, date, savedAt: Date.now(), ...value,
+    }));
+  } catch (_error) {}
+}
 const VAPID_PUBLIC_KEY = "BMJMbr9mvNVbmo7X8YNKHxOL0Wb62RNvfti9jMn8lwlCFaYqJpZqxam_GDE5RRU-p9RRFscP1mIetfa404Em7Dw";
 const {
   MASCOT_OUTFITS,
@@ -1160,7 +1189,20 @@ function GlowUpTracker() {
       return;
     }
     let active = true;
-    setDone({});
+    const warmCache = readWarmStartCache(user.id, period.date);
+    if (warmCache) {
+      setDone(warmCache.done || {});
+      setTrackerProfile(warmCache.profile || null);
+      setDisplayNameDraft(warmCache.profile?.display_name || "");
+      setComfortItemDraft(warmCache.profile?.comfort_item_name || "");
+      setTrackerTasks(warmCache.tasks || []);
+      setTaskSnoozes(warmCache.snoozes || []);
+      setPersonalSchedules(warmCache.schedules || []);
+      setScheduleExceptions(warmCache.exceptions || []);
+      try { window.PlushLifeRuntime?.metric("warm-cache-hydrated", performance.now(), String(warmCache.tasks?.length || 0) + " tasks"); } catch (_error) {}
+    } else {
+      setDone({});
+    }
     setSyncStatus("syncing");
     Promise.all([
       supabase
@@ -1212,11 +1254,21 @@ function GlowUpTracker() {
               )
               .map((row) => row.task_key);
 
-        setDone(Object.fromEntries(completedKeys.map((key) => [key, true])));
+        const serverDone = Object.fromEntries(completedKeys.map((key) => [key, true]));
+        setDone(serverDone);
         setWeeklyHistory((entries) => [
           ...entries.filter((entry) => entry.progress_date !== period.date),
           { progress_date: period.date, completed_keys: completedKeys },
         ]);
+        writeWarmStartCache(user.id, period.date, {
+          done: serverDone,
+          profile: profileResult.data || null,
+          tasks: tasksResult.data || [],
+          snoozes: snoozesResult.data || [],
+          schedules: schedulesResult.data || [],
+          exceptions: exceptionsResult.data || [],
+        });
+        try { window.PlushLifeRuntime?.metric("tracker-sync-ready", performance.now(), String((tasksResult.data || []).length) + " tasks"); } catch (_error) {}
 
         if (!hasDatedProgress) {
           const { error: migrationError } = await supabase.from("daily_progress").upsert({
@@ -4530,13 +4582,16 @@ function GlowUpTracker() {
     setFocusHelperOpen(true);
   };
 
-  const historyByDate = new Map(
+  const historyByDate = React.useMemo(() => new Map(
     weeklyHistory.map((entry) => [entry.progress_date, new Set(entry.completed_keys || [])])
-  );
-  const habitHistoryByDate = new Map(
-    habitHistory.map((entry) => [entry.progress_date, new Set(entry.completed_keys || [])])
-  );
-  habitHistoryByDate.set(period.date, new Set(Object.keys(done).filter((key) => done[key])));
+  ), [weeklyHistory]);
+  const habitHistoryByDate = React.useMemo(() => {
+    const map = new Map(
+      habitHistory.map((entry) => [entry.progress_date, new Set(entry.completed_keys || [])])
+    );
+    map.set(period.date, new Set(Object.keys(done).filter((key) => done[key])));
+    return map;
+  }, [habitHistory, period.date, done]);
   const taskIsExpectedOnDate = (task, date) => taskIsScheduledForDate(task, date);
   const habitStatsForTask = (task) => {
     const firstHistoryDate = habitHistory.length
@@ -4584,9 +4639,10 @@ function GlowUpTracker() {
     const nextReward = HABIT_REWARDS.find((reward) => total < reward.count) || null;
     return { current, best, total, earnedReward, nextReward };
   };
-  const habitTasks = trackerTasks
+  const habitTasks = React.useMemo(() => trackerTasks
     .filter((task) => habitTypeForTask(task) !== "regular")
-    .map((task) => ({ ...task, habitType: habitTypeForTask(task), stats: habitStatsForTask(task) }));
+    .map((task) => ({ ...task, habitType: habitTypeForTask(task), stats: habitStatsForTask(task) })),
+  [trackerTasks, habitHistory, done, period.date]);
   const habitGardenTotalCheckIns = habitTasks.reduce((total, task) => total + task.stats.total, 0);
   const habitGardenGrowthPct = habitTasks.length
     ? Math.round(habitTasks.reduce((total, task) => {
@@ -4758,8 +4814,10 @@ function GlowUpTracker() {
 
   const completedKeysForToday = new Set(Object.keys(done).filter((key) => done[key]));
   const todayDayId = dayIdForDate(period.date);
+  const requiredKeysCache = new Map();
   const requiredKeysForDate = (date) => {
-    return trackerTasks
+    if (requiredKeysCache.has(date)) return requiredKeysCache.get(date);
+    const keys = trackerTasks
       .filter((task) =>
         taskIsScheduledForDate(task, date) &&
         !taskIsOptional(task) &&
@@ -4767,6 +4825,8 @@ function GlowUpTracker() {
         !isTaskPausedOnDate(task, date)
       )
       .map((task) => task.task_key);
+    requiredKeysCache.set(date, keys);
+    return keys;
   };
   const todayRequiredKeys = requiredKeysForDate(period.date);
   const todayRequiredDone = todayRequiredKeys.filter((key) => completedKeysForToday.has(key)).length;

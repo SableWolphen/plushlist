@@ -5,6 +5,7 @@ const FIRST_SEEN_KEY = "plushlife:companion:first-seen:v1";
 const HISTORY_KEY = "plushlife:companion:history:v1";
 const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 const SYNCED_DAYS = 45;
+const FALLBACK_SYNC_MS = 120000;
 
 function safeJson(value, fallback = null) {
   try { return JSON.parse(value); } catch (_error) { return fallback; }
@@ -14,6 +15,7 @@ function storageJson(key, fallback) {
 }
 function storageHas(key) { try { return localStorage.getItem(key) !== null; } catch (_error) { return false; } }
 function storageSet(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_error) {} }
+function plainObject(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
 
 function findAccessToken(value, depth = 0) {
   if (!value || depth > 4) return "";
@@ -60,9 +62,9 @@ function localCompanionState() {
   return {
     version: 2,
     first_seen: storageJson(FIRST_SEEN_KEY, "") || "",
-    history: storageJson(HISTORY_KEY, []).slice(0, SYNCED_DAYS),
+    history: Array.isArray(storageJson(HISTORY_KEY, [])) ? storageJson(HISTORY_KEY, []).slice(0, SYNCED_DAYS) : [],
     days,
-    habit_coach: storageJson(HABIT_STATE_KEY, {}),
+    habit_coach: plainObject(storageJson(HABIT_STATE_KEY, {})),
     updated_at: new Date().toISOString(),
   };
 }
@@ -74,26 +76,28 @@ function mergeHistory(cloud = [], local = []) {
   return [...byDate.values()].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, SYNCED_DAYS);
 }
 function mergeHabitHistory(cloud = {}, local = {}) {
-  const merged = { ...cloud };
-  for (const [date, localDay] of Object.entries(local || {})) merged[date] = { ...(cloud?.[date] || {}), ...(localDay || {}) };
+  const merged = { ...plainObject(cloud) };
+  for (const [date, localDay] of Object.entries(plainObject(local))) merged[date] = { ...(plainObject(cloud)?.[date] || {}), ...(plainObject(localDay)) };
   return merged;
 }
 function newerObject(cloud = {}, local = {}) {
+  cloud = plainObject(cloud); local = plainObject(local);
   const cloudTime = Date.parse(cloud?.updated_at || "") || 0;
   const localTime = Date.parse(local?.updated_at || "") || 0;
-  return cloudTime > localTime ? { ...(local || {}), ...(cloud || {}) } : { ...(cloud || {}), ...(local || {}) };
+  return cloudTime > localTime ? { ...local, ...cloud } : { ...cloud, ...local };
 }
 function mergeEventList(cloud = [], local = [], limit = 180) {
   const map = new Map();
-  for (const item of [...(cloud || []), ...(local || [])]) if (item?.id) map.set(item.id, { ...(map.get(item.id) || {}), ...item });
+  for (const item of [...(Array.isArray(cloud) ? cloud : []), ...(Array.isArray(local) ? local : [])]) if (item?.id) map.set(item.id, { ...(map.get(item.id) || {}), ...item });
   return [...map.values()].sort((a,b)=>String(a.date || "").localeCompare(String(b.date || "")) || Number(a.hour || 0)-Number(b.hour || 0) || Number(a.minute || 0)-Number(b.minute || 0)).slice(-limit);
 }
 function mergeBackgroundEngine(cloud = {}, local = {}) {
+  cloud = plainObject(cloud); local = plainObject(local);
   const preferred = newerObject(cloud, local);
-  const checkIns = { ...(cloud?.checkIns || {}) };
-  for (const [date, item] of Object.entries(local?.checkIns || {})) checkIns[date] = newerObject(checkIns[date] || {}, item || {});
-  const habitProfiles = { ...(cloud?.habitProfiles || {}), ...(local?.habitProfiles || {}) };
-  const experiments = { ...(cloud?.experiments || {}), ...(local?.experiments || {}) };
+  const checkIns = { ...plainObject(cloud?.checkIns) };
+  for (const [date, item] of Object.entries(plainObject(local?.checkIns))) checkIns[date] = newerObject(checkIns[date] || {}, item || {});
+  const habitProfiles = { ...plainObject(cloud?.habitProfiles), ...plainObject(local?.habitProfiles) };
+  const experiments = { ...plainObject(cloud?.experiments), ...plainObject(local?.experiments) };
   return {
     ...preferred,
     version: Math.max(Number(cloud?.version || 0), Number(local?.version || 0), 2),
@@ -106,7 +110,8 @@ function mergeBackgroundEngine(cloud = {}, local = {}) {
   };
 }
 function mergeNestedMeta(cloud = {}, local = {}) {
-  const merged = { ...(cloud || {}), ...(local || {}) };
+  cloud = plainObject(cloud); local = plainObject(local);
+  const merged = { ...cloud, ...local };
   const background = mergeBackgroundEngine(cloud?.__background_engine || {}, local?.__background_engine || {});
   if (Object.keys(background).length) merged.__background_engine = background;
   for (const key of ["__retention", "__resilience"]) {
@@ -116,39 +121,41 @@ function mergeNestedMeta(cloud = {}, local = {}) {
 }
 
 function mergeHabitCoach(cloud = {}, local = {}) {
+  cloud = plainObject(cloud); local = plainObject(local);
   const cloudExperiments = Array.isArray(cloud?.experiments) ? cloud.experiments : [];
   const localExperiments = Array.isArray(local?.experiments) ? local.experiments : [];
   const experiments = new Map();
   for (const item of cloudExperiments) if (item?.id) experiments.set(item.id, item);
   for (const item of localExperiments) if (item?.id) experiments.set(item.id, { ...(experiments.get(item.id) || {}), ...item });
-  const cloudPaths = cloud?.paths && typeof cloud.paths === "object" ? cloud.paths : {};
-  const localPaths = local?.paths && typeof local.paths === "object" ? local.paths : {};
+  const cloudPaths = plainObject(cloud?.paths);
+  const localPaths = plainObject(local?.paths);
   const active = localPaths.active || cloudPaths.active || null;
-  const completed = [...new Set([...(cloudPaths.completed || []), ...(localPaths.completed || [])])];
+  const completed = [...new Set([...(Array.isArray(cloudPaths.completed) ? cloudPaths.completed : []), ...(Array.isArray(localPaths.completed) ? localPaths.completed : [])])];
   return {
     version: 1,
-    anchors: { ...(cloud?.anchors || {}), ...(local?.anchors || {}) },
-    goals: { ...(cloud?.goals || {}), ...(local?.goals || {}) },
+    anchors: { ...plainObject(cloud?.anchors), ...plainObject(local?.anchors) },
+    goals: { ...plainObject(cloud?.goals), ...plainObject(local?.goals) },
     meta: mergeNestedMeta(cloud?.meta || {}, local?.meta || {}),
     experiments: [...experiments.values()].slice(-40),
     paths: { ...cloudPaths, ...localPaths, active, completed },
-    reviews: { ...(cloud?.reviews || {}), ...(local?.reviews || {}) },
+    reviews: { ...plainObject(cloud?.reviews), ...plainObject(local?.reviews) },
     history: mergeHabitHistory(cloud?.history || {}, local?.history || {}),
-    recovery: { ...(cloud?.recovery || {}), ...(local?.recovery || {}) },
+    recovery: { ...plainObject(cloud?.recovery), ...plainObject(local?.recovery) },
     updated_at: new Date().toISOString(),
   };
 }
 
 function mergeState(cloud = {}, local = {}) {
-  const cloudDays = cloud?.days && typeof cloud.days === "object" ? cloud.days : {};
-  const localDays = local?.days && typeof local.days === "object" ? local.days : {};
+  cloud = plainObject(cloud); local = plainObject(local);
+  const cloudDays = plainObject(cloud?.days);
+  const localDays = plainObject(local?.days);
   const days = { ...cloudDays };
-  for (const [date, localDay] of Object.entries(localDays)) days[date] = { ...(cloudDays[date] || {}), ...localDay };
+  for (const [date, localDay] of Object.entries(localDays)) days[date] = { ...plainObject(cloudDays[date]), ...plainObject(localDay) };
   const candidates = [cloud?.first_seen, local?.first_seen].filter(Boolean).sort();
   return {
     version: 2,
     first_seen: candidates[0] || "",
-    history: mergeHistory(cloud?.history || [], local?.history || []),
+    history: mergeHistory(Array.isArray(cloud?.history) ? cloud.history : [], Array.isArray(local?.history) ? local.history : []),
     days,
     habit_coach: mergeHabitCoach(cloud?.habit_coach || {}, local?.habit_coach || {}),
     updated_at: new Date().toISOString(),
@@ -156,15 +163,15 @@ function mergeState(cloud = {}, local = {}) {
 }
 
 function hydrateLocal(state) {
-  if (!state || typeof state !== "object") return;
+  if (!state || typeof state !== "object" || Array.isArray(state)) return;
   if (state.first_seen) storageSet(FIRST_SEEN_KEY, state.first_seen);
   if (Array.isArray(state.history)) storageSet(HISTORY_KEY, state.history.slice(0, SYNCED_DAYS));
-  for (const [date, day] of Object.entries(state.days || {})) {
+  for (const [date, day] of Object.entries(plainObject(state.days))) {
     if (day && Object.prototype.hasOwnProperty.call(day, "gentle_done")) storageSet(`plushlife:gentle-day:${date}`, day.gentle_done || {});
     if (day && Object.prototype.hasOwnProperty.call(day, "wind_down")) storageSet(`plushlife:wind-down:${date}`, day.wind_down || {});
     if (day && Object.prototype.hasOwnProperty.call(day, "support_need")) storageSet(`plushlife:support-need:${date}`, day.support_need || "");
   }
-  if (state.habit_coach && typeof state.habit_coach === "object") {
+  if (state.habit_coach && typeof state.habit_coach === "object" && !Array.isArray(state.habit_coach)) {
     storageSet(HABIT_STATE_KEY, state.habit_coach);
     try { window.dispatchEvent(new CustomEvent("plushlife:habit-coach-hydrated")); } catch (_error) {}
   }
@@ -196,15 +203,21 @@ export function useCompanionCloudSync(active) {
   const [status, setStatus] = React.useState("local");
   React.useEffect(() => {
     let cancelled = false;
-    let timer = null;
+    let debounceTimer = null;
+    let fallbackTimer = null;
     let hydratedState = null;
+    let syncing = false;
+    let queued = false;
+
     const sync = async (initial = false, keepalive = false) => {
+      if (syncing && !initial) { queued = true; return; }
       const token = currentAccessToken();
       const userId = userIdFromToken(token);
       if (!token || !userId || !navigator.onLine) {
         if (!cancelled) { setStatus(token ? "offline" : "local"); if (initial) setReady(true); }
         return;
       }
+      syncing = true;
       try {
         if (initial) {
           const cloud = await readCloud(token, userId);
@@ -212,6 +225,7 @@ export function useCompanionCloudSync(active) {
           hydrateLocal(merged);
           hydratedState = merged;
           await writeCloud(token, userId, merged);
+          try { window.PlushLifeRuntime?.metric("companion-sync-ready", performance.now()); } catch (_error) {}
         } else {
           const local = localCompanionState();
           const merged = mergeState(hydratedState || {}, local);
@@ -222,21 +236,51 @@ export function useCompanionCloudSync(active) {
       } catch (_error) {
         if (!cancelled) setStatus("local");
       } finally {
+        syncing = false;
         if (initial && !cancelled) setReady(true);
+        if (queued && !cancelled) {
+          queued = false;
+          window.setTimeout(() => sync(false), 250);
+        }
       }
     };
+
+    const scheduleSync = (delay = 900) => {
+      if (cancelled) return;
+      if (debounceTimer) window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(() => { debounceTimer = null; sync(false); }, delay);
+    };
+
     if (!active) { setReady(false); return () => {}; }
     sync(true);
-    timer = window.setInterval(() => sync(false), 12000);
+    fallbackTimer = window.setInterval(() => sync(false), FALLBACK_SYNC_MS);
+
     const onOnline = () => sync(false);
     const onPageHide = () => sync(false, true);
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") sync(false, true);
+      else scheduleSync(250);
+    };
+    const onHabitChanged = () => scheduleSync(700);
+    const onStorage = (event) => {
+      const key = String(event?.key || "");
+      if (key === HABIT_STATE_KEY || key === HISTORY_KEY || key.startsWith("plushlife:gentle-day:") || key.startsWith("plushlife:wind-down:") || key.startsWith("plushlife:support-need:")) scheduleSync(900);
+    };
+
     window.addEventListener("online", onOnline);
     window.addEventListener("pagehide", onPageHide);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("plushlife:habit-coach-updated", onHabitChanged);
+    window.addEventListener("storage", onStorage);
     return () => {
       cancelled = true;
-      if (timer) window.clearInterval(timer);
+      if (debounceTimer) window.clearTimeout(debounceTimer);
+      if (fallbackTimer) window.clearInterval(fallbackTimer);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("pagehide", onPageHide);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("plushlife:habit-coach-updated", onHabitChanged);
+      window.removeEventListener("storage", onStorage);
     };
   }, [active]);
   return { ready, status };
