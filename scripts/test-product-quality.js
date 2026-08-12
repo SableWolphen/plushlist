@@ -16,6 +16,7 @@ const checks = [
   [completed.includes("moved to Completed Today"), "screen-reader completion announcement exists"],
   [today.includes("useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || [])"), "all Today modes use shared completion flow"],
   [today.includes("<LowScreenToday {...modeProps} />") && today.includes("<CompletedTaskArea"), "Low Screen mode exposes Completed Today"],
+  [today.includes("LowScreenJustCompleted") && today.includes("JUST COMPLETED"), "Low Screen keeps a completed task crossed off during the linger period"],
   [baby.includes("CompletedTaskArea") && baby.includes("recentlyCompletedKeys"), "Baby Mode uses the same completion lifecycle"],
   [today.includes("YOUR FIRST FEW DAYS"), "new users get focused first-days guidance"],
   [progress.includes("Why PlushLife thinks this:"), "habit insights explain their evidence"],
