@@ -1,0 +1,35 @@
+name: Habit retention validation
+
+on:
+  push:
+    branches:
+      - habit-retention-suite
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run web:sync
+      - name: Verify behavior-change features
+        run: |
+          grep -q 'HABIT ASSIST' src/components/habit-retention.jsx
+          grep -q 'HABIT RESCUE' src/components/habit-retention.jsx
+          grep -q 'LOW SCREEN TIME' src/components/habit-retention.jsx
+          grep -q 'What Works for Me' src/components/habit-retention.jsx
+          grep -q 'Gentle challenges' src/components/habit-retention.jsx
+          grep -q 'Accountability circle' src/components/habit-retention.jsx
+          grep -q 'Set up a habit in plain English' src/components/habit-retention.jsx
+          grep -q 'Better completion states' src/components/habit-retention.jsx
+          grep -q 'Anchor Habit' android/app/src/main/java/com/PlushLife/WidgetBridgePlugin.java
+      - name: Compile Android Java
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew :app:compileDebugJavaWithJavac --no-daemon
