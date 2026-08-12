@@ -16,7 +16,7 @@ function FirstDaysGuide({ activityDaysTotal = 0, rows = [], viewDone = {}, goToD
   const completed = required.filter((row) => !!viewDone?.[row.key]).length;
   const guides = [
     { title: "Start small", text: "Three to five useful habits are plenty for week one. A smaller routine is easier to trust and repeat.", action: required.length < 3 ? "Add a few habits" : "" },
-    { title: "Choose your Anchor", text: "Pick one habit that makes today count. PlushLife will quietly give it extra weight when choosing your next step." },
+    { title: "Choose your Focus Habit", text: "Pick one real habit you especially want to build right now. PlushLife will remember it across days and quietly give it extra weight when choosing your next step.", action: "Choose Focus Habit" },
     { title: "Give PlushLife one real check-in", text: "Mood and energy help PlushLife tell the difference between a normal day and a day that needs less pressure." },
     { title: "Keep reminders selective", text: "One useful reminder beats a wall of notifications. Keep only the times that genuinely help you start." },
     { title: "Try a gentler day on purpose", text: "Soft and Tiny days are part of the system, not a failure state. Using them teaches PlushLife what survives low-energy days." },
@@ -32,6 +32,7 @@ function FirstDaysGuide({ activityDaysTotal = 0, rows = [], viewDone = {}, goToD
       {completed > 0 && dayNumber <= 2 && <div style={{ marginTop: 6, fontSize: 11, color: "#4D8174", fontWeight: 800 }}>✓ You already completed {completed} today. That is enough data to start learning from.</div>}
       {guide.action && <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 9 }}>
         {guide.action === "Add a few habits" && <button type="button" onClick={() => openTaskManager?.()} style={{ minHeight: 44, padding: "8px 11px", borderRadius: 10, border: 0, background: "#38816F", color: "white", fontWeight: 900, cursor: "pointer" }}>Add a few habits</button>}
+        {guide.action === "Choose Focus Habit" && <button type="button" onClick={() => { try { window.dispatchEvent(new CustomEvent("plushlife:open-focus-habit-picker")); document.getElementById("plushlife-focus-habit")?.scrollIntoView?.({ behavior: "smooth", block: "center" }); } catch (_error) {} }} style={{ minHeight: 44, padding: "8px 11px", borderRadius: 10, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Choose Focus Habit</button>}
         {guide.action === "Open PlushGrowth" && <button type="button" onClick={() => goToDashboard?.("progress")} style={{ minHeight: 44, padding: "8px 11px", borderRadius: 10, border: "1px solid #BFDCD3", background: "white", color: "#38816F", fontWeight: 900, cursor: "pointer" }}>Open PlushGrowth</button>}
       </div>}
     </section>
