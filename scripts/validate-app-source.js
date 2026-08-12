@@ -39,6 +39,11 @@ const movedModulesText = movedModuleFiles
 const searchableSource = (appSource + componentsSource + movedModulesText).replace(/\r\n/g, "\n");
 
 const requiredRegressionMarkers = [
+  'required task${pendingCount === 1 ? "" : "s"} still waiting',
+  'optional bonus ${bonusPendingCount === 1 ? "task" : "tasks"} available',
+  'if (/^mornings?$/.test(words)) return { key: "morning", label: "☀️ Mornings" };',
+  'Show monthly details',
+  'Your habit progress and earned rewards live here in PlushGrowth.',
   'Close habit tools',
   '<HabitCoach {...props}>',
   // WEEKDAY_PRESET_IDS/WEEKEND_PRESET_IDS are exported by

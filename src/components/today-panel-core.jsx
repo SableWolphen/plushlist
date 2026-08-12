@@ -370,17 +370,19 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
             })() : taskListCollapsed ? (() => {
               const pendingRows = rows.filter((r) => !viewDone[r.key] && !(r.sourceTask && isTaskPausedOnDate(r.sourceTask, period.date)));
               const requiredPendingRows = pendingRows.filter((r) => !r.isBonus);
+              const bonusPendingCount = pendingRows.length - requiredPendingRows.length;
               const previewRows = (requiredPendingRows.length ? requiredPendingRows : pendingRows).slice(0, 3);
-              const pendingCount = pendingRows.length;
+              const pendingCount = requiredPendingRows.length;
               return (
                 <button type="button" onClick={() => setTaskListCollapsed(false)} style={{ width: "100%", display: "block", padding: "13px 14px", borderRadius: 13, border: `1px solid ${day.accent}55`, background: "white", cursor: "pointer", textAlign: "left" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontWeight: 900, fontSize: 13.5, color: "#5B4B6B" }}>📋 {pendingCount ? `${pendingCount} task${pendingCount === 1 ? "" : "s"} still waiting` : "Today's tasks"}</span>
+                    <span style={{ fontWeight: 900, fontSize: 13.5, color: "#5B4B6B" }}>📋 {pendingCount ? `${pendingCount} required task${pendingCount === 1 ? "" : "s"} still waiting` : bonusPendingCount ? "Required tasks are done" : "Today's tasks"}</span>
                     <span style={{ fontWeight: 900, fontSize: 12.5, color: day.accent, whiteSpace: "nowrap" }}>See full list ›</span>
                   </div>
                   {previewRows.length > 0 && <div style={{ marginTop: 8, display: "grid", gap: 4 }}>
                     {previewRows.map((r) => <div key={r.key} style={{ fontSize: 12, color: "#6B5A7D", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>○ {r.sourceTask && <HabitTypeIcon task={r.sourceTask} />}{r.label}</div>)}
                   </div>}
+                  {bonusPendingCount > 0 && <div style={{ marginTop: 6, fontSize: 10.5, color: "#927C9E" }}>{bonusPendingCount} optional bonus {bonusPendingCount === 1 ? "task" : "tasks"} available</div>}
                 </button>
               );
             })() : (
