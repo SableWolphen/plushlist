@@ -1,0 +1,27 @@
+name: Baby Mode declutter validation
+
+on:
+  push:
+    branches:
+      - baby-mode-habit-first-declutter
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run web:sync
+      - name: Verify Baby Mode routing
+        run: |
+          test -f src/components/baby-today.jsx
+          grep -q 'if (props.babyMode) return <BabyToday' src/components/today-panel.jsx
+          grep -q 'MY TINY THING' src/components/baby-today.jsx
+          grep -q 'Only a few at a time. No giant list.' src/components/baby-today.jsx
+          grep -q 'More for grown-up me' src/components/baby-today.jsx
+          grep -q 'Need a little help?' src/components/baby-today.jsx
