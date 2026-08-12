@@ -1,7 +1,8 @@
 const COMPLETED_LINGER_MS = 2600;
 
-export function useCompletedTaskFlow(toggle, viewDone = {}) {
+export function useCompletedTaskFlow(toggle, viewDone = {}, rows = []) {
   const [lingerKeys, setLingerKeys] = React.useState([]);
+  const [announcement, setAnnouncement] = React.useState("");
   const timersRef = React.useRef(new Map());
 
   React.useEffect(() => () => {
@@ -11,25 +12,29 @@ export function useCompletedTaskFlow(toggle, viewDone = {}) {
 
   const unifiedToggle = React.useCallback((key, ...args) => {
     const wasDone = !!viewDone?.[key];
+    const label = rows.find((row) => row.key === key)?.label || "Task";
     const oldTimer = timersRef.current.get(key);
     if (oldTimer) window.clearTimeout(oldTimer);
 
     if (wasDone) {
       setLingerKeys((keys) => keys.filter((item) => item !== key));
       timersRef.current.delete(key);
+      setAnnouncement(`${label} marked incomplete.`);
     } else {
       setLingerKeys((keys) => keys.includes(key) ? keys : [...keys, key]);
+      setAnnouncement(`${label} completed. It will move to Completed Today in a moment.`);
       const timer = window.setTimeout(() => {
         setLingerKeys((keys) => keys.filter((item) => item !== key));
         timersRef.current.delete(key);
+        setAnnouncement(`${label} moved to Completed Today.`);
       }, COMPLETED_LINGER_MS);
       timersRef.current.set(key, timer);
     }
 
     return toggle?.(key, ...args);
-  }, [toggle, viewDone]);
+  }, [toggle, viewDone, rows]);
 
-  return { unifiedToggle, lingerKeys };
+  return { unifiedToggle, lingerKeys, announcement };
 }
 
 export function CompletedTaskArea({ rows = [], viewDone = {}, lingerKeys = [], toggle, title = "Completed today", compact = false }) {
