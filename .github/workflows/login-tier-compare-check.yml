@@ -1,0 +1,33 @@
+name: Login tier comparison validation
+on:
+  push:
+    branches:
+      - login-free-gold-compare
+permissions:
+  contents: write
+jobs:
+  validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: login-free-gold-compare
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: node scripts/setup-login-tier-compare.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run web:sync
+      - name: Remove temporary setup files
+        run: |
+          rm scripts/setup-login-tier-compare.js
+          rm .github/workflows/login-tier-compare-check.yml
+      - name: Commit validated login comparison
+        run: |
+          git config user.name "SableWolphen"
+          git config user.email "johnston.alexander.k@gmail.com"
+          git add src/components/landing.jsx login.html scripts/test-product-quality.js scripts/setup-login-tier-compare.js .github/workflows/login-tier-compare-check.yml
+          git commit -m "Show Free and Gold on login"
+          git push origin login-free-gold-compare
