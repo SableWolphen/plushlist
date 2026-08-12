@@ -1,3 +1,6 @@
+// Today used to render <HabitCoach {...props}> with a large expandable toolbox.
+// Keep the same habit-coach storage/history contract here while showing only
+// the one daily control that belongs on Today: the Anchor Habit.
 const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 const MAX_HISTORY_DAYS = 60;
 
