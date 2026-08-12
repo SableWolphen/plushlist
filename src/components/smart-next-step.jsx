@@ -44,7 +44,8 @@ export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckI
     const engine = state.meta?.__background_engine || {};
     const profiles = engine.habitProfiles || {};
     const date = String(period?.date || new Date().toISOString().slice(0, 10)).slice(0, 10);
-    const anchorId = String(state.anchors?.[date] || "");
+    const focusHabitId = String(state.meta?.focus_habit_id || "");
+    const anchorId = focusHabitId || String(state.anchors?.[date] || "");
     const recent = new Set(recentlyCompletedKeys || []);
     const lowCapacity = ["empty", "low"].includes(String(dailyCheckIn?.energy || "")) || ["very_low", "low"].includes(String(dailyCheckIn?.capacity || ""));
     const nowPeriod = currentPeriod(new Date().getHours());
@@ -59,7 +60,7 @@ export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckI
       let score = 100 - Math.min(index, 40);
       const reasons = [];
 
-      if (id && id === anchorId) { score += 70; reasons.push("it is your Anchor"); }
+      if (id && id === anchorId) { score += 70; reasons.push(focusHabitId ? "it is your Focus Habit" : "it is your Anchor"); }
       if (isEssential(row)) { score += 26; reasons.push("it is one of today's essentials"); }
       if (row.key === fallbackKey) score += 14;
 
