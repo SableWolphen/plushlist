@@ -26,8 +26,13 @@ const syncWww = read("scripts/sync-www.js");
 const packageJson = read("package.json");
 const goldAccess = read("src/plush-gold.js");
 const goldPreview = read("src/components/plush-gold-preview.jsx");
+const landing = read("src/components/landing.jsx");
+const loginPage = read("login.html");
 
 const checks = [
+  [landing.includes("PlushLife Free") && landing.includes("Plush Gold") && landing.includes("FREE PREVIEW"), "signed-out landing compares Free and Gold"],
+  [loginPage.includes("PlushLife Free") && loginPage.includes("Plush Gold") && loginPage.includes("FREE PREVIEW"), "dedicated login page compares Free and Gold"],
+  [landing.includes("No payment is required right now") && loginPage.includes("No payment required right now"), "login tier comparison clearly keeps Gold free during preview"],
   [goldAccess.includes('PLUSH_GOLD_ACCESS_MODE = "free_preview"') && goldAccess.includes("PLUSH_GOLD_BILLING_ENABLED = false"), "Plush Gold stays fully unlocked with billing disabled during preview"],
   [goldAccess.includes("advanced_growth_insights") && goldAccess.includes("smart_next_step") && goldAccess.includes("adaptive_habit_coaching") && goldAccess.includes("advanced_reminders") && goldAccess.includes("habit_experiments") && goldAccess.includes("recovery_intelligence") && goldAccess.includes("expanded_growth_history") && goldAccess.includes("multiple_focus_habits") && goldAccess.includes("advanced_planning") && goldAccess.includes("advanced_personalization") && goldAccess.includes("priority_history_protection") && goldAccess.includes("gold_reports"), "Plush Gold has one central registry for current and reserved premium capabilities"],
   [goldPreview.includes("Everything is included free for now") && goldPreview.includes("Billing off · free preview"), "Settings clearly explains the free Plush Gold preview"],

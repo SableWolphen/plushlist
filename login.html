@@ -25,7 +25,7 @@
         #fff8fc;
     }
     main {
-      width: min(100%, 470px);
+      width: min(100%, 640px);
       padding: 26px;
       border: 1px solid #f0d9ee;
       border-radius: 24px;
@@ -64,12 +64,32 @@
     .back { display: block; margin-top: 17px; text-align: center; color: #8574a0; font-size: 13px; }
     .legal { margin-top: 18px; padding-top: 14px; border-top: 1px solid #f0d9ee; text-align: center; color: #8574a0; font-size: 11px; line-height: 1.7; }
     .legal a { color: #9c5fb5; }
+    .tier-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px; }
+    .tier-card { padding:13px;border:1px solid #eadcec;border-radius:15px;background:#fff; }
+    .tier-card.gold { border-color:#dfb5e9;background:linear-gradient(145deg,#fff8fe,#f3fbf8); }
+    .tier-title { display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;font-weight:900; }
+    .preview-badge { padding:3px 7px;border-radius:999px;background:#f1e3f6;color:#8e4eaa;font-size:9px;font-weight:900;white-space:nowrap; }
+    .tier-list { margin:8px 0 0;padding:0;list-style:none;display:grid;gap:5px;color:#756483;font-size:11.5px;line-height:1.35; }
+    .tier-note { margin:-7px 0 18px;padding:9px 10px;border-radius:11px;background:#f7f2fa;color:#756483;font-size:11.5px;line-height:1.4;text-align:center; }
+    @media(max-width:560px){ .tier-grid{grid-template-columns:1fr} main{padding:20px} }
   </style>
 </head>
 <body>
   <main>
     <h1>Welcome to PlushLife 💛</h1>
-    <p class="intro">Enter your email, then use the one-time code we send you.</p>
+    <p class="intro">Sign in to the same private tracker on Free or Gold. Gold is included free during preview.</p>
+
+    <div class="tier-grid" aria-label="PlushLife Free and Plush Gold comparison">
+      <div class="tier-card">
+        <div class="tier-title"><span>🧸 PlushLife Free</span><span style="font-size:9px;color:#3f9c86">CORE</span></div>
+        <ul class="tier-list"><li>✓ Today, habits & tasks</li><li>✓ Focus Habit & check-ins</li><li>✓ Basic reminders & progress</li><li>✓ Baby Mode, Low Screen & care tools</li></ul>
+      </div>
+      <div class="tier-card gold">
+        <div class="tier-title"><span>✨ Plush Gold</span><span class="preview-badge">FREE PREVIEW</span></div>
+        <ul class="tier-list"><li>✓ Everything in Free</li><li>✓ Smarter Next Step intelligence</li><li>✓ Advanced PlushGrowth insights</li><li>✓ Adaptive coaching & recovery patterns</li></ul>
+      </div>
+    </div>
+    <div class="tier-note"><strong>No payment required right now.</strong> If Gold becomes paid later, the core Free experience stays available.</div>
 
     <label for="email">Email address</label>
     <input id="email" type="email" autocomplete="email" placeholder="you@example.com">

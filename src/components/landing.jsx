@@ -52,7 +52,11 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         .landing-demo-task:hover { border-color:#D9A6E3 !important; transform:translateY(-1px) }
         .landing-demo-task:focus-visible { outline:3px solid #E7B8F0;outline-offset:2px }
         @media(max-width:800px){.plush-feature-grid,.landing-how-grid{grid-template-columns:1fr}.landing-benefit-strip{grid-template-columns:repeat(2,1fr)}.landing-device-stage{border-radius:24px}}
-        @media(max-width:560px){.landing-nav-links{display:none}.landing-benefit-strip{grid-template-columns:1fr 1fr;gap:7px;padding:0 14px}.landing-benefit-pill{border-radius:15px;font-size:11px;padding:7px}.landing-signin-row{flex-direction:column}.landing-signin-row button{width:100%}.landing-difference-cell{min-height:96px;padding:15px 13px}}
+        .landing-tier-grid { display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px;text-align:left }
+        .landing-tier-card { padding:12px;border-radius:14px;border:1px solid #EADCEC;background:#FFF }
+        .landing-tier-card.gold { border-color:#E0B6EA;background:linear-gradient(145deg,#FFF8FE,#F4FCF9);box-shadow:0 10px 24px -20px rgba(126,69,145,.55) }
+        .landing-tier-list { margin:7px 0 0;padding:0;list-style:none;display:grid;gap:4px;color:#6E5A82;font-size:11px;line-height:1.35 }
+        @media(max-width:560px){.landing-nav-links{display:none}.landing-benefit-strip{grid-template-columns:1fr 1fr;gap:7px;padding:0 14px}.landing-benefit-pill{border-radius:15px;font-size:11px;padding:7px}.landing-signin-row{flex-direction:column}.landing-signin-row button{width:100%}.landing-difference-cell{min-height:96px;padding:15px 13px}.landing-tier-grid{grid-template-columns:1fr}}
       `}</style>
       <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "26px 28px", maxWidth: 1080, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "'Baloo 2',sans-serif", fontSize: 22, fontWeight: 800 }}>
@@ -77,9 +81,29 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         </div>
 
         {showSignIn && (
-          <div style={{ maxWidth: 480, margin: "22px auto 0", padding: 16, borderRadius: 18, background: "rgba(255,255,255,.86)", border: `1px solid ${colors.line}`, boxShadow: "0 18px 38px -24px rgba(90,50,110,.35)" }}>
+          <div style={{ maxWidth: 660, margin: "22px auto 0", padding: 16, borderRadius: 18, background: "rgba(255,255,255,.86)", border: `1px solid ${colors.line}`, boxShadow: "0 18px 38px -24px rgba(90,50,110,.35)" }}>
             <div style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 20, fontWeight: 800 }}>Create or open your private tracker</div>
-            <div style={{ marginTop: 3, fontSize: 13, color: colors.soft }}>We’ll email you a secure one-time sign-in code.</div>
+            <div style={{ marginTop: 3, fontSize: 13, color: colors.soft }}>Choose the level of support that fits you. <strong>Gold is included free for everyone during preview.</strong></div>
+            <div className="landing-tier-grid" aria-label="PlushLife Free and Plush Gold comparison">
+              <div className="landing-tier-card">
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                  <strong style={{ fontSize: 13.5 }}>🧸 PlushLife Free</strong><span style={{ fontSize: 10, fontWeight: 900, color: colors.mint }}>CORE</span>
+                </div>
+                <ul className="landing-tier-list">
+                  <li>✓ Today, habits & tasks</li><li>✓ Focus Habit & check-ins</li><li>✓ Basic reminders & progress</li><li>✓ Baby Mode, Low Screen & care tools</li>
+                </ul>
+              </div>
+              <div className="landing-tier-card gold">
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                  <strong style={{ fontSize: 13.5 }}>✨ Plush Gold</strong><span style={{ padding: "2px 6px", borderRadius: 999, background: "#F2E4F7", color: "#8E4EAA", fontSize: 9.5, fontWeight: 900 }}>FREE PREVIEW</span>
+                </div>
+                <ul className="landing-tier-list">
+                  <li>✓ Everything in Free</li><li>✓ Smarter Next Step intelligence</li><li>✓ Advanced PlushGrowth insights</li><li>✓ Adaptive coaching & recovery patterns</li>
+                </ul>
+              </div>
+            </div>
+            <div style={{ marginTop: 8, fontSize: 11.5, color: colors.soft }}>No payment is required right now. If Gold becomes paid later, the core Free experience will stay available.</div>
+            <div style={{ marginTop: 11, fontSize: 12.5, color: colors.soft }}>We’ll email you a secure one-time sign-in code.</div>
             <div className="landing-signin-row" style={{ display: "flex", gap: 8, marginTop: 11 }}>
               <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" aria-label="Email address" style={{ flex: 1, minWidth: 0, padding: "11px 12px", borderRadius: 11, border: `1px solid ${colors.line}`, fontSize: 14 }} />
               <button onClick={sendSignInLink} disabled={codeCooldown > 0} style={{ padding: "11px 14px", borderRadius: 11, border: 0, background: colors.orchid, color: "white", fontWeight: 800, cursor: codeCooldown > 0 ? "not-allowed" : "pointer", opacity: codeCooldown > 0 ? 0.55 : 1 }}>{codeCooldown > 0 ? `Wait ${codeCooldown}s` : "Send code"}</button>
