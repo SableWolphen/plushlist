@@ -36,7 +36,7 @@ const movedModuleFiles = ["plush-content.js", "plush-helpers.js", "plush-schedul
 const movedModulesText = movedModuleFiles
   .map((file) => fs.readFileSync(path.join(__dirname, "..", "assets", file), "utf8"))
   .join("");
-const searchableSource = appSource + componentsSource + movedModulesText;
+const searchableSource = (appSource + componentsSource + movedModulesText).replace(/\r\n/g, "\n");
 
 const requiredRegressionMarkers = [
   // WEEKDAY_PRESET_IDS/WEEKEND_PRESET_IDS are exported by
@@ -126,7 +126,11 @@ const requiredRegressionMarkers = [
   'Your daily PlushJournal prompt',
   "📝 Open today's PlushJournal",
   'const openTodayJournal = async () => {',
-  'week: "PlushCalendar"',
+  '{ id: "today", label: "PlushHome"',
+  '{ id: "week", label: "PlushCalendar"',
+  '{ id: "care", label: "PlushCare"',
+  '{ id: "progress", label: "PlushGrowth"',
+  'babyMode && item.id === "today" ? "Nursery" : item.label',
   'setJournalQuickOpen(true);',
   '📖 PLUSHJOURNAL HISTORY',
   'journalHistoryExpanded ? reflectionHistory.length : 5',
