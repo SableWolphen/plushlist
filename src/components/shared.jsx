@@ -74,7 +74,7 @@ export function ToolPanel({ title, onClose, children, inline = false, hideClose 
   );
 }
 
-export function HabitTypeIcon({ task }) {
+export const HabitTypeIcon = React.memo(function HabitTypeIcon({ task }) {
   const { habitTypeForTask } = window.PlushLifeSchedule;
   const habitType = habitTypeForTask(task);
   if (habitType === "regular") return null;
@@ -83,4 +83,4 @@ export function HabitTypeIcon({ task }) {
       {habitType === "build" ? "🌱" : "🍂"}
     </span>
   );
-}
+});
