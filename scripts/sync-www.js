@@ -53,10 +53,12 @@ const GENERATED_INDEX_PRELOADS = [
   '<link rel="preload" href="./assets/plush-helpers.js" as="script">',
   '<link rel="preload" href="./assets/plush-schedule.js" as="script">',
   '<link rel="preload" href="./assets/plush-billing.js" as="script">',
+  '<link rel="preload" href="./assets/plush-runtime.js" as="script">',
   '<link rel="modulepreload" href="./assets/app.bundle.js">',
 ];
 
 const GENERATED_INDEX_SCRIPTS = [
+  '<script src="./assets/plush-runtime.js"></script>',
   '<script src="./assets/cloudflare-primary.js"></script>',
   '<script src="./assets/plush-guide.js"></script>',
   '<script src="./assets/plush-tools-fix.js"></script>',
@@ -77,6 +79,12 @@ const LAZY_PANEL_MODULES = new Map([
   ["./components/progress-panel.jsx", ["ProgressPanel"]],
   ["./components/week-panel.jsx", ["WeekPanel"]],
 ]);
+
+const IDLE_PREFETCH_PRIORITY = [
+  "week-panel.jsx",
+  "progress-panel.jsx",
+  "settings-panel.jsx",
+];
 
 function rimraf(target) {
   if (fs.existsSync(target)) fs.rmSync(target, { recursive: true, force: true });
@@ -103,27 +111,21 @@ function lazyPanelPlugin() {
         const realModule = args.path.replace("./components/", "");
         const source = exportNames.map((exportName) => `
 const Lazy${exportName} = React.lazy(() => import("plush-real:${realModule}").then((module) => ({ default: module.${exportName} })));
+function ${exportName}Fallback() {
+  return React.createElement(
+    "div",
+    { className: "plush-lazy-skeleton", role: "status", "aria-live": "polite", "data-panel": "${exportName}" },
+    React.createElement("div", { className: "plush-lazy-skeleton__title" }),
+    React.createElement("div", { className: "plush-lazy-skeleton__line" }),
+    React.createElement("div", { className: "plush-lazy-skeleton__line plush-lazy-skeleton__line--short" }),
+    React.createElement("span", { className: "plush-lazy-skeleton__label" }, "Opening ${exportName.replace(/Panel$/, "")}…")
+  );
+}
 export function ${exportName}(props) {
   if (!props || !props.open) return null;
   return React.createElement(
     React.Suspense,
-    {
-      fallback: React.createElement(
-        "div",
-        {
-          role: "status",
-          "aria-live": "polite",
-          style: {
-            padding: "18px",
-            textAlign: "center",
-            color: "#8C6B9E",
-            fontWeight: 800,
-            fontSize: "12px",
-          },
-        },
-        "Opening…"
-      ),
-    },
+    { fallback: React.createElement(${exportName}Fallback) },
     React.createElement(Lazy${exportName}, props)
   );
 }
@@ -136,6 +138,31 @@ export function ${exportName}(props) {
       }));
     },
   };
+}
+
+function outputAbsolutePath(outputPath) {
+  return path.isAbsolute(outputPath) ? outputPath : path.resolve(ROOT, outputPath);
+}
+
+function writeIdlePrefetchManifest(metafile) {
+  const outputs = Object.entries(metafile.outputs || {});
+  const files = [];
+
+  for (const wanted of IDLE_PREFETCH_PRIORITY) {
+    const match = outputs.find(([, meta]) => {
+      const entryPoint = String(meta.entryPoint || "").replace(/\\/g, "/");
+      return entryPoint.endsWith("/" + wanted) || entryPoint.endsWith(wanted);
+    });
+    if (!match) continue;
+    const relative = path.relative(path.join(WWW, "assets"), outputAbsolutePath(match[0])).replace(/\\/g, "/");
+    if (!relative.startsWith("..")) files.push("./assets/" + relative);
+  }
+
+  fs.writeFileSync(
+    path.join(WWW, "assets", "prefetch-manifest.json"),
+    JSON.stringify(files, null, 2) + "\n"
+  );
+  return files;
 }
 
 async function compileAppSource() {
@@ -165,7 +192,8 @@ async function compileAppSource() {
 
   const emittedFiles = Object.keys(result.metafile.outputs || {});
   const chunkCount = emittedFiles.filter((file) => file.includes("/chunks/") || file.includes("\\chunks\\")).length;
-  return { emittedFiles: emittedFiles.length, chunkCount };
+  const prefetchFiles = writeIdlePrefetchManifest(result.metafile);
+  return { emittedFiles: emittedFiles.length, chunkCount, prefetchCount: prefetchFiles.length };
 }
 
 function prepareHtml(file, source) {
@@ -237,7 +265,7 @@ async function main() {
   }
 
   if (missingVendorFiles) process.exitCode = 1;
-  console.log(`www/ synced (${copiedFiles} files, ${copiedDirectories} directories, ${VENDOR_FILES.length} vendored scripts, ${bundleStats.emittedFiles} app outputs, ${bundleStats.chunkCount} lazy chunks).`);
+  console.log(`www/ synced (${copiedFiles} files, ${copiedDirectories} directories, ${VENDOR_FILES.length} vendored scripts, ${bundleStats.emittedFiles} app outputs, ${bundleStats.chunkCount} lazy chunks, ${bundleStats.prefetchCount} idle-prefetch chunks).`);
 }
 
 main().catch((error) => {
