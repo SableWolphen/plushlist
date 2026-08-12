@@ -24,6 +24,7 @@ const REQUIRED_FILES = [
   "assets/plushlife-completion.js",
   "assets/cloudflare-primary.js",
   "assets/plush-guide.js",
+  "assets/plush-runtime.js",
   "assets/thunderstorm.mp3",
   "capacitor.config.json",
   "wrangler.jsonc",
@@ -42,8 +43,8 @@ function read(relativePath) {
 
 if (fs.existsSync(path.join(ROOT, "service-worker.js"))) {
   const serviceWorker = read("service-worker.js");
-  if (!serviceWorker.includes('const CACHE_NAME = "plushlife-v64"')) {
-    failures.push("Service worker cache is not set to plushlife-v64.");
+  if (!serviceWorker.includes('const CACHE_NAME = "plushlife-v65"')) {
+    failures.push("Service worker cache is not set to plushlife-v65.");
   }
   for (const shellFile of [
     "login.html",
@@ -56,6 +57,8 @@ if (fs.existsSync(path.join(ROOT, "service-worker.js"))) {
     "assets/plush-helpers.js",
     "assets/plush-schedule.js",
     "assets/plush-billing.js",
+    "assets/plush-runtime.js",
+    "assets/prefetch-manifest.json",
     "assets/cloudflare-primary.js",
     "assets/plush-guide.js",
     "assets/thunderstorm.mp3",
@@ -75,6 +78,28 @@ if (fs.existsSync(path.join(ROOT, "scripts/sync-www.js"))) {
   }
   if (!syncScript.includes('type=\"module\"') || !syncScript.includes('rel=\"modulepreload\"')) {
     failures.push("Generated index is not configured to load the split app entry as a module.");
+  }
+  if (!syncScript.includes("writeIdlePrefetchManifest") || !syncScript.includes("IDLE_PREFETCH_PRIORITY")) {
+    failures.push("Production app build is missing idle-prefetch manifest generation.");
+  }
+  if (!syncScript.includes('<script src="./assets/plush-runtime.js"></script>')) {
+    failures.push("Generated index is not configured to load PlushLife runtime diagnostics.");
+  }
+  if (!syncScript.includes("plush-lazy-skeleton")) {
+    failures.push("Lazy panel fallback no longer uses the polished loading skeleton.");
+  }
+}
+
+if (fs.existsSync(path.join(ROOT, "assets/plush-runtime.js"))) {
+  const runtime = read("assets/plush-runtime.js");
+  if (!runtime.includes("first-app-render") || !runtime.includes("lazy-panel-open")) {
+    failures.push("Runtime diagnostics are missing critical performance timings.");
+  }
+  if (!runtime.includes("connection.saveData") || !runtime.includes("requestIdleCallback")) {
+    failures.push("Runtime idle prefetching no longer respects connection/idle safeguards.");
+  }
+  if (!runtime.includes("window.Capacitor") || !runtime.includes("navigator.vibrate")) {
+    failures.push("Native completion haptic safeguard is missing.");
   }
 }
 
