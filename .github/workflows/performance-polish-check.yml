@@ -1,0 +1,23 @@
+name: Performance polish validation
+
+on:
+  push:
+    branches:
+      - performance-polish-2
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run web:sync
+      - name: Show critical bundle sizes
+        run: |
+          wc -c www/assets/app.bundle.js
+          find www/assets/chunks -type f -printf '%s %p\n' | sort -nr | head -10
