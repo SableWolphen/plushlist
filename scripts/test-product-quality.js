@@ -24,8 +24,15 @@ const appSource = read("src/app-source.jsx");
 const runtime = read("assets/plush-runtime.js");
 const syncWww = read("scripts/sync-www.js");
 const packageJson = read("package.json");
+const goldAccess = read("src/plush-gold.js");
+const goldPreview = read("src/components/plush-gold-preview.jsx");
 
 const checks = [
+  [goldAccess.includes('PLUSH_GOLD_ACCESS_MODE = "free_preview"') && goldAccess.includes("PLUSH_GOLD_BILLING_ENABLED = false"), "Plush Gold stays fully unlocked with billing disabled during preview"],
+  [goldAccess.includes("advanced_growth_insights") && goldAccess.includes("smart_next_step") && goldAccess.includes("adaptive_habit_coaching") && goldAccess.includes("advanced_reminders") && goldAccess.includes("habit_experiments") && goldAccess.includes("recovery_intelligence") && goldAccess.includes("expanded_growth_history") && goldAccess.includes("multiple_focus_habits") && goldAccess.includes("advanced_planning") && goldAccess.includes("advanced_personalization") && goldAccess.includes("priority_history_protection") && goldAccess.includes("gold_reports"), "Plush Gold has one central registry for current and reserved premium capabilities"],
+  [goldPreview.includes("Everything is included free for now") && goldPreview.includes("Billing off · free preview"), "Settings clearly explains the free Plush Gold preview"],
+  [settings.includes("Plush Gold Preview") && settings.includes("<PlushGoldPreview />"), "Plush Gold preview is discoverable from Settings"],
+  [progress.includes('hasGoldFeature("advanced_growth_insights")') && smartNextStep.includes('hasGoldFeature("smart_next_step")') && background.includes('hasGoldFeature("adaptive_habit_coaching")'), "advanced intelligence routes through the Gold entitlement model"],
   [completed.includes("COMPLETED_LINGER_MS = 2600"), "completed tasks linger before moving"],
   [completed.includes("moved to Completed Today"), "screen-reader completion announcement exists"],
   [today.includes("useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || [])"), "all Today modes use shared completion flow"],

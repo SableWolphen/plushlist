@@ -1,4 +1,5 @@
 import { ToolPanel } from "./shared.jsx";
+import { PlushGoldPreview } from "./plush-gold-preview.jsx";
 
 const cardStyle = {
   background: "rgba(255,255,255,.86)",
@@ -125,6 +126,7 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
     ["rest", "🌴", "Rest & Vacation", "Pause tasks and reminders without losing progress", "rest vacation illness pause"],
     ["privacy", "🔐", "Privacy & Data", "Backup, restore, and delete selected data", "privacy data backup restore export delete reflections check-ins"],
     ["support", "💬", "Help & Feedback", "Send feedback or report something that feels off", "feedback help support bug"],
+    ["gold", "✨", "Plush Gold Preview", "Future premium intelligence · everything included free for now", "gold premium plus preview subscription intelligence"],
     ["account", "🔑", "Account", "Email, sync status, sessions, and account controls", "account email sync sign out delete account"],
   ];
 
@@ -364,6 +366,13 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
     </>
   );
 
+  const gold = (
+    <>
+      <DetailHeader title="Plush Gold Preview" onBack={() => setSection("home")} />
+      <PlushGoldPreview />
+    </>
+  );
+
   const account = (
     <>
       <DetailHeader title="Account" onBack={() => setSection("home")} />
@@ -397,7 +406,7 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
     </>
   );
 
-  const pages = { home, personalize, notifications, experience, devices, rest, privacy, support, account };
+  const pages = { home, personalize, notifications, experience, devices, rest, privacy, support, gold, account };
 
   return (
     <ToolPanel title="Settings" onClose={onClose}>

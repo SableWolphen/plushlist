@@ -1,6 +1,7 @@
 import { ProgressPanel as ProgressPanelCore } from "./progress-panel-core.jsx";
 import { HabitHealth } from "./habit-health.jsx";
 import { GrowthNextMove } from "./growth-next-move.jsx";
+import { hasGoldFeature } from "../plush-gold.js";
 
 const LazyWeeklyHabitReview = React.lazy(() => import("./habit-intelligence.jsx").then((module) => ({ default: module.WeeklyHabitReview })));
 const LazyWhatWorksForMe = React.lazy(() => import("./habit-retention.jsx").then((module) => ({ default: module.WhatWorksForMe })));
@@ -13,10 +14,11 @@ function InsightToolsFallback() {
 export function ProgressPanel(props) {
   const [insightsOpen, setInsightsOpen] = React.useState(false);
   if (!props.open) return null;
+  const goldInsights = hasGoldFeature("advanced_growth_insights");
   return (
     <>
-      <GrowthNextMove />
-      <section className="habit-insights-card" style={{ marginBottom: 14, borderRadius: 18, border: "1px solid #CFE8E1", background: "linear-gradient(145deg,#F4FBF9,#FFF9FD)", overflow: "hidden", boxShadow: "0 7px 22px rgba(49,140,121,.08)" }}>
+      {goldInsights && <GrowthNextMove />}
+      {goldInsights && <section className="habit-insights-card" style={{ marginBottom: 14, borderRadius: 18, border: "1px solid #CFE8E1", background: "linear-gradient(145deg,#F4FBF9,#FFF9FD)", overflow: "hidden", boxShadow: "0 7px 22px rgba(49,140,121,.08)" }}>
         <details onToggle={(event) => setInsightsOpen(event.currentTarget.open)}>
           <summary style={{ minHeight: 48, padding: "14px 15px", cursor: "pointer", color: "#3E746A", listStyle: "none" }}>
             <span style={{ display: "block", fontSize: 10.5, letterSpacing: ".13em", fontWeight: 900 }}>🌱 HABIT INSIGHTS</span>
@@ -46,7 +48,7 @@ export function ProgressPanel(props) {
           </div>
         </details>
         <style>{`.habit-insights-sections > section { margin: 0 !important; border: 0 !important; border-top: 1px solid #E5EDE9 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; } .habit-insights-sections > section:first-of-type { border-top: 0 !important; }`}</style>
-      </section>
+      </section>}
       <ProgressPanelCore {...props} />
     </>
   );
