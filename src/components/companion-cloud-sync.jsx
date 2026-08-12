@@ -9,23 +9,11 @@ const SYNCED_DAYS = 45;
 function safeJson(value, fallback = null) {
   try { return JSON.parse(value); } catch (_error) { return fallback; }
 }
-
 function storageJson(key, fallback) {
-  try {
-    const value = localStorage.getItem(key);
-    return value === null ? fallback : safeJson(value, fallback);
-  } catch (_error) {
-    return fallback;
-  }
+  try { const value = localStorage.getItem(key); return value === null ? fallback : safeJson(value, fallback); } catch (_error) { return fallback; }
 }
-
-function storageHas(key) {
-  try { return localStorage.getItem(key) !== null; } catch (_error) { return false; }
-}
-
-function storageSet(key, value) {
-  try { localStorage.setItem(key, JSON.stringify(value)); } catch (_error) {}
-}
+function storageHas(key) { try { return localStorage.getItem(key) !== null; } catch (_error) { return false; } }
+function storageSet(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_error) {} }
 
 function findAccessToken(value, depth = 0) {
   if (!value || depth > 4) return "";
@@ -35,41 +23,25 @@ function findAccessToken(value, depth = 0) {
     return parsed ? findAccessToken(parsed, depth + 1) : "";
   }
   if (Array.isArray(value)) {
-    for (const item of value) {
-      const token = findAccessToken(item, depth + 1);
-      if (token) return token;
-    }
+    for (const item of value) { const token = findAccessToken(item, depth + 1); if (token) return token; }
     return "";
   }
   if (typeof value === "object") {
     if (typeof value.access_token === "string") return value.access_token;
-    for (const item of Object.values(value)) {
-      const token = findAccessToken(item, depth + 1);
-      if (token) return token;
-    }
+    for (const item of Object.values(value)) { const token = findAccessToken(item, depth + 1); if (token) return token; }
   }
   return "";
 }
-
-function currentAccessToken() {
-  try { return findAccessToken(localStorage.getItem(AUTH_KEY)); } catch (_error) { return ""; }
-}
-
+function currentAccessToken() { try { return findAccessToken(localStorage.getItem(AUTH_KEY)); } catch (_error) { return ""; } }
 function userIdFromToken(token) {
   try {
     const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
     const padded = payload + "=".repeat((4 - payload.length % 4) % 4);
     return safeJson(atob(padded), {})?.sub || "";
-  } catch (_error) {
-    return "";
-  }
+  } catch (_error) { return ""; }
 }
-
 function isoDateOffset(days) {
-  const date = new Date();
-  date.setHours(12, 0, 0, 0);
-  date.setDate(date.getDate() + days);
-  return date.toISOString().slice(0, 10);
+  const date = new Date(); date.setHours(12, 0, 0, 0); date.setDate(date.getDate() + days); return date.toISOString().slice(0, 10);
 }
 
 function localCompanionState() {
@@ -101,10 +73,45 @@ function mergeHistory(cloud = [], local = []) {
   for (const item of local) if (item?.date) byDate.set(item.date, { ...(byDate.get(item.date) || {}), ...item });
   return [...byDate.values()].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, SYNCED_DAYS);
 }
-
 function mergeHabitHistory(cloud = {}, local = {}) {
   const merged = { ...cloud };
   for (const [date, localDay] of Object.entries(local || {})) merged[date] = { ...(cloud?.[date] || {}), ...(localDay || {}) };
+  return merged;
+}
+function newerObject(cloud = {}, local = {}) {
+  const cloudTime = Date.parse(cloud?.updated_at || "") || 0;
+  const localTime = Date.parse(local?.updated_at || "") || 0;
+  return cloudTime > localTime ? { ...(local || {}), ...(cloud || {}) } : { ...(cloud || {}), ...(local || {}) };
+}
+function mergeEventList(cloud = [], local = [], limit = 180) {
+  const map = new Map();
+  for (const item of [...(cloud || []), ...(local || [])]) if (item?.id) map.set(item.id, { ...(map.get(item.id) || {}), ...item });
+  return [...map.values()].sort((a,b)=>String(a.date || "").localeCompare(String(b.date || "")) || Number(a.hour || 0)-Number(b.hour || 0) || Number(a.minute || 0)-Number(b.minute || 0)).slice(-limit);
+}
+function mergeBackgroundEngine(cloud = {}, local = {}) {
+  const preferred = newerObject(cloud, local);
+  const checkIns = { ...(cloud?.checkIns || {}) };
+  for (const [date, item] of Object.entries(local?.checkIns || {})) checkIns[date] = newerObject(checkIns[date] || {}, item || {});
+  const habitProfiles = { ...(cloud?.habitProfiles || {}), ...(local?.habitProfiles || {}) };
+  const experiments = { ...(cloud?.experiments || {}), ...(local?.experiments || {}) };
+  return {
+    ...preferred,
+    version: Math.max(Number(cloud?.version || 0), Number(local?.version || 0), 2),
+    completionEvents: mergeEventList(cloud?.completionEvents || [], local?.completionEvents || []),
+    checkIns,
+    habitProfiles,
+    experiments,
+    maintenance: newerObject(cloud?.maintenance || {}, local?.maintenance || {}),
+    updated_at: new Date().toISOString(),
+  };
+}
+function mergeNestedMeta(cloud = {}, local = {}) {
+  const merged = { ...(cloud || {}), ...(local || {}) };
+  const background = mergeBackgroundEngine(cloud?.__background_engine || {}, local?.__background_engine || {});
+  if (Object.keys(background).length) merged.__background_engine = background;
+  for (const key of ["__retention", "__resilience"]) {
+    if (cloud?.[key] || local?.[key]) merged[key] = newerObject(cloud?.[key] || {}, local?.[key] || {});
+  }
   return merged;
 }
 
@@ -122,7 +129,7 @@ function mergeHabitCoach(cloud = {}, local = {}) {
     version: 1,
     anchors: { ...(cloud?.anchors || {}), ...(local?.anchors || {}) },
     goals: { ...(cloud?.goals || {}), ...(local?.goals || {}) },
-    meta: { ...(cloud?.meta || {}), ...(local?.meta || {}) },
+    meta: mergeNestedMeta(cloud?.meta || {}, local?.meta || {}),
     experiments: [...experiments.values()].slice(-40),
     paths: { ...cloudPaths, ...localPaths, active, completed },
     reviews: { ...(cloud?.reviews || {}), ...(local?.reviews || {}) },
@@ -136,9 +143,7 @@ function mergeState(cloud = {}, local = {}) {
   const cloudDays = cloud?.days && typeof cloud.days === "object" ? cloud.days : {};
   const localDays = local?.days && typeof local.days === "object" ? local.days : {};
   const days = { ...cloudDays };
-  for (const [date, localDay] of Object.entries(localDays)) {
-    days[date] = { ...(cloudDays[date] || {}), ...localDay };
-  }
+  for (const [date, localDay] of Object.entries(localDays)) days[date] = { ...(cloudDays[date] || {}), ...localDay };
   const candidates = [cloud?.first_seen, local?.first_seen].filter(Boolean).sort();
   return {
     version: 2,
@@ -168,26 +173,18 @@ function hydrateLocal(state) {
 async function request(path, token, options = {}) {
   return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     ...options,
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${token}`, "Content-Type": "application/json", ...(options.headers || {}) },
   });
 }
-
 async function readCloud(token, userId) {
   const response = await request(`app_preferences?select=companion_state&user_id=eq.${encodeURIComponent(userId)}&limit=1`, token);
   if (!response.ok) throw new Error(`read ${response.status}`);
   const rows = await response.json();
   return rows?.[0]?.companion_state || {};
 }
-
 async function writeCloud(token, userId, state, keepalive = false) {
   const response = await request("app_preferences?on_conflict=user_id", token, {
-    method: "POST",
-    keepalive,
+    method: "POST", keepalive,
     headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
     body: JSON.stringify({ user_id: userId, companion_state: state, updated_at: new Date().toISOString() }),
   });
@@ -197,20 +194,15 @@ async function writeCloud(token, userId, state, keepalive = false) {
 export function useCompanionCloudSync(active) {
   const [ready, setReady] = React.useState(false);
   const [status, setStatus] = React.useState("local");
-
   React.useEffect(() => {
     let cancelled = false;
     let timer = null;
     let hydratedState = null;
-
     const sync = async (initial = false, keepalive = false) => {
       const token = currentAccessToken();
       const userId = userIdFromToken(token);
       if (!token || !userId || !navigator.onLine) {
-        if (!cancelled) {
-          setStatus(token ? "offline" : "local");
-          if (initial) setReady(true);
-        }
+        if (!cancelled) { setStatus(token ? "offline" : "local"); if (initial) setReady(true); }
         return;
       }
       try {
@@ -233,12 +225,7 @@ export function useCompanionCloudSync(active) {
         if (initial && !cancelled) setReady(true);
       }
     };
-
-    if (!active) {
-      setReady(false);
-      return () => {};
-    }
-
+    if (!active) { setReady(false); return () => {}; }
     sync(true);
     timer = window.setInterval(() => sync(false), 12000);
     const onOnline = () => sync(false);
@@ -252,6 +239,5 @@ export function useCompanionCloudSync(active) {
       window.removeEventListener("pagehide", onPageHide);
     };
   }, [active]);
-
   return { ready, status };
 }
