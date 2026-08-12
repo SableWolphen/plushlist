@@ -10,6 +10,7 @@ const completed = read("src/components/completed-task-flow.jsx");
 const baby = read("src/components/baby-today.jsx");
 const progress = read("src/components/progress-panel.jsx");
 const shared = read("src/components/shared.jsx");
+const anchor = read("src/components/compact-anchor.jsx");
 
 const checks = [
   [completed.includes("COMPLETED_LINGER_MS = 2600"), "completed tasks linger before moving"],
@@ -19,6 +20,9 @@ const checks = [
   [today.includes("LowScreenJustCompleted") && today.includes("JUST COMPLETED"), "Low Screen keeps a completed task crossed off during the linger period"],
   [baby.includes("CompletedTaskArea") && baby.includes("recentlyCompletedKeys"), "Baby Mode uses the same completion lifecycle"],
   [today.includes("YOUR FIRST FEW DAYS"), "new users get focused first-days guidance"],
+  [today.includes("<CompactAnchor {...modeProps} />"), "Today uses the compact anchor instead of the full habit toolbox"],
+  [!today.includes("HabitRetentionTools") && !today.includes("HabitResilienceSuite"), "advanced habit tool suites stay off Today"],
+  [anchor.includes("TODAY'S ANCHOR") && !anchor.includes("HABIT ASSIST") && !anchor.includes("HABIT RESILIENCE"), "compact anchor stays focused"],
   [progress.includes("Why PlushLife thinks this:"), "habit insights explain their evidence"],
   [shared.includes("previousActive") && shared.includes("firstFocusable"), "dialogs restore and manage keyboard focus"],
   [shared.includes("minHeight: 44"), "shared dialog action meets minimum touch target"],
