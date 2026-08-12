@@ -77,7 +77,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
                   <div style={{ fontSize: 9.5, letterSpacing: "0.12em", fontWeight: 900, color: day.accent }}>{babyMode ? "🍼 ONE TINY THING" : "🎯 NEXT STEP"}</div>
                   <div style={{ marginTop: 2, fontSize: 15, lineHeight: 1.25, fontWeight: 850, color: "#5B4B6B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nextStepTask.sourceTask && <HabitTypeIcon task={nextStepTask.sourceTask} />}{nextStepTask.label}</div>
                 </div>
-                <button type="button" onClick={() => toggle(nextStepTask.key)} style={{ minHeight: 34, padding: "6px 10px", borderRadius: 9, border: 0, background: day.accent, color: "white", fontWeight: 900, fontSize: 11.5, cursor: "pointer", flexShrink: 0 }}>✓ Done</button>
+                <button type="button" data-plushlife-compact-hit-target="next-step-done" onClick={() => toggle(nextStepTask.key)} style={{ minHeight: 44, margin: "-5px 0", padding: "11px 10px", borderRadius: 9, border: 0, background: day.accent, color: "white", fontWeight: 900, fontSize: 11.5, cursor: "pointer", flexShrink: 0 }}>✓ Done</button>
               </div>
               {nextStepReason && <div title={nextStepReason} style={{ marginTop: 3, fontSize: 10.5, lineHeight: 1.35, color: "#806B8D", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nextStepReason}</div>}
               {nextStepHint?.key === nextStepTask.key && (
@@ -87,8 +87,8 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
                 </div>
               )}
               <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 6 }}>
-                <button type="button" onClick={() => pickEasierSuggestion(nextStepTask.key)} style={{ minHeight: 32, padding: "5px 8px", borderRadius: 9, border: "1px solid " + day.accent + "55", background: "white", color: day.accent, fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>🌱 Make easier</button>
-                <button type="button" onClick={() => setNextStepMoreOpen((open) => !open)} aria-expanded={nextStepMoreOpen} aria-label="More next-step choices" style={{ minWidth: 34, minHeight: 32, padding: "5px 8px", borderRadius: 9, border: "1px solid #D8C8E2", background: "white", color: "#8C6B9E", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>•••</button>
+                <button type="button" data-plushlife-compact-hit-target="make-easier" onClick={() => pickEasierSuggestion(nextStepTask.key)} style={{ minHeight: 44, margin: "-6px 0", padding: "11px 8px", borderRadius: 9, border: "1px solid " + day.accent + "55", background: "white", color: day.accent, fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>🌱 Make easier</button>
+                <button type="button" data-plushlife-compact-hit-target="next-step-more" onClick={() => setNextStepMoreOpen((open) => !open)} aria-expanded={nextStepMoreOpen} aria-label="More next-step choices" style={{ minWidth: 44, minHeight: 44, margin: "-6px 0", padding: "11px 8px", borderRadius: 9, border: "1px solid #D8C8E2", background: "white", color: "#8C6B9E", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>•••</button>
               </div>
               {nextStepMoreOpen && <div style={{ display: "flex", gap: 5, marginTop: 6, flexWrap: "wrap" }}>
                 <button type="button" onClick={() => { setNextStepSkipped((keys) => [...keys, nextStepTask.key]); setNextStepMoreOpen(false); }} style={{ padding: "6px 9px", borderRadius: 9, border: "1px solid " + day.accent + "55", background: "white", color: day.accent, fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>Pick another</button>
@@ -104,7 +104,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                 <div style={{ fontSize: 9.5, letterSpacing: "0.12em", fontWeight: 900, color: "#A65DC1" }}>📮 PLUSHWEEK</div>
-                {!weeklyIntentionEditing && <button type="button" onClick={() => { setWeeklyIntentionDraft(weeklyIntentionText); setWeeklyIntentionEditing(true); }} style={{ minHeight: 30, padding: "4px 6px", border: 0, background: "transparent", color: "#8E4EAA", fontWeight: 900, fontSize: 10.5, cursor: "pointer", flexShrink: 0 }}>{weeklyIntentionText ? "Edit" : "Add"}</button>}
+                {!weeklyIntentionEditing && <button type="button" onClick={() => { setWeeklyIntentionDraft(weeklyIntentionText); setWeeklyIntentionEditing(true); }} data-plushlife-compact-hit-target="plushweek-edit" style={{ minHeight: 44, margin: "-7px 0", padding: "11px 6px", border: 0, background: "transparent", color: "#8E4EAA", fontWeight: 900, fontSize: 10.5, cursor: "pointer", flexShrink: 0 }}>{weeklyIntentionText ? "Edit" : "Add"}</button>}
               </div>
               {!weeklyIntentionEditing && <div style={{ marginTop: 1, fontSize: 12.5, lineHeight: 1.3, color: weeklyIntentionText ? "#5B4B6B" : "#9A86A7", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{weeklyIntentionText || "Set one gentle direction for this week"}</div>}
             </div>

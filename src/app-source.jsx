@@ -14,7 +14,7 @@ import { CarePanel } from "./components/care-panel.jsx";
 import { ProgressPanel } from "./components/progress-panel.jsx";
 import { WeekPanel } from "./components/week-panel.jsx";
 import { TodayPanel } from "./components/today-panel.jsx";
-import { createDeviceBackup, scheduleAutomaticDeviceBackup } from "./device-backup.js";
+import { createDeviceBackup, getDeviceBackupStatus, scheduleAutomaticDeviceBackup, verifyDeviceBackup } from "./device-backup.js";
 
 const { useState, useEffect } = React;
 const supabase = window.supabase.createClient(
@@ -587,6 +587,7 @@ function GlowUpTracker() {
   const [appearanceTheme, setAppearanceTheme] = useState("soft");
   const [deviceBackupStatus, setDeviceBackupStatus] = useState({ exists: false, savedAt: null });
   const [deviceBackupBusy, setDeviceBackupBusy] = useState(false);
+  const [deviceBackupVerifyBusy, setDeviceBackupVerifyBusy] = useState(false);
   const [progressView, setProgressView] = useState("overview");
   const swipeStartX = React.useRef(null);
   const swipeStartY = React.useRef(null);
@@ -3907,7 +3908,6 @@ function GlowUpTracker() {
     setFeedbackMessage("Sending…");
     const { error } = await supabase.from("feedback_messages").insert({
       user_id: user?.id || null,
-      email: user?.email || null,
       message: trimmed.slice(0, 2000),
     });
     if (error) {
@@ -4098,10 +4098,25 @@ function GlowUpTracker() {
       setSettingsMessage("That file doesn't look like a PlushLife backup export.");
       return;
     }
-    if (!window.confirm("Restore this backup? Anything in it will overwrite matching tasks, days, and entries you currently have. Guardian connections aren't restored this way — you'll need to re-invite any Guardian afterward.")) {
+    const restorePreview = RESTORABLE_DATA_TABLES.map((spec) => {
+      const raw = payload[spec.payloadKey];
+      const count = spec.single ? (raw ? 1 : 0) : (Array.isArray(raw) ? raw.length : 0);
+      return { label: spec.payloadKey.replace(/_/g, " "), count };
+    }).filter((item) => item.count > 0);
+    const totalRecords = restorePreview.reduce((sum, item) => sum + item.count, 0);
+    const categorySummary = restorePreview.slice(0, 10).map((item) => "• " + item.label + ": " + item.count).join("\n");
+    const extraCategories = restorePreview.length > 10 ? "\n• +" + (restorePreview.length - 10) + " more categories" : "";
+    const previewText = "Restore preview\n\n" + (categorySummary || "No independently restorable records found") + extraCategories + "\n\n" + totalRecords + " record" + (totalRecords === 1 ? "" : "s") + " would be added or updated. Existing cloud records are not bulk-deleted. A fresh on-device Safety copy will be created before restoring. Guardian connections are not restored.";
+    if (!window.confirm(previewText)) return;
+    setSettingsMessage("Creating a Safety copy before restoring…");
+    try {
+      const safetyStatus = await createDeviceBackup(supabase, user);
+      setDeviceBackupStatus(safetyStatus);
+    } catch (_error) {
+      setSettingsMessage("Restore stopped because PlushLife could not create a Safety copy first. Nothing was changed.");
       return;
     }
-    setSettingsMessage("Restoring your backup…");
+    setSettingsMessage("Safety copy created before restoring. Restoring your backup…");
     const restoredTables = [];
     const failedTables = [];
     for (const spec of RESTORABLE_DATA_TABLES) {
@@ -5586,6 +5601,28 @@ function GlowUpTracker() {
     }
   }, [user?.id, deviceBackupBusy]);
 
+  const verifyDeviceBackupNow = React.useCallback(async () => {
+    if (!user?.id || deviceBackupVerifyBusy) return;
+    setDeviceBackupVerifyBusy(true);
+    try {
+      const result = await verifyDeviceBackup(user.id);
+      const status = await getDeviceBackupStatus(user.id);
+      setDeviceBackupStatus(status);
+      setSettingsMessage(result.ok ? "On-device backup verified. The latest recovery copy is readable." : (result.reason || "The on-device backup could not be verified."));
+    } catch (_error) {
+      setSettingsMessage("The on-device backup could not be verified. Your cloud copy is still untouched.");
+    } finally {
+      setDeviceBackupVerifyBusy(false);
+    }
+  }, [user?.id, deviceBackupVerifyBusy]);
+
+  useEffect(() => {
+    if (!user?.id) return undefined;
+    let cancelled = false;
+    getDeviceBackupStatus(user.id).then((status) => { if (!cancelled) setDeviceBackupStatus(status); });
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
   useEffect(() => {
     if (!user?.id || !online) return undefined;
     return scheduleAutomaticDeviceBackup({
@@ -6644,7 +6681,7 @@ function GlowUpTracker() {
 
         <RewardsPanel open={collectionOpen} onClose={() => setCollectionOpen(false)} FeatureTip={FeatureTip} selectedOutfit={selectedOutfit} mascotMood={mascotMood} activityDaysTotal={activityDaysTotal} preferences={preferences} mascotGrowth={mascotGrowth} careDaysTotal={careDaysTotal} unlockedOutfits={unlockedOutfits} earnedBadgeIdSet={earnedBadgeIdSet} BADGE_DEFS={BADGE_DEFS} unlockedIdSet={unlockedIdSet} mascotRequirementProgress={mascotRequirementProgress} saveMascotCollection={saveMascotCollection} mascotCollection={mascotCollection} savedBestStreak={savedBestStreak} collectionTab={collectionTab} setCollectionTab={setCollectionTab} winsJarEntries={winsJarEntries} />
 
-        <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} watchPairingCode={watchPairingCode} setWatchPairingCode={setWatchPairingCode} connectWatch={connectWatch} watchPairingBusy={watchPairingBusy} watchPairingMessage={watchPairingMessage} localWatchSyncBusy={localWatchSyncBusy} startLocalWatchSync={startLocalWatchSync} localWatchSyncMessage={localWatchSyncMessage} dailyCheckIn={dailyCheckIn} pct={pct} rows={rows} viewDone={viewDone} weeklyOverallPct={weeklyOverallPct} widgetSyncMsg={widgetSyncMsg} setWidgetSyncMsg={setWidgetSyncMsg} displayNameDraft={displayNameDraft} setDisplayNameDraft={setDisplayNameDraft} saveDisplayName={saveDisplayName} comfortItemDraft={comfortItemDraft} setComfortItemDraft={setComfortItemDraft} saveComfortItem={saveComfortItem} preferences={preferences} appearanceTheme={appearanceTheme} selectAppearanceTheme={selectAppearanceTheme} dinoTheme={dinoTheme} updatePreference={updatePreference} enableNotifications={enableNotifications} smartReminderSuggestion={smartReminderSuggestion} restDatesSet={restDatesSet} toggleRestToday={toggleRestToday} period={period} restRangeDraft={restRangeDraft} setRestRangeDraft={setRestRangeDraft} saveRestRange={saveRestRange} restDates={restDates} savePreferences={savePreferences} feedbackText={feedbackText} setFeedbackText={setFeedbackText} submitFeedback={submitFeedback} feedbackMessage={feedbackMessage} exportMyData={exportMyData} restoreFileInputRef={restoreFileInputRef} restoreFromBackup={restoreFromBackup} deleteAllCheckIns={deleteAllCheckIns} deleteAllReflections={deleteAllReflections} user={user} online={online} syncStatus={syncStatus} lastSyncedAt={lastSyncedAt} syncNow={syncNow} emailChangeDraft={emailChangeDraft} setEmailChangeDraft={setEmailChangeDraft} requestEmailChange={requestEmailChange} signingOut={signingOut} handleSignOut={handleSignOut} signOutOtherDevices={signOutOtherDevices} deleteMyAccount={deleteMyAccount} deviceBackupStatus={deviceBackupStatus} refreshDeviceBackup={refreshDeviceBackup} deviceBackupBusy={deviceBackupBusy} settingsMessage={settingsMessage} />
+        <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} watchPairingCode={watchPairingCode} setWatchPairingCode={setWatchPairingCode} connectWatch={connectWatch} watchPairingBusy={watchPairingBusy} watchPairingMessage={watchPairingMessage} localWatchSyncBusy={localWatchSyncBusy} startLocalWatchSync={startLocalWatchSync} localWatchSyncMessage={localWatchSyncMessage} dailyCheckIn={dailyCheckIn} pct={pct} rows={rows} viewDone={viewDone} weeklyOverallPct={weeklyOverallPct} widgetSyncMsg={widgetSyncMsg} setWidgetSyncMsg={setWidgetSyncMsg} displayNameDraft={displayNameDraft} setDisplayNameDraft={setDisplayNameDraft} saveDisplayName={saveDisplayName} comfortItemDraft={comfortItemDraft} setComfortItemDraft={setComfortItemDraft} saveComfortItem={saveComfortItem} preferences={preferences} appearanceTheme={appearanceTheme} selectAppearanceTheme={selectAppearanceTheme} dinoTheme={dinoTheme} updatePreference={updatePreference} enableNotifications={enableNotifications} smartReminderSuggestion={smartReminderSuggestion} restDatesSet={restDatesSet} toggleRestToday={toggleRestToday} period={period} restRangeDraft={restRangeDraft} setRestRangeDraft={setRestRangeDraft} saveRestRange={saveRestRange} restDates={restDates} savePreferences={savePreferences} feedbackText={feedbackText} setFeedbackText={setFeedbackText} submitFeedback={submitFeedback} feedbackMessage={feedbackMessage} exportMyData={exportMyData} restoreFileInputRef={restoreFileInputRef} restoreFromBackup={restoreFromBackup} deleteAllCheckIns={deleteAllCheckIns} deleteAllReflections={deleteAllReflections} user={user} online={online} syncStatus={syncStatus} lastSyncedAt={lastSyncedAt} syncNow={syncNow} emailChangeDraft={emailChangeDraft} setEmailChangeDraft={setEmailChangeDraft} requestEmailChange={requestEmailChange} signingOut={signingOut} handleSignOut={handleSignOut} signOutOtherDevices={signOutOtherDevices} deleteMyAccount={deleteMyAccount} deviceBackupStatus={deviceBackupStatus} refreshDeviceBackup={refreshDeviceBackup} deviceBackupBusy={deviceBackupBusy} verifyDeviceBackupNow={verifyDeviceBackupNow} deviceBackupVerifyBusy={deviceBackupVerifyBusy} settingsMessage={settingsMessage} />
 
         <AdminPanel open={isAdminUser && adminOpen} onClose={() => setAdminOpen(false)} loadAdminData={loadAdminData} adminMessage={adminMessage} adminStats={adminStats} adminOnline={adminOnline} adminFunnel={adminFunnel} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} supporterEmailDraft={supporterEmailDraft} setSupporterEmailDraft={setSupporterEmailDraft} setSupporterStatus={setSupporterStatus} supporterGrantMessage={supporterGrantMessage} reviewAccountRole={reviewAccountRole} setReviewAccountRole={setReviewAccountRole} reviewAccountEmail={reviewAccountEmail} setReviewAccountEmail={setReviewAccountEmail} reviewAccountPassword={reviewAccountPassword} setReviewAccountPassword={setReviewAccountPassword} createOrUpdateReviewAccount={createOrUpdateReviewAccount} reviewAccountMessage={reviewAccountMessage} adminFeedback={adminFeedback} resolveFeedback={resolveFeedback} adminErrors={adminErrors} clearAllErrors={clearAllErrors} devPreviewPlan={devPreviewPlan} setDevPreviewPlan={setDevPreviewPlan} />
 
