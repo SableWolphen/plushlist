@@ -3,6 +3,7 @@ import { DailyCompanion } from "./daily-companion.jsx";
 import { BabyToday } from "./baby-today.jsx";
 import { CompactAnchor } from "./compact-anchor.jsx";
 import { LowScreenToday, useLowScreenMode } from "./habit-retention.jsx";
+import { HabitBackgroundEngine } from "./habit-background-engine.jsx";
 import { CompletedTaskArea, useCompletedTaskFlow } from "./completed-task-flow.jsx";
 
 function FirstDaysGuide({ activityDaysTotal = 0, rows = [], viewDone = {}, goToDashboard, openTaskManager }) {
@@ -46,12 +47,14 @@ export function TodayPanel(props) {
   ]));
   const modeProps = { ...props, toggle: unifiedToggle, recentlyCompletedKeys, completedLingerKeys: lingerKeys };
   const liveRegion = <div aria-live="polite" aria-atomic="true" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>{announcement}</div>;
+  const backgroundEngine = <HabitBackgroundEngine {...modeProps} />;
 
   if (!props.open) return null;
-  if (props.babyMode) return <>{liveRegion}<BabyToday {...modeProps} /></>;
+  if (props.babyMode) return <>{backgroundEngine}{liveRegion}<BabyToday {...modeProps} /></>;
   if (lowScreen) {
     return (
       <>
+        {backgroundEngine}
         {liveRegion}
         <LowScreenToday {...modeProps} />
         <LowScreenJustCompleted rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} />
@@ -62,6 +65,7 @@ export function TodayPanel(props) {
 
   return (
     <>
+      {backgroundEngine}
       {liveRegion}
       <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
       <CompactAnchor {...modeProps} />
