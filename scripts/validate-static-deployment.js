@@ -43,9 +43,10 @@ function read(relativePath) {
 
 if (fs.existsSync(path.join(ROOT, "service-worker.js"))) {
   const serviceWorker = read("service-worker.js");
-  if (!serviceWorker.includes('const CACHE_NAME = "plushlife-v65"')) {
-    failures.push("Service worker cache is not set to plushlife-v65.");
+  if (!serviceWorker.includes('const CACHE_NAME = "plushlife-v66"')) {
+    failures.push("Service worker cache is not set to plushlife-v66.");
   }
+  if (!serviceWorker.includes('["script", "style", "manifest"].includes(event.request.destination)')) failures.push("Executable app resources are not network-first.");
   for (const shellFile of [
     "login.html",
     "oauth.html",
