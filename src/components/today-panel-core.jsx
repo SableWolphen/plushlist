@@ -544,7 +544,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
         </div>
 
         <button type="button" onClick={() => setCalmQuickOpen(true)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 13px", borderRadius: 12, border: "1px solid #E6D4F2", background: "rgba(255,255,255,0.55)", color: "#6B5A7D", fontWeight: 800, fontSize: 12.5, cursor: "pointer", marginBottom: 18 }}>
-          <span>🛟 If I feel overwhelmed</span>
+          <span>🆘 If I feel overwhelmed</span>
           <span style={{ color: "#C77DD6" }}>›</span>
         </button>
 
