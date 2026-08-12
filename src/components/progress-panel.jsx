@@ -1,5 +1,6 @@
 import { ProgressPanel as ProgressPanelCore } from "./progress-panel-core.jsx";
 import { HabitHealth } from "./habit-health.jsx";
+import { GrowthNextMove } from "./growth-next-move.jsx";
 
 const LazyWeeklyHabitReview = React.lazy(() => import("./habit-intelligence.jsx").then((module) => ({ default: module.WeeklyHabitReview })));
 const LazyWhatWorksForMe = React.lazy(() => import("./habit-retention.jsx").then((module) => ({ default: module.WhatWorksForMe })));
@@ -14,6 +15,7 @@ export function ProgressPanel(props) {
   if (!props.open) return null;
   return (
     <>
+      <GrowthNextMove />
       <section className="habit-insights-card" style={{ marginBottom: 14, borderRadius: 18, border: "1px solid #CFE8E1", background: "linear-gradient(145deg,#F4FBF9,#FFF9FD)", overflow: "hidden", boxShadow: "0 7px 22px rgba(49,140,121,.08)" }}>
         <details onToggle={(event) => setInsightsOpen(event.currentTarget.open)}>
           <summary style={{ minHeight: 48, padding: "14px 15px", cursor: "pointer", color: "#3E746A", listStyle: "none" }}>

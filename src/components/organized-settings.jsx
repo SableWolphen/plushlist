@@ -211,9 +211,10 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
           ))}
         </div>
         {(preferences.reminder_times || []).length < 8 && <button type="button" onClick={() => updatePreference({ reminder_times: [...(preferences.reminder_times || []), "12:00"] })} style={{ ...secondaryButton, marginTop: 10 }}>＋ Add reminder</button>}
+        {(preferences.reminder_times || []).length >= 5 && <div style={{ marginTop: 10, padding: "9px 10px", borderRadius: 10, background: "#FFF9E9", border: "1px solid #F0D99E", color: "#6B5A3D", fontSize: 11.5, lineHeight: 1.45 }}><strong>REMINDER LOAD:</strong> You have {(preferences.reminder_times || []).length} daily reminders. If they start blending into the background, keeping fewer high-value times usually makes each one easier to notice.</div>}
         {smartReminderSuggestion && (preferences.reminder_times || []).length < 8 && (
           <div style={{ marginTop: 12, padding: 11, borderRadius: 12, background: "#F0FAF6", border: "1px solid #CFE7DC", color: "#347865", fontSize: 11.5, lineHeight: 1.45 }}>
-            💡 You tend to check in around <strong>{smartReminderSuggestion.label}</strong>.
+            💡 You tend to check in around <strong>{smartReminderSuggestion.label}</strong>. <span style={{ opacity: .82 }}>This suggestion comes from your own recent check-in timing.</span>
             <div style={{ display: "flex", gap: 7, marginTop: 8 }}>
               <button type="button" onClick={() => updatePreference({ reminder_times: [...preferences.reminder_times, smartReminderSuggestion.suggestedTime] })} style={{ ...primaryButton, padding: "7px 10px", background: "#388C79" }}>Add it</button>
               <button type="button" onClick={() => updatePreference({ smart_reminder_hint_dismissed_at: new Date().toISOString() })} style={{ ...secondaryButton, padding: "7px 10px" }}>No thanks</button>
@@ -244,7 +245,7 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
           ["large_text", "Larger text", "Increase readability throughout the tracker."],
           ["reduced_motion", "Reduce animation", "Use less movement and celebration animation."],
           ["high_contrast", "Higher contrast", "Increase separation between text and backgrounds."],
-          ["simple_mode", "Simpler, quieter layout", "Reduce visual decisions and extra decoration."],
+          ["simple_mode", "Simpler, quieter layout", "Reduce visual decisions, ambient theme effects, and extra decoration."],
           ["pattern_insights_enabled", "Show PlushInsights", "Private mood and energy pattern suggestions."],
           ["colorblind_mode", "Colorblind-friendly colors", "Use cues that rely less on color alone."],
         ].map(([key, title, description]) => <ToggleRow key={key} checked={preferences[key]} onChange={(event) => updatePreference({ [key]: event.target.checked })} title={title} description={description} />)}

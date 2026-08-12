@@ -76,7 +76,9 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
   }, [open, dateKey, pct, rows, viewDone, dailyCheckIn.day_type, dailyCheckIn.mood, dailyCheckIn.energy]);
 
   const history = useMemo(() => safeRead(HISTORY_KEY, []), [dateKey, pct, rows, viewDone, dailyCheckIn.day_type]);
-  const firstWeekDay = Math.min(7, dateDiffDays(firstSeen, dateKey) + 1);
+  const firstWeekElapsed = dateDiffDays(firstSeen, dateKey) + 1;
+  const firstWeekDay = Math.min(7, firstWeekElapsed);
+  const inFirstWeek = firstWeekElapsed <= 7;
   const incomplete = rows.filter((row) => !viewDone[row.key] && !row.isBonus);
   const heavyMood = ["tired", "stressed", "anxious", "sad", "lonely", "overwhelmed", "numb", "sick"].includes(dailyCheckIn.mood);
   const lowCapacity = ["very_low", "low"].includes(dailyCheckIn.capacity) || ["empty", "low"].includes(dailyCheckIn.energy);
@@ -224,8 +226,8 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
           </div>
         )}
 
-        {firstWeekDay <= 7 && sectionButton(`First-week guide · Day ${firstWeekDay}`, firstWeekIcon, openSection === "firstweek", () => toggleSection("firstweek"))}
-        {firstWeekDay <= 7 && openSection === "firstweek" && (
+        {inFirstWeek && sectionButton(`First-week guide · Day ${firstWeekDay}`, firstWeekIcon, openSection === "firstweek", () => toggleSection("firstweek"))}
+        {inFirstWeek && openSection === "firstweek" && (
           <div style={{ padding: "11px 12px", borderRadius: 12, background: "#FFF9EFD9", border: "1px solid #F0D99E" }}>
             <div style={{ fontSize: 12.5, fontWeight: 900, color: "#6B5A3D" }}>{firstWeekTitle}</div>
             <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.5, color: "#7B6B50" }}>{firstWeekText}</div>
