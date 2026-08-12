@@ -1,4 +1,4 @@
-const CACHE_NAME = "plushlife-v65";
+const CACHE_NAME = "plushlife-v66";
 const APP_SHELL = [
   "./",
   "./login.html",
@@ -64,6 +64,20 @@ function staleWhileRevalidate(event) {
   );
 }
 
+function networkFirst(event) {
+  event.respondWith(
+    fetch(event.request, { cache: "no-store" })
+      .then((response) => {
+        if (response.ok) {
+          const copy = response.clone();
+          event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request).then((cached) => cached || Response.error()))
+  );
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -126,7 +140,16 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (sameOrigin && ["script", "style", "image", "font", "audio", "manifest"].includes(event.request.destination)) {
+  // Entry bundles keep stable filenames, so cache-first delivery can leave an
+  // installed PWA multiple releases behind. Fetch executable app resources
+  // from the network first and retain the cached copy only as an offline
+  // fallback. Large media remains stale-while-revalidate.
+  if (sameOrigin && ["script", "style", "manifest"].includes(event.request.destination)) {
+    networkFirst(event);
+    return;
+  }
+
+  if (sameOrigin && ["image", "font", "audio"].includes(event.request.destination)) {
     staleWhileRevalidate(event);
     return;
   }
