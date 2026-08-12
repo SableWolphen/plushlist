@@ -24,6 +24,7 @@ export function BabyToday({
   toggleRestToday,
   rows = [],
   viewDone = {},
+  recentlyCompletedKeys = [],
   openTaskManager,
   openJournalForSelectedDate,
   activityDaysTotal = 0,
@@ -38,9 +39,11 @@ export function BabyToday({
   if (!open) return null;
 
   const allLittleJobs = rows.filter((row) => !row.isBonus);
+  const recentSet = new Set(recentlyCompletedKeys || []);
   const waiting = allLittleJobs.filter((row) => !viewDone[row.key]);
-  const visible = waiting.slice(0, 4);
-  const tuckedIn = allLittleJobs.filter((row) => !!viewDone[row.key]);
+  const activeLittleJobs = allLittleJobs.filter((row) => !viewDone[row.key] || recentSet.has(row.key));
+  const visible = activeLittleJobs.slice(0, 4);
+  const tuckedIn = allLittleJobs.filter((row) => !!viewDone[row.key] && !recentSet.has(row.key));
   const resting = restDatesSet?.has?.(period?.date);
   const comfortItem = trackerProfile?.comfort_item || trackerProfile?.comfort_item_name || "";
 
@@ -86,23 +89,26 @@ export function BabyToday({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
           <div>
             <div style={{ fontSize: 11, letterSpacing: ".13em", fontWeight: 900, color: "#A65DC1" }}>🧸 LITTLE JOBS</div>
-            <div style={{ marginTop: 3, fontSize: 11.5, color: "#8C6B9E" }}>Only a few at a time. Finished jobs stay crossed off below.</div>
+            <div style={{ marginTop: 3, fontSize: 11.5, color: "#8C6B9E" }}>Finished jobs cross off first, then tuck into Completed.</div>
           </div>
           <div style={{ fontSize: 11, fontWeight: 900, color: "#8C6B9E" }}>{Math.round(Number(pct) || 0)}%</div>
         </div>
         <div style={{ display: "grid", gap: 7, marginTop: 10 }}>
-          {visible.map((task) => (
-            <button key={task.key} type="button" onClick={() => toggle(task.key)} style={{ display: "grid", gridTemplateColumns: "24px 1fr", gap: 8, alignItems: "center", padding: "11px 12px", borderRadius: 13, border: "1px solid #E2D5E8", background: "white", color: "#5B4B6B", textAlign: "left", cursor: "pointer" }}>
-              <span aria-hidden="true" style={{ width: 22, height: 22, borderRadius: "50%", border: "2px solid #B67AC8", display: "grid", placeItems: "center" }}>○</span>
-              <span style={{ fontSize: 13, lineHeight: 1.35, fontWeight: 850 }}>{task.label}</span>
-            </button>
-          ))}
+          {visible.map((task) => {
+            const checked = !!viewDone[task.key];
+            return (
+              <button key={task.key} type="button" onClick={() => toggle(task.key)} aria-label={`${checked ? "Mark incomplete" : "Mark complete"}: ${task.label}`} style={{ display: "grid", gridTemplateColumns: "24px 1fr", gap: 8, alignItems: "center", padding: "11px 12px", borderRadius: 13, border: checked ? "1px solid #D8B7E3" : "1px solid #E2D5E8", background: checked ? "#FAF4FC" : "white", color: checked ? "#A081AD" : "#5B4B6B", textAlign: "left", cursor: "pointer", transition: "background .2s ease, color .2s ease" }}>
+                <span aria-hidden="true" style={{ width: 22, height: 22, borderRadius: "50%", border: "2px solid #B67AC8", background: checked ? "#B67AC8" : "transparent", color: "white", display: "grid", placeItems: "center", fontWeight: 900 }}>{checked ? "✓" : "○"}</span>
+                <span style={{ fontSize: 13, lineHeight: 1.35, fontWeight: 850, textDecoration: checked ? "line-through" : "none" }}>{task.label}</span>
+              </button>
+            );
+          })}
           {!visible.length && <div style={{ padding: "12px 2px", color: "#806B8D", fontSize: 12.5 }}>All tucked in. 💜</div>}
         </div>
 
         {tuckedIn.length > 0 && (
-          <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #EEE3F2" }}>
-            <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#9A7BA7" }}>✓ TUCKED IN TODAY</div>
+          <details style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #EEE3F2" }}>
+            <summary style={{ cursor: "pointer", color: "#9A7BA7", fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900 }}>✓ COMPLETED TODAY ({tuckedIn.length})</summary>
             <div style={{ display: "grid", gap: 6, marginTop: 8 }}>
               {tuckedIn.map((task) => (
                 <button key={task.key} type="button" onClick={() => toggle(task.key)} aria-label={`Mark ${task.label} incomplete`} style={{ display: "grid", gridTemplateColumns: "24px 1fr", gap: 8, alignItems: "center", padding: "9px 10px", borderRadius: 12, border: "1px solid #E7D8ED", background: "#FAF6FC", color: "#A081AD", textAlign: "left", cursor: "pointer" }}>
@@ -111,7 +117,7 @@ export function BabyToday({
                 </button>
               ))}
             </div>
-          </div>
+          </details>
         )}
 
         <div style={{ display: "flex", gap: 7, marginTop: 10, flexWrap: "wrap" }}>
