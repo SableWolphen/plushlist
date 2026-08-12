@@ -39,6 +39,9 @@ const movedModulesText = movedModuleFiles
 const searchableSource = (appSource + componentsSource + movedModulesText).replace(/\r\n/g, "\n");
 
 const requiredRegressionMarkers = [
+  '⚙️ Advanced habit tools',
+  'See habit insights',
+  'habitRows.length ? `${completedHabits} of ${habitRows.length} habits complete today`',
   // WEEKDAY_PRESET_IDS/WEEKEND_PRESET_IDS are exported by
   // assets/plush-schedule.js but were missing from app-source.jsx's
   // top-level destructuring of window.PlushLifeSchedule — a real bug
