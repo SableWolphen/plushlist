@@ -42,8 +42,8 @@ function read(relativePath) {
 
 if (fs.existsSync(path.join(ROOT, "service-worker.js"))) {
   const serviceWorker = read("service-worker.js");
-  if (!serviceWorker.includes('const CACHE_NAME = "plushlife-v63"')) {
-    failures.push("Service worker cache is not set to plushlife-v63.");
+  if (!serviceWorker.includes('const CACHE_NAME = "plushlife-v64"')) {
+    failures.push("Service worker cache is not set to plushlife-v64.");
   }
   for (const shellFile of [
     "login.html",
@@ -59,8 +59,22 @@ if (fs.existsSync(path.join(ROOT, "service-worker.js"))) {
     "assets/cloudflare-primary.js",
     "assets/plush-guide.js",
     "assets/thunderstorm.mp3",
+    "assets/app.bundle.js",
   ]) {
     if (!serviceWorker.includes(`./${shellFile}`)) failures.push(`Service worker app shell does not include ${shellFile}.`);
+  }
+}
+
+if (fs.existsSync(path.join(ROOT, "scripts/sync-www.js"))) {
+  const syncScript = read("scripts/sync-www.js");
+  if (!syncScript.includes('format: "esm"') || !syncScript.includes("splitting: true")) {
+    failures.push("Production app build is not configured for ES-module code splitting.");
+  }
+  if (!syncScript.includes("plushlife-lazy-panels") || !syncScript.includes('chunkNames: "chunks/[name]-[hash]"')) {
+    failures.push("Production app build is missing lazy-panel chunking safeguards.");
+  }
+  if (!syncScript.includes('type=\"module\"') || !syncScript.includes('rel=\"modulepreload\"')) {
+    failures.push("Generated index is not configured to load the split app entry as a module.");
   }
 }
 

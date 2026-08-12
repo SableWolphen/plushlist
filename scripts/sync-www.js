@@ -9,6 +9,7 @@ const esbuild = require("esbuild");
 const ROOT = path.join(__dirname, "..");
 const WWW = path.join(ROOT, "www");
 const VENDOR = path.join(WWW, "vendor");
+const APP_SOURCE_ENTRY = path.join(ROOT, "src", "app-source.jsx");
 
 const SITE_FILES = [
   "index.html",
@@ -52,7 +53,7 @@ const GENERATED_INDEX_PRELOADS = [
   '<link rel="preload" href="./assets/plush-helpers.js" as="script">',
   '<link rel="preload" href="./assets/plush-schedule.js" as="script">',
   '<link rel="preload" href="./assets/plush-billing.js" as="script">',
-  '<link rel="preload" href="./assets/app.bundle.js" as="script">',
+  '<link rel="modulepreload" href="./assets/app.bundle.js">',
 ];
 
 const GENERATED_INDEX_SCRIPTS = [
@@ -60,6 +61,22 @@ const GENERATED_INDEX_SCRIPTS = [
   '<script src="./assets/plush-guide.js"></script>',
   '<script src="./assets/plush-tools-fix.js"></script>',
 ];
+
+// These panels are rendered in the root tree even while closed. Keeping their
+// tiny wrappers in the startup bundle, while loading their real implementations
+// only when open becomes true, prevents rarely-used screens from bloating the
+// first authenticated render.
+const LAZY_PANEL_MODULES = new Map([
+  ["./components/schedule-editor-panel.jsx", ["ScheduleEditorPanel"]],
+  ["./components/rewards-panel.jsx", ["RewardsPanel"]],
+  ["./components/admin-panel.jsx", ["AdminPanel"]],
+  ["./components/settings-panel.jsx", ["SettingsPanel"]],
+  ["./components/tasks-panel.jsx", ["TasksPanel"]],
+  ["./components/guardian-panel.jsx", ["GuardianPanel"]],
+  ["./components/care-panel.jsx", ["CarePanel"]],
+  ["./components/progress-panel.jsx", ["ProgressPanel"]],
+  ["./components/week-panel.jsx", ["WeekPanel"]],
+]);
 
 function rimraf(target) {
   if (fs.existsSync(target)) fs.rmSync(target, { recursive: true, force: true });
@@ -71,21 +88,70 @@ function copyDirectory(source, destination) {
   return true;
 }
 
-const APP_SOURCE_ENTRY = path.join(ROOT, "src", "app-source.jsx");
+function lazyPanelPlugin() {
+  return {
+    name: "plushlife-lazy-panels",
+    setup(build) {
+      build.onResolve({ filter: /^\.\/components\/.*-panel\.jsx$/ }, (args) => {
+        if (path.resolve(args.importer || "") !== APP_SOURCE_ENTRY) return null;
+        if (!LAZY_PANEL_MODULES.has(args.path)) return null;
+        return { path: args.path, namespace: "plushlife-lazy-panel" };
+      });
 
-function compileAppSource() {
-  // esbuild replaces the previous @babel/standalone Babel.transform() call
-  // here (module split phase 4 — see docs/module-split-plan.md). This is a
-  // real bundle build (not a single-file transform): src/app-source.jsx and
-  // anything it imports get resolved and concatenated into one file. Keep
-  // identifier names stable for debuggability and to avoid the historical
-  // collision concerns, while allowing safe syntax + whitespace minification
-  // so the browser has less JavaScript to download and parse on startup.
-  const result = esbuild.buildSync({
+      build.onLoad({ filter: /.*/, namespace: "plushlife-lazy-panel" }, (args) => {
+        const exportNames = LAZY_PANEL_MODULES.get(args.path);
+        const realModule = args.path.replace("./components/", "");
+        const source = exportNames.map((exportName) => `
+const Lazy${exportName} = React.lazy(() => import("plush-real:${realModule}").then((module) => ({ default: module.${exportName} })));
+export function ${exportName}(props) {
+  if (!props || !props.open) return null;
+  return React.createElement(
+    React.Suspense,
+    {
+      fallback: React.createElement(
+        "div",
+        {
+          role: "status",
+          "aria-live": "polite",
+          style: {
+            padding: "18px",
+            textAlign: "center",
+            color: "#8C6B9E",
+            fontWeight: 800,
+            fontSize: "12px",
+          },
+        },
+        "Opening…"
+      ),
+    },
+    React.createElement(Lazy${exportName}, props)
+  );
+}
+`).join("\n");
+        return { contents: source, loader: "js" };
+      });
+
+      build.onResolve({ filter: /^plush-real:/ }, (args) => ({
+        path: path.join(ROOT, "src", "components", args.path.slice("plush-real:".length)),
+      }));
+    },
+  };
+}
+
+async function compileAppSource() {
+  // The app entry remains the critical Today/startup path. Heavy dashboard and
+  // management panels are turned into dynamic imports by the plugin above, so
+  // esbuild can emit independent chunks that are fetched only when needed.
+  const result = await esbuild.build({
     entryPoints: [APP_SOURCE_ENTRY],
     bundle: true,
-    write: false,
-    format: "iife",
+    write: true,
+    outdir: path.join(WWW, "assets"),
+    entryNames: "app.bundle",
+    chunkNames: "chunks/[name]-[hash]",
+    format: "esm",
+    splitting: true,
+    plugins: [lazyPanelPlugin()],
     loader: { ".jsx": "jsx" },
     jsx: "transform",
     minifyWhitespace: true,
@@ -94,12 +160,12 @@ function compileAppSource() {
     treeShaking: true,
     legalComments: "none",
     charset: "utf8",
+    metafile: true,
   });
-  const compiled = result.outputFiles[0].text;
-  // Runtime Babel previously used Function(compiled), which gave the app its
-  // own scope. Keep that boundary in the production bundle so names such as
-  // `supabase` never collide with the UMD libraries loaded before the app.
-  return `;(function () {\n${compiled}\n}());\n`;
+
+  const emittedFiles = Object.keys(result.metafile.outputs || {});
+  const chunkCount = emittedFiles.filter((file) => file.includes("/chunks/") || file.includes("\\chunks\\")).length;
+  return { emittedFiles: emittedFiles.length, chunkCount };
 }
 
 function prepareHtml(file, source) {
@@ -107,18 +173,20 @@ function prepareHtml(file, source) {
   for (const [from, to] of CDN_REPLACEMENTS) content = content.split(from).join(to);
 
   if (file === "index.html") {
-    // index.html already references ./assets/app.bundle.js directly (see
-    // src/app-source.jsx and docs/module-split-plan.md — module split phase
-    // 4 step 2 unified all three deploy targets, including GitHub Pages,
-    // onto this same precompiled bundle; there's no more runtime
-    // Babel-in-browser fallback to strip here).
     if (content.includes("babel.min.js") || content.includes('id="app-source"') || content.includes("Babel.transform")) {
       throw new Error("index.html still contains runtime Babel compilation — module split phase 4 step 2 should have removed this");
     }
 
-    // These resources are all required before the first authenticated render.
-    // Preloading lets the browser fetch them in parallel instead of discovering
-    // each one only when the parser reaches its script tag.
+    // The split app entry is an ES module. Module scripts are deferred by
+    // default, while modulepreload lets its critical fetch begin immediately.
+    content = content.replace(
+      '<script src="./assets/app.bundle.js"></script>',
+      '<script type="module" src="./assets/app.bundle.js"></script>'
+    );
+    if (!content.includes('<script type="module" src="./assets/app.bundle.js"></script>')) {
+      throw new Error("index.html is missing the generated ES-module app bundle entry");
+    }
+
     for (const preload of GENERATED_INDEX_PRELOADS) {
       if (!content.includes(preload)) content = content.replace("</head>", `  ${preload}\n</head>`);
     }
@@ -131,7 +199,7 @@ function prepareHtml(file, source) {
   return content;
 }
 
-function main() {
+async function main() {
   rimraf(WWW);
   fs.mkdirSync(VENDOR, { recursive: true });
 
@@ -155,7 +223,7 @@ function main() {
     if (copyDirectory(path.join(ROOT, directory), path.join(WWW, directory))) copiedDirectories += 1;
   }
 
-  fs.writeFileSync(path.join(WWW, "assets", "app.bundle.js"), compileAppSource());
+  const bundleStats = await compileAppSource();
 
   let missingVendorFiles = false;
   for (const { src, dest } of VENDOR_FILES) {
@@ -169,7 +237,10 @@ function main() {
   }
 
   if (missingVendorFiles) process.exitCode = 1;
-  console.log(`www/ synced (${copiedFiles} files, ${copiedDirectories} directories, ${VENDOR_FILES.length} vendored scripts, precompiled app bundle).`);
+  console.log(`www/ synced (${copiedFiles} files, ${copiedDirectories} directories, ${VENDOR_FILES.length} vendored scripts, ${bundleStats.emittedFiles} app outputs, ${bundleStats.chunkCount} lazy chunks).`);
 }
 
-main();
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
