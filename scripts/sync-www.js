@@ -42,6 +42,19 @@ const CDN_REPLACEMENTS = [
   ["https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js", "./vendor/supabase.min.js"],
 ];
 
+const GENERATED_INDEX_PRELOADS = [
+  '<link rel="preload" href="./vendor/react.production.min.js" as="script">',
+  '<link rel="preload" href="./vendor/react-dom.production.min.js" as="script">',
+  '<link rel="preload" href="./vendor/supabase.min.js" as="script">',
+  '<link rel="preload" href="./assets/care-upgrades.js" as="script">',
+  '<link rel="preload" href="./assets/entitlements.js" as="script">',
+  '<link rel="preload" href="./assets/plush-content.js" as="script">',
+  '<link rel="preload" href="./assets/plush-helpers.js" as="script">',
+  '<link rel="preload" href="./assets/plush-schedule.js" as="script">',
+  '<link rel="preload" href="./assets/plush-billing.js" as="script">',
+  '<link rel="preload" href="./assets/app.bundle.js" as="script">',
+];
+
 const GENERATED_INDEX_SCRIPTS = [
   '<script src="./assets/cloudflare-primary.js"></script>',
   '<script src="./assets/plush-guide.js"></script>',
@@ -64,13 +77,10 @@ function compileAppSource() {
   // esbuild replaces the previous @babel/standalone Babel.transform() call
   // here (module split phase 4 — see docs/module-split-plan.md). This is a
   // real bundle build (not a single-file transform): src/app-source.jsx and
-  // anything it imports (e.g. src/components/shared.jsx, phase 5+) get
-  // resolved and concatenated into one file. Same JSX shape as before:
-  // classic runtime (React.createElement, not the automatic jsx-runtime
-  // import), since the app loads React as a global via a <script> tag, not
-  // an ES import. Whitespace-only minification (not full identifier
-  // renaming) to keep output as close to the previous Babel compact:true
-  // shape as possible.
+  // anything it imports get resolved and concatenated into one file. Keep
+  // identifier names stable for debuggability and to avoid the historical
+  // collision concerns, while allowing safe syntax + whitespace minification
+  // so the browser has less JavaScript to download and parse on startup.
   const result = esbuild.buildSync({
     entryPoints: [APP_SOURCE_ENTRY],
     bundle: true,
@@ -79,6 +89,10 @@ function compileAppSource() {
     loader: { ".jsx": "jsx" },
     jsx: "transform",
     minifyWhitespace: true,
+    minifySyntax: true,
+    minifyIdentifiers: false,
+    treeShaking: true,
+    legalComments: "none",
     charset: "utf8",
   });
   const compiled = result.outputFiles[0].text;
@@ -101,6 +115,14 @@ function prepareHtml(file, source) {
     if (content.includes("babel.min.js") || content.includes('id="app-source"') || content.includes("Babel.transform")) {
       throw new Error("index.html still contains runtime Babel compilation — module split phase 4 step 2 should have removed this");
     }
+
+    // These resources are all required before the first authenticated render.
+    // Preloading lets the browser fetch them in parallel instead of discovering
+    // each one only when the parser reaches its script tag.
+    for (const preload of GENERATED_INDEX_PRELOADS) {
+      if (!content.includes(preload)) content = content.replace("</head>", `  ${preload}\n</head>`);
+    }
+
     for (const script of GENERATED_INDEX_SCRIPTS) {
       if (!content.includes(script)) content = content.replace("</body>", `  ${script}\n</body>`);
     }
