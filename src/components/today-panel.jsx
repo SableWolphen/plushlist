@@ -26,18 +26,20 @@ function FirstDaysGuide({ activityDaysTotal = 0, rows = [], viewDone = {}, goToD
 
 export function TodayPanel(props) {
   const lowScreen = useLowScreenMode();
-  const { unifiedToggle, lingerKeys } = useCompletedTaskFlow(props.toggle, props.viewDone);
+  const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
   const recentlyCompletedKeys = Array.from(new Set([
     ...(props.recentlyCompletedKeys || []),
     ...lingerKeys,
   ]));
   const modeProps = { ...props, toggle: unifiedToggle, recentlyCompletedKeys, completedLingerKeys: lingerKeys };
+  const liveRegion = <div aria-live="polite" aria-atomic="true" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>{announcement}</div>;
 
   if (!props.open) return null;
-  if (props.babyMode) return <BabyToday {...modeProps} />;
+  if (props.babyMode) return <>{liveRegion}<BabyToday {...modeProps} /></>;
   if (lowScreen) {
     return (
       <>
+        {liveRegion}
         <LowScreenToday {...modeProps} />
         <CompletedTaskArea rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} compact />
       </>
@@ -46,6 +48,7 @@ export function TodayPanel(props) {
 
   return (
     <>
+      {liveRegion}
       <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
       <HabitCoach {...modeProps}>
         <div style={{ paddingTop: 4, borderTop: "1px solid #EDE3F2" }}>
