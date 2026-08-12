@@ -1,6 +1,7 @@
 import { ProgressPanel as ProgressPanelCore } from "./progress-panel-core.jsx";
 import { HabitHealth } from "./habit-health.jsx";
 import { WeeklyHabitReview } from "./habit-intelligence.jsx";
+import { WhatWorksForMe } from "./habit-retention.jsx";
 
 export function ProgressPanel(props) {
   if (!props.open) return null;
@@ -16,6 +17,7 @@ export function ProgressPanel(props) {
         openTaskManager={props.openTaskManager}
       />
       <WeeklyHabitReview open={props.open} openTaskManager={props.openTaskManager} goToDashboard={props.goToDashboard} />
+      <WhatWorksForMe open={props.open} openTaskManager={props.openTaskManager} />
       <ProgressPanelCore {...props} />
     </>
   );
