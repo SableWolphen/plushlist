@@ -1,9 +1,8 @@
 import { TodayPanel as TodayPanelCore } from "./today-panel-core.jsx";
 import { DailyCompanion } from "./daily-companion.jsx";
 import { BabyToday } from "./baby-today.jsx";
-import { HabitCoach } from "./habit-intelligence.jsx";
-import { HabitRetentionTools, LowScreenToday, useLowScreenMode } from "./habit-retention.jsx";
-import { HabitResilienceSuite } from "./habit-resilience.jsx";
+import { CompactAnchor } from "./compact-anchor.jsx";
+import { LowScreenToday, useLowScreenMode } from "./habit-retention.jsx";
 import { CompletedTaskArea, useCompletedTaskFlow } from "./completed-task-flow.jsx";
 
 function FirstDaysGuide({ activityDaysTotal = 0, rows = [], viewDone = {}, goToDashboard, openTaskManager }) {
@@ -65,13 +64,7 @@ export function TodayPanel(props) {
     <>
       {liveRegion}
       <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
-      {/* Regression contract used to be <HabitCoach {...props}>; modeProps now overlays the shared completion flow. */}
-      <HabitCoach {...props} {...modeProps}>
-        <div style={{ paddingTop: 4, borderTop: "1px solid #EDE3F2" }}>
-          <HabitRetentionTools {...modeProps} />
-          <HabitResilienceSuite {...modeProps} />
-        </div>
-      </HabitCoach>
+      <CompactAnchor {...modeProps} />
       <TodayPanelCore {...modeProps} />
       <DailyCompanion {...modeProps} />
     </>
