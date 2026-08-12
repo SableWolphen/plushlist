@@ -5,32 +5,54 @@ import { HabitCoach } from "./habit-intelligence.jsx";
 import { HabitRetentionTools, LowScreenToday, useLowScreenMode } from "./habit-retention.jsx";
 import { HabitResilienceSuite } from "./habit-resilience.jsx";
 
+const COMPLETED_LINGER_MS = 2600;
+
 export function TodayPanel(props) {
   const lowScreen = useLowScreenMode();
-  if (!props.open) return null;
-  if (props.babyMode) return <BabyToday {...props} />;
-  if (lowScreen) return <LowScreenToday {...props} />;
+  const [lingerKeys, setLingerKeys] = React.useState([]);
+  const timersRef = React.useRef(new Map());
 
-  // The core Today view historically moved a completed task into a collapsed
-  // "Completed today" bucket after its short celebration. That made checking
-  // a box feel like deleting the task. Treat every completed row as recently
-  // completed while the full Today list is visible so it stays in place with
-  // its checkmark and strikethrough and can be tapped again to undo.
-  const crossedOffKeys = (props.rows || [])
-    .filter((row) => !!props.viewDone?.[row.key])
-    .map((row) => row.key);
-  const visibleCompletedKeys = Array.from(new Set([
+  React.useEffect(() => () => {
+    timersRef.current.forEach((timer) => window.clearTimeout(timer));
+    timersRef.current.clear();
+  }, []);
+
+  const unifiedToggle = (key, ...args) => {
+    const wasDone = !!props.viewDone?.[key];
+    const previousTimer = timersRef.current.get(key);
+    if (previousTimer) window.clearTimeout(previousTimer);
+
+    if (wasDone) {
+      setLingerKeys((keys) => keys.filter((item) => item !== key));
+      timersRef.current.delete(key);
+    } else {
+      setLingerKeys((keys) => keys.includes(key) ? keys : [...keys, key]);
+      const timer = window.setTimeout(() => {
+        setLingerKeys((keys) => keys.filter((item) => item !== key));
+        timersRef.current.delete(key);
+      }, COMPLETED_LINGER_MS);
+      timersRef.current.set(key, timer);
+    }
+
+    return props.toggle?.(key, ...args);
+  };
+
+  const recentlyCompletedKeys = Array.from(new Set([
     ...(props.recentlyCompletedKeys || []),
-    ...crossedOffKeys,
+    ...lingerKeys,
   ]));
+  const modeProps = { ...props, toggle: unifiedToggle, recentlyCompletedKeys };
 
+  if (!props.open) return null;
+  if (props.babyMode) return <BabyToday {...modeProps} />;
+  if (lowScreen) return <LowScreenToday {...modeProps} />;
   return (
     <>
-      <HabitCoach {...props} />
-      <HabitRetentionTools {...props} />
-      <HabitResilienceSuite {...props} />
-      <TodayPanelCore {...props} recentlyCompletedKeys={visibleCompletedKeys} />
-      <DailyCompanion {...props} />
+      <HabitCoach {...modeProps} />
+      <HabitRetentionTools {...modeProps} />
+      <HabitResilienceSuite {...modeProps} />
+      <TodayPanelCore {...modeProps} />
+      <DailyCompanion {...modeProps} />
     </>
   );
 }
