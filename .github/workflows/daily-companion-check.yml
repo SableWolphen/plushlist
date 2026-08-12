@@ -1,0 +1,32 @@
+name: Daily companion validation
+
+on:
+  push:
+    branches:
+      - daily-companion-suite
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+      - name: Build production site
+        run: npm run web:sync
+      - name: Verify companion split
+        run: |
+          test -f src/components/daily-companion.jsx
+          test -f src/components/today-panel-core.jsx
+          grep -q 'DailyCompanion' src/components/today-panel.jsx
+          grep -q 'Gentle Day' src/components/daily-companion.jsx
+          grep -q 'Evening reset' src/components/daily-companion.jsx
+          grep -q 'PlushMoments' src/components/daily-companion.jsx
