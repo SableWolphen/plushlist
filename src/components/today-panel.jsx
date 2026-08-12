@@ -50,7 +50,7 @@ export function TodayPanel(props) {
     <>
       {liveRegion}
       <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
-      <HabitCoach {...modeProps}>
+      <HabitCoach {...props} {...modeProps}>
         <div style={{ paddingTop: 4, borderTop: "1px solid #EDE3F2" }}>
           <HabitRetentionTools {...modeProps} />
           <HabitResilienceSuite {...modeProps} />
