@@ -1,10 +1,12 @@
 import { TodayPanel as TodayPanelCore } from "./today-panel-core.jsx";
-import { DailyCompanion } from "./daily-companion.jsx";
-import { BabyToday } from "./baby-today.jsx";
 import { CompactAnchor } from "./compact-anchor.jsx";
-import { LowScreenToday, useLowScreenMode } from "./habit-retention.jsx";
-import { HabitBackgroundEngine } from "./habit-background-engine.jsx";
+import { useLowScreenMode } from "./low-screen-mode.jsx";
 import { CompletedTaskArea, useCompletedTaskFlow } from "./completed-task-flow.jsx";
+
+const LazyDailyCompanion = React.lazy(() => import("./daily-companion.jsx").then((module) => ({ default: module.DailyCompanion })));
+const LazyBabyToday = React.lazy(() => import("./baby-today.jsx").then((module) => ({ default: module.BabyToday })));
+const LazyLowScreenToday = React.lazy(() => import("./habit-retention.jsx").then((module) => ({ default: module.LowScreenToday })));
+const LazyHabitBackgroundEngine = React.lazy(() => import("./habit-background-engine.jsx").then((module) => ({ default: module.HabitBackgroundEngine })));
 
 function FirstDaysGuide({ activityDaysTotal = 0, rows = [], viewDone = {}, goToDashboard, openTaskManager }) {
   if (activityDaysTotal >= 3) return null;
@@ -38,6 +40,28 @@ function LowScreenJustCompleted({ rows = [], viewDone = {}, lingerKeys = [], tog
   );
 }
 
+function BackgroundIntelligence(props) {
+  const [ready, setReady] = React.useState(false);
+  React.useEffect(() => {
+    if (!props.open) {
+      setReady(false);
+      return undefined;
+    }
+    let cancelled = false;
+    let handle = null;
+    const show = () => { if (!cancelled) setReady(true); };
+    if (typeof window.requestIdleCallback === "function") handle = window.requestIdleCallback(show, { timeout: 1800 });
+    else handle = window.setTimeout(show, 900);
+    return () => {
+      cancelled = true;
+      if (typeof window.cancelIdleCallback === "function" && typeof handle === "number") window.cancelIdleCallback(handle);
+      else if (handle) window.clearTimeout(handle);
+    };
+  }, [props.open]);
+  if (!ready) return null;
+  return <React.Suspense fallback={null}><LazyHabitBackgroundEngine {...props} /></React.Suspense>;
+}
+
 export function TodayPanel(props) {
   const lowScreen = useLowScreenMode();
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
@@ -47,16 +71,16 @@ export function TodayPanel(props) {
   ]));
   const modeProps = { ...props, toggle: unifiedToggle, recentlyCompletedKeys, completedLingerKeys: lingerKeys };
   const liveRegion = <div aria-live="polite" aria-atomic="true" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>{announcement}</div>;
-  const backgroundEngine = <HabitBackgroundEngine {...modeProps} />;
+  const backgroundEngine = <BackgroundIntelligence {...modeProps} />;
 
   if (!props.open) return null;
-  if (props.babyMode) return <>{backgroundEngine}{liveRegion}<BabyToday {...modeProps} /></>;
+  if (props.babyMode) return <>{backgroundEngine}{liveRegion}<React.Suspense fallback={null}><LazyBabyToday {...modeProps} /></React.Suspense></>;
   if (lowScreen) {
     return (
       <>
         {backgroundEngine}
         {liveRegion}
-        <LowScreenToday {...modeProps} />
+        <React.Suspense fallback={null}><LazyLowScreenToday {...modeProps} /></React.Suspense>
         <LowScreenJustCompleted rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} />
         <CompletedTaskArea rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} compact />
       </>
@@ -70,7 +94,7 @@ export function TodayPanel(props) {
       <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
       <CompactAnchor {...modeProps} />
       <TodayPanelCore {...modeProps} />
-      <DailyCompanion {...modeProps} />
+      <React.Suspense fallback={null}><LazyDailyCompanion {...modeProps} /></React.Suspense>
     </>
   );
 }

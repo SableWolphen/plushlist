@@ -1,5 +1,6 @@
-import { DailyCompanion as DailyCompanionCore } from "./daily-companion-core.jsx";
 import { useCompanionCloudSync } from "./companion-cloud-sync.jsx";
+
+const LazyDailyCompanionCore = React.lazy(() => import("./daily-companion-core.jsx").then((module) => ({ default: module.DailyCompanion })));
 
 export function DailyCompanion(props) {
   const [open, setOpen] = React.useState(false);
@@ -17,7 +18,7 @@ export function DailyCompanion(props) {
         <span aria-hidden="true" style={{ color: "#A58AAF", fontSize: 21, fontWeight: 900 }}>{open ? "▾" : "›"}</span>
       </button>
       {open && <div style={{ padding: "0 10px 10px" }}>
-        {!ready ? <div role="status" style={{ padding: "12px 10px", color: "#8C6B9E", fontSize: 11.5 }}>Restoring your companion tools…</div> : <DailyCompanionCore {...props} />}
+        {!ready ? <div role="status" style={{ padding: "12px 10px", color: "#8C6B9E", fontSize: 11.5 }}>Restoring your companion tools…</div> : <React.Suspense fallback={<div role="status" style={{ padding: "12px 10px", color: "#8C6B9E", fontSize: 11.5 }}>Opening companion tools…</div>}><LazyDailyCompanionCore {...props} /></React.Suspense>}
       </div>}
     </section>
   );
