@@ -77,3 +77,13 @@ function rep(src, oldText, newText, label){if(!src.includes(oldText)) throw new 
 'baby compact regression');
   write(p,s);
 }
+
+{
+  const p='scripts/validate-app-source.js';
+  let s=read(p);
+  s=rep(s,
+"  '✏️ Change my little jobs',\n  'const [showAllLittleJobs, setShowAllLittleJobs] = React.useState(false);',\n  'const visible = showAllLittleJobs ? waiting : waiting.slice(0, 4);',",
+"  '✏️ Edit jobs',\n  'const [showAllLittleJobs, setShowAllLittleJobs] = React.useState(false);',\n  'const visible = showAllLittleJobs ? waiting : waiting.slice(0, 3);',",
+'validator compact markers');
+  write(p,s);
+}
