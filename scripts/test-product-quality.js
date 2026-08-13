@@ -33,6 +33,8 @@ const loginPage = read("login.html");
 const checks = [
   [deviceBackup.includes("indexedDB") && deviceBackup.includes("DEVICE_BACKUP_TABLES") && deviceBackup.includes("cloudDataDeleted: false"), "on-device backup is additive and never deletes cloud data"],
   [deviceBackup.includes("MAX_DEVICE_SNAPSHOTS = 3") && deviceBackup.includes("verifyDeviceBackup") && deviceBackup.includes("SHA-256"), "device backup keeps verified recovery snapshots"],
+  [deviceBackup.includes("AUTO_BACKUP_START_DELAY_MS = 30000") && deviceBackup.includes("BACKUP_QUERY_BATCH_SIZE = 4"), "automatic device backup stays off the critical startup window and avoids a network burst"],
+  [runtime.includes("PREFETCH_DELAY_MS = 8000") && runtime.includes("PREFETCH_LIMIT = 2"), "lazy-panel prefetch waits until after startup and limits background competition"],
   [deviceBackup.includes("caregiver_links") === false && deviceBackup.includes("push_subscriptions") === false && deviceBackup.includes("supporter_payments") === false, "device backup excludes relationship, push-token and payment rows"],
   [appSource.includes("scheduleAutomaticDeviceBackup") && appSource.includes("refreshDeviceBackup") && !appSource.includes("email: user.email || null"), "app creates device backups and minimizes presence data"],
   [settings.includes("On-device backup") && settings.includes("Nothing is deleted from the cloud automatically"), "Privacy & Data explains lossless device backup behavior"],
