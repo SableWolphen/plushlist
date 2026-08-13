@@ -48,6 +48,7 @@ export function BabyToday({
 }) {
   const [showMore, setShowMore] = React.useState(false);
   const [showAllLittleJobs, setShowAllLittleJobs] = React.useState(false);
+  const [showFullSchedule, setShowFullSchedule] = React.useState(false);
   if (!open) return null;
 
   const allLittleJobs = rows.filter((row) => !row.isBonus);
@@ -137,12 +138,12 @@ export function BabyToday({
           <button type="button" onClick={() => goToDashboard?.("week")} style={{ ...softButton, minHeight: 40, padding: "7px 10px", fontSize: 11.5, flexShrink: 0 }}>Open planner</button>
         </div>
         <div style={{ display: "grid", gap: 5, marginTop: 8 }}>
-          {babyScheduleEntries.slice(0, 3).map((entry, index) => <div key={(entry.time || "any") + "-" + index} style={{ display: "grid", gridTemplateColumns: entry.time ? "62px 1fr" : "1fr", gap: 7, alignItems: "center", minHeight: 34, padding: "6px 8px", borderRadius: 9, background: entry.isException ? "#EEF9F5" : "#FFFFFFA8", border: "1px solid #E8E0EC" }}>
+          {babyScheduleEntries.slice(0, showFullSchedule ? babyScheduleEntries.length : 3).map((entry, index) => <div key={(entry.time || "any") + "-" + index} style={{ display: "grid", gridTemplateColumns: entry.time ? "62px 1fr" : "1fr", gap: 7, alignItems: "center", minHeight: 34, padding: "6px 8px", borderRadius: 9, background: entry.isException ? "#EEF9F5" : "#FFFFFFA8", border: "1px solid #E8E0EC" }}>
             {entry.time && <span style={{ fontSize: 11.5, color: "#4A80B5", fontWeight: 900 }}>{formatTime12 ? formatTime12(entry.time) : entry.time}</span>}
             <span style={{ minWidth: 0, fontSize: 11.8, color: "#5B4B6B", fontWeight: 800, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{entry.text || entry.label || entry.title || "Scheduled item"}</span>
           </div>)}
         </div>
-        {babyScheduleEntries.length > 3 && <button type="button" onClick={() => goToDashboard?.("week")} style={{ marginTop: 6, minHeight: 40, padding: "7px 0", border: 0, background: "transparent", color: "#4A80B5", fontSize: 11.5, fontWeight: 900, cursor: "pointer" }}>+ {babyScheduleEntries.length - 3} more in PlushCalendar</button>}
+        {babyScheduleEntries.length > 3 && <button type="button" aria-expanded={showFullSchedule} onClick={() => setShowFullSchedule((shown) => !shown)} style={{ marginTop: 6, minHeight: 44, padding: "7px 0", border: 0, background: "transparent", color: "#4A80B5", fontSize: 11.5, fontWeight: 900, cursor: "pointer" }}>{showFullSchedule ? "Show fewer schedule items" : "+ " + (babyScheduleEntries.length - 3) + " more · Show all"}</button>}
       </section>}
       {resting && <section style={{ padding: "11px 13px", borderRadius: 15, background: "#EEF9F6", border: "1px solid #BFE5D2", color: "#3E746A" }}>
         <div style={{ fontWeight: 900, fontSize: 12.5 }}>🌴 Today is a rest day.</div>
