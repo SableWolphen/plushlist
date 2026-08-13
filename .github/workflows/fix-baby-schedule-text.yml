@@ -1,0 +1,33 @@
+name: Fix Baby Mode schedule text
+on:
+  push:
+    branches:
+      - fix-baby-schedule-text
+permissions:
+  contents: write
+jobs:
+  validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix-baby-schedule-text
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: node scripts/fix-baby-schedule-text.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run web:sync
+      - name: Remove temporary validation files
+        run: |
+          rm scripts/fix-baby-schedule-text.js
+          rm .github/workflows/fix-baby-schedule-text.yml
+      - name: Commit validated schedule text fix
+        run: |
+          git config user.name "SableWolphen"
+          git config user.email "johnston.alexander.k@gmail.com"
+          git add src/components/baby-today.jsx scripts/audit-interactive-wiring.js scripts/fix-baby-schedule-text.js .github/workflows/fix-baby-schedule-text.yml
+          git commit -m "Show saved schedule text in Baby Mode"
+          git push origin fix-baby-schedule-text
