@@ -16,22 +16,18 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - run: node scripts/fix-patch-simplify-home.js
-      - name: Normalize patch newlines
-        run: perl -0pi -e 's/\\\\n/\n/g' scripts/patch-simplify-home.js
-      - run: node scripts/patch-simplify-home.js
+      - run: node scripts/patch-simplify-home-v2.js
       - run: npm ci
       - run: npm test
       - run: npm run web:sync
-      - name: Remove temporary validation files
+      - name: Commit validated Home simplification
         run: |
           rm scripts/fix-patch-simplify-home.js
           rm scripts/patch-simplify-home.js
+          rm scripts/patch-simplify-home-v2.js
           rm .github/workflows/simplify-plushhome.yml
-      - name: Commit validated Home simplification
-        run: |
           git config user.name "SableWolphen"
           git config user.email "johnston.alexander.k@gmail.com"
-          git add src/components/today-panel-core.jsx src/components/baby-today.jsx scripts/audit-interactive-wiring.js scripts/fix-patch-simplify-home.js scripts/patch-simplify-home.js .github/workflows/simplify-plushhome.yml
+          git add -A
           git commit -m "Simplify PlushHome around today's essentials"
           git push origin simplify-plushhome
