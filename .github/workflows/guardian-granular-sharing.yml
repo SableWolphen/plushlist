@@ -1,0 +1,33 @@
+name: Guardian granular sharing validation
+on:
+  push:
+    branches:
+      - guardian-granular-sharing
+permissions:
+  contents: write
+jobs:
+  validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: guardian-granular-sharing
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: node scripts/patch-guardian-granular-sharing.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run web:sync
+      - name: Remove temporary validation files
+        run: |
+          rm scripts/patch-guardian-granular-sharing.js
+          rm .github/workflows/guardian-granular-sharing.yml
+      - name: Commit validated Guardian sharing
+        run: |
+          git config user.name "SableWolphen"
+          git config user.email "johnston.alexander.k@gmail.com"
+          git add src/app-source.jsx src/components/guardian-panel.jsx scripts/audit-interactive-wiring.js database/guardian-granular-sharing.sql scripts/patch-guardian-granular-sharing.js .github/workflows/guardian-granular-sharing.yml
+          git commit -m "Add granular Guardian sharing controls"
+          git push origin guardian-granular-sharing
