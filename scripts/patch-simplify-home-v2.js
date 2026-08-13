@@ -62,8 +62,8 @@ replaceOnce(today,
 
 const baby = 'src/components/baby-today.jsx';
 replaceOnce(baby,
-`                  {task.sourceTask?.task_key ? <button`,
-`                  {showAllLittleJobs && task.sourceTask?.task_key ? <button`,
+`                  {task.sourceTask?.task_key && <button`,
+`                  {showAllLittleJobs && task.sourceTask?.task_key && <button`,
 'Baby compact drag disclosure');
 
 const audit = 'scripts/audit-interactive-wiring.js';
