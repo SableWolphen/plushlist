@@ -1,0 +1,33 @@
+name: Baby Mode schedule validation
+on:
+  push:
+    branches:
+      - baby-schedule-card
+permissions:
+  contents: write
+jobs:
+  validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: baby-schedule-card
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: node scripts/patch-baby-schedule.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run web:sync
+      - name: Remove temporary validation files
+        run: |
+          rm scripts/patch-baby-schedule.js
+          rm .github/workflows/baby-schedule-card.yml
+      - name: Commit validated Baby Mode schedule
+        run: |
+          git config user.name "SableWolphen"
+          git config user.email "johnston.alexander.k@gmail.com"
+          git add src/components/baby-today.jsx scripts/audit-interactive-wiring.js scripts/patch-baby-schedule.js .github/workflows/baby-schedule-card.yml
+          git commit -m "Restore schedule to Baby Mode"
+          git push origin baby-schedule-card
