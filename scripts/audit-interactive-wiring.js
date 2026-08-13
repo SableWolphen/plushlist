@@ -95,6 +95,9 @@ const mustContain = {
     ['aria-label="Today schedule"', 'Baby Mode schedule card'],
     ['babyScheduleEntries.slice(0, 3)', 'compact Baby Mode schedule preview'],
     ['entry.text || entry.label || entry.title', 'Baby Mode schedule uses saved item text'],
+    ['visibleGroups.map((group)', 'Baby Mode grouped Little Jobs'],
+    ['moveTaskGroup?.(group.section', 'Baby Mode group reorder controls'],
+    ['startPointerTaskDrag?.(event, task.sourceTask.task_key', 'Baby Mode task drag reorder'],
   ],
   'src/components/guardian-panel.jsx': [
     ['can_view_tasks', 'Guardian task sharing permission'],
