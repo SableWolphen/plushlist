@@ -94,6 +94,7 @@ const mustContain = {
     ['onClick={() => goToDashboard?.("progress")}', 'Progress route'],
     ['aria-label="Today schedule"', 'Baby Mode schedule card'],
     ['babyScheduleEntries.slice(0, 3)', 'compact Baby Mode schedule preview'],
+    ['entry.text || entry.label || entry.title', 'Baby Mode schedule uses saved item text'],
   ],
   'src/components/habit-retention.jsx': [
     ['goToDashboard?.("progress")', 'Low Screen review route'],
