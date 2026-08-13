@@ -5,6 +5,8 @@ const BACKUP_VERSION = 2;
 const AUTO_BACKUP_MAX_AGE_MS = 6 * 60 * 60 * 1000;
 const BACKUP_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
 const MAX_DEVICE_SNAPSHOTS = 3;
+const AUTO_BACKUP_START_DELAY_MS = 30000;
+const BACKUP_QUERY_BATCH_SIZE = 4;
 
 // Only user-owned, independently restorable data belongs in the automatic
 // device backup. Relationship/device-token/payment records remain cloud-side
@@ -171,11 +173,19 @@ export async function verifyDeviceBackup(userId) {
 export async function createDeviceBackup(supabase, user) {
   if (!supabase || !user?.id) throw new Error("Sign in before creating an on-device backup.");
 
-  const results = await Promise.all(DEVICE_BACKUP_TABLES.map(async ([key, table, ownerColumn]) => {
-    const { data, error } = await supabase.from(table).select("*").eq(ownerColumn, user.id);
-    if (error) throw new Error(`Could not back up ${table}: ${error.message}`);
-    return [key, data || []];
-  }));
+  const results = [];
+  for (let index = 0; index < DEVICE_BACKUP_TABLES.length; index += BACKUP_QUERY_BATCH_SIZE) {
+    const batch = DEVICE_BACKUP_TABLES.slice(index, index + BACKUP_QUERY_BATCH_SIZE);
+    const batchResults = await Promise.all(batch.map(async ([key, table, ownerColumn]) => {
+      const { data, error } = await supabase.from(table).select("*").eq(ownerColumn, user.id);
+      if (error) throw new Error(`Could not back up ${table}: ${error.message}`);
+      return [key, data || []];
+    }));
+    results.push(...batchResults);
+    if (index + BACKUP_QUERY_BATCH_SIZE < DEVICE_BACKUP_TABLES.length) {
+      await new Promise((resolve) => window.setTimeout(resolve, 0));
+    }
+  }
 
   const savedAt = new Date().toISOString();
   const payload = Object.fromEntries(results);
@@ -234,11 +244,14 @@ export function scheduleAutomaticDeviceBackup({ supabase, user, online = true, o
     }
   };
 
-  if (typeof window.requestIdleCallback === "function") {
-    idleId = window.requestIdleCallback(() => { void run(); }, { timeout: 8000 });
-  } else {
-    timerId = window.setTimeout(() => { void run(); }, 4000);
-  }
+  timerId = window.setTimeout(() => {
+    if (cancelled || document.visibilityState === "hidden") return;
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(() => { void run(); }, { timeout: 15000 });
+    } else {
+      void run();
+    }
+  }, AUTO_BACKUP_START_DELAY_MS);
 
   return () => {
     cancelled = true;
@@ -253,5 +266,7 @@ export const DEVICE_BACKUP_POLICY = Object.freeze({
   maxAgeMs: AUTO_BACKUP_MAX_AGE_MS,
   staleAfterMs: BACKUP_STALE_AFTER_MS,
   maxSnapshots: MAX_DEVICE_SNAPSHOTS,
+  autoStartDelayMs: AUTO_BACKUP_START_DELAY_MS,
+  queryBatchSize: BACKUP_QUERY_BATCH_SIZE,
   cloudDataDeleted: false,
 });

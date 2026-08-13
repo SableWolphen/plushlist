@@ -11,6 +11,8 @@
   var longTaskDuration = 0;
   var firstContentfulPaint = null;
   var lazyStarts = Object.create(null);
+  var PREFETCH_DELAY_MS = 8000;
+  var PREFETCH_LIMIT = 2;
 
   function now() {
     return Math.round((performance && performance.now ? performance.now() : Date.now()) * 10) / 10;
@@ -126,20 +128,23 @@
       .then(function (response) { return response.ok ? response.json() : []; })
       .then(function (files) {
         if (!Array.isArray(files)) return [];
-        files.slice(0, 3).forEach(addModulePreload);
-        recordMetric("idle-prefetch-count", Math.min(files.length, 3));
+        files.slice(0, PREFETCH_LIMIT).forEach(addModulePreload);
+        recordMetric("idle-prefetch-count", Math.min(files.length, PREFETCH_LIMIT));
         return files;
       })
       .catch(function () { return []; });
   }
 
   function scheduleIdlePrefetch() {
-    var run = function () { prefetchLikelyPanels(); };
-    if (typeof requestIdleCallback === "function") {
-      requestIdleCallback(run, { timeout: 3500 });
-    } else {
-      setTimeout(run, 1600);
-    }
+    var run = function () {
+      if (document.visibilityState === "hidden") return;
+      if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(function () { prefetchLikelyPanels(); }, { timeout: 5000 });
+      } else {
+        prefetchLikelyPanels();
+      }
+    };
+    setTimeout(run, PREFETCH_DELAY_MS);
   }
 
   function haptic(kind) {
