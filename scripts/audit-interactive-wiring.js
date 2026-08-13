@@ -92,6 +92,8 @@ const mustContain = {
     ['onClick={() => openTaskManager?.()}', 'Edit jobs'],
     ['onClick={() => goToDashboard?.("week")}', 'Planner route'],
     ['onClick={() => goToDashboard?.("progress")}', 'Progress route'],
+    ['aria-label="Today schedule"', 'Baby Mode schedule card'],
+    ['babyScheduleEntries.slice(0, 3)', 'compact Baby Mode schedule preview'],
   ],
   'src/components/habit-retention.jsx': [
     ['goToDashboard?.("progress")', 'Low Screen review route'],
