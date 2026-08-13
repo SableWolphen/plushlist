@@ -34,20 +34,29 @@ for (const file of files) {
     /onClick\s*=\s*\{\s*undefined\s*\}/g,
     /href\s*=\s*["']javascript:/gi,
     /href\s*=\s*["']\s*["']/gi,
+    /â€¦|â€™|â€œ|â€|Ã./g,
   ]) {
     let match;
-    while ((match = pattern.exec(source))) addIssue(issues, file, source, match.index, 'dead interactive handler/link', match[0]);
-  }
-
-  const buttonRe = /<button\b[^>]*>/g;
-  let button;
-  while ((button = buttonRe.exec(source))) {
-    const tag = button[0];
-    if (/onClick\s*=/.test(tag) || /type\s*=\s*["'](?:submit|reset)["']/.test(tag) || /formAction\s*=/.test(tag)) continue;
-    addIssue(issues, file, source, button.index, 'button has no direct action', tag);
+    while ((match = pattern.exec(source))) addIssue(issues, file, source, match.index, 'dead/broken interactive text or link', match[0]);
   }
 
   if (path.extname(file) === '.html') {
+    const buttonRe = /<button\b[^>]*>/gi;
+    let button;
+    while ((button = buttonRe.exec(source))) {
+      const tag = button[0];
+      if (/type\s*=\s*["'](?:submit|reset)["']/i.test(tag)) continue;
+      const idMatch = tag.match(/\bid=["']([^"']+)["']/i);
+      const id = idMatch && idMatch[1];
+      if (id && source.includes(`getElementById("${id}")`) && source.includes(`${id}.addEventListener("click"`)) continue;
+      // An untyped button inside a form is a submit control; require a submit handler in the page.
+      const before = source.slice(0, button.index);
+      const after = source.slice(button.index + tag.length);
+      const inForm = before.lastIndexOf('<form') > before.lastIndexOf('</form>') && after.indexOf('</form>') >= 0;
+      if (inForm && /addEventListener\(['"]submit['"]/.test(source)) continue;
+      addIssue(issues, file, source, button.index, 'HTML button is not demonstrably wired', tag);
+    }
+
     const hrefRe = /<a\b[^>]*href=["']([^"']+)["'][^>]*>/gi;
     let link;
     while ((link = hrefRe.exec(source))) {
@@ -88,6 +97,16 @@ const mustContain = {
     ['goToDashboard?.("progress")', 'Low Screen review route'],
     ['goToDashboard?.("care")', 'support route'],
     ['openTaskManager?.()', 'task manager route'],
+  ],
+  'login.html': [
+    ['send.addEventListener("click"', 'email-code send button'],
+    ['verify.addEventListener("click"', 'email-code sign-in button'],
+    ['passwordSignIn.addEventListener("click"', 'password sign-in button'],
+    ['togglePassword.addEventListener("click"', 'password-mode toggle'],
+  ],
+  'oauth.html': [
+    ["form.addEventListener('submit'", 'OAuth connect form'],
+    ["location.assign(result.redirect_to)", 'OAuth success redirect'],
   ],
 };
 for (const [relative, checks] of Object.entries(mustContain)) {
