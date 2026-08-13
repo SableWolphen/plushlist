@@ -52,6 +52,7 @@ const checks = [
   [today.includes("<LazyLowScreenToday {...modeProps} />") && today.includes("<CompletedTaskArea"), "Low Screen mode exposes Completed Today"],
   [today.includes("LowScreenJustCompleted") && today.includes("JUST COMPLETED"), "Low Screen keeps a completed task crossed off during the linger period"],
   [baby.includes("CompletedTaskArea") && baby.includes("recentlyCompletedKeys"), "Baby Mode uses the same completion lifecycle"],
+  [baby.includes("✓ {completedCount} tucked in today") && baby.includes("waiting.slice(0, 3)"), "Baby Mode keeps completed work collapsed and limits the first job list"],
   [today.includes("FIRST WEEK · DAY") && today.includes("activityDaysTotal >= 7"), "new users get a focused seven-day introduction"],
   [today.includes("Choose your Focus Habit") && today.includes("plushlife:open-focus-habit-picker"), "first-week onboarding explicitly helps users choose a Focus Habit"],
   [companionCore.includes("const inFirstWeek = firstWeekElapsed <= 7") && !companionCore.includes("firstWeekDay <= 7 &&"), "Companion first-week guide actually ends after day seven"],
