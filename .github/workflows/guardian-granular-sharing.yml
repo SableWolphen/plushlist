@@ -30,9 +30,24 @@ jobs:
           s = s.replace('`Support: ${supportMoodSummary.support_preference}`', '"Support: " + supportMoodSummary.support_preference')
           bad = '''replaceOnce(panel,\n`supportProgress={supportProgress}`,\n`supportProgress={supportProgress}`, 'guardian panel sanity marker');\n\n'''
           s = s.replace(bad, '')
+          if "const audit = 'scripts/audit-interactive-wiring.js';" in s:
+              s = s.split("const audit = 'scripts/audit-interactive-wiring.js';", 1)[0]
           p.write_text(s)
           PY
       - run: node scripts/patch-guardian-granular-sharing.js
+      - name: Protect Guardian sharing wiring
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/audit-interactive-wiring.js')
+          s = p.read_text()
+          marker = "  'src/components/habit-retention.jsx': [\n"
+          block = "  'src/components/guardian-panel.jsx': [\n    ['can_view_tasks', 'Guardian task sharing permission'],\n    ['can_view_schedule', 'Guardian schedule sharing permission'],\n    ['can_view_mood', 'Guardian mood-summary permission'],\n    ['WHAT {selectedSupportName.toUpperCase()} SHARED WITH YOU', 'Guardian shared-access view'],\n  ],\n"
+          if block not in s:
+              if marker not in s: raise SystemExit('Missing audit insertion marker')
+              s = s.replace(marker, block + marker)
+          p.write_text(s)
+          PY
       - run: npm ci
       - run: npm test
       - run: npm run web:sync
