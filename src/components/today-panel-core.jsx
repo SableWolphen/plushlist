@@ -20,6 +20,8 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
   if (!open) return null;
   const { dayIdForDate, offsetDate, legacyScheduleToEntries, formatTime12 } = window.PlushLifeSchedule;
   const { DAYS } = window.PlushLifeContent;
+  const [showFullTodaySchedule, setShowFullTodaySchedule] = React.useState(false);
+  const [arrangeTodayTasks, setArrangeTodayTasks] = React.useState(false);
   return (
   <>
         {returnGapDays >= 2 && !returnBannerDismissed && (
@@ -180,14 +182,16 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
               ? selectedSchedule.entries
               : legacyScheduleToEntries(selectedSchedule);
             const displayEntries = [...baseEntries, ...selectedScheduleExceptionEntries].sort((a, b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")));
+            const visibleScheduleEntries = showFullTodaySchedule ? displayEntries : displayEntries.slice(0, 3);
             return displayEntries.length > 0 ? (
-          <div style={{ display: "grid", gap: 5, marginTop: 10 }}>
-                {displayEntries.map((entry, index) => (
+          <div data-plushlife-home-schedule-preview="true" style={{ display: "grid", gap: 5, marginTop: 8 }}>
+                {visibleScheduleEntries.map((entry, index) => (
                   <div key={index} style={{ display: "grid", gridTemplateColumns: entry.time ? "70px 1fr" : "1fr", alignItems: "center", gap: 7, padding: "8px 9px", borderRadius: 9, background: entry.isException ? "#EEF9F5" : "#FFFFFF99", border: entry.isException ? "1px solid #B9E0D0" : "1px solid #EFE3F3" }}>
                     {entry.time && <span style={{ fontSize: 13, color: day.accent, fontWeight: 900 }}>{formatTime12(entry.time)}</span>}
                     <span style={{ fontSize: 12.5, lineHeight: 1.35, color: "#5B4B6B", fontWeight: 600 }}>{entry.isException && <span style={{ marginRight: 5, color: "#318C79", fontSize: 10, fontWeight: 900 }}>EXTRA</span>}{entry.text}</span>
                   </div>
                 ))}
+                {displayEntries.length > 3 && <button type="button" aria-expanded={showFullTodaySchedule} onClick={() => setShowFullTodaySchedule((shown) => !shown)} style={{ minHeight: 44, padding: "7px 4px", border: 0, background: "transparent", color: day.accent, fontWeight: 900, fontSize: 11.5, cursor: "pointer", textAlign: "left" }}>{showFullTodaySchedule ? "Show fewer schedule items" : "+ " + (displayEntries.length - 3) + " more · Show all"}</button>}
               </div>
             ) : null;
           })()}
@@ -394,7 +398,10 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
               );
             })() : (
               <>
-                <button type="button" onClick={() => setTaskListCollapsed(true)} style={{ marginBottom: 10, padding: "7px 11px", borderRadius: 9, border: "1px solid #E6D4F2", background: "white", color: "#8C6B9E", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>▾ Collapse list</button>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                  <button type="button" onClick={() => { setTaskListCollapsed(true); setArrangeTodayTasks(false); }} style={{ minHeight: 44, padding: "8px 10px", borderRadius: 9, border: "1px solid #E6D4F2", background: "white", color: "#8C6B9E", fontWeight: 700, fontSize: 11.5, cursor: "pointer" }}>▾ Collapse</button>
+                  {!isFutureView && !isHistoricalView && <button type="button" aria-pressed={arrangeTodayTasks} onClick={() => setArrangeTodayTasks((open) => !open)} style={{ minHeight: 44, padding: "8px 10px", borderRadius: 9, border: arrangeTodayTasks ? "1px solid " + day.accent : "1px solid #E6D4F2", background: arrangeTodayTasks ? day.accent + "12" : "white", color: arrangeTodayTasks ? day.accent : "#8C6B9E", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>{arrangeTodayTasks ? "✓ Done arranging" : "↕ Arrange"}</button>}
+                </div>
                 {preferences.focus_mode && (
                   <button type="button" onClick={() => setFocusModeShowAll(false)} style={{ marginBottom: 10, marginLeft: 8, padding: "7px 11px", borderRadius: 9, border: "1px solid #E6D4F2", background: "white", color: "#8C6B9E", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>🎯 Back to one thing at a time</button>
                 )}
@@ -429,7 +436,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
                     {header && (
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, margin: "8px 2px 4px", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}>
                         <span style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 700 }}>{header.toUpperCase()}</span>
-                        {!isFutureView && !isHistoricalView && visibleGroupOrder.length > 1 && (
+                        {arrangeTodayTasks && !isFutureView && !isHistoricalView && visibleGroupOrder.length > 1 && (
                           <span style={{ display: "flex", gap: 3 }}>
                             <button type="button" disabled={visibleGroupOrder.indexOf(r.section) === 0} onClick={() => moveTaskGroup(r.section, -1, visibleGroupOrder)} aria-label={`Move ${header} group earlier`} title="Move group earlier" style={{ width: 26, height: 26, minHeight: 26, padding: 0, borderRadius: 8, border: "1px solid #E7D2E8", background: "rgba(255,255,255,.55)", color: day.accent, opacity: visibleGroupOrder.indexOf(r.section) === 0 ? .3 : 1, fontWeight: 900, cursor: visibleGroupOrder.indexOf(r.section) === 0 ? "default" : "pointer" }}>↑</button>
                             <button type="button" disabled={visibleGroupOrder.indexOf(r.section) === visibleGroupOrder.length - 1} onClick={() => moveTaskGroup(r.section, 1, visibleGroupOrder)} aria-label={`Move ${header} group later`} title="Move group later" style={{ width: 26, height: 26, minHeight: 26, padding: 0, borderRadius: 8, border: "1px solid #E7D2E8", background: "rgba(255,255,255,.55)", color: day.accent, opacity: visibleGroupOrder.indexOf(r.section) === visibleGroupOrder.length - 1 ? .3 : 1, fontWeight: 900, cursor: visibleGroupOrder.indexOf(r.section) === visibleGroupOrder.length - 1 ? "default" : "pointer" }}>↓</button>
@@ -455,7 +462,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
                           if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenRow(expanded ? null : r.key); }
                         } : undefined}
                         style={{ minHeight: 48, display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", cursor: isFutureView ? "not-allowed" : "pointer", opacity: isFutureView ? 0.62 : 1 }}>
-                        {draggableTodayTask && <button
+                        {arrangeTodayTasks && draggableTodayTask && <button
                           type="button"
                           draggable={false}
                           aria-label={`Reorder ${r.label}`}
@@ -492,7 +499,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
                           {r.label !== r.originalLabel && <span style={{ display: "block", marginTop: 2, fontSize: 10.5, color: "#9A86A7", textDecoration: "none" }}>{r.dayType === "tiny" ? "Tiny" : r.dayType === "recovery" ? "Recovery" : "Soft"} version of {r.originalLabel}</span>}
                         </span>
                         {r.right && <span style={{ fontSize: 12.5, color: "#B08AC7", whiteSpace: "nowrap" }}>{r.right}</span>}
-                        {r.sourceTask && !isFutureView && (
+                        {arrangeTodayTasks && r.sourceTask && !isFutureView && (
                           <button
                             type="button"
                             onClick={(event) => { event.stopPropagation(); isTaskPausedOnDate(r.sourceTask, period.date) ? resumeTrackerTask(r.sourceTask.task_key) : pauseTrackerTask(r.sourceTask.task_key); }}
