@@ -11,12 +11,10 @@ replaceOnce(baby,
 `  const [showMore, setShowMore] = React.useState(false);\n  const [showAllLittleJobs, setShowAllLittleJobs] = React.useState(false);`,
 `  const [showMore, setShowMore] = React.useState(false);\n  const [showAllLittleJobs, setShowAllLittleJobs] = React.useState(false);\n  const [showFullSchedule, setShowFullSchedule] = React.useState(false);`,
 'Baby Mode schedule expansion state');
-
 replaceOnce(baby,
 `          {babyScheduleEntries.slice(0, 3).map((entry, index) => <div key={(entry.time || "any") + "-" + index}`,
 `          {babyScheduleEntries.slice(0, showFullSchedule ? babyScheduleEntries.length : 3).map((entry, index) => <div key={(entry.time || "any") + "-" + index}`,
 'Baby Mode schedule visible rows');
-
 replaceOnce(baby,
 `        {babyScheduleEntries.length > 3 && <button type="button" onClick={() => goToDashboard?.("week")} style={{ marginTop: 6, minHeight: 40, padding: "7px 0", border: 0, background: "transparent", color: "#4A80B5", fontSize: 11.5, fontWeight: 900, cursor: "pointer" }}>+ {babyScheduleEntries.length - 3} more in PlushCalendar</button>}`,
 `        {babyScheduleEntries.length > 3 && <button type="button" aria-expanded={showFullSchedule} onClick={() => setShowFullSchedule((shown) => !shown)} style={{ marginTop: 6, minHeight: 44, padding: "7px 0", border: 0, background: "transparent", color: "#4A80B5", fontSize: 11.5, fontWeight: 900, cursor: "pointer" }}>{showFullSchedule ? "Show fewer schedule items" : "+ " + (babyScheduleEntries.length - 3) + " more · Show all"}</button>}`,
@@ -54,13 +52,16 @@ replaceOnce(today,
 
 const audit = 'scripts/audit-interactive-wiring.js';
 let auditSource = fs.readFileSync(audit, 'utf8');
+auditSource = auditSource.replace(
+`    ['babyScheduleEntries.slice(0, 3)', 'compact Baby Mode schedule preview'],`,
+`    ['babyScheduleEntries.slice(0, showFullSchedule ? babyScheduleEntries.length : 3)', 'compact expandable Baby Mode schedule preview'],`
+);
 const needle = `    ['entry.text || entry.label || entry.title', 'Baby Mode schedule uses saved item text'],`;
 if (!auditSource.includes(`['showFullSchedule', 'Baby Mode inline full schedule']`)) {
   if (!auditSource.includes(needle)) throw new Error('Missing Baby Mode audit marker');
   auditSource = auditSource.replace(needle, needle + `\n    ['showFullSchedule', 'Baby Mode inline full schedule'],`);
 }
-const todayNeedle = `  'src/components/today-panel-core.jsx': [`;
-if (!auditSource.includes(todayNeedle)) {
+if (!auditSource.includes(`'src/components/today-panel-core.jsx': [`)) {
   const insertion = `  'src/components/today-panel-core.jsx': [\n    ['minHeight: 48, display: "flex"', 'compact normal Today task rows'],\n    ['width: 38, height: 44, minHeight: 44', 'touch-safe compact task controls'],\n  ],\n`;
   const marker = `  'src/components/habit-retention.jsx': [`;
   if (!auditSource.includes(marker)) throw new Error('Missing Today audit insertion marker');
