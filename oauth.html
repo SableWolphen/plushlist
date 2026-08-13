@@ -17,7 +17,7 @@
     <form id="form">
       <label>Email<input required type="email" name="email" autocomplete="email"></label>
       <label>Password<input required type="password" name="password" autocomplete="current-password"></label>
-      <button>Connect securely</button>
+      <button type="submit">Connect securely</button>
     </form>
     <p id="status" role="status"></p>
   </main>
@@ -28,7 +28,7 @@
     if (!requestToken) { form.hidden = true; status.textContent = 'This connection request is missing or expired. Please return to ChatGPT and try again.'; }
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      status.textContent = 'Connectingâ€¦';
+      status.textContent = 'Connecting…';
       const data = new FormData(form); data.set('request', requestToken);
       try {
         const response = await fetch('https://pvitdhixycegmcovapyh.supabase.co/functions/v1/glow-progress-mcp/authorize', { method: 'POST', body: data });
