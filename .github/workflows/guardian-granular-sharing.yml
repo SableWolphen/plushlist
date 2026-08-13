@@ -16,6 +16,20 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+      - name: Normalize patch script literals
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/patch-guardian-granular-sharing.js')
+          s = p.read_text()
+          s = s.replace('${selectedSupportName.toUpperCase()}', '{selectedSupportName.toUpperCase()}')
+          s = s.replace('`Mood: ${supportMoodSummary.mood}`', '"Mood: " + supportMoodSummary.mood')
+          s = s.replace('`Energy: ${supportMoodSummary.energy}`', '"Energy: " + supportMoodSummary.energy')
+          s = s.replace('`Capacity: ${supportMoodSummary.capacity}`', '"Capacity: " + supportMoodSummary.capacity')
+          s = s.replace('`Day: ${supportMoodSummary.day_type}`', '"Day: " + supportMoodSummary.day_type')
+          s = s.replace('`Support: ${supportMoodSummary.support_preference}`', '"Support: " + supportMoodSummary.support_preference')
+          p.write_text(s)
+          PY
       - run: node scripts/patch-guardian-granular-sharing.js
       - run: npm ci
       - run: npm test
