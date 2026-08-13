@@ -6,12 +6,11 @@
 
 export function BabyArrivalRitual({ comfortItemName, onShowTinyThing, onSoftDay, onShowPlanner }) {
   return (
-    <section className="baby-arrival-ritual" aria-label="Little space arrival">
-      <div><div className="baby-arrival-kicker">🍼 LITTLE SPACE ARRIVAL</div><div className="baby-arrival-title">Hi baby. You are safe here.</div><div className="baby-arrival-copy">We only need one small thing at a time.{comfortItemName ? ` Is ${comfortItemName} nearby?` : ""}</div></div>
+    <section className="baby-arrival-ritual baby-arrival-ritual-compact" aria-label="Little space arrival">
+      <div><div className="baby-arrival-kicker">🍼 LITTLE SPACE ARRIVAL</div><div className="baby-arrival-title">Hi baby. One tiny thing at a time.{comfortItemName ? ` ${comfortItemName} can stay close.` : ""}</div></div>
       <div className="baby-arrival-actions">
-        <button type="button" onClick={onShowTinyThing}>🧸 Show my tiny thing</button>
-        <button type="button" onClick={onSoftDay}>🌼 Make today soft</button>
-        <button type="button" onClick={onShowPlanner}>🗓 Show my planner</button>
+        <button type="button" onClick={onShowTinyThing}>🧸 Tiny thing</button>
+        <button type="button" onClick={onSoftDay}>🌼 Soft day</button>
       </div>
     </section>
   );

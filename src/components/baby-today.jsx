@@ -45,7 +45,8 @@ export function BabyToday({
   const allLittleJobs = rows.filter((row) => !row.isBonus);
   const lingering = new Set(recentlyCompletedKeys || []);
   const waiting = allLittleJobs.filter((row) => !viewDone[row.key] || lingering.has(row.key));
-  const visible = showAllLittleJobs ? waiting : waiting.slice(0, 4);
+  const visible = showAllLittleJobs ? waiting : waiting.slice(0, 3);
+  const completedCount = allLittleJobs.filter((row) => !!viewDone[row.key] && !lingering.has(row.key)).length;
   const resting = restDatesSet?.has?.(period?.date);
   const comfortItem = trackerProfile?.comfort_item || trackerProfile?.comfort_item_name || "";
 
@@ -70,16 +71,16 @@ export function BabyToday({
   });
 
   return (
-    <div className="baby-today-simple" style={{ display: "grid", gap: 13, marginBottom: 18 }}>
-      <section style={{ padding: 16, borderRadius: 20, background: "linear-gradient(145deg,#FFF8FD,#F4FBFF)", border: "1px solid #E3C9EC", boxShadow: "0 8px 24px rgba(118,85,138,.08)" }}>
+    <div className="baby-today-simple" style={{ display: "grid", gap: 9, marginBottom: 14 }}>
+      <section style={{ padding: 13, borderRadius: 17, background: "linear-gradient(145deg,#FFF8FD,#F4FBFF)", border: "1px solid #E3C9EC", boxShadow: "0 6px 18px rgba(118,85,138,.06)" }}>
         <div style={{ fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#A65DC1" }}>🍼 MY TINY THING</div>
         {nextStepTask ? (
           <>
-            <div style={{ marginTop: 7, fontSize: 20, lineHeight: 1.28, fontWeight: 900, color: "#4F405C" }}>
+            <div style={{ marginTop: 5, fontSize: 18, lineHeight: 1.25, fontWeight: 900, color: "#4F405C" }}>
               {nextStepTask.sourceTask && <HabitTypeIcon task={nextStepTask.sourceTask} />}{nextStepTask.label}
             </div>
             {nextStepHint?.key === nextStepTask.key && <div style={{ marginTop: 7, fontSize: 12, lineHeight: 1.45, color: "#806B8D" }}>🌱 {nextStepHint.text}</div>}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, marginTop: 9 }}>
               <button type="button" onClick={() => toggle(nextStepTask.key)} style={{ ...softButton, border: 0, background: "#A65DC1", color: "white" }}>✓ Tuck it in</button>
               <button type="button" onClick={() => pickEasierSuggestion?.(nextStepTask.key)} style={softButton}>🌱 Make it tinier</button>
             </div>
@@ -87,10 +88,10 @@ export function BabyToday({
         ) : (
           <div style={{ marginTop: 7, fontSize: 14, lineHeight: 1.5, color: "#6B5A7D" }}>Everything important is tucked in. Resting and playing count too. 🧸</div>
         )}
-        <div style={{ display: "flex", gap: 7, marginTop: 10, flexWrap: "wrap" }}>
-          <button type="button" onClick={() => selectDayType?.("soft")} style={{ ...softButton, padding: "8px 10px", fontSize: 11.5 }}>🌼 Soft day</button>
-          <button type="button" onClick={() => selectDayType?.("tiny")} style={{ ...softButton, padding: "8px 10px", fontSize: 11.5 }}>🌱 Tiny day</button>
-          <button type="button" onClick={openCare} style={{ ...softButton, padding: "8px 10px", fontSize: 11.5 }}>♥ I need comfort</button>
+        <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+          <button type="button" onClick={() => selectDayType?.("soft")} style={{ ...softButton, minHeight: 40, padding: "7px 9px", fontSize: 11 }}>🌼 Soft</button>
+          <button type="button" onClick={() => selectDayType?.("tiny")} style={{ ...softButton, minHeight: 40, padding: "7px 9px", fontSize: 11 }}>🌱 Tiny</button>
+          <button type="button" onClick={openCare} style={{ ...softButton, minHeight: 40, padding: "7px 9px", fontSize: 11 }}>♥ Comfort</button>
         </div>
       </section>
 
@@ -102,11 +103,11 @@ export function BabyToday({
         <button type="button" onClick={toggleRestToday} style={{ ...softButton, marginTop: 7, padding: "7px 9px", fontSize: 11 }}>End rest day</button>
       </section>}
 
-      <section style={{ padding: 15, borderRadius: 18, background: "rgba(255,255,255,.82)", border: "1px solid #E6D4F2" }}>
+      <section style={{ padding: 12, borderRadius: 16, background: "rgba(255,255,255,.82)", border: "1px solid #E6D4F2" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
           <div>
             <div style={{ fontSize: 11, letterSpacing: ".13em", fontWeight: 900, color: "#A65DC1" }}>🧸 LITTLE JOBS</div>
-            <div style={{ marginTop: 3, fontSize: 11.5, color: "#8C6B9E" }}>Finished jobs cross off here first, then tuck into Completed Today.</div>
+            <div style={{ marginTop: 2, fontSize: 10.8, color: "#8C6B9E" }}>{waiting.length} still waiting</div>
           </div>
           <div style={{ fontSize: 11, fontWeight: 900, color: "#8C6B9E" }}>{Math.round(Number(pct) || 0)}%</div>
         </div>
@@ -121,11 +122,14 @@ export function BabyToday({
           {!visible.length && <div style={{ padding: "12px 2px", color: "#806B8D", fontSize: 12.5 }}>All tucked in. 💜</div>}
         </div>
 
-        <CompletedTaskArea rows={allLittleJobs} viewDone={viewDone} lingerKeys={completedLingerKeys} toggle={toggle} title="Completed today" compact />
+        {completedCount > 0 && <details style={{ marginTop: 8, borderRadius: 12, border: "1px solid #E7DDEB", background: "rgba(255,255,255,.58)", overflow: "hidden" }}>
+          <summary style={{ minHeight: 44, padding: "10px 11px", cursor: "pointer", color: "#806B8D", fontSize: 11.5, fontWeight: 900 }}>✓ {completedCount} tucked in today</summary>
+          <div style={{ padding: "0 6px 6px" }}><CompletedTaskArea rows={allLittleJobs} viewDone={viewDone} lingerKeys={completedLingerKeys} toggle={toggle} title="Completed today" compact /></div>
+        </details>}
 
         <div style={{ display: "flex", gap: 7, marginTop: 10, flexWrap: "wrap" }}>
-          {waiting.length > 4 && <button type="button" aria-expanded={showAllLittleJobs} onClick={() => setShowAllLittleJobs((expanded) => !expanded)} style={softButton}>{showAllLittleJobs ? "Show fewer little jobs" : `Show all ${waiting.length} little jobs`}</button>}
-          <button type="button" onClick={() => openTaskManager?.()} style={softButton}>✏️ Change my little jobs</button>
+          {waiting.length > 3 && <button type="button" aria-expanded={showAllLittleJobs} onClick={() => setShowAllLittleJobs((expanded) => !expanded)} style={{ ...softButton, minHeight: 40, padding: "7px 10px", fontSize: 11.5 }}>{showAllLittleJobs ? "Show fewer" : `Show all ${waiting.length}`}</button>}
+          <button type="button" onClick={() => openTaskManager?.()} style={{ ...softButton, minHeight: 40, padding: "7px 10px", fontSize: 11.5 }}>✏️ Edit jobs</button>
         </div>
       </section>
 
