@@ -427,7 +427,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
                 return (
                   <div key={r.key}>
                     {header && (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, margin: "12px 2px 6px", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, margin: "8px 2px 4px", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}>
                         <span style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 700 }}>{header.toUpperCase()}</span>
                         {!isFutureView && !isHistoricalView && visibleGroupOrder.length > 1 && (
                           <span style={{ display: "flex", gap: 3 }}>
@@ -441,7 +441,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
                       data-plushlife-task-drop-key={draggableTodayTask ? r.sourceTask.task_key : undefined}
                       data-plushlife-task-drop-label={draggableTodayTask ? r.label : undefined}
                       data-plushlife-task-drop-section={draggableTodayTask ? r.sourceTask.section : undefined}
-                      style={{ marginBottom: 6, borderRadius: 12,
+                      style={{ marginBottom: 4, borderRadius: 10,
                       border: "1px solid " + (checked ? day.accent + "66" : "#F3D9EC"),
                       background: checked ? day.accent + "1A" : "rgba(255,255,255,0.25)",
                       overflow: "hidden", userSelect: draggableTodayTask ? "none" : undefined, WebkitUserSelect: draggableTodayTask ? "none" : undefined, WebkitTouchCallout: draggableTodayTask ? "none" : undefined, transition: "transform .12s ease, box-shadow .12s ease" }}>
@@ -454,7 +454,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
                           if (isFutureView) return;
                           if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenRow(expanded ? null : r.key); }
                         } : undefined}
-                        style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 12px", cursor: isFutureView ? "not-allowed" : "pointer", opacity: isFutureView ? 0.62 : 1 }}>
+                        style={{ minHeight: 48, display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", cursor: isFutureView ? "not-allowed" : "pointer", opacity: isFutureView ? 0.62 : 1 }}>
                         {draggableTodayTask && <button
                           type="button"
                           draggable={false}
@@ -467,7 +467,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
                           onPointerCancel={cancelPointerTaskDrag}
                           onContextMenu={(event) => event.preventDefault()}
                           onSelect={(event) => event.preventDefault()}
-                          style={{ flex: "0 0 auto", width: 28, height: 32, minHeight: 32, padding: 0, borderRadius: 8, border: "1px solid #E7D2E8", background: "rgba(255,255,255,.42)", color: "#9A86A7", fontSize: 14, fontWeight: 900, lineHeight: 1, cursor: "grab", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}
+                          style={{ flex: "0 0 auto", width: 38, height: 44, minHeight: 44, padding: 0, borderRadius: 8, border: "1px solid #E7D2E8", background: "rgba(255,255,255,.42)", color: "#9A86A7", fontSize: 14, fontWeight: 900, lineHeight: 1, cursor: "grab", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}
                         >⋮⋮</button>}
                         <span onClick={(e) => { e.stopPropagation(); if (!isFutureView) toggle(r.key); }}
                           role="checkbox"
@@ -478,14 +478,14 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
                             if (isFutureView) return;
                             if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); toggle(r.key); }
                           }}
-                          style={{ width: 22, height: 22, minWidth: 22, borderRadius: 7,
+                          style={{ width: 20, height: 20, minWidth: 20, borderRadius: 6,
                             border: `2px solid ${checked ? day.accent : "#E3B8D8"}`,
                             background: checked ? day.accent : "transparent",
                             display: "flex", alignItems: "center", justifyContent: "center",
                             color: "#FFF6FB", fontWeight: 900, fontSize: 12, animation: celebrateKey === r.key ? "checkPop 0.5s ease" : "none" }}>
                           {checked ? "✓" : ""}
                         </span>
-                        <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: checked ? "#B08AC7" : "#5B4B6B", textDecoration: checked ? "line-through" : "none" }}>
+                        <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, lineHeight: 1.3, fontWeight: 650, color: checked ? "#B08AC7" : "#5B4B6B", textDecoration: checked ? "line-through" : "none" }}>
                           {r.sourceTask && <HabitTypeIcon task={r.sourceTask} />}
                           {r.label}
                           {r.sourceTask && isTaskPausedOnDate(r.sourceTask, period.date) && <span style={{ marginLeft: 6, padding: "1px 6px", borderRadius: 999, background: "#FFFBF2", color: "#A56D14", fontSize: 9.5, fontWeight: 900, textDecoration: "none" }}>PAUSED</span>}
@@ -498,7 +498,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
                             onClick={(event) => { event.stopPropagation(); isTaskPausedOnDate(r.sourceTask, period.date) ? resumeTrackerTask(r.sourceTask.task_key) : pauseTrackerTask(r.sourceTask.task_key); }}
                             aria-label={isTaskPausedOnDate(r.sourceTask, period.date) ? `Resume ${r.label}` : `Pause ${r.label}`}
                             title={isTaskPausedOnDate(r.sourceTask, period.date) ? "Resume" : "Pause"}
-                            style={{ flexShrink: 0, width: 26, height: 26, borderRadius: 8, border: "none", background: "transparent", color: isTaskPausedOnDate(r.sourceTask, period.date) ? "#318C79" : "#C9B8D4", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
+                            style={{ flexShrink: 0, width: 38, height: 44, minHeight: 44, borderRadius: 8, border: "none", background: "transparent", color: isTaskPausedOnDate(r.sourceTask, period.date) ? "#318C79" : "#C9B8D4", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
                           >
                             {isTaskPausedOnDate(r.sourceTask, period.date) ? "▶️" : "⏸"}
                           </button>

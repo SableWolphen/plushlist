@@ -93,8 +93,9 @@ const mustContain = {
     ['onClick={() => goToDashboard?.("week")}', 'Planner route'],
     ['onClick={() => goToDashboard?.("progress")}', 'Progress route'],
     ['aria-label="Today schedule"', 'Baby Mode schedule card'],
-    ['babyScheduleEntries.slice(0, 3)', 'compact Baby Mode schedule preview'],
+    ['babyScheduleEntries.slice(0, showFullSchedule ? babyScheduleEntries.length : 3)', 'compact expandable Baby Mode schedule preview'],
     ['entry.text || entry.label || entry.title', 'Baby Mode schedule uses saved item text'],
+    ['showFullSchedule', 'Baby Mode inline full schedule'],
     ['visibleGroups.map((group)', 'Baby Mode grouped Little Jobs'],
     ['moveTaskGroup?.(group.section', 'Baby Mode group reorder controls'],
     ['startPointerTaskDrag?.(event, task.sourceTask.task_key', 'Baby Mode task drag reorder'],
@@ -104,6 +105,10 @@ const mustContain = {
     ['can_view_schedule', 'Guardian schedule sharing permission'],
     ['can_view_mood', 'Guardian mood-summary permission'],
     ['WHAT {selectedSupportName.toUpperCase()} SHARED WITH YOU', 'Guardian shared-access view'],
+  ],
+  'src/components/today-panel-core.jsx': [
+    ['minHeight: 48, display: "flex"', 'compact normal Today task rows'],
+    ['width: 38, height: 44, minHeight: 44', 'touch-safe compact task controls'],
   ],
   'src/components/habit-retention.jsx': [
     ['goToDashboard?.("progress")', 'Low Screen review route'],
