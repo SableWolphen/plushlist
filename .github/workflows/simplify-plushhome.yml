@@ -17,6 +17,8 @@ jobs:
         with:
           node-version: 22
       - run: node scripts/fix-patch-simplify-home.js
+      - name: Normalize patch newlines
+        run: perl -0pi -e 's/\\\\n/\n/g' scripts/patch-simplify-home.js
       - run: node scripts/patch-simplify-home.js
       - run: npm ci
       - run: npm test
