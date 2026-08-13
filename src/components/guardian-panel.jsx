@@ -11,11 +11,19 @@
 // as a window global.
 import { ToolPanel } from "./shared.jsx";
 
-export function GuardianPanel({ open, onClose, isGuardianAccount, hasOwnGuardian, supportViewMode, setSupportViewMode, isSupportAdult, selectedSupportName, guardianSupportRequests, supportOwnerId, updateGuardianSupportRequest, pendingSupportInvites, supportPeople, acceptSupportInvitation, declineSupportInvitation, canUseCaretakerDashboard, invitedSupportLinks, loadSupportOwner, loadSupportData, user, supportAchievements, period, ownerIsRestingToday, restDatesSet, todayRequiredDone, supportProgress, activeSupportLink, canViewSupportProgress, supportProgressView, setSupportProgressView, supportTodayDayLabel, displayedSupportPercent, displayedSupportCompleted, displayedSupportPossible, supportDailyEssentialCompleted, supportDailyEssentialKeys, supportScheduledTodayCompleted, supportScheduledTodayKeys, canSendSupportNotes, newNote, setNewNote, addSupportNote, suggestComfortTool, canAddSupportRewards, rewardTitle, setRewardTitle, rewardDetails, setRewardDetails, rewardTarget, setRewardTarget, rewardTargetPeriod, setRewardTargetPeriod, rewardApprovalRequired, setRewardApprovalRequired, addSupportReward, suggestedTask, setSuggestedTask, suggestedTaskDay, setSuggestedTaskDay, submitTaskSuggestion, inviteEmail, setInviteEmail, inviteSupportAdult, GUARDIAN_ROLE_PRESETS, guardianRolePreset, setGuardianRolePreset, ownedSupportLinks, supportRelationships, setSupportAdultActive, removeSupportAdult, updateCaretakerPermission, updateCareAgreement, supportRequestGuardian, setSupportRequestGuardian, supportRequestType, setSupportRequestType, supportRequestText, setSupportRequestText, sendGuardianSupportRequest, taskSuggestions, suggestionSectionsById, setSuggestionSectionsById, taskSectionsForDay, decideTaskSuggestion, supportMessage, supportRewards, supportWeeklyPercent, supportPercent, updateRewardStatus, supportNotes, setComfortToolOpen, deleteSupportNote }) {
+export function GuardianPanel({ open, onClose, isGuardianAccount, hasOwnGuardian, supportViewMode, setSupportViewMode, isSupportAdult, selectedSupportName, guardianSupportRequests, supportOwnerId, updateGuardianSupportRequest, pendingSupportInvites, supportPeople, acceptSupportInvitation, declineSupportInvitation, canUseCaretakerDashboard, invitedSupportLinks, loadSupportOwner, loadSupportData, user, supportAchievements, period, ownerIsRestingToday, restDatesSet, todayRequiredDone, supportProgress, activeSupportLink, canViewSupportProgress, canViewSupportTasks, canViewSupportSchedule, canViewSupportMood, supportTrackerTasks = [], supportSchedules = [], supportScheduleExceptions = [], supportMoodSummary, supportProgressView, setSupportProgressView, supportTodayDayLabel, displayedSupportPercent, displayedSupportCompleted, displayedSupportPossible, supportDailyEssentialCompleted, supportDailyEssentialKeys, supportScheduledTodayCompleted, supportScheduledTodayKeys, canSendSupportNotes, newNote, setNewNote, addSupportNote, suggestComfortTool, canAddSupportRewards, rewardTitle, setRewardTitle, rewardDetails, setRewardDetails, rewardTarget, setRewardTarget, rewardTargetPeriod, setRewardTargetPeriod, rewardApprovalRequired, setRewardApprovalRequired, addSupportReward, suggestedTask, setSuggestedTask, suggestedTaskDay, setSuggestedTaskDay, submitTaskSuggestion, inviteEmail, setInviteEmail, inviteSupportAdult, GUARDIAN_ROLE_PRESETS, guardianRolePreset, setGuardianRolePreset, ownedSupportLinks, supportRelationships, setSupportAdultActive, removeSupportAdult, updateCaretakerPermission, updateCareAgreement, supportRequestGuardian, setSupportRequestGuardian, supportRequestType, setSupportRequestType, supportRequestText, setSupportRequestText, sendGuardianSupportRequest, taskSuggestions, suggestionSectionsById, setSuggestionSectionsById, taskSectionsForDay, decideTaskSuggestion, supportMessage, supportRewards, supportWeeklyPercent, supportPercent, updateRewardStatus, supportNotes, setComfortToolOpen, deleteSupportNote }) {
   if (!open) return null;
   const { DAYS, COMFORT_TOOLS } = window.PlushLifeContent;
   const { formatRelativeTime } = window.PlushLifeHelpers;
-  const { daysBetweenDates } = window.PlushLifeSchedule;
+  const { daysBetweenDates, dayIdForDate, legacyScheduleToEntries, formatTime12 } = window.PlushLifeSchedule;
+  const sharedTaskKeys = new Set([...(supportDailyEssentialKeys || []), ...(supportScheduledTodayKeys || [])]);
+  const sharedTodayTasks = (supportTrackerTasks || []).filter((task) => sharedTaskKeys.has(task.task_key));
+  const supportDayId = dayIdForDate?.(period.date);
+  const sharedSchedule = (supportSchedules || []).find((item) => item.day_id === supportDayId) || null;
+  const sharedScheduleEntries = [
+    ...(sharedSchedule?.entries?.length ? sharedSchedule.entries : (legacyScheduleToEntries?.(sharedSchedule) || [])),
+    ...(supportScheduleExceptions || []).flatMap((item) => (item.entries || []).map((entry) => ({ ...entry, isException: true }))),
+  ].sort((a, b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")));
   return (
           <ToolPanel inline title={isGuardianAccount ? "Guardian" : (supportViewMode === "caretaker" ? "Supporting" : (hasOwnGuardian ? "Guardian" : "Add a Guardian"))} onClose={onClose}>
           <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.72)", border: "1px solid #B9DCF6", boxShadow: "0 8px 24px rgba(76,143,232,0.10)" }}>
@@ -73,6 +81,27 @@ export function GuardianPanel({ open, onClose, isGuardianAccount, hasOwnGuardian
               </div>
               <button onClick={() => loadSupportData(user)} style={{ padding: "7px 9px", borderRadius: 9, border: "1px solid #B9DCF6", background: "#F5FAFF", color: "#4C8FE8", fontWeight: 800, cursor: "pointer" }}>↻ Refresh</button>
             </div>
+
+            {isSupportAdult && <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
+              <div style={{ padding: 11, borderRadius: 12, background: "#FFF9FD", border: "1px solid #E9D7F0" }}>
+                <div style={{ fontSize: 10, fontWeight: 900, color: "#8D5CA5", letterSpacing: ".08em" }}>WHAT {selectedSupportName.toUpperCase()} SHARED WITH YOU</div>
+                <div style={{ marginTop: 5, fontSize: 10.5, lineHeight: 1.45, color: "#806B8D" }}>Connection alone does not unlock private data. Each category below is controlled by the Cozy.</div>
+              </div>
+              {canViewSupportTasks ? <div style={{ padding: 11, borderRadius: 12, background: "#F7FBFF", border: "1px solid #D9ECFA" }}>
+                <div style={{ fontSize: 10.5, fontWeight: 900, color: "#4C8FE8" }}>✓ TODAY'S SHARED TASKS</div>
+                {sharedTodayTasks.length ? <div style={{ display: "grid", gap: 5, marginTop: 7 }}>{sharedTodayTasks.slice(0, 8).map((task) => <div key={task.task_key} style={{ padding: "7px 8px", borderRadius: 8, background: "white", color: "#5B4B6B", fontSize: 11.5, fontWeight: 750 }}>{task.task}</div>)}</div> : <div style={{ marginTop: 6, fontSize: 11, color: "#71839A" }}>No shared tasks are scheduled for today.</div>}
+              </div> : null}
+              {canViewSupportSchedule ? <div style={{ padding: 11, borderRadius: 12, background: "#F7FBFF", border: "1px solid #D9ECFA" }}>
+                <div style={{ fontSize: 10.5, fontWeight: 900, color: "#4C8FE8" }}>🗓 SHARED SCHEDULE</div>
+                {sharedScheduleEntries.length ? <div style={{ display: "grid", gap: 5, marginTop: 7 }}>{sharedScheduleEntries.slice(0, 8).map((entry, index) => <div key={(entry.time || "any") + index} style={{ display: "grid", gridTemplateColumns: entry.time ? "62px 1fr" : "1fr", gap: 6, padding: "7px 8px", borderRadius: 8, background: entry.isException ? "#EEF9F5" : "white", fontSize: 11 }}>
+                  {entry.time && <strong style={{ color: "#4C8FE8" }}>{formatTime12?.(entry.time) || entry.time}</strong>}<span style={{ color: "#5B4B6B" }}>{entry.text || entry.label || entry.title || "Scheduled item"}</span>
+                </div>)}</div> : <div style={{ marginTop: 6, fontSize: 11, color: "#71839A" }}>No schedule items are shared for today.</div>}
+              </div> : null}
+              {canViewSupportMood ? <div style={{ padding: 11, borderRadius: 12, background: "#F7FBFF", border: "1px solid #D9ECFA" }}>
+                <div style={{ fontSize: 10.5, fontWeight: 900, color: "#4C8FE8" }}>♥ SHARED MOOD SUMMARY</div>
+                {supportMoodSummary ? <div style={{ marginTop: 6, fontSize: 11.5, lineHeight: 1.5, color: "#5B4B6B" }}>{[supportMoodSummary.mood && "Mood: " + supportMoodSummary.mood, supportMoodSummary.energy && "Energy: " + supportMoodSummary.energy, supportMoodSummary.capacity && "Capacity: " + supportMoodSummary.capacity, supportMoodSummary.day_type && "Day: " + supportMoodSummary.day_type, supportMoodSummary.support_preference && "Support: " + supportMoodSummary.support_preference].filter(Boolean).join(" · ")}</div> : <div style={{ marginTop: 6, fontSize: 11, color: "#71839A" }}>No mood summary shared for today. Private notes are never included.</div>}
+              </div> : null}
+            </div>}
 
             {isSupportAdult && canViewSupportProgress && supportAchievements?.last_celebrated_date && daysBetweenDates(supportAchievements.last_celebrated_date, period.date) !== null && daysBetweenDates(supportAchievements.last_celebrated_date, period.date) <= 2 && (
               <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: 13, background: "#FFF9E9", border: "1px solid #F0D99E" }}>
@@ -242,6 +271,9 @@ export function GuardianPanel({ open, onClose, isGuardianAccount, hasOwnGuardian
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 9, paddingTop: 8, borderTop: "1px solid #D9ECFA" }}>
                         {[
                           ["can_view_progress", "View progress"],
+                          ["can_view_tasks", "See today's tasks"],
+                          ["can_view_schedule", "See schedule"],
+                          ["can_view_mood", "See mood summary"],
                           ["can_send_notes", "Send notes"],
                           ["can_add_rewards", "Add rewards"],
                           ["can_suggest_tasks", "Suggest tasks"],
@@ -251,6 +283,14 @@ export function GuardianPanel({ open, onClose, isGuardianAccount, hasOwnGuardian
                             {label}
                           </label>
                         ))}
+                      </div>
+                      <div style={{ marginTop: 8, padding: "8px 9px", borderRadius: 9, background: "white", border: "1px solid #E3ECF5" }}>
+                        <div style={{ fontSize: 10, fontWeight: 900, color: "#4C8FE8", letterSpacing: ".08em" }}>SHARED ACCESS</div>
+                        <div style={{ marginTop: 5, display: "flex", gap: 5, flexWrap: "wrap" }}>
+                          {[["can_view_progress","Progress"],["can_view_tasks","Today's tasks"],["can_view_schedule","Schedule"],["can_view_mood","Mood summary"],["can_send_notes","Notes"],["can_add_rewards","Rewards"],["can_suggest_tasks","Task suggestions"]].filter(([key]) => link[key]).map(([key,label]) => <span key={key} style={{ padding: "3px 7px", borderRadius: 999, background: "#EEF7FF", color: "#416D98", fontSize: 9.5, fontWeight: 800 }}>{label}</span>)}
+                          {![["can_view_progress"],["can_view_tasks"],["can_view_schedule"],["can_view_mood"],["can_send_notes"],["can_add_rewards"],["can_suggest_tasks"]].some(([key]) => link[key]) && <span style={{ fontSize: 10.5, color: "#8C6B9E" }}>Nothing shared right now.</span>}
+                        </div>
+                        {!pending && <div style={{ marginTop: 5, fontSize: 9.8, color: "#8C6B9E" }}>Last Guardian view: {formatRelativeTime(link.last_viewed_at)} · Pause access anytime.</div>}
                       </div>
                       <label style={{ display: "grid", gap: 5, marginTop: 10, paddingTop: 9, borderTop: "1px solid #D9ECFA", fontSize: 10.5, fontWeight: 900, color: "#4C8FE8" }}>
                         CARE AGREEMENT · WHAT HELPS AND WHAT TO AVOID

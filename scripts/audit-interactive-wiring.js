@@ -96,6 +96,12 @@ const mustContain = {
     ['babyScheduleEntries.slice(0, 3)', 'compact Baby Mode schedule preview'],
     ['entry.text || entry.label || entry.title', 'Baby Mode schedule uses saved item text'],
   ],
+  'src/components/guardian-panel.jsx': [
+    ['can_view_tasks', 'Guardian task sharing permission'],
+    ['can_view_schedule', 'Guardian schedule sharing permission'],
+    ['can_view_mood', 'Guardian mood-summary permission'],
+    ['WHAT {selectedSupportName.toUpperCase()} SHARED WITH YOU', 'Guardian shared-access view'],
+  ],
   'src/components/habit-retention.jsx': [
     ['goToDashboard?.("progress")', 'Low Screen review route'],
     ['goToDashboard?.("care")', 'support route'],
