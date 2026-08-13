@@ -1,0 +1,21 @@
+name: Button and link audit
+on:
+  push:
+    branches:
+      - button-link-audit
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: button-link-audit
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: node scripts/audit-interactive-wiring.js
+      - run: npm test
+      - run: npm run web:sync
