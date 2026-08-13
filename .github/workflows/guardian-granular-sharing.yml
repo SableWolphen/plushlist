@@ -28,6 +28,8 @@ jobs:
           s = s.replace('`Capacity: ${supportMoodSummary.capacity}`', '"Capacity: " + supportMoodSummary.capacity')
           s = s.replace('`Day: ${supportMoodSummary.day_type}`', '"Day: " + supportMoodSummary.day_type')
           s = s.replace('`Support: ${supportMoodSummary.support_preference}`', '"Support: " + supportMoodSummary.support_preference')
+          bad = '''replaceOnce(panel,\n`supportProgress={supportProgress}`,\n`supportProgress={supportProgress}`, 'guardian panel sanity marker');\n\n'''
+          s = s.replace(bad, '')
           p.write_text(s)
           PY
       - run: node scripts/patch-guardian-granular-sharing.js
