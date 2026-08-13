@@ -99,6 +99,7 @@ const mustContain = {
     ['visibleGroups.map((group)', 'Baby Mode grouped Little Jobs'],
     ['moveTaskGroup?.(group.section', 'Baby Mode group reorder controls'],
     ['startPointerTaskDrag?.(event, task.sourceTask.task_key', 'Baby Mode task drag reorder'],
+    ['showAllLittleJobs && task.sourceTask?.task_key', 'Baby Mode drag controls only when expanded'],
   ],
   'src/components/guardian-panel.jsx': [
     ['can_view_tasks', 'Guardian task sharing permission'],
@@ -107,6 +108,9 @@ const mustContain = {
     ['WHAT {selectedSupportName.toUpperCase()} SHARED WITH YOU', 'Guardian shared-access view'],
   ],
   'src/components/today-panel-core.jsx': [
+    ['data-plushlife-home-schedule-preview="true"', 'three-item Home schedule preview'],
+    ['arrangeTodayTasks', 'opt-in task arrange controls'],
+    ['setTaskListCollapsed(true); setArrangeTodayTasks(false)', 'collapse exits arrange mode'],
     ['minHeight: 48, display: "flex"', 'compact normal Today task rows'],
     ['width: 38, height: 44, minHeight: 44', 'touch-safe compact task controls'],
   ],
