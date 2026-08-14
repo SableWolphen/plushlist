@@ -24,23 +24,12 @@ esbuild.buildSync({
   jsx: "transform",
 });
 
-// Runtime guard for the production crash seen on 2026-08-14. esbuild can
-// compile a temporal-dead-zone mistake, so verify this render-time effect stays
-// after the derived rows declaration.
 const rowsDeclarationIndex = appSource.indexOf("  const rows = scheduledTasksForView");
 const notificationActionEffectIndex = appSource.indexOf('document.addEventListener("plushlife-notification-task-action"');
 if (notificationActionEffectIndex !== -1 && (rowsDeclarationIndex === -1 || notificationActionEffectIndex < rowsDeclarationIndex)) {
   throw new Error("Runtime safety check failed: notification action effect references rows before rows is initialized.");
 }
 
-// Some regression markers below cover content that has since moved out of
-// the inline app-source block into the assets/plush-*.js modules (mascot
-// outfits, appearance themes, small pure helpers, schedule/date/task
-// utilities, billing provider, etc.) and, as of phases 5-6, into
-// src/components/*.jsx (ToolPanel, HabitTypeIcon, PlushMascot, NurseryNook,
-// AppLoadingScreen, BabyArrivalRitual, MamasCorner, BabyModeCareSuite,
-// LandingPage) — check markers against all of them so a marker still passes
-// if its content moved rather than disappeared.
 const movedModuleFiles = ["plush-content.js", "plush-helpers.js", "plush-schedule.js", "plush-billing.js"];
 const movedModulesText = movedModuleFiles
   .map((file) => fs.readFileSync(path.join(__dirname, "..", "assets", file), "utf8"))
@@ -58,12 +47,6 @@ const requiredRegressionMarkers = [
   'Your habit progress and earned rewards live here in PlushGrowth.',
   'Close habit tools',
   '<HabitCoach {...props}>',
-  // WEEKDAY_PRESET_IDS/WEEKEND_PRESET_IDS are exported by
-  // assets/plush-schedule.js but were missing from app-source.jsx's
-  // top-level destructuring of window.PlushLifeSchedule — a real bug
-  // (ReferenceError at runtime, not caught by esbuild since bare
-  // identifier references aren't statically checked) discovered while
-  // extracting the "Change my tasks" panel in module split phase 7.
   'WEEKDAY_PRESET_IDS,\n  WEEKEND_PRESET_IDS,\n} = window.PlushLifeSchedule;',
   'const [onboardingMode, setOnboardingMode] = useState(null);',
   'onboardingMode === "supporter"',
@@ -133,7 +116,7 @@ const requiredRegressionMarkers = [
   '🧸 MY LITTLE JOBS',
   '{babyMode ? "🧸 Little Jobs" : "✓ Tasks"}',
   'littleJobs={rows.filter((row) => !viewDone[row.key])}',
-  '✏️ Edit jobs',
+  '⚙️ Task setup',
   'const [showAllLittleJobs, setShowAllLittleJobs] = React.useState(false);',
   'const visible = showAllLittleJobs ? waiting : waiting.slice(0, 3);',
   'const [journalQuickOpenDate, setJournalQuickOpenDate] = useState(() => trackerPeriod().date);',
