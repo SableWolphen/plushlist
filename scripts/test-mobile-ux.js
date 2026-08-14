@@ -22,7 +22,7 @@ const checks = [
   [today.includes('textOverflow: "ellipsis"') && today.includes('whiteSpace: "nowrap"'), "long Today labels are constrained instead of widening the page"],
   [care.includes('gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))"') && care.includes('gridTemplateColumns: "repeat(auto-fit,minmax(145px,1fr))"'), "Care tools reflow to available phone width"],
   [tasks.includes('minWidth: 0') && tasks.includes('width: "100%"') && tasks.includes('flexWrap: "wrap"'), "task editing fields and schedule controls can shrink/wrap on narrow phones"],
-  [settings.includes("Simple Layout") && settings.includes("Privacy & Data"), "Settings keeps high-complexity options organized and discoverable"],
+  [settings.includes('placeholder="Search settings"') && settings.includes("Privacy & Data") && settings.includes("Experience") && settings.includes("Notifications & Reminders"), "Settings keeps high-complexity options organized and discoverable"],
 ];
 
 const failures = checks.filter(([ok]) => !ok).map(([, label]) => label);
