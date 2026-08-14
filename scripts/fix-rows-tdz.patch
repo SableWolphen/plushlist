@@ -1,0 +1,99 @@
+diff --git a/src/app-source.jsx b/src/app-source.jsx
+index ac40c33..fixrows1 100644
+--- a/src/app-source.jsx
++++ b/src/app-source.jsx
+@@ -4467,34 +4467,6 @@ function GlowUpTracker() {
+       });
+   };
+ 
+-  useEffect(() => {
+-    const consumeTaskAction = () => {
+-      let pending = null;
+-      try { pending = JSON.parse(localStorage.getItem("plushlife:pending-notification-action:v1") || "null"); } catch (_error) {}
+-      if (!pending?.taskKey || !["done", "tiny", "skip"].includes(pending.action)) return;
+-      try { localStorage.removeItem("plushlife:pending-notification-action:v1"); } catch (_error) {}
+-      const row = rows.find((item) => item.key === pending.taskKey);
+-      if (!row) return;
+-      if (pending.action === "done" && !viewDone[row.key]) toggle(row.key);
+-      if (pending.action === "tiny") {
+-        const stateKey = "plushlife:habit-coach:v1";
+-        try {
+-          const state = JSON.parse(localStorage.getItem(stateKey) || "{}") || {};
+-          const retention = state.meta?.__retention || {};
+-          const completionStates = { ...(retention.completionStates || {}), [`${period.date}:${row.key}`]: "tiny" };
+-          localStorage.setItem(stateKey, JSON.stringify({ ...state, meta: { ...(state.meta || {}), __retention: { ...retention, completionStates, updated_at: new Date().toISOString() } } }));
+-        } catch (_error) {}
+-        if (!viewDone[row.key]) toggle(row.key);
+-      }
+-      if (pending.action === "skip") {
+-        setNextStepSkipped((items) => items.includes(row.key) ? items : [...items, row.key]);
+-      }
+-    };
+-    consumeTaskAction();
+-    document.addEventListener("plushlife-notification-task-action", consumeTaskAction);
+-    return () => document.removeEventListener("plushlife-notification-task-action", consumeTaskAction);
+-  }, [period.date, rows, viewDone]);
+-
+   // Normalize an item — either a plain string, or { label, how } for expandable ones
+   const norm = (it) => (typeof it === "string" ? { label: it, how: null } : it);
+@@ -4568,6 +4540,34 @@ function GlowUpTracker() {
+     })
+     .map(rowForTask);
++
++  // Notification actions need the derived rows collection. Keep this effect
++  // after rows is initialized: dependency arrays are evaluated during render,
++  // so referencing rows earlier triggers a temporal-dead-zone ReferenceError.
++  useEffect(() => {
++    const consumeTaskAction = () => {
++      let pending = null;
++      try { pending = JSON.parse(localStorage.getItem("plushlife:pending-notification-action:v1") || "null"); } catch (_error) {}
++      if (!pending?.taskKey || !["done", "tiny", "skip"].includes(pending.action)) return;
++      try { localStorage.removeItem("plushlife:pending-notification-action:v1"); } catch (_error) {}
++      const row = rows.find((item) => item.key === pending.taskKey);
++      if (!row) return;
++      if (pending.action === "done" && !viewDone[row.key]) toggle(row.key);
++      if (pending.action === "tiny") {
++        const stateKey = "plushlife:habit-coach:v1";
++        try {
++          const state = JSON.parse(localStorage.getItem(stateKey) || "{}") || {};
++          const retention = state.meta?.__retention || {};
++          const completionStates = { ...(retention.completionStates || {}), [`${period.date}:${row.key}`]: "tiny" };
++          localStorage.setItem(stateKey, JSON.stringify({ ...state, meta: { ...(state.meta || {}), __retention: { ...retention, completionStates, updated_at: new Date().toISOString() } } }));
++        } catch (_error) {}
++        if (!viewDone[row.key]) toggle(row.key);
++      }
++      if (pending.action === "skip") {
++        setNextStepSkipped((items) => items.includes(row.key) ? items : [...items, row.key]);
++      }
++    };
++    consumeTaskAction();
++    document.addEventListener("plushlife-notification-task-action", consumeTaskAction);
++    return () => document.removeEventListener("plushlife-notification-task-action", consumeTaskAction);
++  }, [period.date, rows, viewDone]);
++
+   useEffect(() => {
+     if (!user || !window.PlushLifeNativeNotifications) return;
+     let habitCoachMeta = {};
+diff --git a/scripts/validate-app-source.js b/scripts/validate-app-source.js
+index a1670bf..guardtdz 100644
+--- a/scripts/validate-app-source.js
++++ b/scripts/validate-app-source.js
+@@ -20,6 +20,18 @@ esbuild.buildSync({
+   jsx: "transform",
+ });
+ 
++// esbuild proves syntax/bundling, but it does not catch JavaScript temporal
++// dead-zone mistakes where a render-time expression reads a const before its
++// declaration. That exact class of bug can compile cleanly and still crash
++// React on first render. Guard the notification-action effect specifically.
++const rowsDeclarationIndex = appSource.indexOf("  const rows = scheduledTasksForView");
++const notificationActionEffectIndex = appSource.indexOf('document.addEventListener("plushlife-notification-task-action"');
++if (notificationActionEffectIndex !== -1 && (
++  rowsDeclarationIndex === -1 || notificationActionEffectIndex < rowsDeclarationIndex
++)) {
++  throw new Error("Runtime safety check failed: notification action effect references rows before rows is initialized.");
++}
++
+ // Some regression markers below cover content that has since moved out of
+ // the inline app-source block into the assets/plush-*.js modules (mascot
+ // outfits, appearance themes, small pure helpers, schedule/date/task
