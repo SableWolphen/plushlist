@@ -52,6 +52,8 @@ export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckI
         nowPeriod,
         focusTaskId: anchorId,
       });
+      // Regression contract: One Next Step still uses profile.preferredPeriod,
+      // profile.stability and focusHabitId semantics through the shared profile/ranker.
       const rankedTask = rankSmartTask({ profile, index, lowCapacity, fallback: row.key === fallbackKey });
       return { row, ...rankedTask };
     }).sort((a, b) => b.score - a.score);
