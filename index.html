@@ -196,6 +196,8 @@
         var restDates = new Set(Array.isArray(options.restDates) ? options.restDates : []);
         var taskReminders = Array.isArray(options.taskReminders) ? options.taskReminders : [];
         var notifications = [];
+        var coveredTasks = new Set();
+        var duplicateWindowMinutes = 45;
 
         for (var dayOffset = 0; dayOffset < 7; dayOffset += 1) {
           for (var timeIndex = 0; timeIndex < times.length; timeIndex += 1) {
@@ -208,6 +210,13 @@
             var dateKey = window.PlushLifeCare.localDateString(at);
             if (restDates.has(dateKey)) continue;
             var suggestedTask = pickTaskForReminder(taskReminders, at);
+            if (suggestedTask && suggestedTask.taskKey) {
+              var suggestedMinutes = taskMinutes(suggestedTask);
+              var reminderMinutes = at.getHours() * 60 + at.getMinutes();
+              if (suggestedMinutes !== null && Math.abs(suggestedMinutes - reminderMinutes) <= duplicateWindowMinutes) {
+                coveredTasks.add(dateKey + "::" + suggestedTask.taskKey);
+              }
+            }
             notifications.push({
               id: window.PlushLifeCare.notificationId("daily-" + dateKey + "-" + timeIndex),
               title: options.discreet ? "A gentle PlushLife reminder" : (suggestedTask ? titleForTime(at) : "A gentle PlushLife reminder"),
@@ -230,6 +239,7 @@
             date.setDate(date.getDate() + dayOffset);
             var dateKey = window.PlushLifeCare.localDateString(date);
             if (restDates.has(dateKey) || !taskAppliesToDate(task, date)) return;
+            if (task.taskKey && coveredTasks.has(dateKey + "::" + task.taskKey)) return;
             var taskAtMinutes = taskMinutes(task);
             if (taskAtMinutes === null) return;
             date.setHours(Math.floor(taskAtMinutes / 60), taskAtMinutes % 60, 0, 0);
