@@ -1,0 +1,24 @@
+name: Fix rows TDZ crash
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/fix-rows-tdz.patch
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply rows initialization fix
+        run: |
+          git apply --check scripts/fix-rows-tdz.patch
+          git apply scripts/fix-rows-tdz.patch
+          npm ci
+          npm test
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/app-source.jsx scripts/validate-app-source.js
+          git commit -m "Fix rows initialization crash and guard against TDZ regressions"
+          git push
