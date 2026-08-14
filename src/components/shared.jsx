@@ -9,6 +9,66 @@
 // <script> tags already loaded.
 const { useEffect } = React;
 
+// Mobile safety rules live with the shared UI layer so every dashboard/tool
+// inherits the same protections without each panel having to remember them.
+if (typeof document !== "undefined" && !document.getElementById("plushlife-mobile-ux-safety")) {
+  const style = document.createElement("style");
+  style.id = "plushlife-mobile-ux-safety";
+  style.textContent = `
+    html, body, #root { max-width: 100%; overflow-x: clip; }
+    img, svg, video, canvas { max-width: 100%; }
+    button, input, select, textarea { min-width: 0; max-width: 100%; }
+    button, [role="button"], [role="tab"], summary { overflow-wrap: anywhere; touch-action: manipulation; }
+    @media (pointer: coarse) {
+      button, [role="button"], [role="tab"], summary { min-height: 44px; }
+    }
+    @media (max-width: 380px) {
+      input, select, textarea { font-size: 16px !important; }
+      [role="tablist"] { gap: 4px !important; }
+      [role="tab"] { padding-left: 4px !important; padding-right: 4px !important; }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+class PanelErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { failed: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error, info) {
+    try {
+      window.dispatchEvent(new CustomEvent("plushlife:panel-error", {
+        detail: {
+          panel: this.props.label || "Panel",
+          message: String(error?.message || error || "Unknown panel error"),
+          componentStack: String(info?.componentStack || "").slice(0, 1800),
+        },
+      }));
+    } catch (_error) {}
+  }
+
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <div role="alert" style={{ margin: "12px 0", padding: 14, borderRadius: 14, border: "1px solid #E9C7D0", background: "#FFF5F7", color: "#704D58" }}>
+        <div style={{ fontWeight: 900, fontSize: 13 }}>This section hit a snag.</div>
+        <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.5 }}>Your saved data was not changed. Close this panel and try opening it again.</div>
+        <button type="button" onClick={() => this.setState({ failed: false })} style={{ marginTop: 9, minHeight: 44, padding: "8px 12px", borderRadius: 10, border: "1px solid #D9A7B4", background: "white", color: "#7C4D5B", fontWeight: 900, cursor: "pointer" }}>Try this section again</button>
+      </div>
+    );
+  }
+}
+
+export function SafePanelRegion({ label, children }) {
+  return <PanelErrorBoundary label={label}>{children}</PanelErrorBoundary>;
+}
+
 export function ToolPanel({ title, onClose, children, inline = false, hideClose = false }) {
   const onCloseRef = React.useRef(onClose);
   const panelRef = React.useRef(null);
@@ -78,7 +138,7 @@ export function ToolPanel({ title, onClose, children, inline = false, hideClose 
             💡 Simple Layout reduces ambient theme effects and decorative backgrounds. Turn it off in <strong>Experience</strong> to see the full theme.
           </div>
         )}
-        <div style={{ padding: "14px" }}>{children}</div>
+        <div style={{ padding: "14px" }}><PanelErrorBoundary label={title}>{children}</PanelErrorBoundary></div>
       </div>
     </div>
   );
