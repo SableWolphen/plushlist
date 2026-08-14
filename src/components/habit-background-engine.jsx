@@ -1,5 +1,6 @@
 import { hasGoldFeature } from "../plush-gold.js";
 import { buildHabitLearning } from "../habit-learning.mjs";
+import { buildSmartTaskProfile, taskId } from "../task-intelligence.mjs";
 
 const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 const ENGINE_KEY = "__background_engine";
@@ -214,6 +215,18 @@ export function HabitBackgroundEngine({ open, rows = [], viewDone = {}, period, 
       const baseEngine = { ...currentEngine, completionEvents:events, checkIns:prunedCheckIns };
       const profiles = Object.fromEntries(compactRows.map((row)=>{ const p=profileFor(state,baseEngine,row,today); return [p.id,p]; }));
       const load = loadProfile(compactRows, viewDone, dailyCheckIn);
+      const focusTaskId = String(state.meta?.focus_habit_id || state.anchors?.[today] || "");
+      const nowPeriod = periodLabel(now.getHours());
+      const smartTaskProfiles = Object.fromEntries(compactRows.map((row) => {
+        const id = taskId(row);
+        return [id, buildSmartTaskProfile({
+          row,
+          learned: profiles[id] || {},
+          load,
+          nowPeriod,
+          focusTaskId,
+        })];
+      }));
       const recovery = recoveryProfile(state,today);
       const crossPatterns = checkInPatterns(baseEngine,state);
       const experiments = experimentResults(state,profiles,today);
@@ -229,10 +242,11 @@ export function HabitBackgroundEngine({ open, rows = [], viewDone = {}, period, 
       const week = weekKey(today);
       const maintenanceDue = currentEngine.maintenance?.week !== week;
       const engine = {
-        version:3,
+        version:4,
         completionEvents:events,
         checkIns:prunedCheckIns,
         habitProfiles:profiles,
+        smartTaskProfiles,
         load,
         recovery,
         crossPatterns,
