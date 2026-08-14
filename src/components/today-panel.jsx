@@ -83,6 +83,7 @@ export function TodayPanel(props) {
   const lowScreen = useLowScreenMode();
   const readinessReportedRef = React.useRef(false);
   const [smartNextStepHidden, setSmartNextStepHidden] = React.useState(false);
+  const [moreForTodayOpen, setMoreForTodayOpen] = React.useState(false);
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
   const recentlyCompletedKeys = Array.from(new Set([
     ...(props.recentlyCompletedKeys || []),
@@ -99,6 +100,7 @@ export function TodayPanel(props) {
 
   React.useEffect(() => {
     setSmartNextStepHidden(false);
+    setMoreForTodayOpen(false);
   }, [props.period?.date]);
 
   const setNextStepDismissedToday = (hidden) => {
@@ -146,10 +148,34 @@ export function TodayPanel(props) {
     <>
       {backgroundEngine}
       {liveRegion}
-      <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
-      <CompactAnchor {...modeProps} />
       <TodayPanelCore {...modeProps} />
-      <React.Suspense fallback={null}><LazyDailyCompanion {...modeProps} /></React.Suspense>
+
+      <button
+        type="button"
+        onClick={() => setMoreForTodayOpen((open) => !open)}
+        aria-expanded={moreForTodayOpen}
+        style={{
+          width: "100%",
+          minHeight: 46,
+          margin: "10px 0 8px",
+          padding: "10px 12px",
+          borderRadius: 13,
+          border: "1px solid #E6D4F2",
+          background: "rgba(255,255,255,.78)",
+          color: "#765F84",
+          fontWeight: 900,
+          fontSize: 12,
+          cursor: "pointer",
+        }}
+      >
+        {moreForTodayOpen ? "Hide extra tools" : "More for today"} {moreForTodayOpen ? "⌃" : "⌄"}
+      </button>
+
+      <div style={{ display: moreForTodayOpen ? "block" : "none" }} aria-hidden={!moreForTodayOpen}>
+        <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
+        <CompactAnchor {...modeProps} />
+        {moreForTodayOpen && <React.Suspense fallback={null}><LazyDailyCompanion {...modeProps} /></React.Suspense>}
+      </div>
     </>
   );
 }
