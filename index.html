@@ -184,6 +184,34 @@
       return winner.task;
     };
 
+    var formatMinutes = function (minutes) {
+      var safe = ((minutes % 1440) + 1440) % 1440;
+      var hour = Math.floor(safe / 60);
+      var minute = safe % 60;
+      return String(hour).padStart(2, "0") + ":" + String(minute).padStart(2, "0");
+    };
+
+    var automaticReminderTimes = function (taskReminders) {
+      var groups = { morning: [], daytime: [], evening: [] };
+      (Array.isArray(taskReminders) ? taskReminders : []).forEach(function (task) {
+        if (!task || task.done || task.completed || task.isDone) return;
+        var minutes = taskMinutes(task);
+        if (minutes === null) return;
+        if (minutes >= 300 && minutes < 720) groups.morning.push(minutes);
+        else if (minutes >= 720 && minutes < 1080) groups.daytime.push(minutes);
+        else groups.evening.push(minutes);
+      });
+      var chosen = [];
+      [groups.morning, groups.daytime, groups.evening].forEach(function (group) {
+        if (!group.length) return;
+        group.sort(function (a, b) { return a - b; });
+        var middle = group[Math.floor((group.length - 1) / 2)];
+        var reminder = Math.floor(Math.max(0, middle - 15) / 15) * 15;
+        chosen.push(formatMinutes(reminder));
+      });
+      return chosen.length ? chosen.slice(0, 3) : ["08:30", "13:00", "19:30"];
+    };
+
     window.PlushLifeNativeNotifications = {
       syncDailyReminders: async function (options) {
         var pending = await LocalNotifications.getPending();
@@ -192,9 +220,14 @@
         });
         if (old.length) await LocalNotifications.cancel({ notifications: old.map(function (item) { return { id: item.id }; }) });
         if (!options || !options.enabled) return;
-        var times = Array.isArray(options.times) ? options.times.slice(0, 8) : [];
-        var restDates = new Set(Array.isArray(options.restDates) ? options.restDates : []);
         var taskReminders = Array.isArray(options.taskReminders) ? options.taskReminders : [];
+        var suppliedTimes = Array.isArray(options.times) ? options.times.slice(0, 8) : [];
+        var legacyDefaults = ["08:00", "12:30", "17:30", "20:30"];
+        var isLegacyDefaultSchedule = suppliedTimes.length === legacyDefaults.length && suppliedTimes.every(function (time, index) {
+          return String(time).slice(0, 5) === legacyDefaults[index];
+        });
+        var times = (!suppliedTimes.length || isLegacyDefaultSchedule) ? automaticReminderTimes(taskReminders) : suppliedTimes;
+        var restDates = new Set(Array.isArray(options.restDates) ? options.restDates : []);
         var notifications = [];
         var coveredTasks = new Set();
         var duplicateWindowMinutes = 45;
@@ -228,8 +261,8 @@
               actionTypeId: "PLUSHLIFE_REMINDER",
               autoCancel: true,
               extra: suggestedTask
-                ? { plushlifeKind: "daily-reminder", reminderTime: times[timeIndex], taskKey: suggestedTask.taskKey, taskLabel: suggestedTask.label }
-                : { plushlifeKind: "daily-reminder", reminderTime: times[timeIndex] },
+                ? { plushlifeKind: "daily-reminder", reminderTime: times[timeIndex], taskKey: suggestedTask.taskKey, taskLabel: suggestedTask.label, automaticSchedule: isLegacyDefaultSchedule || !suppliedTimes.length }
+                : { plushlifeKind: "daily-reminder", reminderTime: times[timeIndex], automaticSchedule: isLegacyDefaultSchedule || !suppliedTimes.length },
             });
           }
 
