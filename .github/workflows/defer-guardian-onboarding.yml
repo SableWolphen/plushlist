@@ -1,0 +1,31 @@
+name: Defer Guardian onboarding validation
+on:
+  push:
+    branches:
+      - defer-guardian-onboarding
+permissions:
+  contents: write
+jobs:
+  validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: defer-guardian-onboarding
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: node scripts/patch-defer-guardian-onboarding.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run web:sync
+      - name: Commit validated onboarding change
+        run: |
+          rm scripts/patch-defer-guardian-onboarding.js
+          rm .github/workflows/defer-guardian-onboarding.yml
+          git config user.name "SableWolphen"
+          git config user.email "johnston.alexander.k@gmail.com"
+          git add -A
+          git commit -m "Let users finish setup before connecting a Guardian"
+          git push origin defer-guardian-onboarding
