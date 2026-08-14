@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
     paths:
-      - scripts/fix-rows-tdz.patch
+      - .github/workflows/fix-rows-tdz.yml
 permissions:
   contents: write
 jobs:
@@ -11,12 +11,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply rows initialization fix
+      - name: Move notification effect after rows initialization
         run: |
-          git apply --check scripts/fix-rows-tdz.patch
-          git apply scripts/fix-rows-tdz.patch
+          python3 - <<'PY'
+          from pathlib import Path
+
+          app_path = Path('src/app-source.jsx')
+          text = app_path.read_text()
+          effect_start = '  useEffect(() => {\n    const consumeTaskAction = () => {'
+          start = text.index(effect_start)
+          end = text.index('\n\n  // Normalize an item', start)
+          block = text[start:end]
+          text = text[:start] + text[end:]
+
+          anchor = '    .map(rowForTask);'
+          anchor_pos = text.index(anchor, start) + len(anchor)
+          safety_comment = ('\n\n  // Runtime safety: this effect consumes derived rows, so it must stay after '\
+                            'rows is initialized. Dependency arrays are evaluated during render.')
+          text = text[:anchor_pos] + safety_comment + '\n' + block + text[anchor_pos:]
+          app_path.write_text(text)
+
+          validator_path = Path('scripts/validate-app-source.js')
+          validator = validator_path.read_text()
+          marker = '// Some regression markers below cover content that has since moved out of'
+          guard = '''// Runtime guard for the production crash seen on 2026-08-14. esbuild can\n// compile a temporal-dead-zone mistake, so verify this render-time effect stays\n// after the derived rows declaration.\nconst rowsDeclarationIndex = appSource.indexOf("  const rows = scheduledTasksForView");\nconst notificationActionEffectIndex = appSource.indexOf('document.addEventListener("plushlife-notification-task-action"');\nif (notificationActionEffectIndex !== -1 && (rowsDeclarationIndex === -1 || notificationActionEffectIndex < rowsDeclarationIndex)) {\n  throw new Error("Runtime safety check failed: notification action effect references rows before rows is initialized.");\n}\n\n'''
+          if 'Runtime safety check failed: notification action effect references rows' not in validator:
+              validator = validator.replace(marker, guard + marker, 1)
+              validator_path.write_text(validator)
+          PY
           npm ci
           npm test
+          git diff --check
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add src/app-source.jsx scripts/validate-app-source.js
