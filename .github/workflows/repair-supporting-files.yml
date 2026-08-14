@@ -1,0 +1,35 @@
+name: Repair supporting source files
+on:
+  push:
+    paths:
+      - scripts/repair-supporting-files.patch
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore and patch supporting files
+        run: |
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:android/app/src/main/java/com/PlushLife/MainActivity.java > android/app/src/main/java/com/PlushLife/MainActivity.java
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:android/app/src/main/java/com/PlushLife/PlushLifeWidgetProvider.java > android/app/src/main/java/com/PlushLife/PlushLifeWidgetProvider.java
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:android/app/src/main/java/com/PlushLife/WidgetBridgePlugin.java > android/app/src/main/java/com/PlushLife/WidgetBridgePlugin.java
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:index.html > index.html
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:package.json > package.json
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:scripts/test-backup-recovery.js > scripts/test-backup-recovery.js
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:scripts/validate-android-widget.js > scripts/validate-android-widget.js
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:src/components/companion-cloud-sync.jsx > src/components/companion-cloud-sync.jsx
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:src/components/habit-background-engine.jsx > src/components/habit-background-engine.jsx
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:src/components/habit-intelligence.jsx > src/components/habit-intelligence.jsx
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:src/components/organized-settings.jsx > src/components/organized-settings.jsx
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:src/components/progress-panel.jsx > src/components/progress-panel.jsx
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:src/components/today-panel-core.jsx > src/components/today-panel-core.jsx
+          git apply scripts/repair-supporting-files.patch
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add "android/app/src/main/java/com/PlushLife/MainActivity.java" "android/app/src/main/java/com/PlushLife/PlushLifeWidgetProvider.java" "android/app/src/main/java/com/PlushLife/WidgetBridgePlugin.java" "index.html" "package.json" "scripts/test-backup-recovery.js" "scripts/validate-android-widget.js" "src/components/companion-cloud-sync.jsx" "src/components/habit-background-engine.jsx" "src/components/habit-intelligence.jsx" "src/components/organized-settings.jsx" "src/components/progress-panel.jsx" "src/components/today-panel-core.jsx"
+          git commit -m "Repair uploaded supporting source files"
+          git push
