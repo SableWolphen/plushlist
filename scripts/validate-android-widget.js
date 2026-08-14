@@ -81,6 +81,7 @@ if (fs.existsSync(providerPath)) {
     if (!provider.includes(`${lifecycle}(`)) failures.push(`Widget provider is missing ${lifecycle}.`);
   }
   if (!provider.includes("refreshAll(context)")) failures.push("Widget provider does not refresh all widget instances.");
+  if (!provider.includes("plushlifeTaskAction")) failures.push("Widget task rows no longer expose the quick Done action.");
 }
 
 if (fs.existsSync(bridgePath)) {
@@ -90,6 +91,7 @@ if (fs.existsSync(bridgePath)) {
     "document.addEventListener('change'",
     "setInterval(sync,30000)",
     "plugin.updateWidget",
+    "consumeWidgetAction",
     "getBridge().getWebView().evaluateJavascript",
   ]) {
     if (!bridge.includes(marker)) failures.push(`Widget bridge integration marker is missing: ${marker}`);

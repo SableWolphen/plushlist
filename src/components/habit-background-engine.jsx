@@ -1,4 +1,5 @@
 import { hasGoldFeature } from "../plush-gold.js";
+import { buildHabitLearning } from "../habit-learning.mjs";
 
 const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 const ENGINE_KEY = "__background_engine";
@@ -15,6 +16,19 @@ function writeState(nextState) {
 }
 function habitId(row) { return String(row?.sourceTask?.id || row?.task_id || row?.id || row?.key || ""); }
 function habitLabel(row) { return String(row?.label || row?.sourceTask?.label || row?.sourceTask?.name || "Habit"); }
+function learningRow(row) {
+  const source = row?.sourceTask || {};
+  return {
+    id: habitId(row),
+    label: habitLabel(row),
+    reminderTime: source.reminder_time || row?.reminder_time || "",
+    tinyLabel: source.tiny_label || row?.tiny_label || "",
+  };
+}
+function readReminderEvents() {
+  try { return JSON.parse(localStorage.getItem("plushlife:notification-events:v1") || "[]") || []; }
+  catch (_error) { return []; }
+}
 function dateKey(value) { return String(value || new Date().toISOString().slice(0, 10)).slice(0, 10); }
 function validDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(String(value || "")); }
 function daysBetween(a, b) { return Math.round((new Date(`${b}T12:00:00`) - new Date(`${a}T12:00:00`)) / 86400000); }
@@ -185,7 +199,7 @@ export function HabitBackgroundEngine({ open, rows = [], viewDone = {}, period, 
         const isDone = !!viewDone?.[row.key];
         if (!wasDone && isDone) {
           const id = `${today}:${habitId(row)}:${now.getHours()}:${now.getMinutes()}`;
-          if (!events.some((event)=>event.id === id)) events.push({ id, date:today, habitId:habitId(row), label:habitLabel(row), hour:now.getHours(), minute:now.getMinutes(), period:periodLabel(now.getHours()) });
+          if (!events.some((event)=>event.id === id)) events.push({ id, date:today, habitId:habitId(row), label:habitLabel(row), hour:now.getHours(), minute:now.getMinutes(), period:periodLabel(now.getHours()), completedAt:now.toISOString() });
         }
       });
       events = events.slice(-MAX_EVENTS);
@@ -203,10 +217,19 @@ export function HabitBackgroundEngine({ open, rows = [], viewDone = {}, period, 
       const recovery = recoveryProfile(state,today);
       const crossPatterns = checkInPatterns(baseEngine,state);
       const experiments = experimentResults(state,profiles,today);
+      const userChoices = currentEngine.userChoices || {};
+      const learning = buildHabitLearning({
+        rows: compactRows.map(learningRow),
+        history: state.history || {},
+        completionEvents: events,
+        retention: state.meta?.__retention || {},
+        reminderEvents: readReminderEvents(),
+        userChoices,
+      });
       const week = weekKey(today);
       const maintenanceDue = currentEngine.maintenance?.week !== week;
       const engine = {
-        version:2,
+        version:3,
         completionEvents:events,
         checkIns:prunedCheckIns,
         habitProfiles:profiles,
@@ -214,6 +237,9 @@ export function HabitBackgroundEngine({ open, rows = [], viewDone = {}, period, 
         recovery,
         crossPatterns,
         experiments,
+        learning,
+        suggestions: learning.suggestions,
+        userChoices,
         maintenance: maintenanceDue ? { week, ran_at:now.toISOString(), activeHabits:compactRows.length, staleProfilesRemoved:Object.keys(currentEngine.habitProfiles || {}).filter((id)=>!profiles[id]).length } : (currentEngine.maintenance || { week, ran_at:now.toISOString() }),
         updated_at:now.toISOString(),
       };

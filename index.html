@@ -106,6 +106,9 @@
       types: [{
         id: "PLUSHLIFE_REMINDER",
         actions: [
+          { id: "DONE", title: "Done" },
+          { id: "TINY", title: "Tiny version" },
+          { id: "SKIP", title: "Skip today" },
           { id: "SNOOZE_10", title: "10 min" },
           { id: "SNOOZE_30", title: "30 min" },
           { id: "SNOOZE_60", title: "1 hour" },
@@ -216,7 +219,7 @@
       syncDailyReminders: async function (options) {
         var pending = await LocalNotifications.getPending();
         var old = (pending.notifications || []).filter(function (item) {
-          return item.extra && item.extra.plushlifeKind === "daily-reminder";
+          return item.extra && (item.extra.plushlifeKind === "daily-reminder" || item.extra.plushlifeKind === "task-reminder");
         });
         if (old.length) await LocalNotifications.cancel({ notifications: old.map(function (item) { return { id: item.id }; }) });
         if (!options || !options.enabled) return;
@@ -231,6 +234,28 @@
         var notifications = [];
         var coveredTasks = new Set();
         var duplicateWindowMinutes = 45;
+        var completedTaskKeys = new Set(taskReminders.filter(function (task) { return task && (task.done || task.completed || task.isDone); }).map(function (task) { return task.taskKey; }));
+        var firedAnchorKey = "plushlife:anchor-reminders-fired:v1";
+        var firedAnchors = {};
+        try { firedAnchors = JSON.parse(localStorage.getItem(firedAnchorKey) || "{}") || {}; } catch (_error) {}
+
+        taskReminders.forEach(function (task) {
+          if (!task || !task.taskKey || !task.anchorTaskKey || task.done || !completedTaskKeys.has(task.anchorTaskKey)) return;
+          var todayKey = window.PlushLifeCare.localDateString(new Date());
+          var fingerprint = todayKey + "::" + task.anchorTaskKey + "::" + task.taskKey;
+          if (firedAnchors[fingerprint]) return;
+          var at = new Date(Date.now() + 15000);
+          notifications.push({
+            id: window.PlushLifeCare.notificationId("anchor-" + fingerprint),
+            title: "Ready for the next gentle step?",
+            body: options.discreet ? "You have something waiting in PlushLife." : task.label,
+            schedule: { at: at, allowWhileIdle: true }, channelId: reminderChannelId,
+            actionTypeId: "PLUSHLIFE_REMINDER", autoCancel: true,
+            extra: { plushlifeKind: "task-reminder", taskKey: task.taskKey, taskLabel: task.label, tinyLabel: task.tinyLabel || "", anchorTaskKey: task.anchorTaskKey }
+          });
+          firedAnchors[fingerprint] = new Date().toISOString();
+        });
+        try { localStorage.setItem(firedAnchorKey, JSON.stringify(firedAnchors)); } catch (_error) {}
 
         for (var dayOffset = 0; dayOffset < 7; dayOffset += 1) {
           for (var timeIndex = 0; timeIndex < times.length; timeIndex += 1) {
@@ -285,7 +310,7 @@
               channelId: reminderChannelId,
               actionTypeId: "PLUSHLIFE_REMINDER",
               autoCancel: true,
-              extra: { plushlifeKind: "daily-reminder", taskKey: task.taskKey, taskLabel: task.label },
+              extra: { plushlifeKind: "task-reminder", taskKey: task.taskKey, taskLabel: task.label },
             });
           });
         }
@@ -308,6 +333,28 @@
       var minutesByAction = { SNOOZE_10: 10, SNOOZE_30: 30, SNOOZE_60: 60 };
       var minutes = minutesByAction[event && event.actionId];
       var notification = event && event.notification;
+      var taskAction = event && ["DONE", "TINY", "SKIP"].includes(event.actionId) ? event.actionId.toLowerCase() : "";
+      if (notification) {
+        try {
+          var storedEvents = JSON.parse(localStorage.getItem("plushlife:notification-events:v1") || "[]");
+          storedEvents.push({
+            id: String(notification.id || "") + ":" + Date.now(),
+            action: minutes ? "snoozed" : "opened",
+            actionId: event && event.actionId || "tap",
+            taskKey: notification.extra && notification.extra.taskKey || "",
+            kind: notification.extra && notification.extra.plushlifeKind || "",
+            at: new Date().toISOString()
+          });
+          localStorage.setItem("plushlife:notification-events:v1", JSON.stringify(storedEvents.slice(-120)));
+          window.dispatchEvent(new CustomEvent("plushlife:notification-interaction"));
+        } catch (_error) {}
+      }
+      if (taskAction && notification && notification.extra && notification.extra.taskKey) {
+        try {
+          localStorage.setItem("plushlife:pending-notification-action:v1", JSON.stringify({ action: taskAction, taskKey: notification.extra.taskKey, at: new Date().toISOString() }));
+          document.dispatchEvent(new CustomEvent("plushlife-notification-task-action"));
+        } catch (_error) {}
+      }
       if (minutes && notification) {
         scheduleLocalReminder({
           id: window.PlushLifeCare.notificationId("action-snooze", Date.now() % 2147483647),

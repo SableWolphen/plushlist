@@ -1,6 +1,7 @@
 package com.PlushLife;
 
 import android.graphics.Color;
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.SystemBarStyle;
@@ -128,6 +129,15 @@ public class MainActivity extends BridgeActivity {
                     promptToRestartForUpdate();
                 }
             });
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (bridge != null && bridge.getWebView() != null) {
+            bridge.getWebView().post(() -> bridge.getWebView().evaluateJavascript("document.dispatchEvent(new CustomEvent('plushlife-widget-action'))", null));
         }
     }
 

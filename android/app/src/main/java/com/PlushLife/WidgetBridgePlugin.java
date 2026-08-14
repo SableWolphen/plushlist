@@ -69,16 +69,19 @@ public class WidgetBridgePlugin extends Plugin {
         for (int i = 0; i < 3; i++) {
             String label = "";
             boolean done = false;
+            String taskKey = "";
             if (tasks != null && i < tasks.length()) {
                 try {
                     JSONObject task = tasks.getJSONObject(i);
                     label = task.optString("label", "");
                     done = task.optBoolean("done", false);
+                    taskKey = task.optString("key", "");
                 } catch (JSONException ignored) {
                 }
             }
             editor.putString("task" + i + "Label", label);
             editor.putBoolean("task" + i + "Done", done);
+            editor.putString("task" + i + "Key", taskKey);
         }
         editor.apply();
 
@@ -86,6 +89,18 @@ public class WidgetBridgePlugin extends Plugin {
             .setAction(PlushLifeWidgetProvider.ACTION_REFRESH));
         JSObject result = new JSObject();
         result.put("updated", true);
+        call.resolve(result);
+    }
+
+    @PluginMethod
+    public void consumeWidgetAction(PluginCall call) {
+        String taskKey = getActivity().getIntent().getStringExtra("plushlifeTaskKey");
+        String action = getActivity().getIntent().getStringExtra("plushlifeTaskAction");
+        JSObject result = new JSObject();
+        result.put("taskKey", taskKey == null ? "" : taskKey);
+        result.put("action", action == null ? "" : action);
+        getActivity().getIntent().removeExtra("plushlifeTaskKey");
+        getActivity().getIntent().removeExtra("plushlifeTaskAction");
         call.resolve(result);
     }
 

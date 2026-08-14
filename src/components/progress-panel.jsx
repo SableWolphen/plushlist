@@ -11,12 +11,35 @@ function InsightToolsFallback() {
   return <div role="status" style={{ padding: "12px 10px", color: "#71857F", fontSize: 11.5 }}>Loading deeper habit insights…</div>;
 }
 
+function MeasuredGoalsSummary() {
+  const [state, setState] = React.useState(() => { try { return JSON.parse(localStorage.getItem("plushlife:habit-coach:v1") || "{}") || {}; } catch (_error) { return {}; } });
+  React.useEffect(() => {
+    const refresh = () => { try { setState(JSON.parse(localStorage.getItem("plushlife:habit-coach:v1") || "{}") || {}); } catch (_error) {} };
+    window.addEventListener("plushlife:habit-coach-updated", refresh);
+    window.addEventListener("plushlife:habit-coach-hydrated", refresh);
+    return () => { window.removeEventListener("plushlife:habit-coach-updated", refresh); window.removeEventListener("plushlife:habit-coach-hydrated", refresh); };
+  }, []);
+  const goals = Object.entries(state.meta || {}).filter(([id, meta]) => !id.startsWith("__") && Number(meta?.goalTarget) > 0);
+  if (!goals.length) return null;
+  const dates = Object.keys(state.measurements || {}).sort();
+  const latestDate = dates[dates.length - 1] || "";
+  return <section style={{ marginBottom: 14, padding: 13, borderRadius: 16, border: "1px solid #D9E6F6", background: "#F7FBFF" }}>
+    <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#4C78A8" }}>MEASURABLE GOALS</div>
+    <div style={{ display: "grid", gap: 7, marginTop: 8 }}>{goals.slice(0, 4).map(([id, meta]) => {
+      const value = Number(state.measurements?.[latestDate]?.[id] || 0);
+      const pct = Math.min(100, Math.round(value * 100 / Number(meta.goalTarget)));
+      return <div key={id}><div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 11.5, color: "#536C89" }}><strong>{meta.label || "Measured habit"}</strong><span>{value}/{meta.goalTarget} {meta.goalUnit || "times"}</span></div><div style={{ height: 6, marginTop: 4, borderRadius: 99, overflow: "hidden", background: "#E6EFF9" }}><div style={{ height: "100%", width: `${pct}%`, background: "#4C8FE8" }} /></div></div>;
+    })}</div>
+  </section>;
+}
+
 export function ProgressPanel(props) {
   const [insightsOpen, setInsightsOpen] = React.useState(false);
   if (!props.open) return null;
   const goldInsights = hasGoldFeature("advanced_growth_insights");
   return (
     <>
+      <MeasuredGoalsSummary />
       {goldInsights && <GrowthNextMove />}
       {goldInsights && <section className="habit-insights-card" style={{ marginBottom: 14, borderRadius: 18, border: "1px solid #CFE8E1", background: "linear-gradient(145deg,#F4FBF9,#FFF9FD)", overflow: "hidden", boxShadow: "0 7px 22px rgba(49,140,121,.08)" }}>
         <details onToggle={(event) => setInsightsOpen(event.currentTarget.open)}>

@@ -100,11 +100,14 @@ function mergeBackgroundEngine(cloud = {}, local = {}) {
   const experiments = { ...plainObject(cloud?.experiments), ...plainObject(local?.experiments) };
   return {
     ...preferred,
-    version: Math.max(Number(cloud?.version || 0), Number(local?.version || 0), 2),
+    version: Math.max(Number(cloud?.version || 0), Number(local?.version || 0), 3),
     completionEvents: mergeEventList(cloud?.completionEvents || [], local?.completionEvents || []),
     checkIns,
     habitProfiles,
     experiments,
+    learning: preferred.learning || {},
+    suggestions: Array.isArray(preferred.suggestions) ? preferred.suggestions : [],
+    userChoices: { ...plainObject(cloud?.userChoices), ...plainObject(local?.userChoices) },
     maintenance: newerObject(cloud?.maintenance || {}, local?.maintenance || {}),
     updated_at: new Date().toISOString(),
   };
@@ -140,6 +143,7 @@ function mergeHabitCoach(cloud = {}, local = {}) {
     paths: { ...cloudPaths, ...localPaths, active, completed },
     reviews: { ...plainObject(cloud?.reviews), ...plainObject(local?.reviews) },
     history: mergeHabitHistory(cloud?.history || {}, local?.history || {}),
+    measurements: mergeHabitHistory(cloud?.measurements || {}, local?.measurements || {}),
     recovery: { ...plainObject(cloud?.recovery), ...plainObject(local?.recovery) },
     updated_at: new Date().toISOString(),
   };

@@ -3,6 +3,7 @@ import { CompactAnchor } from "./compact-anchor.jsx";
 import { useLowScreenMode } from "./low-screen-mode.jsx";
 import { CompletedTaskArea, useCompletedTaskFlow } from "./completed-task-flow.jsx";
 import { useSmartNextStep } from "./smart-next-step.jsx";
+import { HabitSuggestions } from "./habit-suggestions.jsx";
 
 const LazyDailyCompanion = React.lazy(() => import("./daily-companion.jsx").then((module) => ({ default: module.DailyCompanion })));
 const LazyBabyToday = React.lazy(() => import("./baby-today.jsx").then((module) => ({ default: module.BabyToday })));
@@ -172,6 +173,7 @@ export function TodayPanel(props) {
       </button>
 
       <div style={{ display: moreForTodayOpen ? "block" : "none" }} aria-hidden={!moreForTodayOpen}>
+        {moreForTodayOpen && <HabitSuggestions rows={props.rows || []} openTaskManager={props.openTaskManager} />}
         <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
         <CompactAnchor {...modeProps} />
         {moreForTodayOpen && <React.Suspense fallback={null}><LazyDailyCompanion {...modeProps} /></React.Suspense>}
