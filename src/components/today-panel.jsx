@@ -80,51 +80,6 @@ function BackgroundIntelligence(props) {
   return <React.Suspense fallback={null}><LazyHabitBackgroundEngine {...props} /></React.Suspense>;
 }
 
-const NEXT_STEP_EXPLAINER_KEY = "plushlife:one-next-step-explainer-dismissed:v1";
-
-function NextStepFeatureTip({ text }) {
-  const [open, setOpen] = React.useState(() => {
-    try { return window.localStorage.getItem(NEXT_STEP_EXPLAINER_KEY) !== "1"; }
-    catch (_error) { return true; }
-  });
-
-  const dismiss = () => {
-    try { window.localStorage.setItem(NEXT_STEP_EXPLAINER_KEY, "1"); } catch (_error) {}
-    setOpen(false);
-  };
-
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Explain One Next Step"
-        style={{
-          minHeight: 38,
-          marginBottom: 9,
-          padding: "7px 10px",
-          borderRadius: 10,
-          border: "1px solid #F0D99E",
-          background: "#FFFDF5",
-          color: "#9A6B17",
-          fontWeight: 850,
-          fontSize: 11,
-          cursor: "pointer",
-        }}
-      >
-        💡 Why this?
-      </button>
-    );
-  }
-
-  return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 9, padding: "9px 10px", borderRadius: 10, background: "#FFF9E9", border: "1px solid #F0D99E" }}>
-      <span style={{ fontSize: 11.5, lineHeight: 1.45, color: "#6B5A3D" }}>💡 {text}</span>
-      <button type="button" onClick={dismiss} aria-label="Dismiss One Next Step explanation" style={{ minHeight: 38, padding: "6px 9px", borderRadius: 8, border: "1px solid #F0D99E", background: "white", color: "#A56D14", fontWeight: 900, fontSize: 10.5, cursor: "pointer", flexShrink: 0 }}>Got it</button>
-    </div>
-  );
-}
-
 export function TodayPanel(props) {
   const lowScreen = useLowScreenMode();
   const readinessReportedRef = React.useRef(false);
@@ -162,7 +117,6 @@ export function TodayPanel(props) {
     nextStepTask: smartNextStepHidden ? null : (smartNextStep.task || props.nextStepTask),
     nextStepReason: smartNextStepHidden ? "" : smartNextStep.reason,
     setNextStepDismissedToday,
-    FeatureTip: NextStepFeatureTip,
   };
   const liveRegion = <div aria-live="polite" aria-atomic="true" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>{announcement}</div>;
   const backgroundEngine = <BackgroundIntelligence {...modeProps} />;
