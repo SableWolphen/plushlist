@@ -1,5 +1,16 @@
 import { ProgressPanel as ProgressPanelCore } from "./progress-panel-core.jsx";
 import { HabitTypeIcon } from "./shared.jsx";
+import { HabitHealth } from "./habit-health.jsx";
+import { GrowthNextMove } from "./growth-next-move.jsx";
+import { hasGoldFeature } from "../plush-gold.js";
+
+const LazyWeeklyHabitReview = React.lazy(() => import("./habit-intelligence.jsx").then((module) => ({ default: module.WeeklyHabitReview })));
+const LazyWhatWorksForMe = React.lazy(() => import("./habit-retention.jsx").then((module) => ({ default: module.WhatWorksForMe })));
+const LazyResilienceProgress = React.lazy(() => import("./habit-resilience.jsx").then((module) => ({ default: module.ResilienceProgress })));
+
+function InsightToolsFallback() {
+  return <div role="status" style={{ padding: "10px", color: "#71857F", fontSize: 11.5 }}>Loading deeper habit insights…</div>;
+}
 
 const card = {
   borderRadius: 18,
@@ -24,9 +35,10 @@ function ProgressTabs({ progressView, setProgressView }) {
 
 function CompactGrowthOverview(props) {
   const [monthlyOpen, setMonthlyOpen] = React.useState(false);
+  const [insightsOpen, setInsightsOpen] = React.useState(false);
+  const goldInsights = hasGoldFeature("advanced_growth_insights");
   const firstInsight = props.patternInsightCards?.[props.insightCardIndex % Math.max(1, props.patternInsightCards?.length || 1)] || null;
   const highlights = props.weeklyHighlights || {};
-  const totalDays = Math.max(1, Number(props.caringDays) || 0);
 
   return <div data-plushlife-growth-focus="true" style={{ display: "grid", gap: 12 }}>
     <section style={{ ...card, padding: 17 }}>
@@ -86,6 +98,23 @@ function CompactGrowthOverview(props) {
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline" }}><div><div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#8E4EAA" }}>MONTH SO FAR</div><div style={{ marginTop: 3, fontSize: 16, fontWeight: 900, color: "#4F405C" }}>Monthly growth</div></div><strong style={{ fontSize: 23, color: "#A65DC1" }}>{props.monthlyOverallPct || 0}%</strong></div>
       <div style={{ height: 9, marginTop: 10, overflow: "hidden", borderRadius: 99, background: "#F2E8F8" }}><div style={{ width: `${Math.max(0, Math.min(100, Number(props.monthlyOverallPct) || 0))}%`, height: "100%", background: "linear-gradient(90deg,#C77DD6,#7FC8F8)" }} /></div>
       <div style={{ marginTop: 9, fontSize: 11.5, lineHeight: 1.45, color: "#806B8D" }}>{props.monthOverMonthDelta == null ? "Your month is still taking shape." : props.monthOverMonthDelta > 0 ? `${props.monthOverMonthDelta}% ahead of this point last month.` : props.monthOverMonthDelta < 0 ? `${Math.abs(props.monthOverMonthDelta)}% behind this point last month — that’s okay.` : "About the same as this point last month."}</div>
+
+      {goldInsights && <div style={{ marginTop: 13, paddingTop: 13, borderTop: "1px solid #EDE2F2" }}>
+        <GrowthNextMove />
+        <details onToggle={(event) => setInsightsOpen(event.currentTarget.open)} style={{ marginTop: 10, borderRadius: 14, border: "1px solid #CFE8E1", background: "#F6FCFA", overflow: "hidden" }}>
+          <summary style={{ minHeight: 44, padding: "11px 12px", cursor: "pointer", color: "#3E746A", fontWeight: 900, listStyle: "none" }}>🌱 Deeper PlushInsights</summary>
+          <div style={{ padding: "0 10px 10px" }}>
+            <div style={{ marginBottom: 8, padding: "9px 10px", borderRadius: 10, background: "white", border: "1px solid #DDECE7", color: "#637B74", fontSize: 11, lineHeight: 1.5 }}><strong style={{ color: "#3E746A" }}>Why PlushLife thinks this:</strong> insights use your own recent habit and check-in history, and stay in learning mode when there is not enough evidence.</div>
+            <HabitHealth weeklyOverallPct={props.weeklyOverallPct} weeklyEssentialPct={props.weeklyEssentialPct} caringDays={props.caringDays} weekOverWeekDelta={props.weekOverWeekDelta} preferences={props.preferences} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
+            {insightsOpen && <React.Suspense fallback={<InsightToolsFallback />}>
+              <LazyWeeklyHabitReview open={props.open} openTaskManager={props.openTaskManager} goToDashboard={props.goToDashboard} />
+              <LazyWhatWorksForMe open={props.open} openTaskManager={props.openTaskManager} />
+              <LazyResilienceProgress open={props.open} openTaskManager={props.openTaskManager} />
+            </React.Suspense>}
+          </div>
+        </details>
+      </div>}
+
       <div style={{ display: "flex", gap: 7, marginTop: 11, flexWrap: "wrap" }}><button type="button" onClick={() => props.setShareCardOpen(true)} style={{ minHeight: 44, padding: "8px 11px", borderRadius: 11, border: "1px solid #E2CDEB", background: "white", color: "#8E4EAA", fontWeight: 900 }}>📸 Share my week</button>{props.habitTasks?.length > 0 && <span style={{ alignSelf: "center", fontSize: 10.5, color: "#7D8C86" }}>🌱 {props.habitTasks.length} habits · {props.habitGardenTotalCheckIns || 0} caring check-ins</span>}</div>
     </section>}
 
