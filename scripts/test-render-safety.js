@@ -45,4 +45,10 @@ if (!smart.includes("buildSmartTaskProfile") || !smart.includes("rankSmartTask")
   process.exit(1);
 }
 
+const background = read("src/components/habit-background-engine.jsx");
+if (!background.includes("smartTaskProfiles") || !background.includes("buildSmartTaskProfile") || !background.includes("taskId")) {
+  console.error("Render safety failed: background intelligence must maintain smart profiles for normal tasks.");
+  process.exit(1);
+}
+
 console.log(`Render safety checks passed across ${sourceFiles.length} source files.`);
