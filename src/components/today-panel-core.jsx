@@ -117,7 +117,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
           );
         })()}
 
-        <div data-plushlife-compact-card="plushweek" style={{ marginBottom: 9, padding: "8px 10px", borderRadius: 13, background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", border: "1px solid #E3C9EC" }}>
+        <div data-plushlife-compact-card="plushweek" aria-hidden="true" style={{ display: "none", marginBottom: 9, padding: "8px 10px", borderRadius: 13, background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", border: "1px solid #E3C9EC" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
@@ -228,7 +228,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
           </button>
         </div>
         )}
-        {dailyCheckIn.day_type !== "rest" && !babyMode && (() => {
+        {false && dailyCheckIn.day_type !== "rest" && !babyMode && (() => {
           // A small glance at what still needs doing, so leading with the
           // schedule doesn't mean losing sight of today's tasks entirely.
           const habitRowsToday = rows.filter((r) => r.habitType !== "regular");
@@ -277,7 +277,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
           />
         )}
 
-        {todayCardIndex === 1 && !babyMode && !isFutureView && rows.length > 0 && dailyCheckIn.day_type !== "rest" && (focusHelperOpen || !nextStepTask) && (
+        {false && todayCardIndex === 1 && !babyMode && !isFutureView && rows.length > 0 && dailyCheckIn.day_type !== "rest" && (focusHelperOpen || !nextStepTask) && (
           // Suppressed (unless already open) whenever the One Next Step card
           // above is already showing this same single-task suggestion — no
           // point offering "pick one thing for me" right under a card that's

@@ -47,11 +47,12 @@ export function ProgressPanel({ open, progressView, setProgressView, weeklyInten
   return (
   <>
         <div role="tablist" aria-label="Progress views" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 6, marginBottom: 12, padding: 5, borderRadius: 14, background: "#F3E8FA", border: "1px solid #E6D4F2" }}>
-          {[{ id: "overview", label: "PlushView", icon: "📊" }, { id: "story", label: "PlushStory", icon: "📖" }, { id: "areas", label: "PlushSpaces", icon: "🪴" }].map((item) => {
+          {[{ id: "overview", label: "Overview", icon: "📊" }, { id: "story", label: "Story", icon: "📖" }, { id: "areas", label: "Areas", icon: "🪴" }].map((item) => {
             const selected = progressView === item.id;
             return <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} style={{ minWidth: 0, padding: "8px 4px", borderRadius: 10, border: selected ? "2px solid #A65DC1" : "1px solid transparent", background: selected ? "white" : "transparent", color: selected ? "#7A3D93" : "#8C6B9E", fontSize: 10.5, fontWeight: 900, cursor: "pointer" }}>{item.icon} {item.label}</button>;
           })}
         </div>
+        <button type="button" onClick={() => goToDashboard("week")} style={{ width: "100%", minHeight: 44, margin: "-3px 0 12px", padding: "8px 11px", borderRadius: 11, border: "1px solid #D9C6E5", background: "#FFFFFFB8", color: "#765F84", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>📅 Calendar & history</button>
         {progressView === "overview" && <>
         <div style={{ marginBottom: 12, padding: "11px 12px", borderRadius: 12, background: "#F9F1FC", border: "1px solid #E6D4F2" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>

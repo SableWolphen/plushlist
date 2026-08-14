@@ -169,7 +169,7 @@ export function TodayPanel(props) {
           cursor: "pointer",
         }}
       >
-        {moreForTodayOpen ? "Hide extra tools" : "More for today"} {moreForTodayOpen ? "⌃" : "⌄"}
+        {moreForTodayOpen ? "Hide help & extras" : "Help & extras"} {moreForTodayOpen ? "⌃" : "⌄"}
       </button>
 
       <div style={{ display: moreForTodayOpen ? "block" : "none" }} aria-hidden={!moreForTodayOpen}>

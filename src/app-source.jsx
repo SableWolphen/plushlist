@@ -5420,6 +5420,9 @@ function GlowUpTracker() {
   const dashboardItems = isGuardianAccount
     ? [...DASHBOARDS, { id: "guardian", label: "Guardian", icon: "💛", accent: "#318C79" }]
     : DASHBOARDS;
+  // Calendar remains available from Progress, but it no longer competes for
+  // a permanent top-level slot. The everyday path is Today → Progress → Support.
+  const primaryDashboardItems = dashboardItems.filter((item) => item.id !== "week");
 
   useEffect(() => {
     if (!user) {
@@ -5452,10 +5455,10 @@ function GlowUpTracker() {
       }
     }
   };
-  const dashboardIndex = dashboardItems.findIndex((item) => item.id === dashboard);
+  const dashboardIndex = primaryDashboardItems.findIndex((item) => item.id === dashboard);
   const stepDashboard = (direction) => {
     const currentIndex = dashboardIndex === -1 ? 0 : dashboardIndex;
-    const nextItem = dashboardItems[Math.max(0, Math.min(dashboardItems.length - 1, currentIndex + direction))];
+    const nextItem = primaryDashboardItems[Math.max(0, Math.min(primaryDashboardItems.length - 1, currentIndex + direction))];
     if (nextItem && nextItem.id !== dashboard) {
       goToDashboard(nextItem.id);
       document.getElementById(`dashboard-tab-${nextItem.id}`)?.focus();
@@ -6685,8 +6688,8 @@ function GlowUpTracker() {
           <div role="tablist" aria-label="PlushLife dashboards" onKeyDown={(event) => {
             if (event.key === "ArrowRight") { event.preventDefault(); stepDashboard(1); }
             else if (event.key === "ArrowLeft") { event.preventDefault(); stepDashboard(-1); }
-          }} style={{ flex: 1, display: "grid", gridTemplateColumns: `repeat(${dashboardItems.length}, minmax(0, 1fr))`, gap: 6, minWidth: 0 }}>
-            {dashboardItems.map((item) => {
+          }} style={{ flex: 1, display: "grid", gridTemplateColumns: `repeat(${primaryDashboardItems.length}, minmax(0, 1fr))`, gap: 6, minWidth: 0 }}>
+            {primaryDashboardItems.map((item) => {
               const on = item.id === dashboard;
               const displayLabel = babyMode && item.id === "today" ? "Nursery" : item.label;
               return <button key={item.id} id={`dashboard-tab-${item.id}`} role="tab" aria-selected={on} onClick={() => goToDashboard(item.id)} style={{ position: "relative", minHeight: 52, padding: "7px 3px", borderRadius: 13, border: on ? `2px solid ${item.accent}` : "2px solid #F3D9EC", background: on ? `${item.accent}22` : "#FFFFFF", color: on ? item.accent : "#8C6B9E", fontWeight: 900, fontSize: displayLabel.length > 10 ? 9.5 : 11, lineHeight: 1.15, overflowWrap: "break-word", wordBreak: "break-word", cursor: "pointer" }}>

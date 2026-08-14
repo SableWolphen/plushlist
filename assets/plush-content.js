@@ -145,10 +145,10 @@
   ];
 
   const DASHBOARDS = [
-    { id: "today", label: "PlushHome", icon: "☀️", accent: "#C77DD6" },
-    { id: "week", label: "PlushCalendar", icon: "📅", accent: "#4C8FE8" },
-    { id: "care", label: "PlushCare", icon: "♥", accent: "#318C79" },
-    { id: "progress", label: "PlushGrowth", icon: "📈", accent: "#8E4EAA" },
+    { id: "today", label: "Today", icon: "☀️", accent: "#C77DD6" },
+    { id: "week", label: "Calendar", icon: "📅", accent: "#4C8FE8" },
+    { id: "care", label: "Support", icon: "♥", accent: "#318C79" },
+    { id: "progress", label: "Progress", icon: "📈", accent: "#8E4EAA" },
   ];
 
   const PLUSH_PATHS = [

@@ -107,12 +107,14 @@ function formatSyncStatus(online, syncStatus, lastSyncedAt) {
 export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairingCode, connectWatch, watchPairingBusy, watchPairingMessage, localWatchSyncBusy, startLocalWatchSync, localWatchSyncMessage, dailyCheckIn, pct, rows, viewDone, weeklyOverallPct, widgetSyncMsg, setWidgetSyncMsg, displayNameDraft, setDisplayNameDraft, saveDisplayName, comfortItemDraft, setComfortItemDraft, saveComfortItem, preferences, appearanceTheme, selectAppearanceTheme, dinoTheme, updatePreference, enableNotifications, smartReminderSuggestion, restDatesSet, toggleRestToday, period, restRangeDraft, setRestRangeDraft, saveRestRange, restDates, feedbackText, setFeedbackText, submitFeedback, feedbackMessage, exportMyData, restoreFileInputRef, restoreFromBackup, deleteAllCheckIns, deleteAllReflections, user, online, syncStatus, lastSyncedAt, syncNow, emailChangeDraft, setEmailChangeDraft, requestEmailChange, signingOut, handleSignOut, signOutOtherDevices, deleteMyAccount, deviceBackupStatus, refreshDeviceBackup, deviceBackupBusy, verifyDeviceBackupNow, deviceBackupVerifyBusy, settingsMessage }) {
   const [section, setSection] = React.useState("home");
   const [search, setSearch] = React.useState("");
+  const [moreSettingsOpen, setMoreSettingsOpen] = React.useState(false);
   const { APPEARANCE_THEMES } = window.PlushLifeContent;
 
   React.useEffect(() => {
     if (!open) {
       setSection("home");
       setSearch("");
+      setMoreSettingsOpen(false);
     }
   }, [open]);
 
@@ -131,12 +133,19 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
   ];
 
   const query = search.trim().toLowerCase();
-  const visibleCategories = query ? categories.filter((item) => `${item[2]} ${item[3]} ${item[4]}`.toLowerCase().includes(query)) : categories;
+  const primarySettingIds = new Set(["personalize", "notifications", "experience", "privacy", "account"]);
+  const matchingCategories = query
+    ? categories.filter((item) => `${item[2]} ${item[3]} ${item[4]}`.toLowerCase().includes(query))
+    : categories;
+  const visibleCategories = query || moreSettingsOpen
+    ? matchingCategories
+    : matchingCategories.filter(([id]) => primarySettingIds.has(id));
+  const hiddenSettingCount = categories.length - primarySettingIds.size;
 
   const home = (
     <>
       <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 13, color: "#8A7895", lineHeight: 1.45 }}>Everything has a home now. Pick what you want to change.</div>
+        <div style={{ fontSize: 13, color: "#8A7895", lineHeight: 1.45 }}>The essentials are here. Less-used controls stay under More settings.</div>
         <div style={{ position: "relative", marginTop: 11 }}>
           <span aria-hidden="true" style={{ position: "absolute", left: 12, top: 11, color: "#A493AD" }}>⌕</span>
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search settings" aria-label="Search settings" style={{ ...inputStyle, paddingLeft: 35, background: "#FFFCFE" }} />
@@ -148,6 +157,7 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
         ))}
         {visibleCategories.length === 0 && <div style={{ padding: 22, textAlign: "center", color: "#8A7895", fontSize: 12.5 }}>No settings match “{search}”.</div>}
       </div>
+      {!query && <button type="button" onClick={() => setMoreSettingsOpen((open) => !open)} aria-expanded={moreSettingsOpen} style={{ width: "100%", minHeight: 44, marginTop: 10, padding: "9px 12px", borderRadius: 11, border: "1px solid #E6D4F2", background: "#FFFFFFB8", color: "#765F84", fontWeight: 900, cursor: "pointer" }}>{moreSettingsOpen ? "Show fewer settings" : `More settings (${hiddenSettingCount})`}</button>}
       {settingsMessage && <div role="status" style={{ marginTop: 12, padding: "10px 12px", borderRadius: 11, background: "#F0FAF6", color: "#347865", fontSize: 12, fontWeight: 800 }}>{settingsMessage}</div>}
     </>
   );
