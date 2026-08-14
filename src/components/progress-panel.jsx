@@ -1,9 +1,9 @@
 import { ProgressPanel as ProgressPanelCore } from "./progress-panel-core.jsx";
 import { HabitTypeIcon } from "./shared.jsx";
-import { HabitHealth } from "./habit-health.jsx";
-import { GrowthNextMove } from "./growth-next-move.jsx";
 import { hasGoldFeature } from "../plush-gold.js";
 
+const GrowthNextMove = React.lazy(() => import("./growth-next-move.jsx").then((module) => ({ default: module.GrowthNextMove })));
+const HabitHealth = React.lazy(() => import("./habit-health.jsx").then((module) => ({ default: module.HabitHealth })));
 const LazyWeeklyHabitReview = React.lazy(() => import("./habit-intelligence.jsx").then((module) => ({ default: module.WeeklyHabitReview })));
 const LazyWhatWorksForMe = React.lazy(() => import("./habit-retention.jsx").then((module) => ({ default: module.WhatWorksForMe })));
 const LazyResilienceProgress = React.lazy(() => import("./habit-resilience.jsx").then((module) => ({ default: module.ResilienceProgress })));
@@ -100,12 +100,16 @@ function CompactGrowthOverview(props) {
       <div style={{ marginTop: 9, fontSize: 11.5, lineHeight: 1.45, color: "#806B8D" }}>{props.monthOverMonthDelta == null ? "Your month is still taking shape." : props.monthOverMonthDelta > 0 ? `${props.monthOverMonthDelta}% ahead of this point last month.` : props.monthOverMonthDelta < 0 ? `${Math.abs(props.monthOverMonthDelta)}% behind this point last month — that’s okay.` : "About the same as this point last month."}</div>
 
       {goldInsights && <div style={{ marginTop: 13, paddingTop: 13, borderTop: "1px solid #EDE2F2" }}>
-        <GrowthNextMove />
+        <React.Suspense fallback={<InsightToolsFallback />}>
+          <GrowthNextMove />
+        </React.Suspense>
         <details onToggle={(event) => setInsightsOpen(event.currentTarget.open)} style={{ marginTop: 10, borderRadius: 14, border: "1px solid #CFE8E1", background: "#F6FCFA", overflow: "hidden" }}>
           <summary style={{ minHeight: 44, padding: "11px 12px", cursor: "pointer", color: "#3E746A", fontWeight: 900, listStyle: "none" }}>🌱 Deeper PlushInsights</summary>
           <div style={{ padding: "0 10px 10px" }}>
             <div style={{ marginBottom: 8, padding: "9px 10px", borderRadius: 10, background: "white", border: "1px solid #DDECE7", color: "#637B74", fontSize: 11, lineHeight: 1.5 }}><strong style={{ color: "#3E746A" }}>Why PlushLife thinks this:</strong> insights use your own recent habit and check-in history, and stay in learning mode when there is not enough evidence.</div>
-            <HabitHealth weeklyOverallPct={props.weeklyOverallPct} weeklyEssentialPct={props.weeklyEssentialPct} caringDays={props.caringDays} weekOverWeekDelta={props.weekOverWeekDelta} preferences={props.preferences} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
+            <React.Suspense fallback={<InsightToolsFallback />}>
+              <HabitHealth weeklyOverallPct={props.weeklyOverallPct} weeklyEssentialPct={props.weeklyEssentialPct} caringDays={props.caringDays} weekOverWeekDelta={props.weekOverWeekDelta} preferences={props.preferences} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
+            </React.Suspense>
             {insightsOpen && <React.Suspense fallback={<InsightToolsFallback />}>
               <LazyWeeklyHabitReview open={props.open} openTaskManager={props.openTaskManager} goToDashboard={props.goToDashboard} />
               <LazyWhatWorksForMe open={props.open} openTaskManager={props.openTaskManager} />
