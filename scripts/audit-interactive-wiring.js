@@ -79,6 +79,11 @@ for (const file of files) {
 }
 
 const mustContain = {
+  'src/app-source.jsx': [
+    ['const onboardingTotalSteps = onboardingMode === "supporter" ? 2 : 6;', 'Guardian onboarding no longer adds a required setup step'],
+    ['data-plushlife-onboarding-guardian-deferred="true"', 'Guardian setup is explicitly deferred and optional'],
+    ['My cozy space + optional Guardian support', 'Guardian onboarding choice explains optional support'],
+  ],
   'src/components/baby-mode.jsx': [
     ['onClick={onShowTinyThing}', 'Baby Mode Tiny thing action'],
     ['onClick={onSoftDay}', 'Baby Mode Soft day action'],
@@ -133,6 +138,14 @@ const mustContain = {
 for (const [relative, checks] of Object.entries(mustContain)) {
   const source = fs.readFileSync(path.join(ROOT, relative), 'utf8');
   for (const [needle, label] of checks) if (!source.includes(needle)) issues.push(`${relative}: missing expected wiring: ${label}`);
+}
+
+const appSource = fs.readFileSync(path.join(ROOT, 'src/app-source.jsx'), 'utf8');
+for (const [needle, label] of [
+  ['Add your guardian\'s email address to continue.', 'Guardian email must not block onboarding Next'],
+  ['Add your guardian\'s email address first.', 'Guardian email must not block onboarding completion'],
+]) {
+  if (appSource.includes(needle)) issues.push(`src/app-source.jsx: forbidden onboarding gate remains: ${label}`);
 }
 
 if (issues.length) {
