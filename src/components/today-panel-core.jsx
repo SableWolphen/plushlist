@@ -129,5 +129,464 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
           </div>
           {weeklyIntentionEditing && <>
             <div style={{ marginTop: 4, fontSize: 10.5, lineHeight: 1.35, color: "#806B8D", fontStyle: "italic" }}>What do I want to carry with me this week?</div>
-            <textarea value={weeklyIntentionDraft} onChange={(event) => setWeeklyIntentionDraft(event.target.value)} maxLength={2000} placeholder="What do I want to carry with me this week?" style={{ width: "100%", boxSizing: "border-box", minHeight: 64, marginTop: 6, padding: 8, borderRadius: 9, border: "1p÷}6¶‰žËkºwµçt(€€€€€€€€€€€€€€€€è‘…¥±å¡•­%¸¹‘…å}ÑåÁ”€ôôô€‰Ñ¥¹äˆ4(€€€€€€€€€€€€€€€€€€ü€¡±½Ý…Á…¥ÑåI½ÝÌ¹±•¹Ñ €ü±½Ý…Á…¥ÑåI½ÝÌ€èÉ½ÝÌ¹™¥±Ñ•È ¡È¤€ôø€…È¹¥Í	½¹ÕÌ¤¹Í±¥” À°€Ì¤¤4(€€€€€€€€€€€€€€€€è‘…¥±å¡•­%¸¹‘…å}ÑåÁ”€ôôô€‰É•½Ù•Éäˆ4(€€€€€€€€€€€€€€€€€€ü€¡±½Ý…Á…¥ÑåI½ÝÌ¹±•¹Ñ €ü±½Ý…Á…¥ÑåI½ÝÌ€èÉ½ÝÌ¹™¥±Ñ•È ¡È¤€ôø€…È¹¥Í	½¹ÕÌ¤¹Í±¥” À°€Ô¤¤4(€€€€€€€€€€€€€€€€€€è‘…¥±å¡•­%¸¹Í½™Ñ}‘…äñð‘…¥±å¡•­%¸¹‘…å}ÑåÁ”€ôôô€‰Í½™Ðˆ4(€€€€€€€€€€€€€€€€€€€€üÉ½ÝÌ¹™¥±Ñ•È ¡È¤€ôø€…È¹¥Í	½¹ÕÌ¤4(€€€€€€€€€€€€€€€€€€€€èÉ½ÝÌì4(€€€€€€€€€€€€€½¹ÍÐÙ¥Í¥‰±•É½ÕÁ=É‘•È€ôÉÉ…ä¹™É½´¡¹•ÜM•Ð¡Ù¥Í¥‰±•I½ÝÌ¹µ…À ¡É½Ü¤€ôøÉ½Ü¹Í•Ñ¥½¸¤¹™¥±Ñ•È¡	½½±•…¸¤¤¤ì4(€€€€€€€€€€€€€½¹ÍÐ¥¹½µÁ±•Ñ•I½ÝÌ€ôÙ¥Í¥‰±•I½ÝÌ¹™¥±Ñ•È ¡È¤€ôø€…Ù¥•Ý½¹•mÈ¹­•åtñðÉ••¹Ñ±å½µÁ±•Ñ•‘-•åÌ¹¥¹±Õ‘•Ì¡È¹­•ä¤¤ì4(€€€€€€€€€€€€€½¹ÍÐ½µÁ±•Ñ•‘I½ÝÌ€ôÙ¥Í¥‰±•I½ÝÌ¹™¥±Ñ•È ¡È¤€ôøÙ¥•Ý½¹•mÈ¹­•åt€˜˜€…É••¹Ñ±å½µÁ±•Ñ•‘-•åÌ¹¥¹±Õ‘•Ì¡È¹­•ä¤¤ì4(€€€€€€€€€€€€€½¹ÍÐÉ•¹‘•ÉI½Ü€ô€¡È¤€ôøì4(€€€€€€€€€€€€€€€½¹ÍÐÉ½ÕÁ-•ä€ôÈ¹¥ÍÙ•Éå‘…ä€ü€‰}}•Ù•Éå‘…å}|ˆ€èÈ¹Í•Ñ¥½¸ì4(€€€€€€€€€€€€€€€½¹ÍÐ¡•…‘•È€ôÉ½ÕÁ-•ä€„ôô±…ÍÑM•Ñ¥½¸€ü€¡È¹¥ÍÙ•Éå‘…ä€ü€‰…¥±äˆ€èÈ¹Í•Ñ¥½¸¤€è¹Õ±°ì4(€€€€€€€€€€€€€€€±…ÍÑM•Ñ¥½¸€ôÉ½ÕÁ-•äì4(€€€€€€€€€€€€€€€½¹ÍÐ¡•­•€ô€„…Ù¥•Ý½¹•mÈ¹­•åtì4(€€€€€€€€€€€€€€€½¹ÍÐ¥Í5½Ù…‰±”€ôÈ¹Í½ÕÉ•Q…Í¬ü¹Í¡•‘Õ±•}ÑåÁ”€ôôô€‰½¹”ˆ€˜˜€…¡•­•€˜˜€…¥ÍÕÑÕÉ•Y¥•Üì4(€€€€€€€€€€€€€€€½¹ÍÐ•áÁ…¹‘…‰±”€ô€„„¡È¹¡½ÜñðÈ¹Ý¡ä¤ñð¥Í5½Ù…‰±”ì4(€€€€€€€€€€€€€€€½¹ÍÐ•áÁ…¹‘•€ô½Á•¹I½Ü€ôôôÈ¹­•äì4(€€€€€€€€€€€€€€€½¹ÍÐ‘É……‰±•Q½‘…åQ…Í¬€ô€„…È¹Í½ÕÉ•Q…Í¬€˜˜€…¡•­•€˜˜€…¥ÍÕÑÕÉ•Y¥•Ü€˜˜€…¥Í!¥ÍÑ½É¥…±Y¥•Üì4(€€€€€€€€€€€€€€€É•ÑÕÉ¸€ 4(€€€€€€€€€€€€€€€€€€ñ‘¥Ø­•äõíÈ¹­•åôø4(€€€€€€€€€€€€€€€€€€€í¡•…‘•È€˜˜€ 4(€€€€€€€€€€€€€€€€€€€€€€ñ‘¥ØÍÑå±”õíì‘¥ÍÁ±…äè€‰™±•àˆ°…±¥¹%Ñ•µÌè€‰•¹Ñ•Èˆ°©ÕÍÑ¥™å½¹Ñ•¹Ðè€‰ÍÁ…”µ‰•ÑÝ••¸ˆ°…Àè€à°µ…É¥¸è€ˆáÁà€ÉÁà€ÑÁàˆ°ÕÍ•ÉM•±•Ðè€‰¹½¹”ˆ°]•‰­¥ÑUÍ•ÉM•±•Ðè€‰¹½¹”ˆ°]•‰­¥ÑQ½Õ¡…±±½ÕÐè€‰¹½¹”ˆõôø4(€€€€€€€€€€€€€€€€€€€€€€€€ñÍÁ…¸ÍÑå±”õíì™½¹ÑM¥é”è€ÄÄ°±•ÑÑ•ÉMÁ…¥¹œè€ˆÀ¸Äá•´ˆ°½±½Èè‘…ä¹…•¹Ð°™½¹Ñ]•¥¡Ðè€ÜÀÀõôùí¡•…‘•È¹Ñ½UÁÁ•É…Í” ¥ôð½ÍÁ…¸ø4(€€€€€€€€€€€€€€€€€€€€€€€í…ÉÉ…¹•Q½‘…åQ…Í­Ì€˜˜€…¥ÍÕÑÕÉ•Y¥•Ü€˜˜€…¥Í!¥ÍÑ½É¥…±Y¥•Ü€˜˜Ù¥Í¥‰±•É½ÕÁ=É‘•È¹±•¹Ñ €ø€Ä€˜˜€ 4(€€€€€€€€€€€€€€€€€€€€€€€€€€ñÍÁ…¸ÍÑå±”õíì‘¥ÍÁ±…äè€‰™±•àˆ°…Àè€Ìõôø4(€€€€€€€€€€€€€€€€€€€€€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘¥Í…‰±•õíÙ¥Í¥‰±•É½ÕÁ=É‘•È¹¥¹‘•á=˜¡È¹Í•Ñ¥½¸¤€ôôô€Áô½¹±¥¬õì ¤€ôøµ½Ù•Q…Í­É½ÕÀ¡È¹Í•Ñ¥½¸°€´Ä°Ù¥Í¥‰±•É½ÕÁ=É‘•È¥ô…É¥„µ±…‰•°õí5½Ù”€‘í¡•…‘•ÉôÉ½ÕÀ•…É±¥•ÉôÑ¥Ñ±”ô‰5½Ù”É½ÕÀ•…É±¥•ÈˆÍÑå±”õíìÝ¥‘Ñ è€ÈØ°¡•¥¡Ðè€ÈØ°µ¥¹!•¥¡Ðè€ÈØ°Á…‘‘¥¹œè€À°‰½É‘•ÉI…‘¥ÕÌè€à°‰½É‘•Èè€ˆÅÁàÍ½±¥€ÝÉàˆ°‰…­É½Õ¹è€‰É‰„ ÈÔÔ°ÈÔÔ°ÈÔÔ°¸ÔÔ¤ˆ°½±½Èè‘…ä¹…•¹Ð°½Á…¥ÑäèÙ¥Í¥‰±•É½ÕÁ=É‘•È¹¥¹‘•á=˜¡È¹Í•Ñ¥½¸¤€ôôô€À€ü€¸Ì€è€Ä°™½¹Ñ]•¥¡Ðè€äÀÀ°ÕÉÍ½ÈèÙ¥Í¥‰±•É½ÕÁ=É‘•È¹¥¹‘•á=˜¡È¹Í•Ñ¥½¸¤€ôôô€À€ü€‰‘•™…Õ±Ðˆ€è€‰Á½¥¹Ñ•ÈˆõôûŠDð½‰ÕÑÑ½¸ø4(€€€€€€€€€€€€€€€€€€€€€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘¥Í…‰±•õíÙ¥Í¥‰±•É½ÕÁ=É‘•È¹¥¹‘•á=˜¡È¹Í•Ñ¥½¸¤€ôôôÙ¥Í¥‰±•É½ÕÁ=É‘•È¹±•¹Ñ €´€Åô½¹±¥¬õì ¤€ôøµ½Ù•Q…Í­É½ÕÀ¡È¹Í•Ñ¥½¸°€Ä°Ù¥Í¥‰±•É½ÕÁ=É‘•È¥ô…É¥„µ±…‰•°õí5½Ù”€‘í¡•…‘•ÉôÉ½ÕÀ±…Ñ•ÉôÑ¥Ñ±”ô‰5½Ù”É½ÕÀ±…Ñ•ÈˆÍÑå±”õíìÝ¥‘Ñ è€ÈØ°¡•¥¡Ðè€ÈØ°µ¥¹!•¥¡Ðè€ÈØ°Á…‘‘¥¹œè€À°‰½É‘•ÉI…‘¥ÕÌè€à°‰½É‘•Èè€ˆÅÁàÍ½±¥€ÝÉàˆ°‰…­É½Õ¹è€‰É‰„ ÈÔÔ°ÈÔÔ°ÈÔÔ°¸ÔÔ¤ˆ°½±½Èè‘…ä¹…•¹Ð°½Á…¥ÑäèÙ¥Í¥‰±•É½ÕÁ=É‘•È¹¥¹‘•á=˜¡È¹Í•Ñ¥½¸¤€ôôôÙ¥Í¥‰±•É½ÕÁ=É‘•È¹±•¹Ñ €´€Ä€ü€¸Ì€è€Ä°™½¹Ñ]•¥¡Ðè€äÀÀ°ÕÉÍ½ÈèÙ¥Í¥‰±•É½ÕÁ=É‘•È¹¥¹‘•á=˜¡È¹Í•Ñ¥½¸¤€ôôôÙ¥Í¥‰±•É½ÕÁ=É‘•È¹±•¹Ñ €´€Ä€ü€‰‘•™…Õ±Ðˆ€è€‰Á½¥¹Ñ•ÈˆõôûŠLð½‰ÕÑÑ½¸ø4(€€€€€€€€€€€€€€€€€€€€€€€€€€ð½ÍÁ…¸ø4(€€€€€€€€€€€€€€€€€€€€€€€€¥ô4(€€€€€€€€€€€€€€€€€€€€€€ð½‘¥Øø4(€€€€€€€€€€€€€€€€€€€€¥ô4(€€€€€€€€€€€€€€€€€€€€ñ‘¥Ø4(€€€€€€€€€€€€€€€€€€€€€‘…Ñ„µÁ±ÕÍ¡±¥™”µÑ…Í¬µ‘É½Àµ­•äõí‘É……‰±•Q½‘…åQ…Í¬€üÈ¹Í½ÕÉ•Q…Í¬¹Ñ…Í­}­•ä€èÕ¹‘•™¥¹•‘ô4(€€€€€€€€€€€€€€€€€€€€€‘…Ñ„µÁ±ÕÍ¡±¥™”µÑ…Í¬µ‘É½Àµ±…‰•°õí‘É……‰±•Q½‘…åQ…Í¬€üÈ¹±…‰•°€èÕ¹‘•™¥¹•‘ô4(€€€€€€€€€€€€€€€€€€€€€‘…Ñ„µÁ±ÕÍ¡±¥™”µÑ…Í¬µ‘É½ÀµÍ•Ñ¥½¸õí‘É……‰±•Q½‘…åQ…Í¬€üÈ¹Í½ÕÉ•Q…Í¬¹Í•Ñ¥½¸€èÕ¹‘•™¥¹•‘ô4(€€€€€€€€€€€€€€€€€€€€€ÍÑå±”õíìµ…É¥¹	½ÑÑ½´è€Ð°‰½É‘•ÉI…‘¥ÕÌè€ÄÀ°4(€€€€€€€€€€€€€€€€€€€€€‰½É‘•Èè€ˆÅÁàÍ½±¥€ˆ€¬€¡¡•­•€ü‘…ä¹…•¹Ð€¬€ˆØØˆ€è€ˆÍåˆ¤°4(€€€€€€€€€€€€€€€€€€€€€‰…­É½Õ¹è¡•­•€ü‘…ä¹…•¹Ð€¬€ˆÅˆ€è€‰É‰„ ÈÔÔ°ÈÔÔ°ÈÔÔ°À¸ÈÔ¤ˆ°4(€€€€€€€€€€€€€€€€€€€€€½Ù•É™±½Üè€‰¡¥‘‘•¸ˆ°ÕÍ•ÉM•±•Ðè‘É……‰±•Q½‘…åQ…Í¬€ü€‰¹½¹”ˆ€èÕ¹‘•™¥¹•°]•‰­¥ÑUÍ•ÉM•±•Ðè‘É……‰±•Q½‘…åQ…Í¬€ü€‰¹½¹”ˆ€èÕ¹‘•™¥¹•°]•‰­¥ÑQ½Õ¡…±±½ÕÐè‘É……‰±•Q½‘…åQ…Í¬€ü€‰¹½¹”ˆ€èÕ¹‘•™¥¹•°ÑÉ…¹Í¥Ñ¥½¸è€‰ÑÉ…¹Í™½É´€¸ÄÉÌ•…Í”°‰½àµÍ¡…‘½Ü€¸ÄÉÌ•…Í”ˆõôø4(€€€€€€€€€€€€€€€€€€€€€€ñ‘¥Ø½¹±¥¬õì ¤€ôøì¥˜€¡¥ÍÕÑÕÉ•Y¥•Ü¤É•ÑÕÉ¸ì•áÁ…¹‘…‰±”€üÍ•Ñ=Á•¹I½Ü¡•áÁ…¹‘•€ü¹Õ±°€èÈ¹­•ä¤€èÑ½±”¡È¹­•ä¤ìõô4(€€€€€€€€€€€€€€€€€€€€€€€É½±”õí•áÁ…¹‘…‰±”€ü€‰‰ÕÑÑ½¸ˆ€èÕ¹‘•™¥¹•‘ô4(€€€€€€€€€€€€€€€€€€€€€€€…É¥„µ•áÁ…¹‘•õí•áÁ…¹‘…‰±”€ü•áÁ…¹‘•€èÕ¹‘•™¥¹•‘ô4(€€€€€€€€€€€€€€€€€€€€€€€…É¥„µ±…‰•°õí•áÁ…¹‘…‰±”€ü€‘í•áÁ…¹‘•€ü€‰!¥‘”ˆ€è€‰M¡½Ü‰ô‘•Ñ…¥±Ì™½È€‘íÈ¹±…‰•±õ€€èÕ¹‘•™¥¹•‘ô4(€€€€€€€€€€€€€€€€€€€€€€€Ñ…‰%¹‘•àõí•áÁ…¹‘…‰±”€˜˜€…¥ÍÕÑÕÉ•Y¥•Ü€ü€À€èÕ¹‘•™¥¹•‘ô4(€€€€€€€€€€€€€€€€€€€€€€€½¹-•å½Ý¸õí•áÁ…¹‘…‰±”€ü€¡”¤€ôøì4(€€€€€€€€€€€€€€€€€€€€€€€€€¥˜€¡¥ÍÕÑÕÉ•Y¥•Ü¤É•ÑÕÉ¸ì4(€€€€€€€€€€€€€€€€€€€€€€€€€¥˜€¡”¹­•ä€ôôô€‰¹Ñ•Èˆñð”¹­•ä€ôôô€ˆ€ˆ¤ì”¹ÁÉ•Ù•¹Ñ•™…Õ±Ð ¤ìÍ•Ñ=Á•¹I½Ü¡•áÁ…¹‘•€ü¹Õ±°€èÈ¹­•ä¤ìô4(€€€€€€€€€€€€€€€€€€€€€€€ô€èÕ¹‘•™¥¹•‘ô4(€€€€€€€€€€€€€€€€€€€€€€€ÍÑå±”õíìµ¥¹!•¥¡Ðè€Ðà°‘¥ÍÁ±…äè€‰™±•àˆ°…±¥¹%Ñ•µÌè€‰•¹Ñ•Èˆ°…Àè€à°Á…‘‘¥¹œè€ˆÙÁà€áÁàˆ°ÕÉÍ½Èè¥ÍÕÑÕÉ•Y¥•Ü€ü€‰¹½Ðµ…±±½Ý•ˆ€è€‰Á½¥¹Ñ•Èˆ°½Á…¥Ñäè¥ÍÕÑÕÉ•Y¥•Ü€ü€À¸ØÈ€è€Äõôø4(€€€€€€€€€€€€€€€€€€€€€€€í…ÉÉ…¹•Q½‘…åQ…Í­Ì€˜˜‘É……‰±•Q½‘…åQ…Í¬€˜˜€ñ‰ÕÑÑ½¸4(€€€€€€€€€€€€€€€€€€€€€€€€€ÑåÁ”ô‰‰ÕÑÑ½¸ˆ4(€€€€€€€€€€€€€€€€€€€€€€€€€‘É……‰±”õí™…±Í•ô4(€€€€€€€€€€€€€€€€€€€€€€€€€…É¥„µ±…‰•°õíI•½É‘•È€‘íÈ¹±…‰•±õô4(€€€€€€€€€€€€€€€€€€€€€€€€€Ñ¥Ñ±”ô‰É…œÑ¼µ½Ù”ˆ4(€€€€€€€€€€€€€€€€€€€€€€€€€½¹±¥¬õì¡•Ù•¹Ð¤€ôøì•Ù•¹Ð¹ÁÉ•Ù•¹Ñ•™…Õ±Ð ¤ì•Ù•¹Ð¹ÍÑ½ÁAÉ½Á……Ñ¥½¸ ¤ìõô4(€€€€€€€€€€€€€€€€€€€€€€€€€½¹A½¥¹Ñ•É½Ý¸õì¡•Ù•¹Ð¤€ôøÍÑ…ÉÑA½¥¹Ñ•ÉQ…Í­É…œ¡•Ù•¹Ð°È¹Í½ÕÉ•Q…Í¬¹Ñ…Í­}­•ä°È¹±…‰•°¥ô4(€€€€€€€€€€€€€€€€€€€€€€€€€½¹A½¥¹Ñ•É5½Ù”õíµ½Ù•A½¥¹Ñ•ÉQ…Í­É…ô4(€€€€€€€€€€€€€€€€€€€€€€€€€½¹A½¥¹Ñ•ÉUÀõí•¹‘A½¥¹Ñ•ÉQ…Í­É…ô4(€€€€€€€€€€€€€€€€€€€€€€€€€½¹A½¥¹Ñ•É…¹•°õí…¹•±A½¥¹Ñ•ÉQ…Í­É…ô4(€€€€€€€€€€€€€€€€€€€€€€€€€½¹½¹Ñ•áÑ5•¹Ôõì¡•Ù•¹Ð¤€ôø•Ù•¹Ð¹ÁÉ•Ù•¹Ñ•™…Õ±Ð ¥ô4(€€€€€€€€€€€€€€€€€€€€€€€€€½¹M•±•Ðõì¡•Ù•¹Ð¤€ôø•Ù•¹Ð¹ÁÉ•Ù•¹Ñ•™…Õ±Ð ¥ô4(€€€€€€€€€€€€€€€€€€€€€€€€€ÍÑå±”õíì™±•àè€ˆÀ€À…ÕÑ¼ˆ°Ý¥‘Ñ è€Ìà°¡•¥¡Ðè€ÐÐ°µ¥¹!•¥¡Ðè€ÐÐ°Á…‘‘¥¹œè€À°‰½É‘•ÉI…‘¥ÕÌè€à°‰½É‘•Èè€ˆÅÁàÍ½±¥€ÝÉàˆ°‰…­É½Õ¹è€‰É‰„ ÈÔÔ°ÈÔÔ°ÈÔÔ°¸ÐÈ¤ˆ°½±½Èè€ˆŒåàÙÜˆ°™½¹ÑM¥é”è€ÄÐ°™½¹Ñ]•¥¡Ðè€äÀÀ°±¥¹•!•¥¡Ðè€Ä°ÕÉÍ½Èè€‰É…ˆˆ°Ñ½Õ¡Ñ¥½¸è€‰¹½¹”ˆ°ÕÍ•ÉM•±•Ðè€‰¹½¹”ˆ°]•‰­¥ÑUÍ•ÉM•±•Ðè€‰¹½¹”ˆ°]•‰­¥ÑQ½Õ¡…±±½ÕÐè€‰¹½¹”ˆõô4(€€€€€€€€€€€€€€€€€€€€€€€€ûŠ.»Š.¸ð½‰ÕÑÑ½¸ùô4(€€€€€€€€€€€€€€€€€€€€€€€€ñÍÁ…¸½¹±¥¬õì¡”¤€ôøì”¹ÍÑ½ÁAÉ½Á……Ñ¥½¸ ¤ì¥˜€ …¥ÍÕÑÕÉ•Y¥•Ü¤Ñ½±”¡È¹­•ä¤ìõô4(€€€€€€€€€€€€€€€€€€€€€€€€€É½±”ô‰¡•­‰½àˆ4(€€€€€€€€€€€€€€€€€€€€€€€€€…É¥„µ¡•­•õí¡•­•‘ô4(€€€€€€€€€€€€€€€€€€€€€€€€€…É¥„µ±…‰•°õíÈ¹±…‰•±ô4(€€€€€€€€€€€€€€€€€€€€€€€€€Ñ…‰%¹‘•àõí¥ÍÕÑÕÉ•Y¥•Ü€ü€´Ä€è€Áô4(€€€€€€€€€€€€€€€€€€€€€€€€€½¹-•å½Ý¸õì¡”¤€ôøì4(€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜€¡¥ÍÕÑÕÉ•Y¥•Ü¤É•ÑÕÉ¸ì4(€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜€¡”¹­•ä€ôôô€‰¹Ñ•Èˆñð”¹­•ä€ôôô€ˆ€ˆ¤ì”¹ÁÉ•Ù•¹Ñ•™…Õ±Ð ¤ì”¹ÍÑ½ÁAÉ½Á……Ñ¥½¸ ¤ìÑ½±”¡È¹­•ä¤ìô4(€€€€€€€€€€€€€€€€€€€€€€€€€õô4(€€€€€€€€€€€€€€€€€€€€€€€€€ÍÑå±”õíìÝ¥‘Ñ è€ÈÀ°¡•¥¡Ðè€ÈÀ°µ¥¹]¥‘Ñ è€ÈÀ°‰½É‘•ÉI…‘¥ÕÌè€Ø°4(€€€€€€€€€€€€€€€€€€€€€€€€€€€‰½É‘•Èè€ÉÁàÍ½±¥€‘í¡•­•€ü‘…ä¹…•¹Ð€è€ˆÍáà‰õ€°4(€€€€€€€€€€€€€€€€€€€€€€€€€€€‰…­É½Õ¹è¡•­•€ü‘…ä¹…•¹Ð€è€‰ÑÉ…¹ÍÁ…É•¹Ðˆ°4(€€€€€€€€€€€€€€€€€€€€€€€€€€€‘¥ÍÁ±…äè€‰™±•àˆ°…±¥¹%Ñ•µÌè€‰•¹Ñ•Èˆ°©ÕÍÑ¥™å½¹Ñ•¹Ðè€‰•¹Ñ•Èˆ°4(€€€€€€€€€€€€€€€€€€€€€€€€€€€½±½Èè€ˆÙˆ°™½¹Ñ]•¥¡Ðè€äÀÀ°™½¹ÑM¥é”è€ÄÈ°…¹¥µ…Ñ¥½¸è•±•‰É…Ñ•-•ä€ôôôÈ¹­•ä€ü€‰¡•­A½À€À¸ÕÌ•…Í”ˆ€è€‰¹½¹”ˆõôø4(€€€€€€€€€€€€€€€€€€€€€€€€€í¡•­•€ü€‹ŠrLˆ€è€ˆ‰ô4(€€€€€€€€€€€€€€€€€€€€€€€€ð½ÍÁ…¸ø4(€€€€€€€€€€€€€€€€€€€€€€€€ñÍÁ…¸ÍÑå±”õíì™±•àè€Ä°µ¥¹]¥‘Ñ è€À°™½¹ÑM¥é”è€ÄÈ¸Ô°±¥¹•!•¥¡Ðè€Ä¸Ì°™½¹Ñ]•¥¡Ðè€ØÔÀ°½±½Èè¡•­•€ü€ˆÀáÜˆ€è€ˆŒÕÑÙˆ°Ñ•áÑ•½É…Ñ¥½¸è¡•­•€ü€‰±¥¹”µÑ¡É½Õ ˆ€è€‰¹½¹”ˆõôø4(€€€€€€€€€€€€€€€€€€€€€€€€€íÈ¹Í½ÕÉ•Q…Í¬€˜˜€ñ!…‰¥ÑQåÁ•%½¸Ñ…Í¬õíÈ¹Í½ÕÉ•Q…Í­ô€¼ùô4(€€€€€€€€€€€€€€€€€€€€€€€€€íÈ¹±…‰•±ô4(€€€€€€€€€€€€€€€€€€€€€€€€€íÈ¹Í½ÕÉ•Q…Í¬€˜˜¥ÍQ…Í­A…ÕÍ•‘=¹…Ñ”¡È¹Í½ÕÉ•Q…Í¬°Á•É¥½¹‘…Ñ”¤€˜˜€ñÍÁ…¸ÍÑå±”õíìµ…É¥¹1•™Ðè€Ø°Á…‘‘¥¹œè€ˆÅÁà€ÙÁàˆ°‰½É‘•ÉI…‘¥ÕÌè€äää°‰…­É½Õ¹è€ˆ	Èˆ°½±½Èè€ˆÔÙÄÐˆ°™½¹ÑM¥é”è€ä¸Ô°™½¹Ñ]•¥¡Ðè€äÀÀ°Ñ•áÑ•½É…Ñ¥½¸è€‰¹½¹”ˆõôùAUMð½ÍÁ…¸ùô4(€€€€€€€€€€€€€€€€€€€€€€€€€íÈ¹±…‰•°€„ôôÈ¹½É¥¥¹…±1…‰•°€˜˜€ñÍÁ…¸ÍÑå±”õíì‘¥ÍÁ±…äè€‰‰±½¬ˆ°µ…É¥¹Q½Àè€È°™½¹ÑM¥é”è€ÄÀ¸Ô°½±½Èè€ˆŒåàÙÜˆ°Ñ•áÑ•½É…Ñ¥½¸è€‰¹½¹”ˆõôùíÈ¹‘…åQåÁ”€ôôô€‰Ñ¥¹äˆ€ü€‰Q¥¹äˆ€èÈ¹‘…åQåÁ”€ôôô€‰É•½Ù•Éäˆ€ü€‰I•½Ù•Éäˆ€è€‰M½™Ð‰ôÙ•ÉÍ¥½¸½˜íÈ¹½É¥¥¹…±1…‰•±ôð½ÍÁ…¸ùô4(€€€€€€€€€€€€€€€€€€€€€€€€ð½ÍÁ…¸ø4(€€€€€€€€€€€€€€€€€€€€€€€íÈ¹½…°€˜˜€  ¤€ôøì(€€€€€€€€€€€€€€€€€€€€€€€€€±•ÐÙ…±Õ”€ôÈ¹½…°¹Ù…±Õ”ñð€Àì(€€€€€€€€€€€€€€€€€€€€€€€€€ÑÉäìÙ…±Õ”€ô9Õµ‰•È¡)M=8¹Á…ÉÍ”¡±½…±MÑ½É…”¹•Ñ%Ñ•´ ‰Á±ÕÍ¡±¥™”é¡…‰¥Ðµ½… éØÄˆ¤ñð€‰íôˆ¤ü¹µ•…ÍÕÉ•µ•¹ÑÌü¹mÁ•É¥½¹‘…Ñ•tü¹mÈ¹­•åtñðÙ…±Õ”¤ìô…Ñ €¡}•ÉÉ½È¤íô(€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì¡•Ù•¹Ð¤€ôøì•Ù•¹Ð¹ÍÑ½ÁAÉ½Á……Ñ¥½¸ ¤ì…‘‘5•…ÍÕÉ•µ•¹Ð¡È¤ìõô…É¥„µ±…‰•°õí‘€‘íÈ¹½…°¹ÍÑ•Áô€‘íÈ¹½…°¹Õ¹¥ÑôÑ¼€‘íÈ¹±…‰•±õôÍÑå±”õíì™±•áM¡É¥¹¬è€À°Á…‘‘¥¹œè€ˆÕÁà€ÝÁàˆ°‰½É‘•ÉI…‘¥ÕÌè€à°‰½É‘•Èè€ˆÅÁàÍ½±¥€åØˆ°‰…­É½Õ¹è€ˆÝ	ˆ°½±½Èè€ˆŒÍÜÁÌˆ°™½¹ÑM¥é”è€ÄÀ¸Ô°™½¹Ñ]•¥¡Ðè€äÀÀ°ÕÉÍ½Èè€‰Á½¥¹Ñ•Èˆõôø­íÈ¹½…°¹ÍÑ•Áôƒ
-ÜíÙ…±Õ•ô½íÈ¹½…°¹Ñ…É•ÑôíÈ¹½…°¹Õ¹¥Ñôð½‰ÕÑÑ½¸øì(€€€€€€€€€€€€€€€€€€€€€€€ô¤ ¥ô(€€€€€€€€€€€€€€€€€€€€€€€íÈ¹É¥¡Ð€˜˜€ñÍÁ…¸ÍÑå±”õíì™½¹ÑM¥é”è€ÄÈ¸Ô°½±½Èè€ˆÀáÜˆ°Ý¡¥Ñ•MÁ…”è€‰¹½ÝÉ…ÀˆõôùíÈ¹É¥¡Ñôð½ÍÁ…¸ùô(€€€€€€€€€€€€€€€€€€€€€€€í…ÉÉ…¹•Q½‘…åQ…Í­Ì€˜˜È¹Í½ÕÉ•Q…Í¬€˜˜€…¥ÍÕÑÕÉ•Y¥•Ü€˜˜€ 4(€€€€€€€€€€€€€€€€€€€€€€€€€€ñ‰ÕÑÑ½¸4(€€€€€€€€€€€€€€€€€€€€€€€€€€€ÑåÁ”ô‰‰ÕÑÑ½¸ˆ4(€€€€€€€€€€€€€€€€€€€€€€€€€€€½¹±¥¬õì¡•Ù•¹Ð¤€ôøì•Ù•¹Ð¹ÍÑ½ÁAÉ½Á……Ñ¥½¸ ¤ì¥ÍQ…Í­A…ÕÍ•‘=¹…Ñ”¡È¹Í½ÕÉ•Q…Í¬°Á•É¥½¹‘…Ñ”¤€üÉ•ÍÕµ•QÉ…­•ÉQ…Í¬¡È¹Í½ÕÉ•Q…Í¬¹Ñ…Í­}­•ä¤€èÁ…ÕÍ•QÉ…­•ÉQ…Í¬¡È¹Í½ÕÉ•Q…Í¬¹Ñ…Í­}­•ä¤ìõô4(€€€€€€€€€€€€€€€€€€€€€€€€€€€…É¥„µ±…‰•°õí¥ÍQ…Í­A…ÕÍ•‘=¹…Ñ”¡È¹Í½ÕÉ•Q…Í¬°Á•É¥½¹‘…Ñ”¤€üI•ÍÕµ”€‘íÈ¹±…‰•±õ€€èA…ÕÍ”€‘íÈ¹±…‰•±õô4(€€€€€€€€€€€€€€€€€€€€€€€€€€€Ñ¥Ñ±”õí¥ÍQ…Í­A…ÕÍ•‘=¹…Ñ”¡È¹Í½ÕÉ•Q…Í¬°Á•É¥½¹‘…Ñ”¤€ü€‰I•ÍÕµ”ˆ€è€‰A…ÕÍ”‰ô4(€€€€€€€€€€€€€€€€€€€€€€€€€€€ÍÑå±”õíì™±•áM¡É¥¹¬è€À°Ý¥‘Ñ è€Ìà°¡•¥¡Ðè€ÐÐ°µ¥¹!•¥¡Ðè€ÐÐ°‰½É‘•ÉI…‘¥ÕÌè€à°‰½É‘•Èè€‰¹½¹”ˆ°‰…­É½Õ¹è€‰ÑÉ…¹ÍÁ…É•¹Ðˆ°½±½Èè¥ÍQ…Í­A…ÕÍ•‘=¹…Ñ”¡È¹Í½ÕÉ•Q…Í¬°Á•É¥½¹‘…Ñ”¤€ü€ˆŒÌÄáÜäˆ€è€ˆåáÐˆ°™½¹ÑM¥é”è€ÄÐ°ÕÉÍ½Èè€‰Á½¥¹Ñ•Èˆ°‘¥ÍÁ±…äè€‰™±•àˆ°…±¥¹%Ñ•µÌè€‰•¹Ñ•Èˆ°©ÕÍÑ¥™å½¹Ñ•¹Ðè€‰•¹Ñ•Èˆ°Á…‘‘¥¹œè€Àõô4(€€€€€€€€€€€€€€€€€€€€€€€€€€ø4(€€€€€€€€€€€€€€€€€€€€€€€€€€€í¥ÍQ…Í­A…ÕÍ•‘=¹…Ñ”¡È¹Í½ÕÉ•Q…Í¬°Á•É¥½¹‘…Ñ”¤€ü€‹ŠZÛ¾â<ˆ€è€‹Š>à‰ô4(€€€€€€€€€€€€€€€€€€€€€€€€€€ð½‰ÕÑÑ½¸ø4(€€€€€€€€€€€€€€€€€€€€€€€€¥ô4(€€€€€€€€€€€€€€€€€€€€€€€í•áÁ…¹‘…‰±”€˜˜€ñÍÁ…¸ÍÑå±”õíì½±½Èè‘…ä¹…•¹Ð°™½¹ÑM¥é”è€ÄÄ°ÑÉ…¹Í™½É´è•áÁ…¹‘•€ü€‰É½Ñ…Ñ” ÄàÁ‘•œ¤ˆ€è€‰¹½¹”ˆ°ÑÉ…¹Í¥Ñ¥½¸è€‰ÑÉ…¹Í™½É´€¸ÉÌˆõôûŠZøð½ÍÁ…¸ùô4(€€€€€€€€€€€€€€€€€€€€€€ð½‘¥Øø4(€€€€€€€€€€€€€€€€€€€€€í•áÁ…¹‘…‰±”€˜˜•áÁ…¹‘•€˜˜€ 4(€€€€€€€€€€€€€€€€€€€€€€€€ñ‘¥ØÍÑå±”õíìÁ…‘‘¥¹œè€ˆÀ€ÄÑÁà€ÄÉÁà€ÐÙÁàˆ°™½¹ÑM¥é”è€ÄÌ°±¥¹•!•¥¡Ðè€Ä¸Ø°½±½Èè€ˆŒÙÕÝˆõôø4(€€€€€€€€€€€€€€€€€€€€€€€€€íÈ¹¡½Ü€˜˜€ñ‘¥ØùíÈ¹¡½Ýôð½‘¥Øùô4(€€€€€€€€€€€€€€€€€€€€€€€€€íÈ¹Ý¡ä€˜˜€ñ‘¥ØÍÑå±”õíìµ…É¥¹Q½ÀèÈ¹¡½Ü€ü€Ø€è€À°™½¹ÑMÑå±”è€‰¥Ñ…±¥Œˆ°½±½Èè‘…ä¹…•¹ÐõôûÂ~Jl]¡äèíÈ¹Ý¡åôð½‘¥Øùô4(€€€€€€€€€€€€€€€€€€€€€€€€€í¥Í5½Ù…‰±”€˜˜€ 4(€€€€€€€€€€€€€€€€€€€€€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì¡•Ù•¹Ð¤€ôøì•Ù•¹Ð¹ÍÑ½ÁAÉ½Á……Ñ¥½¸ ¤ìµ½Ù•Q…Í­Q½Q½µ½ÉÉ½Ü¡È¹­•ä°Á•É¥½¹‘…Ñ”¤ìÍ•Ñ=Á•¹I½Ü¡¹Õ±°¤ìõôÍÑå±”õíìµ…É¥¹Q½ÀèÈ¹¡½ÜñðÈ¹Ý¡ä€ü€à€è€À°Á…‘‘¥¹œè€ˆÙÁà€ÄÁÁàˆ°‰½É‘•ÉI…‘¥ÕÌè€à°‰½É‘•Èè€ÅÁàÍ½±¥€‘í‘…ä¹…•¹ÑôÔÕ€°‰…­É½Õ¹è€‰Ý¡¥Ñ”ˆ°½±½Èè‘…ä¹…•¹Ð°™½¹Ñ]•¥¡Ðè€àÀÀ°™½¹ÑM¥é”è€ÄÄ¸Ô°ÕÉÍ½Èè€‰Á½¥¹Ñ•ÈˆõôûÂ~N5½Ù”Ñ¼Ñ½µ½ÉÉ½Üð½‰ÕÑÑ½¸ø4(€€€€€€€€€€€€€€€€€€€€€€€€€€¥ô4(€€€€€€€€€€€€€€€€€€€€€€€€ð½‘¥Øø4(€€€€€€€€€€€€€€€€€€€€€€¥ô4(€€€€€€€€€€€€€€€€€€€€ð½‘¥Øø4(€€€€€€€€€€€€€€€€€€ð½‘¥Øø4(€€€€€€€€€€€€€€€€¤ì4(€€€€€€€€€€€€€ôì4(€€€€€€€€€€€€€É•ÑÕÉ¸€ 4(€€€€€€€€€€€€€€€€ñ‘¥Ø‘…Ñ„µÁ±ÕÍ¡±¥™”µÑ…Í¬µ‘É…œµÍ½Á”ø4(€€€€€€€€€€€€€€€€€í¥¹½µÁ±•Ñ•I½ÝÌ¹µ…À¡É•¹‘•ÉI½Ü¥ô4(€€€€€€€€€€€€€€€€€í½µÁ±•Ñ•‘I½ÝÌ¹±•¹Ñ €ø€À€˜˜€ 4(€€€€€€€€€€€€€€€€€€€€ñ‘¥ØÍÑå±”õíìµ…É¥¹Q½Àè€ÄÀõôø4(€€€€€€€€€€€€€€€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøÍ•Ñ½µÁ±•Ñ•‘Q½‘…åáÁ…¹‘• ¡½Á•¸¤€ôø€…½Á•¸¥ôÍÑå±”õíìÝ¥‘Ñ è€ˆÄÀÀ”ˆ°‘¥ÍÁ±…äè€‰™±•àˆ°©ÕÍÑ¥™å½¹Ñ•¹Ðè€‰ÍÁ…”µ‰•ÑÝ••¸ˆ°…±¥¹%Ñ•µÌè€‰•¹Ñ•Èˆ°Á…‘‘¥¹œè€ˆáÁà€ÄÁÁàˆ°‰½É‘•ÉI…‘¥ÕÌè€ÄÀ°‰½É‘•Èè€ˆÅÁàÍ½±¥€ÙÑÈˆ°‰…­É½Õ¹è€‰É‰„ ÈÔÔ°ÈÔÔ°ÈÔÔ°À¸Ð¤ˆ°½±½Èè€ˆŒáÙåˆ°™½¹Ñ]•¥¡Ðè€àÀÀ°™½¹ÑM¥é”è€ÄÈ°ÕÉÍ½Èè€‰Á½¥¹Ñ•Èˆõôø4(€€€€€€€€€€€€€€€€€€€€€€€€ñÍÁ…¸ûŠrL½µÁ±•Ñ•Ñ½‘…ä€¡í½µÁ±•Ñ•‘I½ÝÌ¹±•¹Ñ¡ô¤ð½ÍÁ…¸ø4(€€€€€€€€€€€€€€€€€€€€€€€€ñÍÁ…¸ÍÑå±”õíìÑÉ…¹Í™½É´è½µÁ±•Ñ•‘Q½‘…åáÁ…¹‘•€ü€‰É½Ñ…Ñ” ÄàÁ‘•œ¤ˆ€è€‰¹½¹”ˆ°ÑÉ…¹Í¥Ñ¥½¸è€‰ÑÉ…¹Í™½É´€¸ÉÌˆõôûŠZøð½ÍÁ…¸ø4(€€€€€€€€€€€€€€€€€€€€€€ð½‰ÕÑÑ½¸ø4(€€€€€€€€€€€€€€€€€€€€€í½µÁ±•Ñ•‘Q½‘…åáÁ…¹‘•€˜˜€ñ‘¥ØÍÑå±”õíìµ…É¥¹Q½Àè€àõôùí½µÁ±•Ñ•‘I½ÝÌ¹µ…À¡É•¹‘•ÉI½Ü¥ôð½‘¥Øùô4(€€€€€€€€€€€€€€€€€€€€ð½‘¥Øø4(€€€€€€€€€€€€€€€€€€¥ô4(€€€€€€€€€€€€€€€€ð½‘¥Øø4(€€€€€€€€€€€€€€¤ì4(€€€€€€€€€€€€€€€ô¤ ¥ô4(€€€€€€€€€€€€€€ð¼ø4(€€€€€€€€€€€€¥ô4(€€€€€€€€€€€í‘…¥±å¡•­%¸¹‘…å}ÑåÁ”€„ôô€‰É•ÍÐˆ€˜˜€¡‘…¥±å¡•­%¸¹ÕÍÑ½µ}•ÍÍ•¹Ñ¥…±Ìü¹±•¹Ñ €ü€ 4(€€€€€€€€€€€€€‘…¥±å¡•­%¸¹ÕÍÑ½µ}•ÍÍ•¹Ñ¥…±Ì¹•Ù•Éä ¡­•ä¤€ôøÙ¥•Ý½¹•m­•åt¤€˜˜€ 4(€€€€€€€€€€€€€€€€ñ‘¥ØÍÑå±”õíìÑ•áÑ±¥¸è€‰•¹Ñ•Èˆ°Á…‘‘¥¹œè€ˆÄÁÁà€À€ÉÁàˆ°½±½Èè‘…ä¹…•¹Ð°™½¹Ñ]•¥¡Ðè€àÀÀ°™½¹ÑM¥é”è€ÄÔõôûŠr Q½‘…äÌ•ÍÍ•¹Ñ¥…±Ì…É”‘½¹”ƒŠPÑ¡…ÐÌ•¹½Õ ¸ƒÂ~Jlð½‘¥Øø4(€€€€€€€€€€€€€€¤4(€€€€€€€€€€€€¤€èÁÐ€ôôô€ÄÀÀ€˜˜€ 4(€€€€€€€€€€€€€€ñ‘¥ØÍÑå±”õíìÑ•áÑ±¥¸è€‰•¹Ñ•Èˆ°Á…‘‘¥¹œè€ˆÄÁÁà€À€ÉÁàˆ°½±½Èè‘…ä¹…•¹Ð°™½¹Ñ]•¥¡Ðè€àÀÀ°™½¹ÑM¥é”è€ÄÔõôùíÙ½¥”¹‘…å½µÁ±•Ñ•ôð½‘¥Øø4(€€€€€€€€€€€€¤¥ô4(€€€€€€€€€€ð½‘¥Øø4(€€€€€€€€¥ô4(€€€€€€€íÑ½‘…å…É‘%¹‘•à€ôôô€Ä€˜˜É½ÝÌ¹±•¹Ñ €ôôô€À€˜˜€…‰…‰å5½‘”€˜˜€ 4(€€€€€€€€€€ñ‘¥ØÍÑå±”õíìµ…É¥¹	½ÑÑ½´è€Äà°Á…‘‘¥¹œè€Äà°‰½É‘•ÉI…‘¥ÕÌè€ÈÀ°‰…­É½Õ¹è€‰É‰„ ÈÔÔ°ÈÔÔ°ÈÔÔ°À¸Ô¤ˆ°‰½É‘•Èè€ˆÅÁà‘…Í¡•€åÍˆ°Ñ•áÑ±¥¸è€‰•¹Ñ•Èˆ°½±½Èè€ˆŒáÙåˆ°™½¹ÑM¥é”è€ÄÈ¸Ôõôø4(€€€€€€€€€€€€ñ‘¥Øù9¼Ñ…Í­Ì™½ÈÑ½‘…äå•Ð¸	Õ¥±„±¥ÍÐÑ¡…Ð™¥ÑÌå½ÕÈ‘…ä¸ƒÂ~žàð½‘¥Øø4(€€€€€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôø½Á•¹Q…Í­5…¹…•È¡‘…å%‘½É…Ñ”¡Á•É¥½¹‘…Ñ”¤¥ôÍÑå±”õíìµ…É¥¹Q½Àè€ÄÀ°Á…‘‘¥¹œè€ˆáÁà€ÄÉÁàˆ°‰½É‘•ÉI…‘¥ÕÌè€ä°‰½É‘•Èè€À°‰…­É½Õ¹è€ˆØÕÄˆ°½±½Èè€‰Ý¡¥Ñ”ˆ°™½¹Ñ]•¥¡Ðè€äÀÀ°ÕÉÍ½Èè€‰Á½¥¹Ñ•Èˆõôû¾ò,‘Ñ½‘…çŠeÌÑ…Í­Ìð½‰ÕÑÑ½¸ø4(€€€€€€€€€€ð½‘¥Øø4(€€€€€€€€¥ô4(€€€€€€€€ð½‘¥Øø4(4(€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøÍ•Ñ…±µEÕ¥­=Á•¸¡ÑÉÕ”¥ôÍÑå±”õíìÝ¥‘Ñ è€ˆÄÀÀ”ˆ°‘¥ÍÁ±…äè€‰™±•àˆ°©ÕÍÑ¥™å½¹Ñ•¹Ðè€‰ÍÁ…”µ‰•ÑÝ••¸ˆ°…±¥¹%Ñ•µÌè€‰•¹Ñ•Èˆ°Á…‘‘¥¹œè€ˆÄÅÁà€ÄÍÁàˆ°‰½É‘•ÉI…‘¥ÕÌè€ÄÈ°‰½É‘•Èè€ˆÅÁàÍ½±¥€ÙÑÈˆ°‰…­É½Õ¹è€‰É‰„ ÈÔÔ°ÈÔÔ°ÈÔÔ°À¸ÔÔ¤ˆ°½±½Èè€ˆŒÙÕÝˆ°™½¹Ñ]•¥¡Ðè€àÀÀ°™½¹ÑM¥é”è€ÄÈ¸Ô°ÕÉÍ½Èè€‰Á½¥¹Ñ•Èˆ°µ…É¥¹	½ÑÑ½´è€Äàõôø4(€€€€€€€€€€ñÍÁ…¸ûÂ~n|%˜$™••°½Ù•ÉÝ¡•±µ•ð½ÍÁ…¸ø4(€€€€€€€€€€ñÍÁ…¸ÍÑå±”õíì½±½Èè€ˆÜÝØˆõôûŠèð½ÍÁ…¸ø4(€€€€€€€€ð½‰ÕÑÑ½¸ø4(4(€€€€€€€€ñ…±µA…¹•°½Á•¸õí…±µEÕ¥­=Á•¹ô½¹±½Í”õì ¤€ôøÍ•Ñ…±µEÕ¥­=Á•¸¡™…±Í”¥ôÕÉÉ•¹Ñ½Á¥¹=ÁÑ¥½¸õíÕÉÉ•¹Ñ½Á¥¹=ÁÑ¥½¹ôÉ•Í¡Õ™™±”õíÉ•Í¡Õ™™±•ôÍ•Ñ…É•M•Ñ¥½¸õíÍ•Ñ…É•M•Ñ¥½¹ô½Q½…Í¡‰½…Éõí½Q½…Í¡‰½…É‘ô€¼ø4(4(€€ð¼ø4(€€¤ì4)ô4(
+            <textarea value={weeklyIntentionDraft} onChange={(event) => setWeeklyIntentionDraft(event.target.value)} maxLength={2000} placeholder="What do I want to carry with me this week?" style={{ width: "100%", boxSizing: "border-box", minHeight: 64, marginTop: 6, padding: 8, borderRadius: 9, border: "1px solid #D9B8E8", resize: "vertical" }} />
+            <div style={{ display: "flex", gap: 6, marginTop: 6 }}><button type="button" onClick={saveWeeklyIntentionEdit} style={{ padding: "6px 9px", borderRadius: 8, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save</button><button type="button" onClick={() => setWeeklyIntentionEditing(false)} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, cursor: "pointer" }}>Cancel</button></div>
+            {weeklyIntentionMessage && <div style={{ marginTop: 5, fontSize: 10.5, color: "#8C6B9E" }}>{weeklyIntentionMessage}</div>}
+          </>}
+        </div>
+
+        <div role="tablist" aria-label="Today view" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, marginBottom: 9, padding: 4, borderRadius: 12, background: "#FFFFFF99", border: "1px solid #EADCEC" }}>
+          <button role="tab" aria-selected={todayCardIndex === 0} type="button" onClick={() => setTodayCardIndex(0)} style={{ padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 0 ? `${day.accent}22` : "transparent", color: todayCardIndex === 0 ? day.accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>ðŸ—“ Schedule</button>
+          <button role="tab" aria-selected={todayCardIndex === 1} type="button" onClick={() => setTodayCardIndex(1)} style={{ padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 1 ? `${day.accent}22` : "transparent", color: todayCardIndex === 1 ? day.accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{babyMode ? "ðŸ§¸ Little Jobs" : "âœ“ Tasks"}</button>
+        </div>
+        {todayCardIndex === 1 && (
+          <>
+            <div role="tablist" aria-label="Task week" style={{ display: "grid", gridTemplateColumns: "repeat(7,minmax(0,1fr))", gap: 4, marginBottom: 9, padding: 5, borderRadius: 13, background: "rgba(255,255,255,.72)", border: "1px solid #EADCEC" }}>
+              {taskWeekDates.map((date) => {
+                const selected = selectedProgressDate === date;
+                const isTodayDate = date === period.date;
+                const isUpcomingDate = date > period.date;
+                const dateValue = new Date(`${date}T12:00:00Z`);
+                const shortDay = dateValue.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }).slice(0, 2);
+                const dayNumber = dateValue.toLocaleDateString("en-US", { day: "numeric", timeZone: "UTC" });
+                const fullDay = dateValue.toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" });
+                return (
+                  <button key={date} role="tab" aria-selected={selected} type="button" onClick={() => selectTaskPreviewDate(date)} title={`${fullDay}${isTodayDate ? " Â· Today" : isUpcomingDate ? " Â· Preview" : ""}`} style={{ minWidth: 0, minHeight: 48, padding: "5px 2px", borderRadius: 9, border: selected ? `2px solid ${day.accent}` : "1px solid transparent", background: selected ? `${day.accent}18` : "transparent", color: selected ? day.accent : "#806B8D", cursor: "pointer", display: "grid", placeItems: "center", alignContent: "center", gap: 1, position: "relative" }}>
+                    <span style={{ fontSize: 9.5, fontWeight: 900, letterSpacing: ".04em", textTransform: "uppercase" }}>{shortDay}</span>
+                    <span style={{ fontSize: 12, fontWeight: 900, lineHeight: 1 }}>{dayNumber}</span>
+                    {isTodayDate && <span aria-hidden="true" style={{ position: "absolute", bottom: 2, fontSize: 9, lineHeight: 1, color: day.accent }}>â—</span>}
+                  </button>
+                );
+              })}
+            </div>
+            {isFutureView && (
+              <div style={{ margin: "-1px 0 10px", padding: "8px 10px", borderRadius: 11, background: "#F7F2FB", border: "1px solid #E6D4F2", color: "#765F84", fontSize: 11.5, lineHeight: 1.4 }}>
+                <strong>{selectedTaskDateLabel} preview</strong> Â· You can see what is coming up now. Checkboxes unlock when that day arrives.
+              </div>
+            )}
+          </>
+        )}
+        <div
+          onTouchStart={(event) => { event.stopPropagation(); todaySwipeStartX.current = event.touches[0]?.clientX ?? null; todaySwipeStartY.current = event.touches[0]?.clientY ?? null; }}
+          onTouchEnd={(event) => {
+            event.stopPropagation();
+            const startX = todaySwipeStartX.current;
+            const startY = todaySwipeStartY.current;
+            const endX = event.changedTouches[0]?.clientX;
+            const endY = event.changedTouches[0]?.clientY;
+            todaySwipeStartX.current = null;
+            todaySwipeStartY.current = null;
+            if (startX == null || endX == null || startY == null || endY == null) return;
+            const deltaX = endX - startX;
+            const deltaY = endY - startY;
+            if (Math.abs(deltaX) < 45 || Math.abs(deltaX) < Math.abs(deltaY) * 1.5) return;
+            setTodayCardIndex(deltaX < 0 ? 1 : 0);
+          }}
+          style={{ touchAction: "pan-y" }}>
+        {todayCardIndex === 0 && <>
+        {/* Personal schedule */}
+        {selectedSchedule || selectedScheduleExceptionEntries.length > 0 ? (
+        <div style={{ marginBottom: 14, padding: 14, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: `1px solid ${day.accent}44` }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <div style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 800 }}>ðŸ—“ï¸ {(selectedSchedule?.label || DAYS.find((item) => item.id === scheduleDayId)?.title || "TODAY").toUpperCase()} SCHEDULE</div>
+            <button type="button" onClick={() => setManageSchedule((open) => !open)} style={{ padding: "7px 10px", borderRadius: 9, border: "1px solid #4C8FE855", background: manageSchedule ? "#EAF4FF" : "#FFFFFFAA", color: "#4C8FE8", fontWeight: 800, fontSize: 12, cursor: "pointer" }}>
+              ðŸ—“ï¸ {manageSchedule ? "Done changing schedule" : "Change schedule"}
+            </button>
+          </div>
+          {(() => {
+            const baseEntries = selectedSchedule?.entries?.length
+              ? selectedSchedule.entries
+              : legacyScheduleToEntries(selectedSchedule);
+            const displayEntries = [...baseEntries, ...selectedScheduleExceptionEntries].sort((a, b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")));
+            const visibleScheduleEntries = showFullTodaySchedule ? displayEntries : displayEntries.slice(0, 3);
+            return displayEntries.length > 0 ? (
+          <div data-plushlife-home-schedule-preview="true" style={{ display: "grid", gap: 5, marginTop: 8 }}>
+                {visibleScheduleEntries.map((entry, index) => (
+                  <div key={index} style={{ display: "grid", gridTemplateColumns: entry.time ? "70px 1fr" : "1fr", alignItems: "center", gap: 7, padding: "8px 9px", borderRadius: 9, background: entry.isException ? "#EEF9F5" : "#FFFFFF99", border: entry.isException ? "1px solid #B9E0D0" : "1px solid #EFE3F3" }}>
+                    {entry.time && <span style={{ fontSize: 13, color: day.accent, fontWeight: 900 }}>{formatTime12(entry.time)}</span>}
+                    <span style={{ fontSize: 12.5, lineHeight: 1.35, color: "#5B4B6B", fontWeight: 600 }}>{entry.isException && <span style={{ marginRight: 5, color: "#318C79", fontSize: 10, fontWeight: 900 }}>EXTRA</span>}{entry.text}</span>
+                  </div>
+                ))}
+                {displayEntries.length > 3 && <button type="button" aria-expanded={showFullTodaySchedule} onClick={() => setShowFullTodaySchedule((shown) => !shown)} style={{ minHeight: 44, padding: "7px 4px", border: 0, background: "transparent", color: day.accent, fontWeight: 900, fontSize: 11.5, cursor: "pointer", textAlign: "left" }}>{showFullTodaySchedule ? "Show fewer schedule items" : "+ " + (displayEntries.length - 3) + " more Â· Show all"}</button>}
+              </div>
+            ) : null;
+          })()}
+          {active === "daily" && (
+            <div style={{ marginTop: 9, fontSize: 11.5, color: "#8C6B9E" }}>
+              DAILY follows today's schedule. Tap a day above to preview another day. ðŸ’›
+            </div>
+          )}
+        </div>
+        ) : (
+        <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.5)", border: "1px dashed #C9B3DC", textAlign: "center" }}>
+          <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "#8C6B9E", fontWeight: 800 }}>ðŸ—“ï¸ NO SCHEDULE YET</div>
+          <div style={{ marginTop: 6, fontSize: 12.5, lineHeight: 1.5, color: "#6B5A7D" }}>
+            You haven't set a wake-up time or schedule for {active === "daily" ? "today" : (DAYS.find((item) => item.id === scheduleDayId)?.label || scheduleDayId.toUpperCase())} yet.
+          </div>
+          <button type="button" onClick={() => setManageSchedule(true)} style={{ marginTop: 10, padding: "9px 14px", borderRadius: 10, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>
+            ðŸ—“ï¸ Add a schedule
+          </button>
+        </div>
+        )}
+        {dailyCheckIn.day_type !== "rest" && !babyMode && (() => {
+          // A small glance at what still needs doing, so leading with the
+          // schedule doesn't mean losing sight of today's tasks entirely.
+          const habitRowsToday = rows.filter((r) => r.habitType !== "regular");
+          const previewHabits = habitRowsToday.filter((r) => !viewDone[r.key]).slice(0, 3);
+          if (habitRowsToday.length === 0) return null;
+          return (
+            <div style={{ marginTop: 14, padding: 14, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: "1px solid #E6D4F2" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 800 }}>ðŸŒ± HABITS TODAY</div>
+                <button type="button" onClick={() => openTaskManager(dayIdForDate(period.date))} style={{ padding: "5px 9px", borderRadius: 8, border: `1px solid ${day.accent}55`, background: "white", color: day.accent, fontWeight: 900, fontSize: 11, cursor: "pointer" }}>Manage habits ({habitRowsToday.length}) â†’</button>
+              </div>
+              <div style={{ display: "grid", gap: 5 }}>
+                {previewHabits.length > 0 ? previewHabits.map((r) => (
+                  <div key={r.key} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 9px", borderRadius: 9, background: "#FFFFFF99", border: "1px solid #F3D9EC", opacity: isFutureView ? 0.62 : 1 }}>
+                    <span onClick={() => { if (!isFutureView) toggle(r.key); }}
+                      role="checkbox" aria-checked={false} aria-label={r.label} tabIndex={isFutureView ? -1 : 0}
+                      onKeyDown={(e) => { if (isFutureView) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(r.key); } }}
+                      style={{ width: 18, height: 18, minWidth: 18, borderRadius: 6, border: "2px solid #E3B8D8", cursor: isFutureView ? "not-allowed" : "pointer" }} />
+                    <span style={{ fontSize: 13, color: "#5B4B6B", fontWeight: 500 }}>
+                      {r.sourceTask && <HabitTypeIcon task={r.sourceTask} />}
+                      {r.label}
+                    </span>
+                  </div>
+                )) : (
+                  <div style={{ padding: "9px 10px", borderRadius: 9, background: "#FFFFFF99", border: "1px solid #D7EEE2", fontSize: 12.5, color: "#318C79", fontWeight: 800 }}>All of today's habits are checked in. âœ¨</div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+        </>}
+
+        {todayCardIndex === 1 && babyMode && !isFutureView && !isHistoricalView && dailyCheckIn.day_type !== "rest" && (
+          <BabyModeCareSuite
+            date={period.date}
+            todayDone={todayRequiredDone}
+            todayTotal={todayRequiredKeys.length}
+            activityDays={activityDaysTotal}
+            careDays={careDaysTotal}
+            caregiverName={babyCaregiverName}
+            comfortItemName={trackerProfile?.comfort_item_name?.trim() || ""}
+            littleJobs={rows.filter((row) => !viewDone[row.key])}
+            onCompleteTask={(taskKey) => toggle(taskKey)}
+            onManageTasks={() => openTaskManager(dayIdForDate(period.date))}
+            onOpenJournal={openJournalForSelectedDate}
+          />
+        )}
+
+        {todayCardIndex === 1 && !babyMode && !isFutureView && rows.length > 0 && dailyCheckIn.day_type !== "rest" && (focusHelperOpen || !nextStepTask) && (
+          // Suppressed (unless already open) whenever the One Next Step card
+          // above is already showing this same single-task suggestion â€” no
+          // point offering "pick one thing for me" right under a card that's
+          // already doing exactly that.
+          <div style={{ marginBottom: 14, padding: 15, borderRadius: 18, background: focusHelperOpen ? "#F2FFFB" : "#FFFFFF99", border: focusHelperOpen ? "1px solid #73B7A8" : "1px solid #CFE8E1" }}>
+            {!focusHelperOpen ? (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+                <div>
+                  <div style={{ fontSize: 12.5, fontWeight: 900, color: "#318C79" }}>Feeling stuck or overwhelmed?</div>
+                  <div style={{ marginTop: 3, fontSize: 11.5, color: "#6B5A7D" }}>{isHistoricalView ? "I can gently choose one required task from this day." : "I can gently choose one required task for today."}</div>
+                </div>
+                <button type="button" onClick={pickRandomFocusTask} style={{ padding: "8px 11px", borderRadius: 10, border: 0, background: "#318C79", color: "white", fontWeight: 900, cursor: "pointer" }}>ðŸ§¸ Pick one thing for me</button>
+              </div>
+            ) : (
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                  <div style={{ fontSize: 11, letterSpacing: "0.12em", fontWeight: 900, color: "#318C79" }}>ðŸ§¸ JUST ONE LITTLE STEP</div>
+                  <button type="button" onClick={() => { setFocusHelperOpen(false); setFocusSuggestionKey(null); }} aria-label="Close one-step helper" style={{ padding: "4px 7px", borderRadius: 8, border: "1px solid #B9DDD4", background: "white", color: "#318C79", fontWeight: 900, cursor: "pointer" }}>Close</button>
+                </div>
+                {focusedEssential ? (
+                  <>
+                    <div style={{ marginTop: 9, fontSize: 17, fontWeight: 900, color: "#4F405C" }}>{focusedEssential.sourceTask && <HabitTypeIcon task={focusedEssential.sourceTask} />}{focusedEssential.label}</div>
+                    {focusedEssential.how && <div style={{ marginTop: 5, fontSize: 12, lineHeight: 1.5, color: "#6B5A7D" }}>{focusedEssential.how}</div>}
+                    {focusedEssential.why && <div style={{ marginTop: 5, fontSize: 12.5, lineHeight: 1.5, fontStyle: "italic", color: "#318C79" }}>ðŸ’› Why: {focusedEssential.why}</div>}
+                    <div style={{ marginTop: 10, display: "flex", gap: 7, flexWrap: "wrap" }}>
+                      <button type="button" onClick={() => { toggle(focusedEssential.key, selectedProgressDate); setFocusHelperOpen(false); setFocusSuggestionKey(null); }} style={{ padding: "8px 11px", borderRadius: 10, border: 0, background: "#318C79", color: "white", fontWeight: 900, cursor: "pointer" }}>Mark this done âœ“</button>
+                      {focusChoices.length > 1 && <button type="button" onClick={pickRandomFocusTask} style={{ padding: "8px 11px", borderRadius: 10, border: "1px solid #73B7A8", background: "white", color: "#318C79", fontWeight: 900, cursor: "pointer" }}>Pick a different one</button>}
+                    </div>
+                    <div style={{ marginTop: 8, fontSize: 11, color: "#6B8A82" }}>Nothing is marked done until you tap the green button.</div>
+                  </>
+                ) : (
+                  <div style={{ marginTop: 9, fontSize: 13.5, color: "#318C79", fontWeight: 900 }}>All required tasks here are finished. You did it! âœ¨</div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        {todayCardIndex === 1 && rows.length > 0 && (!babyMode || isFutureView || isHistoricalView || selectedTaskViewIsRest) && (
+          <div style={{ marginBottom: 14, padding: 14, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: "1px solid #E6D4F2" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 4 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 800 }}>{selectedTaskViewIsRest ? "REST DAY" : isFutureView ? `${selectedTaskDateLabel.toUpperCase()} TASKS` : isHistoricalView ? `${selectedTaskDateLabel.toUpperCase()} HISTORY` : "TODAY'S TASKS"}</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 7, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 13, color: day.accent, fontWeight: 700 }}>{selectedTaskViewIsRest ? "NO TASKS REQUIRED" : `${pct}% Â· ${requiredDoneCount}/${requiredRows.length}`}</span>
+                {!isHistoricalView && <button type="button" onClick={() => openTaskManager(dayIdForDate(period.date))} style={{ padding: "6px 9px", borderRadius: 8, border: `1px solid ${day.accent}55`, background: "white", color: day.accent, fontWeight: 900, fontSize: 11, cursor: "pointer" }}>âœï¸ Edit tasks</button>}
+              </div>
+            </div>
+            {!selectedTaskViewIsRest && <div style={{ height: 8, background: "rgba(255,255,255,0.4)", borderRadius: 6, margin: "8px 0 11px", overflow: "hidden", border: "1px solid #F3D9EC" }}>
+              <div style={{ height: "100%", width: `${pct}%`, background: day.accent, borderRadius: 6, transition: "width .4s cubic-bezier(.34,1.56,.64,1)" }} />
+            </div>}
+            {!selectedTaskViewIsRest && preferences.nurturing_checkins && (
+              <div style={{ marginBottom: 10, fontSize: 13, lineHeight: 1.5, fontWeight: 700, color: "#7D668C" }}>
+                {doneCount > 0 ? voice.nurturingSome(doneCount) : voice.nurturingNone}
+              </div>
+            )}
+            {selectedTaskViewIsRest ? (
+              <div style={{ padding: "22px 14px", borderRadius: 16, background: "#EAF6F1", border: "1px solid #A9DFC4", textAlign: "center", color: "#2F6E48" }}>
+                <div style={{ fontSize: 26 }}>ðŸŒ´</div>
+                <div style={{ marginTop: 6, fontWeight: 900, fontSize: 15 }}>Your list is resting too.</div>
+                <div style={{ marginTop: 4, fontSize: 12.5, lineHeight: 1.5 }}>Nothing is overdue, no backlog is created, and anything you choose to do is simply a bonus.</div>
+              </div>
+            ) : preferences.focus_mode && !focusModeShowAll ? (() => {
+              const isPickable = (r) => !viewDone[r.key] && !(r.sourceTask && isTaskPausedOnDate(r.sourceTask, period.date));
+              const focusNextTask = rows.find((r) => !r.isBonus && isPickable(r)) || rows.find(isPickable);
+              if (!focusNextTask) {
+                return (
+                  <div style={{ textAlign: "center", padding: "18px 0 2px", color: day.accent, fontWeight: 800, fontSize: 15 }}>Everything's done â€” proud of you ðŸ’œ</div>
+                );
+              }
+              const checked = !!viewDone[focusNextTask.key];
+              const expandable = !!(focusNextTask.how || focusNextTask.why);
+              const expanded = openRow === focusNextTask.key;
+              return (
+                <div>
+                  <div style={{ fontSize: 10.5, letterSpacing: "0.14em", color: day.accent, fontWeight: 800, marginBottom: 6 }}>ðŸŽ¯ NEXT UP{focusNextTask.section ? ` Â· ${focusNextTask.section.toUpperCase()}` : ""}</div>
+                  <div style={{ borderRadius: 18, border: `2px solid ${day.accent}`, background: day.accent + "14", overflow: "hidden" }}>
+                    <div onClick={() => { if (isFutureView) return; expandable ? setOpenRow(expanded ? null : focusNextTask.key) : toggle(focusNextTask.key); }}
+                      role={expandable ? "button" : undefined}
+                      aria-expanded={expandable ? expanded : undefined}
+                      aria-label={expandable ? `${expanded ? "Hide" : "Show"} details for ${focusNextTask.label}` : undefined}
+                      tabIndex={expandable && !isFutureView ? 0 : undefined}
+                      onKeyDown={expandable ? (e) => {
+                        if (isFutureView) return;
+                        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenRow(expanded ? null : focusNextTask.key); }
+                      } : undefined}
+                      style={{ display: "flex", alignItems: "center", gap: 16, padding: "22px 18px", cursor: isFutureView ? "not-allowed" : "pointer" }}>
+                      <button type="button" onClick={(e) => { e.stopPropagation(); if (!isFutureView) toggle(focusNextTask.key); }}
+                        disabled={isFutureView} aria-pressed={checked} aria-label={`${checked ? "Mark incomplete" : "Mark complete"}: ${focusNextTask.label}`}
+                        style={{ width: 40, height: 40, minWidth: 40, borderRadius: 12,
+                          border: `3px solid ${day.accent}`,
+                          background: checked ? day.accent : "white",
+                          display: "flex", alignItems: "center", justifyContent: "center", padding: 0, cursor: isFutureView ? "not-allowed" : "pointer",
+                          color: "white", fontWeight: 900, fontSize: 22, animation: celebrateKey === focusNextTask.key ? "checkPop 0.5s ease" : "none" }}>
+                        {checked ? "âœ“" : ""}
+                      </button>
+                      <span style={{ flex: 1, fontSize: 19, fontWeight: 700, color: "#5B4B6B" }}>{focusNextTask.sourceTask && <HabitTypeIcon task={focusNextTask.sourceTask} />}{focusNextTask.label}</span>
+                      {focusNextTask.sourceTask && !isFutureView && (
+                        <button
+                          type="button"
+                          onClick={(event) => { event.stopPropagation(); pauseTrackerTask(focusNextTask.sourceTask.task_key); }}
+                          aria-label={`Pause ${focusNextTask.label}`}
+                          title="Pause"
+                          style={{ flexShrink: 0, width: 32, height: 32, borderRadius: 10, border: "none", background: "transparent", color: "#C9B8D4", fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
+                        >
+                          â¸
+                        </button>
+                      )}
+                    </div>
+                    {expandable && expanded && (
+                      <div style={{ padding: "0 18px 16px 74px", fontSize: 14, lineHeight: 1.6, color: "#6B5A7D" }}>
+                        {focusNextTask.how && <div>{focusNextTask.how}</div>}
+                        {focusNextTask.why && <div style={{ marginTop: focusNextTask.how ? 6 : 0, fontStyle: "italic", color: day.accent }}>ðŸ’› Why: {focusNextTask.why}</div>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })() : taskListCollapsed ? (() => {
+              const pendingRows = rows.filter((r) => !viewDone[r.key] && !(r.sourceTask && isTaskPausedOnDate(r.sourceTask, period.date)));
+              const requiredPendingRows = pendingRows.filter((r) => !r.isBonus);
+              const bonusPendingCount = pendingRows.length - requiredPendingRows.length;
+              const previewRows = (requiredPendingRows.length ? requiredPendingRows : pendingRows).slice(0, 3);
+              const pendingCount = requiredPendingRows.length;
+              return (
+                <button type="button" onClick={() => setTaskListCollapsed(false)} style={{ width: "100%", display: "block", padding: "13px 14px", borderRadius: 13, border: `1px solid ${day.accent}55`, background: "white", cursor: "pointer", textAlign: "left" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontWeight: 900, fontSize: 13.5, color: "#5B4B6B" }}>ðŸ“‹ {pendingCount ? `${pendingCount} required task${pendingCount === 1 ? "" : "s"} still waiting` : bonusPendingCount ? "Required tasks are done" : "Today's tasks"}</span>
+                    <span style={{ fontWeight: 900, fontSize: 12.5, color: day.accent, whiteSpace: "nowrap" }}>See full list â€º</span>
+                  </div>
+                  {previewRows.length > 0 && <div style={{ marginTop: 8, display: "grid", gap: 4 }}>
+                    {previewRows.map((r) => <div key={r.key} style={{ fontSize: 12, color: "#6B5A7D", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>â—‹ {r.sourceTask && <HabitTypeIcon task={r.sourceTask} />}{r.label}</div>)}
+                  </div>}
+                  {bonusPendingCount > 0 && <div style={{ marginTop: 6, fontSize: 10.5, color: "#927C9E" }}>{bonusPendingCount} optional bonus {bonusPendingCount === 1 ? "task" : "tasks"} available</div>}
+                </button>
+              );
+            })() : (
+              <>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                  <button type="button" onClick={() => { setTaskListCollapsed(true); setArrangeTodayTasks(false); }} style={{ minHeight: 44, padding: "8px 10px", borderRadius: 9, border: "1px solid #E6D4F2", background: "white", color: "#8C6B9E", fontWeight: 700, fontSize: 11.5, cursor: "pointer" }}>â–¾ Collapse</button>
+                  {!isFutureView && !isHistoricalView && <button type="button" aria-pressed={arrangeTodayTasks} onClick={() => setArrangeTodayTasks((open) => !open)} style={{ minHeight: 44, padding: "8px 10px", borderRadius: 9, border: arrangeTodayTasks ? "1px solid " + day.accent : "1px solid #E6D4F2", background: arrangeTodayTasks ? day.accent + "12" : "white", color: arrangeTodayTasks ? day.accent : "#8C6B9E", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>{arrangeTodayTasks ? "âœ“ Done arranging" : "â†• Arrange"}</button>}
+                </div>
+                {preferences.focus_mode && (
+                  <button type="button" onClick={() => setFocusModeShowAll(false)} style={{ marginBottom: 10, marginLeft: 8, padding: "7px 11px", borderRadius: 9, border: "1px solid #E6D4F2", background: "white", color: "#8C6B9E", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>ðŸŽ¯ Back to one thing at a time</button>
+                )}
+                {(() => {
+              let lastSection = "";
+              const lowCapacityRows = rows.filter((r) => !r.isBonus && r.sourceTask?.essential_on_low_capacity);
+              const visibleRows = dailyCheckIn.day_type === "rest"
+                ? []
+                : dailyCheckIn.custom_essentials?.length
+                  ? rows.filter((r) => dailyCheckIn.custom_essentials.includes(r.key))
+                : dailyCheckIn.day_type === "tiny"
+                  ? (lowCapacityRows.length ? lowCapacityRows : rows.filter((r) => !r.isBonus).slice(0, 3))
+                : dailyCheckIn.day_type === "recovery"
+                  ? (lowCapacityRows.length ? lowCapacityRows : rows.filter((r) => !r.isBonus).slice(0, 5))
+                  : dailyCheckIn.soft_day || dailyCheckIn.day_type === "soft"
+                    ? rows.filter((r) => !r.isBonus)
+                    : rows;
+              const visibleGroupOrder = Array.from(new Set(visibleRows.map((row) => row.section).filter(Boolean)));
+              const incompleteRows = visibleRows.filter((r) => !viewDone[r.key] || recentlyCompletedKeys.includes(r.key));
+              const completedRows = visibleRows.filter((r) => viewDone[r.key] && !recentlyCompletedKeys.includes(r.key));
+              const renderRow = (r) => {
+                const groupKey = r.isEveryday ? "__everyday__" : r.section;
+                const header = groupKey !== lastSection ? (r.isEveryday ? "Daily" : r.section) : null;
+                lastSection = groupKey;
+                const checked = !!viewDone[r.key];
+                const isMovable = r.sourceTask?.schedule_type === "once" && !checked && !isFutureView;
+                const expandable = !!(r.how || r.why) || isMovable;
+                const expanded = openRow === r.key;
+                const draggableTodayTask = !!r.sourceTask && !checked && !isFutureView && !isHistoricalView;
+                return (
+                  <div key={r.key}>
+                    {header && (
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, margin: "8px 2px 4px", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}>
+                        <span style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 700 }}>{header.toUpperCase()}</span>
+                        {arrangeTodayTasks && !isFutureView && !isHistoricalView && visibleGroupOrder.length > 1 && (
+                          <span style={{ display: "flex", gap: 3 }}>
+                            <button type="button" disabled={visibleGroupOrder.indexOf(r.section) === 0} onClick={() => moveTaskGroup(r.section, -1, visibleGroupOrder)} aria-label={`Move ${header} group earlier`} title="Move group earlier" style={{ width: 26, height: 26, minHeight: 26, padding: 0, borderRadius: 8, border: "1px solid #E7D2E8", background: "rgba(255,255,255,.55)", color: day.accent, opacity: visibleGroupOrder.indexOf(r.section) === 0 ? .3 : 1, fontWeight: 900, cursor: visibleGroupOrder.indexOf(r.section) === 0 ? "default" : "pointer" }}>â†‘</button>
+                            <button type="button" disabled={visibleGroupOrder.indexOf(r.section) === visibleGroupOrder.length - 1} onClick={() => moveTaskGroup(r.section, 1, visibleGroupOrder)} aria-label={`Move ${header} group later`} title="Move group later" style={{ width: 26, height: 26, minHeight: 26, padding: 0, borderRadius: 8, border: "1px solid #E7D2E8", background: "rgba(255,255,255,.55)", color: day.accent, opacity: visibleGroupOrder.indexOf(r.section) === visibleGroupOrder.length - 1 ? .3 : 1, fontWeight: 900, cursor: visibleGroupOrder.indexOf(r.section) === visibleGroupOrder.length - 1 ? "default" : "pointer" }}>â†“</button>
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <div
+                      data-plushlife-task-drop-key={draggableTodayTask ? r.sourceTask.task_key : undefined}
+                      data-plushlife-task-drop-label={draggableTodayTask ? r.label : undefined}
+                      data-plushlife-task-drop-section={draggableTodayTask ? r.sourceTask.section : undefined}
+                      style={{ marginBottom: 4, borderRadius: 10,
+                      border: "1px solid " + (checked ? day.accent + "66" : "#F3D9EC"),
+                      background: checked ? day.accent + "1A" : "rgba(255,255,255,0.25)",
+                      overflow: "hidden", userSelect: draggableTodayTask ? "none" : undefined, WebkitUserSelect: draggableTodayTask ? "none" : undefined, WebkitTouchCallout: draggableTodayTask ? "none" : undefined, transition: "transform .12s ease, box-shadow .12s ease" }}>
+                      <div onClick={() => { if (isFutureView) return; expandable ? setOpenRow(expanded ? null : r.key) : toggle(r.key); }}
+                        role={expandable ? "button" : undefined}
+                        aria-expanded={expandable ? expanded : undefined}
+                        aria-label={expandable ? `${expanded ? "Hide" : "Show"} details for ${r.label}` : undefined}
+                        tabIndex={expandable && !isFutureView ? 0 : undefined}
+                        onKeyDown={expandable ? (e) => {
+                          if (isFutureView) return;
+                          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenRow(expanded ? null : r.key); }
+                        } : undefined}
+                        style={{ minHeight: 48, display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", cursor: isFutureView ? "not-allowed" : "pointer", opacity: isFutureView ? 0.62 : 1 }}>
+                        {arrangeTodayTasks && draggableTodayTask && <button
+                          type="button"
+                          draggable={false}
+                          aria-label={`Reorder ${r.label}`}
+                          title="Drag to move"
+                          onClick={(event) => { event.preventDefault(); event.stopPropagation(); }}
+                          onPointerDown={(event) => startPointerTaskDrag(event, r.sourceTask.task_key, r.label)}
+                          onPointerMove={movePointerTaskDrag}
+                          onPointerUp={endPointerTaskDrag}
+                          onPointerCancel={cancelPointerTaskDrag}
+                          onContextMenu={(event) => event.preventDefault()}
+                          onSelect={(event) => event.preventDefault()}
+                          style={{ flex: "0 0 auto", width: 38, height: 44, minHeight: 44, padding: 0, borderRadius: 8, border: "1px solid #E7D2E8", background: "rgba(255,255,255,.42)", color: "#9A86A7", fontSize: 14, fontWeight: 900, lineHeight: 1, cursor: "grab", touchAction: "none", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" }}
+                        >â‹®â‹®</button>}
+                        <span onClick={(e) => { e.stopPropagation(); if (!isFutureView) toggle(r.key); }}
+                          role="checkbox"
+                          aria-checked={checked}
+                          aria-label={r.label}
+                          tabIndex={isFutureView ? -1 : 0}
+                          onKeyDown={(e) => {
+                            if (isFutureView) return;
+                            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); toggle(r.key); }
+                          }}
+                          style={{ width: 20, height: 20, minWidth: 20, borderRadius: 6,
+                            border: `2px solid ${checked ? day.accent : "#E3B8D8"}`,
+                            background: checked ? day.accent : "transparent",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            color: "#FFF6FB", fontWeight: 900, fontSize: 12, animation: celebrateKey === r.key ? "checkPop 0.5s ease" : "none" }}>
+                          {checked ? "âœ“" : ""}
+                        </span>
+                        <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, lineHeight: 1.3, fontWeight: 650, color: checked ? "#B08AC7" : "#5B4B6B", textDecoration: checked ? "line-through" : "none" }}>
+                          {r.sourceTask && <HabitTypeIcon task={r.sourceTask} />}
+                          {r.label}
+                          {r.sourceTask && isTaskPausedOnDate(r.sourceTask, period.date) && <span style={{ marginLeft: 6, padding: "1px 6px", borderRadius: 999, background: "#FFFBF2", color: "#A56D14", fontSize: 9.5, fontWeight: 900, textDecoration: "none" }}>PAUSED</span>}
+                          {r.label !== r.originalLabel && <span style={{ display: "block", marginTop: 2, fontSize: 10.5, color: "#9A86A7", textDecoration: "none" }}>{r.dayType === "tiny" ? "Tiny" : r.dayType === "recovery" ? "Recovery" : "Soft"} version of {r.originalLabel}</span>}
+                        </span>
+                        {r.goal && (() => {
+                          let value = r.goal.value || 0;
+                          try { value = Number(JSON.parse(localStorage.getItem("plushlife:habit-coach:v1") || "{}")?.measurements?.[period.date]?.[r.key] || value); } catch (_error) {}
+                          return <button type="button" onClick={(event) => { event.stopPropagation(); addMeasurement(r); }} aria-label={`Add ${r.goal.step} ${r.goal.unit} to ${r.label}`} style={{ flexShrink: 0, padding: "5px 7px", borderRadius: 8, border: "1px solid #B9DCF6", background: "#F7FBFF", color: "#3D70A3", fontSize: 10.5, fontWeight: 900, cursor: "pointer" }}>+{r.goal.step} Â· {value}/{r.goal.target} {r.goal.unit}</button>;
+                        })()}
+                        {r.right && <span style={{ fontSize: 12.5, color: "#B08AC7", whiteSpace: "nowrap" }}>{r.right}</span>}
+                        {arrangeTodayTasks && r.sourceTask && !isFutureView && (
+                          <button
+                            type="button"
+                            onClick={(event) => { event.stopPropagation(); isTaskPausedOnDate(r.sourceTask, period.date) ? resumeTrackerTask(r.sourceTask.task_key) : pauseTrackerTask(r.sourceTask.task_key); }}
+                            aria-label={isTaskPausedOnDate(r.sourceTask, period.date) ? `Resume ${r.label}` : `Pause ${r.label}`}
+                            title={isTaskPausedOnDate(r.sourceTask, period.date) ? "Resume" : "Pause"}
+                            style={{ flexShrink: 0, width: 38, height: 44, minHeight: 44, borderRadius: 8, border: "none", background: "transparent", color: isTaskPausedOnDate(r.sourceTask, period.date) ? "#318C79" : "#C9B8D4", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
+                          >
+                            {isTaskPausedOnDate(r.sourceTask, period.date) ? "â–¶ï¸" : "â¸"}
+                          </button>
+                        )}
+                        {expandable && <span style={{ color: day.accent, fontSize: 11, transform: expanded ? "rotate(180deg)" : "none", transition: "transform .2s" }}>â–¾</span>}
+                      </div>
+                      {expandable && expanded && (
+                        <div style={{ padding: "0 14px 12px 46px", fontSize: 13, lineHeight: 1.6, color: "#6B5A7D" }}>
+                          {r.how && <div>{r.how}</div>}
+                          {r.why && <div style={{ marginTop: r.how ? 6 : 0, fontStyle: "italic", color: day.accent }}>ðŸ’› Why: {r.why}</div>}
+                          {isMovable && (
+                            <button type="button" onClick={(event) => { event.stopPropagation(); moveTaskToTomorrow(r.key, period.date); setOpenRow(null); }} style={{ marginTop: r.how || r.why ? 8 : 0, padding: "6px 10px", borderRadius: 8, border: `1px solid ${day.accent}55`, background: "white", color: day.accent, fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>ðŸ“… Move to tomorrow</button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              };
+              return (
+                <div data-plushlife-task-drag-scope>
+                  {incompleteRows.map(renderRow)}
+                  {completedRows.length > 0 && (
+                    <div style={{ marginTop: 10 }}>
+                      <button type="button" onClick={() => setCompletedTodayExpanded((open) => !open)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", borderRadius: 10, border: "1px solid #E6D4F2", background: "rgba(255,255,255,0.4)", color: "#8C6B9E", fontWeight: 800, fontSize: 12, cursor: "pointer" }}>
+                        <span>âœ“ Completed today ({completedRows.length})</span>
+                        <span style={{ transform: completedTodayExpanded ? "rotate(180deg)" : "none", transition: "transform .2s" }}>â–¾</span>
+                      </button>
+                      {completedTodayExpanded && <div style={{ marginTop: 8 }}>{completedRows.map(renderRow)}</div>}
+                    </div>
+                  )}
+                </div>
+              );
+                })()}
+              </>
+            )}
+            {dailyCheckIn.day_type !== "rest" && (dailyCheckIn.custom_essentials?.length ? (
+              dailyCheckIn.custom_essentials.every((key) => viewDone[key]) && (
+                <div style={{ textAlign: "center", padding: "10px 0 2px", color: day.accent, fontWeight: 800, fontSize: 15 }}>âœ¨ Today's essentials are done â€” that's enough. ðŸ’›</div>
+              )
+            ) : pct === 100 && (
+              <div style={{ textAlign: "center", padding: "10px 0 2px", color: day.accent, fontWeight: 800, fontSize: 15 }}>{voice.dayComplete}</div>
+            ))}
+          </div>
+        )}
+        {todayCardIndex === 1 && rows.length === 0 && !babyMode && (
+          <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.5)", border: "1px dashed #C9B3DC", textAlign: "center", color: "#8C6B9E", fontSize: 12.5 }}>
+            <div>No tasks for today yet. Build a list that fits your day. ðŸ§¸</div>
+            <button type="button" onClick={() => openTaskManager(dayIdForDate(period.date))} style={{ marginTop: 10, padding: "8px 12px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>ï¼‹ Add todayâ€™s tasks</button>
+          </div>
+        )}
+        </div>
+
+        <button type="button" onClick={() => setCalmQuickOpen(true)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 13px", borderRadius: 12, border: "1px solid #E6D4F2", background: "rgba(255,255,255,0.55)", color: "#6B5A7D", fontWeight: 800, fontSize: 12.5, cursor: "pointer", marginBottom: 18 }}>
+          <span>ðŸ›Ÿ If I feel overwhelmed</span>
+          <span style={{ color: "#C77DD6" }}>â€º</span>
+        </button>
+
+        <CalmPanel open={calmQuickOpen} onClose={() => setCalmQuickOpen(false)} currentCopingOption={currentCopingOption} reshuffle={reshuffle} setCareSection={setCareSection} goToDashboard={goToDashboard} />
+
+  </>
+  );
+}

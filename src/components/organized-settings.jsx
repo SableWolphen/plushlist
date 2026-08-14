@@ -214,8 +214,220 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
         </div>
         {(preferences.reminder_times || []).length < 8 && <button type="button" onClick={() => updatePreference({ reminder_times: [...(preferences.reminder_times || []), "12:00"] })} style={{ ...secondaryButton, marginTop: 10 }}>Ôºã Add reminder</button>}
         {(preferences.reminder_times || []).length >= 5 && <div style={{ marginTop: 10, padding: "9px 10px", borderRadius: 10, background: "#FFF9E9", border: "1px solid #F0D99E", color: "#6B5A3D", fontSize: 11.5, lineHeight: 1.45 }}><strong>REMINDER LOAD:</strong> You have {(preferences.reminder_times || []).length} daily reminders. If they start blending into the background, keeping fewer high-value times usually makes each one easier to notice.</div>}
-        {smartReminderSuggestion && (preferences.reminder_times || []).length < 8◊n8∂âûÀk∫wµÁtÅëïÕç…•¡—•Ω∏ıÌëïÕç…•¡—•ΩπÙÄº¯•Ù4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄº¯4(ÄÄ§Ï4(4(ÄÅçΩπÕ–ÅëïŸ•çïÃÄÙÄ†4(ÄÄÄÄ¯4(ÄÄÄÄÄÄÒï—Ö•±!ïÖëï»Å—•—±îÙâïŸ•çïÃàÅΩπ	Öç¨ıÏ†§ÄÙ¯ÅÕï—Mïç—•Ω∏†â°Ωµîà•ÙÄº¯4(ÄÄÄÄÄÄÒMïç—•ΩπQ•—±îÅ•çΩ∏Ùãä2hàÅ—•—±îÙâΩππïç—ïêÅï·¡ï…•ïπçïÃàÅëïÕç…•¡—•Ω∏Ùâ]Ö—ç†Å¡Ö•…•πúÅÖπêÅ—°îÅ°ΩµîµÕç…ïï∏Å›•ëùï–ÅÖ…îÅ≠ï¡–Å—Ωùï—°ï»Å°ï…î∏àÄº¯4(ÄÄÄÄÄÄÒÖ…ê¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅôΩπ—M•ÈîËÄƒÃ∏‘∞ÅôΩπ—]ï•ù°–ËÄ‰¿¿∞ÅçΩ±Ω»ËÄàå—‹‘ŸàÅıÙ˚ä2hÅµÖÈô•–Å›Ö—ç†Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ–∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞Å±•πï!ï•ù°–ËÄƒ∏–‘∞ÅçΩ±Ω»ËÄàå›·‡‹àÅıÙ˘=¡ï∏ÅA±’Õ°1•ôîÅΩ∏ÅÂΩ’»Å›Ö—ç†∞Åç°ΩΩÕîÄÒÕ—…Ωπú˘5‰Å—ÖÕ≠ÃΩÕ—…Ωπú¯∞Å—°ï∏Åïπ—ï»Å•—ÃÅçΩëîÅâï±Ω‹∏Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅë•Õ¡±Ö‰ËÄâù…•êà∞Åù…•ëQïµ¡±Ö—ïΩ±’µπÃËÄâµ•πµÖ‡†¿∞≈ô»§ÅÖ’—ºà∞ÅùÖ¿ËÄ‡∞ÅµÖ…ù•πQΩ¿ËÄƒ¿ÅıÙ¯4(ÄÄÄÄÄÄÄÄÄÄÒ•π¡’–Å—Â¡îÙâ—ï·–àÅŸÖ±’îıÌ›Ö—ç°AÖ•…•πùΩëïÙÅΩπ°ÖπùîıÏ°ïŸïπ–§ÄÙ¯ÅÕï—]Ö—ç°AÖ•…•πùΩëî°ïŸïπ–π—Ö…ùï–πŸÖ±’îπ—ΩU¡¡ï…ÖÕî†§π…ï¡±Öçî†Ωmyµh¿¥ÂtΩú∞Äàà§πÕ±•çî†¿∞Ä‡§•ÙÅΩπ-ïÂΩ›∏ıÏ°ïŸïπ–§ÄÙ¯ÅÏÅ•òÄ°ïŸïπ–π≠ï‰ÄÙÙÙÄâπ—ï»à§ÅçΩππïç—]Ö—ç††§ÏÅıÙÅµÖ·1ïπù—†ıÏ·ÙÅ¡±Öçï°Ω±ëï»Ùà‡µç°Ö…Öç—ï»ÅçΩëîàÅÕ—Â±îıÌÏÄ∏∏π•π¡’—M—Â±î∞Å±ï——ï…M¡Öç•πúËÄà∏ƒ…ï¥à∞Å—ï·—Q…ÖπÕôΩ…¥ËÄâ’¡¡ï…çÖÕîàÅıÙÄº¯4(ÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅë•ÕÖâ±ïêıÌ›Ö—ç°AÖ•…•πù	’ÕÂÙÅΩπ±•ç¨ıÌçΩππïç—]Ö—ç°ÙÅÕ—Â±îıÌÏÄ∏∏π¡…•µÖ…Â	’——Ω∏∞ÅâÖç≠ù…Ω’πêËÅ›Ö—ç°AÖ•…•πù	’Õ‰Ä¸Äàå‰›’àÄËÄàåÃ‡·‹‰àÅıÙ˘Ì›Ö—ç°AÖ•…•πù	’Õ‰Ä¸ÄâΩππïç—•πüäòàÄËÄâΩππïç–âÙΩâ’——Ω∏¯4(ÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄÄÅÌ›Ö—ç°AÖ•…•πù5ïÕÕÖùîÄòòÄÒë•ÿÅ…Ω±îÙâÕ—Ö—’ÃàÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ‡∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞ÅçΩ±Ω»ËÄàå–‹‹‹Ÿà∞ÅôΩπ—]ï•ù°–ËÄ‹¿¿ÅıÙ˘Ì›Ö—ç°AÖ•…•πù5ïÕÕÖùïÙΩë•ÿ˘Ù4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄÄÅÌ›•πëΩ‹πÖ¡Öç•—Ω»¸π•Õ9Ö—•ŸïA±Ö—ôΩ…¥¸∏†§ÄòòÅ›•πëΩ‹πÖ¡Öç•—Ω»¸πA±’ù•πÃ¸π]Ö—ç°MÂπç	…•ëùîÄòòÄ†4(ÄÄÄÄÄÄÄÄÒÖ…ê¯4(ÄÄÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅôΩπ—M•ÈîËÄƒÃ∏‘∞ÅôΩπ—]ï•ù°–ËÄ‰¿¿∞ÅçΩ±Ω»ËÄàå—‹‘ŸàÅıÙ˚äjÑÅ%πÕ—Öπ–Å±ΩçÖ∞ÅÕÂπåΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ–∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞Å±•πï!ï•ù°–ËÄƒ∏–‘∞ÅçΩ±Ω»ËÄàå›·‡‹àÅıÙ˘=¡—•ΩπÖ∞Å	±’ï—ΩΩ—†ÅÕÂπåÅ›°•±îÅ—°•ÃÅ¡°ΩπîÅÖ¡¿Å•ÃÅ…’ππ•πú∏Å9Ω…µÖ∞Å›Ö—ç†ÅÕÂπåÅÕ—•±∞Å›Ω…≠ÃÅÖÃÅÑÅôÖ±±âÖç¨∏Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅë•ÕÖâ±ïêıÌ±ΩçÖ±]Ö—ç°MÂπç	’ÕÂÙÅΩπ±•ç¨ıÌÕ—Ö…—1ΩçÖ±]Ö—ç°MÂπçÙÅÕ—Â±îıÌÏÄ∏∏πÕïçΩπëÖ…Â	’——Ω∏∞ÅµÖ…ù•πQΩ¿ËÄ‰∞ÅçΩ±Ω»ËÄàåÃ‡·‹‰àÅıÙ˘Ì±ΩçÖ±]Ö—ç°MÂπç	’Õ‰Ä¸Äâ]Ö•—•πúÅôΩ»Å›Ö—ç£äòàÄËÄâπÖâ±îÅ•πÕ—Öπ–ÅÕÂπåâÙΩâ’——Ω∏¯4(ÄÄÄÄÄÄÄÄÄÅÌ±ΩçÖ±]Ö—ç°MÂπç5ïÕÕÖùîÄòòÄÒë•ÿÅ…Ω±îÙâÕ—Ö—’ÃàÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ‹∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞ÅçΩ±Ω»ËÄàåŸ’›àÅıÙ˘Ì±ΩçÖ±]Ö—ç°MÂπç5ïÕÕÖùïÙΩë•ÿ˘Ù4(ÄÄÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄÄÄ•Ù4(ÄÄÄÄÄÄÒÖ…ê¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅë•Õ¡±Ö‰ËÄâô±ï‡à∞Å©’Õ—•ôÂΩπ—ïπ–ËÄâÕ¡Öçîµâï—›ïï∏à∞ÅùÖ¿ËÄƒ¿∞ÅÖ±•ùπ%—ïµÃËÄâçïπ—ï»àÅıÙ¯4(ÄÄÄÄÄÄÄÄÄÄÒë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅôΩπ—M•ÈîËÄƒÃ∏‘∞ÅôΩπ—]ï•ù°–ËÄ‰¿¿∞ÅçΩ±Ω»ËÄàåŸ‘–‡¿àÅıÙ˚¬~NƒÅ!ΩµîµÕç…ïï∏Å›•ëùï–Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄÃ∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞ÅçΩ±Ω»ËÄàå·‹‡‰‘àÅıÙ˘QΩëÖ‰ÅÌ¡ç—ÙîÉ
-‹Å]ïï¨ÅÌ›ïï≠±Â=Ÿï…Ö±±Aç—ÙîΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅΩπ±•ç¨ıÏ†§ÄÙ¯ÅÏ4(ÄÄÄÄÄÄÄÄÄÄÄÅëΩç’µïπ–πë•Õ¡Ö—ç°Ÿïπ–°πï‹Å’Õ—ΩµŸïπ–†â¡±’Õ°±•ôîµ›•ëùï–µÕÂπåà§§Ï4(ÄÄÄÄÄÄÄÄÄÄÄÅçΩπÕ–Å]•ëùï—	…•ëùîÄÙÅ›•πëΩ‹πÖ¡Öç•—Ω»¸πA±’ù•πÃ¸π]•ëùï—	…•ëùîÏ4(ÄÄÄÄÄÄÄÄÄÄÄÅ•òÄ°]•ëùï—	…•ëùî§ÅÏ4(ÄÄÄÄÄÄÄÄÄÄÄÄÄÅçΩπÕ–Åπï·—QÖÕ¨ÄÙÅ…Ω›Ãπô•πê†°…Ω‹§ÄÙ¯ÄÖ…Ω‹π•Õ	Ωπ’ÃÄòòÄÖŸ•ï›Ωπïm…Ω‹π≠ïÂt§ÅÒÅ…Ω›Ãπô•πê†°…Ω‹§ÄÙ¯ÄÖ…Ω‹π•Õ	Ωπ’Ã§Ï4(ÄÄÄÄÄÄÄÄÄÄÄÄÄÅ]•ëùï—	…•ëùîπ’¡ëÖ—ï]•ëùï–°ÏÅπï·—QÖÕ¨ËÅëÖ•±Â°ïç≠%∏πëÖÂ}—Â¡îÄÙÙÙÄâ…ïÕ–àÄ¸ÄâIïÕ—•πúÅçΩ’π—ÃÅ—ΩëÖ‰àÄËÄ°πï·—QÖÕ¨¸π±Öâï∞ÅÒÄâQΩëÖ‰ùÃÅçÖ…•πúÅÕ—ï¡ÃÅÖ…îÅçΩµ¡±ï—îà§∞ÅëÖÂQÂ¡îËÅÄëÏ°ëÖ•±Â°ïç≠%∏πëÖÂ}—Â¡îÅÒÄâô’±∞à§π…ï¡±Öçî†Ωx∏º∞Ä°±ï——ï»§ÄÙ¯Å±ï——ï»π—ΩU¡¡ï…ÖÕî†§•ÙÅÖ‰É
-‹ÄëÌ¡ç—ÙïÄ∞Å¡…Ωù…ïÕÃËÅ¡ç–∞Å›ïï≠±ÂA…Ωù…ïÕÃËÅ›ïï≠±Â=Ÿï…Ö±±Aç–∞Å—ÖÕ≠ÃËÅ…Ω›ÃπÕ±•çî†¿∞Ä–§πµÖ¿†°…Ω‹§ÄÙ¯Ä°ÏÅ≠ï‰ËÅ…Ω‹π≠ï‰∞Å±Öâï∞ËÅ…Ω‹π±Öâï∞∞ÅëΩπîËÄÑÖŸ•ï›Ωπïm…Ω‹π≠ïÂtÅÙ§§ÅÙ§πçÖ—ç†††§ÄÙ¯ÅÌÙ§Ï(ÄÄÄÄÄÄÄÄÄÄÄÅÙ4(ÄÄÄÄÄÄÄÄÄÄÄÅÕï—]•ëùï—MÂπç5Õú†â]•ëùï–ÅÕÂπçïêÑÉ¬~JTà§Ï4(ÄÄÄÄÄÄÄÄÄÄÄÅÕï—Q•µïΩ’–††§ÄÙ¯ÅÕï—]•ëùï—MÂπç5Õú†àà§∞ÄÃ¿¿¿§Ï4(ÄÄÄÄÄÄÄÄÄÅıÙÅÕ—Â±îıÌ¡…•µÖ…Â	’——ΩπÙ˘MÂπåÅπΩ‹Ωâ’——Ω∏¯4(ÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄÄÅÌ›•ëùï—MÂπç5ÕúÄòòÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ‹∞ÅçΩ±Ω»ËÄàåÃ‡‡ƒŸà∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞ÅôΩπ—]ï•ù°–ËÄ‡¿¿ÅıÙ˘Ì›•ëùï—MÂπç5ÕùÙΩë•ÿ˘Ù4(ÄÄÄÄÄÄÄÄÒëï—Ö•±ÃÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄƒƒÅıÙ¯4(ÄÄÄÄÄÄÄÄÄÄÒÕ’µµÖ…‰ÅÕ—Â±îıÌÏÅç’…ÕΩ»ËÄâ¡Ω•π—ï»à∞ÅçΩ±Ω»ËÄàå‹‘’‡»à∞ÅôΩπ—M•ÈîËÄƒ»∞ÅôΩπ—]ï•ù°–ËÄ‡‘¿ÅıÙ˘!Ω‹Å—ºÅÖëêÅ—°îÅπë…Ω•êÅ›•ëùï–ΩÕ’µµÖ…‰¯4(ÄÄÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ‡∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞Å±•πï!ï•ù°–ËÄƒ∏‘‘∞ÅçΩ±Ω»ËÄàå·‹‡‰‘àÅıÙ¯ƒ∏Å1Ωπúµ¡…ïÕÃÅÖ∏Åïµ¡—‰ÅÕ¡ÖçîÅΩ∏ÅÂΩ’»Å°ΩµîÅÕç…ïï∏∏Òâ»º¯»∏ÅQÖ¿ÄÒÕ—…Ωπú˘]•ëùï—ÃΩÕ—…Ωπú¯ÅÖπêÅô•πêÄÒÕ—…Ωπú˘A±’Õ°1•ôîΩÕ—…Ωπú¯∏Òâ»º¯Ã∏Å…ÖúÅ—°îÅ›•ëùï–ÅΩπ—ºÅÂΩ’»Å°ΩµîÅÕç…ïï∏∏Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄΩëï—Ö•±Ã¯4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄº¯4(ÄÄ§Ï4(4(ÄÅçΩπÕ–Å…ïÕ–ÄÙÄ†4(ÄÄÄÄ¯4(ÄÄÄÄÄÄÒï—Ö•±!ïÖëï»Å—•—±îÙâIïÕ–ÄòÅYÖçÖ—•Ω∏àÅΩπ	Öç¨ıÏ†§ÄÙ¯ÅÕï—Mïç—•Ω∏†â°Ωµîà•ÙÄº¯4(ÄÄÄÄÄÄÒMïç—•ΩπQ•—±îÅ•çΩ∏Ùã¬~2–àÅ—•—±îÙâA…Ω—ïç—ïêÅ…ïÕ–àÅëïÕç…•¡—•Ω∏ÙâAÖ’ÕîÅ—°îÅ±•Õ–ÅÖπêÅ…ïµ•πëï…ÃÅ›•—°Ω’–Åï…ÖÕ•πúÅ¡…Ωù…ïÕÃ∏àÄº¯4(ÄÄÄÄÄÄÒÖ…ê¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅë•Õ¡±Ö‰ËÄâô±ï‡à∞Å©’Õ—•ôÂΩπ—ïπ–ËÄâÕ¡Öçîµâï—›ïï∏à∞ÅùÖ¿ËÄƒ»∞ÅÖ±•ùπ%—ïµÃËÄâçïπ—ï»àÅıÙ¯4(ÄÄÄÄÄÄÄÄÄÄÒë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅôΩπ—M•ÈîËÄƒÃ∏‘∞ÅôΩπ—]ï•ù°–ËÄ‰¿¿∞ÅçΩ±Ω»ËÄàå—‹‘ŸàÅıÙ˘IïÕ–Å—ΩëÖ‰Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄÃ∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞ÅçΩ±Ω»ËÄàå‡ƒ‰»·àÅıÙ˘9Ω—°•πúÅ•ÃÅ…ï≈’•…ïêÅ—ΩëÖ‰∏Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅΩπ±•ç¨ıÌ—Ωùù±ïIïÕ—QΩëÖÂÙÅÕ—Â±îıÌÏÄ∏∏πÕïçΩπëÖ…Â	’——Ω∏∞ÅâΩ…ëï»ËÅ…ïÕ—Ö—ïÕMï–π°ÖÃ°¡ï…•ΩêπëÖ—î§Ä¸Äà…¡‡ÅÕΩ±•êÄåÃ‡·‹‰àÄËÅÕïçΩπëÖ…Â	’——Ω∏πâΩ…ëï»∞ÅçΩ±Ω»ËÄàåÃ‡·‹‰àÅıÙ˘Ì…ïÕ—Ö—ïÕMï–π°ÖÃ°¡ï…•ΩêπëÖ—î§Ä¸ÄãärLÅIïÕ—•πúàÄËÄâQ’…∏ÅΩ∏âÙΩâ’——Ω∏¯4(ÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄÄÄÒÖ…ê¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅôΩπ—M•ÈîËÄƒÃ∏‘∞ÅôΩπ—]ï•ù°–ËÄ‰¿¿∞ÅçΩ±Ω»ËÄàå—‹‘ŸàÅıÙ˘A±Ö∏ÅÑÅ…ïÕ–Å…ÖπùîΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅë•Õ¡±Ö‰ËÄâù…•êà∞Åù…•ëQïµ¡±Ö—ïΩ±’µπÃËÄà≈ô»Ä≈ô»à∞ÅùÖ¿ËÄ‡∞ÅµÖ…ù•πQΩ¿ËÄ‰ÅıÙ¯4(ÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞ÅÕ—Â±îıÌÏÅôΩπ—M•ÈîËÄƒƒ∏‘∞ÅôΩπ—]ï•ù°–ËÄ‡¿¿∞ÅçΩ±Ω»ËÄàåŸ‡ƒ›àÅıÙ˘…Ω¥Ò•π¡’–Å—Â¡îÙâëÖ—îàÅŸÖ±’îıÌ…ïÕ—IÖπùï…Öô–πÕ—Ö…—ÙÅΩπ°ÖπùîıÏ°ïŸïπ–§ÄÙ¯ÅÕï—IïÕ—IÖπùï…Öô–†°ç’……ïπ–§ÄÙ¯Ä°ÏÄ∏∏πç’……ïπ–∞ÅÕ—Ö…–ËÅïŸïπ–π—Ö…ùï–πŸÖ±’îÅÙ§•ÙÅÕ—Â±îıÌÏÄ∏∏π•π¡’—M—Â±î∞ÅµÖ…ù•πQΩ¿ËÄ‘ÅıÙÄº¯Ω±Öâï∞¯4(ÄÄÄÄÄÄÄÄÄÄÒ±Öâï∞ÅÕ—Â±îıÌÏÅôΩπ—M•ÈîËÄƒƒ∏‘∞ÅôΩπ—]ï•ù°–ËÄ‡¿¿∞ÅçΩ±Ω»ËÄàåŸ‡ƒ›àÅıÙ˘QºÒ•π¡’–Å—Â¡îÙâëÖ—îàÅŸÖ±’îıÌ…ïÕ—IÖπùï…Öô–πïπëÙÅΩπ°ÖπùîıÏ°ïŸïπ–§ÄÙ¯ÅÕï—IïÕ—IÖπùï…Öô–†°ç’……ïπ–§ÄÙ¯Ä°ÏÄ∏∏πç’……ïπ–∞ÅïπêËÅïŸïπ–π—Ö…ùï–πŸÖ±’îÅÙ§•ÙÅÕ—Â±îıÌÏÄ∏∏π•π¡’—M—Â±î∞ÅµÖ…ù•πQΩ¿ËÄ‘ÅıÙÄº¯Ω±Öâï∞¯4(ÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅΩπ±•ç¨ıÌÕÖŸïIïÕ—IÖπùïÙÅÕ—Â±îıÌÏÄ∏∏π¡…•µÖ…Â	’——Ω∏∞ÅµÖ…ù•πQΩ¿ËÄƒ¿∞ÅâÖç≠ù…Ω’πêËÄàåÃ‡·‹‰àÅıÙ˘5Ö…¨ÅÖÃÅ…ïÕ—•πúΩâ’——Ω∏¯4(ÄÄÄÄÄÄÄÅÌ…ïÕ—Ö—ïÃπ±ïπù—†Ä¯Ä¿ÄòòÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ‡∞ÅçΩ±Ω»ËÄàå‡ƒ‰»·à∞ÅôΩπ—M•ÈîËÄƒƒ∏‘ÅıÙ˘Ì…ïÕ—Ö—ïÃπ±ïπù—°ÙÅ…ïÕ–ÅÌ…ïÕ—Ö—ïÃπ±ïπù—†ÄÙÙÙÄƒÄ¸ÄâëÖ‰àÄËÄâëÖÂÃâÙÅµÖ…≠ïê∏Ωë•ÿ˘Ù4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄº¯4(ÄÄ§Ï4(4(ÄÅçΩπÕ–Å¡…•ŸÖç‰ÄÙÄ†4(ÄÄÄÄ¯4(ÄÄÄÄÄÄÒï—Ö•±!ïÖëï»Å—•—±îÙâA…•ŸÖç‰ÄòÅÖ—ÑàÅΩπ	Öç¨ıÏ†§ÄÙ¯ÅÕï—Mïç—•Ω∏†â°Ωµîà•ÙÄº¯4(ÄÄÄÄÄÄÒMïç—•ΩπQ•—±îÅ•çΩ∏Ùã¬~R@àÅ—•—±îÙâeΩ’»ÅëÖ—ÑÅÕ—ÖÂÃÅÂΩ’…ÃàÅëïÕç…•¡—•Ω∏Ùâ	Öç≠’¿∞Å…ïÕ—Ω…î∞ÅΩ»Å…ïµΩŸîÅÕ¡ïç•ô•åÅçÖ—ïùΩ…•ïÃ∏àÄº¯4(ÄÄÄÄÄÄÒÖ…êÅÕ—Â±îıÌÏÅâÖç≠ù…Ω’πêËÄàç’	‰à∞ÅâΩ…ëï…Ω±Ω»ËÄàç›àÅıÙ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅë•Õ¡±Ö‰ËÄâô±ï‡à∞Å©’Õ—•ôÂΩπ—ïπ–ËÄâÕ¡Öçîµâï—›ïï∏à∞ÅùÖ¿ËÄƒ»∞ÅÖ±•ùπ%—ïµÃËÄâçïπ—ï»àÅıÙ¯4(ÄÄÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµ•π]•ë—†ËÄ¿ÅıÙ¯4(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅôΩπ—M•ÈîËÄƒÃ∏‘∞ÅôΩπ—]ï•ù°–ËÄ‰¿¿∞ÅçΩ±Ω»ËÄàåÃ–‹‡ÿ‘àÅıÙ˚¬~NƒÅ=∏µëïŸ•çîÅâÖç≠’¿Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ–∞ÅçΩ±Ω»ËÄàåŸ‡ƒ›à∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞Å±•πï!ï•ù°–ËÄƒ∏–‘ÅıÙ˘A±’Õ°1•ôîÅ≠ïï¡ÃÅÑÅÕïçΩπêÅçΩ¡‰ÅΩòÅÂΩ’»Å•πëï¡ïπëïπ—±‰Å…ïÕ—Ω…Öâ±îÅëÖ—ÑÅΩ∏Å—°•ÃÅëïŸ•çî∏Å±Ω’êÅÕÂπåÅÕ—ÖÂÃÅΩ∏ÅÕºÅÑÅπï‹Å¡°ΩπîÅçÖ∏ÅÕ—•±∞Å…ïçΩŸï»ÅÂΩ’»ÅÖççΩ’π–∏Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄÿ∞ÅçΩ±Ω»ËÅëïŸ•çï	Öç≠’¡M—Ö—’Ã¸πÕ—Ö±îÄ¸Äàç‘Ÿƒ–àÄËÄàå‘ÿ‹‘Ÿà∞ÅôΩπ—M•ÈîËÄƒƒ∞ÅôΩπ—]ï•ù°–ËÄ‡¿¿ÅıÙ¯4(ÄÄÄÄÄÄÄÄÄÄÄÄÄÅÌëïŸ•çï	Öç≠’¡M—Ö—’Ã¸πÕÖŸïë–Ä¸Ä°ëïŸ•çï	Öç≠’¡M—Ö—’ÃπÕ—Ö±îÄ¸Äâ	Öç≠’¿ÅπïïëÃÅ…ïô…ïÕ°•πúÉ
-‹Å±ÖÕ–ÅÕÖŸïêÄàÄËÄâ1ÖÕ–ÅÕÖŸïêÄà§Ä¨Åπï‹ÅÖ—î°ëïŸ•çï	Öç≠’¡M—Ö—’ÃπÕÖŸïë–§π—Ω1ΩçÖ±ïM—…•πú†§ÄËÅëïŸ•çï	Öç≠’¡M—Ö—’Ã¸π’πÖŸÖ•±Öâ±îÄ¸Äâ=∏µëïŸ•çîÅâÖç≠’¿Å’πÖŸÖ•±Öâ±îÅΩ∏Å—°•ÃÅëïŸ•çîàÄËÄâ]Ö•—•πúÅôΩ»Å—°îÅô•…Õ–ÅΩ∏µëïŸ•çîÅâÖç≠’¿âÙ4(ÄÄÄÄÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄÄÅÌëïŸ•çï	Öç≠’¡M—Ö—’Ã¸πï·•Õ—ÃÄòòÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄÃ∞ÅçΩ±Ω»ËÄàå‹ƒ‡‘›à∞ÅôΩπ—M•ÈîËÄƒ¿∏‘∞Å±•πï!ï•ù°–ËÄƒ∏–ÅıÙ˘ÌëïŸ•çï	Öç≠’¡M—Ö—’ÃπŸï…•ô•ïêÄ¸ÄãärLÅ1Ö—ïÕ–ÅâÖç≠’¿ÅŸï…•ô•ïêàÄËÄâYï…•ô•çÖ—•Ω∏Å…ïçΩµµïπëïêâÙÉ
-‹ÅIïçΩŸï…‰ÅÕπÖ¡Õ°Ω—ÃËÅÌëïŸ•çï	Öç≠’¡M—Ö—’ÃπÕπÖ¡Õ°Ω—Ω’π–ÅÒÄ≈ÙºÃΩë•ÿ˘Ù4(ÄÄÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅë•Õ¡±Ö‰ËÄâù…•êà∞ÅùÖ¿ËÄÿ∞Åô±ï·M°…•π¨ËÄ¿ÅıÙ¯4(ÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅë•ÕÖâ±ïêıÌëïŸ•çï	Öç≠’¡	’ÕÂÙÅΩπ±•ç¨ıÌ…ïô…ïÕ°ïŸ•çï	Öç≠’¡ÙÅÕ—Â±îıÌÏÄ∏∏πÕïçΩπëÖ…Â	’——Ω∏∞ÅçΩ±Ω»ËÄàåÃ–‹‡ÿ‘à∞ÅΩ¡Öç•—‰ËÅëïŸ•çï	Öç≠’¡	’Õ‰Ä¸Ä∏ÿ‘ÄËÄƒÅıÙ˘ÌëïŸ•çï	Öç≠’¡	’Õ‰Ä¸ÄâMÖŸ•πüäòàÄËÄâ	Öç¨Å’¿ÅπΩ‹âÙΩâ’——Ω∏¯4(ÄÄÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅë•ÕÖâ±ïêıÌëïŸ•çï	Öç≠’¡Yï…•ôÂ	’Õ‰ÅÒÄÖëïŸ•çï	Öç≠’¡M—Ö—’Ã¸πï·•Õ—ÕÙÅΩπ±•ç¨ıÌŸï…•ôÂïŸ•çï	Öç≠’¡9Ω›ÙÅÕ—Â±îıÌÏÄ∏∏πÕïçΩπëÖ…Â	’——Ω∏∞ÅçΩ±Ω»ËÄàåÕ‹·‡à∞ÅΩ¡Öç•—‰ËÄ°ëïŸ•çï	Öç≠’¡Yï…•ôÂ	’Õ‰ÅÒÄÖëïŸ•çï	Öç≠’¡M—Ö—’Ã¸πï·•Õ—Ã§Ä¸Ä∏‘‘ÄËÄƒÅıÙ˘ÌëïŸ•çï	Öç≠’¡Yï…•ôÂ	’Õ‰Ä¸ÄâYï…•ôÂ•πüäòàÄËÄâYï…•ô‰ÅâÖç≠’¿âÙΩâ’——Ω∏¯4(ÄÄÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ‰∞Å¡Öëë•πúËÄà·¡‡ÄÂ¡‡à∞ÅâΩ…ëï…IÖë•’ÃËÄƒ¿∞ÅâÖç≠ù…Ω’πêËÄâ…ùâÑ†»‘‘∞»‘‘∞»‘‘∞∏‹§à∞ÅçΩ±Ω»ËÄàå‹ƒ‡‘›à∞ÅôΩπ—M•ÈîËÄƒ¿∏‡∞Å±•πï!ï•ù°–ËÄƒ∏–‘ÅıÙ˘A±’Õ°1•ôîÅ≠ïï¡ÃÅ’¿Å—ºÄÃÅ…ïçïπ–Å…ïçΩŸï…‰ÅÕπÖ¡Õ°Ω—ÃÅΩ∏Å—°•ÃÅëïŸ•çî∏Å9Ω—°•πúÅ•ÃÅëï±ï—ïêÅô…Ω¥Å—°îÅç±Ω’êÅÖ’—ΩµÖ—•çÖ±±‰∏ÅIï±Ö—•ΩπÕ°•¿∞Å¡ÖÂµïπ–∞Å¡’Õ†µ—Ω≠ï∏∞ÅÖπêÅëïŸ•çîµ¡Ö•…•πúÅ…ïçΩ…ëÃÅÖ…îÅëï±•âï…Ö—ï±‰ÅπΩ–ÅçΩ¡•ïêÅ•π—ºÅ—°îÅ…ïÕ—Ω…Öâ±îÅëïŸ•çîÅâÖç≠’¿∏Ωë•ÿ¯4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄÄÄÒÖ…êÅÕ—Â±îıÌÏÅâÖç≠ù…Ω’πêËÄàç·	à∞ÅâΩ…ëï…Ω±Ω»ËÄàçÂÂÿàÅıÙ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅôΩπ—M•ÈîËÄƒÃ∏‘∞ÅôΩπ—]ï•ù°–ËÄ‰¿¿∞ÅçΩ±Ω»ËÄàåÕ‹·‡àÅıÙ˚¬~RHÅ]îÅ›•±∞ÅπïŸï»ÅÕï±∞ÅÂΩ’»ÅëÖ—Ñ∏ÅŸï»∏Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ–∞ÅçΩ±Ω»ËÄàåÿ‰‡’Ãà∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞Å±•πï!ï•ù°–ËÄƒ∏–‘ÅıÙ˘9ºÅëÖ—ÑÅâ…Ω≠ï…ÃÅÖπêÅπºÅÕÖ±îÅΩòÅÂΩ’»Å°Öâ•—Ã∞ÅµΩΩëÃ∞ÅΩ»Å…ïô±ïç—•ΩπÃ∏Ωë•ÿ¯4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄÄÄÒÖ…ê¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅë•Õ¡±Ö‰ËÄâù…•êà∞ÅùÖ¿ËÄ‡ÅıÙ¯4(ÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅΩπ±•ç¨ıÌï·¡Ω…—5ÂÖ—ÖÙÅÕ—Â±îıÌÏÄ∏∏πÕïçΩπëÖ…Â	’——Ω∏∞Å—ï·—±•ù∏ËÄâ±ïô–àÅıÙ˚ä≤æ‚<ÅΩ›π±ΩÖêÅµ‰ÅëÖ—ÑΩâ’——Ω∏¯4(ÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅΩπ±•ç¨ıÏ†§ÄÙ¯Å…ïÕ—Ω…ï•±ï%π¡’—Iïòπç’……ïπ–¸πç±•ç¨†•ÙÅÕ—Â±îıÌÏÄ∏∏πÕïçΩπëÖ…Â	’——Ω∏∞Å—ï·—±•ù∏ËÄâ±ïô–àÅıÙ˚ä≤æ‚<ÅIïÕ—Ω…îÅô…Ω¥ÅâÖç≠’¿Ωâ’——Ω∏¯4(ÄÄÄÄÄÄÄÄÄÄÒ•π¡’–Å…ïòıÌ…ïÕ—Ω…ï•±ï%π¡’—IïôÙÅ—Â¡îÙâô•±îàÅÖççï¡–ÙâÖ¡¡±•çÖ—•Ω∏Ω©ÕΩ∏àÅÕ—Â±îıÌÏÅë•Õ¡±Ö‰ËÄâπΩπîàÅıÙÅΩπ°ÖπùîıÏ°ïŸïπ–§ÄÙ¯ÅÏÅçΩπÕ–Åô•±îÄÙÅïŸïπ–π—Ö…ùï–πô•±ïÃ¸πl¡tÏÅïŸïπ–π—Ö…ùï–πŸÖ±’îÄÙÄààÏÅ•òÄ°ô•±î§Å…ïÕ—Ω…ï…Ωµ	Öç≠’¿°ô•±î§ÏÅıÙÄº¯4(ÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ‡∞ÅçΩ±Ω»ËÄàå·‹‡‰‘à∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞Å±•πï!ï•ù°–ËÄƒ∏–‘ÅıÙ˘	Öç≠’¡ÃÅ•πç±’ëîÅÂΩ’»ÅΩ›∏Å—ÖÕ≠Ã∞ÅÕç°ïë’±ïÃ∞Å¡…Ωù…ïÕÃ∞ÅÖπêÅ…ïô±ïç—•ΩπÃ∏Å’Ö…ë•Ö∏ÅçΩππïç—•ΩπÃÅÖ…îÅπΩ–Å•πç±’ëïê∏Ωë•ÿ¯4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄÄÄÒÖ…ê¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅôΩπ—M•ÈîËÄƒ»∞ÅôΩπ—]ï•ù°–ËÄ‰¿¿∞ÅçΩ±Ω»ËÄàçÿ’‹¿àÅıÙ˘1QÅM=5Å=Å5dÅQΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ–∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞ÅçΩ±Ω»ËÄàå·‹‡‰‘àÅıÙ˘Q°ïÕîÅ±ïÖŸîÅÂΩ’»ÅÖççΩ’π–∞Å—ÖÕ≠Ã∞ÅÖπêÅ…Ω’—•πïÃÅ•∏Å¡±Öçî∏Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅë•Õ¡±Ö‰ËÄâù…•êà∞ÅùÖ¿ËÄ‡∞ÅµÖ…ù•πQΩ¿ËÄƒ¿ÅıÙ¯4(ÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅΩπ±•ç¨ıÌëï±ï—ï±±°ïç≠%πÕÙÅÕ—Â±îıÌÏÄ∏∏πÕïçΩπëÖ…Â	’——Ω∏∞ÅçΩ±Ω»ËÄàçÿ’‹¿àÅıÙ˘ï±ï—îÅÖ±∞Åç°ïç¨µ•πÃΩâ’——Ω∏¯4(ÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅΩπ±•ç¨ıÌëï±ï—ï±±Iïô±ïç—•ΩπÕÙÅÕ—Â±îıÌÏÄ∏∏πÕïçΩπëÖ…Â	’——Ω∏∞ÅçΩ±Ω»ËÄàçÿ’‹¿àÅıÙ˘ï±ï—îÅÖ±∞Å…ïô±ïç—•ΩπÃΩâ’——Ω∏¯4(ÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄº¯4(ÄÄ§Ï4(4(ÄÅçΩπÕ–ÅÕ’¡¡Ω…–ÄÙÄ†4(ÄÄÄÄ¯4(ÄÄÄÄÄÄÒï—Ö•±!ïÖëï»Å—•—±îÙâ!ï±¿ÄòÅïïëâÖç¨àÅΩπ	Öç¨ıÏ†§ÄÙ¯ÅÕï—Mïç—•Ω∏†â°Ωµîà•ÙÄº¯4(ÄÄÄÄÄÄÒMïç—•ΩπQ•—±îÅ•çΩ∏Ùã¬~J∞àÅ—•—±îÙâQï±∞Å’ÃÅ›°Ö–Åôïï±ÃÅΩôòàÅëïÕç…•¡—•Ω∏Ùâ	’úÅ…ï¡Ω…—ÃÅÖπêÅôïïëâÖç¨ÅùºÅÕ—…Ö•ù°–Å—ºÅ—°îÅ¡ï…ÕΩ∏ÅµÖ•π—Ö•π•πúÅA±’Õ°1•ôî∏àÄº¯4(ÄÄÄÄÄÄÒÖ…ê¯4(ÄÄÄÄÄÄÄÄÒ—ï·—Ö…ïÑÅŸÖ±’îıÌôïïëâÖç≠Qï·—ÙÅΩπ°ÖπùîıÏ°ïŸïπ–§ÄÙ¯ÅÕï—ïïëâÖç≠Qï·–°ïŸïπ–π—Ö…ùï–πŸÖ±’î•ÙÅµÖ·1ïπù—†ıÏ»¿¿¡ÙÅ¡±Öçï°Ω±ëï»Ùâ]°Ö–ùÃÅùΩ•πúÅΩ∏¸àÅÕ—Â±îıÌÏÄ∏∏π•π¡’—M—Â±î∞Åµ•π!ï•ù°–ËÄƒ»¿∞Å…ïÕ•ÈîËÄâŸï…—•çÖ∞à∞ÅôΩπ—Öµ•±‰ËÄâ•π°ï…•–àÅıÙÄº¯4(ÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅΩπ±•ç¨ıÌÕ’âµ•—ïïëâÖç≠ÙÅÕ—Â±îıÌÏÄ∏∏π¡…•µÖ…Â	’——Ω∏∞ÅµÖ…ù•πQΩ¿ËÄ‰ÅıÙ˚¬~J0ÅMïπêÅôïïëâÖç¨Ωâ’——Ω∏¯4(ÄÄÄÄÄÄÄÅÌôïïëâÖç≠5ïÕÕÖùîÄòòÄÒë•ÿÅ…Ω±îÙâÕ—Ö—’ÃàÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ‹∞ÅçΩ±Ω»ËÄàå‹‘’‡»à∞ÅôΩπ—M•ÈîËÄƒƒ∏‘ÅıÙ˘ÌôïïëâÖç≠5ïÕÕÖùïÙΩë•ÿ˘Ù4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄº¯4(ÄÄ§Ï4(4(ÄÅçΩπÕ–ÅùΩ±êÄÙÄ†4(ÄÄÄÄ¯4(ÄÄÄÄÄÄÒï—Ö•±!ïÖëï»Å—•—±îÙâA±’Õ†ÅΩ±êÅA…ïŸ•ï‹àÅΩπ	Öç¨ıÏ†§ÄÙ¯ÅÕï—Mïç—•Ω∏†â°Ωµîà•ÙÄº¯4(ÄÄÄÄÄÄÒA±’Õ°Ω±ëA…ïŸ•ï‹Äº¯4(ÄÄÄÄº¯4(ÄÄ§Ï4(4(ÄÅçΩπÕ–ÅÖççΩ’π–ÄÙÄ†4(ÄÄÄÄ¯4(ÄÄÄÄÄÄÒï—Ö•±!ïÖëï»Å—•—±îÙâççΩ’π–àÅΩπ	Öç¨ıÏ†§ÄÙ¯ÅÕï—Mïç—•Ω∏†â°Ωµîà•ÙÄº¯4(ÄÄÄÄÄÄÒMïç—•ΩπQ•—±îÅ•çΩ∏Ùã¬~RDàÅ—•—±îÙâççΩ’π–ÄòÅÕÂπåàÅëïÕç…•¡—•Ω∏Ùâ5ÖπÖùîÅÂΩ’»ÅïµÖ•∞∞ÅÕïÕÕ•ΩπÃ∞ÅÖπêÅÖççΩ’π–ÅçΩπ—…Ω±Ã∏àÄº¯4(ÄÄÄÄÄÄÒÖ…ê¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅôΩπ—M•ÈîËÄƒƒ∏‘∞ÅçΩ±Ω»ËÄàå·‹‡‰‘àÅıÙ˘M%9Å%8ÅLΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄÃ∞ÅôΩπ—M•ÈîËÄƒ–∞ÅôΩπ—]ï•ù°–ËÄ‰¿¿∞ÅçΩ±Ω»ËÄàå’—Ÿà∞ÅΩŸï…ô±Ω›]…Ö¿ËÄâÖπÂ›°ï…îàÅıÙ˘Ì’Õï»¸πïµÖ•∞ÅÒÄãäPâÙΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄƒ¿∞Å¡Öëë•πúËÄàƒ¡¡‡Äƒ≈¡‡à∞ÅâΩ…ëï…IÖë•’ÃËÄƒƒ∞ÅâÖç≠ù…Ω’πêËÅΩπ±•πîÄòòÅÕÂπçM—Ö—’ÃÄÑÙÙÄâΩôô±•πîàÄ¸Äàç¡ÿàÄËÄàç›»à∞ÅçΩ±Ω»ËÅΩπ±•πîÄòòÅÕÂπçM—Ö—’ÃÄÑÙÙÄâΩôô±•πîàÄ¸ÄàåÃ–‹‡ÿ‘àÄËÄàåÂŸ—à∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞ÅôΩπ—]ï•ù°–ËÄ‹‘¿ÅıÙ˘ÌôΩ…µÖ—MÂπçM—Ö—’Ã°Ωπ±•πî∞ÅÕÂπçM—Ö—’Ã∞Å±ÖÕ—MÂπçïë–•ÙΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅΩπ±•ç¨ıÌÕÂπç9Ω›ÙÅÕ—Â±îıÌÏÄ∏∏πÕïçΩπëÖ…Â	’——Ω∏∞ÅµÖ…ù•πQΩ¿ËÄ‡ÅıÙ˘ÌÕÂπçM—Ö—’ÃÄÙÙÙÄâï……Ω»àÄ¸ÄâIï—…‰ÅÕÂπåàÄËÄâMÂπåÅπΩ‹âÙΩâ’——Ω∏¯4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄÄÄÒÖ…ê¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅôΩπ—M•ÈîËÄƒ»∞ÅôΩπ—]ï•ù°–ËÄ‰¿¿∞ÅçΩ±Ω»ËÄàåÿÿ‘–‹–àÅıÙ˘!9Å5%0Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅë•Õ¡±Ö‰ËÄâù…•êà∞Åù…•ëQïµ¡±Ö—ïΩ±’µπÃËÄâµ•πµÖ‡†¿∞≈ô»§ÅÖ’—ºà∞ÅùÖ¿ËÄ‡∞ÅµÖ…ù•πQΩ¿ËÄ‡ÅıÙ¯4(ÄÄÄÄÄÄÄÄÄÄÒ•π¡’–Å—Â¡îÙâïµÖ•∞àÅŸÖ±’îıÌïµÖ•±°Öπùï…Öô—ÙÅΩπ°ÖπùîıÏ°ïŸïπ–§ÄÙ¯ÅÕï—µÖ•±°Öπùï…Öô–°ïŸïπ–π—Ö…ùï–πŸÖ±’î•ÙÅ¡±Öçï°Ω±ëï»Ùâ9ï‹ÅïµÖ•∞ÅÖëë…ïÕÃàÅÕ—Â±îıÌ•π¡’—M—Â±ïÙÄº¯4(ÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅΩπ±•ç¨ıÌ…ï≈’ïÕ—µÖ•±°ÖπùïÙÅÕ—Â±îıÌÏÄ∏∏π¡…•µÖ…Â	’——Ω∏∞ÅâÖç≠ù…Ω’πêËÄàå—·‡àÅıÙ˘°ÖπùîΩâ’——Ω∏¯4(ÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄÿ∞ÅôΩπ—M•ÈîËÄƒƒ∞Å±•πï!ï•ù°–ËÄƒ∏–∞ÅçΩ±Ω»ËÄàå·‹‡‰‘àÅıÙ˘Ω»ÅÕïç’…•—‰∞ÅçΩπô•…µÖ—•Ω∏Å±•π≠ÃÅÖ…îÅÕïπ–ÅâïôΩ…îÅ—°îÅÖëë…ïÕÃÅç°ÖπùïÃ∏Ωë•ÿ¯4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄÄÄÒÖ…ê¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅë•Õ¡±Ö‰ËÄâù…•êà∞ÅùÖ¿ËÄ‡ÅıÙ¯4(ÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅë•ÕÖâ±ïêıÌÕ•ùπ•πù=’—ÙÅΩπ±•ç¨ıÏ†§ÄÙ¯ÅÏÅŸΩ•êÅ°Öπë±ïM•ùπ=’–†§ÏÅıÙÅÕ—Â±îıÌÏÄ∏∏πÕïçΩπëÖ…Â	’——Ω∏∞Å—ï·—±•ù∏ËÄâ±ïô–à∞ÅΩ¡Öç•—‰ËÅÕ•ùπ•πù=’–Ä¸Ä∏ÿÄËÄƒÅıÙ˚¬~j®ÅÌÕ•ùπ•πù=’–Ä¸ÄâM•ùπ•πúÅΩ’”äòàÄËÄâM•ù∏ÅΩ’–âÙΩâ’——Ω∏¯4(ÄÄÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅΩπ±•ç¨ıÌÕ•ùπ=’—=—°ï…ïŸ•çïÕÙÅÕ—Â±îıÌÏÄ∏∏πÕïçΩπëÖ…Â	’——Ω∏∞Å—ï·—±•ù∏ËÄâ±ïô–à∞ÅçΩ±Ω»ËÄàçÿ’‹¿àÅıÙ˘M•ù∏ÅΩ’–ÅΩ—°ï»ÅëïŸ•çïÃΩâ’——Ω∏¯4(ÄÄÄÄÄÄÄÄΩë•ÿ¯4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄÄÄÒÖ…êÅÕ—Â±îıÌÏÅâΩ…ëï…Ω±Ω»ËÄàçÿàÅıÙ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅôΩπ—M•ÈîËÄƒ»∞ÅôΩπ—]ï•ù°–ËÄ‰¿¿∞ÅçΩ±Ω»ËÄàçÿ’‹¿àÅıÙ˘9HÅi=9Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄ–∞ÅôΩπ—M•ÈîËÄƒƒ∏‘∞ÅçΩ±Ω»ËÄàå·‹‡‰‘àÅıÙ˘ï±ï—•πúÅÂΩ’»ÅÖççΩ’π–Å…ï≈’•…ïÃÅçΩπô•…µÖ—•Ω∏ÅÖπêÅçÖππΩ–ÅâîÅ’πëΩπî∏Ωë•ÿ¯4(ÄÄÄÄÄÄÄÄÒâ’——Ω∏Å—Â¡îÙââ’——Ω∏àÅΩπ±•ç¨ıÌëï±ï—ï5ÂççΩ’π—ÙÅÕ—Â±îıÌÏÄ∏∏πÕïçΩπëÖ…Â	’——Ω∏∞ÅµÖ…ù•πQΩ¿ËÄ‰∞ÅçΩ±Ω»ËÄàçÿ’‹¿à∞ÅâΩ…ëï…Ω±Ω»ËÄàçŸ…àÅıÙ˘ï±ï—îÅÖççΩ’π–Ωâ’——Ω∏¯4(ÄÄÄÄÄÄΩÖ…ê¯4(ÄÄÄÄÄÅÌÕï——•πùÕ5ïÕÕÖùîÄòòÄÒë•ÿÅ…Ω±îÙâÕ—Ö—’ÃàÅÕ—Â±îıÌÏÅµÖ…ù•πQΩ¿ËÄƒ¿∞ÅçΩ±Ω»ËÄàåÃ–‹‡ÿ‘à∞ÅôΩπ—M•ÈîËÄƒ»∞ÅôΩπ—]ï•ù°–ËÄ‡¿¿ÅıÙ˘ÌÕï——•πùÕ5ïÕÕÖùïÙΩë•ÿ˘Ù4(ÄÄÄÄº¯4(ÄÄ§Ï4(4(ÄÅçΩπÕ–Å¡ÖùïÃÄÙÅÏÅ°Ωµî∞Å¡ï…ÕΩπÖ±•Èî∞ÅπΩ—•ô•çÖ—•ΩπÃ∞Åï·¡ï…•ïπçî∞ÅëïŸ•çïÃ∞Å…ïÕ–∞Å¡…•ŸÖç‰∞ÅÕ’¡¡Ω…–∞ÅùΩ±ê∞ÅÖççΩ’π–ÅÙÏ4(4(ÄÅ…ï—’…∏Ä†4(ÄÄÄÄÒQΩΩ±AÖπï∞Å—•—±îÙâMï——•πùÃàÅΩπ±ΩÕîıÌΩπ±ΩÕïÙ¯4(ÄÄÄÄÄÄÒë•ÿÅÕ—Â±îıÌÏÅµÖ·]•ë—†ËÄÿ»¿∞ÅµÖ…ù•∏ËÄà¿ÅÖ’—ºàÅıÙ˘Ì¡ÖùïÕmÕïç—•ΩπtÅÒÅ°ΩµïÙΩë•ÿ¯4(ÄÄÄÄΩQΩΩ±AÖπï∞¯4(ÄÄ§Ï4)Ù4(
+        {smartReminderSuggestion && (preferences.reminder_times || []).length < 8 && (
+          <div style={{ marginTop: 12, padding: 11, borderRadius: 12, background: "#F0FAF6", border: "1px solid #CFE7DC", color: "#347865", fontSize: 11.5, lineHeight: 1.45 }}>
+            üí° You tend to check in around <strong>{smartReminderSuggestion.label}</strong>. <span style={{ opacity: .82 }}>This suggestion comes from your own recent check-in timing.</span>
+            <div style={{ display: "flex", gap: 7, marginTop: 8 }}>
+              <button type="button" onClick={() => updatePreference({ reminder_times: [...preferences.reminder_times, smartReminderSuggestion.suggestedTime] })} style={{ ...primaryButton, padding: "7px 10px", background: "#388C79" }}>Add it</button>
+              <button type="button" onClick={() => updatePreference({ smart_reminder_hint_dismissed_at: new Date().toISOString() })} style={{ ...secondaryButton, padding: "7px 10px" }}>No thanks</button>
+            </div>
+          </div>
+        )}
+      </Card>
+      <Card>
+        <div style={{ fontSize: 11.5, fontWeight: 900, color: "#665474" }}>QUIET HOURS</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 8 }}>
+          <label style={{ fontSize: 11.5, fontWeight: 800, color: "#745D81" }}>Starts<input type="time" value={preferences.quiet_start || ""} onChange={(event) => updatePreference({ quiet_start: event.target.value })} style={{ ...inputStyle, marginTop: 5, padding: "9px 10px" }} /></label>
+          <label style={{ fontSize: 11.5, fontWeight: 800, color: "#745D81" }}>Ends<input type="time" value={preferences.quiet_end || ""} onChange={(event) => updatePreference({ quiet_end: event.target.value })} style={{ ...inputStyle, marginTop: 5, padding: "9px 10px" }} /></label>
+        </div>
+        <ToggleRow checked={preferences.discreet_notifications} onChange={(event) => updatePreference({ discreet_notifications: event.target.checked })} title="Discreet lock-screen wording" description="Also hides Guardian note previews." />
+        <ToggleRow checked={preferences.nurturing_checkins} onChange={(event) => updatePreference({ nurturing_checkins: event.target.checked })} title="Nurturing check-ins" description="Allow PlushLife to use the warmer check-in style." />
+      </Card>
+    </>
+  );
+
+  const experience = (
+    <>
+      <DetailHeader title="Experience" onBack={() => setSection("home")} />
+      <SectionTitle icon="‚ú®" title="How PlushLife feels" description="These options save automatically." />
+      <Card>
+        <ToggleRow checked={preferences.focus_mode} onChange={(event) => updatePreference({ focus_mode: event.target.checked })} title="üéØ PlushFocus ‚Äî one task at a time" description="Show only your next task on Today when a full list feels like too much." />
+        {[
+          ["gentle_streaks", "Use gentle consistency tracking", "Keep progress language softer and less streak-focused."],
+          ["large_text", "Larger text", "Increase readability throughout the tracker."],
+          ["reduced_motion", "Reduce animation", "Use less movement and celebration animation."],
+          ["high_contrast", "Higher contrast", "Increase separation between text and backgrounds."],
+          ["simple_mode", "Simpler, quieter layout", "Reduce visual decisions, ambient theme effects, and extra decoration."],
+          ["pattern_insights_enabled", "Show PlushInsights", "Private mood and energy pattern suggestions."],
+          ["colorblind_mode", "Colorblind-friendly colors", "Use cues that rely less on color alone."],
+        ].map(([key, title, description]) => <ToggleRow key={key} checked={preferences[key]} onChange={(event) => updatePreference({ [key]: event.target.checked })} title={title} description={description} />)}
+      </Card>
+    </>
+  );
+
+  const devices = (
+    <>
+      <DetailHeader title="Devices" onBack={() => setSection("home")} />
+      <SectionTitle icon="‚åö" title="Connected experiences" description="Watch pairing and the home-screen widget are kept together here." />
+      <Card>
+        <div style={{ fontSize: 13.5, fontWeight: 900, color: "#4D756B" }}>‚åö Amazfit watch</div>
+        <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#7E8B87" }}>Open PlushLife on your watch, choose <strong>My tasks</strong>, then enter its code below.</div>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 8, marginTop: 10 }}>
+          <input type="text" value={watchPairingCode} onChange={(event) => setWatchPairingCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8))} onKeyDown={(event) => { if (event.key === "Enter") connectWatch(); }} maxLength={8} placeholder="8-character code" style={{ ...inputStyle, letterSpacing: ".12em", textTransform: "uppercase" }} />
+          <button type="button" disabled={watchPairingBusy} onClick={connectWatch} style={{ ...primaryButton, background: watchPairingBusy ? "#97B5AD" : "#388C79" }}>{watchPairingBusy ? "Connecting‚Ä¶" : "Connect"}</button>
+        </div>
+        {watchPairingMessage && <div role="status" style={{ marginTop: 8, fontSize: 11.5, color: "#47776B", fontWeight: 700 }}>{watchPairingMessage}</div>}
+      </Card>
+      {window.Capacitor?.isNativePlatform?.() && window.Capacitor?.Plugins?.WatchSyncBridge && (
+        <Card>
+          <div style={{ fontSize: 13.5, fontWeight: 900, color: "#4D756B" }}>‚ö° Instant local sync</div>
+          <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#7E8B87" }}>Optional Bluetooth sync while this phone app is running. Normal watch sync still works as a fallback.</div>
+          <button type="button" disabled={localWatchSyncBusy} onClick={startLocalWatchSync} style={{ ...secondaryButton, marginTop: 9, color: "#388C79" }}>{localWatchSyncBusy ? "Waiting for watch‚Ä¶" : "Enable instant sync"}</button>
+          {localWatchSyncMessage && <div role="status" style={{ marginTop: 7, fontSize: 11.5, color: "#6F5C7C" }}>{localWatchSyncMessage}</div>}
+        </Card>
+      )}
+      <Card>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: 13.5, fontWeight: 900, color: "#6E5480" }}>üì± Home-screen widget</div>
+            <div style={{ marginTop: 3, fontSize: 11.5, color: "#8A7895" }}>Today {pct}% ¬∑ Week {weeklyOverallPct}%</div>
+          </div>
+          <button type="button" onClick={() => {
+            document.dispatchEvent(new CustomEvent("plushlife-widget-sync"));
+            const WidgetBridge = window.Capacitor?.Plugins?.WidgetBridge;
+            if (WidgetBridge) {
+              const nextTask = rows.find((row) => !row.isBonus && !viewDone[row.key]) || rows.find((row) => !row.isBonus);
+              WidgetBridge.updateWidget({ nextTask: dailyCheckIn.day_type === "rest" ? "Resting counts today" : (nextTask?.label || "Today's caring steps are complete"), dayType: `${(dailyCheckIn.day_type || "full").replace(/^./, (letter) => letter.toUpperCase())} Day ¬∑ ${pct}%`, progress: pct, weeklyProgress: weeklyOverallPct, tasks: rows.slice(0, 4).map((row) => ({ key: row.key, label: row.label, done: !!viewDone[row.key] })) }).catch(() => {});
+            }
+            setWidgetSyncMsg("Widget synced! üíï");
+            setTimeout(() => setWidgetSyncMsg(""), 3000);
+          }} style={primaryButton}>Sync now</button>
+        </div>
+        {widgetSyncMsg && <div style={{ marginTop: 7, color: "#38816F", fontSize: 11.5, fontWeight: 800 }}>{widgetSyncMsg}</div>}
+        <details style={{ marginTop: 11 }}>
+          <summary style={{ cursor: "pointer", color: "#755D82", fontSize: 12, fontWeight: 850 }}>How to add the Android widget</summary>
+          <div style={{ marginTop: 8, fontSize: 11.5, lineHeight: 1.55, color: "#8A7895" }}>1. Long-press an empty space on your home screen.<br/>2. Tap <strong>Widgets</strong> and find <strong>PlushLife</strong>.<br/>3. Drag the widget onto your home screen.</div>
+        </details>
+      </Card>
+    </>
+  );
+
+  const rest = (
+    <>
+      <DetailHeader title="Rest & Vacation" onBack={() => setSection("home")} />
+      <SectionTitle icon="üå¥" title="Protected rest" description="Pause the list and reminders without erasing progress." />
+      <Card>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: 13.5, fontWeight: 900, color: "#4F756A" }}>Rest today</div>
+            <div style={{ marginTop: 3, fontSize: 11.5, color: "#81928D" }}>Nothing is required today.</div>
+          </div>
+          <button type="button" onClick={toggleRestToday} style={{ ...secondaryButton, border: restDatesSet.has(period.date) ? "2px solid #388C79" : secondaryButton.border, color: "#388C79" }}>{restDatesSet.has(period.date) ? "‚úì Resting" : "Turn on"}</button>
+        </div>
+      </Card>
+      <Card>
+        <div style={{ fontSize: 13.5, fontWeight: 900, color: "#4F756A" }}>Plan a rest range</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 9 }}>
+          <label style={{ fontSize: 11.5, fontWeight: 800, color: "#6B817B" }}>From<input type="date" value={restRangeDraft.start} onChange={(event) => setRestRangeDraft((current) => ({ ...current, start: event.target.value }))} style={{ ...inputStyle, marginTop: 5 }} /></label>
+          <label style={{ fontSize: 11.5, fontWeight: 800, color: "#6B817B" }}>To<input type="date" value={restRangeDraft.end} onChange={(event) => setRestRangeDraft((current) => ({ ...current, end: event.target.value }))} style={{ ...inputStyle, marginTop: 5 }} /></label>
+        </div>
+        <button type="button" onClick={saveRestRange} style={{ ...primaryButton, marginTop: 10, background: "#388C79" }}>Mark as resting</button>
+        {restDates.length > 0 && <div style={{ marginTop: 8, color: "#81928D", fontSize: 11.5 }}>{restDates.length} rest {restDates.length === 1 ? "day" : "days"} marked.</div>}
+      </Card>
+    </>
+  );
+
+  const privacy = (
+    <>
+      <DetailHeader title="Privacy & Data" onBack={() => setSection("home")} />
+      <SectionTitle icon="üîê" title="Your data stays yours" description="Backup, restore, or remove specific categories." />
+      <Card style={{ background: "#F5FBF9", borderColor: "#CFE7DF" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 13.5, fontWeight: 900, color: "#347865" }}>üì± On-device backup</div>
+            <div style={{ marginTop: 4, color: "#6E817B", fontSize: 11.5, lineHeight: 1.45 }}>PlushLife keeps a second copy of your independently restorable data on this device. Cloud sync stays on so a new phone can still recover your account.</div>
+            <div style={{ marginTop: 6, color: deviceBackupStatus?.stale ? "#A56D14" : "#56756C", fontSize: 11, fontWeight: 800 }}>
+              {deviceBackupStatus?.savedAt ? (deviceBackupStatus.stale ? "Backup needs refreshing ¬∑ last saved " : "Last saved ") + new Date(deviceBackupStatus.savedAt).toLocaleString() : deviceBackupStatus?.unavailable ? "On-device backup unavailable on this device" : "Waiting for the first on-device backup"}
+            </div>
+            {deviceBackupStatus?.exists && <div style={{ marginTop: 3, color: "#71857F", fontSize: 10.5, lineHeight: 1.4 }}>{deviceBackupStatus.verified ? "‚úì Latest backup verified" : "Verification recommended"} ¬∑ Recovery snapshots: {deviceBackupStatus.snapshotCount || 1}/3</div>}
+          </div>
+          <div style={{ display: "grid", gap: 6, flexShrink: 0 }}>
+            <button type="button" disabled={deviceBackupBusy} onClick={refreshDeviceBackup} style={{ ...secondaryButton, color: "#347865", opacity: deviceBackupBusy ? .65 : 1 }}>{deviceBackupBusy ? "Saving‚Ä¶" : "Back up now"}</button>
+            <button type="button" disabled={deviceBackupVerifyBusy || !deviceBackupStatus?.exists} onClick={verifyDeviceBackupNow} style={{ ...secondaryButton, color: "#3F78B8", opacity: (deviceBackupVerifyBusy || !deviceBackupStatus?.exists) ? .55 : 1 }}>{deviceBackupVerifyBusy ? "Verifying‚Ä¶" : "Verify backup"}</button>
+          </div>
+        </div>
+        <div style={{ marginTop: 9, padding: "8px 9px", borderRadius: 10, background: "rgba(255,255,255,.7)", color: "#71857F", fontSize: 10.8, lineHeight: 1.45 }}>PlushLife keeps up to 3 recent recovery snapshots on this device. Nothing is deleted from the cloud automatically. Relationship, payment, push-token, and device-pairing records are deliberately not copied into the restorable device backup.</div>
+      </Card>
+      <Card style={{ background: "#F8FBFF", borderColor: "#D9E9F6" }}>
+        <div style={{ fontSize: 13.5, fontWeight: 900, color: "#3F78B8" }}>üîí We will never sell your data. Ever.</div>
+        <div style={{ marginTop: 4, color: "#6985A3", fontSize: 11.5, lineHeight: 1.45 }}>No data brokers and no sale of your habits, moods, or reflections.</div>
+      </Card>
+      <Card>
+        <div style={{ display: "grid", gap: 8 }}>
+          <button type="button" onClick={exportMyData} style={{ ...secondaryButton, textAlign: "left" }}>‚¨áÔ∏è Download my data</button>
+          <button type="button" onClick={() => restoreFileInputRef.current?.click()} style={{ ...secondaryButton, textAlign: "left" }}>‚¨ÜÔ∏è Restore from backup</button>
+          <input ref={restoreFileInputRef} type="file" accept="application/json" style={{ display: "none" }} onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) restoreFromBackup(file); }} />
+        </div>
+        <div style={{ marginTop: 8, color: "#8A7895", fontSize: 11.5, lineHeight: 1.45 }}>Backups include your own tasks, schedules, progress, and reflections. Guardian connections are not included.</div>
+      </Card>
+      <Card>
+        <div style={{ fontSize: 12, fontWeight: 900, color: "#A65F70" }}>DELETE SOME OF MY DATA</div>
+        <div style={{ marginTop: 4, fontSize: 11.5, color: "#8A7895" }}>These leave your account, tasks, and routines in place.</div>
+        <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+          <button type="button" onClick={deleteAllCheckIns} style={{ ...secondaryButton, color: "#A65F70" }}>Delete all check-ins</button>
+          <button type="button" onClick={deleteAllReflections} style={{ ...secondaryButton, color: "#A65F70" }}>Delete all reflections</button>
+        </div>
+      </Card>
+    </>
+  );
+
+  const support = (
+    <>
+      <DetailHeader title="Help & Feedback" onBack={() => setSection("home")} />
+      <SectionTitle icon="üí¨" title="Tell us what feels off" description="Bug reports and feedback go straight to the person maintaining PlushLife." />
+      <Card>
+        <textarea value={feedbackText} onChange={(event) => setFeedbackText(event.target.value)} maxLength={2000} placeholder="What's going on?" style={{ ...inputStyle, minHeight: 120, resize: "vertical", fontFamily: "inherit" }} />
+        <button type="button" onClick={submitFeedback} style={{ ...primaryButton, marginTop: 9 }}>üíå Send feedback</button>
+        {feedbackMessage && <div role="status" style={{ marginTop: 7, color: "#755D82", fontSize: 11.5 }}>{feedbackMessage}</div>}
+      </Card>
+    </>
+  );
+
+  const gold = (
+    <>
+      <DetailHeader title="Plush Gold Preview" onBack={() => setSection("home")} />
+      <PlushGoldPreview />
+    </>
+  );
+
+  const account = (
+    <>
+      <DetailHeader title="Account" onBack={() => setSection("home")} />
+      <SectionTitle icon="üîë" title="Account & sync" description="Manage your email, sessions, and account controls." />
+      <Card>
+        <div style={{ fontSize: 11.5, color: "#8A7895" }}>SIGNED IN AS</div>
+        <div style={{ marginTop: 3, fontSize: 14, fontWeight: 900, color: "#5B4B6B", overflowWrap: "anywhere" }}>{user?.email || "‚Äî"}</div>
+        <div style={{ marginTop: 10, padding: "10px 11px", borderRadius: 11, background: online && syncStatus !== "offline" ? "#F0FAF6" : "#FFF7F2", color: online && syncStatus !== "offline" ? "#347865" : "#9A6B4F", fontSize: 11.5, fontWeight: 750 }}>{formatSyncStatus(online, syncStatus, lastSyncedAt)}</div>
+        <button type="button" onClick={syncNow} style={{ ...secondaryButton, marginTop: 8 }}>{syncStatus === "error" ? "Retry sync" : "Sync now"}</button>
+      </Card>
+      <Card>
+        <div style={{ fontSize: 12, fontWeight: 900, color: "#665474" }}>CHANGE EMAIL</div>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 8, marginTop: 8 }}>
+          <input type="email" value={emailChangeDraft} onChange={(event) => setEmailChangeDraft(event.target.value)} placeholder="New email address" style={inputStyle} />
+          <button type="button" onClick={requestEmailChange} style={{ ...primaryButton, background: "#4C8FE8" }}>Change</button>
+        </div>
+        <div style={{ marginTop: 6, fontSize: 11, lineHeight: 1.4, color: "#8A7895" }}>For security, confirmation links are sent before the address changes.</div>
+      </Card>
+      <Card>
+        <div style={{ display: "grid", gap: 8 }}>
+          <button type="button" disabled={signingOut} onClick={() => { void handleSignOut(); }} style={{ ...secondaryButton, textAlign: "left", opacity: signingOut ? .6 : 1 }}>üö™ {signingOut ? "Signing out‚Ä¶" : "Sign out"}</button>
+          <button type="button" onClick={signOutOtherDevices} style={{ ...secondaryButton, textAlign: "left", color: "#A65F70" }}>Sign out other devices</button>
+        </div>
+      </Card>
+      <Card style={{ borderColor: "#EACFD6" }}>
+        <div style={{ fontSize: 12, fontWeight: 900, color: "#A65F70" }}>DANGER ZONE</div>
+        <div style={{ marginTop: 4, fontSize: 11.5, color: "#8A7895" }}>Deleting your account requires confirmation and cannot be undone.</div>
+        <button type="button" onClick={deleteMyAccount} style={{ ...secondaryButton, marginTop: 9, color: "#A65F70", borderColor: "#E6C2CB" }}>Delete account</button>
+      </Card>
+      {settingsMessage && <div role="status" style={{ marginTop: 10, color: "#347865", fontSize: 12, fontWeight: 800 }}>{settingsMessage}</div>}
+    </>
+  );
+
+  const pages = { home, personalize, notifications, experience, devices, rest, privacy, support, gold, account };
+
+  return (
+    <ToolPanel title="Settings" onClose={onClose}>
+      <div style={{ maxWidth: 620, margin: "0 auto" }}>{pages[section] || home}</div>
+    </ToolPanel>
+  );
+}
