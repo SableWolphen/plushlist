@@ -11,8 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Move notification effect after rows initialization
+        with:
+          fetch-depth: 0
+      - name: Recover corrupted JSX and fix rows initialization order
         run: |
+          # Three component files contain binary-like corruption in the current source.
+          # Restore their last clean versions before the 2026-08-14 adaptive-intelligence commit.
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:src/components/habit-intelligence.jsx > src/components/habit-intelligence.jsx
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:src/components/organized-settings.jsx > src/components/organized-settings.jsx
+          git show f05bca6a210b77872fa84304cf8751cc15bf9b2d:src/components/today-panel-core.jsx > src/components/today-panel-core.jsx
+
           python3 - <<'PY'
           from pathlib import Path
 
@@ -39,12 +47,13 @@ jobs:
               validator = validator.replace(marker, guard + marker, 1)
               validator_path.write_text(validator)
           PY
+
           npm ci
           node scripts/validate-app-source.js
           npm run web:sync
           git diff --check
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add src/app-source.jsx scripts/validate-app-source.js
-          git commit -m "Fix rows initialization crash and guard against TDZ regressions"
+          git add src/app-source.jsx scripts/validate-app-source.js src/components/habit-intelligence.jsx src/components/organized-settings.jsx src/components/today-panel-core.jsx
+          git commit -m "Repair runtime crash and corrupted JSX source"
           git push
