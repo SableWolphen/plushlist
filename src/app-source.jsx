@@ -3607,15 +3607,9 @@ function GlowUpTracker() {
   const completeOnboarding = async () => {
     if (!user) return;
     const displayName = displayNameDraft.trim().replace(/\s+/g, " ").slice(0, 40);
-    const guardianEmail = inviteEmail.trim().toLowerCase();
     if (!displayName) {
       setOnboardingMessage("Add your name first.");
       setOnboardingStep(1);
-      return;
-    }
-    if (onboardingMode === "guardian" && (!guardianEmail || !guardianEmail.includes("@"))) {
-      setOnboardingMessage("Add your guardian's email address first.");
-      setOnboardingStep(2);
       return;
     }
     setOnboardingMessage("Saving your space…");
@@ -3631,28 +3625,6 @@ function GlowUpTracker() {
     if (profileError) {
       setOnboardingMessage("Your space couldn't be saved yet. Please try again.");
       return;
-    }
-    if (onboardingMode === "guardian") {
-      const rolePermissions = GUARDIAN_ROLE_PRESETS.find((role) => role.id === guardianRolePreset)?.permissions || GUARDIAN_ROLE_PRESETS[0].permissions;
-      const { error: guardianLinkError } = await supabase.from("caregiver_links").upsert(
-        { owner_user_id: user.id, caregiver_email: guardianEmail, label: "Guardian", active: true, ...rolePermissions },
-        { onConflict: "owner_user_id,caregiver_email" }
-      );
-      if (guardianLinkError) {
-        setOnboardingMessage("Your space is saved, but guardian access couldn't be added yet.");
-        return;
-      }
-      const { error: guardianEmailError } = await supabase.auth.signInWithOtp({
-        email: guardianEmail,
-        options: {
-          shouldCreateUser: true,
-          emailRedirectTo: window.location.origin + window.location.pathname,
-        },
-      });
-      if (guardianEmailError) {
-        setOnboardingMessage("Your guardian was added, but we couldn't send their email yet. Try again from Profile.");
-        return;
-      }
     }
     if (onboardingMode !== "supporter" && trackerTasks.length === 0) {
       const pack = TEMPLATE_PACKS.find((item) => item.id === selectedTemplateId) || TEMPLATE_PACKS[0];
@@ -5691,7 +5663,7 @@ function GlowUpTracker() {
   } : baseVoice;
   const comfortItemName = trackerProfile?.comfort_item_name?.trim() || "a comfort item";
   const currentCopingOption = COPING_OPTIONS[copingPick].replace(/Tigger/gi, comfortItemName);
-  const onboardingTotalSteps = onboardingMode === "supporter" ? 2 : (onboardingMode === "guardian" ? 7 : 6);
+  const onboardingTotalSteps = onboardingMode === "supporter" ? 2 : 6;
   const autoPopupToShow = (() => {
     if (weeklyKickoffOpen) return "weekly_kickoff";
     if (user && preferences.onboarding_complete && preferences.last_seen_changelog !== CURRENT_CHANGELOG_VERSION) return "changelog";
@@ -6383,7 +6355,7 @@ function GlowUpTracker() {
               </label>
               <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
                 <button type="button" aria-pressed={onboardingMode === "cozy"} onClick={() => { setOnboardingMode("cozy"); setOnboardingMessage(""); }} style={{ padding: "10px", borderRadius: 10, border: onboardingMode === "cozy" ? "2px solid #A65DC1" : "1px solid #DCC9E8", background: onboardingMode === "cozy" ? "#F7ECFB" : "white", fontWeight: 800 }}>My own cozy space</button>
-                <button type="button" aria-pressed={onboardingMode === "guardian"} onClick={() => { setOnboardingMode("guardian"); setOnboardingMessage(""); }} style={{ padding: "10px", borderRadius: 10, border: onboardingMode === "guardian" ? "2px solid #4C8FE8" : "1px solid #DCC9E8", background: onboardingMode === "guardian" ? "#EAF4FF" : "white", fontWeight: 800 }}>My cozy space + a Guardian</button>
+                <button type="button" aria-pressed={onboardingMode === "guardian"} onClick={() => { setOnboardingMode("guardian"); setOnboardingMessage(""); }} style={{ padding: "10px", borderRadius: 10, border: onboardingMode === "guardian" ? "2px solid #4C8FE8" : "1px solid #DCC9E8", background: onboardingMode === "guardian" ? "#EAF4FF" : "white", fontWeight: 800 }}>My cozy space + optional Guardian support</button>
                 <button type="button" aria-pressed={onboardingMode === "supporter"} onClick={() => { setOnboardingMode("supporter"); setOnboardingMessage(""); }} style={{ padding: "10px", borderRadius: 10, border: onboardingMode === "supporter" ? "2px solid #318C79" : "1px solid #DCC9E8", background: onboardingMode === "supporter" ? "#EAF6F1" : "white", fontWeight: 800 }}>I'm here as a Guardian</button>
               </div>
             </>}
@@ -6394,32 +6366,12 @@ function GlowUpTracker() {
                 ? <div style={{ marginTop: 10, padding: 11, borderRadius: 11, background: "#FFF9E9", border: "1px solid #F0D99E", color: "#7A5A18", fontSize: 12.5, fontWeight: 800 }}>You have {pendingSupportInvites.length} Guardian invitation{pendingSupportInvites.length === 1 ? "" : "s"} waiting.</div>
                 : <div style={{ marginTop: 10, padding: 11, borderRadius: 11, background: "#F5FAFF", border: "1px solid #CFE4F5", color: "#4C6E8E", fontSize: 12.5 }}>No invitation is visible yet. Ask your Cozy to invite this exact email, then refresh the Guardian screen.</div>}
             </>}
-            {onboardingStep === 2 && onboardingMode === "guardian" && <>
-              <h2 style={{ margin: "8px 0 6px" }}>Add your Guardian 💛</h2>
-              <p style={{ color: "#6B5A7D", lineHeight: 1.55 }}>Enter their email. They will get a sign-in invitation; if they already use PlushLife, they can sign in with that same email.</p>
-              <label style={{ display: "grid", gap: 5, color: "#6B5A7D", fontWeight: 800 }}>GUARDIAN EMAIL
-                <input type="email" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="guardian@example.com" style={{ padding: "10px", borderRadius: 10, border: "1px solid #B9DCF6" }} />
-              </label>
-              <div style={{ marginTop: 10, fontSize: 11, fontWeight: 800, color: "#4C8FE8" }}>WHAT'S THEIR ROLE?</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, marginTop: 6 }}>
-                {GUARDIAN_ROLE_PRESETS.map((role) => (
-                  <button key={role.id} type="button" onClick={() => setGuardianRolePreset(role.id)} aria-pressed={guardianRolePreset === role.id} style={{ padding: "8px 6px", borderRadius: 10, border: guardianRolePreset === role.id ? "2px solid #4C8FE8" : "1px solid #B9DCF6", background: guardianRolePreset === role.id ? "#EAF4FF" : "white", textAlign: "center", cursor: "pointer" }}>
-                    <div style={{ fontSize: 16 }}>{role.icon}</div>
-                    <div style={{ marginTop: 2, fontSize: 10.5, fontWeight: 800, color: "#4C6E8E" }}>{role.label}</div>
-                  </button>
-                ))}
-              </div>
-              {(() => {
-                const selectedRole = GUARDIAN_ROLE_PRESETS.find((role) => role.id === guardianRolePreset);
-                return selectedRole && <div style={{ marginTop: 6, fontSize: 11, lineHeight: 1.4, color: "#6B7E98" }}>{selectedRole.description}</div>;
-              })()}
-            </>}
-            {((onboardingMode === "cozy" && onboardingStep === 2) || (onboardingMode === "guardian" && onboardingStep === 3)) && <>
+            {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 2) && <>
               <h2 style={{ margin: "8px 0 6px" }}>One comforting detail 🧸</h2>
               <p style={{ color: "#6B5A7D", lineHeight: 1.55 }}>Optional: name a comfort item. You can change this later.</p>
               <input value={comfortItemDraft} onChange={(event) => setComfortItemDraft(event.target.value)} maxLength={80} placeholder="Example: favorite plush" aria-label="Comfort item name" style={{ width: "100%", boxSizing: "border-box", padding: "10px", borderRadius: 10, border: "1px solid #DCC9E8" }} />
             </>}
-            {((onboardingMode === "cozy" && onboardingStep === 3) || (onboardingMode === "guardian" && onboardingStep === 4)) && <>
+            {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 3) && <>
               <h2 style={{ margin: "8px 0 6px" }}>Pick a starting point 🌱</h2>
               <p style={{ color: "#6B5A7D", lineHeight: 1.55 }}>Optional — just a head start. You can add, edit, or delete anything afterward.</p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 7, marginTop: 10 }}>
@@ -6442,7 +6394,7 @@ function GlowUpTracker() {
                 );
               })()}
             </>}
-            {((onboardingMode === "cozy" && onboardingStep === 4) || (onboardingMode === "guardian" && onboardingStep === 5)) && <>
+            {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 4) && <>
               <h2 style={{ margin: "8px 0 6px" }}>What you're working toward 🧸</h2>
               <p style={{ color: "#6B5A7D", lineHeight: 1.55 }}>
                 As you check things off, your plush mascot earns new outfits and badges — for showing up day after day, for building a good habit, or for gently reducing one you're working on.
@@ -6451,14 +6403,15 @@ function GlowUpTracker() {
                 Missing a day never takes anything away. You can see what you've unlocked (and what's next) anytime from 🏅 Rewards.
               </p>
             </>}
-            {((onboardingMode === "cozy" && onboardingStep === 5) || (onboardingMode === "guardian" && onboardingStep === 6)) && <>
+            {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 5) && <>
               <h2 style={{ margin: "8px 0 6px" }}>One intention for this week 📮</h2>
               <p style={{ color: "#6B5A7D", lineHeight: 1.55 }}>Optional — just one small thing you want to carry with you this week. Every Sunday, PlushLife will remind you what you wrote and let you check in on it.</p>
               <textarea value={onboardingIntentionDraft} onChange={(event) => setOnboardingIntentionDraft(event.target.value)} maxLength={2000} placeholder="Example: Be a little gentler with myself this week." style={{ width: "100%", boxSizing: "border-box", minHeight: 80, marginTop: 8, padding: 10, borderRadius: 10, border: "1px solid #DCC9E8", resize: "vertical" }} />
               <div style={{ marginTop: 6, fontSize: 10.5, color: "#8C6B9E" }}>Private — only you can ever read this. You can skip this and write one later too.</div>
             </>}
-            {((onboardingMode === "cozy" && onboardingStep === 6) || (onboardingMode === "guardian" && onboardingStep === 7)) && <>
+            {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 6) && <>
               <h2 style={{ margin: "8px 0 6px" }}>You're ready ✨</h2>
+              {onboardingMode === "guardian" && <div data-plushlife-onboarding-guardian-deferred="true" style={{ margin: "8px 0 12px", padding: 11, borderRadius: 11, background: "#F5FAFF", border: "1px solid #CFE4F5", color: "#4C6E8E", fontSize: 12, lineHeight: 1.5 }}><strong>Guardian setup is optional.</strong> Finish your cozy space first. You can connect a Guardian later from the Guardian area, then choose exactly what they can see. Nothing is shared automatically.</div>}
               <p style={{ color: "#6B5A7D", lineHeight: 1.55 }}>{(TEMPLATE_PACKS.find((pack) => pack.id === selectedTemplateId)?.tasks.length ?? 0) > 0 ? `PlushLife will begin with your ${TEMPLATE_PACKS.find((pack) => pack.id === selectedTemplateId)?.label.toLowerCase()} tasks.` : "You chose to start from scratch — add your first task once you're in."} Soft Plush is your default theme.</p>
               <div style={{ marginTop: 14, paddingTop: 13, borderTop: "1px solid #E9DAF2" }}>
                 <div style={{ fontSize: 12.5, fontWeight: 800, color: "#6B5A7D" }}>One last thing, totally optional 💛</div>
@@ -6500,10 +6453,6 @@ function GlowUpTracker() {
                 }
                 if (onboardingStep === 1 && !onboardingMode) {
                   setOnboardingMessage("Choose how you'll use PlushLife to continue.");
-                  return;
-                }
-                if (onboardingMode === "guardian" && onboardingStep === 2 && (!inviteEmail.trim() || !inviteEmail.includes("@"))) {
-                  setOnboardingMessage("Add your guardian's email address to continue.");
                   return;
                 }
                 setOnboardingMessage("");
