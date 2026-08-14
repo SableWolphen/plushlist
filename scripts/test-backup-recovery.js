@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-function read(path) { return fs.readFileSync(path, "utf8"); }
+function read(path) { return fs.readFileSync(path, "utf8").replace(/\r\n/g, "\n"); }
 function assert(condition, message) {
   if (!condition) {
     console.error(`✗ ${message}`);
