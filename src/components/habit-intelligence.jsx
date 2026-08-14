@@ -22,15 +22,15 @@ const PATHS = [
 function safeRead() {
   try {
     const raw = localStorage.getItem(HABIT_STATE_KEY);
-    if (!raw) return { version: 1, anchors: {}, goals: {}, meta: {}, experiments: [], paths: {}, reviews: {}, history: {}, measurements: {}, recovery: {} };
+    if (!raw) return { version: 1, anchors: {}, goals: {}, meta: {}, experiments: [], paths: {}, reviews: {}, history: {}, recovery: {} };
     const parsed = JSON.parse(raw);
     return {
       version: 1,
       anchors: parsed.anchors || {}, goals: parsed.goals || {}, meta: parsed.meta || {}, experiments: parsed.experiments || [],
-      paths: parsed.paths || {}, reviews: parsed.reviews || {}, history: parsed.history || {}, measurements: parsed.measurements || {}, recovery: parsed.recovery || {},
+      paths: parsed.paths || {}, reviews: parsed.reviews || {}, history: parsed.history || {}, recovery: parsed.recovery || {},
     };
   } catch (_error) {
-    return { version: 1, anchors: {}, goals: {}, meta: {}, experiments: [], paths: {}, reviews: {}, history: {}, measurements: {}, recovery: {} };
+    return { version: 1, anchors: {}, goals: {}, meta: {}, experiments: [], paths: {}, reviews: {}, history: {}, recovery: {} };
   }
 }
 
@@ -238,7 +238,193 @@ export function HabitCoach({ open, rows = [], viewDone = {}, period, nextStepTas
           <button type="button" onClick={() => setExpanded((value) => !value)} aria-expanded={expanded} style={cardButton(expanded)}>âš™ï¸ {expanded ? "Close habit tools" : "Habit tools"}</button>
         </div>
         {anchorPicker && <div style={{ display: "grid", gap: 6, marginTop: 8, padding: 9, borderRadius: 11, background: "#FBF7FC" }}>
-          {currentRows.slice(0, 14).map((row) => <button key={habitId(row)} type="button" onClick={() => setAnchor(habitId(row))} style={{ ...cardButton(habitId(row) === anchor×¯6¶‰ËkºwµçUP!Iü4(€€€€€€€€€€€€€€€€ñÍ•±•ĞÙ…±Õ”õíÍ•±•Ñ•‘5•Ñ„¹™É¥Ñ¥½¸ñğ€ˆ‰ô½¹¡…¹”õì¡•Ù•¹Ğ¤€ôøÕÁ‘…Ñ•5•Ñ„¡ì™É¥Ñ¥½¸è•Ù•¹Ğ¹Ñ…É•Ğ¹Ù…±Õ”ô¥ôÍÑå±”õíìÁ…‘‘¥¹œè€à°‰½É‘•ÉI…‘¥ÕÌè€ä°‰½É‘•Èè€ˆÅÁàÍ½±¥€åàˆõôøñ½ÁÑ¥½¸Ù…±Õ”ôˆˆù¡½½Í”„É•…Í½¸ğ½½ÁÑ¥½¸ùí=‰©•Ğ¹•¹ÑÉ¥•Ì¡I%Q%=8¤¹µ…À ¡m¥°m±…‰•±ut¤€ôø€ñ½ÁÑ¥½¸­•äõí¥‘ôÙ…±Õ”õí¥‘ôùí±…‰•±ôğ½½ÁÑ¥½¸ø¥ôğ½Í•±•Ğø4(€€€€€€€€€€€€€€ğ½±…‰•°ø4(€€€€€€€€€€€€€íÍ•±•Ñ•‘5•Ñ„¹™É¥Ñ¥½¸€˜˜€ñ‘¥ØÍÑå±”õíìÁ…‘‘¥¹œè€ˆáÁà€åÁàˆ°‰½É‘•ÉI…‘¥ÕÌè€ä°‰…­É½Õ¹è€ˆåäˆ°½±½Èè€ˆŒÙÕÍˆ°™½¹ÑM¥é”è€ÄÄ¸ÔõôûÂ~J„íI%Q%=9mÍ•±•Ñ•‘5•Ñ„¹™É¥Ñ¥½¹tü¹lÅuôğ½‘¥Øùô4(€€€€€€€€€€€€€€ñ±…‰•°ÍÑå±”õíì‘¥ÍÁ±…äè€‰É¥ˆ°…Àè€Ğ°™½¹ÑM¥é”è€ÄÀ¸Ô°™½¹Ñ]•¥¡Ğè€äÀÀ°½±½Èè€ˆŒÜØÔÔáˆõôù!	%PMQ,4(€€€€€€€€€€€€€€€€ñÍ•±•ĞÙ…±Õ”õíÍ•±•Ñ•‘5•Ñ„¹ÍÑ…­™Ñ•Èñğ€ˆ‰ô½¹¡…¹”õì¡•Ù•¹Ğ¤€ôøÕÁ‘…Ñ•5•Ñ„¡ìÍÑ…­™Ñ•Èè•Ù•¹Ğ¹Ñ…É•Ğ¹Ù…±Õ”ô¥ôÍÑå±”õíìÁ…‘‘¥¹œè€à°‰½É‘•ÉI…‘¥ÕÌè€ä°‰½É‘•Èè€ˆÅÁàÍ½±¥€åàˆõôøñ½ÁÑ¥½¸Ù…±Õ”ôˆˆù9¼ÍÑ…¬å•Ğğ½½ÁÑ¥½¸ùíÕÉÉ•¹ÑI½İÌ¹™¥±Ñ•È ¡É½Ü¤€ôø¡…‰¥Ñ%¡É½Ü¤€„ôô¡…‰¥Ñ%¡Í•±•Ñ•‘I½Ü¤¤¹µ…À ¡É½Ü¤€ôø€ñ½ÁÑ¥½¸­•äõí¡…‰¥Ñ%¡É½Ü¥ôÙ…±Õ”õí¡…‰¥Ñ%¡É½Ü¥ôù™Ñ•Èèí¡…‰¥Ñ1…‰•°¡É½Ü¥ôğ½½ÁÑ¥½¸ø¥ôğ½Í•±•Ğø4(€€€€€€€€€€€€€€ğ½±…‰•°ø4(€€€€€€€€€€€€€íÍ•±•Ñ•‘5•Ñ„¹ÍÑ…­™Ñ•È€˜˜É½İ	å%¹•Ğ¡Í•±•Ñ•‘5•Ñ„¹ÍÑ…­™Ñ•È¤€˜˜€ñ‘¥ØÍÑå±”õíì™½¹ÑM¥é”è€ÄÄ¸Ô°½±½Èè€ˆŒÜØÔÔáˆõôûÂ~R\™Ñ•È€ñÍÑÉ½¹œùí¡…‰¥Ñ1…‰•°¡É½İ	å%¹•Ğ¡Í•±•Ñ•‘5•Ñ„¹ÍÑ…­™Ñ•È¤¥ôğ½ÍÑÉ½¹œøƒŠH€ñÍÑÉ½¹œùí¡…‰¥Ñ1…‰•°¡Í•±•Ñ•‘I½Ü¥ôğ½ÍÑÉ½¹œøğ½‘¥Øùô4(€€€€€€€€€€€€€ì…ÕÉÉ•¹ÑáÁ•É¥µ•¹Ğ€ü€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøì4(€€€€€€€€€€€€€€€½¹ÍĞ¥€ô¡…‰¥Ñ%¡Í•±•Ñ•‘I½Ü¤ì4(€€€€€€€€€€€€€€€½¹ÍĞ•áÁ•É¥µ•¹Ğ€ôì¥è€‘í¥‘ô´‘í…Ñ”¹¹½Ü ¥õ€°¡…‰¥Ñ%è¥°±…‰•°è¡…‰¥Ñ1…‰•°¡Í•±•Ñ•‘I½Ü¤°ÍÑ…ÉÑ•è‘…Ñ”°•¹‘Ìè…‘‘…åÌ¡‘…Ñ”°€Ø¤°ÍÑ…ÑÕÌè€‰…Ñ¥Ù”ˆ°Í•ÑÕÀèÍ•±•Ñ•‘5•Ñ„¹ÍÑ…­™Ñ•È€ü€‰ÍÑ…¬ˆ€èÍ•±•Ñ•‘5•Ñ„¹µ¥¹¥µÕ´€ü€‰µ¥¹¥µÕ´ˆ€èÍ•±•Ñ•‘5•Ñ„¹™É¥Ñ¥½¸€ôôô€‰İÉ½¹}Ñ¥µ”ˆ€ü€‰É•Í¡•‘Õ±”ˆ€è€‰Í¥µÁ±¥™äˆôì4(€€€€€€€€€€€€€€€Í…Ù” ¡ÕÉÉ•¹Ğ¤€ôø€¡ì€¸¸¹ÕÉÉ•¹Ğ°•áÁ•É¥µ•¹ÑÌèl¸¸¸¡ÕÉÉ•¹Ğ¹•áÁ•É¥µ•¹ÑÌñğmt¤¹™¥±Ñ•È ¡¥Ñ•´¤€ôø¥Ñ•´¹¡…‰¥Ñ%€„ôô¥ñğ¥Ñ•´¹ÍÑ…ÑÕÌ€ôôô€‰•¹‘•ˆ¤°•áÁ•É¥µ•¹Ñtô¤¤ì4(€€€€€€€€€€€€€õôÍÑå±”õí…É‘	ÕÑÑ½¸¡™…±Í”¥ôûÂ~¨MÑ…ÉĞ„€Üµ‘…ä¡…‰¥Ğ•áÁ•É¥µ•¹Ğğ½‰ÕÑÑ½¸ø€è€ñ‘¥ØÍÑå±”õíìÁ…‘‘¥¹œè€ä°‰½É‘•ÉI…‘¥ÕÌè€ÄÀ°‰…­É½Õ¹è€ˆÉˆ°½±½Èè€ˆŒÍÜĞÙˆ°™½¹ÑM¥é”è€ÄÄ¸Ô°±¥¹•!•¥¡Ğè€Ä¸ÔõôøñÍÑÉ½¹œûÂ~¨áÁ•É¥µ•¹ĞÑ¡É½Õ íÕÉÉ•¹ÑáÁ•É¥µ•¹Ğ¹•¹‘Íôğ½ÍÑÉ½¹œøñ‰È€¼ùí•áÁ•É¥µ•¹ÑMÕµµ…Éä¡ÍÑ…Ñ”°ÕÉÉ•¹ÑáÁ•É¥µ•¹Ğ¥ôñ‰È€¼øñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøÍ…Ù” ¡ÕÉÉ•¹Ğ¤€ôø€¡ì€¸¸¹ÕÉÉ•¹Ğ°•áÁ•É¥µ•¹ÑÌè€¡ÕÉÉ•¹Ğ¹•áÁ•É¥µ•¹ÑÌñğmt¤¹µ…À ¡¥Ñ•´¤€ôø¥Ñ•´¹¥€ôôôÕÉÉ•¹ÑáÁ•É¥µ•¹Ğ¹¥€üì€¸¸¹¥Ñ•´°ÍÑ…ÑÕÌè€‰•¹‘•ˆô€è¥Ñ•´¤ô¤¥ôÍÑå±”õíì€¸¸¹…É‘	ÕÑÑ½¸¡™…±Í”¤°µ…É¥¹Q½Àè€Øõôù¹•áÁ•É¥µ•¹Ğğ½‰ÕÑÑ½¸øğ½‘¥Øùô4(€€€€€€€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôø½Á•¹Q…Í­5…¹…•Èü¸ ¥ôÍÑå±”õí…É‘	ÕÑÑ½¸¡™…±Í”¥ôûŠr?¾â<I•Í¡•‘Õ±”°É•¹…µ”°Á…ÕÍ”½È•‘¥ĞÑ¡¥Ì¡…‰¥Ğğ½‰ÕÑÑ½¸ø4(€€€€€€€€€€€€ğ¼ùô4(€€€€€€€€€€ğ½‘¥Øø4(€€€€€€€€ğ½‘•Ñ…¥±Ìø4(4(€€€€€€€€ñ‘¥ØÍÑå±”õíì‘¥ÍÁ±…äè€‰™±•àˆ°…Àè€Ø°™±•á]É…Àè€‰İÉ…Àˆõôø4(€€€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôø½Q½…Í¡‰½…Éü¸ ‰ÁÉ½É•ÍÌˆ¥ôÍÑå±”õí…É‘	ÕÑÑ½¸¡™…±Í”¥ôûÂ~N(=Á•¸]••­±ä!…‰¥ĞI•Ù¥•Üğ½‰ÕÑÑ½¸ø4(€€€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøìÍ•Ñ…É•M•Ñ¥½¸ü¸ ‰ÅÕ¥¬ˆ¤ì½Q½…Í¡‰½…Éü¸ ‰…É”ˆ¤ìõôÍÑå±”õí…É‘	ÕÑÑ½¸¡™…±Í”¥ôûŠf”MÕÁÁ½ÉĞÑ½½±Ìğ½‰ÕÑÑ½¸ø4(€€€€€€€€ğ½‘¥Øø4(€€€€€€€í¡¥±‘É•¹ô4(€€€€€€ğ½‘¥Øùô4(€€€€ğ½Í•Ñ¥½¸ø4(€€¤ì4)ô4(4)•áÁ½ÉĞ™Õ¹Ñ¥½¸!…‰¥ÑÉ½İÑ¡Q½½±Ì¡ìÉ½İÌ€ômt°Á•É¥½°½Á•¹Q…Í­5…¹…•Èô¤ì4(€½¹ÍĞmÍÑ…Ñ”°Í•ÑMÑ…Ñ•t€ôI•…Ğ¹ÕÍ•MÑ…Ñ”  ¤€ôøÍ…™•I•… ¤¤ì4(€I•…Ğ¹ÕÍ•™™•Ğ  ¤€ôøì4(€€€½¹ÍĞÉ•™É•Í €ô€ ¤€ôøÍ•ÑMÑ…Ñ”¡Í…™•I•… ¤¤ì4(€€€İ¥¹‘½Ü¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ‰Á±ÕÍ¡±¥™”é¡…‰¥Ğµ½… µÕÁ‘…Ñ•ˆ°É•™É•Í ¤ì4(€€€İ¥¹‘½Ü¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ‰Á±ÕÍ¡±¥™”é¡…‰¥Ğµ½… µ¡å‘É…Ñ•ˆ°É•™É•Í ¤ì4(€€€É•ÑÕÉ¸€ ¤€ôøì4(€€€€€İ¥¹‘½Ü¹É•µ½Ù•Ù•¹Ñ1¥ÍÑ•¹•È ‰Á±ÕÍ¡±¥™”é¡…‰¥Ğµ½… µÕÁ‘…Ñ•ˆ°É•™É•Í ¤ì4(€€€€€İ¥¹‘½Ü¹É•µ½Ù•Ù•¹Ñ1¥ÍÑ•¹•È ‰Á±ÕÍ¡±¥™”é¡…‰¥Ğµ½… µ¡å‘É…Ñ•ˆ°É•™É•Í ¤ì4(€€€ôì4(€ô°mt¤ì4(€½¹ÍĞÍ…Ù”€ô€¡ÕÁ‘…Ñ•È¤€ôøÍ•ÑMÑ…Ñ” ¡ÕÉÉ•¹Ğ¤€ôøÍ…™•]É¥Ñ”¡ÑåÁ•½˜ÕÁ‘…Ñ•È€ôôô€‰™Õ¹Ñ¥½¸ˆ€üÕÁ‘…Ñ•È¡ÕÉÉ•¹Ğ¤€èÕÁ‘…Ñ•È¤¤ì4(€½¹ÍĞ‘…Ñ”€ô‘…å-•ä¡Á•É¥½ü¹‘…Ñ”¤ì4(€½¹ÍĞÕÉÉ•¹ÑI½İÌ€ô€¡É½İÌñğmt¤¹™¥±Ñ•È ¡É½Ü¤€ôø€…É½Üü¹…É¡¥Ù•‘}…Ğ€˜˜€…É½Üü¹¥Í	½¹ÕÌ¤ì4(€½¹ÍĞ…Ñ¥Ù•A…Ñ €ôÍÑ…Ñ”¹Á…Ñ¡Ìü¹…Ñ¥Ù”€üAQ!L¹™¥¹ ¡Á…Ñ ¤€ôøÁ…Ñ ¹¥€ôôôÍÑ…Ñ”¹Á…Ñ¡Ì¹…Ñ¥Ù”¹¥¤€è¹Õ±°ì4(€½¹ÍĞ…Ñ¥Ù•MÑ•À€ô…Ñ¥Ù•A…Ñ €ü5…Ñ ¹µ¥¸¡9Õµ‰•È¡ÍÑ…Ñ”¹Á…Ñ¡Ì¹…Ñ¥Ù”¹ÍÑ•Àñğ€À¤°…Ñ¥Ù•A…Ñ ¹ÍÑ•ÁÌ¹±•¹Ñ €´€Ä¤€è€Àì4(€É•ÑÕÉ¸€ñÍ•Ñ¥½¸ÍÑå±”õíìµ…É¥¹	½ÑÑ½´è€Äà°Á…‘‘¥¹œè€ÄĞ°‰½É‘•ÉI…‘¥ÕÌè€Äà°‰…­É½Õ¹è€‰±¥¹•…ÈµÉ…‘¥•¹Ğ ÄĞÕ‘•œ°°áÑ¤ˆ°‰½É‘•Èè€ˆÅÁàÍ½±¥€ÙÑÈˆõôø4(€€€€ñ‘¥ØÍÑå±”õíì™½¹ÑM¥é”è€ÄÀ¸Ô°±•ÑÑ•ÉMÁ…¥¹œè€ˆ¸ÄÍ•´ˆ°™½¹Ñ]•¥¡Ğè€äÀÀ°½±½Èè€ˆØÕÄˆõôûÂ~´!	%PI=]Q ğ½‘¥Øø4(€€€€ñ‘¥ØÍÑå±”õíìµ…É¥¹Q½Àè€Ğ°™½¹ÑM¥é”è€ÄÌ¸Ô°™½¹Ñ]•¥¡Ğè€äÀÀ°½±½Èè€ˆŒÑĞÀÕˆõôù)½ÕÉ¹•åÌ…¹±¥™”…É•…Ìğ½‘¥Øø4(€€€€ñ‘¥ØÍÑå±”õíìµ…É¥¹Q½Àè€Ì°™½¹ÑM¥é”è€ÄÄ°½±½Èè€ˆŒàÀÙáˆõôù1½¹•ÈµÑ•É´¡…‰¥ĞÁ±…¹¹¥¹œ±¥Ù•Ì¡•É”¥¹ÍÑ•…½˜¥¸Ñ½‘…çŠeÌÑ½½±Ì¸ğ½‘¥Øø4(€€€€ñ‘¥ØÍÑå±”õíì‘¥ÍÁ±…äè€‰É¥ˆ°…Àè€ä°µ…É¥¹Q½Àè€ÄÀõôø4(€€€€€€ñ‘•Ñ…¥±ÌÍÑå±”õíì‰½É‘•ÉI…‘¥ÕÌè€ÄÈ°‰½É‘•Èè€ˆÅÁàÍ½±¥€ÙÑÈˆ°‰…­É½Õ¹è€‰İ¡¥Ñ”ˆ°½Ù•É™±½Üè€‰¡¥‘‘•¸ˆõôø4(€€€€€€€€ñÍÕµµ…ÉäÍÑå±”õíìÁ…‘‘¥¹œè€ˆÄÁÁà€ÄÅÁàˆ°™½¹ÑM¥é”è€ÄÄ¸Ô°™½¹Ñ]•¥¡Ğè€äÀÀ°½±½Èè€ˆŒÜØÔÔáˆ°ÕÉÍ½Èè€‰Á½¥¹Ñ•ÈˆõôûÂ~^èA±ÕÍ¡A…Ñ¡Ìƒ
-ÜÕ¥‘•¡…‰¥Ğ©½ÕÉ¹•åÌğ½ÍÕµµ…Éäø4(€€€€€€€€ñ‘¥ØÍÑå±”õíìÁ…‘‘¥¹œè€ˆÀ€ÄÅÁà€ÄÅÁàˆõôùí…Ñ¥Ù•A…Ñ €ü€ñ‘¥ØÍÑå±”õíìÁ…‘‘¥¹œè€ÄÀ°‰½É‘•ÉI…‘¥ÕÌè€ÄÀ°‰…­É½Õ¹è€ˆÙˆõôø4(€€€€€€€€€€ñ‘¥ØÍÑå±”õíì™½¹Ñ]•¥¡Ğè€äÀÀ°½±½Èè€ˆŒÕÑÙˆõôùí…Ñ¥Ù•A…Ñ ¹•µ½©¥ôí…Ñ¥Ù•A…Ñ ¹¹…µ•ôğ½‘¥Øø4(€€€€€€€€€€ñ‘¥ØÍÑå±”õíìµ…É¥¹Q½Àè€Ğ°™½¹ÑM¥é”è€ÄÄ¸Ô°½±½Èè€ˆŒàÀÙáˆõôùMÑ•Àí…Ñ¥Ù•MÑ•À€¬€Åô½˜í…Ñ¥Ù•A…Ñ ¹ÍÑ•ÁÌ¹±•¹Ñ¡ôğ½‘¥Øø4(€€€€€€€€€€ñ‘¥ØÍÑå±”õíìµ…É¥¹Q½Àè€Ø°™½¹ÑM¥é”è€ÄÌ°™½¹Ñ]•¥¡Ğè€àÔÀ°½±½Èè€ˆŒÕÑÙˆõôùí…Ñ¥Ù•A…Ñ ¹ÍÑ•ÁÍm…Ñ¥Ù•MÑ•Áuôğ½‘¥Øø4(€€€€€€€€€€ñ‘¥ØÍÑå±”õíì‘¥ÍÁ±…äè€‰™±•àˆ°…Àè€Ø°µ…É¥¹Q½Àè€à°™±•á]É…Àè€‰İÉ…Àˆõôø4(€€€€€€€€€€€í…Ñ¥Ù•MÑ•À€ğ…Ñ¥Ù•A…Ñ ¹ÍÑ•ÁÌ¹±•¹Ñ €´€Ä€ü€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøÍ…Ù” ¡ÕÉÉ•¹Ğ¤€ôø€¡ì€¸¸¹ÕÉÉ•¹Ğ°Á…Ñ¡Ìèì€¸¸¸¡ÕÉÉ•¹Ğ¹Á…Ñ¡Ìñğíô¤°…Ñ¥Ù”èì€¸¸¹ÕÉÉ•¹Ğ¹Á…Ñ¡Ì¹…Ñ¥Ù”°ÍÑ•Àè…Ñ¥Ù•MÑ•À€¬€Äôôô¤¥ôÍÑå±”õí…É‘	ÕÑÑ½¸¡™…±Í”¥ôù'Še´É•…‘ä™½ÈÑ¡”¹•áĞÍÑ•Àğ½‰ÕÑÑ½¸ø€è€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøÍ…Ù” ¡ÕÉÉ•¹Ğ¤€ôø€¡ì€¸¸¹ÕÉÉ•¹Ğ°Á…Ñ¡Ìèì€¸¸¸¡ÕÉÉ•¹Ğ¹Á…Ñ¡Ìñğíô¤°½µÁ±•Ñ•èl¸¸¸¡ÕÉÉ•¹Ğ¹Á…Ñ¡Ìü¹½µÁ±•Ñ•ñğmt¤°…Ñ¥Ù•A…Ñ ¹¥‘t°…Ñ¥Ù”è¹Õ±°ôô¤¥ôÍÑå±”õí…É‘	ÕÑÑ½¸¡™…±Í”¥ôù¥¹¥Í Ñ¡¥ÌÁ…Ñ ƒŠr ğ½‰ÕÑÑ½¸ùô4(€€€€€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôø½Á•¹Q…Í­5…¹…•Èü¸ ¥ôÍÑå±”õí…É‘	ÕÑÑ½¸¡™…±Í”¥ôù‘½È•‘¥Ğ„µ…Ñ¡¥¹œ¡…‰¥Ğğ½‰ÕÑÑ½¸ø4(€€€€€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøÍ…Ù” ¡ÕÉÉ•¹Ğ¤€ôø€¡ì€¸¸¹ÕÉÉ•¹Ğ°Á…Ñ¡Ìèì€¸¸¸¡ÕÉÉ•¹Ğ¹Á…Ñ¡Ìñğíô¤°…Ñ¥Ù”è¹Õ±°ôô¤¥ôÍÑå±”õí…É‘	ÕÑÑ½¸¡™…±Í”¥ôùA…ÕÍ”Á…Ñ ğ½‰ÕÑÑ½¸ø4(€€€€€€€€€€ğ½‘¥Øø4(€€€€€€€€ğ½‘¥Øø€è€ñ‘¥ØÍÑå±”õíì‘¥ÍÁ±…äè€‰É¥ˆ°É¥‘Q•µÁ±…Ñ•½±Õµ¹Ìè€‰É•Á•…Ğ È±µ¥¹µ…à À°Å™È¤¤ˆ°…Àè€ÜõôùíAQ!L¹µ…À ¡Á…Ñ ¤€ôø€ñ‰ÕÑÑ½¸­•äõíÁ…Ñ ¹¥‘ôÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøÍ…Ù” ¡ÕÉÉ•¹Ğ¤€ôø€¡ì€¸¸¹ÕÉÉ•¹Ğ°Á…Ñ¡Ìèì€¸¸¸¡ÕÉÉ•¹Ğ¹Á…Ñ¡Ìñğíô¤°…Ñ¥Ù”èì¥èÁ…Ñ ¹¥°ÍÑ•Àè€À°ÍÑ…ÉÑ•è‘…Ñ”ôôô¤¥ôÍÑå±”õíì€¸¸¹…É‘	ÕÑÑ½¸¡™…±Í”¤°Ñ•áÑ±¥¸è€‰±•™Ğˆ°µ¥¹!•¥¡Ğè€ÔÔõôùíÁ…Ñ ¹•µ½©¥ôíÁ…Ñ ¹¹…µ•ôğ½‰ÕÑÑ½¸ø¥ôğ½‘¥Øùôğ½‘¥Øø4(€€€€€€ğ½‘•Ñ…¥±Ìø4(€€€€€€ñ‘•Ñ…¥±ÌÍÑå±”õíì‰½É‘•ÉI…‘¥ÕÌè€ÄÈ°‰½É‘•Èè€ˆÅÁàÍ½±¥€ÙÑÈˆ°‰…­É½Õ¹è€‰İ¡¥Ñ”ˆ°½Ù•É™±½Üè€‰¡¥‘‘•¸ˆõôø4(€€€€€€€€ñÍÕµµ…ÉäÍÑå±”õíìÁ…‘‘¥¹œè€ˆÄÁÁà€ÄÅÁàˆ°™½¹ÑM¥é”è€ÄÄ¸Ô°™½¹Ñ]•¥¡Ğè€äÀÀ°½±½Èè€ˆŒÜØÔÔáˆ°ÕÉÍ½Èè€‰Á½¥¹Ñ•ÈˆõôûÂ~2ü1¥™”…É•…Ìğ½ÍÕµµ…Éäø4(€€€€€€€€ñ‘¥ØÍÑå±”õíìÁ…‘‘¥¹œè€ˆÀ€ÄÅÁà€ÄÅÁàˆ°‘¥ÍÁ±…äè€‰™±•àˆ°…Àè€Ø°™±•á]É…Àè€‰İÉ…ÀˆõôùíIL¹µ…À ¡…É•„¤€ôøì4(€€€€€€€€€½¹ÍĞ½Õ¹Ğ€ôÕÉÉ•¹ÑI½İÌ¹™¥±Ñ•È ¡É½Ü¤€ôøÍÑ…Ñ”¹µ•Ñ„ü¹m¡…‰¥Ñ%¡É½Ü¥tü¹…É•„€ôôô…É•„¤¹±•¹Ñ ì4(€€€€€€€€€É•ÑÕÉ¸€ñÍÁ…¸­•äõí…É•…ôÍÑå±”õíìÁ…‘‘¥¹œè€ˆÙÁà€áÁàˆ°‰½É‘•ÉI…‘¥ÕÌè€äää°‰…­É½Õ¹è½Õ¹Ğ€ü€ˆÑàˆ€è€ˆáÙäˆ°½±½Èè½Õ¹Ğ€ü€ˆŒÜØÔÔáˆ€è€ˆÀáäˆ°™½¹ÑM¥é”è€ÄÀ¸Ô°™½¹Ñ]•¥¡Ğè€àÀÀõôùí…É•…ôƒ
-Üí½Õ¹Ñôğ½ÍÁ…¸øì4(€€€€€€€ô¥ôğ½‘¥Øø4(€€€€€€ğ½‘•Ñ…¥±Ìø4(€€€€ğ½‘¥Øø4(€€ğ½Í•Ñ¥½¸øì4)ô4(4)•áÁ½ÉĞ™Õ¹Ñ¥½¸	…‰å!…‰¥Ñ¹¡½È¡ì½Á•¸°É½İÌ€ômt°Ù¥•İ½¹”€ôíô°Á•É¥½°Ñ½±”ô¤ì4(€½¹ÍĞ‘…Ñ”€ô‘…å-•ä¡Á•É¥½ü¹‘…Ñ”¤ì4(€½¹ÍĞmÍÑ…Ñ”°Í•ÑMÑ…Ñ•t€ôI•…Ğ¹ÕÍ•MÑ…Ñ”  ¤€ôøÍ…™•I•… ¤¤ì4(€I•…Ğ¹ÕÍ•™™•Ğ  ¤€ôøì4(€€€½¹ÍĞÉ•™É•Í €ô€ ¤€ôøÍ•ÑMÑ…Ñ”¡Í…™•I•… ¤¤ì4(€€€İ¥¹‘½Ü¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ‰Á±ÕÍ¡±¥™”é¡…‰¥Ğµ½… µ¡å‘É…Ñ•ˆ°É•™É•Í ¤ì4(€€€İ¥¹‘½Ü¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ‰Á±ÕÍ¡±¥™”é¡…‰¥Ğµ½… µÕÁ‘…Ñ•ˆ°É•™É•Í ¤ì4(€€€É•ÑÕÉ¸€ ¤€ôøìİ¥¹‘½Ü¹É•µ½Ù•Ù•¹Ñ1¥ÍÑ•¹•È ‰Á±ÕÍ¡±¥™”é¡…‰¥Ğµ½… µ¡å‘É…Ñ•ˆ°É•™É•Í ¤ìİ¥¹‘½Ü¹É•µ½Ù•Ù•¹Ñ1¥ÍÑ•¹•È ‰Á±ÕÍ¡±¥™”é¡…‰¥Ğµ½… µÕÁ‘…Ñ•ˆ°É•™É•Í ¤ìôì4(€ô°mt¤ì4(€¥˜€ …½Á•¸¤É•ÑÕÉ¸¹Õ±°ì4(€½¹ÍĞ…¹¡½É%€ôÍÑ…Ñ”¹…¹¡½ÉÌü¹m‘…Ñ•tì4(€½¹ÍĞÉ½Ü€ô€¡É½İÌñğmt¤¹™¥¹ ¡¥Ñ•´¤€ôø¡…‰¥Ñ%¡¥Ñ•´¤€ôôô…¹¡½É%¤ì4(€¥˜€ …É½Ü¤É•ÑÕÉ¸¹Õ±°ì4(€½¹ÍĞ‘½¹”€ô€„…Ù¥•İ½¹”ü¹mÉ½Ü¹­•åtì4(€É•ÑÕÉ¸€ñÍ•Ñ¥½¸ÍÑå±”õíìÁ…‘‘¥¹œè€ˆÄÁÁà€ÄÉÁàˆ°‰½É‘•ÉI…‘¥ÕÌè€ÄÔ°‰…­É½Õ¹è€‰É‰„ ÈÔÔ°ÈÔÔ°ÈÔÔ°¸ÜØ¤ˆ°‰½É‘•Èè€ˆÅÁàÍ½±¥€ÙÑÈˆ°‘¥ÍÁ±…äè€‰™±•àˆ°…±¥¹%Ñ•µÌè€‰•¹Ñ•Èˆ°…Àè€äõôøñÍÁ…¸ÍÑå±”õíì™½¹ÑM¥é”è€ÄàõôûÂ~:¼ğ½ÍÁ…¸øñ‘¥ØÍÑå±”õíì™±•àè€Ä°µ¥¹]¥‘Ñ è€Àõôøñ‘¥ØÍÑå±”õíì™½¹ÑM¥é”è€ÄÀ¸Ô°™½¹Ñ]•¥¡Ğè€äÀÀ°½±½Èè€ˆØÕÄˆõôù5d%5A=IQ9PQ!%9ğ½‘¥Øøñ‘¥ØÍÑå±”õíìµ…É¥¹Q½Àè€È°™½¹ÑM¥é”è€ÄÈ¸Ô°™½¹Ñ]•¥¡Ğè€àÔÀ°½±½Èè€ˆŒÕÑÙˆõôùí¡…‰¥Ñ1…‰•°¡É½Ü¥ôğ½‘¥Øøğ½‘¥Øùí‘½¹”€ü€ñÍÁ…¸ÍÑå±”õíì™½¹ÑM¥é”è€ÄÄ°½±½Èè€ˆŒÌÄáÜäˆ°™½¹Ñ]•¥¡Ğè€äÀÀõôûŠrLQÕ­•¥¸ğ½ÍÁ…¸ø€è€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøÑ½±”ü¸¡É½Ü¹­•ä¥ôÍÑå±”õíì€¸¸¹…É‘	ÕÑÑ½¸¡ÑÉÕ”¤°‰½É‘•Èè€À°‰…­É½Õ¹è€ˆØÕÄˆ°½±½Èè€‰İ¡¥Ñ”ˆõôûŠrL½¹”ğ½‰ÕÑÑ½¸ùôğ½Í•Ñ¥½¸øì4)ô4(4)•áÁ½ÉĞ™Õ¹Ñ¥½¸]••­±å!…‰¥ÑI•Ù¥•Ü¡ì½Á•¸°½Á•¹Q…Í­5…¹…•È°½Q½…Í¡‰½…Éô¤ì4(€½¹ÍĞmÍÑ…Ñ”°Í•ÑMÑ…Ñ•t€ôI•…Ğ¹ÕÍ•MÑ…Ñ”  ¤€ôøÍ…™•I•… ¤¤ì4(€½¹ÍĞm•áÁ…¹‘•°Í•ÑáÁ…¹‘•‘t€ôI•…Ğ¹ÕÍ•MÑ…Ñ”¡™…±Í”¤ì4(€I•…Ğ¹ÕÍ•™™•Ğ  ¤€ôøì4(€€€½¹ÍĞÉ•™É•Í €ô€ ¤€ôøÍ•ÑMÑ…Ñ”¡Í…™•I•… ¤¤ì4(€€€İ¥¹‘½Ü¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ‰Á±ÕÍ¡±¥™”é¡…‰¥Ğµ½… µ¡å‘É…Ñ•ˆ°É•™É•Í ¤ì4(€€€İ¥¹‘½Ü¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ‰Á±ÕÍ¡±¥™”é¡…‰¥Ğµ½… µÕÁ‘…Ñ•ˆ°É•™É•Í ¤ì4(€€€É•ÑÕÉ¸€ ¤€ôøìİ¥¹‘½Ü¹É•µ½Ù•Ù•¹Ñ1¥ÍÑ•¹•È ‰Á±ÕÍ¡±¥™”é¡…‰¥Ğµ½… µ¡å‘É…Ñ•ˆ°É•™É•Í ¤ìİ¥¹‘½Ü¹É•µ½Ù•Ù•¹Ñ1¥ÍÑ•¹•È ‰Á±ÕÍ¡±¥™”é¡…‰¥Ğµ½… µÕÁ‘…Ñ•ˆ°É•™É•Í ¤ìôì4(€ô°mt¤ì4(€¥˜€ …½Á•¸¤É•ÑÕÉ¸¹Õ±°ì4(€½¹ÍĞÑ½‘…ä€ô‘…å-•ä ¤ì4(€½¹ÍĞİ••¬€ôİ••­MÑ…ÉÑ-•ä¡Ñ½‘…ä¤ì4(€½¹ÍĞÍ•Ù•¹…åÍ¼€ô…‘‘…åÌ¡Ñ½‘…ä°€´Ø¤ì4(€½¹ÍĞ¡…‰¥ÑÌ€ô¹•Ü5…À ¤ì4(€™½È€¡½¹ÍĞm‘…Ñ”°‘…åt½˜=‰©•Ğ¹•¹ÑÉ¥•Ì¡ÍÑ…Ñ”¹¡¥ÍÑ½Éäñğíô¤¤ì4(€€€¥˜€¡‘…Ñ”€ğÍ•Ù•¹…åÍ¼ñğ‘…Ñ”€øÑ½‘…ä¤½¹Ñ¥¹Õ”ì4(€€€™½È€¡½¹ÍĞm¥°¥Ñ•µt½˜=‰©•Ğ¹•¹ÑÉ¥•Ì¡‘…äñğíô¤¤ì4(€€€€€½¹ÍĞÕÉÉ•¹Ğ€ô¡…‰¥ÑÌ¹•Ğ¡¥¤ñğì¥°±…‰•°è¥Ñ•´¹±…‰•°ñğÍÑ…Ñ”¹µ•Ñ„ü¹m¥‘tü¹±…‰•°ñğ€‰!…‰¥Ğˆ°Ñ½Ñ…°è€À°‘½¹”è€Àôì4(€€€€€ÕÉÉ•¹Ğ¹Ñ½Ñ…°€¬ô€Äì4(€€€€€¥˜€¡¥Ñ•´¹‘½¹”¤ÕÉÉ•¹Ğ¹‘½¹”€¬ô€Äì4(€€€€€¡…‰¥ÑÌ¹Í•Ğ¡¥°ÕÉÉ•¹Ğ¤ì4(€€€ô4(€ô4(€½¹ÍĞÉ…¹­•€ôl¸¸¹¡…‰¥ÑÌ¹Ù…±Õ•Ì ¥t¹µ…À ¡¥Ñ•´¤€ôø€¡ì€¸¸¹¥Ñ•´°É…Ñ”è¥Ñ•´¹Ñ½Ñ…°€ü¥Ñ•´¹‘½¹”€¼¥Ñ•´¹Ñ½Ñ…°€è€Àô¤¤¹Í½ÉĞ ¡„°ˆ¤€ôøˆ¹Ñ½Ñ…°€´„¹Ñ½Ñ…°ñğˆ¹É…Ñ”€´„¹É…Ñ”¤¹Í±¥” À°€à¤ì4(€½¹ÍĞ‘•¥Í¥½¹½È€ô€¡¥Ñ•´¤€ôøì4(€€€¥˜€¡¥Ñ•´¹Ñ½Ñ…°€øô€Ğ€˜˜¥Ñ•´¹É…Ñ”€øô€À¸ÜÔ¤É•ÑÕÉ¸€‰­••Àˆì4(€€€¥˜€¡¥Ñ•´¹Ñ½Ñ…°€øô€Ğ€˜˜¥Ñ•´¹É…Ñ”€ôôô€À¤É•ÑÕÉ¸€‰‘É½Àˆì4(€€€¥˜€¡¥Ñ•´¹É…Ñ”€ğ€À¸Ğ¤É•ÑÕÉ¸€‰Í¡É¥¹¬ˆì4(€€€¥˜€¡¥Ñ•´¹É…Ñ”€ğ€À¸Ü¤É•ÑÕÉ¸€‰É•Í¡•‘Õ±”ˆì4(€€€É•ÑÕÉ¸€‰­••Àˆì4(€ôì4(€½¹ÍĞÍ…Ù••¥Í¥½¸€ô€¡¥°‘•¥Í¥½¸¤€ôøÍ•ÑMÑ…Ñ” ¡ÕÉÉ•¹Ğ¤€ôøÍ…™•]É¥Ñ”¡ì€¸¸¹ÕÉÉ•¹Ğ°É•Ù¥•İÌèì€¸¸¸¡ÕÉÉ•¹Ğ¹É•Ù¥•İÌñğíô¤°mİ••­tèì€¸¸¸¡ÕÉÉ•¹Ğ¹É•Ù¥•İÌü¹mİ••­tñğíô¤°m¥‘tè‘•¥Í¥½¸ôô°µ•Ñ„è‘•¥Í¥½¸€ôôô€‰Í¡É¥¹¬ˆ€üì€¸¸¸¡ÕÉÉ•¹Ğ¹µ•Ñ„ñğíô¤°m¥‘tèì€¸¸¸¡ÕÉÉ•¹Ğ¹µ•Ñ„ü¹m¥‘tñğíô¤°¹••‘ÍM¡É¥¹¬èÑÉÕ”ôô€èÕÉÉ•¹Ğ¹µ•Ñ„ô¤¤ì4(€½¹ÍĞÉ•Ù¥•İ•€ô=‰©•Ğ¹­•åÌ¡ÍÑ…Ñ”¹É•Ù¥•İÌü¹mİ••­tñğíô¤¹±•¹Ñ ì4(€É•ÑÕÉ¸€ñÍ•Ñ¥½¸ÍÑå±”õíìµ…É¥¹	½ÑÑ½´è€ÄĞ°‰½É‘•ÉI…‘¥ÕÌè€ÄÜ°‰…­É½Õ¹è€‰±¥¹•…ÈµÉ…‘¥•¹Ğ ÄĞÕ‘•œ°Ù	°å¤ˆ°‰½É‘•Èè€ˆÅÁàÍ½±¥€ååÀˆ°½Ù•É™±½Üè€‰¡¥‘‘•¸ˆõôø4(€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøÍ•ÑáÁ…¹‘• ¡Ù…±Õ”¤€ôø€…Ù…±Õ”¥ô…É¥„µ•áÁ…¹‘•õí•áÁ…¹‘•‘ôÍÑå±”õíìİ¥‘Ñ è€ˆÄÀÀ”ˆ°‘¥ÍÁ±…äè€‰É¥ˆ°É¥‘Q•µÁ±…Ñ•½±Õµ¹Ìè€ˆÅ™È…ÕÑ¼ˆ°…Àè€ä°Á…‘‘¥¹œè€ˆÄÉÁà€ÄÍÁàˆ°‰½É‘•Èè€À°‰…­É½Õ¹è€‰ÑÉ…¹ÍÁ…É•¹Ğˆ°Ñ•áÑ±¥¸è€‰±•™Ğˆ°ÕÉÍ½Èè€‰Á½¥¹Ñ•Èˆõôø4(€€€€€€ñÍÁ…¸øñÍÁ…¸ÍÑå±”õíì‘¥ÍÁ±…äè€‰‰±½¬ˆ°™½¹ÑM¥é”è€ÄÀ¸Ô°±•ÑÑ•ÉMÁ…¥¹œè€ˆ¸ÄÉ•´ˆ°™½¹Ñ]•¥¡Ğè€äÀÀ°½±½Èè€ˆŒÑàÁÔˆõôûÂ~´IY%\€˜)UMPğ½ÍÁ…¸øñÍÁ…¸ÍÑå±”õíì‘¥ÍÁ±…äè€‰‰±½¬ˆ°µ…É¥¹Q½Àè€Ì°™½¹ÑM¥é”è€ÄÌ¸Ô°™½¹Ñ]•¥¡Ğè€äÀÀ°½±½Èè€ˆŒÑĞÀÕˆõôù-••Àİ¡…Ğİ½É­Ì¸¡…¹”İ¡…Ğ‘½•Í¸Ğ¸ğ½ÍÁ…¸øñÍÁ…¸ÍÑå±”õíì‘¥ÍÁ±…äè€‰‰±½¬ˆ°µ…É¥¹Q½Àè€È°™½¹ÑM¥é”è€ÄÄ°½±½Èè€ˆŒàÀÙáˆõôùíÉ…¹­•¹±•¹Ñ €ü€‘íÉ…¹­•¹±•¹Ñ¡ô¡…‰¥ÑÌİ¥Ñ É•…°‘…Ñ„Ñ¡¥Ìİ••¬ƒ
-Ü€‘íÉ•Ù¥•İ•‘ôÉ•Ù¥•İ•‘€€è€‰UÍ”å½ÕÈ¡…‰¥ÑÌ™½È„™•Ü‘…åÌ…¹Ñ¡”É•Ù¥•Üİ¥±°™¥±°¥ÑÍ•±˜¥¸¸‰ôğ½ÍÁ…¸øğ½ÍÁ…¸øñÍÁ…¸…É¥„µ¡¥‘‘•¸ô‰ÑÉÕ”ˆÍÑå±”õíì™½¹ÑM¥é”è€ÈÀ°½±½Èè€ˆŒáÙåˆõôùí•áÁ…¹‘•€ü€‹ŠZøˆ€è€‹Šè‰ôğ½ÍÁ…¸ø4(€€€€ğ½‰ÕÑÑ½¸ø4(€€€í•áÁ…¹‘•€˜˜€ñ‘¥ØÍÑå±”õíìÁ…‘‘¥¹œè€ˆÀ€ÄÉÁà€ÄÉÁàˆ°‘¥ÍÁ±…äè€‰É¥ˆ°…Àè€àõôø4(€€€€€íÉ…¹­•¹µ…À ¡¥Ñ•´¤€ôøì4(€€€€€€€½¹ÍĞÍÕ•ÍÑ•€ô‘•¥Í¥½¹½È¡¥Ñ•´¤ì4(€€€€€€€½¹ÍĞ¡½Í•¸€ôÍÑ…Ñ”¹É•Ù¥•İÌü¹mİ••­tü¹m¥Ñ•´¹¥‘tñğ€ˆˆì4(€€€€€€€½¹ÍĞÍÑ…ÑÌ€ô¡…‰¥ÑMÑ…ÑÌ¡ÍÑ…Ñ”°¥Ñ•´¹¥¤ì4(€€€€€€€É•ÑÕÉ¸€ñ‘¥Ø­•äõí¥Ñ•´¹¥‘ôÍÑå±”õíìÁ…‘‘¥¹œè€ÄÀ°‰½É‘•ÉI…‘¥ÕÌè€ÄÄ°‰…­É½Õ¹è€‰İ¡¥Ñ”ˆ°‰½É‘•Èè€ˆÅÁàÍ½±¥€ÙÀˆõôø4(€€€€€€€€€€ñ‘¥ØÍÑå±”õíì‘¥ÍÁ±…äè€‰™±•àˆ°©ÕÍÑ¥™å½¹Ñ•¹Ğè€‰ÍÁ…”µ‰•Ñİ••¸ˆ°…Àè€àõôøñÍÑÉ½¹œÍÑå±”õíì½±½Èè€ˆŒÕÑÙˆ°™½¹ÑM¥é”è€ÄÈ¸Ôõôùí¥Ñ•´¹±…‰•±ôğ½ÍÑÉ½¹œøñÍÁ…¸ÍÑå±”õíì™½¹ÑM¥é”è€ÄÄ°½±½Èè€ˆŒáÙåˆ°™½¹Ñ]•¥¡Ğè€äÀÀõôùí5…Ñ ¹É½Õ¹¡¥Ñ•´¹É…Ñ”€¨€ÄÀÀ¥ô”ğ½ÍÁ…¸øğ½‘¥Øø4(€€€€€€€€€€ñ‘¥ØÍÑå±”õíìµ…É¥¹Q½Àè€Ğ°™½¹ÑM¥é”è€ÄÄ°½±½Èè€ˆŒàÀÙáˆ°±¥¹•!•¥¡Ğè€Ä¸ĞÔõôùíÍÕ•ÍÑ•€ôôô€‰­••Àˆ€ü€‰Q¡¥Ì¥Ìİ½É­¥¹œ¸AÉ½Ñ•ĞÑ¡”ÕÉÉ•¹ĞÕ”…¹‘¥™™¥Õ±Ñä¸ˆ€èÍÕ•ÍÑ•€ôôô€‰Í¡É¥¹¬ˆ€ü€‰Q¡¥Ì±½½­Ì¡…ÉÑ¼ÍÑ…ÉĞ¸5…­”Ñ¡”µ¥¹¥µÕ´Ù•ÉÍ¥½¸Íµ…±±•È¸ˆ€èÍÕ•ÍÑ•€ôôô€‰É•Í¡•‘Õ±”ˆ€ü€¡ÍÑ…ÑÌ¹‰•ÍÑ…ä€üQÉäµ½Ù¥¹œ½È•µÁ¡…Í¥é¥¹œ¥Ğ…É½Õ¹€‘íÍÑ…ÑÌ¹‰•ÍÑ…ä¹±…‰•±ô°İ¡•É”¥Ğ¡…Ìİ½É­•‰•ÑÑ•È¹€€è€‰Q¡”¡…‰¥Ğµ…ä¹••„‰•ÑÑ•ÈÑ¥µ”½ÈÕ”¸ˆ¤€è€‰Q¡¥Ì¡…Ì¹½Ğ‰••¸¡•±Á¥¹œÑ¡¥Ìİ••¬¸A…ÕÍ¥¹œ½È‘É½ÁÁ¥¹œ¥Ğµ…äµ…­”Ñ¡”Á±…¸¡•…±Ñ¡¥•È¸‰ôğ½‘¥Øø4(€€€€€€€€€€ñ‘¥ØÍÑå±”õíì‘¥ÍÁ±…äè€‰™±•àˆ°…Àè€Ô°µ…É¥¹Q½Àè€Ü°™±•á]É…Àè€‰İÉ…Àˆõôùíl‰­••Àˆ°€‰Í¡É¥¹¬ˆ°€‰É•Í¡•‘Õ±”ˆ°€‰‘É½À‰t¹µ…À ¡‘•¥Í¥½¸¤€ôø€ñ‰ÕÑÑ½¸­•äõí‘•¥Í¥½¹ôÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøÍ…Ù••¥Í¥½¸¡¥Ñ•´¹¥°‘•¥Í¥½¸¥ôÍÑå±”õíì€¸¸¹…É‘	ÕÑÑ½¸¡¡½Í•¸€ôôô‘•¥Í¥½¸¤°Á…‘‘¥¹œè€ˆÙÁà€áÁàˆ°™½¹ÑM¥é”è€ÄÀ¸Ôõôùí‘•¥Í¥½¸€ôôôÍÕ•ÍÑ•€ü€‹Šb€ˆ€è€ˆ‰õí‘•¥Í¥½¹lÁt¹Ñ½UÁÁ•É…Í” ¤€¬‘•¥Í¥½¸¹Í±¥” Ä¥ôğ½‰ÕÑÑ½¸ø¥ôğ½‘¥Øø4(€€€€€€€€€ì¡¡½Í•¸€ôôô€‰Í¡É¥¹¬ˆñğ¡½Í•¸€ôôô€‰É•Í¡•‘Õ±”ˆñğ¡½Í•¸€ôôô€‰‘É½Àˆ¤€˜˜€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôø½Á•¹Q…Í­5…¹…•Èü¸ ¥ôÍÑå±”õíì€¸¸¹…É‘	ÕÑÑ½¸¡™…±Í”¤°µ…É¥¹Q½Àè€Ü°Á…‘‘¥¹œè€ˆÙÁà€áÁàˆ°™½¹ÑM¥é”è€ÄÀ¸ÔõôùÁÁ±äÑ¡¥Ì¥¸Ñ…Í¬Í•ÑÕÀğ½‰ÕÑÑ½¸ùô4(€€€€€€€€ğ½‘¥Øøì4(€€€€€ô¥ô4(€€€€€ì…É…¹­•¹±•¹Ñ €˜˜€ñ‘¥ØÍÑå±”õíìÁ…‘‘¥¹œè€ÄÀ°½±½Èè€ˆŒàÀÙáˆ°™½¹ÑM¥é”è€ÄÄ¸Ôõôù9¼ÁÉ•ÍÍÕÉ”Ñ¼µ…¹Õ™…ÑÕÉ”‘…Ñ„¸A±ÕÍ¡1¥™”İ¥±°É•Ù¥•ÜÑ¡”¡…‰¥ÑÌå½Ô…ÑÕ…±±äÕÍ”¸ğ½‘¥Øùô4(€€€€€€ñ‘¥ØÍÑå±”õíì‘¥ÍÁ±…äè€‰™±•àˆ°…Àè€Ø°™±•á]É…Àè€‰İÉ…Àˆõôøñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôø½Q½…Í¡‰½…Éü¸ ‰Ñ½‘…äˆ¥ôÍÑå±”õí…É‘	ÕÑÑ½¸¡™…±Í”¥ôù¼Ñ¼Ñ½‘…äğ½‰ÕÑÑ½¸øñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôø½Á•¹Q…Í­5…¹…•Èü¸ ¥ôÍÑå±”õí…É‘	ÕÑÑ½¸¡™…±Í”¥ôù‘¥Ğµä¡…‰¥ÑÌğ½‰ÕÑÑ½¸øğ½‘¥Øø4(€€€€ğ½‘¥Øùô4(€€ğ½Í•Ñ¥½¸øì4)ô4(
+          {currentRows.slice(0, 14).map((row) => <button key={habitId(row)} type="button" onClick={() => setAnchor(habitId(row))} style={{ ...cardButton(habitId(row) === anchorId), textAlign: "left" }}>{viewDone?.[row.key] ? "âœ“ " : ""}{habitLabel(row)}</button>)}
+          {!currentRows.length && <div style={{ fontSize: 11.5, color: "#8C6B9E" }}>Add a habit first, then you can make it todayâ€™s anchor.</div>}
+        </div>}
+        {state.goals?.[date] && <div style={{ marginTop: 6, fontSize: 11.5, color: "#76558A" }}>âœ¨ Todayâ€™s goal: <strong>{state.goals[date]}</strong></div>}
+      </div>
+
+      {expanded && <div style={{ borderTop: "1px solid #EDE3F2", padding: "12px 14px 14px", display: "grid", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 7 }}>
+          <input value={goalDraft} onChange={(event) => setGoalDraft(event.target.value)} maxLength={140} placeholder="Optional goal of the day" style={{ minWidth: 0, padding: "8px 9px", borderRadius: 9, border: "1px solid #E0D1E8", background: "white", color: "#5B4B6B" }} />
+          <button type="button" onClick={saveGoal} style={cardButton(false)}>Save</button>
+        </div>
+        {returnGapDays >= 2 && <div style={{ padding: 11, borderRadius: 12, background: "#FFF9E9", border: "1px solid #F0D99E", color: "#6B5A3D" }}>
+          <div style={{ fontSize: 11.5, fontWeight: 900 }}>ğŸ§¸ Recovery Mode</div>
+          <div style={{ marginTop: 3, fontSize: 11.5, lineHeight: 1.45 }}>No backlog. Pick the easiest way back into your habits.</div>
+          <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+            <button type="button" onClick={() => save((current) => ({ ...current, recovery: { ...(current.recovery || {}), [date]: "fresh" } }))} style={cardButton(false)}>Start fresh today</button>
+            <button type="button" onClick={() => setEssentialsPickerOpen?.(true)} style={cardButton(false)}>Choose essentials</button>
+            <button type="button" onClick={() => selectDayType?.("soft")} style={cardButton(false)}>Make today lighter</button>
+          </div>
+        </div>}
+
+        <div style={{ padding: 11, borderRadius: 12, background: "#F4FBF9", border: "1px solid #CFE8E1" }}>
+          <div style={{ fontSize: 10.5, letterSpacing: ".1em", fontWeight: 900, color: "#318C79" }}>âœ¨ WHAT SHOULD I DO NOW?</div>
+          <div style={{ marginTop: 5, fontSize: 14, fontWeight: 900, color: "#4F625D" }}>{smartRow ? habitLabel(smartRow) : "You can stop for now."}</div>
+          <div style={{ marginTop: 3, fontSize: 11.5, lineHeight: 1.45, color: "#607A73" }}>{smartReason}</div>
+          {smartRow && <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+            <button type="button" onClick={() => toggle?.(smartRow.key)} style={{ ...cardButton(false), border: 0, background: "#318C79", color: "white" }}>âœ“ Done</button>
+            {smartMeta.minimum && <button type="button" onClick={() => toggle?.(smartRow.key)} style={cardButton(false)}>ğŸŒ± Do tiny version: {smartMeta.minimum}</button>}
+            <button type="button" onClick={() => { setSelectedId(habitId(smartRow)); }} style={cardButton(false)}>Why is this hard?</button>
+          </div>}
+        </div>
+
+        <details style={{ borderRadius: 12, border: "1px solid #E6D4F2", background: "white", overflow: "hidden" }} open={!!selectedId}>
+          <summary style={{ padding: "10px 11px", fontSize: 11.5, fontWeight: 900, color: "#76558A", cursor: "pointer" }}>ğŸ›  Tune one habit</summary>
+          <div style={{ padding: "0 11px 11px", display: "grid", gap: 8 }}>
+            <select value={selectedRow ? habitId(selectedRow) : ""} onChange={(event) => setSelectedId(event.target.value)} style={{ padding: 9, borderRadius: 9, border: "1px solid #DCC9E8", background: "white" }}>
+              {currentRows.map((row) => <option key={habitId(row)} value={habitId(row)}>{habitLabel(row)}</option>)}
+            </select>
+            {selectedRow && <>
+              <div style={{ padding: 9, borderRadius: 10, background: "#FAF6FC", color: "#6B5A7D", fontSize: 11.5, lineHeight: 1.5 }}>ğŸ§  {insightFor(state, selectedRow)}</div>
+              <label style={{ display: "grid", gap: 4, fontSize: 10.5, fontWeight: 900, color: "#76558A" }}>LIFE AREA
+                <select value={selectedMeta.area || ""} onChange={(event) => updateMeta({ area: event.target.value })} style={{ padding: 8, borderRadius: 9, border: "1px solid #DCC9E8" }}><option value="">Choose an area</option>{AREAS.map((area) => <option key={area} value={area}>{area}</option>)}</select>
+              </label>
+              <label style={{ display: "grid", gap: 4, fontSize: 10.5, fontWeight: 900, color: "#76558A" }}>MINIMUM VERSION
+                <input value={selectedMeta.minimum || ""} onChange={(event) => updateMeta({ minimum: event.target.value.slice(0, 100) })} placeholder="Example: walk outside for 2 minutes" style={{ padding: 8, borderRadius: 9, border: "1px solid #DCC9E8" }} />
+              </label>
+              <label style={{ display: "grid", gap: 4, fontSize: 10.5, fontWeight: 900, color: "#76558A" }}>WHY DOES THIS GET HARD?
+                <select value={selectedMeta.friction || ""} onChange={(event) => updateMeta({ friction: event.target.value })} style={{ padding: 8, borderRadius: 9, border: "1px solid #DCC9E8" }}><option value="">Choose a reason</option>{Object.entries(FRICTION).map(([id, [label]]) => <option key={id} value={id}>{label}</option>)}</select>
+              </label>
+              {selectedMeta.friction && <div style={{ padding: "8px 9px", borderRadius: 9, background: "#FFF9E9", color: "#6B5A3D", fontSize: 11.5 }}>ğŸ’¡ {FRICTION[selectedMeta.friction]?.[1]}</div>}
+              <label style={{ display: "grid", gap: 4, fontSize: 10.5, fontWeight: 900, color: "#76558A" }}>HABIT STACK
+                <select value={selectedMeta.stackAfter || ""} onChange={(event) => updateMeta({ stackAfter: event.target.value })} style={{ padding: 8, borderRadius: 9, border: "1px solid #DCC9E8" }}><option value="">No stack yet</option>{currentRows.filter((row) => habitId(row) !== habitId(selectedRow)).map((row) => <option key={habitId(row)} value={habitId(row)}>After: {habitLabel(row)}</option>)}</select>
+              </label>
+              {selectedMeta.stackAfter && rowById.get(selectedMeta.stackAfter) && <div style={{ fontSize: 11.5, color: "#76558A" }}>ğŸ”— After <strong>{habitLabel(rowById.get(selectedMeta.stackAfter))}</strong> â†’ <strong>{habitLabel(selectedRow)}</strong></div>}
+              {!currentExperiment ? <button type="button" onClick={() => {
+                const id = habitId(selectedRow);
+                const experiment = { id: `${id}-${Date.now()}`, habitId: id, label: habitLabel(selectedRow), started: date, ends: addDays(date, 6), status: "active", setup: selectedMeta.stackAfter ? "stack" : selectedMeta.minimum ? "minimum" : selectedMeta.friction === "wrong_time" ? "reschedule" : "simplify" };
+                save((current) => ({ ...current, experiments: [...(current.experiments || []).filter((item) => item.habitId !== id || item.status === "ended"), experiment] }));
+              }} style={cardButton(false)}>ğŸ§ª Start a 7-day habit experiment</button> : <div style={{ padding: 9, borderRadius: 10, background: "#F2FFFB", color: "#3E746A", fontSize: 11.5, lineHeight: 1.5 }}><strong>ğŸ§ª Experiment through {currentExperiment.ends}</strong><br />{experimentSummary(state, currentExperiment)}<br /><button type="button" onClick={() => save((current) => ({ ...current, experiments: (current.experiments || []).map((item) => item.id === currentExperiment.id ? { ...item, status: "ended" } : item) }))} style={{ ...cardButton(false), marginTop: 6 }}>End experiment</button></div>}
+              <button type="button" onClick={() => openTaskManager?.()} style={cardButton(false)}>âœï¸ Reschedule, rename, pause or edit this habit</button>
+            </>}
+          </div>
+        </details>
+
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          <button type="button" onClick={() => goToDashboard?.("progress")} style={cardButton(false)}>ğŸ“Š Open Weekly Habit Review</button>
+          <button type="button" onClick={() => { setCareSection?.("quick"); goToDashboard?.("care"); }} style={cardButton(false)}>â™¥ Support tools</button>
+        </div>
+        {children}
+      </div>}
+    </section>
+  );
+}
+
+export function HabitGrowthTools({ rows = [], period, openTaskManager }) {
+  const [state, setState] = React.useState(() => safeRead());
+  React.useEffect(() => {
+    const refresh = () => setState(safeRead());
+    window.addEventListener("plushlife:habit-coach-updated", refresh);
+    window.addEventListener("plushlife:habit-coach-hydrated", refresh);
+    return () => {
+      window.removeEventListener("plushlife:habit-coach-updated", refresh);
+      window.removeEventListener("plushlife:habit-coach-hydrated", refresh);
+    };
+  }, []);
+  const save = (updater) => setState((current) => safeWrite(typeof updater === "function" ? updater(current) : updater));
+  const date = dayKey(period?.date);
+  const currentRows = (rows || []).filter((row) => !row?.archived_at && !row?.isBonus);
+  const activePath = state.paths?.active ? PATHS.find((path) => path.id === state.paths.active.id) : null;
+  const activeStep = activePath ? Math.min(Number(state.paths.active.step || 0), activePath.steps.length - 1) : 0;
+  return <section style={{ marginBottom: 18, padding: 14, borderRadius: 18, background: "linear-gradient(145deg,#FFFDFC,#F8F4FF)", border: "1px solid #E6D4F2" }}>
+    <div style={{ fontSize: 10.5, letterSpacing: ".13em", fontWeight: 900, color: "#A65DC1" }}>ğŸ§­ HABIT GROWTH</div>
+    <div style={{ marginTop: 4, fontSize: 13.5, fontWeight: 900, color: "#4F405C" }}>Journeys and life areas</div>
+    <div style={{ marginTop: 3, fontSize: 11, color: "#806B8D" }}>Longer-term habit planning lives here instead of in todayâ€™s tools.</div>
+    <div style={{ display: "grid", gap: 9, marginTop: 10 }}>
+      <details style={{ borderRadius: 12, border: "1px solid #E6D4F2", background: "white", overflow: "hidden" }}>
+        <summary style={{ padding: "10px 11px", fontSize: 11.5, fontWeight: 900, color: "#76558A", cursor: "pointer" }}>ğŸ—º PlushPaths Â· guided habit journeys</summary>
+        <div style={{ padding: "0 11px 11px" }}>{activePath ? <div style={{ padding: 10, borderRadius: 10, background: "#FAF6FC" }}>
+          <div style={{ fontWeight: 900, color: "#5B4B6B" }}>{activePath.emoji} {activePath.name}</div>
+          <div style={{ marginTop: 4, fontSize: 11.5, color: "#806B8D" }}>Step {activeStep + 1} of {activePath.steps.length}</div>
+          <div style={{ marginTop: 6, fontSize: 13, fontWeight: 850, color: "#5B4B6B" }}>{activePath.steps[activeStep]}</div>
+          <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+            {activeStep < activePath.steps.length - 1 ? <button type="button" onClick={() => save((current) => ({ ...current, paths: { ...(current.paths || {}), active: { ...current.paths.active, step: activeStep + 1 } } }))} style={cardButton(false)}>Iâ€™m ready for the next step</button> : <button type="button" onClick={() => save((current) => ({ ...current, paths: { ...(current.paths || {}), completed: [...(current.paths?.completed || []), activePath.id], active: null } }))} style={cardButton(false)}>Finish this path âœ¨</button>}
+            <button type="button" onClick={() => openTaskManager?.()} style={cardButton(false)}>Add or edit a matching habit</button>
+            <button type="button" onClick={() => save((current) => ({ ...current, paths: { ...(current.paths || {}), active: null } }))} style={cardButton(false)}>Pause path</button>
+          </div>
+        </div> : <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 7 }}>{PATHS.map((path) => <button key={path.id} type="button" onClick={() => save((current) => ({ ...current, paths: { ...(current.paths || {}), active: { id: path.id, step: 0, started: date } } }))} style={{ ...cardButton(false), textAlign: "left", minHeight: 55 }}>{path.emoji} {path.name}</button>)}</div>}</div>
+      </details>
+      <details style={{ borderRadius: 12, border: "1px solid #E6D4F2", background: "white", overflow: "hidden" }}>
+        <summary style={{ padding: "10px 11px", fontSize: 11.5, fontWeight: 900, color: "#76558A", cursor: "pointer" }}>ğŸŒ¿ Life areas</summary>
+        <div style={{ padding: "0 11px 11px", display: "flex", gap: 6, flexWrap: "wrap" }}>{AREAS.map((area) => {
+          const count = currentRows.filter((row) => state.meta?.[habitId(row)]?.area === area).length;
+          return <span key={area} style={{ padding: "6px 8px", borderRadius: 999, background: count ? "#F4ECF8" : "#F8F6F9", color: count ? "#76558A" : "#A08FA9", fontSize: 10.5, fontWeight: 800 }}>{area} Â· {count}</span>;
+        })}</div>
+      </details>
+    </div>
+  </section>;
+}
+
+export function BabyHabitAnchor({ open, rows = [], viewDone = {}, period, toggle }) {
+  const date = dayKey(period?.date);
+  const [state, setState] = React.useState(() => safeRead());
+  React.useEffect(() => {
+    const refresh = () => setState(safeRead());
+    window.addEventListener("plushlife:habit-coach-hydrated", refresh);
+    window.addEventListener("plushlife:habit-coach-updated", refresh);
+    return () => { window.removeEventListener("plushlife:habit-coach-hydrated", refresh); window.removeEventListener("plushlife:habit-coach-updated", refresh); };
+  }, []);
+  if (!open) return null;
+  const anchorId = state.anchors?.[date];
+  const row = (rows || []).find((item) => habitId(item) === anchorId);
+  if (!row) return null;
+  const done = !!viewDone?.[row.key];
+  return <section style={{ padding: "10px 12px", borderRadius: 15, background: "rgba(255,255,255,.76)", border: "1px solid #E6D4F2", display: "flex", alignItems: "center", gap: 9 }}><span style={{ fontSize: 18 }}>ğŸ¯</span><div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 10.5, fontWeight: 900, color: "#A65DC1" }}>MY IMPORTANT THING</div><div style={{ marginTop: 2, fontSize: 12.5, fontWeight: 850, color: "#5B4B6B" }}>{habitLabel(row)}</div></div>{done ? <span style={{ fontSize: 11, color: "#318C79", fontWeight: 900 }}>âœ“ Tucked in</span> : <button type="button" onClick={() => toggle?.(row.key)} style={{ ...cardButton(true), border: 0, background: "#A65DC1", color: "white" }}>âœ“ Done</button>}</section>;
+}
+
+export function WeeklyHabitReview({ open, openTaskManager, goToDashboard }) {
+  const [state, setState] = React.useState(() => safeRead());
+  const [expanded, setExpanded] = React.useState(false);
+  React.useEffect(() => {
+    const refresh = () => setState(safeRead());
+    window.addEventListener("plushlife:habit-coach-hydrated", refresh);
+    window.addEventListener("plushlife:habit-coach-updated", refresh);
+    return () => { window.removeEventListener("plushlife:habit-coach-hydrated", refresh); window.removeEventListener("plushlife:habit-coach-updated", refresh); };
+  }, []);
+  if (!open) return null;
+  const today = dayKey();
+  const week = weekStartKey(today);
+  const sevenDaysAgo = addDays(today, -6);
+  const habits = new Map();
+  for (const [date, day] of Object.entries(state.history || {})) {
+    if (date < sevenDaysAgo || date > today) continue;
+    for (const [id, item] of Object.entries(day || {})) {
+      const current = habits.get(id) || { id, label: item.label || state.meta?.[id]?.label || "Habit", total: 0, done: 0 };
+      current.total += 1;
+      if (item.done) current.done += 1;
+      habits.set(id, current);
+    }
+  }
+  const ranked = [...habits.values()].map((item) => ({ ...item, rate: item.total ? item.done / item.total : 0 })).sort((a, b) => b.total - a.total || b.rate - a.rate).slice(0, 8);
+  const decisionFor = (item) => {
+    if (item.total >= 4 && item.rate >= 0.75) return "keep";
+    if (item.total >= 4 && item.rate === 0) return "drop";
+    if (item.rate < 0.4) return "shrink";
+    if (item.rate < 0.7) return "reschedule";
+    return "keep";
+  };
+  const saveDecision = (id, decision) => setState((current) => safeWrite({ ...current, reviews: { ...(current.reviews || {}), [week]: { ...(current.reviews?.[week] || {}), [id]: decision } }, meta: decision === "shrink" ? { ...(current.meta || {}), [id]: { ...(current.meta?.[id] || {}), needsShrink: true } } : current.meta }));
+  const reviewed = Object.keys(state.reviews?.[week] || {}).length;
+  return <section style={{ marginBottom: 14, borderRadius: 17, background: "linear-gradient(145deg,#F6FBFF,#FFF9FD)", border: "1px solid #D9D9F0", overflow: "hidden" }}>
+    <button type="button" onClick={() => setExpanded((value) => !value)} aria-expanded={expanded} style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr auto", gap: 9, padding: "12px 13px", border: 0, background: "transparent", textAlign: "left", cursor: "pointer" }}>
+      <span><span style={{ display: "block", fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#4A80B5" }}>ğŸ§­ REVIEW & ADJUST</span><span style={{ display: "block", marginTop: 3, fontSize: 13.5, fontWeight: 900, color: "#4F405C" }}>Keep what works. Change what doesn't.</span><span style={{ display: "block", marginTop: 2, fontSize: 11, color: "#806B8D" }}>{ranked.length ? `${ranked.length} habits with real data this week Â· ${reviewed} reviewed` : "Use your habits for a few days and the review will fill itself in."}</span></span><span aria-hidden="true" style={{ fontSize: 20, color: "#8C6B9E" }}>{expanded ? "â–¾" : "â€º"}</span>
+    </button>
+    {expanded && <div style={{ padding: "0 12px 12px", display: "grid", gap: 8 }}>
+      {ranked.map((item) => {
+        const suggested = decisionFor(item);
+        const chosen = state.reviews?.[week]?.[item.id] || "";
+        const stats = habitStats(state, item.id);
+        return <div key={item.id} style={{ padding: 10, borderRadius: 11, background: "white", border: "1px solid #E6DFF0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><strong style={{ color: "#5B4B6B", fontSize: 12.5 }}>{item.label}</strong><span style={{ fontSize: 11, color: "#8C6B9E", fontWeight: 900 }}>{Math.round(item.rate * 100)}%</span></div>
+          <div style={{ marginTop: 4, fontSize: 11, color: "#806B8D", lineHeight: 1.45 }}>{suggested === "keep" ? "This is working. Protect the current cue and difficulty." : suggested === "shrink" ? "This looks hard to start. Make the minimum version smaller." : suggested === "reschedule" ? (stats.bestDay ? `Try moving or emphasizing it around ${stats.bestDay.label}, where it has worked better.` : "The habit may need a better time or cue.") : "This has not been helping this week. Pausing or dropping it may make the plan healthier."}</div>
+          <div style={{ display: "flex", gap: 5, marginTop: 7, flexWrap: "wrap" }}>{["keep", "shrink", "reschedule", "drop"].map((decision) => <button key={decision} type="button" onClick={() => saveDecision(item.id, decision)} style={{ ...cardButton(chosen === decision), padding: "6px 8px", fontSize: 10.5 }}>{decision === suggested ? "â˜… " : ""}{decision[0].toUpperCase() + decision.slice(1)}</button>)}</div>
+          {(chosen === "shrink" || chosen === "reschedule" || chosen === "drop") && <button type="button" onClick={() => openTaskManager?.()} style={{ ...cardButton(false), marginTop: 7, padding: "6px 8px", fontSize: 10.5 }}>Apply this in task setup</button>}
+        </div>;
+      })}
+      {!ranked.length && <div style={{ padding: 10, color: "#806B8D", fontSize: 11.5 }}>No pressure to manufacture data. PlushLife will review the habits you actually use.</div>}
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}><button type="button" onClick={() => goToDashboard?.("today")} style={cardButton(false)}>Go to today</button><button type="button" onClick={() => openTaskManager?.()} style={cardButton(false)}>Edit my habits</button></div>
+    </div>}
+  </section>;
+}

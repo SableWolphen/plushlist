@@ -4476,33 +4476,7 @@ function GlowUpTracker() {
       });
   };
 
-  useEffect(() => {
-    const consumeTaskAction = () => {
-      let pending = null;
-      try { pending = JSON.parse(localStorage.getItem("plushlife:pending-notification-action:v1") || "null"); } catch (_error) {}
-      if (!pending?.taskKey || !["done", "tiny", "skip"].includes(pending.action)) return;
-      try { localStorage.removeItem("plushlife:pending-notification-action:v1"); } catch (_error) {}
-      const row = rows.find((item) => item.key === pending.taskKey);
-      if (!row) return;
-      if (pending.action === "done" && !viewDone[row.key]) toggle(row.key);
-      if (pending.action === "tiny") {
-        const stateKey = "plushlife:habit-coach:v1";
-        try {
-          const state = JSON.parse(localStorage.getItem(stateKey) || "{}") || {};
-          const retention = state.meta?.__retention || {};
-          const completionStates = { ...(retention.completionStates || {}), [`${period.date}:${row.key}`]: "tiny" };
-          localStorage.setItem(stateKey, JSON.stringify({ ...state, meta: { ...(state.meta || {}), __retention: { ...retention, completionStates, updated_at: new Date().toISOString() } } }));
-        } catch (_error) {}
-        if (!viewDone[row.key]) toggle(row.key);
-      }
-      if (pending.action === "skip") {
-        setNextStepSkipped((items) => items.includes(row.key) ? items : [...items, row.key]);
-      }
-    };
-    consumeTaskAction();
-    document.addEventListener("plushlife-notification-task-action", consumeTaskAction);
-    return () => document.removeEventListener("plushlife-notification-task-action", consumeTaskAction);
-  }, [period.date, rows, viewDone]);
+
 
   // Normalize an item — either a plain string, or { label, how } for expandable ones
   const norm = (it) => (typeof it === "string" ? { label: it, how: null } : it);
@@ -4581,6 +4555,35 @@ function GlowUpTracker() {
       return (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0) || a.task_key.localeCompare(b.task_key);
     })
     .map(rowForTask);
+
+  // Runtime safety: this effect consumes derived rows, so it must stay after rows is initialized. Dependency arrays are evaluated during render.
+  useEffect(() => {
+    const consumeTaskAction = () => {
+      let pending = null;
+      try { pending = JSON.parse(localStorage.getItem("plushlife:pending-notification-action:v1") || "null"); } catch (_error) {}
+      if (!pending?.taskKey || !["done", "tiny", "skip"].includes(pending.action)) return;
+      try { localStorage.removeItem("plushlife:pending-notification-action:v1"); } catch (_error) {}
+      const row = rows.find((item) => item.key === pending.taskKey);
+      if (!row) return;
+      if (pending.action === "done" && !viewDone[row.key]) toggle(row.key);
+      if (pending.action === "tiny") {
+        const stateKey = "plushlife:habit-coach:v1";
+        try {
+          const state = JSON.parse(localStorage.getItem(stateKey) || "{}") || {};
+          const retention = state.meta?.__retention || {};
+          const completionStates = { ...(retention.completionStates || {}), [`${period.date}:${row.key}`]: "tiny" };
+          localStorage.setItem(stateKey, JSON.stringify({ ...state, meta: { ...(state.meta || {}), __retention: { ...retention, completionStates, updated_at: new Date().toISOString() } } }));
+        } catch (_error) {}
+        if (!viewDone[row.key]) toggle(row.key);
+      }
+      if (pending.action === "skip") {
+        setNextStepSkipped((items) => items.includes(row.key) ? items : [...items, row.key]);
+      }
+    };
+    consumeTaskAction();
+    document.addEventListener("plushlife-notification-task-action", consumeTaskAction);
+    return () => document.removeEventListener("plushlife-notification-task-action", consumeTaskAction);
+  }, [period.date, rows, viewDone]);
   useEffect(() => {
     if (!user || !window.PlushLifeNativeNotifications) return;
     let habitCoachMeta = {};

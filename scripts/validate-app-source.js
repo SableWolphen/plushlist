@@ -24,6 +24,15 @@ esbuild.buildSync({
   jsx: "transform",
 });
 
+// Runtime guard for the production crash seen on 2026-08-14. esbuild can
+// compile a temporal-dead-zone mistake, so verify this render-time effect stays
+// after the derived rows declaration.
+const rowsDeclarationIndex = appSource.indexOf("  const rows = scheduledTasksForView");
+const notificationActionEffectIndex = appSource.indexOf('document.addEventListener("plushlife-notification-task-action"');
+if (notificationActionEffectIndex !== -1 && (rowsDeclarationIndex === -1 || notificationActionEffectIndex < rowsDeclarationIndex)) {
+  throw new Error("Runtime safety check failed: notification action effect references rows before rows is initialized.");
+}
+
 // Some regression markers below cover content that has since moved out of
 // the inline app-source block into the assets/plush-*.js modules (mascot
 // outfits, appearance themes, small pure helpers, schedule/date/task
