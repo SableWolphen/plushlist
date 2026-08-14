@@ -49,7 +49,6 @@ for (const file of files) {
       const idMatch = tag.match(/\bid=["']([^"']+)["']/i);
       const id = idMatch && idMatch[1];
       if (id && source.includes(`getElementById("${id}")`) && source.includes(`${id}.addEventListener("click"`)) continue;
-      // An untyped button inside a form is a submit control; require a submit handler in the page.
       const before = source.slice(0, button.index);
       const after = source.slice(button.index + tag.length);
       const inForm = before.lastIndexOf('<form') > before.lastIndexOf('</form>') && after.indexOf('</form>') >= 0;
@@ -97,9 +96,11 @@ const mustContain = {
     ['onClick={() => openTaskManager?.()}', 'Edit jobs'],
     ['onClick={() => goToDashboard?.("week")}', 'Planner route'],
     ['onClick={() => goToDashboard?.("progress")}', 'Progress route'],
-    ['aria-label="Today schedule"', 'Baby Mode schedule card'],
-    ['babyScheduleEntries.slice(0, showFullSchedule ? babyScheduleEntries.length : 3)', 'compact expandable Baby Mode schedule preview'],
+    ['aria-label={`${caregiver}\'s gentle schedule`}', 'Baby Mode caregiver schedule card'],
+    ['const schedulePreviewCount = 2;', 'compact two-item Baby Mode schedule preview'],
+    ['babyScheduleEntries.slice(0, showFullSchedule ? babyScheduleEntries.length : schedulePreviewCount)', 'expandable Baby Mode schedule preview'],
     ['entry.text || entry.label || entry.title', 'Baby Mode schedule uses saved item text'],
+    ['caregiverScheduleText(rawLabel)', 'Baby Mode schedule softens planner text'],
     ['showFullSchedule', 'Baby Mode inline full schedule'],
     ['visibleGroups.map((group)', 'Baby Mode grouped Little Jobs'],
     ['moveTaskGroup?.(group.section', 'Baby Mode group reorder controls'],
