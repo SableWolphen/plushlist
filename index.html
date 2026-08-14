@@ -4,15 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#b75acb">
-<!-- This app has no native dark theme (only its own in-app Dark Mode
-     toggle), but without this the WebView's own automatic "dark theme
-     for web content" feature can still decide to darken elements on its
-     own when the OS is in system dark mode — inverting a light header
-     background to near-black while leaving its text light, which is
-     what showed up as a persistent black title bar that no native
-     Android theme/ActionBar change ever touched, because it was never
-     native chrome to begin with. Declaring the page as light-only opts
-     it out of that automatic darkening. -->
 <meta name="color-scheme" content="light only">
 <meta name="description" content="PlushLife is a gentle, private care and routine companion that adapts to the day you are actually having.">
 <meta property="og:title" content="PlushLife — Care that fits today.">
@@ -30,10 +21,6 @@
 <link rel="apple-touch-icon" href="./icon-192.png">
 <title>PlushLife</title>
 <style>
-  /* Edge-to-edge (Android) extends the WebView under the status bar, and
-     without an explicit background here that strip falls back to the
-     WebView's own default canvas color instead of the app's actual color —
-     this is what showed up as a black bar at the top on native builds. */
   html, body { background-color: #FFF6FB; color-scheme: light only; }
   :focus-visible { outline: 3px solid #4C8FE8 !important; outline-offset: 3px; }
   .skip-link { position: fixed; left: 12px; top: -60px; z-index: 99999; padding: 10px 14px; border-radius: 10px; background: #5B4B6B; color: white; font: 800 14px system-ui, sans-serif; }
@@ -57,29 +44,15 @@
 <script src="./assets/plush-schedule.js"></script>
 <script src="./assets/plush-billing.js"></script>
 <script>
-// Native-shell integration for the Capacitor Android build. window.Capacitor
-// only exists inside the packaged native app, so this is a complete no-op on
-// the regular web/GitHub Pages version — one script, both deployments.
 (function () {
   if (!window.Capacitor || !window.Capacitor.Plugins) return;
   var Plugins = window.Capacitor.Plugins;
 
-  if (Plugins.StatusBar) {
-    // setBackgroundColor() used to be called here too, but it routes to
-    // Window.setStatusBarColor() — deprecated on Android 15+ (flagged by
-    // Play Console's pre-launch report) and fundamentally at odds with
-    // EdgeToEdge.enable() in MainActivity, which already draws the app's
-    // own content under a transparent status bar. setStyle() alone (icon
-    // color only) uses the non-deprecated WindowInsetsControllerCompat API.
-    Plugins.StatusBar.setStyle({ style: "DARK" }).catch(function () {});
-  }
+  if (Plugins.StatusBar) Plugins.StatusBar.setStyle({ style: "DARK" }).catch(function () {});
 
   if (Plugins.App) {
     var exitArmed = false;
     Plugins.App.addListener("backButton", function (state) {
-      // Every full-screen ToolPanel modal (Settings, Guardian, Help, Rewards, task
-      // editors, etc.) already closes itself on Escape — reuse that instead of
-      // teaching the native shell about each panel's own close handler.
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       if (state && state.canGoBack) {
         window.history.back();
@@ -98,12 +71,6 @@
     if (Plugins.SplashScreen) Plugins.SplashScreen.hide().catch(function () {});
   });
 
-  // Native push registration (Android FCM). This only fires a real token once
-  // a Firebase project + google-services.json are added to the Android build
-  // (see docs/android-release.md) — until then, registrationError fires
-  // instead, which we swallow quietly since notifications simply aren't wired
-  // up yet. The app-source script picks up window.__plushlifeNativePushToken
-  // once a user is signed in and upserts it into push_subscriptions.
   if (Plugins.PushNotifications) {
     Plugins.PushNotifications.createChannel({
       id: "plushlife-care",
@@ -120,16 +87,10 @@
     Plugins.PushNotifications.addListener("registrationError", function () {});
     Plugins.PushNotifications.addListener("pushNotificationActionPerformed", function (event) {
       var target = event && event.notification && event.notification.data && event.notification.data.url;
-      if (typeof target === "string" && /^https:\/\/sablewolphen\.github\.io\/plushlist\/?/.test(target)) {
-        window.location.href = target;
-      }
+      if (typeof target === "string" && /^https:\/\/sablewolphen\.github\.io\/plushlist\/?/.test(target)) window.location.href = target;
     });
   }
 
-  // Personal reminders are scheduled on the device, so they keep working
-  // without a network connection. Guardian messages still use FCM. Local
-  // reminders carry gentle snooze actions instead of forcing an immediate
-  // choice when someone has low capacity.
   if (Plugins.LocalNotifications) {
     var LocalNotifications = Plugins.LocalNotifications;
     var reminderChannelId = "plushlife-reminders";
@@ -167,6 +128,62 @@
       }] });
     };
 
+    var taskMinutes = function (task) {
+      if (!task || !task.time) return null;
+      var parts = String(task.time).slice(0, 5).split(":").map(Number);
+      if (parts.length !== 2 || parts.some(function (part) { return !Number.isFinite(part); })) return null;
+      if (parts[0] < 0 || parts[0] > 23 || parts[1] < 0 || parts[1] > 59) return null;
+      return parts[0] * 60 + parts[1];
+    };
+
+    var timeBucket = function (minutes) {
+      var hour = Math.floor(minutes / 60);
+      if (hour >= 5 && hour < 12) return "morning";
+      if (hour >= 12 && hour < 15) return "midday";
+      if (hour >= 15 && hour < 18) return "afternoon";
+      if (hour >= 18 && hour < 22) return "evening";
+      return "night";
+    };
+
+    var titleForTime = function (at) {
+      var bucket = timeBucket(at.getHours() * 60 + at.getMinutes());
+      if (bucket === "morning") return "Good morning 🌤️";
+      if (bucket === "midday") return "A little midday check-in 💜";
+      if (bucket === "afternoon") return "One small win? 🧸";
+      if (bucket === "evening") return "Time to wind down 🌙";
+      return "One gentle step before rest ✨";
+    };
+
+    var taskAppliesToDate = function (task, date) {
+      if (!task || task.done || task.completed || task.isDone) return false;
+      var dayId = window.PlushLifeCare.DAY_IDS[date.getDay()];
+      return !(Array.isArray(task.scheduleDays) && task.scheduleDays.length && !task.scheduleDays.includes(dayId));
+    };
+
+    var pickTaskForReminder = function (taskReminders, at) {
+      var reminderMinutes = at.getHours() * 60 + at.getMinutes();
+      var reminderBucket = timeBucket(reminderMinutes);
+      var candidates = (Array.isArray(taskReminders) ? taskReminders : []).map(function (task, index) {
+        var minutes = taskMinutes(task);
+        if (minutes === null || !taskAppliesToDate(task, at) || !task.label) return null;
+        var diff = minutes - reminderMinutes;
+        var sameBucket = timeBucket(minutes) === reminderBucket;
+        var distance = Math.abs(diff);
+        var score = distance;
+        if (!sameBucket) score += 180;
+        if (diff < -180) score += 240;
+        if (diff > 360) score += 180;
+        return { task: task, score: score, index: index };
+      }).filter(Boolean);
+      candidates.sort(function (a, b) { return a.score - b.score || a.index - b.index; });
+      if (!candidates.length) return null;
+      var winner = candidates[0];
+      var winnerMinutes = taskMinutes(winner.task);
+      var winnerDistance = Math.abs(winnerMinutes - reminderMinutes);
+      if (timeBucket(winnerMinutes) !== reminderBucket && winnerDistance > 180) return null;
+      return winner.task;
+    };
+
     window.PlushLifeNativeNotifications = {
       syncDailyReminders: async function (options) {
         var pending = await LocalNotifications.getPending();
@@ -177,7 +194,9 @@
         if (!options || !options.enabled) return;
         var times = Array.isArray(options.times) ? options.times.slice(0, 8) : [];
         var restDates = new Set(Array.isArray(options.restDates) ? options.restDates : []);
+        var taskReminders = Array.isArray(options.taskReminders) ? options.taskReminders : [];
         var notifications = [];
+
         for (var dayOffset = 0; dayOffset < 7; dayOffset += 1) {
           for (var timeIndex = 0; timeIndex < times.length; timeIndex += 1) {
             var parts = String(times[timeIndex]).split(":").map(Number);
@@ -188,28 +207,32 @@
             if (at.getTime() <= Date.now()) continue;
             var dateKey = window.PlushLifeCare.localDateString(at);
             if (restDates.has(dateKey)) continue;
+            var suggestedTask = pickTaskForReminder(taskReminders, at);
             notifications.push({
               id: window.PlushLifeCare.notificationId("daily-" + dateKey + "-" + timeIndex),
-              title: "A gentle PlushLife reminder",
-              body: options.discreet ? "You have something waiting in PlushLife." : "One caring step is enough. Open your PlushList when you're ready.",
+              title: options.discreet ? "A gentle PlushLife reminder" : (suggestedTask ? titleForTime(at) : "A gentle PlushLife reminder"),
+              body: options.discreet
+                ? "You have something waiting in PlushLife."
+                : (suggestedTask ? "Your next gentle step: " + suggestedTask.label : "One caring step is enough. Open your PlushList when you're ready."),
               schedule: { at: at, allowWhileIdle: true },
               channelId: reminderChannelId,
               actionTypeId: "PLUSHLIFE_REMINDER",
               autoCancel: true,
-              extra: { plushlifeKind: "daily-reminder", reminderTime: times[timeIndex] },
+              extra: suggestedTask
+                ? { plushlifeKind: "daily-reminder", reminderTime: times[timeIndex], taskKey: suggestedTask.taskKey, taskLabel: suggestedTask.label }
+                : { plushlifeKind: "daily-reminder", reminderTime: times[timeIndex] },
             });
           }
-          (Array.isArray(options.taskReminders) ? options.taskReminders : []).forEach(function (task) {
-            if (!task || !task.time) return;
+
+          taskReminders.forEach(function (task) {
+            if (!task || !task.time || task.done || task.completed || task.isDone) return;
             var date = new Date();
             date.setDate(date.getDate() + dayOffset);
             var dateKey = window.PlushLifeCare.localDateString(date);
-            if (restDates.has(dateKey)) return;
-            var dayId = window.PlushLifeCare.DAY_IDS[date.getDay()];
-            if (Array.isArray(task.scheduleDays) && task.scheduleDays.length && !task.scheduleDays.includes(dayId)) return;
-            var taskParts = String(task.time).slice(0, 5).split(":").map(Number);
-            if (taskParts.length !== 2 || taskParts.some(function (part) { return !Number.isFinite(part); })) return;
-            date.setHours(taskParts[0], taskParts[1], 0, 0);
+            if (restDates.has(dateKey) || !taskAppliesToDate(task, date)) return;
+            var taskAtMinutes = taskMinutes(task);
+            if (taskAtMinutes === null) return;
+            date.setHours(Math.floor(taskAtMinutes / 60), taskAtMinutes % 60, 0, 0);
             if (date.getTime() <= Date.now()) return;
             notifications.push({
               id: window.PlushLifeCare.notificationId("task-" + task.taskKey + "-" + dateKey),
