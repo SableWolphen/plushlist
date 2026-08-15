@@ -97,7 +97,7 @@ export function TodayPanel(props) {
   }, [props.open, props.rows?.length]);
 
   if (!props.open) return null;
-  if (props.babyMode) return <>{backgroundEngine}{liveRegion}{plushMemory}<React.Suspense fallback={null}><LazyBabyToday {...modeProps} /></React.Suspense></>;
+  if (props.babyMode) return <>{backgroundEngine}{liveRegion}<PlushKnowsMe {...modeProps} quiet /><React.Suspense fallback={null}><LazySmartAdaptationPanel {...modeProps} quiet /></React.Suspense><React.Suspense fallback={null}><LazyBabyToday {...modeProps} /></React.Suspense></>;
   if (lowScreen) return <>{backgroundEngine}{liveRegion}{plushMemory}<React.Suspense fallback={null}><LazyLowScreenToday {...modeProps} /></React.Suspense><LowScreenJustCompleted rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} /><CompletedTaskArea rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} compact /></>;
 
   return <>

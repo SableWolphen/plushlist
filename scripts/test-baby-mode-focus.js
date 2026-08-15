@@ -12,7 +12,8 @@ const checks = [
   [source.includes("LITTLE PLAN") && source.includes("Hey baby, here’s what we’re doing today"), "schedule uses caregiver-style language"],
   [source.includes("schedulePreviewCount = 2"), "schedule defaults to only two visible items"],
   [source.includes("keep <strong>{comfortItem}</strong> close") || source.includes("bring it with you if that helps"), "schedule can remind the user about their comfort item"],
-  [source.includes("showLittleJobs") && source.includes("Only open this when you want to see them"), "task list stays collapsed until requested"],
+  [source.includes("useState(true)") && source.includes("remainingJobs.slice(0, 3)"), "three non-duplicate little jobs appear directly beneath the primary action"],
+  [source.includes("SEE TODAY’S LITTLE PLAN") && source.includes("<details aria-label"), "the caregiver plan is collapsed until requested"],
   [source.includes("caregiverScheduleText"), "schedule entries are softened instead of copied as planner text"],
 ];
 

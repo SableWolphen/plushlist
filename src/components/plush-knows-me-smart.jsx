@@ -52,6 +52,8 @@ export function SmartAdaptationPanel(props) {
     } catch (_error) {}
   };
 
+  if (props.quiet) return null;
+
   if (!gold) return null;
   return <section data-smart-recommendations="true" aria-label="Suggestions you can use now" style={{ display: "grid", gap: 8, margin: "0 0 10px" }}>
     {sequence && <div style={{ ...card, borderColor: "#CFE8E1", background: "linear-gradient(145deg,#F3FFFB,#FFFFFF)" }}>

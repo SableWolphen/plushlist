@@ -62,7 +62,7 @@ export function BabyToday({
   pct = 0,
 }) {
   const [showMore, setShowMore] = React.useState(false);
-  const [showLittleJobs, setShowLittleJobs] = React.useState(false);
+  const [showLittleJobs, setShowLittleJobs] = React.useState(true);
   const [showAllLittleJobs, setShowAllLittleJobs] = React.useState(false);
   const [showFullSchedule, setShowFullSchedule] = React.useState(false);
   if (!open) return null;
@@ -70,8 +70,9 @@ export function BabyToday({
   const allLittleJobs = rows.filter((row) => !row.isBonus);
   const lingering = new Set(recentlyCompletedKeys || []);
   const waiting = allLittleJobs.filter((row) => !viewDone[row.key] || lingering.has(row.key));
-  const visible = showAllLittleJobs ? waiting : waiting.slice(0, 3);
-  const visibleGroupOrder = Array.from(new Set(waiting.map((row) => row.section).filter(Boolean)));
+  const remainingJobs = nextStepTask ? waiting.filter((row) => row.key !== nextStepTask.key) : waiting;
+  const visible = showAllLittleJobs ? remainingJobs : remainingJobs.slice(0, 3);
+  const visibleGroupOrder = Array.from(new Set(remainingJobs.map((row) => row.section).filter(Boolean)));
   const visibleGroups = [];
   for (const task of visible) {
     const groupKey = task.isEveryday ? "__daily__" : (task.section || "__other__");
@@ -141,8 +142,9 @@ export function BabyToday({
         )}
       </section>
 
-      {babyScheduleEntries.length > 0 && <section aria-label={`${caregiver}'s gentle schedule`} style={{ padding: 14, borderRadius: 18, background: "linear-gradient(145deg,#F9FCFF,#FFF9FD)", border: "1px solid #D9E5F1" }}>
-        <div style={{ fontSize: 11, letterSpacing: ".12em", fontWeight: 900, color: "#4A80B5" }}>🗓 {caregiver.toUpperCase()}’S LITTLE PLAN</div>
+      {babyScheduleEntries.length > 0 && <details aria-label={`${caregiver}'s gentle schedule`} style={{ order: 3, padding: "0 14px 12px", borderRadius: 18, background: "linear-gradient(145deg,#F9FCFF,#FFF9FD)", border: "1px solid #D9E5F1" }}>
+        <summary style={{ minHeight: 48, display: "flex", alignItems: "center", cursor: "pointer", fontSize: 11, letterSpacing: ".12em", fontWeight: 900, color: "#4A80B5" }}>🗓 SEE TODAY’S LITTLE PLAN</summary>
+        <div style={{ fontSize: 11, letterSpacing: ".12em", fontWeight: 900, color: "#4A80B5" }}>{caregiver.toUpperCase()}’S LITTLE PLAN</div>
         <div style={{ marginTop: 5, fontSize: 13.2, lineHeight: 1.5, color: "#665474", fontWeight: 750 }}>
           Hey baby, here’s what we’re doing today. You only have to look at one little part at a time.
         </div>
@@ -164,7 +166,7 @@ export function BabyToday({
           </button>}
           {showFullSchedule && <button type="button" onClick={() => goToDashboard?.("week")} style={{ ...softButton, minHeight: 42, padding: "8px 10px", fontSize: 11.5 }}>🗓 Grown-up planner</button>}
         </div>
-      </section>}
+      </details>}
 
       {resting && <section style={{ padding: "12px 14px", borderRadius: 16, background: "#EEF9F6", border: "1px solid #BFE5D2", color: "#3E746A" }}>
         <div style={{ fontWeight: 900, fontSize: 13 }}>🌴 It’s a soft rest day, baby.</div>
@@ -172,13 +174,13 @@ export function BabyToday({
         <button type="button" onClick={toggleRestToday} style={{ ...softButton, marginTop: 7, padding: "7px 9px", fontSize: 11 }}>End rest day</button>
       </section>}
 
-      <button type="button" onClick={openCare} style={{ ...softButton, width: "100%", minHeight: 54, display: "flex", justifyContent: "center", alignItems: "center", gap: 8, fontSize: 14, background: "rgba(255,255,255,.9)" }}>
+      <button type="button" onClick={openCare} style={{ ...softButton, order: 2, width: "100%", minHeight: 54, display: "flex", justifyContent: "center", alignItems: "center", gap: 8, fontSize: 14, background: "rgba(255,255,255,.9)" }}>
         🧸 I need a little help
       </button>
 
-      <section style={{ borderRadius: 17, background: "rgba(255,255,255,.72)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
+      <section style={{ order: 1, borderRadius: 17, background: "rgba(255,255,255,.72)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
         <button type="button" onClick={() => setShowLittleJobs((value) => !value)} aria-expanded={showLittleJobs} style={{ width: "100%", minHeight: 50, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "13px 14px", border: 0, background: "transparent", color: "#76558A", fontWeight: 900, cursor: "pointer", textAlign: "left" }}>
-          <span><span style={{ display: "block", fontSize: 13 }}>🧸 {waiting.length ? `${waiting.length} little job${waiting.length === 1 ? "" : "s"} are waiting` : "All my little jobs are tucked in"}</span><span style={{ display: "block", marginTop: 2, fontSize: 10.8, fontWeight: 700, color: "#9A85A5" }}>{showLittleJobs ? "You can tuck them in here." : "Only open this when you want to see them."}</span></span>
+          <span><span style={{ display: "block", fontSize: 13 }}>🧸 {remainingJobs.length ? `${remainingJobs.length} more little job${remainingJobs.length === 1 ? "" : "s"}` : "All my other little jobs are tucked in"}</span><span style={{ display: "block", marginTop: 2, fontSize: 10.8, fontWeight: 700, color: "#9A85A5" }}>{showLittleJobs ? "Just the first three, nice and easy." : "Open them only when you want to."}</span></span>
           <span aria-hidden="true">{showLittleJobs ? "▾" : "›"}</span>
         </button>
 
@@ -216,11 +218,11 @@ export function BabyToday({
             <div style={{ padding: "0 6px 6px" }}><CompletedTaskArea rows={allLittleJobs} viewDone={viewDone} lingerKeys={completedLingerKeys} toggle={toggle} title="Completed today" compact /></div>
           </details>}
 
-          {waiting.length > 3 && <button type="button" aria-expanded={showAllLittleJobs} onClick={() => setShowAllLittleJobs((expanded) => !expanded)} style={{ ...softButton, marginTop: 9, minHeight: 42, padding: "8px 10px", fontSize: 11.5 }}>{showAllLittleJobs ? "That’s enough for now" : `Show all ${waiting.length}`}</button>}
+          {remainingJobs.length > 3 && <button type="button" aria-expanded={showAllLittleJobs} onClick={() => setShowAllLittleJobs((expanded) => !expanded)} style={{ ...softButton, marginTop: 9, minHeight: 42, padding: "8px 10px", fontSize: 11.5 }}>{showAllLittleJobs ? "That’s enough for now" : `Show all ${remainingJobs.length}`}</button>}
         </div>}
       </section>
 
-      <section style={{ borderRadius: 17, background: "rgba(255,255,255,.66)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
+      <section style={{ order: 4, borderRadius: 17, background: "rgba(255,255,255,.66)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
         <button type="button" onClick={() => setShowMore((value) => !value)} aria-expanded={showMore} style={{ width: "100%", minHeight: 48, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "13px 14px", border: 0, background: "transparent", color: "#76558A", fontWeight: 900, cursor: "pointer" }}>
           <span>🌈 More when I’m ready</span><span aria-hidden="true">{showMore ? "▾" : "›"}</span>
         </button>
