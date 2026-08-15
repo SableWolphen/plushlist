@@ -66,7 +66,7 @@ function CompactGrowthOverview(props) {
   const goldInsights = hasGoldFeature("advanced_growth_insights");
   const highlights = props.weeklyHighlights || {};
 
-  return <div data-plushlife-growth-focus="true" style={{ display: "grid", gap: 14 }}>
+  return <div data-plushlife-growth-focus="true" style={{ display: "grid", gap: 14, width: "calc(100% - 28px)", maxWidth: 520, margin: "0 auto" }}>
     <section style={{ ...card, position: "relative", overflow: "hidden", padding: "24px 18px 21px" }}>
       <span aria-hidden="true" style={{ position: "absolute", right: 7, top: 54, color: "#F2C862", fontSize: 27, opacity: .82 }}>☆</span>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 14 }}>
@@ -87,9 +87,9 @@ function CompactGrowthOverview(props) {
         ["💜", `${props.weeklyEssentialPct || 0}%`, "Essentials", "#FBF4FF", "#A24BC7", "rgba(232,210,244,.58)"],
         ["🗓️", `${props.weeklyOverallDone || 0}/${props.weeklyOverallPossible || 0}`, "Core + Scheduled", "#F2FAFF", "#3E8EEB", "rgba(199,224,247,.65)"],
         ["⭐", `${props.weeklyBonusDone || 0}`, "Bonus wins", "#FFF9EC", "#D89900", "rgba(246,222,169,.65)"],
-      ].map(([icon, value, label, background, accent, halo]) => <div key={label} style={{ minWidth: 0, minHeight: 150, padding: "16px 7px 14px", borderRadius: 24, border: "1px solid #E5DCE8", background, textAlign: "center", boxShadow: "0 8px 22px rgba(149,113,168,.07)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ width: 48, height: 48, display: "grid", placeItems: "center", borderRadius: "50%", background: halo, fontSize: 23 }}>{icon}</div>
-        <div style={{ marginTop: 8, fontSize: 23, lineHeight: 1, fontWeight: 900, color: accent }}>{value}</div>
+      ].map(([icon, value, label, background, accent, halo]) => <div key={label} style={{ minWidth: 0, minHeight: 136, padding: "14px 7px 13px", borderRadius: 24, border: "1px solid #E5DCE8", background, textAlign: "center", boxShadow: "0 8px 22px rgba(149,113,168,.07)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 46, height: 46, display: "grid", placeItems: "center", borderRadius: "50%", background: halo, fontSize: 22 }}>{icon}</div>
+        <div style={{ marginTop: 8, fontSize: 22, lineHeight: 1, fontWeight: 900, color: accent }}>{value}</div>
         <div style={{ marginTop: 8, fontSize: 10.5, lineHeight: 1.25, color: "#6F5D7B", fontWeight: 800 }}>{label}</div>
       </div>)}
     </section>
