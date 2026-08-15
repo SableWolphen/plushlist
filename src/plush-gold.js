@@ -9,6 +9,7 @@ export const PLUSH_GOLD_FEATURES = Object.freeze({
   habit_experiments: { label: "Habit experiments", status: "available" },
   recovery_intelligence: { label: "Recovery & comeback intelligence", status: "available" },
   expanded_growth_history: { label: "Expanded PlushGrowth history", status: "available" },
+  guided_gold_paths: { label: "Gold guided PlushPaths", status: "available" },
   multiple_focus_habits: { label: "Multiple Focus Habits / focus cycles", status: "reserved" },
   advanced_planning: { label: "Advanced planning", status: "available" },
   advanced_personalization: { label: "Advanced personalization controls", status: "reserved" },

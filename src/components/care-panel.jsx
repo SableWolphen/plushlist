@@ -1,5 +1,7 @@
 import { MamasCorner } from "./baby-mode.jsx";
 import { CarePanel as ExistingCarePanel } from "./care-panel-existing.jsx";
+import { EXTRA_PLUSH_PATHS } from "../plush-paths-extra.js";
+import { hasGoldFeature } from "../plush-gold.js";
 
 const shellCard = {
   borderRadius: 14,
@@ -24,18 +26,22 @@ function SituationButton({ option, selected, onClick }) {
 
 export function CarePanel(props) {
   if (!props.open) return null;
-  const { COMFORT_TOOLS } = window.PlushLifeContent;
+  const { COMFORT_TOOLS, PLUSH_PATHS } = window.PlushLifeContent;
+  const goldPathsUnlocked = hasGoldFeature("guided_gold_paths");
+  if (!PLUSH_PATHS.__plushlifeExpanded) {
+    const extras = EXTRA_PLUSH_PATHS
+      .filter((path) => path.tier !== "gold" || goldPathsUnlocked)
+      .map((path) => path.tier === "gold" ? { ...path, title: `✨ Gold · ${path.title}` } : path);
+    const known = new Set(PLUSH_PATHS.map((path) => path.id));
+    PLUSH_PATHS.push(...extras.filter((path) => !known.has(path.id)));
+    Object.defineProperty(PLUSH_PATHS, "__plushlifeExpanded", { value: true, enumerable: false });
+  }
   const [selectedSituationId, setSelectedSituationId] = React.useState(null);
-  const [libraryOpen, setLibraryOpen] = React.useState(props.careSection !== "quick");
   const options = Array.isArray(props.HELP_ME_NOW_OPTIONS) ? props.HELP_ME_NOW_OPTIONS : [];
   const visibleOptions = options.slice(0, props.careSituationsExpanded ? options.length : 4);
   const selectedSituation = options.find((option) => option.id === selectedSituationId) || null;
   const recommendedTool = selectedSituation ? COMFORT_TOOLS.find((tool) => tool.id === selectedSituation.tool) || null : null;
   const helpedBefore = bestHelpfulTool(props.careSessionHistory, COMFORT_TOOLS);
-
-  React.useEffect(() => {
-    if (props.careSection !== "quick") setLibraryOpen(true);
-  }, [props.careSection]);
 
   const chooseSituation = (option) => {
     setSelectedSituationId(option.id);
@@ -64,7 +70,7 @@ export function CarePanel(props) {
         <div style={{ marginTop: 4, fontSize: 10.6, lineHeight: 1.43, color: "#607A73" }}>{selectedSituation.next}</div>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
           <button type="button" onClick={() => props.openCareSession(selectedSituation.tool)} style={{ minHeight: 44, padding: "7px 11px", borderRadius: 10, border: 0, background: "linear-gradient(135deg,#52A792,#3E8C7D)", color: "white", fontWeight: 900, fontSize: 10.7, cursor: "pointer" }}>{props.babyMode ? "🧸 Do this with me" : "Start this"}</button>
-          <button type="button" onClick={() => setLibraryOpen(true)} style={{ minHeight: 44, padding: "7px 10px", borderRadius: 10, border: "1px solid #BFDCCF", background: "white", color: "#52736B", fontWeight: 850, fontSize: 10.3, cursor: "pointer" }}>See other tools</button>
+          <button type="button" onClick={() => props.setCareSection("quick")} style={{ minHeight: 44, padding: "7px 10px", borderRadius: 10, border: "1px solid #BFDCCF", background: "white", color: "#52736B", fontWeight: 850, fontSize: 10.3, cursor: "pointer" }}>🌿 Open PlushCalm</button>
         </div>
       </div>}
     </section>
@@ -81,12 +87,15 @@ export function CarePanel(props) {
       <div style={{ marginTop: 7 }}><MamasCorner userId={props.user.id} caregiverName={props.babyCaregiverName} parentVoice={props.preferences.baby_voice === "fatherly" ? "fatherly" : "motherly"} incompleteTasks={props.rows.filter((row) => !props.viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => props.toggle(taskKey)} supabase={props.supabase} /></div>
     </details>}
 
-    <details open={libraryOpen} onToggle={(event) => setLibraryOpen(event.currentTarget.open)} style={{ borderRadius: 13, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.7)", padding: "8px 9px" }}>
-      <summary style={{ minHeight: 44, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, color: "#76558A", fontWeight: 900, fontSize: 10.8, cursor: "pointer" }}><span>🧰 Browse all care tools</span><span style={{ fontSize: 9.4, color: "#9B83A8", fontWeight: 800 }}>Calm · Paths · Sleep</span></summary>
-      <div className="plushcare-library" style={{ marginTop: 7 }}>
+    <section aria-label="PlushCare main spaces" style={{ borderRadius: 14, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.72)", padding: "9px" }}>
+      <div style={{ padding: "2px 4px 8px" }}>
+        <div style={{ fontSize: 10.4, letterSpacing: ".12em", fontWeight: 900, color: "#8E4EAA" }}>✨ YOUR CARE SPACES</div>
+        <div style={{ marginTop: 3, fontSize: 10.4, lineHeight: 1.4, color: "#806B8D" }}>PlushCalm, PlushPaths, and PlushSleep are core parts of PlushCare — choose whichever kind of support fits right now.</div>
+      </div>
+      <div className="plushcare-library">
         <style>{`.plushcare-library > div > :first-child{display:none!important}.plushcare-library > div{gap:9px!important;margin-bottom:0!important}.plushcare-library [role="tablist"]{margin-top:0!important}`}</style>
         <ExistingCarePanel {...props} open={true} isMamaCornerProfile={false} />
       </div>
-    </details>
+    </section>
   </div>;
 }
