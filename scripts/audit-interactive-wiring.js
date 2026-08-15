@@ -88,8 +88,6 @@ const mustContain = {
     ['onClick={onSoftDay}', 'Baby Mode Soft day action'],
   ],
   'src/components/baby-today.jsx': [
-    ['onClick={() => toggle(nextStepTask.key)}', 'Tiny Thing completion'],
-    ['onClick={() => pickEasierSuggestion?.(nextStepTask.key)}', 'Make it tinier'],
     ['onClick={() => selectDayType?.("soft")}', 'Soft day'],
     ['onClick={() => selectDayType?.("tiny")}', 'Tiny day'],
     ['onClick={openCare}', 'Comfort/Care'],
