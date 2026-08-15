@@ -242,6 +242,96 @@
     }
   }
 
+  // Native reminder dates are created with Date#setHours in index.html, so a
+  // saved 08:00 means 08:00 on the phone. Those notifications are scheduled
+  // several days ahead as absolute instants, though, so travelling or a
+  // device timezone/offset change can leave already-pending reminders tied
+  // to the old zone. Keep the latest reminder recipe and rebuild it whenever
+  // the phone's own timezone signature changes.
+  const NOTIFICATION_TIMEZONE_KEY = "plushlife:notification-phone-timezone:v1";
+  let latestReminderOptions = null;
+  let nativeReminderGuardInstalled = false;
+
+  const phoneTimezoneSignature = () => {
+    let zone = "local";
+    try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || "local"; } catch (_) {}
+    return `${zone}|${new Date().getTimezoneOffset()}`;
+  };
+
+  const cloneReminderOptions = (options) => {
+    if (!options || typeof options !== "object") return options;
+    return {
+      ...options,
+      times: Array.isArray(options.times) ? [...options.times] : [],
+      restDates: Array.isArray(options.restDates) ? [...options.restDates] : [],
+      taskReminders: Array.isArray(options.taskReminders)
+        ? options.taskReminders.map((task) => ({ ...task, scheduleDays: Array.isArray(task.scheduleDays) ? [...task.scheduleDays] : [] }))
+        : [],
+    };
+  };
+
+  const rememberPhoneTimezone = () => {
+    const signature = phoneTimezoneSignature();
+    try { localStorage.setItem(NOTIFICATION_TIMEZONE_KEY, signature); } catch (_) {}
+    return signature;
+  };
+
+  const installNativeReminderGuard = () => {
+    const native = window.PlushLifeNativeNotifications;
+    if (!native || typeof native.syncDailyReminders !== "function") return false;
+    if (nativeReminderGuardInstalled || native.__plushlifePhoneTimeGuard) return true;
+    const originalSync = native.syncDailyReminders.bind(native);
+    native.syncDailyReminders = async (options) => {
+      latestReminderOptions = cloneReminderOptions(options);
+      native.__lastDailyReminderOptions = latestReminderOptions;
+      const result = await originalSync(options);
+      rememberPhoneTimezone();
+      return result;
+    };
+    native.__plushlifePhoneTimeGuard = true;
+    nativeReminderGuardInstalled = true;
+    return true;
+  };
+
+  const resyncRemindersForPhoneTime = async () => {
+    installNativeReminderGuard();
+    const native = window.PlushLifeNativeNotifications;
+    if (!native || typeof native.syncDailyReminders !== "function") return;
+    const current = phoneTimezoneSignature();
+    let previous = "";
+    try { previous = localStorage.getItem(NOTIFICATION_TIMEZONE_KEY) || ""; } catch (_) {}
+    if (!previous) {
+      rememberPhoneTimezone();
+      return;
+    }
+    if (previous === current) return;
+    const options = latestReminderOptions || native.__lastDailyReminderOptions;
+    if (!options) return;
+    try {
+      await native.syncDailyReminders(cloneReminderOptions(options));
+      rememberPhoneTimezone();
+    } catch (_) {
+      // Leave the old signature in place so the next resume retries safely.
+    }
+  };
+
+  const reminderGuardPoll = window.setInterval(() => {
+    if (installNativeReminderGuard()) window.clearInterval(reminderGuardPoll);
+  }, 250);
+  window.setTimeout(installNativeReminderGuard, 0);
+  window.addEventListener("focus", () => { resyncRemindersForPhoneTime(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") resyncRemindersForPhoneTime();
+  });
+  if (window.Capacitor?.Plugins?.App?.addListener) {
+    window.Capacitor.Plugins.App.addListener("appStateChange", (state) => {
+      if (state?.isActive) resyncRemindersForPhoneTime();
+    }).catch?.(() => {});
+  }
+  window.setInterval(() => {
+    if (document.visibilityState === "visible") resyncRemindersForPhoneTime();
+  }, 60000);
+
   if (state.pressureDate && state.pressureDate !== TODAY) restore();
   else if (state.mode === "smaller") setTimeout(() => showOnly(state.energy === "empty" ? 1 : 3, false, state.energy === "empty" || state.energy === "low"), 400);
   else if (state.mode === "next") setTimeout(() => showOnly(1, true, true), 400);
