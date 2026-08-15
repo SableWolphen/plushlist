@@ -6,6 +6,28 @@
   const clean = (value) => String(value || "").replace(/\s+/g, " ").trim().toLowerCase();
   const visible = (node) => !!(node && node.getClientRects && node.getClientRects().length);
 
+  const compactHomeStyle = document.createElement("style");
+  compactHomeStyle.textContent = `
+    [data-plushlife-compact-card="plushweek"] {
+      padding: 6px 10px !important;
+      margin-bottom: 7px !important;
+      border-radius: 12px !important;
+    }
+    [data-plushlife-compact-hit-target="plushweek-edit"] {
+      position: relative !important;
+      min-height: 28px !important;
+      margin: -2px -4px -2px 0 !important;
+      padding: 4px 8px !important;
+      line-height: 1.1 !important;
+    }
+    [data-plushlife-compact-hit-target="plushweek-edit"]::before {
+      content: "";
+      position: absolute;
+      inset: -8px -6px;
+    }
+  `;
+  document.head.appendChild(compactHomeStyle);
+
   function removeGentleLauncher() {
     const launcher = document.getElementById("plushlife-gentle-launcher");
     if (!launcher) return;
