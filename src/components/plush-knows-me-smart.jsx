@@ -15,18 +15,21 @@ function confidenceLabel(value) {
 export function PlushKnowsMe(props) {
   const userId = props.user?.id || "local";
   const gold = hasGoldFeature("advanced_growth_insights");
-  const context = profileContext({ dailyCheckIn: props.dailyCheckIn || {}, rows: props.rows || [], viewDone: props.viewDone || {} });
+  const rows = props.rows || [];
+  const viewDone = props.viewDone || {};
+  const context = profileContext({ dailyCheckIn: props.dailyCheckIn || {}, rows, viewDone });
+  const doneSignature = rows.filter((row) => !row?.isBonus && viewDone?.[row.key]).map((row) => row.key).join("|");
   const [version, setVersion] = React.useState(0);
   const [recipeFeedbackOpen, setRecipeFeedbackOpen] = React.useState(false);
   void version;
 
   React.useEffect(() => {
-    recordCompletionSequence(userId, props.rows || [], props.viewDone || {});
+    recordCompletionSequence(userId, rows, viewDone);
     recordRecoverySnapshot(userId, context);
     setVersion((value) => value + 1);
-  }, [userId, props.viewDone, context.energy, context.capacity, context.mood, context.load, context.time]);
+  }, [userId, doneSignature, context.energy, context.capacity, context.mood, context.load, context.time]);
 
-  const sequence = sequenceSuggestion(userId, props.rows || [], props.viewDone || {});
+  const sequence = sequenceSuggestion(userId, rows, viewDone);
   const recovery = recoveryFingerprint(userId, context);
   const recipe = rescueRecipe(userId, context);
 
