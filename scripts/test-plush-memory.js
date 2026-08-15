@@ -7,7 +7,10 @@ function read(relativePath) {
 
 const memory = read("src/plush-memory.js");
 const profile = read("src/plush-profile.js");
+const adaptation = read("src/plush-smart-adaptation.js");
 const today = read("src/components/plush-knows-me.jsx");
+const smartToday = read("src/components/plush-knows-me-smart.jsx");
+const todayRouter = read("src/components/today-panel.jsx");
 const care = read("src/components/care-panel.jsx");
 const phoneTime = read("scripts/test-phone-time-notifications.js");
 
@@ -28,6 +31,15 @@ const checks = [
   [today.includes('That changed / forget this') && profile.includes('forgetPattern'), "users can correct or forget learned patterns"],
   [today.includes('My gentle boundaries') && profile.includes('setBoundary'), "users can set personal recommendation boundaries"],
   [today.includes('This week PlushLife updated') && profile.includes('weeklyMemoryUpdate'), "Gold receives a weekly memory update"],
+  [adaptation.includes('recordCompletionSequence') && adaptation.includes('sequenceSuggestion'), "task sequence memory learns only from real completion order"],
+  [adaptation.includes('snapshot.date !== currentDay') && adaptation.includes('item.count >= 2') && smartToday.includes('Seen {sequence.count} times'), "sequence learning ignores initial-load completions and requires repeated evidence"],
+  [adaptation.includes('recordRecoverySnapshot') && adaptation.includes('recoveryFingerprint') && adaptation.includes('slice(-45)'), "rough-day recovery fingerprints are bounded and evidence based"],
+  [adaptation.includes('Just One Thing') && adaptation.includes('Tiny Essentials') && adaptation.includes('Pause the Pressure'), "personalized Rescue recipes are available"],
+  [adaptation.includes('recommendationFit(userId, "rescue_recipe"') && smartToday.includes('recordRecommendationOutcome(userId, "rescue_recipe"'), "Rescue recipe selection learns from user outcomes"],
+  [smartToday.includes('Use {recipe.label}') && smartToday.includes('Did this recipe fit today?'), "Rescue recipe remains opt-in and has an outcome loop"],
+  [smartToday.includes('doneSignature') && !smartToday.includes('[userId, props.viewDone,'), "smart adaptation effects are stable instead of object-identity driven"],
+  [smartToday.includes('minHeight: 44'), "smart adaptation actions retain 44px tap targets"],
+  [todayRouter.includes('from "./plush-knows-me-smart.jsx"'), "Today routes through the smarter adaptation wrapper"],
   [care.includes('GOLD · PLUSHMEMORY') && care.includes('Still learning what works for you'), "Gold memory has a no-fabrication fallback"],
   [care.includes('recommendationFit') && care.includes('situations similar to right now'), "PlushCare distinguishes contextual fit from global history"],
   [care.includes('ADAPTIVE PLUSHPATH') && care.includes('How is the current step fitting?'), "adaptive PlushPaths collect explicit fit feedback"],

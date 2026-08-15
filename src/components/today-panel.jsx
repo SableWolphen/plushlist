@@ -4,7 +4,7 @@ import { useLowScreenMode } from "./low-screen-mode.jsx";
 import { CompletedTaskArea, useCompletedTaskFlow } from "./completed-task-flow.jsx";
 import { useSmartNextStep } from "./smart-next-step.jsx";
 import { HabitSuggestions } from "./habit-suggestions.jsx";
-import { PlushKnowsMe } from "./plush-knows-me.jsx";
+import { PlushKnowsMe } from "./plush-knows-me-smart.jsx";
 
 const LazyDailyCompanion = React.lazy(() => import("./daily-companion.jsx").then((module) => ({ default: module.DailyCompanion })));
 const LazyBabyToday = React.lazy(() => import("./baby-today.jsx").then((module) => ({ default: module.BabyToday })));
