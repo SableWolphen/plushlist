@@ -5576,6 +5576,16 @@ function GlowUpTracker() {
   }, [user?.id, preferences.onboarding_complete, privateNoteLoaded, privateNote, dailyCheckIn.capacity, checkInPopupDismissedToday, period.date]);
   const dinoTheme = !!preferences.dino_theme;
   const selectedAppearanceTheme = APPEARANCE_THEMES.find((theme) => theme.id === appearanceTheme) || APPEARANCE_THEMES[0];
+  const softLightPalette = (() => {
+    if (appearanceTheme !== "soft-light") return selectedAppearanceTheme;
+    const hour = new Date().getHours();
+    if (hour >= 19 || hour < 6) return { ...selectedAppearanceTheme, background: "#F2F1FA", glowA: "#DED9ED70", glowB: "#D8E0F070", glowC: "#E9DEEA60", glowD: "#D8E7E660", wash: "#F8F6FCA8" };
+    const dayType = dailyCheckIn.day_type || "full";
+    if (dayType === "rest") return { ...selectedAppearanceTheme, background: "#F0F5FA", glowA: "#DCE8F270", glowB: "#DDE5F270", glowC: "#E8E6F170", glowD: "#DDEDEB60" };
+    if (dayType === "tiny" || dayType === "recovery") return { ...selectedAppearanceTheme, background: "#F1FAF7", glowA: "#DDEFE870", glowB: "#E3E8F370", glowC: "#F1EADA60", glowD: "#D5ECE370" };
+    if (dayType === "soft") return { ...selectedAppearanceTheme, background: "#F5F0FA", glowA: "#E8DDF070", glowB: "#E0E6F270", glowC: "#F1E6E960", glowD: "#DDECE760" };
+    return selectedAppearanceTheme;
+  })();
   const selectAppearanceTheme = (themeId) => {
     setAppearanceTheme(themeId);
     if (user?.id) window.localStorage.setItem(`plushlist-appearance-${user.id}`, themeId);
@@ -5760,27 +5770,27 @@ function GlowUpTracker() {
   return (
     <div id="main-content" tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""} appearance-${appearanceTheme}`} style={{
       minHeight: "100vh",
-      background: babyMode ? "#FFF0FA" : selectedAppearanceTheme.background,
+      background: babyMode ? "#FFF0FA" : softLightPalette.background,
       backgroundImage: preferences.simple_mode ? "none" : babyMode ? `
         radial-gradient(circle at 8% 9%, #FFBFE4 0%, transparent 34%),
         radial-gradient(circle at 93% 8%, #BDEBFF 0%, transparent 35%),
         radial-gradient(circle at 88% 91%, #FFF0A8 0%, transparent 38%),
         radial-gradient(circle at 9% 88%, #C8F4DE 0%, transparent 38%)
       ` : `
-        linear-gradient(135deg, ${selectedAppearanceTheme.wash}, transparent 64%),
-        radial-gradient(circle at 8% 12%, ${selectedAppearanceTheme.glowA} 0%, transparent 42%),
-        radial-gradient(circle at 92% 8%, ${selectedAppearanceTheme.glowB} 0%, transparent 42%),
-        radial-gradient(circle at 85% 90%, ${selectedAppearanceTheme.glowC} 0%, transparent 48%),
-        radial-gradient(circle at 10% 85%, ${selectedAppearanceTheme.glowD} 0%, transparent 48%)
+        linear-gradient(135deg, ${softLightPalette.wash}, transparent 64%),
+        radial-gradient(circle at 8% 12%, ${softLightPalette.glowA} 0%, transparent 42%),
+        radial-gradient(circle at 92% 8%, ${softLightPalette.glowB} 0%, transparent 42%),
+        radial-gradient(circle at 85% 90%, ${softLightPalette.glowC} 0%, transparent 48%),
+        radial-gradient(circle at 10% 85%, ${softLightPalette.glowD} 0%, transparent 48%)
       `,
       fontFamily: babyMode ? "'Comic Sans MS','Nunito','Segoe UI',sans-serif" : "'Avenir Next','Segoe UI',system-ui,sans-serif",
       color: preferences.high_contrast ? "#2D2038" : "#5B4B6B",
       fontSize: babyMode ? "118%" : "100%",
       padding: "max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))",
       position: "relative",
-      boxShadow: appearanceTheme === "soft" || babyMode ? "none" : `inset 0 0 0 8px ${selectedAppearanceTheme.accent}55`,
+      boxShadow: ["soft", "soft-light"].includes(appearanceTheme) || babyMode ? "none" : `inset 0 0 0 8px ${selectedAppearanceTheme.accent}55`,
     }}>
-      {!babyMode && appearanceTheme !== "soft" && <div aria-hidden="true" style={{ position: "absolute", top: 0, left: 0, right: 0, height: 8, background: `linear-gradient(90deg, ${selectedAppearanceTheme.accent}, ${selectedAppearanceTheme.glowB}, ${selectedAppearanceTheme.accent})`, boxShadow: `0 3px 14px ${selectedAppearanceTheme.accent}88`, pointerEvents: "none" }} />}
+      {!babyMode && !["soft", "soft-light"].includes(appearanceTheme) && <div aria-hidden="true" style={{ position: "absolute", top: 0, left: 0, right: 0, height: 8, background: `linear-gradient(90deg, ${selectedAppearanceTheme.accent}, ${selectedAppearanceTheme.glowB}, ${selectedAppearanceTheme.accent})`, boxShadow: `0 3px 14px ${selectedAppearanceTheme.accent}88`, pointerEvents: "none" }} />}
       <style>{`
         @keyframes mascotBounce {
           0%, 100% { transform: translateY(0) rotate(0deg); }
