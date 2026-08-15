@@ -9,7 +9,7 @@ function FeedbackRow({ onFeedback, label = "Did that fit?" }) {
   return <div style={{ marginTop: 7 }}><div style={{ fontSize: 9.6, fontWeight: 900, color: "#8A7894" }}>{label}</div><div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 4 }}><button type="button" onClick={() => onFeedback("helped")} style={button}>💜 Yes</button><button type="button" onClick={() => onFeedback("neutral")} style={button}>🙂 Not sure</button><button type="button" onClick={() => onFeedback("not_helpful")} style={button}>🪶 Not really</button></div></div>;
 }
 
-export function PlushKnowsMe({ user, rows = [], viewDone = {}, dailyCheckIn = {}, dailyCheckInHistory = [], goToDashboard }) {
+export function PlushKnowsMe({ user, rows = [], viewDone = {}, dailyCheckIn = {}, dailyCheckInHistory = [], goToDashboard, quiet = false }) {
   const userId = user?.id || "local";
   const [visit] = React.useState(() => registerVisit(userId));
   const [futureNote, setFutureNote] = React.useState(() => getFutureNote(userId));
@@ -51,6 +51,7 @@ export function PlushKnowsMe({ user, rows = [], viewDone = {}, dailyCheckIn = {}
   };
 
   const saveNote = () => { const next = saveFutureNote(userId, noteDraft); setFutureNote(next); setEditingNote(false); };
+  if (quiet) return null;
   return <section data-contextual-today-support="true" aria-label="Helpful suggestions for today" style={{ display: "grid", gap: 8, margin: "8px 0 10px" }}>
     {showReturn && <div style={{ ...card, borderColor: "#CFE8E1", background: "linear-gradient(145deg,#F2FFFB,#FFF9FD)" }}><div style={{ fontSize: 12.2, fontWeight: 900, color: "#4D8174" }}>🧸 Hi. Your stuff is still here.</div><div style={{ marginTop: 3, fontSize: 10.7, lineHeight: 1.45, color: "#71857F" }}>It has been a few days. There is nothing to catch up on. You can make today tiny and start from right now.</div><div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 7 }}><button type="button" onClick={() => openRescue("return")} style={{ ...button, border: 0, background: "#4D9A86", color: "white" }}>🌿 Make today smaller</button><button type="button" onClick={() => goToDashboard?.("care")} style={button}>💜 Open PlushCare</button></div>{feedbackTarget === "return" && <FeedbackRow label="Was that a good way to come back?" onFeedback={(feedback) => recordFit("rescue", "return-after-break", feedback)} />}</div>}
 

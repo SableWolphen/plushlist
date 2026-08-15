@@ -118,7 +118,7 @@ const requiredRegressionMarkers = [
   'littleJobs={rows.filter((row) => !viewDone[row.key])}',
   '⚙️ Task setup',
   'const [showAllLittleJobs, setShowAllLittleJobs] = React.useState(false);',
-  'const visible = showAllLittleJobs ? waiting : waiting.slice(0, 3);',
+  'const visible = showAllLittleJobs ? remainingJobs : remainingJobs.slice(0, 3);',
   'const [journalQuickOpenDate, setJournalQuickOpenDate] = useState(() => trackerPeriod().date);',
   '.select("body, prompt")',
   'prompt: journalPromptToSave',
