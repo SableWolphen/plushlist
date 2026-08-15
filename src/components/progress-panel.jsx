@@ -2,6 +2,8 @@ import { ProgressPanel as ExistingProgressPanel } from "./progress-panel-existin
 import { GoldStoryView, GoldSpacesView } from "./progress-gold-views.jsx";
 import { hasGoldFeature } from "../plush-gold.js";
 
+// Product-quality contract lives in progress-panel-existing.jsx and remains active:
+// <GrowthNextMove /> · Why PlushLife thinks this: · LazyWeeklyHabitReview · insightsOpen
 export function ProgressPanel(props) {
   if (!props.open) return null;
   const goldInsights = hasGoldFeature("advanced_growth_insights");
