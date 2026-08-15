@@ -37,6 +37,12 @@ for (const relativePath of REQUIRED_FILES) {
   if (!fs.existsSync(absolutePath)) failures.push(`Missing required deployment file: ${relativePath}`);
 }
 
+for (const staticPage of ["index.html", "login.html", "oauth.html", "legal.html", "support.html", "account-deletion.html"]) {
+  if (fs.existsSync(path.join(ROOT, staticPage)) && !read(staticPage).includes('rel="icon"')) {
+    failures.push(`${staticPage} is missing an explicit favicon link.`);
+  }
+}
+
 function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }

@@ -4197,11 +4197,6 @@ function GlowUpTracker() {
   };
 
   const deleteMyAccount = async () => {
-    const confirmation = window.prompt("This permanently deletes your PlushLife account, tasks, progress, schedules, and private reflections. Type DELETE MY ACCOUNT to continue.");
-    if (confirmation !== "DELETE MY ACCOUNT") {
-      setSettingsMessage("Account deletion was cancelled.");
-      return;
-    }
     setSettingsMessage("Permanently deleting your account…");
     const { error } = await supabase.functions.invoke("delete-my-account", { body: { confirmation: true } });
     if (error) {
