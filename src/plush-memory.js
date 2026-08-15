@@ -47,9 +47,21 @@ export function rescueSignal({ rows = [], viewDone = {}, dailyCheckIn = {} } = {
   const lowEnergy = ["empty", "low"].includes(dailyCheckIn?.energy);
   const lowCapacity = ["very_low", "low"].includes(dailyCheckIn?.capacity);
   const hardMood = ["overwhelmed", "anxious", "sad", "sick", "numb", "stressed"].includes(dailyCheckIn?.mood);
-  const shouldOffer = (lowEnergy || lowCapacity || hardMood) && unfinished >= 3 || loadRatio >= .8 && unfinished >= 6;
+  const shouldOffer = ((lowEnergy || lowCapacity || hardMood) && unfinished >= 3) || (loadRatio >= .8 && unfinished >= 6);
   const reason = lowEnergy ? "Your energy check-in is low and there are still several things asking for attention." : lowCapacity ? "You marked lower capacity today, so PlushLife can reduce the number of decisions on screen." : hardMood ? "Your check-in says today feels heavier. PlushLife can make the routine smaller without deleting anything." : "There is a lot still visible today. PlushLife can temporarily narrow the list.";
   return { shouldOffer, unfinished, loadRatio, reason };
+}
+
+export function dayForecast({ rows = [], viewDone = {}, dailyCheckIn = {} } = {}) {
+  const required = rows.filter((row) => !row?.isBonus);
+  const unfinished = required.filter((row) => !viewDone?.[row.key]).length;
+  const lowEnergy = ["empty", "low"].includes(dailyCheckIn?.energy);
+  const veryLow = dailyCheckIn?.energy === "empty" || dailyCheckIn?.capacity === "very_low";
+  const hardMood = ["overwhelmed", "sad", "numb", "sick"].includes(dailyCheckIn?.mood);
+  if (!dailyCheckIn?.energy && !dailyCheckIn?.capacity && !dailyCheckIn?.mood) return { mode: "learning", icon: "🌤️", title: "Still learning today", text: "Add a quick check-in and PlushLife can suggest a gentler day shape from what you actually report." };
+  if (veryLow || (hardMood && unfinished >= 3)) return { mode: "tiny", icon: "🌱", title: "Tiny may fit today", text: "Your check-in suggests protecting capacity. Keep only the smallest meaningful steps visible and let bonus tasks stay optional." };
+  if (lowEnergy || dailyCheckIn?.capacity === "low") return { mode: "soft", icon: "🌤️", title: "Soft may fit today", text: "A gentler routine may match your current energy better than the full version. This is a workload suggestion, not a prediction about how you will feel." };
+  return { mode: "full", icon: "☀️", title: "Full looks reasonable today", text: "Your current check-in does not show a clear need to shrink the day. You can still switch to Soft or Tiny whenever that changes." };
 }
 
 export function supportMemory(history = [], tools = []) {
