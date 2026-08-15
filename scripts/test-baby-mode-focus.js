@@ -14,6 +14,8 @@ const checks = [
   [source.includes("useState(true)") && source.includes("waiting.slice(0, 3)"), "the first three little jobs appear immediately without a separate primary card"],
   [source.includes("<section aria-label={`${caregiver}'s gentle schedule`}") && !source.includes("SEE TODAY’S LITTLE PLAN"), "the caregiver schedule is always visible"],
   [source.includes("caregiverScheduleText"), "schedule entries are softened instead of copied as planner text"],
+  [source.includes('data-baby-task-circle="true"') && source.includes('boxSizing: "border-box"') && source.includes('doneNow ? "✓" : ""'), "task circles use aligned geometry without a doubled empty glyph"],
+  [source.includes('data-baby-task-label="true"') && source.includes('fontFamily: "inherit"') && source.includes('fontWeight: 800'), "task labels use consistent inherited typography"],
 ];
 
 const failures = checks.filter(([ok]) => !ok).map(([, label]) => label);
