@@ -1,5 +1,6 @@
 import { ToolPanel } from "./shared.jsx";
 import { PlushGoldPreview } from "./plush-gold-preview.jsx";
+import { RecommendationSettings } from "./recommendation-settings.jsx";
 
 const cardStyle = {
   background: "rgba(255,255,255,.86)",
@@ -122,6 +123,7 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
     ["personalize", "👤", "Personalize", "Name, comfort item, themes, Baby Mode, Dino Theme", "name profile theme baby dino appearance comfort"],
     ["notifications", "🔔", "Notifications & Reminders", "Reminder times, quiet hours, push notifications", "notifications reminders quiet push nurturing discreet"],
     ["experience", "✨", "Experience", "Focus, accessibility, motion, contrast, PlushInsights", "focus accessibility text motion contrast simple insights colorblind consistency"],
+    ["recommendations", "🧠", "Recommendations", "Suggestion boundaries and learned-pattern corrections", "recommendations learning profile boundaries forget correction"],
     ["devices", "⌚", "Devices", "Amazfit watch, instant sync, and home-screen widget", "watch amazfit widget bluetooth devices sync"],
     ["rest", "🌴", "Rest & Vacation", "Pause tasks and reminders without losing progress", "rest vacation illness pause"],
     ["privacy", "🔐", "Privacy & Data", "Backup, restore, and delete selected data", "privacy data backup restore export delete reflections check-ins"],
@@ -302,6 +304,14 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
     </>
   );
 
+  const recommendations = (
+    <>
+      <DetailHeader title="Recommendations" onBack={() => setSection("home")} />
+      <SectionTitle icon="🧠" title="How suggestions fit you" description="The learning stays in the background. Use these controls only when you want to correct or limit it." />
+      <RecommendationSettings user={user} />
+    </>
+  );
+
   const rest = (
     <>
       <DetailHeader title="Rest & Vacation" onBack={() => setSection("home")} />
@@ -423,7 +433,7 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
     </>
   );
 
-  const pages = { home, personalize, notifications, experience, devices, rest, privacy, support, gold, account };
+  const pages = { home, personalize, notifications, experience, recommendations, devices, rest, privacy, support, gold, account };
 
   return (
     <ToolPanel title="Settings" onClose={onClose}>

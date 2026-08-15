@@ -3,6 +3,7 @@ import { hasGoldFeature } from "../plush-gold.js";
 const LazyExistingProgressPanel = React.lazy(() => import("./progress-panel-existing.jsx").then((module) => ({ default: module.ProgressPanel })));
 const LazyGoldStoryView = React.lazy(() => import("./progress-gold-experience.jsx").then((module) => ({ default: module.GoldStoryExperience })));
 const LazyGoldSpacesView = React.lazy(() => import("./progress-gold-experience.jsx").then((module) => ({ default: module.GoldSpacesExperience })));
+const LazyGrowthMoments = React.lazy(() => import("./growth-moments.jsx").then((module) => ({ default: module.GrowthMoments })));
 
 function GrowthFallback() {
   return <div role="status" style={{ minHeight: 88, display: "grid", placeItems: "center", color: "#806B8D", fontSize: 11.5 }}>✨ Loading PlushGrowth…</div>;
@@ -15,5 +16,5 @@ export function ProgressPanel(props) {
   const goldInsights = hasGoldFeature("advanced_growth_insights");
   if (goldInsights && props.progressView === "story") return <React.Suspense fallback={<GrowthFallback />}><LazyGoldStoryView {...props} /></React.Suspense>;
   if (goldInsights && props.progressView === "areas") return <React.Suspense fallback={<GrowthFallback />}><LazyGoldSpacesView {...props} /></React.Suspense>;
-  return <React.Suspense fallback={<GrowthFallback />}><LazyExistingProgressPanel {...props} /></React.Suspense>;
+  return <><React.Suspense fallback={null}>{props.progressView === "overview" && <LazyGrowthMoments user={props.user} />}</React.Suspense><React.Suspense fallback={<GrowthFallback />}><LazyExistingProgressPanel {...props} /></React.Suspense></>;
 }
