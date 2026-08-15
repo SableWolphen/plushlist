@@ -4,6 +4,7 @@ import { useLowScreenMode } from "./low-screen-mode.jsx";
 import { CompletedTaskArea, useCompletedTaskFlow } from "./completed-task-flow.jsx";
 import { useSmartNextStep } from "./smart-next-step.jsx";
 import { HabitSuggestions } from "./habit-suggestions.jsx";
+import { PlushKnowsMe } from "./plush-knows-me.jsx";
 
 const LazyDailyCompanion = React.lazy(() => import("./daily-companion.jsx").then((module) => ({ default: module.DailyCompanion })));
 const LazyBabyToday = React.lazy(() => import("./baby-today.jsx").then((module) => ({ default: module.BabyToday })));
@@ -57,24 +58,13 @@ function LowScreenJustCompleted({ rows = [], viewDone = {}, lingerKeys = [], tog
 function BackgroundIntelligence(props) {
   const [ready, setReady] = React.useState(false);
   React.useEffect(() => {
-    if (!props.open) {
-      setReady(false);
-      return undefined;
-    }
+    if (!props.open) { setReady(false); return undefined; }
     let cancelled = false;
     let handle = null;
-    const show = () => {
-      if (cancelled) return;
-      try { window.PlushLifeRuntime?.metric("background-intelligence-start", performance.now()); } catch (_error) {}
-      setReady(true);
-    };
+    const show = () => { if (cancelled) return; try { window.PlushLifeRuntime?.metric("background-intelligence-start", performance.now()); } catch (_error) {} setReady(true); };
     if (typeof window.requestIdleCallback === "function") handle = window.requestIdleCallback(show, { timeout: 1800 });
     else handle = window.setTimeout(show, 900);
-    return () => {
-      cancelled = true;
-      if (typeof window.cancelIdleCallback === "function" && typeof handle === "number") window.cancelIdleCallback(handle);
-      else if (handle) window.clearTimeout(handle);
-    };
+    return () => { cancelled = true; if (typeof window.cancelIdleCallback === "function" && typeof handle === "number") window.cancelIdleCallback(handle); else if (handle) window.clearTimeout(handle); };
   }, [props.open]);
   if (!ready) return null;
   return <React.Suspense fallback={null}><LazyHabitBackgroundEngine {...props} /></React.Suspense>;
@@ -86,98 +76,38 @@ export function TodayPanel(props) {
   const [smartNextStepHidden, setSmartNextStepHidden] = React.useState(false);
   const [moreForTodayOpen, setMoreForTodayOpen] = React.useState(false);
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
-  const recentlyCompletedKeys = Array.from(new Set([
-    ...(props.recentlyCompletedKeys || []),
-    ...lingerKeys,
-  ]));
-  const smartNextStep = useSmartNextStep({
-    rows: props.rows || [],
-    viewDone: props.viewDone || {},
-    period: props.period,
-    dailyCheckIn: props.dailyCheckIn || {},
-    fallbackTask: props.nextStepTask,
-    recentlyCompletedKeys,
-  });
+  const recentlyCompletedKeys = Array.from(new Set([...(props.recentlyCompletedKeys || []), ...lingerKeys]));
+  const smartNextStep = useSmartNextStep({ rows: props.rows || [], viewDone: props.viewDone || {}, period: props.period, dailyCheckIn: props.dailyCheckIn || {}, fallbackTask: props.nextStepTask, recentlyCompletedKeys });
 
-  React.useEffect(() => {
-    setSmartNextStepHidden(false);
-    setMoreForTodayOpen(false);
-  }, [props.period?.date]);
-
-  const setNextStepDismissedToday = (hidden) => {
-    props.setNextStepDismissedToday?.(hidden);
-    setSmartNextStepHidden(Boolean(hidden));
-  };
-
-  const modeProps = {
-    ...props,
-    toggle: unifiedToggle,
-    recentlyCompletedKeys,
-    completedLingerKeys: lingerKeys,
-    nextStepTask: smartNextStepHidden ? null : (smartNextStep.task || props.nextStepTask),
-    nextStepReason: smartNextStepHidden ? "" : smartNextStep.reason,
-    setNextStepDismissedToday,
-  };
+  React.useEffect(() => { setSmartNextStepHidden(false); setMoreForTodayOpen(false); }, [props.period?.date]);
+  const setNextStepDismissedToday = (hidden) => { props.setNextStepDismissedToday?.(hidden); setSmartNextStepHidden(Boolean(hidden)); };
+  const modeProps = { ...props, toggle: unifiedToggle, recentlyCompletedKeys, completedLingerKeys: lingerKeys, nextStepTask: smartNextStepHidden ? null : (smartNextStep.task || props.nextStepTask), nextStepReason: smartNextStepHidden ? "" : smartNextStep.reason, setNextStepDismissedToday };
   const liveRegion = <div aria-live="polite" aria-atomic="true" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>{announcement}</div>;
   const backgroundEngine = <BackgroundIntelligence {...modeProps} />;
+  const plushMemory = <PlushKnowsMe {...modeProps} />;
 
   React.useEffect(() => {
     if (!props.open || readinessReportedRef.current) return;
     readinessReportedRef.current = true;
-    const report = () => {
-      try { window.PlushLifeRuntime?.metric("today-interactive", performance.now(), `${props.rows?.length || 0} rows`); } catch (_error) {}
-    };
-    if (typeof window.requestAnimationFrame === "function") window.requestAnimationFrame(report);
-    else report();
+    const report = () => { try { window.PlushLifeRuntime?.metric("today-interactive", performance.now(), `${props.rows?.length || 0} rows`); } catch (_error) {} };
+    if (typeof window.requestAnimationFrame === "function") window.requestAnimationFrame(report); else report();
   }, [props.open, props.rows?.length]);
 
   if (!props.open) return null;
-  if (props.babyMode) return <>{backgroundEngine}{liveRegion}<React.Suspense fallback={null}><LazyBabyToday {...modeProps} /></React.Suspense></>;
-  if (lowScreen) {
-    return (
-      <>
-        {backgroundEngine}
-        {liveRegion}
-        <React.Suspense fallback={null}><LazyLowScreenToday {...modeProps} /></React.Suspense>
-        <LowScreenJustCompleted rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} />
-        <CompletedTaskArea rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} compact />
-      </>
-    );
-  }
+  if (props.babyMode) return <>{backgroundEngine}{liveRegion}{plushMemory}<React.Suspense fallback={null}><LazyBabyToday {...modeProps} /></React.Suspense></>;
+  if (lowScreen) return <>{backgroundEngine}{liveRegion}{plushMemory}<React.Suspense fallback={null}><LazyLowScreenToday {...modeProps} /></React.Suspense><LowScreenJustCompleted rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} /><CompletedTaskArea rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} compact /></>;
 
-  return (
-    <>
-      {backgroundEngine}
-      {liveRegion}
-      <TodayPanelCore {...modeProps} />
-
-      <button
-        type="button"
-        onClick={() => setMoreForTodayOpen((open) => !open)}
-        aria-expanded={moreForTodayOpen}
-        style={{
-          width: "100%",
-          minHeight: 46,
-          margin: "10px 0 8px",
-          padding: "10px 12px",
-          borderRadius: 13,
-          border: "1px solid #E6D4F2",
-          background: "rgba(255,255,255,.78)",
-          color: "#765F84",
-          fontWeight: 900,
-          fontSize: 12,
-          cursor: "pointer",
-        }}
-      >
-        {moreForTodayOpen ? "Hide extra tools" : "More for today"} {moreForTodayOpen ? "⌃" : "⌄"}
-      </button>
-
-      <div style={{ display: moreForTodayOpen ? "block" : "none" }} aria-hidden={!moreForTodayOpen}>
-        {moreForTodayOpen && <HabitSuggestions rows={props.rows || []} openTaskManager={props.openTaskManager} />}
-        <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
-        <CompactAnchor {...modeProps} />
-        {moreForTodayOpen && <React.Suspense fallback={null}><LazyDailyCompanion {...modeProps} /></React.Suspense>}
-      </div>
-    </>
-  );
+  return <>
+    {backgroundEngine}
+    {liveRegion}
+    <TodayPanelCore {...modeProps} />
+    {plushMemory}
+    <button type="button" onClick={() => setMoreForTodayOpen((open) => !open)} aria-expanded={moreForTodayOpen} style={{ width: "100%", minHeight: 46, margin: "10px 0 8px", padding: "10px 12px", borderRadius: 13, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.78)", color: "#765F84", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{moreForTodayOpen ? "Hide extra tools" : "More for today"} {moreForTodayOpen ? "⌃" : "⌄"}</button>
+    <div style={{ display: moreForTodayOpen ? "block" : "none" }} aria-hidden={!moreForTodayOpen}>
+      {moreForTodayOpen && <HabitSuggestions rows={props.rows || []} openTaskManager={props.openTaskManager} />}
+      <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
+      <CompactAnchor {...modeProps} />
+      {moreForTodayOpen && <React.Suspense fallback={null}><LazyDailyCompanion {...modeProps} /></React.Suspense>}
+    </div>
+  </>;
 }
