@@ -63,8 +63,35 @@ function ProgressTabs({ progressView, setProgressView }) {
 function CompactGrowthOverview(props) {
   const [monthlyOpen, setMonthlyOpen] = React.useState(false);
   const [insightsOpen, setInsightsOpen] = React.useState(false);
+  const [selectedMetric, setSelectedMetric] = React.useState(null);
   const goldInsights = hasGoldFeature("advanced_growth_insights");
   const highlights = props.weeklyHighlights || {};
+  const metricDetails = {
+    essentials: {
+      icon: "💜",
+      title: "Essentials",
+      value: `${props.weeklyEssentialPct || 0}%`,
+      tone: "#8F46AF",
+      background: "#FCF6FF",
+      text: `You completed ${props.weeklyEssentialPct || 0}% of the things marked essential this week. These are the tasks PlushLife treats as most important, and bonus items never lower this score.`,
+    },
+    core: {
+      icon: "🗓️",
+      title: "Core + Scheduled",
+      value: `${props.weeklyOverallDone || 0}/${props.weeklyOverallPossible || 0}`,
+      tone: "#347FCF",
+      background: "#F4FAFF",
+      text: `You tucked in ${props.weeklyOverallDone || 0} of ${props.weeklyOverallPossible || 0} core and scheduled items this week. This gives you the fuller picture of what was planned, without mixing in bonus wins.`,
+    },
+    bonus: {
+      icon: "⭐",
+      title: "Bonus wins",
+      value: `${props.weeklyBonusDone || 0}`,
+      tone: "#C88A00",
+      background: "#FFFBF0",
+      text: `You collected ${props.weeklyBonusDone || 0} bonus ${Number(props.weeklyBonusDone) === 1 ? "win" : "wins"} this week. Bonus tasks are extra care: they are celebrated here, but skipping them never hurts your essentials score.`,
+    },
+  };
 
   return <div data-plushlife-growth-focus="true" style={{ display: "grid", gap: 9, width: "100%", margin: 0 }}>
     <section style={{ ...card, position: "relative", overflow: "hidden", padding: "13px 14px 12px" }}>
@@ -84,15 +111,33 @@ function CompactGrowthOverview(props) {
 
     <section aria-label="Weekly growth summary" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 6 }}>
       {[
-        ["💜", `${props.weeklyEssentialPct || 0}%`, "Essentials", "#FBF4FF", "#A24BC7", "rgba(232,210,244,.58)"],
-        ["🗓️", `${props.weeklyOverallDone || 0}/${props.weeklyOverallPossible || 0}`, "Core + Scheduled", "#F2FAFF", "#3E8EEB", "rgba(199,224,247,.65)"],
-        ["⭐", `${props.weeklyBonusDone || 0}`, "Bonus wins", "#FFF9EC", "#D89900", "rgba(246,222,169,.65)"],
-      ].map(([icon, value, label, background, accent, halo]) => <div key={label} style={{ minWidth: 0, minHeight: 88, padding: "8px 5px", borderRadius: 14, border: "1px solid #E5DCE8", background, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ width: 32, height: 32, display: "grid", placeItems: "center", borderRadius: "50%", background: halo, fontSize: 16 }}>{icon}</div>
-        <div style={{ marginTop: 5, fontSize: 18, lineHeight: 1, fontWeight: 900, color: accent }}>{value}</div>
-        <div style={{ marginTop: 5, fontSize: 9.4, lineHeight: 1.18, color: "#6F5D7B", fontWeight: 800 }}>{label}</div>
-      </div>)}
+        ["essentials", "💜", `${props.weeklyEssentialPct || 0}%`, "Essentials", "#FBF4FF", "#A24BC7", "rgba(232,210,244,.58)"],
+        ["core", "🗓️", `${props.weeklyOverallDone || 0}/${props.weeklyOverallPossible || 0}`, "Core + Scheduled", "#F2FAFF", "#3E8EEB", "rgba(199,224,247,.65)"],
+        ["bonus", "⭐", `${props.weeklyBonusDone || 0}`, "Bonus wins", "#FFF9EC", "#D89900", "rgba(246,222,169,.65)"],
+      ].map(([id, icon, value, label, background, accent, halo]) => {
+        const selected = selectedMetric === id;
+        return <button key={id} type="button" aria-expanded={selected} aria-controls="plushgrowth-metric-detail" onClick={() => setSelectedMetric((current) => current === id ? null : id)} style={{ minWidth: 0, minHeight: 88, padding: "8px 5px", borderRadius: 14, border: selected ? `2px solid ${accent}` : "1px solid #E5DCE8", background, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", font: "inherit", boxShadow: selected ? `0 0 0 2px ${halo}` : "none", position: "relative" }}>
+          <span style={{ position: "absolute", right: 6, top: 5, fontSize: 8.5, color: accent, opacity: .78 }}>{selected ? "▴" : "▾"}</span>
+          <span style={{ width: 32, height: 32, display: "grid", placeItems: "center", borderRadius: "50%", background: halo, fontSize: 16 }}>{icon}</span>
+          <span style={{ marginTop: 5, fontSize: 18, lineHeight: 1, fontWeight: 900, color: accent }}>{value}</span>
+          <span style={{ marginTop: 5, fontSize: 9.4, lineHeight: 1.18, color: "#6F5D7B", fontWeight: 800 }}>{label}</span>
+        </button>;
+      })}
     </section>
+
+    {selectedMetric && (() => {
+      const detail = metricDetails[selectedMetric];
+      return <section id="plushgrowth-metric-detail" aria-live="polite" style={{ ...card, padding: "10px 12px", background: detail.background, borderColor: `${detail.tone}44` }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 10.7, fontWeight: 900, color: detail.tone }}>{detail.icon} {detail.title} · {detail.value}</div>
+            <div style={{ marginTop: 4, fontSize: 10.8, lineHeight: 1.42, color: "#675873" }}>{detail.text}</div>
+          </div>
+          <button type="button" aria-label={`Close ${detail.title} details`} onClick={() => setSelectedMetric(null)} style={{ minWidth: 44, minHeight: 44, margin: "-7px -7px -7px 0", border: 0, background: "transparent", color: detail.tone, fontSize: 16, fontWeight: 900, cursor: "pointer" }}>×</button>
+        </div>
+        <div style={{ marginTop: 6, fontSize: 9.5, color: "#917E9C" }}>Tap another summary card to switch views.</div>
+      </section>;
+    })()}
 
     <section style={{ ...card, padding: "11px 12px 10px", background: "linear-gradient(145deg,#F2FFF6,#FBFFF8)", borderColor: "#C8E5D0", overflow: "hidden" }}>
       <div style={{ fontSize: 13.5, fontWeight: 900, color: "#20866E" }}>🌱 PlushInsights</div>
