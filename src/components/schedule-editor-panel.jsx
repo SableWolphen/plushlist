@@ -8,6 +8,10 @@ import { ToolPanel } from "./shared.jsx";
 export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setScheduleEditDayId, personalSchedules, scheduleDraft, updateScheduleEntry, removeScheduleEntry, addScheduleEntry, savePersonalSchedule, copyScheduleToAllDays, clearPersonalSchedule, copyToDayIds, toggleCopyToDay, copyScheduleToSelectedDays, scheduleMessage, scheduleExceptionDraft, setScheduleExceptionDraft, updateScheduleExceptionEntry, removeScheduleExceptionEntry, addScheduleExceptionEntry, saveScheduleException, scheduleExceptionMessage, scheduleExceptions, deleteScheduleException }) {
   if (!open) return null;
   const { DAYS } = window.PlushLifeContent;
+  const confirmCopyToAllDays = () => {
+    if (!window.confirm("Copy this schedule to all 7 days? This can overwrite schedules on other days.")) return;
+    copyScheduleToAllDays();
+  };
   return (
           <ToolPanel title="Change my schedule" onClose={onClose}>
           <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "linear-gradient(145deg,#F3FAFF,#FFF9FD)", border: "2px solid #B9DCF6", boxShadow: "0 8px 22px rgba(76,143,232,.09)" }}>
@@ -45,7 +49,6 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
             <button type="button" onClick={addScheduleEntry} style={{ marginTop: 10, padding: "8px 12px", borderRadius: 10, border: "1px dashed #4C8FE888", background: "white", color: "#4C8FE8", fontWeight: 800, cursor: "pointer" }}>＋ Add an item</button>
             <div style={{ display: "flex", gap: 7, marginTop: 12, flexWrap: "wrap" }}>
               <button onClick={savePersonalSchedule} style={{ padding: "8px 12px", borderRadius: 10, border: 0, background: "#4C8FE8", color: "white", fontWeight: 900, cursor: "pointer" }}>Save this day ✨</button>
-              <button onClick={copyScheduleToAllDays} style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid #4C8FE855", background: "#EAF4FF", color: "#2D6BB5", fontWeight: 800, cursor: "pointer" }}>📋 Same every day? Copy to all 7</button>
               {personalSchedules.some((entry) => entry.day_id === scheduleEditingDayId) && <button onClick={clearPersonalSchedule} style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid #F0B8C4", background: "#FFF7F9", color: "#C45D74", fontWeight: 800, cursor: "pointer" }}>Erase this day's schedule</button>}
             </div>
             <div style={{ marginTop: 12, paddingTop: 11, borderTop: "1px solid #E4E9F5" }}>
@@ -64,6 +67,11 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
               <button type="button" onClick={copyScheduleToSelectedDays} disabled={copyToDayIds.length === 0} style={{ marginTop: 9, padding: "8px 12px", borderRadius: 10, border: "1px solid #4C8FE855", background: copyToDayIds.length === 0 ? "#F4F7FC" : "#EAF4FF", color: copyToDayIds.length === 0 ? "#A7B4CC" : "#2D6BB5", fontWeight: 800, cursor: copyToDayIds.length === 0 ? "not-allowed" : "pointer" }}>
                 📋 Copy to {copyToDayIds.length === 0 ? "selected days" : copyToDayIds.map((id) => DAYS.find((d) => d.id === id)?.label).join(", ")}
               </button>
+              <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #EEF1F7" }}>
+                <button type="button" onClick={confirmCopyToAllDays} style={{ padding: "6px 10px", borderRadius: 9, border: "1px solid #B9CCE8", background: "transparent", color: "#4F7FBE", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>
+                  📋 Copy this day to all 7 days
+                </button>
+              </div>
             </div>
             {scheduleMessage && <div style={{ marginTop: 8, fontSize: 12, color: "#8C6B9E" }}>{scheduleMessage}</div>}
           </div>
