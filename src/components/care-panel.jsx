@@ -1,5 +1,7 @@
 import { MamasCorner } from "./baby-mode.jsx";
 import { CarePanel as ExistingCarePanel } from "./care-panel-existing.jsx";
+import { EXTRA_PLUSH_PATHS } from "../plush-paths-extra.js";
+import { hasGoldFeature } from "../plush-gold.js";
 
 const shellCard = {
   borderRadius: 14,
@@ -24,7 +26,16 @@ function SituationButton({ option, selected, onClick }) {
 
 export function CarePanel(props) {
   if (!props.open) return null;
-  const { COMFORT_TOOLS } = window.PlushLifeContent;
+  const { COMFORT_TOOLS, PLUSH_PATHS } = window.PlushLifeContent;
+  const goldPathsUnlocked = hasGoldFeature("guided_gold_paths");
+  if (!PLUSH_PATHS.__plushlifeExpanded) {
+    const extras = EXTRA_PLUSH_PATHS
+      .filter((path) => path.tier !== "gold" || goldPathsUnlocked)
+      .map((path) => path.tier === "gold" ? { ...path, title: `✨ Gold · ${path.title}` } : path);
+    const known = new Set(PLUSH_PATHS.map((path) => path.id));
+    PLUSH_PATHS.push(...extras.filter((path) => !known.has(path.id)));
+    Object.defineProperty(PLUSH_PATHS, "__plushlifeExpanded", { value: true, enumerable: false });
+  }
   const [selectedSituationId, setSelectedSituationId] = React.useState(null);
   const options = Array.isArray(props.HELP_ME_NOW_OPTIONS) ? props.HELP_ME_NOW_OPTIONS : [];
   const visibleOptions = options.slice(0, props.careSituationsExpanded ? options.length : 4);
