@@ -7,30 +7,39 @@ function write(userId, part, value) { try { localStorage.setItem(key(userId, par
 function day() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
 
 export function recordCompletionSequence(userId, rows = [], viewDone = {}) {
-  const previous = new Set(read(userId, "done-snapshot", []));
+  const currentDay = day();
   const current = rows.filter((row) => !row?.isBonus && viewDone?.[row.key]).map((row) => row.key);
-  const newlyDone = current.filter((taskKey) => !previous.has(taskKey));
+  const snapshot = read(userId, "done-snapshot", null);
   const state = read(userId, "sequence-state", { lastKey: null, lastAt: 0, lastDay: "", pairs: {} });
+  if (!snapshot || snapshot.date !== currentDay) {
+    write(userId, "done-snapshot", { date: currentDay, keys: current.slice(-120) });
+    state.lastKey = null;
+    state.lastAt = 0;
+    state.lastDay = currentDay;
+    write(userId, "sequence-state", state);
+    return state;
+  }
+  const previous = new Set(Array.isArray(snapshot.keys) ? snapshot.keys : []);
+  const newlyDone = current.filter((taskKey) => !previous.has(taskKey));
   newlyDone.forEach((taskKey) => {
     const now = Date.now();
-    if (state.lastKey && state.lastKey !== taskKey && state.lastDay === day() && now - Number(state.lastAt || 0) <= 3 * 60 * 60 * 1000) {
+    if (state.lastKey && state.lastKey !== taskKey && state.lastDay === currentDay && now - Number(state.lastAt || 0) <= 3 * 60 * 60 * 1000) {
       const pairKey = `${state.lastKey}→${taskKey}`;
       state.pairs[pairKey] = Math.min(20, Number(state.pairs[pairKey] || 0) + 1);
     }
     state.lastKey = taskKey;
     state.lastAt = now;
-    state.lastDay = day();
+    state.lastDay = currentDay;
   });
-  const compactPairs = Object.fromEntries(Object.entries(state.pairs || {}).sort((a,b)=>b[1]-a[1]).slice(0,80));
-  state.pairs = compactPairs;
+  state.pairs = Object.fromEntries(Object.entries(state.pairs || {}).sort((a,b)=>b[1]-a[1]).slice(0,80));
   write(userId, "sequence-state", state);
-  write(userId, "done-snapshot", current.slice(-120));
+  write(userId, "done-snapshot", { date: currentDay, keys: current.slice(-120) });
   return state;
 }
 
 export function sequenceSuggestion(userId, rows = [], viewDone = {}) {
   const state = read(userId, "sequence-state", { lastKey: null, pairs: {} });
-  if (!state.lastKey || !viewDone?.[state.lastKey]) return null;
+  if (!state.lastKey || state.lastDay !== day() || !viewDone?.[state.lastKey]) return null;
   const candidates = Object.entries(state.pairs || {}).map(([pair, count]) => {
     const [fromKey, toKey] = pair.split("→");
     return { fromKey, toKey, count: Number(count) || 0 };
@@ -92,7 +101,7 @@ export function rescueRecipe(userId, context = {}) {
   const scored = RECIPES.map((recipe) => {
     const fit = recommendationFit(userId, "rescue_recipe", recipe.id, context);
     let heuristic = 0;
-    if (recipe.id === "just-one" && (["empty"].includes(context.energy) || context.capacity === "very_low")) heuristic += 1.1;
+    if (recipe.id === "just-one" && (context.energy === "empty" || context.capacity === "very_low")) heuristic += 1.1;
     if (recipe.id === "tiny-essentials" && (context.load === "high" || context.energy === "low" || context.capacity === "low")) heuristic += 1;
     if (recipe.id === "pause-pressure" && ["overwhelmed","stressed","anxious"].includes(context.mood)) heuristic += .9;
     if (recipe.id === "pause-pressure" && context.load === "light") heuristic += .2;
