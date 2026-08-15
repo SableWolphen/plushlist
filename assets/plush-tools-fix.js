@@ -6,6 +6,20 @@
   const clean = (value) => String(value || "").replace(/\s+/g, " ").trim().toLowerCase();
   const visible = (node) => !!(node && node.getClientRects && node.getClientRects().length);
 
+  function removeGentleLauncher() {
+    const launcher = document.getElementById("plushlife-gentle-launcher");
+    if (!launcher) return;
+    launcher.setAttribute("aria-hidden", "true");
+    launcher.tabIndex = -1;
+    launcher.remove();
+  }
+
+  // PlushRescue stays available through the app's care/tools surfaces; the
+  // floating launcher duplicated that entry point and obscured page content.
+  removeGentleLauncher();
+  const launcherObserver = new MutationObserver(removeGentleLauncher);
+  launcherObserver.observe(document.documentElement, { childList: true, subtree: true });
+
   function closeToolsPanel(panel) {
     if (!panel) return;
     const close = Array.from(panel.querySelectorAll("button,[role='button']")).find((node) => {
