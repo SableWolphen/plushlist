@@ -6,6 +6,7 @@ function read(relativePath) {
 }
 
 const memory = read("src/plush-memory.js");
+const profile = read("src/plush-profile.js");
 const today = read("src/components/plush-knows-me.jsx");
 const care = read("src/components/care-panel.jsx");
 const phoneTime = read("scripts/test-phone-time-notifications.js");
@@ -19,7 +20,16 @@ const checks = [
   [today.includes('Future Me note') && memory.includes('saveFutureNote'), "Future Me notes are implemented"],
   [today.includes('Hi. Your stuff is still here.') && memory.includes('registerVisit'), "guilt-free return after inactivity is implemented"],
   [today.includes('PlushMoments') && memory.includes('recordMoment'), "monthly PlushMoments are implemented"],
+  [today.includes('PlushProfile · What works for me') && profile.includes('plushProfileSummary'), "living PlushProfile is implemented"],
+  [profile.includes('profileContext') && profile.includes('sameContext'), "recommendation learning includes mood/energy/capacity/load/time context"],
+  [profile.includes('Strong fit') && profile.includes('Growing clue') && profile.includes('Still learning'), "profile uses confidence tiers instead of one-shot certainty"],
+  [profile.includes('beginRecommendation') && profile.includes('syncSessionOutcomes'), "recommendations can be linked to later real outcomes"],
+  [today.includes('Did this forecast fit the day?') && today.includes('Did making the day smaller help?'), "forecast and Rescue have explicit outcome loops"],
+  [today.includes('That changed / forget this') && profile.includes('forgetPattern'), "users can correct or forget learned patterns"],
+  [today.includes('My gentle boundaries') && profile.includes('setBoundary'), "users can set personal recommendation boundaries"],
+  [today.includes('This week PlushLife updated') && profile.includes('weeklyMemoryUpdate'), "Gold receives a weekly memory update"],
   [care.includes('GOLD · PLUSHMEMORY') && care.includes('Still learning what works for you'), "Gold memory has a no-fabrication fallback"],
+  [care.includes('recommendationFit') && care.includes('situations similar to right now'), "PlushCare distinguishes contextual fit from global history"],
   [care.includes('ADAPTIVE PLUSHPATH') && care.includes('How is the current step fitting?'), "adaptive PlushPaths collect explicit fit feedback"],
   [care.includes('savePathFit("too_much")') && memory.includes('pathAdaptation'), "path feedback can soften later guidance"],
   [care.includes('🌙 TONIGHT') && memory.includes('sleepMemory'), "PlushSleep personalized tonight suggestion is implemented"],
