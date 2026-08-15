@@ -29,6 +29,7 @@ const goldAccess = read("src/plush-gold.js");
 const goldPreview = read("src/components/plush-gold-preview.jsx");
 const landing = read("src/components/landing.jsx");
 const loginPage = read("login.html");
+const calmHome = read("src/components/calm-home-controls.jsx");
 
 const checks = [
   [deviceBackup.includes("indexedDB") && deviceBackup.includes("DEVICE_BACKUP_TABLES") && deviceBackup.includes("cloudDataDeleted: false"), "on-device backup is additive and never deletes cloud data"],
@@ -54,6 +55,12 @@ const checks = [
   [baby.includes("CompletedTaskArea") && baby.includes("recentlyCompletedKeys"), "Baby Mode uses the same completion lifecycle"],
   [baby.includes("✓ {completedCount} tucked in today") && baby.includes("waiting.slice(0, 3)"), "Baby Mode keeps completed work collapsed and limits the first job list"],
   [today.includes("FIRST WEEK · DAY") && today.includes("activityDaysTotal >= 7"), "new users get a focused seven-day introduction"],
+  [today.indexOf("<FirstDaysGuide") < today.indexOf("<TodayPanelCore"), "first-week guidance is promoted above the main Today flow"],
+  [today.includes("homeSettings.insights") && today.includes("homeSettings.extras"), "people can hide smart insights and extra Today tools without deleting data"],
+  [calmHome.includes("I'm struggling") && calmHome.includes("Help me restart") && calmHome.includes("setCalmQuickOpen"), "Today has one visible struggle and restart entry point"],
+  [calmHome.includes("make today tiny") && calmHome.includes("open care") && calmHome.includes("edit habits"), "calm commands translate plain-language needs into actions"],
+  [calmHome.includes('window.addEventListener("online"') && calmHome.includes('window.addEventListener("offline"') && calmHome.includes("sync when you reconnect"), "offline status is explicit and reconnect behavior is reassuring"],
+  [calmHome.includes("COMPANION TONE") && calmHome.includes("BACKGROUND FEEL") && calmHome.includes("plushlife:calm-home:v1"), "companion tone and background feel are customizable and persist locally"],
   [today.includes("Choose your Focus Habit") && today.includes("plushlife:open-focus-habit-picker"), "first-week onboarding explicitly helps users choose a Focus Habit"],
   [companionCore.includes("const inFirstWeek = firstWeekElapsed <= 7") && !companionCore.includes("firstWeekDay <= 7 &&"), "Companion first-week guide actually ends after day seven"],
   [today.includes("<CompactAnchor {...modeProps} />"), "Today uses the compact focus-habit card instead of the full habit toolbox"],

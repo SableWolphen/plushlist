@@ -11,6 +11,7 @@ const LazyBabyToday = React.lazy(() => import("./baby-today.jsx").then((module) 
 const LazyLowScreenToday = React.lazy(() => import("./habit-retention.jsx").then((module) => ({ default: module.LowScreenToday })));
 const LazyHabitBackgroundEngine = React.lazy(() => import("./habit-background-engine.jsx").then((module) => ({ default: module.HabitBackgroundEngine })));
 const LazySmartAdaptationPanel = React.lazy(() => import("./plush-knows-me-smart.jsx").then((module) => ({ default: module.SmartAdaptationPanel })));
+const LazyCalmHomeControls = React.lazy(() => import("./calm-home-controls.jsx").then((module) => ({ default: module.CalmHomeControls })));
 
 function FirstDaysGuide({ activityDaysTotal = 0, rows = [], viewDone = {}, goToDashboard, openTaskManager }) {
   if (activityDaysTotal >= 7) return null;
@@ -76,6 +77,7 @@ export function TodayPanel(props) {
   const readinessReportedRef = React.useRef(false);
   const [smartNextStepHidden, setSmartNextStepHidden] = React.useState(false);
   const [moreForTodayOpen, setMoreForTodayOpen] = React.useState(false);
+  const [homeSettings, setHomeSettings] = React.useState({ guide: true, insights: true, extras: true });
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
   const recentlyCompletedKeys = Array.from(new Set([...(props.recentlyCompletedKeys || []), ...lingerKeys]));
   const smartNextStep = useSmartNextStep({ rows: props.rows || [], viewDone: props.viewDone || {}, period: props.period, dailyCheckIn: props.dailyCheckIn || {}, fallbackTask: props.nextStepTask, recentlyCompletedKeys });
@@ -85,7 +87,7 @@ export function TodayPanel(props) {
   const modeProps = { ...props, toggle: unifiedToggle, recentlyCompletedKeys, completedLingerKeys: lingerKeys, nextStepTask: smartNextStepHidden ? null : (smartNextStep.task || props.nextStepTask), nextStepReason: smartNextStepHidden ? "" : smartNextStep.reason, setNextStepDismissedToday };
   const liveRegion = <div aria-live="polite" aria-atomic="true" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>{announcement}</div>;
   const backgroundEngine = <BackgroundIntelligence {...modeProps} />;
-  const plushMemory = <><PlushKnowsMe {...modeProps} /><React.Suspense fallback={null}><LazySmartAdaptationPanel {...modeProps} /></React.Suspense></>;
+  const plushMemory = homeSettings.insights ? <><PlushKnowsMe {...modeProps} /><React.Suspense fallback={null}><LazySmartAdaptationPanel {...modeProps} /></React.Suspense></> : null;
 
   React.useEffect(() => {
     if (!props.open || readinessReportedRef.current) return;
@@ -101,12 +103,13 @@ export function TodayPanel(props) {
   return <>
     {backgroundEngine}
     {liveRegion}
+    <React.Suspense fallback={null}><LazyCalmHomeControls {...modeProps} onSettingsChange={setHomeSettings} /></React.Suspense>
+    {homeSettings.guide && <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />}
     <TodayPanelCore {...modeProps} />
     {plushMemory}
-    <button type="button" onClick={() => setMoreForTodayOpen((open) => !open)} aria-expanded={moreForTodayOpen} style={{ width: "100%", minHeight: 46, margin: "10px 0 8px", padding: "10px 12px", borderRadius: 13, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.78)", color: "#765F84", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{moreForTodayOpen ? "Hide extra tools" : "More for today"} {moreForTodayOpen ? "⌃" : "⌄"}</button>
-    <div style={{ display: moreForTodayOpen ? "block" : "none" }} aria-hidden={!moreForTodayOpen}>
+    {homeSettings.extras && <button type="button" onClick={() => setMoreForTodayOpen((open) => !open)} aria-expanded={moreForTodayOpen} style={{ width: "100%", minHeight: 46, margin: "10px 0 8px", padding: "10px 12px", borderRadius: 13, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.78)", color: "#765F84", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{moreForTodayOpen ? "Hide extra tools" : "More for today"} {moreForTodayOpen ? "⌃" : "⌄"}</button>}
+    <div style={{ display: homeSettings.extras && moreForTodayOpen ? "block" : "none" }} aria-hidden={!homeSettings.extras || !moreForTodayOpen}>
       {moreForTodayOpen && <HabitSuggestions rows={props.rows || []} openTaskManager={props.openTaskManager} />}
-      <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />
       <CompactAnchor {...modeProps} />
       {moreForTodayOpen && <React.Suspense fallback={null}><LazyDailyCompanion {...modeProps} /></React.Suspense>}
     </div>
