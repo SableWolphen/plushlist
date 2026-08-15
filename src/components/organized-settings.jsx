@@ -108,6 +108,9 @@ function formatSyncStatus(online, syncStatus, lastSyncedAt) {
 export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairingCode, connectWatch, watchPairingBusy, watchPairingMessage, localWatchSyncBusy, startLocalWatchSync, localWatchSyncMessage, dailyCheckIn, pct, rows, viewDone, weeklyOverallPct, widgetSyncMsg, setWidgetSyncMsg, displayNameDraft, setDisplayNameDraft, saveDisplayName, comfortItemDraft, setComfortItemDraft, saveComfortItem, preferences, appearanceTheme, selectAppearanceTheme, dinoTheme, updatePreference, enableNotifications, smartReminderSuggestion, restDatesSet, toggleRestToday, period, restRangeDraft, setRestRangeDraft, saveRestRange, restDates, feedbackText, setFeedbackText, submitFeedback, feedbackMessage, exportMyData, restoreFileInputRef, restoreFromBackup, deleteAllCheckIns, deleteAllReflections, user, online, syncStatus, lastSyncedAt, syncNow, emailChangeDraft, setEmailChangeDraft, requestEmailChange, signingOut, handleSignOut, signOutOtherDevices, deleteMyAccount, deviceBackupStatus, refreshDeviceBackup, deviceBackupBusy, verifyDeviceBackupNow, deviceBackupVerifyBusy, settingsMessage }) {
   const [section, setSection] = React.useState("home");
   const [search, setSearch] = React.useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = React.useState("");
+  const [deletingAccount, setDeletingAccount] = React.useState(false);
   const { APPEARANCE_THEMES } = window.PlushLifeContent;
 
   React.useEffect(() => {
@@ -427,7 +430,7 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
       <Card style={{ borderColor: "#EACFD6" }}>
         <div style={{ fontSize: 12, fontWeight: 900, color: "#A65F70" }}>DANGER ZONE</div>
         <div style={{ marginTop: 4, fontSize: 11.5, color: "#8A7895" }}>Deleting your account requires confirmation and cannot be undone.</div>
-        <button type="button" onClick={deleteMyAccount} style={{ ...secondaryButton, marginTop: 9, color: "#A65F70", borderColor: "#E6C2CB" }}>Delete account</button>
+        <button type="button" onClick={() => { setDeleteConfirmation(""); setDeleteDialogOpen(true); }} style={{ ...secondaryButton, marginTop: 9, color: "#A65F70", borderColor: "#E6C2CB" }}>Delete account</button>
       </Card>
       {settingsMessage && <div role="status" style={{ marginTop: 10, color: "#347865", fontSize: 12, fontWeight: 800 }}>{settingsMessage}</div>}
     </>
@@ -438,6 +441,21 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
   return (
     <ToolPanel title="Settings" onClose={onClose}>
       <div style={{ maxWidth: 620, margin: "0 auto" }}>{pages[section] || home}</div>
+      {deleteDialogOpen && (
+        <div role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !deletingAccount) setDeleteDialogOpen(false); }} style={{ position: "fixed", inset: 0, zIndex: 10040, display: "grid", placeItems: "center", padding: 18, background: "rgba(47,32,53,.48)" }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-account-title" aria-describedby="delete-account-description" style={{ width: "min(440px,100%)", padding: 20, borderRadius: 20, background: "white", border: "1px solid #E7C8D1", boxShadow: "0 24px 70px rgba(47,32,53,.24)" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+              <div><div id="delete-account-title" style={{ fontSize: 18, fontWeight: 900, color: "#8E4057" }}>Permanently delete this account?</div><div id="delete-account-description" style={{ marginTop: 7, fontSize: 12, lineHeight: 1.55, color: "#725F68" }}>This permanently deletes your PlushLife account, tasks, progress, schedules, and private reflections. This cannot be undone.</div></div>
+              <button type="button" aria-label="Close account deletion confirmation" disabled={deletingAccount} onClick={() => setDeleteDialogOpen(false)} style={{ minWidth: 44, minHeight: 44, border: 0, borderRadius: 12, background: "#F8F1F3", color: "#8E4057", fontSize: 20, cursor: deletingAccount ? "default" : "pointer" }}>×</button>
+            </div>
+            <label htmlFor="delete-account-confirmation" style={{ display: "grid", gap: 6, marginTop: 16, fontSize: 12, fontWeight: 900, color: "#66515A" }}>Type DELETE MY ACCOUNT to continue<input id="delete-account-confirmation" autoFocus autoComplete="off" value={deleteConfirmation} onChange={(event) => setDeleteConfirmation(event.target.value)} disabled={deletingAccount} style={{ ...inputStyle, borderColor: "#D8AEB9" }} /></label>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
+              <button type="button" disabled={deletingAccount} onClick={() => setDeleteDialogOpen(false)} style={secondaryButton}>Cancel</button>
+              <button type="button" disabled={deleteConfirmation !== "DELETE MY ACCOUNT" || deletingAccount} onClick={async () => { setDeletingAccount(true); await deleteMyAccount(); setDeletingAccount(false); }} style={{ ...primaryButton, background: "#A65F70", opacity: deleteConfirmation === "DELETE MY ACCOUNT" && !deletingAccount ? 1 : .5, cursor: deleteConfirmation === "DELETE MY ACCOUNT" && !deletingAccount ? "pointer" : "not-allowed" }}>{deletingAccount ? "Deleting…" : "Delete my account"}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </ToolPanel>
   );
 }

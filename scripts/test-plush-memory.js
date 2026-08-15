@@ -11,9 +11,12 @@ const adaptation = read("src/plush-smart-adaptation.js");
 const today = read("src/components/plush-knows-me.jsx");
 const smartToday = read("src/components/plush-knows-me-smart.jsx");
 const todayRouter = read("src/components/today-panel.jsx");
+const companion = read("src/components/daily-companion-core.jsx");
 const care = read("src/components/care-panel.jsx");
 const growth = read("src/components/growth-moments.jsx");
 const settings = read("src/components/recommendation-settings.jsx");
+const organizedSettings = read("src/components/organized-settings.jsx");
+const appSource = read("src/app-source.jsx");
 const phoneTime = read("scripts/test-phone-time-notifications.js");
 
 const checks = [
@@ -25,6 +28,7 @@ const checks = [
   [today.includes('Future Me note') && memory.includes('saveFutureNote'), "Future Me notes are implemented"],
   [today.includes('Hi. Your stuff is still here.') && memory.includes('registerVisit'), "guilt-free return after inactivity is implemented"],
   [growth.includes('PlushMoments') && growth.includes('monthlyMoments') && memory.includes('recordMoment'), "monthly PlushMoments live in Growth"],
+  [!companion.includes('sectionButton("PlushMoments"') && !companion.includes('openSection === "moments"'), "PlushMoments are absent from Today companion tools"],
   [settings.includes('plushProfileSummary') && settings.includes('CORRECT LEARNED SUGGESTIONS'), "living profile corrections live in Settings"],
   [profile.includes('profileContext') && profile.includes('sameContext'), "recommendation learning includes mood/energy/capacity/load/time context"],
   [profile.includes('Strong fit') && profile.includes('Growing clue') && profile.includes('Still learning'), "profile uses confidence tiers instead of one-shot certainty"],
@@ -32,6 +36,7 @@ const checks = [
   [today.includes('Did this forecast fit the day?') && today.includes('Did making the day smaller help?'), "forecast and Rescue have explicit outcome loops"],
   [settings.includes('That changed · forget this') && profile.includes('forgetPattern'), "users can correct or forget learned patterns in Settings"],
   [settings.includes('RECOMMENDATION BOUNDARIES') && profile.includes('setBoundary'), "users can set personal recommendation boundaries in Settings"],
+  [organizedSettings.includes('aria-labelledby="delete-account-title"') && organizedSettings.includes('Type DELETE MY ACCOUNT to continue') && !appSource.includes('window.prompt('), "account deletion uses an accessible typed-confirmation dialog"],
   [adaptation.includes('recordCompletionSequence') && adaptation.includes('sequenceSuggestion'), "task sequence memory learns only from real completion order"],
   [adaptation.includes('snapshot.date !== currentDay') && adaptation.includes('item.count >= 2') && smartToday.includes('sequence.count >= 2'), "sequence learning ignores initial-load completions and requires repeated evidence"],
   [adaptation.includes('recordRecoverySnapshot') && adaptation.includes('recoveryFingerprint') && adaptation.includes('slice(-45)'), "rough-day recovery fingerprints are bounded and evidence based"],

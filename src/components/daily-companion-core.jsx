@@ -1,4 +1,4 @@
-const { useEffect, useMemo, useState } = React;
+const { useEffect, useState } = React;
 
 const FIRST_SEEN_KEY = "plushlife:companion:first-seen:v1";
 const HISTORY_KEY = "plushlife:companion:history:v1";
@@ -75,7 +75,6 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
     safeWrite(HISTORY_KEY, next);
   }, [open, dateKey, pct, rows, viewDone, dailyCheckIn.day_type, dailyCheckIn.mood, dailyCheckIn.energy]);
 
-  const history = useMemo(() => safeRead(HISTORY_KEY, []), [dateKey, pct, rows, viewDone, dailyCheckIn.day_type]);
   const firstWeekElapsed = dateDiffDays(firstSeen, dateKey) + 1;
   const firstWeekDay = Math.min(7, firstWeekElapsed);
   const inFirstWeek = firstWeekElapsed <= 7;
@@ -84,14 +83,6 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
   const lowCapacity = ["very_low", "low"].includes(dailyCheckIn.capacity) || ["empty", "low"].includes(dailyCheckIn.energy);
   const canSuggestGentler = (dailyCheckIn.day_type || "full") === "full" && (heavyMood || lowCapacity || incomplete.length >= 8);
   const suggestedDayType = ["very_low"].includes(dailyCheckIn.capacity) || ["empty"].includes(dailyCheckIn.energy) || ["overwhelmed", "numb", "sick"].includes(dailyCheckIn.mood) ? "tiny" : "soft";
-
-  const recent = history.filter((item) => item?.date && dateDiffDays(item.date, dateKey) <= 30);
-  const moments = {
-    checkInDays: recent.length,
-    strongDays: recent.filter((item) => Number(item.pct) >= 80).length,
-    gentleDays: recent.filter((item) => ["soft", "tiny", "recovery"].includes(item.dayType)).length,
-    restDays: recent.filter((item) => item.dayType === "rest").length,
-  };
 
   if (!open) return null;
 
@@ -125,7 +116,7 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
         <div>
           <div style={{ fontSize: 10.5, letterSpacing: ".14em", fontWeight: 900, color: "#A65DC1" }}>✨ PLUSHCOMPANION</div>
           <div style={{ marginTop: 3, fontSize: 16, fontWeight: 900, color: "#4F405C" }}>A few helpful things, only when you want them</div>
-          <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#806B8D" }}>Gentle Day, quick actions, evening reset, progress moments, routine shortcuts, and support all live here instead of becoming more tabs.</div>
+          <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#806B8D" }}>Gentle Day, quick actions, evening reset, routine shortcuts, and support all live here instead of becoming more tabs.</div>
         </div>
       </div>
 
@@ -202,16 +193,6 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
             <label style={{ display: "grid", gap: 4, marginTop: 8, fontSize: 10.5, fontWeight: 900, color: "#76558A" }}>CARRY INTO TOMORROW · OPTIONAL<input value={windDown.carry} onChange={(event) => setWindDown((current) => ({ ...current, carry: event.target.value }))} maxLength={240} placeholder="One thing to remember tomorrow" style={{ padding: 9, borderRadius: 9, border: "1px solid #DCC9E8" }} /></label>
             <button type="button" onClick={() => { safeWrite(`plushlife:wind-down:${dateKey}`, windDown); setSavedMessage("Evening reset saved privately on this device. 🌙"); window.setTimeout(() => setSavedMessage(""), 2500); }} style={{ marginTop: 9, padding: "7px 10px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save reset</button>
             {savedMessage && <div role="status" style={{ marginTop: 6, fontSize: 11, color: "#76558A" }}>{savedMessage}</div>}
-          </div>
-        )}
-
-        {sectionButton("PlushMoments", "📮", openSection === "moments", () => toggleSection("moments"))}
-        {openSection === "moments" && (
-          <div style={{ padding: "11px 12px", borderRadius: 12, background: "#FFFFFFD9", border: "1px solid #E6D4F2" }}>
-            <div style={{ fontSize: 11.5, lineHeight: 1.5, color: "#806B8D" }}>Progress is more than streaks. These are small patterns from the last 30 days stored on this device.</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 7, marginTop: 9 }}>
-              {[["🌸", moments.checkInDays, "days seen"], ["✨", moments.strongDays, "80%+ days"], ["🌱", moments.gentleDays, "gentle days"], ["🌴", moments.restDays, "rest days"]].map(([icon, value, label]) => <div key={label} style={{ padding: "9px 8px", borderRadius: 10, background: "#FAF7FC", textAlign: "center" }}><div style={{ fontSize: 18 }}>{icon}</div><div style={{ marginTop: 2, fontSize: 17, fontWeight: 900, color: "#5B4B6B" }}>{value}</div><div style={{ fontSize: 10.5, color: "#8C6B9E" }}>{label}</div></div>)}
-            </div>
           </div>
         )}
 

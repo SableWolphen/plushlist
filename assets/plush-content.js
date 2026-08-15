@@ -55,6 +55,7 @@
 
   const APPEARANCE_THEMES = [
     { id: "soft", label: "Soft Plush Theme", icon: "💜", background: "#FFF6FB", glowA: "#FFD9EC", glowB: "#C9ECFF", glowC: "#FFF3D6", glowD: "#D6F5E3", wash: "#FFF9FCDD", accent: "#C77DD6" },
+    { id: "soft-light", label: "Soft Light", icon: "☁️", background: "#FFF8FB", glowA: "#F4DDEA70", glowB: "#E4E6F570", glowC: "#F5EAD970", glowD: "#DDEFE970", wash: "#FFFDFEA8", accent: "#B999C7" },
     { id: "twilight", label: "Twilight Theme", icon: "🌙", background: "#DDD4FF", glowA: "#9784E6", glowB: "#7FADE8", glowC: "#D99BE8", glowD: "#AAB7F2", wash: "#EEE9FFB8", accent: "#6950B6" },
     { id: "meadow", label: "Meadow Theme", icon: "🌿", background: "#D9F2DE", glowA: "#77C98B", glowB: "#75C7C1", glowC: "#E8C95D", glowD: "#9BD17D", wash: "#ECFAEEB8", accent: "#328660" },
   ];

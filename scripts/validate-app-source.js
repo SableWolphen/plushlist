@@ -75,7 +75,7 @@ const requiredRegressionMarkers = [
   'const APPEARANCE_THEMES = [',
   'Rainy-Day Coat',
   'AMBIENT THEME',
-  'appearanceTheme !== "soft"',
+  '!["soft", "soft-light"].includes(appearanceTheme)',
   'Ambient themes never recolor content.',
   'A little hello from Mommy 🍼',
   'const MOTHERLY_NICKNAMES = [',
