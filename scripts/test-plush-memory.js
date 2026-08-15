@@ -39,7 +39,7 @@ const checks = [
   [smartToday.includes('Use {recipe.label}') && smartToday.includes('Did this recipe fit today?'), "Rescue recipe remains opt-in and has an outcome loop"],
   [smartToday.includes('doneSignature') && !smartToday.includes('[userId, props.viewDone,'), "smart adaptation effects are stable instead of object-identity driven"],
   [smartToday.includes('minHeight: 44'), "smart adaptation actions retain 44px tap targets"],
-  [todayRouter.includes('from "./plush-knows-me-smart.jsx"'), "Today routes through the smarter adaptation wrapper"],
+  [todayRouter.includes('import("./plush-knows-me-smart.jsx")') && smartToday.includes('export function SmartAdaptationPanel'), "Today lazy-loads smarter adaptation outside the critical entry"],
   [care.includes('GOLD · PLUSHMEMORY') && care.includes('Still learning what works for you'), "Gold memory has a no-fabrication fallback"],
   [care.includes('recommendationFit') && care.includes('situations similar to right now'), "PlushCare distinguishes contextual fit from global history"],
   [care.includes('ADAPTIVE PLUSHPATH') && care.includes('How is the current step fitting?'), "adaptive PlushPaths collect explicit fit feedback"],
