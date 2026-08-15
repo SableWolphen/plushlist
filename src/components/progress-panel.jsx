@@ -13,14 +13,14 @@ function InsightToolsFallback() {
 }
 
 const card = {
-  borderRadius: 20,
+  borderRadius: 14,
   border: "1px solid rgba(220,204,230,.88)",
   background: "rgba(255,255,255,.86)",
-  boxShadow: "0 8px 22px rgba(151,112,173,.09)",
+  boxShadow: "0 3px 10px rgba(151,112,173,.05)",
 };
 
 function PlushGrowthMonster() {
-  return <svg aria-hidden="true" viewBox="0 0 190 178" style={{ width: "100%", maxWidth: 112, height: "auto", display: "block", filter: "drop-shadow(0 8px 11px rgba(125,91,145,.13))" }}>
+  return <svg aria-hidden="true" viewBox="0 0 190 178" style={{ width: "100%", maxWidth: 92, height: "auto", display: "block", filter: "drop-shadow(0 6px 8px rgba(125,91,145,.11))" }}>
     <defs>
       <radialGradient id="growthFur" cx="42%" cy="30%" r="76%"><stop offset="0" stopColor="#FFF4FF"/><stop offset=".44" stopColor="#EAD4F7"/><stop offset="1" stopColor="#CDA4E1"/></radialGradient>
       <linearGradient id="growthHeart" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#FFC7D8"/><stop offset="1" stopColor="#F27FA7"/></linearGradient>
@@ -52,10 +52,10 @@ function ProgressTabs({ progressView, setProgressView }) {
     { id: "story", label: "PlushStory", icon: "📖" },
     { id: "areas", label: "PlushSpaces", icon: "🪴" },
   ];
-  return <div role="tablist" aria-label="Progress views" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 6, padding: 5, borderRadius: 18, background: "rgba(246,235,251,.78)", border: "1px solid #E5D4EE", boxShadow: "0 6px 16px rgba(157,118,178,.06)" }}>
+  return <div role="tablist" aria-label="Progress views" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 5, padding: 4, borderRadius: 14, background: "rgba(246,235,251,.72)", border: "1px solid #E5D4EE" }}>
     {tabs.map((item) => {
       const selected = progressView === item.id;
-      return <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} style={{ minHeight: 46, minWidth: 0, padding: "7px 4px", borderRadius: 14, border: selected ? "2px solid #9850BC" : "1px solid rgba(227,211,235,.95)", background: selected ? "#FFFFFF" : "rgba(255,255,255,.58)", color: selected ? "#53365F" : "#866895", boxShadow: selected ? "0 4px 12px rgba(154,80,189,.10)" : "none", fontSize: 10.4, fontWeight: 900, cursor: "pointer", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.icon} {item.label}</button>;
+      return <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} style={{ minHeight: 44, minWidth: 0, padding: "6px 4px", borderRadius: 11, border: selected ? "2px solid #9850BC" : "1px solid rgba(227,211,235,.95)", background: selected ? "#FFFFFF" : "rgba(255,255,255,.58)", color: selected ? "#53365F" : "#866895", boxShadow: selected ? "0 2px 7px rgba(154,80,189,.08)" : "none", fontSize: 10.2, fontWeight: 900, cursor: "pointer", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.icon} {item.label}</button>;
     })}
   </div>;
 }
@@ -66,66 +66,66 @@ function CompactGrowthOverview(props) {
   const goldInsights = hasGoldFeature("advanced_growth_insights");
   const highlights = props.weeklyHighlights || {};
 
-  return <div data-plushlife-growth-focus="true" style={{ display: "grid", gap: 10, width: "calc(100% - 44px)", maxWidth: 474, margin: "0 auto" }}>
-    <section style={{ ...card, position: "relative", overflow: "hidden", padding: "17px 15px 15px" }}>
-      <span aria-hidden="true" style={{ position: "absolute", right: 8, top: 45, color: "#F2C862", fontSize: 22, opacity: .82 }}>☆</span>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+  return <div data-plushlife-growth-focus="true" style={{ display: "grid", gap: 9, width: "100%", margin: 0 }}>
+    <section style={{ ...card, position: "relative", overflow: "hidden", padding: "13px 14px 12px" }}>
+      <span aria-hidden="true" style={{ position: "absolute", right: 9, top: 38, color: "#F2C862", fontSize: 18, opacity: .82 }}>☆</span>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 9 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 9.8, letterSpacing: ".16em", fontWeight: 900, color: "#9850BC" }}>THIS WEEK · MON–SUN</div>
-          <div style={{ marginTop: 4, fontSize: 20.5, lineHeight: 1.08, fontWeight: 900, color: "#34283D" }}>PlushGrowth ✨</div>
+          <div style={{ fontSize: 9.5, letterSpacing: ".14em", fontWeight: 900, color: "#9850BC" }}>THIS WEEK · MON–SUN</div>
+          <div style={{ marginTop: 3, fontSize: 18, lineHeight: 1.08, fontWeight: 900, color: "#34283D" }}>PlushGrowth ✨</div>
         </div>
-        <div style={{ flexShrink: 0, paddingRight: 14, fontSize: 32, lineHeight: .95, fontWeight: 900, color: "#9442BC" }}>{props.weeklyOverallPct || 0}%</div>
+        <div style={{ flexShrink: 0, paddingRight: 12, fontSize: 28, lineHeight: .95, fontWeight: 900, color: "#9442BC" }}>{props.weeklyOverallPct || 0}%</div>
       </div>
-      <div style={{ height: 10, marginTop: 14, overflow: "hidden", borderRadius: 99, background: "#EEE3F4" }}><div style={{ height: "100%", width: `${Math.max(0, Math.min(100, Number(props.weeklyOverallPct) || 0))}%`, borderRadius: 99, background: "linear-gradient(90deg,#A84DCA 0%,#7D6DDE 46%,#55B9EF 100%)" }} /></div>
-      <div style={{ marginTop: 12, fontSize: 11.7, lineHeight: 1.4, color: "#665473" }}>You cared for your essentials on <strong style={{ color: "#8E4EAA" }}>{props.caringDays || 0} caring {Number(props.caringDays) === 1 ? "day" : "days"}</strong> this week.</div>
+      <div style={{ height: 8, marginTop: 11, overflow: "hidden", borderRadius: 99, background: "#EEE3F4" }}><div style={{ height: "100%", width: `${Math.max(0, Math.min(100, Number(props.weeklyOverallPct) || 0))}%`, borderRadius: 99, background: "linear-gradient(90deg,#A84DCA 0%,#7D6DDE 46%,#55B9EF 100%)" }} /></div>
+      <div style={{ marginTop: 9, fontSize: 11.5, lineHeight: 1.38, color: "#665473" }}>You cared for your essentials on <strong style={{ color: "#8E4EAA" }}>{props.caringDays || 0} caring {Number(props.caringDays) === 1 ? "day" : "days"}</strong> this week.</div>
     </section>
 
     <ProgressTabs progressView={props.progressView} setProgressView={props.setProgressView} />
 
-    <section aria-label="Weekly growth summary" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 7 }}>
+    <section aria-label="Weekly growth summary" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 6 }}>
       {[
         ["💜", `${props.weeklyEssentialPct || 0}%`, "Essentials", "#FBF4FF", "#A24BC7", "rgba(232,210,244,.58)"],
         ["🗓️", `${props.weeklyOverallDone || 0}/${props.weeklyOverallPossible || 0}`, "Core + Scheduled", "#F2FAFF", "#3E8EEB", "rgba(199,224,247,.65)"],
         ["⭐", `${props.weeklyBonusDone || 0}`, "Bonus wins", "#FFF9EC", "#D89900", "rgba(246,222,169,.65)"],
-      ].map(([icon, value, label, background, accent, halo]) => <div key={label} style={{ minWidth: 0, minHeight: 108, padding: "10px 5px", borderRadius: 20, border: "1px solid #E5DCE8", background, textAlign: "center", boxShadow: "0 6px 16px rgba(149,113,168,.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ width: 38, height: 38, display: "grid", placeItems: "center", borderRadius: "50%", background: halo, fontSize: 19 }}>{icon}</div>
-        <div style={{ marginTop: 6, fontSize: 19.5, lineHeight: 1, fontWeight: 900, color: accent }}>{value}</div>
-        <div style={{ marginTop: 6, fontSize: 9.6, lineHeight: 1.2, color: "#6F5D7B", fontWeight: 800 }}>{label}</div>
+      ].map(([icon, value, label, background, accent, halo]) => <div key={label} style={{ minWidth: 0, minHeight: 88, padding: "8px 5px", borderRadius: 14, border: "1px solid #E5DCE8", background, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 32, height: 32, display: "grid", placeItems: "center", borderRadius: "50%", background: halo, fontSize: 16 }}>{icon}</div>
+        <div style={{ marginTop: 5, fontSize: 18, lineHeight: 1, fontWeight: 900, color: accent }}>{value}</div>
+        <div style={{ marginTop: 5, fontSize: 9.4, lineHeight: 1.18, color: "#6F5D7B", fontWeight: 800 }}>{label}</div>
       </div>)}
     </section>
 
-    <section style={{ ...card, padding: "14px 13px 12px", background: "linear-gradient(145deg,#F2FFF6,#FBFFF8)", borderColor: "#C8E5D0", overflow: "hidden" }}>
-      <div style={{ fontSize: 14.6, fontWeight: 900, color: "#20866E" }}>🌱 PlushInsights</div>
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 104px", gap: 7, alignItems: "center", marginTop: 7 }}>
-        <div style={{ display: "grid", gap: 8, minWidth: 0, color: "#4F615B", fontSize: 11.1, lineHeight: 1.38 }}>
-          <div style={{ display: "flex", gap: 7 }}><span style={{ color: "#88CF69", fontSize: 15, lineHeight: 1, fontWeight: 900 }}>•</span><span>Higher-energy days tend to make task completion easier.</span></div>
-          <div style={{ display: "flex", gap: 7 }}><span style={{ color: "#88CF69", fontSize: 15, lineHeight: 1, fontWeight: 900 }}>•</span><span>Keeping about 4 important things visible may make the day easier to start.</span></div>
+    <section style={{ ...card, padding: "11px 12px 10px", background: "linear-gradient(145deg,#F2FFF6,#FBFFF8)", borderColor: "#C8E5D0", overflow: "hidden" }}>
+      <div style={{ fontSize: 13.5, fontWeight: 900, color: "#20866E" }}>🌱 PlushInsights</div>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 86px", gap: 6, alignItems: "center", marginTop: 6 }}>
+        <div style={{ display: "grid", gap: 7, minWidth: 0, color: "#4F615B", fontSize: 10.8, lineHeight: 1.36 }}>
+          <div style={{ display: "flex", gap: 6 }}><span style={{ color: "#88CF69", fontSize: 14, lineHeight: 1, fontWeight: 900 }}>•</span><span>Higher-energy days tend to make task completion easier.</span></div>
+          <div style={{ display: "flex", gap: 6 }}><span style={{ color: "#88CF69", fontSize: 14, lineHeight: 1, fontWeight: 900 }}>•</span><span>Keeping about 4 important things visible may make the day easier to start.</span></div>
         </div>
-        <div style={{ justifySelf: "end", alignSelf: "center", width: 104 }}><PlushGrowthMonster /></div>
+        <div style={{ justifySelf: "end", alignSelf: "center", width: 86 }}><PlushGrowthMonster /></div>
       </div>
-      <div style={{ marginTop: 7, paddingTop: 8, borderTop: "1px solid #D7E9DD", color: "#4F947E", fontSize: 10.2 }}>✨ Patterns, not pressure.</div>
+      <div style={{ marginTop: 6, paddingTop: 7, borderTop: "1px solid #D7E9DD", color: "#4F947E", fontSize: 9.8 }}>✨ Patterns, not pressure.</div>
     </section>
 
-    {(highlights.mostConsistent || highlights.topMood) && <section style={{ ...card, position: "relative", padding: "13px 13px 12px", background: "linear-gradient(145deg,#FFFDF7,#FFF9F2)", borderColor: "#ECDDB5" }}>
-      <span aria-hidden="true" style={{ position: "absolute", right: 18, top: 14, color: "#F0C56B", fontSize: 17 }}>✧</span>
-      <div style={{ fontSize: 14.3, fontWeight: 900, color: "#A56900" }}>✨ Plush highlights</div>
-      <div style={{ display: "grid", gap: 6, marginTop: 7, fontSize: 10.9, lineHeight: 1.38, color: "#665477" }}>
+    {(highlights.mostConsistent || highlights.topMood) && <section style={{ ...card, position: "relative", padding: "10px 12px", background: "linear-gradient(145deg,#FFFDF7,#FFF9F2)", borderColor: "#ECDDB5" }}>
+      <span aria-hidden="true" style={{ position: "absolute", right: 15, top: 11, color: "#F0C56B", fontSize: 15 }}>✧</span>
+      <div style={{ fontSize: 13.3, fontWeight: 900, color: "#A56900" }}>✨ Plush highlights</div>
+      <div style={{ display: "grid", gap: 5, marginTop: 6, fontSize: 10.7, lineHeight: 1.34, color: "#665477" }}>
         {highlights.mostConsistent && <div>☕ Most consistent routine: <strong style={{ color: "#493953" }}><HabitTypeIcon task={highlights.mostConsistent.task} />{highlights.mostConsistent.task.task}</strong></div>}
         {highlights.topMood && <div>🙂 Most common feeling this week: <strong style={{ color: "#493953" }}>{highlights.topMood}</strong></div>}
       </div>
     </section>}
 
-    <section style={{ ...card, padding: "11px 13px", background: "linear-gradient(135deg,#FBF6FE,#FFFBFF)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 9 }}>
-        <div style={{ minWidth: 0 }}><div style={{ fontSize: 10.8, fontWeight: 900, color: "#8A48A6" }}>📝 PlushWeek · Weekly intention</div><div style={{ marginTop: 3, fontSize: 12.6, lineHeight: 1.28, color: "#3E3347", overflowWrap: "anywhere" }}>{props.weeklyIntentionText || "Set one gentle direction for the week"}</div></div>
-        <button type="button" onClick={() => { props.setWeeklyIntentionDraft(props.weeklyIntentionText || ""); props.setWeeklyIntentionEditing(true); }} style={{ minHeight: 44, padding: "7px 11px", borderRadius: 11, border: "1px solid #D7BCE3", background: "rgba(255,255,255,.92)", color: "#8948A6", fontWeight: 900, cursor: "pointer", boxShadow: "0 3px 8px rgba(151,112,173,.06)" }}>{props.weeklyIntentionText ? "Edit" : "Add"}</button>
+    <section style={{ ...card, padding: "9px 11px", background: "linear-gradient(135deg,#FBF6FE,#FFFBFF)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+        <div style={{ minWidth: 0 }}><div style={{ fontSize: 10.5, fontWeight: 900, color: "#8A48A6" }}>📝 PlushWeek · Weekly intention</div><div style={{ marginTop: 2, fontSize: 12.4, lineHeight: 1.26, color: "#3E3347", overflowWrap: "anywhere" }}>{props.weeklyIntentionText || "Set one gentle direction for the week"}</div></div>
+        <button type="button" onClick={() => { props.setWeeklyIntentionDraft(props.weeklyIntentionText || ""); props.setWeeklyIntentionEditing(true); }} style={{ minHeight: 44, padding: "7px 10px", borderRadius: 9, border: "1px solid #D7BCE3", background: "rgba(255,255,255,.92)", color: "#8948A6", fontWeight: 900, cursor: "pointer" }}>{props.weeklyIntentionText ? "Edit" : "Add"}</button>
       </div>
       {props.weeklyIntentionEditing && <div style={{ marginTop: 9 }}><textarea value={props.weeklyIntentionDraft} onChange={(event) => props.setWeeklyIntentionDraft(event.target.value)} maxLength={2000} style={{ width: "100%", boxSizing: "border-box", minHeight: 70, padding: 10, borderRadius: 10, border: "1px solid #D9B8E8", resize: "vertical" }} /><div style={{ display: "flex", gap: 7, marginTop: 7 }}><button type="button" onClick={props.saveWeeklyIntentionEdit} style={{ minHeight: 44, padding: "8px 12px", borderRadius: 10, border: 0, background: "#A65DC1", color: "white", fontWeight: 900 }}>Save</button><button type="button" onClick={() => props.setWeeklyIntentionEditing(false)} style={{ minHeight: 44, padding: "8px 12px", borderRadius: 10, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900 }}>Cancel</button></div></div>}
     </section>
 
-    <button type="button" aria-expanded={monthlyOpen} onClick={() => setMonthlyOpen((open) => !open)} style={{ minHeight: 48, width: "100%", border: "1px solid #E1D0EA", borderRadius: 16, background: "rgba(255,255,255,.90)", color: "#8847A5", boxShadow: "0 7px 18px rgba(149,113,168,.07)", fontSize: 12.1, fontWeight: 900, cursor: "pointer" }}>🗓️ {monthlyOpen ? "Hide monthly details" : "View monthly details"}</button>
+    <button type="button" aria-expanded={monthlyOpen} onClick={() => setMonthlyOpen((open) => !open)} style={{ minHeight: 44, width: "100%", border: "1px solid #E1D0EA", borderRadius: 13, background: "rgba(255,255,255,.90)", color: "#8847A5", fontSize: 11.5, fontWeight: 900, cursor: "pointer" }}>🗓️ {monthlyOpen ? "Hide monthly details" : "View monthly details"}</button>
 
-    {monthlyOpen && <section style={{ ...card, padding: 15 }}>
+    {monthlyOpen && <section style={{ ...card, padding: 13 }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline" }}><div><div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#8E4EAA" }}>MONTH SO FAR</div><div style={{ marginTop: 3, fontSize: 16, fontWeight: 900, color: "#4F405C" }}>Monthly growth</div></div><strong style={{ fontSize: 23, color: "#A65DC1" }}>{props.monthlyOverallPct || 0}%</strong></div>
       <div style={{ height: 9, marginTop: 10, overflow: "hidden", borderRadius: 99, background: "#F2E8F8" }}><div style={{ width: `${Math.max(0, Math.min(100, Number(props.monthlyOverallPct) || 0))}%`, height: "100%", background: "linear-gradient(90deg,#C77DD6,#7FC8F8)" }} /></div>
       <div style={{ marginTop: 9, fontSize: 11.5, lineHeight: 1.45, color: "#806B8D" }}>{props.monthOverMonthDelta == null ? "Your month is still taking shape." : props.monthOverMonthDelta > 0 ? `${props.monthOverMonthDelta}% ahead of this point last month.` : props.monthOverMonthDelta < 0 ? `${Math.abs(props.monthOverMonthDelta)}% behind this point last month — that’s okay.` : "About the same as this point last month."}</div>
@@ -149,7 +149,7 @@ function CompactGrowthOverview(props) {
       <div style={{ display: "flex", gap: 7, marginTop: 11, flexWrap: "wrap" }}><button type="button" onClick={() => props.setShareCardOpen(true)} style={{ minHeight: 44, padding: "8px 11px", borderRadius: 11, border: "1px solid #E2CDEB", background: "white", color: "#8E4EAA", fontWeight: 900 }}>📸 Share my week</button>{props.habitTasks?.length > 0 && <span style={{ alignSelf: "center", fontSize: 10.5, color: "#7D8C86" }}>🌱 {props.habitTasks.length} habits · {props.habitGardenTotalCheckIns || 0} caring check-ins</span>}</div>
     </section>}
 
-    {!props.hasWeeklyActivity && <section style={{ ...card, padding: 14, background: "#F2FFFB", borderColor: "#C8E8DE" }}><div style={{ fontSize: 13, fontWeight: 900, color: "#3E746A" }}>🌱 Your progress can start tiny</div><div style={{ marginTop: 5, fontSize: 11.5, lineHeight: 1.5, color: "#5E766F" }}>One little task, check-in, or kind pause is enough.</div><button type="button" onClick={() => props.goToDashboard("today")} style={{ marginTop: 9, minHeight: 44, padding: "8px 11px", borderRadius: 11, border: "1px solid #84C9B7", background: "white", color: "#318C79", fontWeight: 900 }}>Show me today&apos;s tiny thing</button></section>}
+    {!props.hasWeeklyActivity && <section style={{ ...card, padding: 12, background: "#F2FFFB", borderColor: "#C8E8DE" }}><div style={{ fontSize: 13, fontWeight: 900, color: "#3E746A" }}>🌱 Your progress can start tiny</div><div style={{ marginTop: 5, fontSize: 11.5, lineHeight: 1.5, color: "#5E766F" }}>One little task, check-in, or kind pause is enough.</div><button type="button" onClick={() => props.goToDashboard("today")} style={{ marginTop: 9, minHeight: 44, padding: "8px 11px", borderRadius: 11, border: "1px solid #84C9B7", background: "white", color: "#318C79", fontWeight: 900 }}>Show me today&apos;s tiny thing</button></section>}
   </div>;
 }
 
