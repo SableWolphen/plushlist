@@ -122,8 +122,7 @@ export function BabyToday({
 
   return (
     <div className="baby-today-simple" style={{ display: "grid", gap: 10, marginBottom: 14 }}>
-      {babyScheduleEntries.length > 0 && <details aria-label={`${caregiver}'s gentle schedule`} style={{ order: 3, padding: "0 14px 12px", borderRadius: 18, background: "linear-gradient(145deg,#F9FCFF,#FFF9FD)", border: "1px solid #D9E5F1" }}>
-        <summary style={{ minHeight: 48, display: "flex", alignItems: "center", cursor: "pointer", fontSize: 11, letterSpacing: ".12em", fontWeight: 900, color: "#4A80B5" }}>🗓 SEE TODAY’S LITTLE PLAN</summary>
+      {babyScheduleEntries.length > 0 && <section aria-label={`${caregiver}'s gentle schedule`} style={{ order: 3, padding: 14, borderRadius: 18, background: "linear-gradient(145deg,#F9FCFF,#FFF9FD)", border: "1px solid #D9E5F1" }}>
         <div style={{ fontSize: 11, letterSpacing: ".12em", fontWeight: 900, color: "#4A80B5" }}>{caregiver.toUpperCase()}’S LITTLE PLAN</div>
         <div style={{ marginTop: 5, fontSize: 13.2, lineHeight: 1.5, color: "#665474", fontWeight: 750 }}>
           Hey baby, here’s what we’re doing today. You only have to look at one little part at a time.
@@ -146,7 +145,7 @@ export function BabyToday({
           </button>}
           {showFullSchedule && <button type="button" onClick={() => goToDashboard?.("week")} style={{ ...softButton, minHeight: 42, padding: "8px 10px", fontSize: 11.5 }}>🗓 Grown-up planner</button>}
         </div>
-      </details>}
+      </section>}
 
       {resting && <section style={{ padding: "12px 14px", borderRadius: 16, background: "#EEF9F6", border: "1px solid #BFE5D2", color: "#3E746A" }}>
         <div style={{ fontWeight: 900, fontSize: 13 }}>🌴 It’s a soft rest day, baby.</div>

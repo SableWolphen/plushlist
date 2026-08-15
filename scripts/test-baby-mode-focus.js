@@ -12,7 +12,7 @@ const checks = [
   [source.includes("schedulePreviewCount = 2"), "schedule defaults to only two visible items"],
   [source.includes("keep <strong>{comfortItem}</strong> close") || source.includes("bring it with you if that helps"), "schedule can remind the user about their comfort item"],
   [source.includes("useState(true)") && source.includes("waiting.slice(0, 3)"), "the first three little jobs appear immediately without a separate primary card"],
-  [source.includes("SEE TODAY’S LITTLE PLAN") && source.includes("<details aria-label"), "the caregiver plan is collapsed until requested"],
+  [source.includes("<section aria-label={`${caregiver}'s gentle schedule`}") && !source.includes("SEE TODAY’S LITTLE PLAN"), "the caregiver schedule is always visible"],
   [source.includes("caregiverScheduleText"), "schedule entries are softened instead of copied as planner text"],
 ];
 
