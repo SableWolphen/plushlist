@@ -25,8 +25,98 @@
       position: absolute;
       inset: -8px -6px;
     }
+
+    /* Baby Mode: keep the completed count and settings from turning into
+       giant vertical pills when global/mobile button rules kick in. */
+    .baby-today-simple section[aria-label="Little jobs"] details > summary {
+      box-sizing: border-box !important;
+      min-width: 42px !important;
+      width: auto !important;
+      height: 30px !important;
+      min-height: 30px !important;
+      max-height: 30px !important;
+      padding: 4px 9px !important;
+      border-radius: 999px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      line-height: 1 !important;
+      white-space: nowrap !important;
+      font-size: 11px !important;
+    }
+    .baby-today-simple section[aria-label="Little jobs"] button[title="Edit little jobs"],
+    .baby-today-simple section[aria-label="Little jobs"] button[aria-label="Edit little jobs"] {
+      box-sizing: border-box !important;
+      width: 30px !important;
+      min-width: 30px !important;
+      max-width: 30px !important;
+      height: 30px !important;
+      min-height: 30px !important;
+      max-height: 30px !important;
+      padding: 0 !important;
+      border-radius: 9px !important;
+      display: inline-grid !important;
+      place-items: center !important;
+      line-height: 1 !important;
+      font-size: 14px !important;
+      flex: 0 0 30px !important;
+    }
+
+    /* PlushGuide belongs below the Profile header, not inside the title/Close row. */
+    #plushlife-guide-entry {
+      box-sizing: border-box !important;
+      width: calc(100% - 24px) !important;
+      margin: 8px 12px 10px !important;
+      padding: 10px 12px !important;
+      border-radius: 13px !important;
+      min-height: 0 !important;
+      display: grid !important;
+      grid-template-columns: auto minmax(0,1fr) auto !important;
+      align-items: center !important;
+      column-gap: 8px !important;
+      text-align: left !important;
+      font-size: 12px !important;
+      line-height: 1.2 !important;
+    }
+    #plushlife-guide-entry::before {
+      content: "✨";
+      font-size: 16px;
+    }
+    #plushlife-guide-entry::after {
+      content: "›";
+      font-size: 18px;
+      color: #9b79aa;
+    }
+    #plushlife-guide-entry > small {
+      grid-column: 2;
+      margin: 2px 0 0 !important;
+      font-size: 10.5px !important;
+      line-height: 1.28 !important;
+      font-weight: 600 !important;
+      opacity: .72 !important;
+    }
   `;
   document.head.appendChild(compactHomeStyle);
+
+  function tidyGuideEntry() {
+    const entry = document.getElementById("plushlife-guide-entry");
+    if (!entry) return;
+
+    // plush-guide.js originally inserts the entry before the first button in
+    // the Profile header. On narrow phones that squeezes Profile + Close into
+    // the same row and makes Close wrap. Move the guide below that row.
+    const parent = entry.parentElement;
+    if (!parent) return;
+    const parentText = clean(parent.textContent);
+    const hasClose = Array.from(parent.querySelectorAll("button,[role='button']")).some((node) => {
+      if (node === entry) return false;
+      const label = clean(node.getAttribute("aria-label") || node.textContent);
+      return label === "close" || label.startsWith("close ") || label === "×";
+    });
+    if (hasClose && parentText.includes("profile") && parent.parentElement) {
+      parent.insertAdjacentElement("afterend", entry);
+    }
+  }
 
   function removeGentleLauncher() {
     const launcher = document.getElementById("plushlife-gentle-launcher");
@@ -39,7 +129,11 @@
   // PlushRescue stays available through the app's care/tools surfaces; the
   // floating launcher duplicated that entry point and obscured page content.
   removeGentleLauncher();
-  const launcherObserver = new MutationObserver(removeGentleLauncher);
+  tidyGuideEntry();
+  const launcherObserver = new MutationObserver(() => {
+    removeGentleLauncher();
+    tidyGuideEntry();
+  });
   launcherObserver.observe(document.documentElement, { childList: true, subtree: true });
 
   function closeToolsPanel(panel) {
