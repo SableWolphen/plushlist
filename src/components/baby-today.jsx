@@ -129,20 +129,20 @@ export function BabyToday({
         🧸 I need a little help
       </button>
 
-      {babyScheduleEntries.length > 0 && <section aria-label={`${caregiver}'s gentle schedule`} style={{ padding: "9px 10px 10px", borderRadius: 14, background: "linear-gradient(145deg,#F9FCFF,#FFF9FD)", border: "1px solid #D9E5F1" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 6 }}>
+      {babyScheduleEntries.length > 0 && <section aria-label={`${caregiver}'s gentle schedule`} style={{ padding: 12, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: "1px solid #D9E5F1" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 10.3, letterSpacing: ".1em", fontWeight: 900, color: "#4A80B5" }}>{caregiver.toUpperCase()}’S LITTLE PLAN</div>
-            <div style={{ marginTop: 1, fontSize: 9.8, color: "#806B8D" }}>One little part at a time 💛</div>
+            <div style={{ fontSize: 11, letterSpacing: ".16em", color: "#4A80B5", fontWeight: 900 }}>🗓️ {caregiver.toUpperCase()}’S LITTLE PLAN</div>
+            <div style={{ marginTop: 2, fontSize: 10.5, color: "#806B8D" }}>One little part at a time 💛</div>
           </div>
-          {comfortItem && <span title={`${comfortItem} can stay close`} style={{ maxWidth: "46%", padding: "4px 7px", borderRadius: 999, background: "#FFF7E8", color: "#806A45", fontSize: 9.2, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>🧸 {comfortItem} close</span>}
+          {comfortItem && <span title={`${comfortItem} can stay close`} style={{ maxWidth: "48%", padding: "4px 7px", borderRadius: 999, background: "#FFF7E8", color: "#806A45", fontSize: 9.5, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>🧸 {comfortItem} close</span>}
         </div>
-        <div style={{ display: "grid", gap: 4 }}>
+        <div style={{ display: "grid", gap: 5, marginTop: 8 }}>
           {babyScheduleEntries.map((entry, index) => {
             const rawLabel = entry.text || entry.label || entry.title || "Scheduled item";
-            return <div key={(entry.time || "any") + "-" + index} style={{ minWidth: 0, display: "grid", gridTemplateColumns: entry.time ? "58px minmax(0,1fr)" : "1fr", gap: 7, alignItems: "center", minHeight: 34, padding: "5px 7px", borderRadius: 9, background: entry.isException ? "#EEF9F5" : "#FFFFFFB8", border: "1px solid #E8E0EC" }}>
-              {entry.time && <span style={{ fontSize: 10.2, color: "#4A80B5", fontWeight: 900 }}>{formatTime12 ? formatTime12(entry.time) : entry.time}</span>}
-              <span style={{ minWidth: 0, fontSize: 10.7, color: "#5B4B6B", fontWeight: 750, lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{caregiverScheduleText(rawLabel)}</span>
+            return <div key={(entry.time || "any") + "-" + index} style={{ display: "grid", gridTemplateColumns: entry.time ? "70px minmax(0,1fr)" : "1fr", alignItems: "center", gap: 7, padding: "8px 9px", borderRadius: 9, background: entry.isException ? "#EEF9F5" : "#FFFFFF99", border: entry.isException ? "1px solid #B9E0D0" : "1px solid #EFE3F3" }}>
+              {entry.time && <span style={{ fontSize: 13, color: "#4A80B5", fontWeight: 900 }}>{formatTime12 ? formatTime12(entry.time) : entry.time}</span>}
+              <span style={{ minWidth: 0, fontSize: 12.5, lineHeight: 1.35, color: "#5B4B6B", fontWeight: 600 }}>{entry.isException && <span style={{ marginRight: 5, color: "#318C79", fontSize: 10, fontWeight: 900 }}>EXTRA</span>}{caregiverScheduleText(rawLabel)}</span>
             </div>;
           })}
         </div>
