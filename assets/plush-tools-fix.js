@@ -26,97 +26,108 @@
       inset: -8px -6px;
     }
 
-    /* Baby Mode: keep the completed count and settings from turning into
-       giant vertical pills when global/mobile button rules kick in. */
-    .baby-today-simple section[aria-label="Little jobs"] details > summary {
-      box-sizing: border-box !important;
-      min-width: 42px !important;
-      width: auto !important;
-      height: 30px !important;
-      min-height: 30px !important;
-      max-height: 30px !important;
-      padding: 4px 9px !important;
-      border-radius: 999px !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      line-height: 1 !important;
-      white-space: nowrap !important;
-      font-size: 11px !important;
+    [data-plushlife-task-card] {
+      margin-bottom: 9px !important;
+      padding: 11px 12px !important;
+      border-radius: 14px !important;
+      box-shadow: none !important;
     }
-    .baby-today-simple section[aria-label="Little jobs"] button[title="Edit little jobs"],
-    .baby-today-simple section[aria-label="Little jobs"] button[aria-label="Edit little jobs"] {
-      box-sizing: border-box !important;
-      width: 30px !important;
-      min-width: 30px !important;
-      max-width: 30px !important;
-      height: 30px !important;
-      min-height: 30px !important;
-      max-height: 30px !important;
+    [data-plushlife-task-card="list-picker"] {
+      border-width: 1px !important;
+    }
+    [data-plushlife-task-card="list-picker"] [data-plushlife-day-grid] {
+      gap: 5px !important;
+      margin-top: 8px !important;
+    }
+    [data-plushlife-task-card="list-picker"] [data-plushlife-day-grid] button {
+      min-height: 38px !important;
+      padding: 6px 4px !important;
+      border-radius: 10px !important;
+    }
+    [data-plushlife-task-card="starter-pack"] [data-plushlife-starter-intro] {
+      display: none !important;
+    }
+    [data-plushlife-task-card="starter-pack"] label {
+      margin-top: 6px !important;
+    }
+    [data-plushlife-task-card="starter-pack"] select {
+      min-height: 40px !important;
+      margin-top: 4px !important;
+      padding: 7px 9px !important;
+    }
+    [data-plushlife-task-card="starter-pack"] [data-plushlife-pack-preview] {
+      margin-top: 7px !important;
+      padding: 8px 9px !important;
+      border-radius: 10px !important;
+    }
+    [data-plushlife-task-card="starter-pack"] [data-plushlife-pack-preview] > div:last-child {
+      margin-top: 4px !important;
+      gap: 2px !important;
+    }
+    [data-plushlife-task-card="starter-pack"] [data-plushlife-pack-add] {
+      min-height: 38px !important;
+      margin-top: 7px !important;
+      padding: 7px 11px !important;
+    }
+    [data-plushlife-task-card="import"] {
       padding: 0 !important;
-      border-radius: 9px !important;
-      display: inline-grid !important;
-      place-items: center !important;
-      line-height: 1 !important;
-      font-size: 14px !important;
-      flex: 0 0 30px !important;
+      overflow: hidden !important;
     }
-
-    /* PlushGuide belongs below the Profile header, not inside the title/Close row. */
-    #plushlife-guide-entry {
-      box-sizing: border-box !important;
-      width: calc(100% - 24px) !important;
-      margin: 8px 12px 10px !important;
-      padding: 10px 12px !important;
-      border-radius: 13px !important;
-      min-height: 0 !important;
-      display: grid !important;
-      grid-template-columns: auto minmax(0,1fr) auto !important;
-      align-items: center !important;
-      column-gap: 8px !important;
-      text-align: left !important;
-      font-size: 12px !important;
-      line-height: 1.2 !important;
+    [data-plushlife-task-card="import"] > button:first-child {
+      min-height: 42px !important;
+      padding: 9px 11px !important;
     }
-    #plushlife-guide-entry::before {
-      content: "✨";
-      font-size: 16px;
+    [data-plushlife-task-card="add-task"] {
+      padding-top: 11px !important;
     }
-    #plushlife-guide-entry::after {
-      content: "›";
-      font-size: 18px;
-      color: #9b79aa;
-    }
-    #plushlife-guide-entry > small {
-      grid-column: 2;
-      margin: 2px 0 0 !important;
-      font-size: 10.5px !important;
-      line-height: 1.28 !important;
-      font-weight: 600 !important;
-      opacity: .72 !important;
+    [data-plushlife-task-card] input,
+    [data-plushlife-task-card] select,
+    [data-plushlife-task-card] textarea {
+      font-size: 16px !important;
     }
   `;
   document.head.appendChild(compactHomeStyle);
 
-  function tidyGuideEntry() {
-    const entry = document.getElementById("plushlife-guide-entry");
-    if (!entry) return;
+  function markTaskManager() {
+    const panels = Array.from(document.querySelectorAll('[role="dialog"], aside, [class*="panel"], [class*="modal"], body > div'));
+    const panel = panels.find((node) => visible(node) && clean(node.textContent).includes("change my tasks") && clean(node.textContent).includes("step 1 · choose a list"));
+    if (!panel) return;
 
-    // plush-guide.js originally inserts the entry before the first button in
-    // the Profile header. On narrow phones that squeezes Profile + Close into
-    // the same row and makes Close wrap. Move the guide below that row.
-    const parent = entry.parentElement;
-    if (!parent) return;
-    const parentText = clean(parent.textContent);
-    const hasClose = Array.from(parent.querySelectorAll("button,[role='button']")).some((node) => {
-      if (node === entry) return false;
-      const label = clean(node.getAttribute("aria-label") || node.textContent);
-      return label === "close" || label.startsWith("close ") || label === "×";
-    });
-    if (hasClose && parentText.includes("profile") && parent.parentElement) {
-      parent.insertAdjacentElement("afterend", entry);
+    const divs = Array.from(panel.querySelectorAll("div"));
+    const exactCard = (phrase) => divs.find((node) => clean(node.firstElementChild?.textContent || "") === clean(phrase));
+
+    const listHeading = Array.from(panel.querySelectorAll("div")).find((node) => clean(node.textContent) === "step 1 · choose a list");
+    const listCard = listHeading?.parentElement;
+    if (listCard) {
+      listCard.dataset.plushlifeTaskCard = "list-picker";
+      const grid = Array.from(listCard.querySelectorAll("div")).find((node) => node.querySelectorAll(":scope > button").length >= 7);
+      if (grid) grid.dataset.plushlifeDayGrid = "true";
     }
+
+    const starterHeading = Array.from(panel.querySelectorAll("div")).find((node) => clean(node.textContent).startsWith("starter packs ·"));
+    const starterCard = starterHeading?.parentElement;
+    if (starterCard) {
+      starterCard.dataset.plushlifeTaskCard = "starter-pack";
+      const intro = starterHeading.nextElementSibling;
+      if (intro) intro.dataset.plushlifeStarterIntro = "true";
+      const preview = Array.from(starterCard.querySelectorAll("div")).find((node) => clean(node.textContent).startsWith("this will add") || clean(node.textContent).startsWith("you already have every task"));
+      if (preview?.parentElement) preview.parentElement.dataset.plushlifePackPreview = "true";
+      const addButton = Array.from(starterCard.querySelectorAll("button")).find((node) => clean(node.textContent).startsWith("add "));
+      if (addButton) addButton.dataset.plushlifePackAdd = "true";
+    }
+
+    const importButton = Array.from(panel.querySelectorAll("button")).find((node) => clean(node.textContent).includes("import a list of tasks"));
+    const importCard = importButton?.parentElement;
+    if (importCard) importCard.dataset.plushlifeTaskCard = "import";
+
+    const addHeading = Array.from(panel.querySelectorAll("div")).find((node) => clean(node.textContent) === "step 2 · add a task");
+    const addCard = addHeading?.parentElement;
+    if (addCard) addCard.dataset.plushlifeTaskCard = "add-task";
   }
+
+  markTaskManager();
+  const taskManagerObserver = new MutationObserver(markTaskManager);
+  taskManagerObserver.observe(document.documentElement, { childList: true, subtree: true });
 
   function removeGentleLauncher() {
     const launcher = document.getElementById("plushlife-gentle-launcher");
@@ -126,14 +137,8 @@
     launcher.remove();
   }
 
-  // PlushRescue stays available through the app's care/tools surfaces; the
-  // floating launcher duplicated that entry point and obscured page content.
   removeGentleLauncher();
-  tidyGuideEntry();
-  const launcherObserver = new MutationObserver(() => {
-    removeGentleLauncher();
-    tidyGuideEntry();
-  });
+  const launcherObserver = new MutationObserver(removeGentleLauncher);
   launcherObserver.observe(document.documentElement, { childList: true, subtree: true });
 
   function closeToolsPanel(panel) {
