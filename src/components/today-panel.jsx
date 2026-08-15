@@ -6,6 +6,7 @@ import { useSmartNextStep } from "./smart-next-step.jsx";
 const LazyBabyToday = React.lazy(() => import("./baby-today.jsx").then((module) => ({ default: module.BabyToday })));
 const LazyLowScreenToday = React.lazy(() => import("./habit-retention.jsx").then((module) => ({ default: module.LowScreenToday })));
 const LazyHabitBackgroundEngine = React.lazy(() => import("./habit-background-engine.jsx").then((module) => ({ default: module.HabitBackgroundEngine })));
+const LazySmartAdaptationPanel = React.lazy(() => import("./plush-knows-me-smart.jsx").then((module) => ({ default: module.SmartAdaptationPanel })));
 
 function LowScreenJustCompleted({ rows = [], viewDone = {}, lingerKeys = [], toggle }) {
   const lingering = new Set(lingerKeys || []);
@@ -49,6 +50,7 @@ export function TodayPanel(props) {
   const modeProps = { ...props, toggle: unifiedToggle, recentlyCompletedKeys, completedLingerKeys: lingerKeys, nextStepTask: smartNextStepHidden ? null : (smartNextStep.task || props.nextStepTask), nextStepReason: smartNextStepHidden ? "" : smartNextStep.reason, setNextStepDismissedToday };
   const liveRegion = <div aria-live="polite" aria-atomic="true" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>{announcement}</div>;
   const backgroundEngine = <BackgroundIntelligence {...modeProps} />;
+  const quietSmartLearning = <React.Suspense fallback={null}><LazySmartAdaptationPanel {...modeProps} quiet /></React.Suspense>;
 
   React.useEffect(() => {
     if (!props.open || readinessReportedRef.current) return;
@@ -58,11 +60,12 @@ export function TodayPanel(props) {
   }, [props.open, props.rows?.length]);
 
   if (!props.open) return null;
-  if (props.babyMode) return <>{backgroundEngine}{liveRegion}<React.Suspense fallback={null}><LazyBabyToday {...modeProps} /></React.Suspense></>;
-  if (lowScreen) return <>{backgroundEngine}{liveRegion}<React.Suspense fallback={null}><LazyLowScreenToday {...modeProps} /></React.Suspense><LowScreenJustCompleted rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} /><CompletedTaskArea rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} compact /></>;
+  if (props.babyMode) return <>{backgroundEngine}{quietSmartLearning}{liveRegion}<React.Suspense fallback={null}><LazyBabyToday {...modeProps} /></React.Suspense></>;
+  if (lowScreen) return <>{backgroundEngine}{quietSmartLearning}{liveRegion}<React.Suspense fallback={null}><LazyLowScreenToday {...modeProps} /></React.Suspense><LowScreenJustCompleted rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} /><CompletedTaskArea rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} compact /></>;
 
   return <>
     {backgroundEngine}
+    {quietSmartLearning}
     {liveRegion}
     <TodayPanelCore {...modeProps} />
   </>;
