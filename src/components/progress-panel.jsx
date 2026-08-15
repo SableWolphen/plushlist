@@ -1,8 +1,8 @@
 import { hasGoldFeature } from "../plush-gold.js";
 
 const LazyExistingProgressPanel = React.lazy(() => import("./progress-panel-existing.jsx").then((module) => ({ default: module.ProgressPanel })));
-const LazyGoldStoryView = React.lazy(() => import("./progress-gold-views.jsx").then((module) => ({ default: module.GoldStoryView })));
-const LazyGoldSpacesView = React.lazy(() => import("./progress-gold-views.jsx").then((module) => ({ default: module.GoldSpacesView })));
+const LazyGoldStoryView = React.lazy(() => import("./progress-gold-experience.jsx").then((module) => ({ default: module.GoldStoryExperience })));
+const LazyGoldSpacesView = React.lazy(() => import("./progress-gold-experience.jsx").then((module) => ({ default: module.GoldSpacesExperience })));
 
 function GrowthFallback() {
   return <div role="status" style={{ minHeight: 88, display: "grid", placeItems: "center", color: "#806B8D", fontSize: 11.5 }}>✨ Loading PlushGrowth…</div>;
