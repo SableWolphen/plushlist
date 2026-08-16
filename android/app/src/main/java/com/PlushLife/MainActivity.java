@@ -34,7 +34,24 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        SplashScreen.installSplashScreen(this);
+        // A task selected from Android Recents can recreate this Activity even
+        // when savedInstanceState is null (for example after the process was
+        // reclaimed). Applying the launch splash in that case makes a normal
+        // return to PlushLife look like a full app restart. Detect both normal
+        // state restoration and LAUNCHED_FROM_HISTORY before super.onCreate().
+        final boolean launchedFromHistory =
+            (getIntent().getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0;
+        final boolean restoringExistingTask = savedInstanceState != null || launchedFromHistory;
+
+        if (restoringExistingTask) {
+            // Bypass the splash theme entirely for a warm/task restore. The
+            // WebView or warm-start cache can paint the previous screen while
+            // Capacitor reconnects, instead of flashing the purple launch UI.
+            setTheme(R.style.AppTheme_NoActionBar);
+        } else {
+            SplashScreen.installSplashScreen(this);
+        }
+
         EdgeToEdge.enable(
             this,
             SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
@@ -56,10 +73,8 @@ public class MainActivity extends BridgeActivity {
 
         // Android/Samsung may destroy an activity while PlushLife is in the
         // background even though the task remains in Recents. Capacitor then
-        // builds a fresh WebView when the task is selected again, which looks
-        // like a random app restart and resets transient UI. Preserve the
-        // WebView navigation/scroll state so an activity recreation resumes
-        // where the user left off instead of visibly starting from scratch.
+        // builds a fresh WebView when the task is selected again. Restore any
+        // state Android gave us before falling back to the app's warm cache.
         if (savedInstanceState != null && bridge != null && bridge.getWebView() != null) {
             Bundle webViewState = savedInstanceState.getBundle(WEBVIEW_STATE_KEY);
             if (webViewState != null) {
@@ -67,11 +82,9 @@ public class MainActivity extends BridgeActivity {
             }
         }
 
-        // Only start a new Play update check on a genuine cold launch. An
-        // Android activity recreation should be a transparent resume, not an
-        // opportunity to start another external flow that can make the app
-        // appear to relaunch again.
-        if (savedInstanceState == null) {
+        // Only start a Play update check on a genuine cold launch. Returning
+        // from Recents should never start an external update flow.
+        if (!restoringExistingTask) {
             checkForUpdate();
         } else {
             appUpdateManager = AppUpdateManagerFactory.create(this);
