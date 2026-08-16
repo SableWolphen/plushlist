@@ -40,8 +40,10 @@ export function buildSmartTaskProfile({ row, learned = {}, load = {}, nowPeriod 
   const fragile = stability === "Fragile" || stability === "Recovering";
   const reliable = confidence === "strong" && completionRate !== null && completionRate >= 85 && stability === "Stable";
   const lowCapacityFit = estimatedMinutes > 0 && estimatedMinutes <= 10;
+  const quickWin = estimatedMinutes > 0 && estimatedMinutes <= 15;
   const highEffort = estimatedMinutes >= 30;
   const friction = String(learned.dominantMissReason || "");
+  const overloaded = String(load?.level || "") === "overloaded";
 
   let completionLikelihood = 50;
   if (completionRate !== null) completionLikelihood = completionRate;
@@ -73,6 +75,7 @@ export function buildSmartTaskProfile({ row, learned = {}, load = {}, nowPeriod 
     tinyLabel,
     preferredPeriod,
     preferredHour: learned.preferredHour ?? null,
+    nowPeriod: String(nowPeriod || ""),
     confidence,
     stability,
     completionRate,
@@ -82,8 +85,10 @@ export function buildSmartTaskProfile({ row, learned = {}, load = {}, nowPeriod 
     timingMatch,
     timingMismatch,
     lowCapacityFit,
+    quickWin,
     highEffort,
     reliable,
+    overloaded,
     suggestedVisible,
   };
 }
@@ -106,6 +111,7 @@ export function rankSmartTask({ profile, index = 0, lowCapacity = false, fallbac
   else if (profile.stability === "Fragile") reasons.push("it could use a little support");
 
   if (profile.timingMatch && profile.confidence !== "learning") reasons.push(`this is usually a good ${profile.preferredPeriod} task for you`);
+  if (profile.timingMismatch && profile.confidence !== "learning") score -= 4;
   if (profile.timingMismatch && profile.friction === "bad_timing") score -= 10;
 
   if (lowCapacity) {
@@ -114,6 +120,22 @@ export function rankSmartTask({ profile, index = 0, lowCapacity = false, fallbac
     if (profile.highEffort) score -= 12;
   }
 
+  // When the day is already crowded, prefer something finishable instead of
+  // blindly surfacing another large task. Essentials and Focus Habit still
+  // keep their stronger priority above this nudge.
+  if (profile.overloaded) {
+    if (profile.quickWin) { score += 9; reasons.push("it helps keep a crowded day manageable"); }
+    if (profile.highEffort) score -= 9;
+  }
+
+  // Late at night, avoid pushing a large task just because it ranked well
+  // earlier in the day. Small tasks can still be useful without creating a
+  // guilt-heavy end-of-day recommendation.
+  if (profile.nowPeriod === "night") {
+    if (profile.quickWin) { score += 5; reasons.push("it is a realistic size for this late in the day"); }
+    if (profile.highEffort) score -= 14;
+  }
+
   if (profile.reliable) score -= 3;
-  return { score, reasons };
+  return { score, reasons: [...new Set(reasons)] };
 }
