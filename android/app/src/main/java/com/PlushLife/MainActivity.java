@@ -20,6 +20,8 @@ import com.google.android.play.core.install.model.InstallStatus;
 import com.google.android.play.core.install.model.UpdateAvailability;
 
 public class MainActivity extends BridgeActivity {
+    private static final String WEBVIEW_STATE_KEY = "plushlife_webview_state";
+
     // Must be registered before the activity reaches STARTED, so this has to
     // be a field initializer rather than something called later from
     // onCreate/onResume.
@@ -31,22 +33,7 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        // Must run before super.onCreate() — this is what tells the system
-        // to actually dismiss the splash screen once the first frame draws,
-        // instead of leaving it (and the permanently-applied splash theme)
-        // in an undefined state.
         SplashScreen.installSplashScreen(this);
-        // The no-arg EdgeToEdge.enable(this) defaults both bars to
-        // SystemBarStyle.auto(...), whose nightMode is MODE_NIGHT_AUTO — and
-        // androidx's own EdgeToEdge implementation reads that to set
-        // window.isNavigationBarContrastEnforced = true, opting the app into
-        // Android's own non-customizable translucent scrim over the
-        // navigation bar. That's a platform-drawn overlay sitting on top of
-        // everything, which is why no theme, windowBackground, or WebView
-        // CSS change ever touched it. This app has no native dark chrome
-        // (colors.xml is deliberately day/night-agnostic), so pinning both
-        // bars to an explicit light style — not auto — keeps nightMode off
-        // MODE_NIGHT_AUTO and turns that enforced scrim off for good.
         EdgeToEdge.enable(
             this,
             SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
@@ -55,38 +42,41 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(NotificationPermissionPlugin.class);
         registerPlugin(BuildInfoPlugin.class);
         // Temporarily disabled along with the FOREGROUND_SERVICE_DATA_SYNC
-        // permission and <service> entry in AndroidManifest.xml — Google
-        // Play requires a policy declaration (description + demo video)
-        // for that permission that hasn't been submitted yet. The web app's
-        // own watch-sync code already checks for this plugin's presence
-        // before calling it, so leaving it unregistered safely turns the
-        // whole feature off without touching any other code.
+        // permission and <service> entry in AndroidManifest.xml.
         // registerPlugin(WatchSyncBridgePlugin.class);
         super.onCreate(savedInstanceState);
-        // Belt-and-suspenders: confirmed via a real device screenshot that a
-        // native black title bar (showing title_activity_main, "PlushLife")
-        // does persist, so the theme-level fix and postSplashScreenTheme
-        // handoff (see styles.xml) might still not be the whole story.
-        // getSupportActionBar() only covers an AppCompat-managed action bar;
-        // getActionBar() covers the plain framework one in case this turns
-        // out to be that instead. Both are no-ops if genuinely absent.
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
         if (getActionBar() != null) {
             getActionBar().hide();
         }
-        checkForUpdate();
+
+        // Android/Samsung may destroy an activity while PlushLife is in the
+        // background even though the task remains in Recents. Capacitor then
+        // builds a fresh WebView when the task is selected again, which looks
+        // like a random app restart and resets transient UI. Preserve the
+        // WebView navigation/scroll state so an activity recreation resumes
+        // where the user left off instead of visibly starting from scratch.
+        if (savedInstanceState != null && bridge != null && bridge.getWebView() != null) {
+            Bundle webViewState = savedInstanceState.getBundle(WEBVIEW_STATE_KEY);
+            if (webViewState != null) {
+                bridge.getWebView().restoreState(webViewState);
+            }
+        }
+
+        // Only start a new Play update check on a genuine cold launch. An
+        // Android activity recreation should be a transparent resume, not an
+        // opportunity to start another external flow that can make the app
+        // appear to relaunch again.
+        if (savedInstanceState == null) {
+            checkForUpdate();
+        } else {
+            appUpdateManager = AppUpdateManagerFactory.create(this);
+        }
     }
 
-    // Play's own background auto-update job can lag well behind a new
-    // release actually going live, leaving a device on a stale build
-    // indefinitely. Asking Play Store directly on every launch closes that
-    // gap. IMMEDIATE (a full-screen forced update) is tried first, but Play
-    // doesn't always allow it — depends on the release track and how the
-    // update was rolled out — and when it doesn't, silently doing nothing
-    // is exactly the "it never tells me to update" symptom. FLEXIBLE (a
-    // background download followed by a restart prompt) is the fallback.
     private void checkForUpdate() {
         appUpdateManager = AppUpdateManagerFactory.create(this);
         appUpdateManager.getAppUpdateInfo().addOnSuccessListener(info -> {
@@ -120,9 +110,6 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onResume() {
         super.onResume();
-        // Covers the case where a FLEXIBLE download already finished while
-        // the app was backgrounded — the listener above only fires on the
-        // transition into DOWNLOADED, not on an already-downloaded state.
         if (appUpdateManager != null) {
             appUpdateManager.getAppUpdateInfo().addOnSuccessListener(info -> {
                 if (info.installStatus() == InstallStatus.DOWNLOADED) {
@@ -130,6 +117,16 @@ public class MainActivity extends BridgeActivity {
                 }
             });
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        if (bridge != null && bridge.getWebView() != null) {
+            Bundle webViewState = new Bundle();
+            bridge.getWebView().saveState(webViewState);
+            outState.putBundle(WEBVIEW_STATE_KEY, webViewState);
+        }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
