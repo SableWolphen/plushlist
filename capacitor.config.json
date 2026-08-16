@@ -25,6 +25,9 @@
       "resize": "native",
       "resizeOnFullScreen": true
     },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_plushlife"
+    },
     "PushNotifications": {
       "presentationOptions": ["badge", "sound", "alert"]
     }
