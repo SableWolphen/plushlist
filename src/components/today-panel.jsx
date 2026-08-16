@@ -12,21 +12,21 @@ const LazyLowScreenToday = React.lazy(() => import("./habit-retention.jsx").then
 const LazyHabitBackgroundEngine = React.lazy(() => import("./habit-background-engine.jsx").then((module) => ({ default: module.HabitBackgroundEngine })));
 const LazySmartAdaptationPanel = React.lazy(() => import("./plush-knows-me-smart.jsx").then((module) => ({ default: module.SmartAdaptationPanel })));
 
-function StableFeatureTip({ BaseFeatureTip, id, text }) {
+function StableFeatureTip({ id, text }) {
   const storageKey = `plushlife:feature-tip-dismissed:${id}`;
   const [locallyDismissed, setLocallyDismissed] = React.useState(() => {
     try { return window.localStorage.getItem(storageKey) === "1"; }
     catch (_error) { return false; }
   });
 
-  if (locallyDismissed || !BaseFeatureTip) return null;
+  if (locallyDismissed) return null;
   return (
-    <div onClickCapture={(event) => {
-      if (!event.target?.closest?.("button")) return;
-      try { window.localStorage.setItem(storageKey, "1"); } catch (_error) {}
-      setLocallyDismissed(true);
-    }}>
-      <BaseFeatureTip id={id} text={text} />
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 9, padding: "8px 10px", borderRadius: 10, background: "#FFF9E9", border: "1px solid #F0D99E" }}>
+      <span style={{ fontSize: 11.5, lineHeight: 1.4, color: "#6B5A3D" }}>💡 {text}</span>
+      <button type="button" onClick={() => {
+        try { window.localStorage.setItem(storageKey, "1"); } catch (_error) {}
+        setLocallyDismissed(true);
+      }} aria-label="Dismiss tip" style={{ padding: "2px 6px", borderRadius: 7, border: "1px solid #F0D99E", background: "white", color: "#A56D14", fontWeight: 900, fontSize: 10.5, cursor: "pointer", flexShrink: 0 }}>Got it</button>
     </div>
   );
 }
@@ -100,8 +100,8 @@ export function TodayPanel(props) {
   const recentlyCompletedKeys = Array.from(new Set([...(props.recentlyCompletedKeys || []), ...lingerKeys]));
   const smartNextStep = useSmartNextStep({ rows: props.rows || [], viewDone: props.viewDone || {}, period: props.period, dailyCheckIn: props.dailyCheckIn || {}, fallbackTask: props.nextStepTask, recentlyCompletedKeys });
   const StableTip = React.useMemo(() => function StableTipComponent({ id, text }) {
-    return <StableFeatureTip BaseFeatureTip={props.FeatureTip} id={id} text={text} />;
-  }, [props.FeatureTip]);
+    return <StableFeatureTip id={id} text={text} />;
+  }, []);
 
   React.useEffect(() => { setSmartNextStepHidden(false); setMoreForTodayOpen(false); }, [props.period?.date]);
   const setNextStepDismissedToday = (hidden) => { props.setNextStepDismissedToday?.(hidden); setSmartNextStepHidden(Boolean(hidden)); };
