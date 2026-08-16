@@ -32,10 +32,16 @@ function caregiverScheduleText(label) {
 export function BabyToday({
   open,
   period,
-  nextStepTask,
-  nextStepHint,
+  day,
+  todayCardIndex = 1,
+  setTodayCardIndex,
+  taskWeekDates = [],
+  selectedProgressDate,
+  selectTaskPreviewDate,
+  selectedTaskDateLabel,
+  isFutureView = false,
+  isHistoricalView = false,
   toggle,
-  pickEasierSuggestion,
   selectDayType,
   restDatesSet,
   toggleRestToday,
@@ -44,11 +50,6 @@ export function BabyToday({
   recentlyCompletedKeys = [],
   completedLingerKeys = [],
   openTaskManager,
-  moveTaskGroup,
-  startPointerTaskDrag,
-  movePointerTaskDrag,
-  endPointerTaskDrag,
-  cancelPointerTaskDrag,
   openJournalForSelectedDate,
   activityDaysTotal = 0,
   careDaysTotal = 0,
@@ -56,14 +57,13 @@ export function BabyToday({
   trackerProfile,
   selectedSchedule,
   selectedScheduleExceptionEntries = [],
-  scheduleDayId,
   setCareSection,
   goToDashboard,
-  pct = 0,
 }) {
   const [showMore, setShowMore] = React.useState(false);
   if (!open) return null;
 
+  const accent = day?.accent || "#55BDE9";
   const allLittleJobs = rows.filter((row) => !row.isBonus);
   const lingering = new Set(recentlyCompletedKeys || []);
   const waiting = allLittleJobs.filter((row) => !viewDone[row.key] || lingering.has(row.key));
@@ -84,6 +84,7 @@ export function BabyToday({
   };
 
   const caregiver = babyCaregiverName || "Mommy";
+  const selectedDate = selectedProgressDate || period?.date;
 
   return (
     <div className="baby-today-simple" style={{ display: "grid", gap: 7, marginBottom: 8 }}>
@@ -92,44 +93,69 @@ export function BabyToday({
         <button type="button" onClick={toggleRestToday} style={{ ...softButton, minHeight: 32, padding: "5px 8px", fontSize: 10 }}>End rest</button>
       </section>}
 
-      <section aria-label="Little jobs" style={{ borderRadius: 14, background: "rgba(255,255,255,.76)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "9px 11px 7px" }}>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 12.5, color: "#76558A", fontWeight: 900 }}>🧸 {waiting.length ? `${waiting.length} little job${waiting.length === 1 ? "" : "s"}` : "All tucked in"}</div>
-            <div style={{ marginTop: 1, fontSize: 9.8, color: "#9A85A5", fontWeight: 700 }}>Everything for today, all in one place.</div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
-            {completedCount > 0 && <details style={{ position: "relative" }}>
-              <summary style={{ listStyle: "none", cursor: "pointer", color: "#806B8D", fontSize: 10, fontWeight: 900, padding: "4px 7px", borderRadius: 999, background: "#F7F0F9", border: "1px solid #E7DDEB" }}>✓ {completedCount}</summary>
-              <div style={{ position: "absolute", right: 0, zIndex: 20, width: "min(320px,78vw)", marginTop: 5, padding: 6, borderRadius: 12, background: "#FFF", border: "1px solid #E7DDEB", boxShadow: "0 12px 30px rgba(80,55,95,.18)" }}><CompletedTaskArea rows={allLittleJobs} viewDone={viewDone} lingerKeys={completedLingerKeys} toggle={toggle} title="Completed today" compact /></div>
-            </details>}
-            <button type="button" onClick={() => openTaskManager?.()} aria-label="Edit little jobs" title="Edit little jobs" style={{ width: 30, height: 30, padding: 0, borderRadius: 9, border: "1px solid #E2CDEB", background: "#FFF", color: "#806B8D", cursor: "pointer", fontSize: 14 }}>⚙️</button>
-          </div>
-        </div>
+      <div role="tablist" aria-label="Baby Mode view" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, padding: 4, borderRadius: 12, background: "#FFFFFF99", border: "1px solid #EADCEC" }}>
+        <button role="tab" aria-selected={todayCardIndex === 0} type="button" onClick={() => setTodayCardIndex?.(0)} style={{ minHeight: 42, padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 0 ? `${accent}22` : "transparent", color: todayCardIndex === 0 ? accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>🗓 Schedule</button>
+        <button role="tab" aria-selected={todayCardIndex === 1} type="button" onClick={() => setTodayCardIndex?.(1)} style={{ minHeight: 42, padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 1 ? `${accent}22` : "transparent", color: todayCardIndex === 1 ? accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>🧸 Little Jobs</button>
+      </div>
 
-        {waiting.length > 0 ? <div style={{ borderTop: "1px solid #F0E7F2" }}>
-          {waiting.map((task, index) => {
-            const doneNow = !!viewDone[task.key];
-            const section = task.isEveryday ? "Daily" : (task.section || "");
-            const previousTask = waiting[index - 1];
-            const previousSection = previousTask ? (previousTask.isEveryday ? "Daily" : (previousTask.section || "")) : null;
-            const showSection = !!section && section !== previousSection;
-            return <React.Fragment key={task.key}>
-              {showSection && <div style={{ padding: index === 0 ? "6px 11px 3px" : "7px 11px 3px", background: "#FCF8FD", color: "#A06AB0", fontSize: 8.8, lineHeight: 1.1, letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 900 }}>{section}</div>}
-              <button type="button" onClick={() => toggle(task.key)} aria-label={doneNow ? `Mark ${task.label} incomplete` : `Mark ${task.label} complete`} style={{ width: "100%", minHeight: 38, display: "grid", gridTemplateColumns: "22px minmax(0,1fr)", gap: 8, alignItems: "center", padding: "6px 11px", border: 0, borderTop: "1px solid #F4EDF5", background: doneNow ? "#FAF6FC" : "rgba(255,255,255,.72)", color: doneNow ? "#A081AD" : "#5B4B6B", textAlign: "left", cursor: "pointer", fontFamily: "inherit" }}>
-                <span aria-hidden="true" style={{ boxSizing: "border-box", width: 20, height: 20, borderRadius: "50%", border: doneNow ? "2px solid #A65DC1" : "2px solid #B878CB", background: doneNow ? "#A65DC1" : "white", color: "white", display: "grid", placeItems: "center", fontSize: 11, fontWeight: 900 }}>{doneNow ? "✓" : ""}</span>
-                <span style={{ minWidth: 0, fontSize: 11.6, lineHeight: 1.25, fontWeight: 800, textDecoration: doneNow ? "line-through" : "none", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{task.label}</span>
-              </button>
-            </React.Fragment>;
+      {todayCardIndex === 1 && taskWeekDates.length > 0 && <>
+        <div role="tablist" aria-label="Little jobs week" style={{ display: "grid", gridTemplateColumns: "repeat(7,minmax(0,1fr))", gap: 4, padding: 5, borderRadius: 13, background: "rgba(255,255,255,.72)", border: "1px solid #EADCEC" }}>
+          {taskWeekDates.map((date) => {
+            const selected = selectedDate === date;
+            const isTodayDate = date === period?.date;
+            const isUpcomingDate = period?.date ? date > period.date : false;
+            const dateValue = new Date(`${date}T12:00:00Z`);
+            const shortDay = dateValue.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }).slice(0, 2);
+            const dayNumber = dateValue.toLocaleDateString("en-US", { day: "numeric", timeZone: "UTC" });
+            const fullDay = dateValue.toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" });
+            return <button key={date} role="tab" aria-selected={selected} type="button" onClick={() => selectTaskPreviewDate?.(date)} title={`${fullDay}${isTodayDate ? " · Today" : isUpcomingDate ? " · Preview" : ""}`} style={{ minWidth: 0, minHeight: 48, padding: "5px 2px", borderRadius: 9, border: selected ? `2px solid ${accent}` : "1px solid transparent", background: selected ? `${accent}18` : "transparent", color: selected ? accent : "#806B8D", cursor: "pointer", display: "grid", placeItems: "center", alignContent: "center", gap: 1, position: "relative" }}>
+              <span style={{ fontSize: 9.5, fontWeight: 900, letterSpacing: ".04em", textTransform: "uppercase" }}>{shortDay}</span>
+              <span style={{ fontSize: 12, fontWeight: 900, lineHeight: 1 }}>{dayNumber}</span>
+              {isTodayDate && <span aria-hidden="true" style={{ position: "absolute", bottom: 2, fontSize: 9, lineHeight: 1, color: accent }}>●</span>}
+            </button>;
           })}
-        </div> : <div style={{ padding: "8px 11px 10px", color: "#806B8D", fontSize: 11 }}>Everything is tucked in. 💜</div>}
-      </section>
+        </div>
+        {isFutureView && <div style={{ padding: "8px 10px", borderRadius: 11, background: "#F7F2FB", border: "1px solid #E6D4F2", color: "#765F84", fontSize: 11.5, lineHeight: 1.4 }}><strong>{selectedTaskDateLabel || "Upcoming day"} preview</strong> · You can look ahead now. Checkboxes unlock when that day arrives.</div>}
+      </>}
 
-      <button type="button" onClick={openCare} style={{ ...softButton, minHeight: 38, width: "100%", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, background: "rgba(255,255,255,.88)" }}>
-        🧸 I need a little help
-      </button>
+      {todayCardIndex === 1 && <>
+        <section aria-label="Little jobs" style={{ borderRadius: 14, background: "rgba(255,255,255,.76)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "9px 11px 7px" }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 12.5, color: "#76558A", fontWeight: 900 }}>🧸 {waiting.length ? `${waiting.length} little job${waiting.length === 1 ? "" : "s"}` : "All tucked in"}</div>
+              <div style={{ marginTop: 1, fontSize: 9.8, color: "#9A85A5", fontWeight: 700 }}>{isFutureView ? `${selectedTaskDateLabel || "That day"} at a glance.` : isHistoricalView ? `${selectedTaskDateLabel || "That day"} in your history.` : "Everything for today, all in one place."}</div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+              {completedCount > 0 && <details style={{ position: "relative" }}>
+                <summary style={{ listStyle: "none", cursor: "pointer", minWidth: 38, minHeight: 32, display: "grid", placeItems: "center", color: "#806B8D", fontSize: 10, fontWeight: 900, padding: "4px 7px", borderRadius: 9, background: "#F7F0F9", border: "1px solid #E7DDEB" }}>✓ {completedCount}</summary>
+                <div style={{ position: "absolute", right: 0, zIndex: 20, width: "min(320px,78vw)", marginTop: 5, padding: 6, borderRadius: 12, background: "#FFF", border: "1px solid #E7DDEB", boxShadow: "0 12px 30px rgba(80,55,95,.18)" }}><CompletedTaskArea rows={allLittleJobs} viewDone={viewDone} lingerKeys={completedLingerKeys} toggle={toggle} title="Completed" compact /></div>
+              </details>}
+              <button type="button" onClick={() => openTaskManager?.()} aria-label="Edit little jobs" title="Edit little jobs" style={{ width: 38, height: 32, padding: 0, borderRadius: 9, border: "1px solid #E2CDEB", background: "#FFF", color: "#806B8D", cursor: "pointer", fontSize: 14 }}>⚙️</button>
+            </div>
+          </div>
 
-      {babyScheduleEntries.length > 0 && <section aria-label={`${caregiver}'s gentle schedule`} style={{ padding: 12, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: "1px solid #D9E5F1" }}>
+          {waiting.length > 0 ? <div style={{ borderTop: "1px solid #F0E7F2" }}>
+            {waiting.map((task, index) => {
+              const doneNow = !!viewDone[task.key];
+              const section = task.isEveryday ? "Daily" : (task.section || "");
+              const previousTask = waiting[index - 1];
+              const previousSection = previousTask ? (previousTask.isEveryday ? "Daily" : (previousTask.section || "")) : null;
+              const showSection = !!section && section !== previousSection;
+              return <React.Fragment key={task.key}>
+                {showSection && <div style={{ padding: index === 0 ? "6px 11px 3px" : "7px 11px 3px", background: "#FCF8FD", color: "#A06AB0", fontSize: 8.8, lineHeight: 1.1, letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 900 }}>{section}</div>}
+                <button type="button" disabled={isFutureView} onClick={() => !isFutureView && toggle(task.key)} aria-label={doneNow ? `Mark ${task.label} incomplete` : `Mark ${task.label} complete`} style={{ width: "100%", minHeight: 38, display: "grid", gridTemplateColumns: "22px minmax(0,1fr)", gap: 8, alignItems: "center", padding: "6px 11px", border: 0, borderTop: "1px solid #F4EDF5", background: doneNow ? "#FAF6FC" : "rgba(255,255,255,.72)", color: doneNow ? "#A081AD" : "#5B4B6B", textAlign: "left", cursor: isFutureView ? "default" : "pointer", opacity: isFutureView ? .68 : 1, fontFamily: "inherit" }}>
+                  <span aria-hidden="true" style={{ boxSizing: "border-box", width: 20, height: 20, borderRadius: "50%", border: doneNow ? "2px solid #A65DC1" : "2px solid #B878CB", background: doneNow ? "#A65DC1" : "white", color: "white", display: "grid", placeItems: "center", fontSize: 11, fontWeight: 900 }}>{doneNow ? "✓" : ""}</span>
+                  <span style={{ minWidth: 0, fontSize: 11.6, lineHeight: 1.25, fontWeight: 800, textDecoration: doneNow ? "line-through" : "none", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{task.label}</span>
+                </button>
+              </React.Fragment>;
+            })}
+          </div> : <div style={{ padding: "8px 11px 10px", color: "#806B8D", fontSize: 11 }}>Everything is tucked in. 💜</div>}
+        </section>
+
+        {!isFutureView && <button type="button" onClick={openCare} style={{ ...softButton, minHeight: 38, width: "100%", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, background: "rgba(255,255,255,.88)" }}>🧸 I need a little help</button>}
+      </>}
+
+      {todayCardIndex === 0 && (babyScheduleEntries.length > 0 ? <section aria-label={`${caregiver}'s gentle schedule`} style={{ padding: 12, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: "1px solid #D9E5F1" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 11, letterSpacing: ".16em", color: "#4A80B5", fontWeight: 900 }}>🗓️ {caregiver.toUpperCase()}’S LITTLE PLAN</div>
@@ -146,7 +172,7 @@ export function BabyToday({
             </div>;
           })}
         </div>
-      </section>}
+      </section> : <section style={{ padding: 14, borderRadius: 16, background: "rgba(255,255,255,.65)", border: "1px dashed #C9B3DC", textAlign: "center" }}><div style={{ fontSize: 11, fontWeight: 900, color: "#806B8D" }}>🗓 No little plan yet</div><div style={{ marginTop: 4, fontSize: 10.5, color: "#9A85A5" }}>Your schedule will show here when you add one.</div></section>)}
 
       <section style={{ borderRadius: 12, background: "rgba(255,255,255,.56)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
         <button type="button" onClick={() => setShowMore((value) => !value)} aria-expanded={showMore} style={{ width: "100%", minHeight: 36, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "7px 10px", border: 0, background: "transparent", color: "#76558A", fontWeight: 900, fontSize: 10.5, cursor: "pointer" }}>
@@ -157,7 +183,7 @@ export function BabyToday({
           <details style={{ borderRadius: 11, background: "rgba(255,255,255,.72)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
             <summary style={{ listStyle: "none", minHeight: 36, padding: "8px 9px", color: "#76558A", fontWeight: 900, fontSize: 10.5, cursor: "pointer" }}>🧸 Cozy care corner</summary>
             <div style={{ padding: "0 7px 7px" }}>
-              <BabyModeCareSuite date={period?.date || ""} todayDone={rows.filter((row) => !!viewDone[row.key] && !row.isBonus).length} todayTotal={rows.filter((row) => !row.isBonus).length} activityDays={activityDaysTotal} careDays={careDaysTotal} caregiverName={babyCaregiverName} comfortItemName={comfortItem} littleJobs={waiting.filter((row) => !viewDone[row.key])} onCompleteTask={toggle} onManageTasks={openTaskManager} onOpenJournal={openJournalForSelectedDate} />
+              <BabyModeCareSuite date={selectedDate || ""} todayDone={allLittleJobs.filter((row) => !!viewDone[row.key]).length} todayTotal={allLittleJobs.length} activityDays={activityDaysTotal} careDays={careDaysTotal} caregiverName={babyCaregiverName} comfortItemName={comfortItem} littleJobs={waiting.filter((row) => !viewDone[row.key])} onCompleteTask={toggle} onManageTasks={openTaskManager} onOpenJournal={openJournalForSelectedDate} />
             </div>
           </details>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 5 }}>
