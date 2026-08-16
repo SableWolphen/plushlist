@@ -60,8 +60,8 @@ export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckI
 
     const winner = ranked[0];
     const reason = winner.reasons.length
-      ? `PlushLife picked this because ${winner.reasons.slice(0, 2).join(" and ")}.`
-      : "PlushLife picked this from the unfinished things that matter today.";
+      ? `A good next step because ${winner.reasons.slice(0, 2).join(" and ")}.`
+      : "A useful unfinished thing for right now — no need to look at the whole day at once.";
     return { task: winner.row, reason };
   }, [rows, viewDone, period?.date, dailyCheckIn?.energy, dailyCheckIn?.capacity, fallbackTask?.key, recentlyCompletedKeys, revision]);
 }
