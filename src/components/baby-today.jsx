@@ -1,5 +1,3 @@
-import { BabyModeCareSuite } from "./baby-mode.jsx";
-import { BabyHabitAnchor } from "./habit-intelligence.jsx";
 import { CompletedTaskArea } from "./completed-task-flow.jsx";
 
 const softButton = {
@@ -42,7 +40,6 @@ export function BabyToday({
   isFutureView = false,
   isHistoricalView = false,
   toggle,
-  selectDayType,
   restDatesSet,
   toggleRestToday,
   rows = [],
@@ -50,9 +47,6 @@ export function BabyToday({
   recentlyCompletedKeys = [],
   completedLingerKeys = [],
   openTaskManager,
-  openJournalForSelectedDate,
-  activityDaysTotal = 0,
-  careDaysTotal = 0,
   babyCaregiverName = "Mommy",
   trackerProfile,
   selectedSchedule,
@@ -60,7 +54,6 @@ export function BabyToday({
   setCareSection,
   goToDashboard,
 }) {
-  const [showMore, setShowMore] = React.useState(false);
   if (!open) return null;
 
   const accent = day?.accent || "#55BDE9";
@@ -173,29 +166,6 @@ export function BabyToday({
           })}
         </div>
       </section> : <section style={{ padding: 14, borderRadius: 16, background: "rgba(255,255,255,.65)", border: "1px dashed #C9B3DC", textAlign: "center" }}><div style={{ fontSize: 11, fontWeight: 900, color: "#806B8D" }}>🗓 No little plan yet</div><div style={{ marginTop: 4, fontSize: 10.5, color: "#9A85A5" }}>Your schedule will show here when you add one.</div></section>)}
-
-      <section style={{ borderRadius: 12, background: "rgba(255,255,255,.56)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
-        <button type="button" onClick={() => setShowMore((value) => !value)} aria-expanded={showMore} style={{ width: "100%", minHeight: 36, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "7px 10px", border: 0, background: "transparent", color: "#76558A", fontWeight: 900, fontSize: 10.5, cursor: "pointer" }}>
-          <span>🌈 More when I’m ready</span><span aria-hidden="true">{showMore ? "▾" : "›"}</span>
-        </button>
-        {showMore && <div style={{ padding: "0 8px 8px", display: "grid", gap: 6 }}>
-          <BabyHabitAnchor open={open} rows={rows} viewDone={viewDone} period={period} toggle={toggle} />
-          <details style={{ borderRadius: 11, background: "rgba(255,255,255,.72)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
-            <summary style={{ listStyle: "none", minHeight: 36, padding: "8px 9px", color: "#76558A", fontWeight: 900, fontSize: 10.5, cursor: "pointer" }}>🧸 Cozy care corner</summary>
-            <div style={{ padding: "0 7px 7px" }}>
-              <BabyModeCareSuite date={selectedDate || ""} todayDone={allLittleJobs.filter((row) => !!viewDone[row.key]).length} todayTotal={allLittleJobs.length} activityDays={activityDaysTotal} careDays={careDaysTotal} caregiverName={babyCaregiverName} comfortItemName={comfortItem} littleJobs={waiting.filter((row) => !viewDone[row.key])} onCompleteTask={toggle} onManageTasks={openTaskManager} onOpenJournal={openJournalForSelectedDate} />
-            </div>
-          </details>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 5 }}>
-            <button type="button" onClick={() => selectDayType?.("soft")} style={softButton}>🌼 Soft</button>
-            <button type="button" onClick={() => selectDayType?.("tiny")} style={softButton}>🌱 Tiny</button>
-            <button type="button" onClick={() => goToDashboard?.("week")} style={softButton}>🗓 Plan</button>
-            <button type="button" onClick={() => openJournalForSelectedDate?.()} style={softButton}>📖 Journal</button>
-            <button type="button" onClick={() => goToDashboard?.("progress")} style={softButton}>📈 Progress</button>
-            <button type="button" onClick={() => openTaskManager?.()} style={softButton}>⚙️ Tasks</button>
-          </div>
-        </div>}
-      </section>
     </div>
   );
 }
