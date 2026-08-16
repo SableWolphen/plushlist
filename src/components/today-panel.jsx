@@ -18,16 +18,8 @@ function StableFeatureTip({ BaseFeatureTip, id, text }) {
     try { return window.localStorage.getItem(storageKey) === "1"; }
     catch (_error) { return false; }
   });
-  const [ready, setReady] = React.useState(false);
 
-  React.useEffect(() => {
-    if (locallyDismissed) return undefined;
-    setReady(false);
-    const timer = window.setTimeout(() => setReady(true), 1800);
-    return () => window.clearTimeout(timer);
-  }, [locallyDismissed, id]);
-
-  if (locallyDismissed || !ready || !BaseFeatureTip) return null;
+  if (locallyDismissed || !BaseFeatureTip) return null;
   return (
     <div onClickCapture={(event) => {
       if (!event.target?.closest?.("button")) return;
