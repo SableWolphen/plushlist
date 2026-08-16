@@ -129,11 +129,23 @@ public class MainActivity extends BridgeActivity {
         super.onSaveInstanceState(outState);
     }
 
+    private boolean isWidgetTaskIntent(Intent intent) {
+        if (intent == null) return false;
+        if (intent.hasExtra("plushlifeTaskKey") || intent.hasExtra("plushlifeTaskAction")) return true;
+        String action = intent.getAction();
+        return action != null && action.startsWith("com.PlushLife.WIDGET_DONE_");
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        if (bridge != null && bridge.getWebView() != null) {
+
+        // singleTask means tapping the launcher while PlushLife is already
+        // alive arrives here too. Only notify the web app for an actual
+        // widget task action; ordinary launcher/home-screen taps should just
+        // bring the existing activity forward without re-running app logic.
+        if (isWidgetTaskIntent(intent) && bridge != null && bridge.getWebView() != null) {
             bridge.getWebView().post(() -> bridge.getWebView().evaluateJavascript("document.dispatchEvent(new CustomEvent('plushlife-widget-action'))", null));
         }
     }
