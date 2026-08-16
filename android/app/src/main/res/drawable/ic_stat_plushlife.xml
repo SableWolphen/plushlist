@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Rounded plush ears -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M6.2,8.2a3.2,3.2 0,1 1,2.4,-5.3" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M17.8,8.2a3.2,3.2 0,1 0,-2.4,-5.3" />
+
+    <!-- Plush face outline -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M12,4.8C6.7,4.8 3.4,8.5 3.4,13.1C3.4,18.2 7.1,21.2 12,21.2C16.9,21.2 20.6,18.2 20.6,13.1C20.6,8.5 17.3,4.8 12,4.8Z" />
+
+    <!-- Eyes -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M8.7,11.7m-1.1,0a1.1,1.1 0,1 0,2.2,0a1.1,1.1 0,1 0,-2.2,0" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M15.3,11.7m-1.1,0a1.1,1.1 0,1 0,2.2,0a1.1,1.1 0,1 0,-2.2,0" />
+
+    <!-- Tiny plush nose -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M12,14.2C11.1,14.2 10.5,14.7 10.5,15.3C10.5,16.0 11.2,16.5 12,16.5C12.8,16.5 13.5,16.0 13.5,15.3C13.5,14.7 12.9,14.2 12,14.2Z" />
+
+    <!-- Friendly little mouth -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="1.7"
+        android:strokeLineCap="round"
+        android:pathData="M12,16.2C11.6,17.2 10.8,17.7 9.9,17.7M12,16.2C12.4,17.2 13.2,17.7 14.1,17.7" />
+</vector>
