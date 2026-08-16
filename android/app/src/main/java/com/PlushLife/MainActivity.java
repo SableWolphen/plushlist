@@ -9,7 +9,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.splashscreen.SplashScreen;
 import com.getcapacitor.BridgeActivity;
 import com.google.android.play.core.appupdate.AppUpdateManager;
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
@@ -22,9 +21,6 @@ import com.google.android.play.core.install.model.UpdateAvailability;
 public class MainActivity extends BridgeActivity {
     private static final String WEBVIEW_STATE_KEY = "plushlife_webview_state";
 
-    // Must be registered before the activity reaches STARTED, so this has to
-    // be a field initializer rather than something called later from
-    // onCreate/onResume.
     private final ActivityResultLauncher<IntentSenderRequest> updateLauncher =
         registerForActivityResult(new ActivityResultContracts.StartIntentSenderForResult(), result -> {});
 
@@ -34,24 +30,15 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        // A task selected from Android Recents can recreate this Activity even
-        // when savedInstanceState is null (for example after the process was
-        // reclaimed). Applying the launch splash in that case makes a normal
-        // return to PlushLife look like a full app restart. Detect both normal
-        // state restoration and LAUNCHED_FROM_HISTORY before super.onCreate().
         final boolean launchedFromHistory =
             (getIntent().getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0;
         final boolean restoringExistingTask = savedInstanceState != null || launchedFromHistory;
 
-        if (restoringExistingTask) {
-            // Bypass the splash theme entirely for a warm/task restore. The
-            // WebView or warm-start cache can paint the previous screen while
-            // Capacitor reconnects, instead of flashing the purple launch UI.
-            setTheme(R.style.AppTheme_NoActionBar);
-        } else {
-            SplashScreen.installSplashScreen(this);
-        }
-
+        // MainActivity deliberately uses the normal no-action-bar theme in
+        // AndroidManifest.xml. A native splash starting window is created
+        // before onCreate(), so trying to suppress it here during a Recents
+        // restore is too late. PlushLife's web boot shell handles cold-start
+        // loading instead, which avoids a fake purple relaunch on warm return.
         EdgeToEdge.enable(
             this,
             SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
@@ -71,10 +58,6 @@ public class MainActivity extends BridgeActivity {
             getActionBar().hide();
         }
 
-        // Android/Samsung may destroy an activity while PlushLife is in the
-        // background even though the task remains in Recents. Capacitor then
-        // builds a fresh WebView when the task is selected again. Restore any
-        // state Android gave us before falling back to the app's warm cache.
         if (savedInstanceState != null && bridge != null && bridge.getWebView() != null) {
             Bundle webViewState = savedInstanceState.getBundle(WEBVIEW_STATE_KEY);
             if (webViewState != null) {
@@ -82,8 +65,6 @@ public class MainActivity extends BridgeActivity {
             }
         }
 
-        // Only start a Play update check on a genuine cold launch. Returning
-        // from Recents should never start an external update flow.
         if (!restoringExistingTask) {
             checkForUpdate();
         } else {
