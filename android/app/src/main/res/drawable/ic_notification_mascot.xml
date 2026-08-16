@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Simplified PlushLife mascot for Android's monochrome status bar. -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M13,4A9,9 0,1 1,13,22A9,9 0,1 1,13,4M13,8A5,5 0,1 0,13,18A5,5 0,1 0,13,8M35,4A9,9 0,1 1,35,22A9,9 0,1 1,35,4M35,8A5,5 0,1 0,35,18A5,5 0,1 0,35,8" />
+
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M24,9C13.5,9 6,17 6,28C6,38.5 13.5,44 24,44C34.5,44 42,38.5 42,28C42,17 34.5,9 24,9ZM17,22A3.4,3.4 0,1 0,17,28.8A3.4,3.4 0,1 0,17,22ZM31,22A3.4,3.4 0,1 0,31,28.8A3.4,3.4 0,1 0,31,22ZM24,29.2C21.6,29.2 20.2,30.6 20.2,32.4C20.2,34 21.5,35.1 24,35.1C26.5,35.1 27.8,34 27.8,32.4C27.8,30.6 26.4,29.2 24,29.2Z" />
+</vector>
