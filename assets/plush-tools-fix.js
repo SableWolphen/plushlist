@@ -34,15 +34,20 @@
     }
     [data-plushlife-task-card="list-picker"] {
       border-width: 1px !important;
+      background: linear-gradient(145deg,#fffafd,#f8fbff) !important;
     }
     [data-plushlife-task-card="list-picker"] [data-plushlife-day-grid] {
-      gap: 5px !important;
+      gap: 6px !important;
       margin-top: 8px !important;
     }
     [data-plushlife-task-card="list-picker"] [data-plushlife-day-grid] button {
       min-height: 38px !important;
       padding: 6px 4px !important;
-      border-radius: 10px !important;
+      border-radius: 11px !important;
+      box-shadow: 0 3px 10px rgba(118,85,138,.05) !important;
+    }
+    [data-plushlife-task-card="starter-pack"] {
+      background: linear-gradient(145deg,#f7fcfa,#fbfffd) !important;
     }
     [data-plushlife-task-card="starter-pack"] [data-plushlife-starter-intro] {
       display: none !important;
@@ -72,6 +77,7 @@
     [data-plushlife-task-card="import"] {
       padding: 0 !important;
       overflow: hidden !important;
+      background: rgba(255,255,255,.76) !important;
     }
     [data-plushlife-task-card="import"] > button:first-child {
       min-height: 42px !important;
@@ -80,10 +86,180 @@
     [data-plushlife-task-card="add-task"] {
       padding-top: 11px !important;
     }
+    [data-plushlife-task-card="add-task"] > button:last-of-type {
+      min-height: 42px !important;
+    }
     [data-plushlife-task-card] input,
     [data-plushlife-task-card] select,
     [data-plushlife-task-card] textarea {
       font-size: 16px !important;
+    }
+
+    [data-plushlife-natural-schedule] {
+      display: none !important;
+      margin-top: 6px !important;
+    }
+    [data-plushlife-natural-schedule][data-open="true"] {
+      display: block !important;
+    }
+    [data-plushlife-natural-toggle] {
+      width: 100% !important;
+      min-height: 40px !important;
+      margin-top: 8px !important;
+      padding: 8px 10px !important;
+      border-radius: 10px !important;
+      border: 1px solid #cfe3f7 !important;
+      background: #f8fbff !important;
+      color: #527aa4 !important;
+      font-weight: 800 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 8px !important;
+    }
+
+    [data-plushlife-task-card="task-list"] {
+      padding: 11px !important;
+      background: linear-gradient(145deg,#fbfffd,#fffafd) !important;
+    }
+    [data-plushlife-task-card="task-list"] > input {
+      margin-top: 7px !important;
+      min-height: 40px !important;
+      padding: 8px 10px !important;
+    }
+    [data-plushlife-drag-help] {
+      padding: 6px 9px !important;
+      border-radius: 9px !important;
+      font-size: 10.5px !important;
+      background: #f2faf7 !important;
+      border-color: #d8ebe5 !important;
+      color: #4c8377 !important;
+    }
+    [data-plushlife-section-card] {
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      border-radius: 0 !important;
+    }
+    [data-plushlife-section-card] > div:first-child {
+      margin: 7px 2px 5px !important;
+    }
+    [data-plushlife-section-card] [data-plushlife-task-row-container] {
+      gap: 0 !important;
+      border: 1px solid #e8deec !important;
+      border-radius: 12px !important;
+      overflow: hidden !important;
+      background: rgba(255,255,255,.82) !important;
+    }
+    [data-plushlife-task-row] {
+      min-height: 48px !important;
+      padding: 7px 8px !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: rgba(255,255,255,.82) !important;
+      flex-wrap: nowrap !important;
+      gap: 7px !important;
+      box-shadow: none !important;
+    }
+    [data-plushlife-task-row] + [data-plushlife-task-row] {
+      border-top: 1px solid #f0e8f2 !important;
+    }
+    [data-plushlife-task-row] > button[aria-label^="Reorder"] {
+      width: 24px !important;
+      min-width: 24px !important;
+      height: 36px !important;
+      min-height: 36px !important;
+      border: 0 !important;
+      background: transparent !important;
+      color: #aa96b4 !important;
+      font-size: 15px !important;
+    }
+    [data-plushlife-task-row] > div {
+      flex: 1 1 auto !important;
+    }
+    [data-plushlife-task-row] > div > div:first-child {
+      font-size: 11.8px !important;
+      line-height: 1.25 !important;
+    }
+    [data-plushlife-task-row] > div > div:nth-child(2) {
+      font-size: 9.8px !important;
+      margin-top: 1px !important;
+    }
+    [data-plushlife-task-row] > button[data-plushlife-edit] {
+      padding: 5px 7px !important;
+      border: 0 !important;
+      background: transparent !important;
+      color: #9b59b6 !important;
+      font-size: 10.5px !important;
+    }
+    [data-plushlife-task-row] > select[data-plushlife-more-action],
+    [data-plushlife-task-row] > button[data-plushlife-more-action] {
+      display: none !important;
+    }
+    [data-plushlife-task-row][data-more-open="true"] {
+      flex-wrap: wrap !important;
+      background: #fffdfd !important;
+    }
+    [data-plushlife-task-row][data-more-open="true"] > select[data-plushlife-more-action],
+    [data-plushlife-task-row][data-more-open="true"] > button[data-plushlife-more-action] {
+      display: inline-flex !important;
+      min-height: 34px !important;
+      padding: 5px 8px !important;
+      font-size: 10px !important;
+    }
+    [data-plushlife-more-toggle] {
+      flex: 0 0 auto !important;
+      width: 34px !important;
+      min-width: 34px !important;
+      height: 34px !important;
+      padding: 0 !important;
+      border-radius: 9px !important;
+      border: 1px solid #e8deec !important;
+      background: #faf7fc !important;
+      color: #76558a !important;
+      font-size: 18px !important;
+      line-height: 1 !important;
+      cursor: pointer !important;
+    }
+
+    .baby-today-simple {
+      gap: 7px !important;
+    }
+    .baby-today-simple section[aria-label="Little jobs"] {
+      border-radius: 15px !important;
+      overflow: hidden !important;
+    }
+    .baby-today-simple section[aria-label="Little jobs"] > div:first-child {
+      padding: 9px 11px 7px !important;
+    }
+    .baby-today-simple section[aria-label="Little jobs"] details > summary,
+    .baby-today-simple section[aria-label="Little jobs"] button[aria-label="Edit little jobs"] {
+      min-width: 34px !important;
+      width: auto !important;
+      height: 34px !important;
+      min-height: 34px !important;
+      padding: 5px 8px !important;
+      border-radius: 10px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .baby-today-simple section[aria-label="Little jobs"] button[aria-label="Edit little jobs"] {
+      width: 34px !important;
+      padding: 0 !important;
+    }
+    .baby-today-simple section[aria-label="Little jobs"] button:not([aria-label="Edit little jobs"]) {
+      min-height: 38px !important;
+    }
+    .baby-today-simple > button {
+      min-height: 38px !important;
+      border-radius: 12px !important;
+    }
+
+    @media (max-width: 520px) {
+      [data-plushlife-task-card] { padding: 10px !important; }
+      [data-plushlife-task-card="starter-pack"] [data-plushlife-pack-preview] { font-size: 11px !important; }
+      [data-plushlife-task-row] { min-height: 46px !important; }
     }
   `;
   document.head.appendChild(compactHomeStyle);
@@ -92,9 +268,6 @@
     const panels = Array.from(document.querySelectorAll('[role="dialog"], aside, [class*="panel"], [class*="modal"], body > div'));
     const panel = panels.find((node) => visible(node) && clean(node.textContent).includes("change my tasks") && clean(node.textContent).includes("step 1 · choose a list"));
     if (!panel) return;
-
-    const divs = Array.from(panel.querySelectorAll("div"));
-    const exactCard = (phrase) => divs.find((node) => clean(node.firstElementChild?.textContent || "") === clean(phrase));
 
     const listHeading = Array.from(panel.querySelectorAll("div")).find((node) => clean(node.textContent) === "step 1 · choose a list");
     const listCard = listHeading?.parentElement;
@@ -122,7 +295,64 @@
 
     const addHeading = Array.from(panel.querySelectorAll("div")).find((node) => clean(node.textContent) === "step 2 · add a task");
     const addCard = addHeading?.parentElement;
-    if (addCard) addCard.dataset.plushlifeTaskCard = "add-task";
+    if (addCard) {
+      addCard.dataset.plushlifeTaskCard = "add-task";
+      const scheduleLabel = Array.from(addCard.querySelectorAll("label")).find((node) => clean(node.textContent).startsWith("say when it should happen"));
+      const scheduleBox = scheduleLabel?.parentElement;
+      if (scheduleBox) {
+        scheduleBox.dataset.plushlifeNaturalSchedule = "true";
+        if (!scheduleBox.dataset.open) scheduleBox.dataset.open = "false";
+        if (!addCard.querySelector("[data-plushlife-natural-toggle]")) {
+          const toggle = document.createElement("button");
+          toggle.type = "button";
+          toggle.dataset.plushlifeNaturalToggle = "true";
+          toggle.innerHTML = '<span>🕒 Say when it should happen <small style="font-weight:600">· Optional</small></span><span>⌄</span>';
+          toggle.addEventListener("click", () => {
+            const open = scheduleBox.dataset.open === "true";
+            scheduleBox.dataset.open = open ? "false" : "true";
+            toggle.lastElementChild.textContent = open ? "⌄" : "⌃";
+          });
+          scheduleBox.parentElement.insertBefore(toggle, scheduleBox);
+        }
+      }
+    }
+
+    const step3Heading = Array.from(panel.querySelectorAll("div")).find((node) => clean(node.textContent).startsWith("step 3 · edit or delete"));
+    const step3Card = step3Heading?.parentElement;
+    if (step3Card) {
+      step3Card.dataset.plushlifeTaskCard = "task-list";
+      const dragHelp = Array.from(step3Card.querySelectorAll("div")).find((node) => clean(node.textContent).startsWith("↕️ drag the") || clean(node.textContent).startsWith("drag the"));
+      if (dragHelp) dragHelp.dataset.plushlifeDragHelp = "true";
+      step3Card.querySelectorAll("section[data-plushlife-task-drop-section]").forEach((section) => {
+        section.dataset.plushlifeSectionCard = "true";
+      });
+      step3Card.querySelectorAll("[data-plushlife-task-drop-key]").forEach((row) => {
+        row.dataset.plushlifeTaskRow = "true";
+        const buttons = Array.from(row.querySelectorAll(":scope > button"));
+        const edit = buttons.find((button) => clean(button.getAttribute("aria-label")).startsWith("edit "));
+        if (edit) edit.dataset.plushlifeEdit = "true";
+        Array.from(row.querySelectorAll(":scope > select")).forEach((select) => { select.dataset.plushlifeMoreAction = "true"; });
+        buttons.forEach((button) => {
+          const label = clean(button.getAttribute("aria-label"));
+          if (label.startsWith("pause ") || label.startsWith("resume ") || label.startsWith("archive ") || label.startsWith("delete ")) button.dataset.plushlifeMoreAction = "true";
+        });
+        if (!row.querySelector("[data-plushlife-more-toggle]")) {
+          const more = document.createElement("button");
+          more.type = "button";
+          more.dataset.plushlifeMoreToggle = "true";
+          more.setAttribute("aria-label", "More task actions");
+          more.textContent = "⋯";
+          more.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const isOpen = row.dataset.moreOpen === "true";
+            step3Card.querySelectorAll('[data-plushlife-task-row][data-more-open="true"]').forEach((other) => { if (other !== row) other.dataset.moreOpen = "false"; });
+            row.dataset.moreOpen = isOpen ? "false" : "true";
+          });
+          row.appendChild(more);
+        }
+      });
+    }
   }
 
   markTaskManager();
