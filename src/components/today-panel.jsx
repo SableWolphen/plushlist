@@ -12,6 +12,33 @@ const LazyLowScreenToday = React.lazy(() => import("./habit-retention.jsx").then
 const LazyHabitBackgroundEngine = React.lazy(() => import("./habit-background-engine.jsx").then((module) => ({ default: module.HabitBackgroundEngine })));
 const LazySmartAdaptationPanel = React.lazy(() => import("./plush-knows-me-smart.jsx").then((module) => ({ default: module.SmartAdaptationPanel })));
 
+function StableFeatureTip({ BaseFeatureTip, id, text }) {
+  const storageKey = `plushlife:feature-tip-dismissed:${id}`;
+  const [locallyDismissed, setLocallyDismissed] = React.useState(() => {
+    try { return window.localStorage.getItem(storageKey) === "1"; }
+    catch (_error) { return false; }
+  });
+  const [ready, setReady] = React.useState(false);
+
+  React.useEffect(() => {
+    if (locallyDismissed) return undefined;
+    setReady(false);
+    const timer = window.setTimeout(() => setReady(true), 1800);
+    return () => window.clearTimeout(timer);
+  }, [locallyDismissed, id]);
+
+  if (locallyDismissed || !ready || !BaseFeatureTip) return null;
+  return (
+    <div onClickCapture={(event) => {
+      if (!event.target?.closest?.("button")) return;
+      try { window.localStorage.setItem(storageKey, "1"); } catch (_error) {}
+      setLocallyDismissed(true);
+    }}>
+      <BaseFeatureTip id={id} text={text} />
+    </div>
+  );
+}
+
 function FirstDaysGuide({ activityDaysTotal = 0, rows = [], viewDone = {}, goToDashboard, openTaskManager }) {
   if (activityDaysTotal >= 7) return null;
   const dayNumber = Math.min(7, Math.max(1, Number(activityDaysTotal || 0) + 1));
@@ -80,10 +107,13 @@ export function TodayPanel(props) {
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
   const recentlyCompletedKeys = Array.from(new Set([...(props.recentlyCompletedKeys || []), ...lingerKeys]));
   const smartNextStep = useSmartNextStep({ rows: props.rows || [], viewDone: props.viewDone || {}, period: props.period, dailyCheckIn: props.dailyCheckIn || {}, fallbackTask: props.nextStepTask, recentlyCompletedKeys });
+  const StableTip = React.useMemo(() => function StableTipComponent({ id, text }) {
+    return <StableFeatureTip BaseFeatureTip={props.FeatureTip} id={id} text={text} />;
+  }, [props.FeatureTip]);
 
   React.useEffect(() => { setSmartNextStepHidden(false); setMoreForTodayOpen(false); }, [props.period?.date]);
   const setNextStepDismissedToday = (hidden) => { props.setNextStepDismissedToday?.(hidden); setSmartNextStepHidden(Boolean(hidden)); };
-  const modeProps = { ...props, toggle: unifiedToggle, recentlyCompletedKeys, completedLingerKeys: lingerKeys, nextStepTask: smartNextStepHidden ? null : (smartNextStep.task || props.nextStepTask), nextStepReason: smartNextStepHidden ? "" : smartNextStep.reason, setNextStepDismissedToday };
+  const modeProps = { ...props, FeatureTip: StableTip, toggle: unifiedToggle, recentlyCompletedKeys, completedLingerKeys: lingerKeys, nextStepTask: smartNextStepHidden ? null : (smartNextStep.task || props.nextStepTask), nextStepReason: smartNextStepHidden ? "" : smartNextStep.reason, setNextStepDismissedToday };
   const liveRegion = <div aria-live="polite" aria-atomic="true" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>{announcement}</div>;
   const backgroundEngine = <BackgroundIntelligence {...modeProps} />;
   const plushMemory = homeSettings.insights ? <><PlushKnowsMe {...modeProps} /><React.Suspense fallback={null}><LazySmartAdaptationPanel {...modeProps} /></React.Suspense></> : null;
