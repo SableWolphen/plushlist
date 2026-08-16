@@ -30,6 +30,7 @@ public class MainActivity extends BridgeActivity {
 
     private AppUpdateManager appUpdateManager;
     private InstallStateUpdatedListener installStateListener;
+    private AlertDialog updateReadyDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,13 +99,18 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void promptToRestartForUpdate() {
-        new AlertDialog.Builder(this)
+        if (isFinishing() || isDestroyed()) return;
+        if (updateReadyDialog != null && updateReadyDialog.isShowing()) return;
+
+        updateReadyDialog = new AlertDialog.Builder(this)
             .setTitle("Update ready")
             .setMessage("A newer version of PlushLife has finished downloading.")
             .setPositiveButton("Restart now", (dialog, which) -> appUpdateManager.completeUpdate())
             .setNegativeButton("Later", null)
             .setCancelable(true)
-            .show();
+            .create();
+        updateReadyDialog.setOnDismissListener(dialog -> updateReadyDialog = null);
+        updateReadyDialog.show();
     }
 
     @Override
@@ -140,6 +146,10 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onDestroy() {
+        if (updateReadyDialog != null) {
+            updateReadyDialog.dismiss();
+            updateReadyDialog = null;
+        }
         if (appUpdateManager != null && installStateListener != null) {
             appUpdateManager.unregisterListener(installStateListener);
         }
