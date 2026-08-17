@@ -11,6 +11,21 @@ const LazyBabyToday = React.lazy(() => import("./baby-today.jsx").then((module) 
 const LazyLowScreenToday = React.lazy(() => import("./habit-retention.jsx").then((module) => ({ default: module.LowScreenToday })));
 const LazyHabitBackgroundEngine = React.lazy(() => import("./habit-background-engine.jsx").then((module) => ({ default: module.HabitBackgroundEngine })));
 const LazySmartAdaptationPanel = React.lazy(() => import("./plush-knows-me-smart.jsx").then((module) => ({ default: module.SmartAdaptationPanel })));
+const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
+
+function recordNextStepChoice(row, action, date) {
+  const taskId = String(row?.sourceTask?.id || row?.task_id || row?.id || row?.key || "");
+  if (!taskId || !action) return;
+  try {
+    const state = JSON.parse(window.localStorage.getItem(HABIT_STATE_KEY) || "{}") || {};
+    const engine = state.meta?.__background_engine || {};
+    const feedback = Array.isArray(engine.nextStepFeedback) ? engine.nextStepFeedback.slice(-119) : [];
+    feedback.push({ taskId, taskKey: String(row?.key || taskId), action, date: String(date || ""), at: new Date().toISOString() });
+    const next = { ...state, meta: { ...(state.meta || {}), __background_engine: { ...engine, nextStepFeedback: feedback } } };
+    window.localStorage.setItem(HABIT_STATE_KEY, JSON.stringify(next));
+    window.dispatchEvent(new CustomEvent("plushlife:habit-coach-updated"));
+  } catch (_error) {}
+}
 
 function StableFeatureTip({ id, text }) {
   const storageKey = `plushlife:feature-tip-dismissed:${id}`;
@@ -106,14 +121,20 @@ export function TodayPanel(props) {
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
   const recentlyCompletedKeys = Array.from(new Set([...(props.recentlyCompletedKeys || []), ...lingerKeys]));
   const smartNextStep = useSmartNextStep({ rows: props.rows || [], viewDone: props.viewDone || {}, period: props.period, dailyCheckIn: props.dailyCheckIn || {}, fallbackTask: props.nextStepTask, recentlyCompletedKeys });
+  const activeNextStep = smartNextStep.task || props.nextStepTask;
   const StableTip = React.useMemo(() => function StableTipComponent({ id, text }) {
     return <StableFeatureTip id={id} text={text} />;
   }, []);
 
   React.useEffect(() => { setSmartNextStepHidden(false); setSmartEaseHint(null); setMoreForTodayOpen(false); }, [props.period?.date]);
-  const setNextStepDismissedToday = (hidden) => { props.setNextStepDismissedToday?.(hidden); setSmartNextStepHidden(Boolean(hidden)); };
+  const setNextStepDismissedToday = (hidden) => {
+    if (hidden && activeNextStep) recordNextStepChoice(activeNextStep, "hide", props.period?.date);
+    props.setNextStepDismissedToday?.(hidden);
+    setSmartNextStepHidden(Boolean(hidden));
+  };
   const pickEasierSuggestion = (taskKey) => {
     const task = (props.rows || []).find((row) => row.key === taskKey);
+    if (task) recordNextStepChoice(task, "easier", props.period?.date);
     const source = task?.sourceTask || {};
     const gentler = String(source.tiny_label || task?.tiny_label || source.soft_label || task?.soft_label || "").trim();
     if (gentler) {
@@ -123,7 +144,19 @@ export function TodayPanel(props) {
     setSmartEaseHint(null);
     props.pickEasierSuggestion?.(taskKey);
   };
-  const modeProps = { ...props, FeatureTip: StableTip, toggle: unifiedToggle, recentlyCompletedKeys, completedLingerKeys: lingerKeys, nextStepTask: smartNextStepHidden ? null : (smartNextStep.task || props.nextStepTask), nextStepReason: smartNextStepHidden ? "" : smartNextStep.reason, nextStepHint: smartEaseHint || props.nextStepHint, pickEasierSuggestion, setNextStepDismissedToday };
+  const setNextStepSkipped = (updater) => {
+    const current = Array.isArray(props.nextStepSkipped) ? props.nextStepSkipped : [];
+    const next = typeof updater === "function" ? updater(current) : updater;
+    const addedKey = Array.isArray(next) ? next.find((key) => !current.includes(key)) : null;
+    const task = addedKey ? (props.rows || []).find((row) => row.key === addedKey) : null;
+    if (task) recordNextStepChoice(task, "skip", props.period?.date);
+    props.setNextStepSkipped?.(updater);
+  };
+  const smartToggle = (key, ...args) => {
+    if (activeNextStep?.key === key && !props.viewDone?.[key]) recordNextStepChoice(activeNextStep, "done", props.period?.date);
+    unifiedToggle(key, ...args);
+  };
+  const modeProps = { ...props, FeatureTip: StableTip, toggle: smartToggle, recentlyCompletedKeys, completedLingerKeys: lingerKeys, nextStepTask: smartNextStepHidden ? null : activeNextStep, nextStepReason: smartNextStepHidden ? "" : smartNextStep.reason, nextStepHint: smartEaseHint || props.nextStepHint, pickEasierSuggestion, setNextStepSkipped, setNextStepDismissedToday };
   const liveRegion = <div aria-live="polite" aria-atomic="true" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>{announcement}</div>;
   const backgroundEngine = <BackgroundIntelligence {...modeProps} />;
   const plushMemory = homeSettings.insights ? <><PlushKnowsMe {...modeProps} /><React.Suspense fallback={null}><LazySmartAdaptationPanel {...modeProps} /></React.Suspense></> : null;
@@ -137,7 +170,7 @@ export function TodayPanel(props) {
 
   if (!props.open) return null;
   if (props.babyMode) return <>{backgroundEngine}{liveRegion}<PlushKnowsMe {...modeProps} quiet /><React.Suspense fallback={null}><LazySmartAdaptationPanel {...modeProps} quiet /></React.Suspense><React.Suspense fallback={null}><LazyBabyToday {...modeProps} /></React.Suspense></>;
-  if (lowScreen) return <>{backgroundEngine}{liveRegion}{plushMemory}<React.Suspense fallback={null}><LazyLowScreenToday {...modeProps} /></React.Suspense><LowScreenJustCompleted rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} /><CompletedTaskArea rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} compact /></>;
+  if (lowScreen) return <>{backgroundEngine}{liveRegion}{plushMemory}<React.Suspense fallback={null}><LazyLowScreenToday {...modeProps} /></React.Suspense><LowScreenJustCompleted rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={smartToggle} /><CompletedTaskArea rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={smartToggle} compact /></>;
 
   return <>
     {backgroundEngine}
