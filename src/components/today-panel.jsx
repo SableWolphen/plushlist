@@ -12,6 +12,7 @@ const LazyLowScreenToday = React.lazy(() => import("./habit-retention.jsx").then
 const LazyHabitBackgroundEngine = React.lazy(() => import("./habit-background-engine.jsx").then((module) => ({ default: module.HabitBackgroundEngine })));
 const LazySmartAdaptationPanel = React.lazy(() => import("./plush-knows-me-smart.jsx").then((module) => ({ default: module.SmartAdaptationPanel })));
 const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
+const WEEKLY_INTENTION_REMINDER_KEY = "plushlife:weekly-intention-reminder:v1";
 
 function recordNextStepChoice(row, action, date) {
   const taskId = String(row?.sourceTask?.id || row?.task_id || row?.id || row?.key || "");
@@ -111,12 +112,26 @@ function BackgroundIntelligence(props) {
   return <React.Suspense fallback={null}><LazyHabitBackgroundEngine {...props} /></React.Suspense>;
 }
 
+function WeeklyIntentionReminder({ open, onAdd, onDismiss }) {
+  if (!open) return null;
+  return <div role="dialog" aria-modal="true" aria-labelledby="weekly-intention-reminder-title" style={{ position: "fixed", inset: 0, zIndex: 58, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.42)", backdropFilter: "blur(5px)" }}>
+    <div style={{ width: "min(100%,360px)", padding: 17, borderRadius: 18, background: "#FFFBFE", border: "1px solid #E3C9EC", boxShadow: "0 16px 45px rgba(64,39,80,.18)" }}>
+      <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#A65DC1" }}>📮 PLUSHWEEK</div>
+      <div id="weekly-intention-reminder-title" style={{ marginTop: 5, fontSize: 17, lineHeight: 1.25, fontWeight: 900, color: "#54405F" }}>Want to set your intention for this week?</div>
+      <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.48, color: "#7E6989" }}>You still haven’t added one. One gentle direction is enough — it doesn’t need to be a goal or another thing to finish.</div>
+      <button type="button" onClick={onAdd} style={{ width: "100%", minHeight: 44, marginTop: 12, padding: "9px 12px", borderRadius: 11, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>📝 Add weekly intention</button>
+      <button type="button" onClick={onDismiss} style={{ width: "100%", minHeight: 44, marginTop: 6, padding: "9px 12px", borderRadius: 11, border: "1px solid #D8C8E2", background: "transparent", color: "#8C6B9E", fontWeight: 800, cursor: "pointer" }}>Not right now</button>
+    </div>
+  </div>;
+}
+
 export function TodayPanel(props) {
   const lowScreen = useLowScreenMode();
   const readinessReportedRef = React.useRef(false);
   const [smartNextStepHidden, setSmartNextStepHidden] = React.useState(false);
   const [smartEaseHint, setSmartEaseHint] = React.useState(null);
   const [moreForTodayOpen, setMoreForTodayOpen] = React.useState(false);
+  const [weeklyIntentionReminderOpen, setWeeklyIntentionReminderOpen] = React.useState(false);
   const [homeSettings] = React.useState({ guide: false, insights: false, extras: false });
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
   const recentlyCompletedKeys = Array.from(new Set([...(props.recentlyCompletedKeys || []), ...lingerKeys]));
@@ -127,6 +142,34 @@ export function TodayPanel(props) {
   }, []);
 
   React.useEffect(() => { setSmartNextStepHidden(false); setSmartEaseHint(null); setMoreForTodayOpen(false); }, [props.period?.date]);
+  React.useEffect(() => {
+    const intention = String(props.weeklyIntentionText || "").trim();
+    const weekStart = String(props.period?.weekStart || "");
+    const date = String(props.period?.date || "");
+    const storageKey = `${WEEKLY_INTENTION_REMINDER_KEY}:${weekStart}`;
+    if (intention) {
+      setWeeklyIntentionReminderOpen(false);
+      try { window.localStorage.removeItem(storageKey); } catch (_error) {}
+      return;
+    }
+    if (!props.open || !weekStart || !date) {
+      setWeeklyIntentionReminderOpen(false);
+      return;
+    }
+    const isMonday = new Date(`${date}T12:00:00Z`).getUTCDay() === 1;
+    if (isMonday) {
+      setWeeklyIntentionReminderOpen(false);
+      return;
+    }
+    try {
+      const visits = Math.max(0, Number(window.localStorage.getItem(storageKey)) || 0) + 1;
+      window.localStorage.setItem(storageKey, String(visits));
+      setWeeklyIntentionReminderOpen(visits % 2 === 0);
+    } catch (_error) {
+      setWeeklyIntentionReminderOpen(false);
+    }
+  }, [props.open, props.weeklyIntentionText, props.period?.weekStart, props.period?.date]);
+
   const setNextStepDismissedToday = (hidden) => {
     if (hidden && activeNextStep) recordNextStepChoice(activeNextStep, "hide", props.period?.date);
     props.setNextStepDismissedToday?.(hidden);
@@ -160,6 +203,11 @@ export function TodayPanel(props) {
   const liveRegion = <div aria-live="polite" aria-atomic="true" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>{announcement}</div>;
   const backgroundEngine = <BackgroundIntelligence {...modeProps} />;
   const plushMemory = homeSettings.insights ? <><PlushKnowsMe {...modeProps} /><React.Suspense fallback={null}><LazySmartAdaptationPanel {...modeProps} /></React.Suspense></> : null;
+  const weeklyReminder = <WeeklyIntentionReminder open={weeklyIntentionReminderOpen} onDismiss={() => setWeeklyIntentionReminderOpen(false)} onAdd={() => {
+    props.setWeeklyIntentionDraft?.(props.weeklyIntentionText || "");
+    props.setWeeklyIntentionEditing?.(true);
+    setWeeklyIntentionReminderOpen(false);
+  }} />;
 
   React.useEffect(() => {
     if (!props.open || readinessReportedRef.current) return;
@@ -169,10 +217,11 @@ export function TodayPanel(props) {
   }, [props.open, props.rows?.length]);
 
   if (!props.open) return null;
-  if (props.babyMode) return <>{backgroundEngine}{liveRegion}<PlushKnowsMe {...modeProps} quiet /><React.Suspense fallback={null}><LazySmartAdaptationPanel {...modeProps} quiet /></React.Suspense><React.Suspense fallback={null}><LazyBabyToday {...modeProps} /></React.Suspense></>;
-  if (lowScreen) return <>{backgroundEngine}{liveRegion}{plushMemory}<React.Suspense fallback={null}><LazyLowScreenToday {...modeProps} /></React.Suspense><LowScreenJustCompleted rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={smartToggle} /><CompletedTaskArea rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={smartToggle} compact /></>;
+  if (props.babyMode) return <>{weeklyReminder}{backgroundEngine}{liveRegion}<PlushKnowsMe {...modeProps} quiet /><React.Suspense fallback={null}><LazySmartAdaptationPanel {...modeProps} quiet /></React.Suspense><React.Suspense fallback={null}><LazyBabyToday {...modeProps} /></React.Suspense></>;
+  if (lowScreen) return <>{weeklyReminder}{backgroundEngine}{liveRegion}{plushMemory}<React.Suspense fallback={null}><LazyLowScreenToday {...modeProps} /></React.Suspense><LowScreenJustCompleted rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={smartToggle} /><CompletedTaskArea rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={smartToggle} compact /></>;
 
   return <>
+    {weeklyReminder}
     {backgroundEngine}
     {liveRegion}
     {homeSettings.guide && <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />}
