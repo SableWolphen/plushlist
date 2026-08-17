@@ -87,22 +87,22 @@ export function BabyToday({
   const selectedDate = selectedProgressDate || period?.date;
 
   return (
-    <div className="baby-today-simple" style={{ display: "grid", gap: 7, marginBottom: 8 }}>
+    <div className="baby-today-simple" style={{ display: "grid", gap: 7, marginBottom: 8, minWidth: 0, width: "100%" }}>
       {resting && <section style={{ padding: "8px 10px", borderRadius: 12, background: "#EEF9F6", border: "1px solid #BFE5D2", color: "#3E746A", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
         <div><strong style={{ fontSize: 11.5 }}>🌴 Soft rest day</strong><div style={{ marginTop: 1, fontSize: 10 }}>Nothing is required today.</div></div>
         <button type="button" onClick={toggleRestToday} style={{ ...softButton, minHeight: 32, padding: "5px 8px", fontSize: 10 }}>End rest</button>
       </section>}
 
-      <section aria-label="Weekly intention" style={{ padding: "8px 10px", borderRadius: 12, background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", border: "1px solid #E3C9EC" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-          <div style={{ minWidth: 0, flex: 1 }}>
+      <section aria-label="Weekly intention" style={{ minWidth: 0, width: "100%", overflow: "hidden", padding: "8px 10px", borderRadius: 12, background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", border: "1px solid #E3C9EC" }}>
+        <div style={{ minWidth: 0, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+          <div style={{ minWidth: 0, flex: "1 1 auto", overflow: "hidden" }}>
             <div style={{ fontSize: 9.5, letterSpacing: ".12em", fontWeight: 900, color: "#A65DC1" }}>📮 PLUSHWEEK</div>
-            {!weeklyIntentionEditing && <div style={{ marginTop: 2, fontSize: 11.5, lineHeight: 1.3, fontWeight: 800, color: weeklyIntentionText ? "#5B4B6B" : "#9A86A7", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{weeklyIntentionText || "Pick one gentle direction for this week"}</div>}
+            {!weeklyIntentionEditing && <div title={weeklyIntentionText || "Pick one gentle direction for this week"} style={{ display: "block", maxWidth: "100%", marginTop: 2, fontSize: 11.5, lineHeight: 1.3, fontWeight: 800, color: weeklyIntentionText ? "#5B4B6B" : "#9A86A7", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{weeklyIntentionText || "Pick one gentle direction for this week"}</div>}
           </div>
-          {!weeklyIntentionEditing && <button type="button" onClick={() => { setWeeklyIntentionDraft?.(weeklyIntentionText || ""); setWeeklyIntentionEditing?.(true); }} style={{ minHeight: 38, padding: "7px 8px", borderRadius: 9, border: "1px solid #E2CDEB", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 10.5, cursor: "pointer", flexShrink: 0 }}>{weeklyIntentionText ? "Edit" : "Add"}</button>}
+          {!weeklyIntentionEditing && <button type="button" onClick={() => { setWeeklyIntentionDraft?.(weeklyIntentionText || ""); setWeeklyIntentionEditing?.(true); }} style={{ minWidth: 48, minHeight: 38, padding: "7px 8px", borderRadius: 9, border: "1px solid #E2CDEB", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 10.5, cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap", overflowWrap: "normal" }}>{weeklyIntentionText ? "Edit" : "Add"}</button>}
         </div>
         {weeklyIntentionEditing && <>
-          <textarea value={weeklyIntentionDraft || ""} onChange={(event) => setWeeklyIntentionDraft?.(event.target.value)} rows={2} placeholder="What do I want to carry with me this week?" style={{ width: "100%", minHeight: 54, marginTop: 7, padding: "8px 9px", resize: "vertical", borderRadius: 9, border: "1px solid #D8C8E2", background: "white", color: "#5B4B6B", font: "inherit", fontSize: 11.5, lineHeight: 1.4 }} />
+          <textarea value={weeklyIntentionDraft || ""} onChange={(event) => setWeeklyIntentionDraft?.(event.target.value)} rows={2} placeholder="What do I want to carry with me this week?" style={{ width: "100%", minWidth: 0, minHeight: 54, marginTop: 7, padding: "8px 9px", resize: "vertical", borderRadius: 9, border: "1px solid #D8C8E2", background: "white", color: "#5B4B6B", font: "inherit", fontSize: 11.5, lineHeight: 1.4 }} />
           <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
             <button type="button" onClick={saveWeeklyIntentionEdit} style={{ ...softButton, minHeight: 36, flex: 1, background: "#A65DC1", borderColor: "#A65DC1", color: "white" }}>Save intention</button>
             <button type="button" onClick={() => setWeeklyIntentionEditing?.(false)} style={{ ...softButton, minHeight: 36 }}>Cancel</button>
@@ -111,13 +111,13 @@ export function BabyToday({
         </>}
       </section>
 
-      <div role="tablist" aria-label="Baby Mode view" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, padding: 4, borderRadius: 12, background: "#FFFFFF99", border: "1px solid #EADCEC" }}>
-        <button role="tab" aria-selected={todayCardIndex === 0} type="button" onClick={() => setTodayCardIndex?.(0)} style={{ minHeight: 42, padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 0 ? `${accent}22` : "transparent", color: todayCardIndex === 0 ? accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>🗓 Schedule</button>
-        <button role="tab" aria-selected={todayCardIndex === 1} type="button" onClick={() => setTodayCardIndex?.(1)} style={{ minHeight: 42, padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 1 ? `${accent}22` : "transparent", color: todayCardIndex === 1 ? accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>🧸 Little Jobs</button>
+      <div role="tablist" aria-label="Baby Mode view" style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: 5, padding: 4, borderRadius: 12, background: "#FFFFFF99", border: "1px solid #EADCEC", minWidth: 0, width: "100%" }}>
+        <button role="tab" aria-selected={todayCardIndex === 0} type="button" onClick={() => setTodayCardIndex?.(0)} style={{ minWidth: 0, minHeight: 42, padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 0 ? `${accent}22` : "transparent", color: todayCardIndex === 0 ? accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>🗓 Schedule</button>
+        <button role="tab" aria-selected={todayCardIndex === 1} type="button" onClick={() => setTodayCardIndex?.(1)} style={{ minWidth: 0, minHeight: 42, padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 1 ? `${accent}22` : "transparent", color: todayCardIndex === 1 ? accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>🧸 Little Jobs</button>
       </div>
 
       {todayCardIndex === 1 && taskWeekDates.length > 0 && <>
-        <div role="tablist" aria-label="Little jobs week" style={{ display: "grid", gridTemplateColumns: "repeat(7,minmax(0,1fr))", gap: 4, padding: 5, borderRadius: 13, background: "rgba(255,255,255,.72)", border: "1px solid #EADCEC" }}>
+        <div role="tablist" aria-label="Little jobs week" style={{ display: "grid", gridTemplateColumns: "repeat(7,minmax(0,1fr))", gap: 4, padding: 5, borderRadius: 13, background: "rgba(255,255,255,.72)", border: "1px solid #EADCEC", minWidth: 0, width: "100%" }}>
           {taskWeekDates.map((date) => {
             const selected = selectedDate === date;
             const isTodayDate = date === period?.date;
@@ -137,7 +137,7 @@ export function BabyToday({
       </>}
 
       {todayCardIndex === 1 && <>
-        <section aria-label="Little jobs" style={{ borderRadius: 14, background: "rgba(255,255,255,.76)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
+        <section aria-label="Little jobs" style={{ minWidth: 0, width: "100%", borderRadius: 14, background: "rgba(255,255,255,.76)", border: "1px solid #E6D4F2", overflow: "hidden" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "9px 11px 7px" }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 12.5, color: "#76558A", fontWeight: 900 }}>🧸 {waiting.length ? `${waiting.length} little job${waiting.length === 1 ? "" : "s"}` : "All tucked in"}</div>
@@ -173,7 +173,7 @@ export function BabyToday({
         {!isFutureView && <button type="button" onClick={openCare} style={{ ...softButton, minHeight: 38, width: "100%", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, background: "rgba(255,255,255,.88)" }}>🧸 I need a little help</button>}
       </>}
 
-      {todayCardIndex === 0 && (babyScheduleEntries.length > 0 ? <section aria-label={`${caregiver}'s gentle schedule`} style={{ padding: 12, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: "1px solid #D9E5F1" }}>
+      {todayCardIndex === 0 && (babyScheduleEntries.length > 0 ? <section aria-label={`${caregiver}'s gentle schedule`} style={{ minWidth: 0, width: "100%", padding: 12, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: "1px solid #D9E5F1" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 11, letterSpacing: ".16em", color: "#4A80B5", fontWeight: 900 }}>🗓️ {caregiver.toUpperCase()}’S LITTLE PLAN</div>
@@ -190,7 +190,7 @@ export function BabyToday({
             </div>;
           })}
         </div>
-      </section> : <section style={{ padding: 14, borderRadius: 16, background: "rgba(255,255,255,.65)", border: "1px dashed #C9B3DC", textAlign: "center" }}><div style={{ fontSize: 11, fontWeight: 900, color: "#806B8D" }}>🗓 No little plan yet</div><div style={{ marginTop: 4, fontSize: 10.5, color: "#9A85A5" }}>Your schedule will show here when you add one.</div></section>)}
+      </section> : <section style={{ minWidth: 0, width: "100%", padding: 14, borderRadius: 16, background: "rgba(255,255,255,.65)", border: "1px dashed #C9B3DC", textAlign: "center" }}><div style={{ fontSize: 11, fontWeight: 900, color: "#806B8D" }}>🗓 No little plan yet</div><div style={{ marginTop: 4, fontSize: 10.5, color: "#9A85A5" }}>Your schedule will show here when you add one.</div></section>)}
     </div>
   );
 }
