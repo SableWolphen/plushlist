@@ -12,6 +12,20 @@ function currentPeriod(hour) {
   return hour < 12 ? "morning" : hour < 17 ? "afternoon" : hour < 21 ? "evening" : "night";
 }
 
+function conciseReason(reasons = []) {
+  const labels = reasons.slice(0, 2).map((reason) => {
+    if (reason.includes("Focus Habit")) return "Focus Habit";
+    if (reason.includes("essentials")) return "Essential today";
+    if (reason.includes("good") && reason.includes("task for you")) return "Good fit right now";
+    if (reason.includes("smaller lift")) return "Fits your energy";
+    if (reason.includes("gentler version")) return "Gentler version available";
+    if (reason.includes("rebuilding")) return "Rebuilding gently";
+    if (reason.includes("little support")) return "Could use support";
+    return reason.replace(/^it is /, "").replace(/^this is /, "");
+  });
+  return labels.length ? labels.join(" · ") : "Useful unfinished step for right now";
+}
+
 export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckIn = {}, fallbackTask = null, recentlyCompletedKeys = [] }) {
   const [revision, setRevision] = React.useState(0);
 
@@ -59,9 +73,6 @@ export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckI
     }).sort((a, b) => b.score - a.score);
 
     const winner = ranked[0];
-    const reason = winner.reasons.length
-      ? `A good next step because ${winner.reasons.slice(0, 2).join(" and ")}.`
-      : "A useful unfinished thing for right now — no need to look at the whole day at once.";
-    return { task: winner.row, reason };
+    return { task: winner.row, reason: conciseReason(winner.reasons) };
   }, [rows, viewDone, period?.date, dailyCheckIn?.energy, dailyCheckIn?.capacity, fallbackTask?.key, recentlyCompletedKeys, revision]);
 }
