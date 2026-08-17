@@ -18,15 +18,21 @@ function StableFeatureTip({ id, text }) {
     try { return window.localStorage.getItem(storageKey) === "1"; }
     catch (_error) { return false; }
   });
+  const [open, setOpen] = React.useState(false);
 
   if (locallyDismissed) return null;
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 9, padding: "8px 10px", borderRadius: 10, background: "#FFF9E9", border: "1px solid #F0D99E" }}>
-      <span style={{ fontSize: 11.5, lineHeight: 1.4, color: "#6B5A3D" }}>💡 {text}</span>
-      <button type="button" onClick={() => {
-        try { window.localStorage.setItem(storageKey, "1"); } catch (_error) {}
-        setLocallyDismissed(true);
-      }} aria-label="Dismiss tip" style={{ padding: "2px 6px", borderRadius: 7, border: "1px solid #F0D99E", background: "white", color: "#A56D14", fontWeight: 900, fontSize: 10.5, cursor: "pointer", flexShrink: 0 }}>Got it</button>
+    <div style={{ marginBottom: 5 }}>
+      <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} style={{ minHeight: 34, padding: "5px 8px", border: 0, background: "transparent", color: "#8C6B9E", fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>{open ? "Hide why" : "Why Next Step?"}</button>
+      {open && (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, padding: "7px 9px", borderRadius: 9, background: "#FFF9E9", border: "1px solid #F0D99E" }}>
+          <span style={{ fontSize: 11, lineHeight: 1.4, color: "#6B5A3D" }}>💡 {text}</span>
+          <button type="button" onClick={() => {
+            try { window.localStorage.setItem(storageKey, "1"); } catch (_error) {}
+            setLocallyDismissed(true);
+          }} aria-label="Dismiss tip" style={{ padding: "2px 6px", borderRadius: 7, border: "1px solid #F0D99E", background: "white", color: "#A56D14", fontWeight: 900, fontSize: 10.5, cursor: "pointer", flexShrink: 0 }}>Got it</button>
+        </div>
+      )}
     </div>
   );
 }
