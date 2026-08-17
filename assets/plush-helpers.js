@@ -44,6 +44,27 @@
   };
 })(typeof window !== "undefined" ? window : globalThis);
 
+(function (root) {
+  if (!root?.document?.head) return;
+  const style = root.document.createElement("style");
+  style.id = "plushlife-baby-background";
+  style.textContent = `
+    .baby-mode {
+      background: #FFF5FB !important;
+      background-image:
+        radial-gradient(circle at 12% 8%, rgba(255,190,226,.42) 0%, transparent 30%),
+        radial-gradient(circle at 90% 10%, rgba(190,235,255,.42) 0%, transparent 31%),
+        linear-gradient(180deg, #FFF4FA 0%, #FBF5FF 46%, #F5FAFF 100%) !important;
+      background-attachment: fixed !important;
+    }
+    .baby-mode .baby-shell {
+      background: rgba(255,255,255,.14) !important;
+      box-shadow: 0 14px 40px rgba(166,93,193,.08) !important;
+    }
+  `;
+  root.document.head.appendChild(style);
+})(typeof window !== "undefined" ? window : globalThis);
+
 (function (root, factory) {
   const plushContent = typeof module === "object" && module.exports
     ? require("./plush-content.js")
