@@ -7,10 +7,21 @@ function readState() {
 
 function chooseMove(state) {
   const engine = state.meta?.__background_engine || {};
+  const dayModel = engine.dayModel || null;
   const profiles = Object.values(engine.habitProfiles || {});
   const load = engine.load || {};
   const recovery = engine.recovery || {};
   const cross = engine.crossPatterns || {};
+
+  if (dayModel?.intervention && dayModel.intervention.kind !== "steady") {
+    const confidence = dayModel.confidence === "learning" ? "Still learning from your real days." : `${dayModel.evidence || 0}% evidence confidence · ${dayModel.state || "today's pattern"}.`;
+    return {
+      icon: dayModel.intervention.kind === "comeback" ? "↺" : dayModel.intervention.kind === "trim" ? "🪶" : dayModel.intervention.kind === "smaller" ? "🌱" : "🧭",
+      title: dayModel.intervention.title,
+      text: dayModel.intervention.text,
+      evidence: `${confidence} ${dayModel.uncertainty || ""}`.trim(),
+    };
+  }
 
   if (recovery.recentGap >= 2) {
     const label = recovery.suggestedRamp === "essentials" ? "restart with essentials only" : recovery.suggestedRamp === "lighter" ? "use a lighter routine for a couple of days" : "resume normally";
