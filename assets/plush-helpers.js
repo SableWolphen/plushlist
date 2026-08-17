@@ -61,6 +61,18 @@
       background: rgba(255,255,255,.14) !important;
       box-shadow: 0 14px 40px rgba(166,93,193,.08) !important;
     }
+    .baby-mode .baby-today-simple,
+    .baby-mode .baby-today-simple > * {
+      min-width: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .baby-mode .baby-today-simple section[aria-label="Little jobs"] > div:last-child > button {
+      box-sizing: border-box !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
   `;
   root.document.head.appendChild(style);
 })(typeof window !== "undefined" ? window : globalThis);
