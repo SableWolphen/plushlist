@@ -225,7 +225,7 @@ export function TodayPanel(props) {
     {backgroundEngine}
     {liveRegion}
     {homeSettings.guide && <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />}
-    <style>{`[data-plushlife-home-stack] { display:grid; gap:8px; } [data-plushlife-home-stack] > * { margin-top:0 !important; margin-bottom:0 !important; }`}</style>
+    <style>{`[data-plushlife-home-stack] { display:grid; grid-template-columns:minmax(0,1fr); gap:8px; min-width:0; width:100%; max-width:100%; overflow:hidden; } [data-plushlife-home-stack] > * { min-width:0; width:100%; max-width:100%; box-sizing:border-box; margin-top:0 !important; margin-bottom:0 !important; } [data-plushlife-home-stack] [role="tablist"] { min-width:0; width:100%; max-width:100%; box-sizing:border-box; }`}</style>
     <div data-plushlife-home-stack><TodayPanelCore {...modeProps} /></div>
     {plushMemory}
     {homeSettings.extras && <button type="button" onClick={() => setMoreForTodayOpen((open) => !open)} aria-expanded={moreForTodayOpen} style={{ width: "100%", minHeight: 46, margin: "10px 0 8px", padding: "10px 12px", borderRadius: 13, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.78)", color: "#765F84", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{moreForTodayOpen ? "Hide extra tools" : "More for today"} {moreForTodayOpen ? "⌃" : "⌄"}</button>}
