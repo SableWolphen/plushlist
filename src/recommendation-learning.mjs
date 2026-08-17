@@ -29,6 +29,9 @@ function feedbackProfile(events) {
   const decisions = counts.done + counts.skip + counts.hide;
   const acceptanceRate = decisions ? counts.done / decisions : null;
   const easierRate = recent.length ? counts.easier / recent.length : 0;
+  const easierDates = [...new Set(recent.filter((event) => event.action === "easier" && validDate(event.date)).map((event) => event.date))];
+  const easierSuccesses = easierDates.filter((date) => recent.some((event) => event.action === "done" && event.date === date)).length;
+  const easierSuccessRate = easierDates.length ? easierSuccesses / easierDates.length : null;
 
   let scoreAdjustment = 0;
   if (decisions >= 3 && acceptanceRate !== null) {
@@ -36,6 +39,9 @@ function feedbackProfile(events) {
   }
   if (counts.skip + counts.hide >= 3) scoreAdjustment -= 5;
   if (counts.done >= 3) scoreAdjustment += 4;
+  if (easierDates.length >= 2 && easierSuccessRate !== null) {
+    scoreAdjustment += easierSuccessRate >= 0.6 ? 3 : easierSuccessRate <= 0.25 ? -2 : 0;
+  }
   scoreAdjustment = clamp(scoreAdjustment, -14, 14);
 
   let friction = "";
@@ -48,8 +54,10 @@ function feedbackProfile(events) {
     counts,
     acceptanceRate: acceptanceRate === null ? null : Math.round(acceptanceRate * 100),
     easierRate: Math.round(easierRate * 100),
+    easierTrials: easierDates.length,
+    easierSuccessRate: easierSuccessRate === null ? null : Math.round(easierSuccessRate * 100),
     scoreAdjustment,
-    preferGentler: counts.easier >= 2 && easierRate >= 0.3,
+    preferGentler: counts.easier >= 2 && easierRate >= 0.3 && (easierSuccessRate === null || easierSuccessRate >= 0.5),
     friction,
     confidence: recent.length >= 8 ? "strong" : recent.length >= 4 ? "moderate" : "learning",
   };
