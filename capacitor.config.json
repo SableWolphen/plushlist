@@ -2,24 +2,20 @@
   "appId": "com.PlushLife",
   "appName": "PlushLife",
   "webDir": "www",
-  "backgroundColor": "#fff8fc",
-  "server": {
-    "url": "https://plushlife.plushlife-app.workers.dev/",
-    "androidScheme": "https"
-  },
+  "backgroundColor": "#fff0fa",
   "android": {
-    "backgroundColor": "#fff8fc"
+    "backgroundColor": "#fff0fa"
   },
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 600,
-      "backgroundColor": "#fff8fc",
+      "backgroundColor": "#fff0fa",
       "androidScaleType": "CENTER_CROP",
       "showSpinner": false
     },
     "StatusBar": {
       "style": "DARK",
-      "backgroundColor": "#fff8fc"
+      "backgroundColor": "#fff0fa"
     },
     "Keyboard": {
       "resize": "native",
