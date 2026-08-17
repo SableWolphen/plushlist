@@ -51,6 +51,13 @@ export function BabyToday({
   trackerProfile,
   selectedSchedule,
   selectedScheduleExceptionEntries = [],
+  weeklyIntentionEditing,
+  setWeeklyIntentionEditing,
+  weeklyIntentionDraft,
+  setWeeklyIntentionDraft,
+  weeklyIntentionText,
+  saveWeeklyIntentionEdit,
+  weeklyIntentionMessage,
   setCareSection,
   goToDashboard,
 }) {
@@ -85,6 +92,24 @@ export function BabyToday({
         <div><strong style={{ fontSize: 11.5 }}>🌴 Soft rest day</strong><div style={{ marginTop: 1, fontSize: 10 }}>Nothing is required today.</div></div>
         <button type="button" onClick={toggleRestToday} style={{ ...softButton, minHeight: 32, padding: "5px 8px", fontSize: 10 }}>End rest</button>
       </section>}
+
+      <section aria-label="Weekly intention" style={{ padding: "8px 10px", borderRadius: 12, background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", border: "1px solid #E3C9EC" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: 9.5, letterSpacing: ".12em", fontWeight: 900, color: "#A65DC1" }}>📮 PLUSHWEEK</div>
+            {!weeklyIntentionEditing && <div style={{ marginTop: 2, fontSize: 11.5, lineHeight: 1.3, fontWeight: 800, color: weeklyIntentionText ? "#5B4B6B" : "#9A86A7", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{weeklyIntentionText || "Pick one gentle direction for this week"}</div>}
+          </div>
+          {!weeklyIntentionEditing && <button type="button" onClick={() => { setWeeklyIntentionDraft?.(weeklyIntentionText || ""); setWeeklyIntentionEditing?.(true); }} style={{ minHeight: 38, padding: "7px 8px", borderRadius: 9, border: "1px solid #E2CDEB", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 10.5, cursor: "pointer", flexShrink: 0 }}>{weeklyIntentionText ? "Edit" : "Add"}</button>}
+        </div>
+        {weeklyIntentionEditing && <>
+          <textarea value={weeklyIntentionDraft || ""} onChange={(event) => setWeeklyIntentionDraft?.(event.target.value)} rows={2} placeholder="What do I want to carry with me this week?" style={{ width: "100%", minHeight: 54, marginTop: 7, padding: "8px 9px", resize: "vertical", borderRadius: 9, border: "1px solid #D8C8E2", background: "white", color: "#5B4B6B", font: "inherit", fontSize: 11.5, lineHeight: 1.4 }} />
+          <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+            <button type="button" onClick={saveWeeklyIntentionEdit} style={{ ...softButton, minHeight: 36, flex: 1, background: "#A65DC1", borderColor: "#A65DC1", color: "white" }}>Save intention</button>
+            <button type="button" onClick={() => setWeeklyIntentionEditing?.(false)} style={{ ...softButton, minHeight: 36 }}>Cancel</button>
+          </div>
+          {weeklyIntentionMessage && <div style={{ marginTop: 5, fontSize: 10.5, color: "#806B8D" }}>{weeklyIntentionMessage}</div>}
+        </>}
+      </section>
 
       <div role="tablist" aria-label="Baby Mode view" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, padding: 4, borderRadius: 12, background: "#FFFFFF99", border: "1px solid #EADCEC" }}>
         <button role="tab" aria-selected={todayCardIndex === 0} type="button" onClick={() => setTodayCardIndex?.(0)} style={{ minHeight: 42, padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 0 ? `${accent}22` : "transparent", color: todayCardIndex === 0 ? accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>🗓 Schedule</button>
