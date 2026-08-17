@@ -43,7 +43,6 @@ const requiredRegressionMarkers = [
   'required task${pendingCount === 1 ? "" : "s"} still waiting',
   'optional bonus {bonusPendingCount === 1 ? "task" : "tasks"} available',
   'if (/^mornings?$/.test(words)) return { key: "morning", label: "☀️ Mornings" };',
-  '🗓️ Month so far',
   'Your habit progress and earned rewards live here in PlushGrowth.',
   'Close habit tools',
   '<HabitCoach {...props}>',
@@ -66,12 +65,18 @@ const requiredRegressionMarkers = [
   'Add another one anyway?',
   'Import ${duplicateNames.length === 1 ? "it" : "them"} again anyway?',
   'const careAreas = (() => {',
-  '📖 YOUR CARE STORY',
-  '🪴 CARE AREAS',
   'const [progressView, setProgressView] = useState("overview");',
+  'const tabs = [\n    { id: "overview", label: "Overview", icon: "📊" },\n    { id: "story", label: "Your story", icon: "📖" },\n    { id: "areas", label: "Care areas", icon: "🪴" },\n  ];',
   'aria-label="Progress views"',
+  'function CompactGrowthOverview(props)',
   'data-plushlife-growth-focus="true"',
-  '🌱 PlushInsights',
+  '✨ What PlushLife noticed',
+  '🗓️ Month so far',
+  '📖 THIS WEEK IN ONE GLANCE',
+  '🪴 CARE AREAS',
+  'data-plush-gold-lab="true"',
+  '🧪 PlushLab',
+  'Why this experiment?',
   'const APPEARANCE_THEMES = [',
   'Rainy-Day Coat',
   'AMBIENT THEME',
@@ -143,7 +148,7 @@ const requiredRegressionMarkers = [
 
 for (const marker of requiredRegressionMarkers) {
   if (!searchableSource.includes(marker)) {
-    throw new Error(`Missing onboarding/weekly-intention regression marker: ${marker}`);
+    throw new Error(`Missing app-source regression marker: ${marker}`);
   }
 }
 
