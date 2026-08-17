@@ -127,10 +127,10 @@ export function ToolPanel({ title, onClose, children, inline = false, hideClose 
           gap: 12, padding: "13px 15px", background: "rgba(255,249,253,.96)", borderBottom: "1px solid #E8D5EF",
           backdropFilter: "blur(8px)",
         }}>
-          <div style={{ fontSize: 15, fontWeight: 900, color: "#5B4B6B" }}>{title}</div>
+          <div style={{ minWidth: 0, fontSize: 15, fontWeight: 900, color: "#5B4B6B" }}>{title}</div>
           {!hideClose && <button type="button" onClick={onClose} aria-label={`Close ${title}`} style={{
-            minWidth: 44, minHeight: 44, padding: "7px 11px", borderRadius: 11, border: "1px solid #D9C5E2",
-            background: "white", color: "#7A598C", fontWeight: 900, cursor: "pointer",
+            minWidth: 58, minHeight: 44, padding: "7px 11px", borderRadius: 11, border: "1px solid #D9C5E2",
+            background: "white", color: "#7A598C", fontWeight: 900, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, overflowWrap: "normal",
           }}>{inline ? "Back to tracker" : "Close"}</button>}
         </div>
         {title === "Settings" && (
