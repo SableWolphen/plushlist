@@ -47,6 +47,7 @@ const GENERATED_INDEX_PRELOADS = [
   '<link rel="preload" href="./vendor/react.production.min.js" as="script">',
   '<link rel="preload" href="./vendor/react-dom.production.min.js" as="script">',
   '<link rel="preload" href="./vendor/supabase.min.js" as="script">',
+  '<link rel="preload" href="./assets/fast-start.js" as="script">',
   '<link rel="preload" href="./assets/plush-content.js" as="script">',
   '<link rel="preload" href="./assets/plush-helpers.js" as="script">',
   '<link rel="preload" href="./assets/plush-schedule.js" as="script">',
@@ -233,6 +234,16 @@ function prepareHtml(file, source) {
       throw new Error("index.html still contains runtime Babel compilation — module split phase 4 step 2 should have removed this");
     }
 
+    // On Android, let the first auth read use a still-valid persisted local
+    // session before the app module starts. Supabase continues its normal
+    // verification in the background, but first paint no longer waits on it.
+    if (!content.includes('<script src="./assets/fast-start.js"></script>')) {
+      content = content.replace(
+        '<script src="./assets/app.bundle.js"></script>',
+        '<script src="./assets/fast-start.js"></script>\n<script src="./assets/app.bundle.js"></script>'
+      );
+    }
+
     // The split app entry is an ES module. Module scripts are deferred by
     // default, while modulepreload lets its critical fetch begin immediately.
     content = content.replace(
@@ -241,6 +252,9 @@ function prepareHtml(file, source) {
     );
     if (!content.includes('<script type="module" src="./assets/app.bundle.js"></script>')) {
       throw new Error("index.html is missing the generated ES-module app bundle entry");
+    }
+    if (!content.includes('<script src="./assets/fast-start.js"></script>')) {
+      throw new Error("index.html is missing the fast-start session bridge");
     }
 
     if (!content.includes('id="plush-boot-style"')) content = content.replace("</head>", `  ${BOOT_SHELL_STYLE}\n</head>`);
