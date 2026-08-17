@@ -136,7 +136,7 @@ export function TodayPanel(props) {
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
   const recentlyCompletedKeys = Array.from(new Set([...(props.recentlyCompletedKeys || []), ...lingerKeys]));
   const smartNextStep = useSmartNextStep({ rows: props.rows || [], viewDone: props.viewDone || {}, period: props.period, dailyCheckIn: props.dailyCheckIn || {}, fallbackTask: props.nextStepTask, recentlyCompletedKeys });
-  const activeNextStep = smartNextStep.task || props.nextStepTask;
+  const activeNextStep = props.dailyCheckIn?.day_type === "soft" ? (smartNextStep.task || props.nextStepTask) : null;
   const StableTip = React.useMemo(() => function StableTipComponent({ id, text }) {
     return <StableFeatureTip id={id} text={text} />;
   }, []);
@@ -225,7 +225,8 @@ export function TodayPanel(props) {
     {backgroundEngine}
     {liveRegion}
     {homeSettings.guide && <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} />}
-    <TodayPanelCore {...modeProps} />
+    <style>{`[data-plushlife-home-stack] { display:grid; gap:8px; } [data-plushlife-home-stack] > * { margin-top:0 !important; margin-bottom:0 !important; }`}</style>
+    <div data-plushlife-home-stack><TodayPanelCore {...modeProps} /></div>
     {plushMemory}
     {homeSettings.extras && <button type="button" onClick={() => setMoreForTodayOpen((open) => !open)} aria-expanded={moreForTodayOpen} style={{ width: "100%", minHeight: 46, margin: "10px 0 8px", padding: "10px 12px", borderRadius: 13, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.78)", color: "#765F84", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{moreForTodayOpen ? "Hide extra tools" : "More for today"} {moreForTodayOpen ? "⌃" : "⌄"}</button>}
     <div style={{ display: homeSettings.extras && moreForTodayOpen ? "block" : "none" }} aria-hidden={!homeSettings.extras || !moreForTodayOpen}>
