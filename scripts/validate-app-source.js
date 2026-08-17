@@ -43,7 +43,7 @@ const requiredRegressionMarkers = [
   'required task${pendingCount === 1 ? "" : "s"} still waiting',
   'optional bonus {bonusPendingCount === 1 ? "task" : "tasks"} available',
   'if (/^mornings?$/.test(words)) return { key: "morning", label: "☀️ Mornings" };',
-  'View monthly details',
+  '🗓️ Month so far',
   'Your habit progress and earned rewards live here in PlushGrowth.',
   'Close habit tools',
   '<HabitCoach {...props}>',
