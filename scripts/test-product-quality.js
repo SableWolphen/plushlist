@@ -12,6 +12,7 @@ const baby = read("src/components/baby-today.jsx");
 const progress = read("src/components/progress-panel.jsx");
 const growthMove = read("src/components/growth-next-move.jsx");
 const smartNextStep = read("src/components/smart-next-step.jsx");
+const taskIntelligence = read("src/task-intelligence.mjs");
 const shared = read("src/components/shared.jsx");
 const settings = read("src/components/organized-settings.jsx");
 const anchor = read("src/components/compact-anchor.jsx");
@@ -70,7 +71,7 @@ const checks = [
   [anchor.includes("FOCUS HABIT") && anchor.includes("focus_habit_id") && !anchor.includes("HABIT ASSIST") && !anchor.includes("HABIT RESILIENCE"), "Focus Habit stays compact and persistent"],
   [anchor.includes('String(row.habitType || "regular") !== "regular"') && anchor.includes("Only habits are shown here"), "Focus Habit picker excludes regular tasks and shows habits only"],
   [anchor.includes("focus_habit_selected_at") && anchor.includes("anchors: { ...(latest.anchors || {}), [date]: id }"), "Focus Habit preserves existing anchor intelligence compatibility"],
-  [today.includes("useSmartNextStep") && smartNextStep.includes("profile.preferredPeriod") && smartNextStep.includes("profile.stability") && smartNextStep.includes("focusHabitId"), "One Next Step quietly ranks Focus Habit, timing, stability and capacity"],
+  [today.includes("useSmartNextStep") && smartNextStep.includes("focusHabitId") && smartNextStep.includes("rankSmartTask") && taskIntelligence.includes("preferredPeriod") && taskIntelligence.includes("stability") && taskIntelligence.includes("completionLikelihood") && taskIntelligence.includes("lowCapacity"), "One Next Step quietly ranks Focus Habit, timing, stability and capacity"],
   [today.includes("smartNextStepHidden ? null") && today.includes("setSmartNextStepHidden(Boolean(hidden))"), "Hide for today suppresses the smart next-step card immediately"],
   [anchor.includes('data-plushlife-compact-card="focus-habit"') && anchor.includes('>{focusId ? "Change" : "Choose"}</button>'), "Focus Habit uses the compact mobile summary layout"],
   [todayCore.includes('data-plushlife-compact-card="next-step"') && todayCore.includes('data-plushlife-compact-card="plushweek"'), "Next Step and PlushWeek use compact mobile summary cards"],
