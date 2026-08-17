@@ -130,9 +130,8 @@ if (fs.existsSync(path.join(ROOT, "capacitor.config.json"))) {
   try {
     const capacitor = JSON.parse(read("capacitor.config.json"));
     if (capacitor.appId !== "com.PlushLife") failures.push("Android package name changed unexpectedly.");
-    if (capacitor.server?.url !== "https://plushlife.plushlife-app.workers.dev/") {
-      failures.push("Android server URL is not set to the production Cloudflare host.");
-    }
+    if (capacitor.webDir !== "www") failures.push("Android must launch from the generated bundled www directory.");
+    if (capacitor.server?.url) failures.push("Android must not depend on a remote server URL for startup.");
   } catch (error) {
     failures.push(`Capacitor config is invalid JSON: ${error.message}`);
   }
