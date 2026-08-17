@@ -56,12 +56,16 @@ const comeback = buildPersonalDayModel({
 assert.equal(comeback.recommendedDayType, "recovery");
 assert.equal(comeback.intervention.kind, "comeback");
 
+const sparseProfiles = {
+  meds: { observedDays: 2, completionEvents: 1, completionRate: 50, confidence: "learning", stability: "New" },
+  walk: { observedDays: 1, completionEvents: 0, completionRate: 0, confidence: "learning", stability: "New" },
+};
 const steady = buildPersonalDayModel({
   rows: rows.slice(0, 2),
   viewDone: { meds: true },
   dailyCheckIn: { energy: "steady", capacity: "usual" },
-  profiles,
-  smartTaskProfiles,
+  profiles: sparseProfiles,
+  smartTaskProfiles: {},
   load: { score: 30, level: "comfortable", suggestedVisibleCount: 2 },
   recovery: { recentGap: 0 },
   hour: 11,
