@@ -100,6 +100,7 @@ export function TodayPanel(props) {
   const lowScreen = useLowScreenMode();
   const readinessReportedRef = React.useRef(false);
   const [smartNextStepHidden, setSmartNextStepHidden] = React.useState(false);
+  const [smartEaseHint, setSmartEaseHint] = React.useState(null);
   const [moreForTodayOpen, setMoreForTodayOpen] = React.useState(false);
   const [homeSettings] = React.useState({ guide: false, insights: false, extras: false });
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
@@ -109,9 +110,20 @@ export function TodayPanel(props) {
     return <StableFeatureTip id={id} text={text} />;
   }, []);
 
-  React.useEffect(() => { setSmartNextStepHidden(false); setMoreForTodayOpen(false); }, [props.period?.date]);
+  React.useEffect(() => { setSmartNextStepHidden(false); setSmartEaseHint(null); setMoreForTodayOpen(false); }, [props.period?.date]);
   const setNextStepDismissedToday = (hidden) => { props.setNextStepDismissedToday?.(hidden); setSmartNextStepHidden(Boolean(hidden)); };
-  const modeProps = { ...props, FeatureTip: StableTip, toggle: unifiedToggle, recentlyCompletedKeys, completedLingerKeys: lingerKeys, nextStepTask: smartNextStepHidden ? null : (smartNextStep.task || props.nextStepTask), nextStepReason: smartNextStepHidden ? "" : smartNextStep.reason, setNextStepDismissedToday };
+  const pickEasierSuggestion = (taskKey) => {
+    const task = (props.rows || []).find((row) => row.key === taskKey);
+    const source = task?.sourceTask || {};
+    const gentler = String(source.tiny_label || task?.tiny_label || source.soft_label || task?.soft_label || "").trim();
+    if (gentler) {
+      setSmartEaseHint({ key: taskKey, text: gentler });
+      return;
+    }
+    setSmartEaseHint(null);
+    props.pickEasierSuggestion?.(taskKey);
+  };
+  const modeProps = { ...props, FeatureTip: StableTip, toggle: unifiedToggle, recentlyCompletedKeys, completedLingerKeys: lingerKeys, nextStepTask: smartNextStepHidden ? null : (smartNextStep.task || props.nextStepTask), nextStepReason: smartNextStepHidden ? "" : smartNextStep.reason, nextStepHint: smartEaseHint || props.nextStepHint, pickEasierSuggestion, setNextStepDismissedToday };
   const liveRegion = <div aria-live="polite" aria-atomic="true" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>{announcement}</div>;
   const backgroundEngine = <BackgroundIntelligence {...modeProps} />;
   const plushMemory = homeSettings.insights ? <><PlushKnowsMe {...modeProps} /><React.Suspense fallback={null}><LazySmartAdaptationPanel {...modeProps} /></React.Suspense></> : null;
