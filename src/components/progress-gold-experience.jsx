@@ -107,7 +107,7 @@ function daysSince(timestamp) {
 }
 
 function TinyButton({ children, onClick, primary = false }) {
-  return <button type="button" onClick={onClick} style={{ minHeight: 44, padding: "7px 10px", borderRadius: 10, border: primary ? 0 : "1px solid #E4C878", background: primary ? "linear-gradient(135deg,#B36AD0,#7D72E8)" : "rgba(255,255,255,.92)", color: primary ? "white" : "#8A6711", fontWeight: 900, fontSize: 10.4, cursor: "pointer" }}>{children}</button>;
+  return <button type="button" onClick={onClick} style={{ minHeight: 42, padding: "7px 10px", borderRadius: 10, border: primary ? 0 : "1px solid #E4C878", background: primary ? "linear-gradient(135deg,#A961C7,#7770D9)" : "rgba(255,255,255,.9)", color: primary ? "white" : "#8A6711", fontWeight: 900, fontSize: 10.2, cursor: "pointer" }}>{children}</button>;
 }
 
 function PlushLab({ props }) {
@@ -132,43 +132,41 @@ function PlushLab({ props }) {
   }, [experiment, props, save]);
 
   const reset = React.useCallback(() => save(null), [save]);
+  const current = experiment?.status === "running" ? experiment : suggestion;
 
-  return <section data-plush-gold-lab="true" style={{ marginTop: 9, borderRadius: 14, border: "1px solid #E8D58E", background: "linear-gradient(145deg,#FFFDF2,#FFF7DF)", boxShadow: "0 3px 10px rgba(151,112,173,.05)", padding: "12px 13px" }}>
-    <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
-      <div><div style={{ fontSize: 12.7, fontWeight: 900, color: "#8D6710" }}>🧪 PlushLab</div><div style={{ marginTop: 2, fontSize: 9.7, color: "#8E7B4A" }}>Gold learns what actually helps you.</div></div>
-      <span style={{ padding: "3px 7px", borderRadius: 999, background: "#FFF3C8", border: "1px solid #E7CE76", color: "#916A00", fontSize: 9, fontWeight: 900 }}>✨ GOLD</span>
+  return <section data-plush-gold-lab="true" style={{ marginTop: 9, borderRadius: 14, border: "1px solid #E6D58F", background: "linear-gradient(145deg,#FFFDF3,#FFF8E4)", boxShadow: "0 3px 10px rgba(151,112,173,.05)", padding: "11px 12px" }}>
+    <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}>
+      <div style={{ minWidth: 0 }}><div style={{ fontSize: 12.8, fontWeight: 900, color: "#8D6710" }}>🧪 PlushLab</div><div style={{ marginTop: 2, fontSize: 9.7, lineHeight: 1.35, color: "#8E7B4A" }}>One small experiment to learn what actually helps.</div></div>
+      {experiment?.status === "running" && <span style={{ flexShrink: 0, fontSize: 9.3, fontWeight: 900, color: "#9A8656" }}>Day {Math.min(7, age + 1)} of 7</span>}
     </div>
 
     {!experiment && <>
-      <div style={{ marginTop: 9, padding: "9px 10px", borderRadius: 11, background: "rgba(255,255,255,.8)", border: "1px solid #EEE0AE" }}>
-        <div style={{ fontSize: 11, fontWeight: 900, color: "#69552B" }}>{suggestion.icon} This week&apos;s tiny experiment</div>
-        <div style={{ marginTop: 4, fontSize: 11.3, fontWeight: 900, color: "#493D2D" }}>{suggestion.title}</div>
-        <div style={{ marginTop: 4, fontSize: 10.5, lineHeight: 1.42, color: "#6F6247" }}>{suggestion.action}</div>
-        <div style={{ marginTop: 7, paddingTop: 7, borderTop: "1px solid #EFE4BC", fontSize: 9.8, lineHeight: 1.4, color: "#8A7B58" }}><strong>Why this:</strong> {suggestion.why}</div>
+      <div style={{ marginTop: 8, padding: "8px 9px", borderRadius: 10, background: "rgba(255,255,255,.72)", border: "1px solid #EEE0AE" }}>
+        <div style={{ fontSize: 11.2, fontWeight: 900, color: "#493D2D" }}>{current.icon} {current.title}</div>
+        <div style={{ marginTop: 3, fontSize: 10.3, lineHeight: 1.4, color: "#6F6247" }}>{current.action}</div>
+        <details style={{ marginTop: 5 }}><summary style={{ minHeight: 32, display: "flex", alignItems: "center", cursor: "pointer", color: "#8A7B58", fontSize: 9.7, fontWeight: 900 }}>Why this experiment?</summary><div style={{ padding: "2px 0 4px", fontSize: 9.7, lineHeight: 1.4, color: "#8A7B58" }}>{current.why}</div></details>
       </div>
-      <div style={{ marginTop: 8 }}><TinyButton primary onClick={start}>✨ Try this for a week</TinyButton></div>
+      <div style={{ marginTop: 7 }}><TinyButton primary onClick={start}>Try this for a week</TinyButton></div>
     </>}
 
-    {experiment?.status === "running" && <>
-      <div style={{ marginTop: 9, padding: "9px 10px", borderRadius: 11, background: "rgba(255,255,255,.8)", border: "1px solid #EEE0AE" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><strong style={{ fontSize: 10.8, color: "#69552B" }}>{experiment.icon} In progress · {experiment.title}</strong><span style={{ fontSize: 9.4, color: "#9A8656", whiteSpace: "nowrap" }}>Day {Math.min(7, age + 1)} of 7</span></div>
-        <div style={{ marginTop: 4, fontSize: 10.4, lineHeight: 1.4, color: "#6F6247" }}>{experiment.action}</div>
-        {!readyToReview && <div style={{ marginTop: 7, fontSize: 9.7, color: "#8A7B58" }}>PlushLife captured the starting point. No need to track anything extra — just use the app normally.</div>}
-        {readyToReview && <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #EFE4BC" }}>
-          <div style={{ fontSize: 10.5, fontWeight: 900, color: "#69552B" }}>Did this actually help?</div>
-          <div style={{ marginTop: 3, fontSize: 9.8, lineHeight: 1.4, color: "#8A7B58" }}>{observed?.direction === "better" ? "The numbers moved in a helpful direction too, but your experience gets the final say." : observed?.direction === "lower" ? "The numbers were lower, but that does not automatically mean the experiment failed. How it felt matters." : "The numbers stayed fairly steady, so your own experience is especially useful here."}</div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 7 }}><TinyButton primary onClick={() => finish("helped")}>💜 Yes, it helped</TinyButton><TinyButton onClick={() => finish("neutral")}>🙂 Not sure</TinyButton><TinyButton onClick={() => finish("too_much")}>🪶 Too much</TinyButton></div>
-        </div>}
-      </div>
-    </>}
+    {experiment?.status === "running" && <div style={{ marginTop: 8, padding: "8px 9px", borderRadius: 10, background: "rgba(255,255,255,.72)", border: "1px solid #EEE0AE" }}>
+      <div style={{ fontSize: 11.1, fontWeight: 900, color: "#493D2D" }}>{experiment.icon} {experiment.title}</div>
+      <div style={{ marginTop: 3, fontSize: 10.2, lineHeight: 1.38, color: "#6F6247" }}>{experiment.action}</div>
+      {!readyToReview && <div style={{ marginTop: 6, fontSize: 9.5, lineHeight: 1.35, color: "#8A7B58" }}>Nothing extra to track. Use PlushLife normally and it will compare the starting point with what happens.</div>}
+      {readyToReview && <div style={{ marginTop: 7, paddingTop: 7, borderTop: "1px solid #EFE4BC" }}>
+        <div style={{ fontSize: 10.4, fontWeight: 900, color: "#69552B" }}>Did this actually help?</div>
+        <div style={{ marginTop: 3, fontSize: 9.7, lineHeight: 1.38, color: "#8A7B58" }}>{observed?.direction === "better" ? "The numbers moved in a helpful direction too, but your experience gets the final say." : observed?.direction === "lower" ? "The numbers were lower, but that does not automatically mean the experiment failed. How it felt matters." : "The numbers stayed fairly steady, so your own experience is especially useful here."}</div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 7 }}><TinyButton primary onClick={() => finish("helped")}>💜 Helped</TinyButton><TinyButton onClick={() => finish("neutral")}>🙂 Not sure</TinyButton><TinyButton onClick={() => finish("too_much")}>🪶 Too much</TinyButton></div>
+      </div>}
+    </div>}
 
     {experiment?.status === "completed" && <>
-      <div style={{ marginTop: 9, padding: "9px 10px", borderRadius: 11, background: "rgba(255,255,255,.82)", border: "1px solid #EEE0AE" }}>
-        <div style={{ fontSize: 10.8, fontWeight: 900, color: "#69552B" }}>✨ PlushLife learned something</div>
-        <div style={{ marginTop: 5, fontSize: 10.5, lineHeight: 1.42, color: "#6F6247" }}>{experiment.feedback === "helped" ? `You said “${experiment.title}” helped. PlushLife will treat this kind of adjustment as a stronger fit for you in future suggestions.` : experiment.feedback === "too_much" ? `You said “${experiment.title}” felt like too much. PlushLife will down-rank similar suggestions and favor gentler options next time.` : `You were not sure whether “${experiment.title}” helped. PlushLife will keep this as weak evidence instead of turning it into a rule.`}</div>
-        {experiment.observed && <div style={{ marginTop: 7, paddingTop: 7, borderTop: "1px solid #EFE4BC", fontSize: 9.7, lineHeight: 1.4, color: "#8A7B58" }}><strong>Observed alongside your feedback:</strong> essentials {experiment.observed.essentialDelta >= 0 ? "+" : ""}{experiment.observed.essentialDelta}% · overall {experiment.observed.overallDelta >= 0 ? "+" : ""}{experiment.observed.overallDelta}%{experiment.observed.areaDelta != null ? ` · ${experiment.targetArea} ${experiment.observed.areaDelta >= 0 ? "+" : ""}${experiment.observed.areaDelta}%` : ""}. This is context, not proof.</div>}
+      <div style={{ marginTop: 8, padding: "8px 9px", borderRadius: 10, background: "rgba(255,255,255,.76)", border: "1px solid #EEE0AE" }}>
+        <div style={{ fontSize: 10.8, fontWeight: 900, color: "#69552B" }}>✨ What PlushLife learned</div>
+        <div style={{ marginTop: 4, fontSize: 10.3, lineHeight: 1.4, color: "#6F6247" }}>{experiment.feedback === "helped" ? `You said “${experiment.title}” helped, so similar adjustments can get a little more weight in future suggestions.` : experiment.feedback === "too_much" ? `You said “${experiment.title}” felt like too much, so PlushLife can favor gentler options next time.` : `You were not sure whether “${experiment.title}” helped, so PlushLife will keep it as weak evidence instead of a rule.`}</div>
+        {experiment.observed && <details style={{ marginTop: 5 }}><summary style={{ minHeight: 32, display: "flex", alignItems: "center", cursor: "pointer", color: "#8A7B58", fontSize: 9.5, fontWeight: 900 }}>See what changed</summary><div style={{ paddingBottom: 3, fontSize: 9.5, lineHeight: 1.38, color: "#8A7B58" }}>Essentials {experiment.observed.essentialDelta >= 0 ? "+" : ""}{experiment.observed.essentialDelta}% · overall {experiment.observed.overallDelta >= 0 ? "+" : ""}{experiment.observed.overallDelta}%{experiment.observed.areaDelta != null ? ` · ${experiment.targetArea} ${experiment.observed.areaDelta >= 0 ? "+" : ""}${experiment.observed.areaDelta}%` : ""}. Context, not proof.</div></details>}
       </div>
-      <div style={{ marginTop: 8 }}><TinyButton onClick={reset}>🌱 Let PlushLife choose another experiment</TinyButton></div>
+      <div style={{ marginTop: 7 }}><TinyButton onClick={reset}>Choose another experiment</TinyButton></div>
     </>}
   </section>;
 }
