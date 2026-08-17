@@ -230,6 +230,7 @@ export function HabitBackgroundEngine({ open, rows = [], viewDone = {}, period, 
       }));
       const recovery = recoveryProfile(state,today);
       const crossPatterns = checkInPatterns(baseEngine,state);
+      const nextStepFeedback = Array.isArray(currentEngine.nextStepFeedback) ? currentEngine.nextStepFeedback.slice(-120) : [];
       const dayModel = buildPersonalDayModel({
         rows: compactRows,
         viewDone,
@@ -239,6 +240,7 @@ export function HabitBackgroundEngine({ open, rows = [], viewDone = {}, period, 
         load,
         recovery,
         crossPatterns,
+        nextStepFeedback,
         hour: now.getHours(),
         checkInDays: Object.keys(prunedCheckIns).length,
       });
@@ -255,12 +257,13 @@ export function HabitBackgroundEngine({ open, rows = [], viewDone = {}, period, 
       const week = weekKey(today);
       const maintenanceDue = currentEngine.maintenance?.week !== week;
       const engine = {
-        version:5,
+        version:6,
         completionEvents:events,
         checkIns:prunedCheckIns,
         habitProfiles:profiles,
         smartTaskProfiles,
         dayModel,
+        nextStepFeedback,
         load,
         recovery,
         crossPatterns,
