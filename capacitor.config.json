@@ -3,6 +3,10 @@
   "appName": "PlushLife",
   "webDir": "www",
   "backgroundColor": "#fff8fc",
+  "server": {
+    "url": "https://plushlife.plushlife-app.workers.dev/",
+    "androidScheme": "https"
+  },
   "android": {
     "backgroundColor": "#fff8fc"
   },
