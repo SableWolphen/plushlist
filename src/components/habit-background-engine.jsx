@@ -1,6 +1,7 @@
 import { hasGoldFeature } from "../plush-gold.js";
 import { buildHabitLearning } from "../habit-learning.mjs";
 import { buildSmartTaskProfile, taskId } from "../task-intelligence.mjs";
+import { buildPersonalDayModel } from "../personal-day-model.mjs";
 
 const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 const ENGINE_KEY = "__background_engine";
@@ -229,6 +230,18 @@ export function HabitBackgroundEngine({ open, rows = [], viewDone = {}, period, 
       }));
       const recovery = recoveryProfile(state,today);
       const crossPatterns = checkInPatterns(baseEngine,state);
+      const dayModel = buildPersonalDayModel({
+        rows: compactRows,
+        viewDone,
+        dailyCheckIn,
+        profiles,
+        smartTaskProfiles,
+        load,
+        recovery,
+        crossPatterns,
+        hour: now.getHours(),
+        checkInDays: Object.keys(prunedCheckIns).length,
+      });
       const experiments = experimentResults(state,profiles,today);
       const userChoices = currentEngine.userChoices || {};
       const learning = buildHabitLearning({
@@ -242,11 +255,12 @@ export function HabitBackgroundEngine({ open, rows = [], viewDone = {}, period, 
       const week = weekKey(today);
       const maintenanceDue = currentEngine.maintenance?.week !== week;
       const engine = {
-        version:4,
+        version:5,
         completionEvents:events,
         checkIns:prunedCheckIns,
         habitProfiles:profiles,
         smartTaskProfiles,
+        dayModel,
         load,
         recovery,
         crossPatterns,
