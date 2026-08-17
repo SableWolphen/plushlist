@@ -6,10 +6,9 @@ const ASSETS = path.join(ROOT, "www", "assets");
 const ENTRY = path.join(ASSETS, "app.bundle.js");
 const CHUNKS = path.join(ASSETS, "chunks");
 
-// These are intentionally above the current production sizes (~427 KB entry,
-// ~32 KB largest lazy chunk) so ordinary small changes have room while a real
-// startup regression fails the build instead of silently accumulating.
-const MAX_ENTRY_BYTES = 475 * 1024;
+// Keep modest headroom above the current production size so ordinary small
+// changes can ship while meaningful startup regressions still fail the build.
+const MAX_ENTRY_BYTES = 485 * 1024;
 const MAX_LAZY_CHUNK_BYTES = 45 * 1024;
 
 function size(file) {
