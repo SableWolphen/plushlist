@@ -6,6 +6,6 @@
          this app doesn't have a native dark theme, only its own in-app
          Dark Mode toggle, so the native chrome should always stay light. -->
     <color name="colorPrimary">#C77DD6</color>
-    <color name="colorPrimaryDark">#FFF6FB</color>
+    <color name="colorPrimaryDark">#FFF0FA</color>
     <color name="colorAccent">#A65DC1</color>
 </resources>
