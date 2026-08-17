@@ -1,3 +1,49 @@
+(function (root) {
+  // Supabase restores the same persisted session that is already stored on
+  // this device. On some Android WebViews that restore can spend several
+  // seconds waiting on the auth initialization lock before getSession()
+  // resolves, leaving the user on the opening skeleton even though a valid
+  // unexpired session is already available locally.
+  //
+  // Give the first getSession() call a cache-first fast path when (and only
+  // when) that persisted access token is still valid. Supabase still runs
+  // its normal initialization in the background and onAuthStateChange in the
+  // app remains the source of truth, so refreshes/sign-outs still reconcile.
+  if (!root || !root.supabase || typeof root.supabase.createClient !== "function") return;
+  const authStorageKey = "sb-pvitdhixycegmcovapyh-auth-token";
+  const originalCreateClient = root.supabase.createClient.bind(root.supabase);
+
+  root.supabase.createClient = function createClientWithWarmSession(url, key, options) {
+    const client = originalCreateClient(url, key, options);
+    const originalGetSession = client?.auth?.getSession?.bind(client.auth);
+    if (!originalGetSession) return client;
+
+    let usedWarmSession = false;
+    client.auth.getSession = function getSessionWithWarmStart() {
+      if (usedWarmSession) return originalGetSession();
+      usedWarmSession = true;
+
+      let cachedSession = null;
+      try {
+        const parsed = JSON.parse(root.localStorage.getItem(authStorageKey) || "null");
+        const expiresAt = Number(parsed?.expires_at || 0);
+        const tokenStillValid = Boolean(parsed?.access_token && parsed?.user?.id && expiresAt * 1000 > Date.now() + 30000);
+        if (tokenStillValid) cachedSession = parsed;
+      } catch (_error) {}
+
+      if (!cachedSession) return originalGetSession();
+
+      // Start the normal Supabase restore immediately too. The app's existing
+      // auth-state listener will reconcile the authoritative session once it
+      // completes; this promise is intentionally not awaited by first paint.
+      Promise.resolve().then(() => originalGetSession()).catch(() => {});
+      return Promise.resolve({ data: { session: cachedSession }, error: null });
+    };
+
+    return client;
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
 (function (root, factory) {
   const plushContent = typeof module === "object" && module.exports
     ? require("./plush-content.js")
