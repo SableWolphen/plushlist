@@ -1,4 +1,4 @@
-export const PERSONAL_DAY_MODEL_VERSION = 1;
+export const PERSONAL_DAY_MODEL_VERSION = 2;
 
 function number(value, fallback = 0) {
   const parsed = Number(value);
@@ -49,6 +49,17 @@ function stateLabel({ dayType, overloadRisk, lowCapacity, recentGap, hour }) {
   return "steady day";
 }
 
+function feedbackFor(feedback, id) {
+  const recent = (feedback || []).filter((item) => String(item?.taskId || "") === id).slice(-12);
+  return {
+    done: recent.filter((item) => item.action === "done").length,
+    skipped: recent.filter((item) => item.action === "skip").length,
+    easier: recent.filter((item) => item.action === "easier").length,
+    hidden: recent.filter((item) => item.action === "hide").length,
+    samples: recent.length,
+  };
+}
+
 function buildIntervention({ dayType, overloadRisk, load, recentGap, rows, taskPredictions, profiles }) {
   if (recentGap >= 2) {
     return {
@@ -65,6 +76,22 @@ function buildIntervention({ dayType, overloadRisk, load, recentGap, rows, taskP
       kind: "trim",
       title: "Trim the visible day early",
       text: `Keep about ${Math.max(1, number(load?.suggestedVisibleCount, 3))} important things in view before the day gets more crowded.`,
+    };
+  }
+
+  const avoided = (rows || [])
+    .map((row) => ({ row, prediction: taskPredictions?.[taskId(row)] }))
+    .filter(({ prediction }) => prediction?.feedback?.skipped >= 2 || prediction?.feedback?.easier >= 2)
+    .sort((a, b) => (b.prediction.feedback.skipped + b.prediction.feedback.easier) - (a.prediction.feedback.skipped + a.prediction.feedback.easier))[0];
+  if (avoided) {
+    const label = String(avoided.row?.label || "this task");
+    const tiny = gentlerLabel(avoided.row);
+    return {
+      kind: tiny ? "smaller" : "friction",
+      title: tiny ? `Default “${label}” to something easier` : `Rework “${label}”`,
+      text: tiny
+        ? `You have repeatedly asked for less friction here. “${tiny}” may be the better starting version on days like this.`
+        : "This keeps getting skipped, so changing its timing, size, or frequency is probably more useful than repeating the same prompt.",
     };
   }
 
@@ -94,7 +121,7 @@ function buildIntervention({ dayType, overloadRisk, load, recentGap, rows, taskP
   return { kind: "steady", title: "Keep the day steady", text: "No major adjustment is needed yet. PlushLife can keep learning from what actually happens today." };
 }
 
-export function buildPersonalDayModel({ rows = [], viewDone = {}, dailyCheckIn = {}, profiles = {}, smartTaskProfiles = {}, load = {}, recovery = {}, crossPatterns = {}, hour = new Date().getHours(), checkInDays = 0 } = {}) {
+export function buildPersonalDayModel({ rows = [], viewDone = {}, dailyCheckIn = {}, profiles = {}, smartTaskProfiles = {}, load = {}, recovery = {}, crossPatterns = {}, nextStepFeedback = [], hour = new Date().getHours(), checkInDays = 0 } = {}) {
   const active = (rows || []).filter((row) => row && !row.isBonus);
   const incompleteRows = active.filter((row) => !viewDone?.[row.key]);
   const incomplete = incompleteRows.length;
@@ -122,6 +149,7 @@ export function buildPersonalDayModel({ rows = [], viewDone = {}, dailyCheckIn =
     const profile = profiles?.[id] || {};
     const minutes = taskMinutes(row);
     const tiny = gentlerLabel(row);
+    const feedback = feedbackFor(nextStepFeedback, id);
     let likelihood = number(smart.completionLikelihood, Number.isFinite(Number(profile.completionRate)) ? Number(profile.completionRate) : 50);
     let adjustment = 0;
     const reasons = [];
@@ -136,12 +164,21 @@ export function buildPersonalDayModel({ rows = [], viewDone = {}, dailyCheckIn =
     if (hour >= 21 && minutes >= 30) { adjustment -= 12; reasons.push("too large this late"); }
     if (profile.stability === "Recovering") { adjustment -= 4; reasons.push("rebuilding"); }
 
+    if (feedback.samples >= 2) {
+      adjustment += Math.min(8, feedback.done * 2);
+      adjustment -= Math.min(14, feedback.skipped * 4 + feedback.hidden * 2);
+      if (feedback.skipped >= 2) reasons.push("often skipped when suggested");
+      if (feedback.easier >= 2 && tiny) { adjustment += 5; reasons.push("you often prefer the gentler version"); }
+      if (feedback.done >= 2) reasons.push("this suggestion has worked before");
+    }
+
     likelihood = clamp(Math.round(likelihood + adjustment), 5, 95);
     taskPredictions[id] = {
       likelihood,
       adjustment,
       reasons,
-      suggestedVersion: (dayType === "tiny" || dayType === "soft") && tiny ? tiny : "",
+      feedback,
+      suggestedVersion: ((dayType === "tiny" || dayType === "soft") || feedback.easier >= 2) && tiny ? tiny : "",
       preferredPeriod: profile.preferredPeriod || "",
     };
   });
