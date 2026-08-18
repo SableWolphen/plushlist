@@ -76,7 +76,7 @@ export function CalmHomeControls({ onSettingsChange, selectDayType, setEssential
       setMessage(`Your next useful step is ${nextStepTask.label || nextStepTask.title || "ready"}.`);
     }
     else if (/next|one thing|what now|what should i do/.test(q)) setMessage("You're caught up on the next step right now.");
-    else setMessage("Try “what should I do?”, “make today tiny,” “add a habit,” “help me restart,” “progress,” or “settings.”");
+    else setMessage("Try “what should I do?”, “make today tiny,” “open care,” “edit habits,” “help me restart,” “progress,” or “settings.”");
     setCommand("");
   };
   const applySimpleHome = () => {
