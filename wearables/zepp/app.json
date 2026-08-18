@@ -5,8 +5,8 @@
     "appName": "PlushLife",
     "appType": "app",
     "version": {
-      "code": 5,
-      "name": "0.4.0"
+      "code": 6,
+      "name": "0.5.0"
     },
     "icon": "icon.png",
     "vender": "SableWolphen",
@@ -37,6 +37,18 @@
         },
         "app-side": {
           "path": "app-side/index"
+        },
+        "app-widget": {
+          "widgets": [
+            {
+              "path": "app-widget/index",
+              "icon": "icon.png",
+              "name": "PlushLife Today",
+              "runtime": {
+                "type": "js"
+              }
+            }
+          ]
         }
       },
       "platforms": [
@@ -47,7 +59,12 @@
   },
   "i18n": {
     "en-US": {
-      "appName": "PlushLife"
+      "appName": "PlushLife",
+      "app-widget": {
+        "widgets": [
+          { "name": "PlushLife Today" }
+        ]
+      }
     }
   },
   "defaultLanguage": "en-US",
