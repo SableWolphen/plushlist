@@ -1,7 +1,9 @@
 import { createWidget, widget, align, prop } from '@zos/ui'
 import { LocalStorage } from '@zos/storage'
+import { Vibrator } from '@zos/sensor'
 
 const storage = new LocalStorage()
+const vibrator = new Vibrator()
 
 function centered(text, y, size = 28, color = 0xffffff, height = 52) {
   return createWidget(widget.TEXT, { x: 40, y, w: 400, h: height, color, text_size: size, align_h: align.CENTER_H, align_v: align.CENTER_V, text })
@@ -14,7 +16,9 @@ function action(label, y, message, status) {
     color: 0xffffff, text_size: 22, text: label,
     click_func: () => {
       storage.setItem('lastRescueAction', message)
-      status.setProperty(prop.TEXT, 'That counts. Stay here as long as you need. 💜')
+      storage.setItem('lastRescueAt', Date.now())
+      vibrator.start()
+      status.setProperty(prop.TEXT, '✓ That counts. Stay here as long as you need. 💜')
     }
   })
 }
@@ -35,6 +39,6 @@ Page({
     action('💧 One sip of water', 160, 'water', status)
     action('🫶 Unclench + breathe', 234, 'breathe', status)
     action('🛋️ Sit somewhere safe', 308, 'safe-place', status)
-    centered('You can stop after one.', 386, 17, 0x9b8aaa, 42)
+    centered('One choice is enough. You can stop here.', 386, 16, 0x9b8aaa, 42)
   }
 })
