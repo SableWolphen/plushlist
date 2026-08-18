@@ -72,13 +72,19 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
             views.setTextViewText(TASK_ROW_IDS[i], (done ? "✓ " : "○ ") + label);
             views.setViewVisibility(TASK_ROW_IDS[i], View.VISIBLE);
             String taskKey = prefs.getString("task" + i + "Key", "");
-            if (!done && taskKey != null && !taskKey.isEmpty()) {
+            if (!done) {
                 Intent complete = new Intent(context, MainActivity.class)
                     .setAction("com.PlushLife.WIDGET_DONE_" + i)
                     .putExtra("plushlifeTaskAction", "done")
-                    .putExtra("plushlifeTaskKey", taskKey)
+                    .putExtra("plushlifeTaskLabel", label)
+                    .putExtra("plushlifeTaskKey", taskKey == null ? "" : taskKey)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                PendingIntent completePending = PendingIntent.getActivity(context, widgetId * 10 + i + 1, complete, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                PendingIntent completePending = PendingIntent.getActivity(
+                    context,
+                    widgetId * 10 + i + 1,
+                    complete,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                );
                 views.setOnClickPendingIntent(TASK_ROW_IDS[i], completePending);
             }
             anyTaskShown = true;
