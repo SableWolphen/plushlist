@@ -62,6 +62,7 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
         views.setProgressBar(R.id.widget_weekly_progress, 100, prefs.getInt("weeklyProgress", 0), false);
 
         boolean anyTaskShown = false;
+        boolean anyOpenTask = false;
         for (int i = 0; i < TASK_ROW_IDS.length; i++) {
             String label = prefs.getString("task" + i + "Label", "");
             if (label == null || label.isEmpty()) {
@@ -73,6 +74,7 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
             views.setViewVisibility(TASK_ROW_IDS[i], View.VISIBLE);
             String taskKey = prefs.getString("task" + i + "Key", "");
             if (!done) {
+                anyOpenTask = true;
                 Intent complete = new Intent(context, MainActivity.class)
                     .setAction("com.PlushLife.WIDGET_DONE_" + i)
                     .putExtra("plushlifeTaskAction", "done")
@@ -90,7 +92,7 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
             anyTaskShown = true;
         }
         views.setTextViewText(R.id.widget_next_task, prefs.getString("nextTask", "Open PlushLife for one caring step"));
-        views.setViewVisibility(R.id.widget_next_task, anyTaskShown ? View.GONE : View.VISIBLE);
+        views.setViewVisibility(R.id.widget_next_task, (!anyTaskShown || !anyOpenTask) ? View.VISIBLE : View.GONE);
 
         Intent launch = new Intent(context, MainActivity.class)
             .setAction(Intent.ACTION_VIEW)
