@@ -73,7 +73,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
           return (
             <>
             <FeatureTip id="one_next_step" text="This is your One Next Step — just the single most useful thing to do right now, so you don't have to look at everything at once." />
-            <div data-plushlife-compact-card="next-step" style={{ marginBottom: 8, padding: "9px 11px", borderRadius: 13, background: day.accent + "10", border: "1px solid " + day.accent + "88" }}>
+            <div id="plushlife-smart-next-step" data-plushlife-compact-card="next-step" style={{ marginBottom: 8, padding: "9px 11px", borderRadius: 13, background: day.accent + "10", border: "1px solid " + day.accent + "88", scrollMarginTop: 16 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 9.5, letterSpacing: "0.12em", fontWeight: 900, color: day.accent }}>{babyMode ? "🍼 ONE TINY THING" : "🎯 NEXT STEP"}</div>
