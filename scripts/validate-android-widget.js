@@ -30,9 +30,7 @@ function stripXmlComments(source) {
     }
     output += source.slice(cursor, start);
     const end = source.indexOf("-->", start + 4);
-    if (end === -1) {
-      throw new Error("Widget layout contains an unterminated XML comment.");
-    }
+    if (end === -1) throw new Error("Widget layout contains an unterminated XML comment.");
     output += " ".repeat(end + 3 - start);
     cursor = end + 3;
   }
@@ -42,11 +40,8 @@ function stripXmlComments(source) {
 if (fs.existsSync(layoutPath)) {
   const layout = read(layoutPath);
   let layoutWithoutComments = layout;
-  try {
-    layoutWithoutComments = stripXmlComments(layout);
-  } catch (error) {
-    failures.push(error.message);
-  }
+  try { layoutWithoutComments = stripXmlComments(layout); }
+  catch (error) { failures.push(error.message); }
   const tags = [...layoutWithoutComments.matchAll(/<\/?([A-Za-z0-9_.]+)(?:\s|>|\/)/g)].map((match) => match[1]);
   const allowed = new Set([
     "LinearLayout", "RelativeLayout", "FrameLayout", "GridLayout", "TextView", "Button",
@@ -81,7 +76,8 @@ if (fs.existsSync(providerPath)) {
     if (!provider.includes(`${lifecycle}(`)) failures.push(`Widget provider is missing ${lifecycle}.`);
   }
   if (!provider.includes("refreshAll(context)")) failures.push("Widget provider does not refresh all widget instances.");
-  if (!provider.includes("plushlifeTaskAction")) failures.push("Widget task rows no longer expose the quick Done action.");
+  if (!provider.includes("plushlifeTaskAction") || !provider.includes("plushlifeTaskLabel")) failures.push("Widget task rows no longer expose the quick Done action.");
+  if (!provider.includes("anyOpenTask")) failures.push("Widget all-done state is no longer guarded by open-task detection.");
 }
 
 if (fs.existsSync(bridgePath)) {
@@ -89,9 +85,12 @@ if (fs.existsSync(bridgePath)) {
   for (const marker of [
     "window.__plushlifeWidgetSyncInstalled",
     "document.addEventListener('change'",
+    "document.addEventListener('plushlife-widget-action',consumeAction)",
     "setInterval(sync,30000)",
     "plugin.updateWidget",
     "consumeWidgetAction",
+    "plushlifeTaskLabel",
+    "dayMode=function()",
     "getBridge().getWebView().evaluateJavascript",
   ]) {
     if (!bridge.includes(marker)) failures.push(`Widget bridge integration marker is missing: ${marker}`);
