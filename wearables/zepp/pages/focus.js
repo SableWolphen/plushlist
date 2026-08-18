@@ -12,22 +12,28 @@ function formatRemaining(ms) {
   return `${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`
 }
 
+function dayKey() {
+  const now = new Date()
+  const pad = (value) => String(value).padStart(2, '0')
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+}
+
 Page({
   build() {
     this.durationMinutes = Number(storage.getItem('focusDurationMinutes', 15)) || 15
     this.timerId = null
     this.completedBuzzed = false
 
-    createWidget(widget.TEXT, { x: 40, y: 24, w: 400, h: 48, color: 0xffffff, text_size: 32, align_h: align.CENTER_H, align_v: align.CENTER_V, text: '🎯 PlushFocus' })
+    createWidget(widget.TEXT, { x: 40, y: 20, w: 400, h: 46, color: 0xffffff, text_size: 31, align_h: align.CENTER_H, align_v: align.CENTER_V, text: '🎯 PlushFocus' })
     this.label = createWidget(widget.TEXT, {
-      x: 48, y: 72, w: 384, h: 62,
+      x: 48, y: 64, w: 384, h: 58,
       color: 0xe9d8ff, text_size: 18,
       align_h: align.CENTER_H, align_v: align.CENTER_V,
       text: 'One thing. One gentle block. Stopping early still counts.'
     })
     this.timerText = createWidget(widget.TEXT, {
-      x: 90, y: 130, w: 300, h: 82,
-      color: 0xffffff, text_size: 48,
+      x: 90, y: 120, w: 300, h: 78,
+      color: 0xffffff, text_size: 46,
       align_h: align.CENTER_H, align_v: align.CENTER_V,
       text: `${String(this.durationMinutes).padStart(2, '0')}:00`
     })
@@ -42,30 +48,42 @@ Page({
     }
 
     ;[[10, 62], [15, 180], [25, 298]].forEach(([minutes, x]) => createWidget(widget.BUTTON, {
-      x, y: 218, w: 120, h: 50, radius: 22,
+      x, y: 204, w: 120, h: 50, radius: 22,
       normal_color: minutes === this.durationMinutes ? 0x536ea6 : 0x42364f,
       press_color: 0x7188bc, color: 0xffffff, text_size: 19,
       text: `${minutes} min`, click_func: () => setDuration(minutes),
     }))
 
     this.startButton = createWidget(widget.BUTTON, {
-      x: 70, y: 286, w: 340, h: 66, radius: 31,
+      x: 70, y: 270, w: 340, h: 64, radius: 30,
       normal_color: 0x536ea6, press_color: 0x7188bc,
-      color: 0xffffff, text_size: 24, text: 'Start focus',
+      color: 0xffffff, text_size: 23, text: 'Start focus',
       click_func: () => this.startFocus()
     })
 
     this.stopButton = createWidget(widget.BUTTON, {
-      x: 90, y: 366, w: 300, h: 58, radius: 27,
+      x: 90, y: 348, w: 300, h: 56, radius: 26,
       normal_color: 0x6f55a8, press_color: 0x8f6ab8,
-      color: 0xffffff, text_size: 21, text: 'Finish for now',
+      color: 0xffffff, text_size: 20, text: 'Finish for now',
       click_func: () => this.finishFocus(false)
     })
 
-    createWidget(widget.TEXT, { x: 60, y: 430, w: 360, h: 30, color: 0x9b8aaa, text_size: 14, align_h: align.CENTER_H, align_v: align.CENTER_V, text: 'A soft buzz marks the finish.' })
+    this.historyText = createWidget(widget.TEXT, { x: 60, y: 412, w: 360, h: 30, color: 0xb9f2df, text_size: 15, align_h: align.CENTER_H, align_v: align.CENTER_V, text: '' })
+    this.updateHistory()
 
     const startedAt = Number(storage.getItem('focusStartedAt', 0)) || 0
     if (startedAt) this.resumeFocus(startedAt)
+  },
+  updateHistory() {
+    const key = `focusMinutes:${dayKey()}`
+    const minutes = Number(storage.getItem(key, 0)) || 0
+    this.historyText.setProperty(prop.TEXT, minutes ? `Today: ${minutes} gentle focus min` : 'No focus minutes owed today.')
+  },
+  addMinutes(minutes) {
+    const key = `focusMinutes:${dayKey()}`
+    const current = Number(storage.getItem(key, 0)) || 0
+    storage.setItem(key, current + Math.max(0, Math.round(minutes)))
+    this.updateHistory()
   },
   startFocus() {
     const now = Date.now()
@@ -92,6 +110,7 @@ Page({
         storage.setItem('focusStartedAt', 0)
         storage.setItem('focusStoppedAt', Date.now())
         storage.setItem('lastFocusMinutes', duration)
+        this.addMinutes(duration)
         if (this.timerId) clearInterval(this.timerId)
         this.timerId = null
       }
@@ -101,7 +120,11 @@ Page({
   },
   finishFocus(completed) {
     const active = Number(storage.getItem('focusStartedAt', 0)) || 0
-    if (active) storage.setItem('lastFocusMinutes', Math.max(1, Math.round((Date.now() - active) / 60000)))
+    if (active) {
+      const minutes = Math.max(1, Math.round((Date.now() - active) / 60000))
+      storage.setItem('lastFocusMinutes', minutes)
+      this.addMinutes(minutes)
+    }
     storage.setItem('focusStoppedAt', Date.now())
     storage.setItem('focusStartedAt', 0)
     if (this.timerId) clearInterval(this.timerId)
