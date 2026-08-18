@@ -81,6 +81,7 @@ function FirstDaysGuide({ activityDaysTotal = 0, rows = [], viewDone = {}, setWe
 }
 
 function DayModeCue({ dayType = "full", changed = false }) {
+  if (dayType === "full" && !changed) return null;
   const modes = {
     full: { icon: "☀️", label: "Full Day", text: "Whole routine", bg: "#FFF9ED", border: "#F1DCA7", color: "#876724" },
     soft: { icon: "🌤️", label: "Soft Day", text: "Gentler versions + one next step", bg: "#F8F2FF", border: "#DDCDEA", color: "#755A91" },
@@ -95,6 +96,25 @@ function DayModeCue({ dayType = "full", changed = false }) {
     <span aria-hidden="true" style={{ opacity: .45 }}>·</span>
     <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 10.5, fontWeight: 700 }}>{changed ? `I resized the rest of today — ${mode.text.toLowerCase()}.` : mode.text}</span>
   </div>;
+}
+
+function CapacityNudge({ forecast, dayType, dismissed, onDismiss, selectDayType }) {
+  if (dismissed || dayType !== "full" || !forecast?.reason || !["soft", "tiny"].includes(forecast?.suggestedDayType)) return null;
+  const suggested = forecast.suggestedDayType;
+  const label = suggested === "tiny" ? "Tiny Day" : "Soft Day";
+  return <section aria-label="Gentler day suggestion" style={{ padding: "9px 10px", borderRadius: 12, border: "1px solid #DDD0E6", background: "linear-gradient(145deg,#FAF6FD,#F7FCFA)" }}>
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+      <span aria-hidden="true" style={{ fontSize: 16 }}>🪶</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 11.2, fontWeight: 900, color: "#675573" }}>Today may fit better a little lighter</div>
+        <div style={{ marginTop: 2, fontSize: 10.4, lineHeight: 1.38, color: "#7B6886" }}>{forecast.reason}</div>
+      </div>
+    </div>
+    <div style={{ display: "flex", gap: 6, marginTop: 7 }}>
+      <button type="button" onClick={() => selectDayType?.(suggested)} style={{ minHeight: 44, flex: 1, padding: "8px 9px", borderRadius: 10, border: 0, background: suggested === "tiny" ? "#4D8174" : "#755A91", color: "white", fontWeight: 900, fontSize: 10.8, cursor: "pointer" }}>Use {label}</button>
+      <button type="button" onClick={onDismiss} style={{ minHeight: 44, padding: "8px 10px", borderRadius: 10, border: "1px solid #DDD0E6", background: "white", color: "#7B6886", fontWeight: 800, fontSize: 10.8, cursor: "pointer" }}>Keep Full</button>
+    </div>
+  </section>;
 }
 
 function PersonalLearningLine({ reason, dayType, activityDaysTotal = 0 }) {
@@ -158,9 +178,9 @@ function WeeklyIntentionReminder({ open, onAdd, onDismiss }) {
     <div style={{ width: "min(100%,360px)", padding: 17, borderRadius: 18, background: "#FFFBFE", border: "1px solid #E3C9EC", boxShadow: "0 16px 45px rgba(64,39,80,.18)" }}>
       <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#A65DC1" }}>📮 PLUSHWEEK</div>
       <div id="weekly-intention-reminder-title" style={{ marginTop: 5, fontSize: 17, lineHeight: 1.25, fontWeight: 900, color: "#54405F" }}>Want to set your intention for this week?</div>
-      <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.48, color: "#7E6989" }}>You still haven’t added one. One gentle direction is enough — it doesn’t need to be a goal or another thing to finish.</div>
+      <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.48, color: "#7E6989" }}>One gentle direction is enough. You can skip this and keep using Today normally.</div>
       <button type="button" onClick={onAdd} style={{ width: "100%", minHeight: 44, marginTop: 12, padding: "9px 12px", borderRadius: 11, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>📝 Add weekly intention</button>
-      <button type="button" onClick={onDismiss} style={{ width: "100%", minHeight: 44, marginTop: 6, padding: "9px 12px", borderRadius: 11, border: "1px solid #D8C8E2", background: "transparent", color: "#8C6B9E", fontWeight: 800, cursor: "pointer" }}>Not right now</button>
+      <button type="button" onClick={onDismiss} style={{ width: "100%", minHeight: 44, marginTop: 6, padding: "9px 12px", borderRadius: 11, border: "1px solid #D8C8E2", background: "transparent", color: "#8C6B9E", fontWeight: 800, cursor: "pointer" }}>Skip this week</button>
     </div>
   </div>;
 }
@@ -174,17 +194,18 @@ export function TodayPanel(props) {
   const [smartEaseHint, setSmartEaseHint] = React.useState(null);
   const [moreForTodayOpen, setMoreForTodayOpen] = React.useState(false);
   const [weeklyIntentionReminderOpen, setWeeklyIntentionReminderOpen] = React.useState(false);
+  const [capacityNudgeDismissed, setCapacityNudgeDismissed] = React.useState(false);
   const [homeSettings] = React.useState({ insights: false, extras: false });
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
   const recentlyCompletedKeys = Array.from(new Set([...(props.recentlyCompletedKeys || []), ...lingerKeys]));
   const smartNextStep = useSmartNextStep({ rows: props.rows || [], viewDone: props.viewDone || {}, period: props.period, dailyCheckIn: props.dailyCheckIn || {}, fallbackTask: props.nextStepTask, recentlyCompletedKeys });
   const dayType = props.dailyCheckIn?.day_type || "full";
-  const activeNextStep = dayType === "soft" ? (smartNextStep.task || props.nextStepTask) : null;
+  const activeNextStep = dayType === "rest" ? null : (smartNextStep.task || props.nextStepTask);
   const StableTip = React.useMemo(() => function StableTipComponent({ id, text }) {
     return <StableFeatureTip id={id} text={text} />;
   }, []);
 
-  React.useEffect(() => { setSmartNextStepHidden(false); setSmartEaseHint(null); setMoreForTodayOpen(false); setModeChanged(false); previousDayTypeRef.current = props.dailyCheckIn?.day_type || "full"; }, [props.period?.date]);
+  React.useEffect(() => { setSmartNextStepHidden(false); setSmartEaseHint(null); setMoreForTodayOpen(false); setModeChanged(false); setCapacityNudgeDismissed(false); previousDayTypeRef.current = props.dailyCheckIn?.day_type || "full"; }, [props.period?.date]);
   React.useEffect(() => {
     const previous = previousDayTypeRef.current;
     if (previous && previous !== dayType) {
@@ -203,10 +224,10 @@ export function TodayPanel(props) {
     const storageKey = `${WEEKLY_INTENTION_REMINDER_KEY}:${weekStart}`;
     if (intention) {
       setWeeklyIntentionReminderOpen(false);
-      try { window.localStorage.removeItem(storageKey); } catch (_error) {}
+      try { window.localStorage.setItem(storageKey, "done"); } catch (_error) {}
       return;
     }
-    if (!props.open || !weekStart || !date) {
+    if (!props.open || !weekStart || !date || Number(props.activityDaysTotal || 0) < 3) {
       setWeeklyIntentionReminderOpen(false);
       return;
     }
@@ -216,13 +237,23 @@ export function TodayPanel(props) {
       return;
     }
     try {
-      const visits = Math.max(0, Number(window.localStorage.getItem(storageKey)) || 0) + 1;
-      window.localStorage.setItem(storageKey, String(visits));
-      setWeeklyIntentionReminderOpen(visits % 2 === 0);
+      const stored = window.localStorage.getItem(storageKey) || "0";
+      if (stored === "done" || stored === "shown") {
+        setWeeklyIntentionReminderOpen(false);
+        return;
+      }
+      const visits = Math.max(0, Number(stored) || 0) + 1;
+      if (visits >= 3) {
+        window.localStorage.setItem(storageKey, "shown");
+        setWeeklyIntentionReminderOpen(true);
+      } else {
+        window.localStorage.setItem(storageKey, String(visits));
+        setWeeklyIntentionReminderOpen(false);
+      }
     } catch (_error) {
       setWeeklyIntentionReminderOpen(false);
     }
-  }, [props.open, props.weeklyIntentionText, props.period?.weekStart, props.period?.date]);
+  }, [props.open, props.weeklyIntentionText, props.period?.weekStart, props.period?.date, props.activityDaysTotal]);
 
   const setNextStepDismissedToday = (hidden) => {
     if (hidden && activeNextStep) recordNextStepChoice(activeNextStep, "hide", props.period?.date);
@@ -282,6 +313,7 @@ export function TodayPanel(props) {
     <div data-plushlife-home-stack>
       {(Number(props.activityDaysTotal || 0) < 3) && <FirstDaysGuide activityDaysTotal={props.activityDaysTotal} rows={props.rows} viewDone={props.viewDone} weeklyIntentionText={props.weeklyIntentionText} setWeeklyIntentionDraft={props.setWeeklyIntentionDraft} setWeeklyIntentionEditing={props.setWeeklyIntentionEditing} />}
       <DayModeCue dayType={dayType} changed={modeChanged} />
+      <CapacityNudge forecast={smartNextStep.capacityForecast} dayType={dayType} dismissed={capacityNudgeDismissed} onDismiss={() => setCapacityNudgeDismissed(true)} selectDayType={props.selectDayType} />
       <TodayPanelCore {...modeProps} />
       <PersonalLearningLine reason={smartNextStep.reason} dayType={dayType} activityDaysTotal={props.activityDaysTotal} />
       <DayWrapUp rows={props.rows} viewDone={props.viewDone} weeklyIntentionText={props.weeklyIntentionText} />
