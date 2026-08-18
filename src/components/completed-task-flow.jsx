@@ -1,4 +1,16 @@
-const COMPLETED_LINGER_MS = 2600;
+const COMPLETED_LINGER_MS = 4200;
+const COMPLETION_EVENT = "plushlife:task-completion-feedback";
+
+function giveCompletionFeedback(label, completed) {
+  try {
+    if (navigator?.vibrate) navigator.vibrate(completed ? [28, 28, 42] : 24);
+  } catch (_error) {}
+  try {
+    window.dispatchEvent(new CustomEvent(COMPLETION_EVENT, {
+      detail: { label, completed, at: Date.now() },
+    }));
+  } catch (_error) {}
+}
 
 export function useCompletedTaskFlow(toggle, viewDone = {}, rows = []) {
   const [lingerKeys, setLingerKeys] = React.useState([]);
@@ -20,9 +32,11 @@ export function useCompletedTaskFlow(toggle, viewDone = {}, rows = []) {
       setLingerKeys((keys) => keys.filter((item) => item !== key));
       timersRef.current.delete(key);
       setAnnouncement(`${label} marked incomplete.`);
+      giveCompletionFeedback(label, false);
     } else {
       setLingerKeys((keys) => keys.includes(key) ? keys : [...keys, key]);
-      setAnnouncement(`${label} completed. It will move to Completed Today in a moment.`);
+      setAnnouncement(`${label} completed. Undo is available for a few seconds.`);
+      giveCompletionFeedback(label, true);
       const timer = window.setTimeout(() => {
         setLingerKeys((keys) => keys.filter((item) => item !== key));
         timersRef.current.delete(key);
@@ -44,12 +58,16 @@ export function CompletedTaskArea({ rows = [], viewDone = {}, lingerKeys = [], t
 
   return (
     <section aria-label={title} style={{ marginTop: compact ? 8 : 12, padding: compact ? 10 : 12, borderRadius: 14, border: "1px solid #E4D9E9", background: "rgba(255,255,255,.72)" }}>
-      <div style={{ fontSize: 10.5, letterSpacing: ".11em", fontWeight: 900, color: "#8D7898" }}>✓ {title.toUpperCase()}</div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+        <div style={{ fontSize: 10.5, letterSpacing: ".11em", fontWeight: 900, color: "#8D7898" }}>✓ {title.toUpperCase()}</div>
+        <div style={{ fontSize: 9.5, color: "#A08EAA" }}>Tap any item to undo</div>
+      </div>
       <div style={{ display: "grid", gap: 6, marginTop: 8 }}>
         {completed.map((task) => (
-          <button key={task.key} type="button" onClick={() => toggle?.(task.key)} aria-label={`Mark ${task.label} incomplete`} style={{ minHeight: 44, display: "grid", gridTemplateColumns: "24px 1fr", gap: 8, alignItems: "center", padding: compact ? "8px 9px" : "9px 10px", borderRadius: 11, border: "1px solid #E7DDEB", background: "#FCF9FD", color: "#927F9C", textAlign: "left", cursor: "pointer" }}>
+          <button key={task.key} type="button" onClick={() => toggle?.(task.key)} aria-label={`Undo completion for ${task.label}`} style={{ minHeight: 44, display: "grid", gridTemplateColumns: "24px minmax(0,1fr) auto", gap: 8, alignItems: "center", padding: compact ? "8px 9px" : "9px 10px", borderRadius: 11, border: "1px solid #E7DDEB", background: "#FCF9FD", color: "#927F9C", textAlign: "left", cursor: "pointer" }}>
             <span aria-hidden="true" style={{ width: 22, height: 22, borderRadius: "50%", background: "#9B78AA", color: "white", display: "grid", placeItems: "center", fontWeight: 900 }}>✓</span>
-            <span style={{ fontSize: 12.5, lineHeight: 1.35, fontWeight: 800, textDecoration: "line-through" }}>{task.label}</span>
+            <span style={{ minWidth: 0, fontSize: 12.5, lineHeight: 1.35, fontWeight: 800, textDecoration: "line-through", overflow: "hidden", textOverflow: "ellipsis" }}>{task.label}</span>
+            <span aria-hidden="true" style={{ fontSize: 10.5, fontWeight: 900, color: "#8D7898" }}>Undo</span>
           </button>
         ))}
       </div>
@@ -58,3 +76,4 @@ export function CompletedTaskArea({ rows = [], viewDone = {}, lingerKeys = [], t
 }
 
 export const COMPLETED_TASK_LINGER_MS = COMPLETED_LINGER_MS;
+export const TASK_COMPLETION_FEEDBACK_EVENT = COMPLETION_EVENT;
