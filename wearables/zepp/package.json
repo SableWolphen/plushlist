@@ -4,7 +4,8 @@
   "private": true,
   "zeppos": true,
   "scripts": {
-    "build": "node scripts/run-zeus.js build",
+    "test:layout": "node scripts/test-layout.cjs",
+    "build": "npm run test:layout && node scripts/run-zeus.js build",
     "preview": "node scripts/run-zeus.js preview --target \"Amazfit Balance 2\""
   },
   "devDependencies": {
