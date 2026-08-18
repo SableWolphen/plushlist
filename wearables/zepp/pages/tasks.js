@@ -9,6 +9,7 @@ const vibrator = new Vibrator()
 const CACHE_KEY = 'plushlife_watch_tasks_cache_v2'
 const SUMMARY_KEY = 'plushlife_watch_summary_v2'
 const QUEUE_KEY = 'plushlife_watch_completion_queue_v1'
+const RECENT_KEY = 'plushlife_watch_recent_action_v1'
 const GROUP_LABELS = {
   morning: 'Morning',
   habits: 'Habits',
@@ -29,7 +30,7 @@ function textLabel(text, y, size = 24, color = 0xffffff) {
 
 Page(BasePage({
   state: {
-    tasks: [], groups: [], activeGroup: null, offset: 0, total: 0, hasMore: false, phoneTime: '', dayType: 'full',
+    tasks: [], groups: [], activeGroup: null, offset: 0, total: 0, hasMore: false, phoneTime: '', dayType: 'full', syncing: false,
   },
   build() {
     textLabel('✓ Today’s tasks', 18, 32)
@@ -63,7 +64,11 @@ Page(BasePage({
     if (cached) this.showTasks(cached, true)
     this.flushQueue().then(() => this.loadTasks())
   },
+  onResume() {
+    if (!this.state.syncing) this.loadTasks(this.state.activeGroup, this.state.offset)
+  },
   loadTasks(group = null, offset = 0) {
+    this.state.syncing = true
     this.status.setProperty(widget.TEXT, { text: 'Syncing quietly with your phone…' })
     return this.request({ method: 'plushlife.watch', params: { action: 'sync', group, offset, limit: PAGE_SIZE } })
       .then((result) => {
@@ -77,6 +82,7 @@ Page(BasePage({
         if (cached) this.showTasks(cached, true)
         else this.status.setProperty(widget.TEXT, { text: 'Phone unavailable · open PlushLife when you can.' })
       })
+      .finally(() => { this.state.syncing = false })
   },
   register() {
     return this.request({ method: 'plushlife.watch', params: { action: 'register' } })
@@ -142,6 +148,7 @@ Page(BasePage({
       .then((result) => {
         if (!result?.connected) throw new Error('offline')
         task.completed = completed
+        saveJson(RECENT_KEY, { task_key: task.key, label: task.label, completed, undoable: completed, at: Date.now() })
         vibrator.start()
         button.setProperty(widget.BUTTON, {
           text: `${completed ? '✓ ' : ''}${String(task.label).slice(0, 34)}`,
@@ -155,6 +162,7 @@ Page(BasePage({
         const queue = readJson(QUEUE_KEY, []).filter((item) => item.task_key !== task.key)
         queue.push({ task_key: task.key, completed })
         saveJson(QUEUE_KEY, queue.slice(-20))
+        saveJson(RECENT_KEY, { task_key: task.key, label: task.label, completed, undoable: completed, at: Date.now() })
         const cached = { ...readJson(CACHE_KEY, {}), tasks: this.state.tasks }
         saveJson(CACHE_KEY, cached)
         vibrator.start()
