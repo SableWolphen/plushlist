@@ -90,6 +90,31 @@ function normalizedLimit(value: unknown) {
   return Math.min(5, Math.max(1, number));
 }
 
+function normalizedDayType(value: unknown) {
+  const type = String(value || "full").toLowerCase();
+  return ["full", "soft", "tiny", "recovery", "rest"].includes(type) ? type : "full";
+}
+
+function labelForDayType(task: Record<string, any>, dayType: string) {
+  if (dayType === "tiny" && String(task.tiny_label || "").trim()) return String(task.tiny_label).trim();
+  if (["soft", "recovery"].includes(dayType) && String(task.soft_label || "").trim()) return String(task.soft_label).trim();
+  return String(task.task || "Task");
+}
+
+function visibleTasksForDay(tasks: Record<string, any>[], dayType: string) {
+  if (dayType === "rest") return [];
+  if (dayType === "tiny") {
+    const essentials = tasks.filter((task) => !task.is_bonus && task.essential_on_low_capacity);
+    return essentials.length ? essentials : tasks.filter((task) => !task.is_bonus).slice(0, 3);
+  }
+  if (dayType === "recovery") {
+    const essentials = tasks.filter((task) => !task.is_bonus && task.essential_on_low_capacity);
+    return essentials.length ? essentials : tasks.filter((task) => !task.is_bonus).slice(0, 5);
+  }
+  if (dayType === "soft") return tasks.filter((task) => !task.is_bonus);
+  return tasks;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS_HEADERS });
   if (req.method !== "POST") return json({ error: "POST required" }, 405);
@@ -152,17 +177,21 @@ Deno.serve(async (req) => {
     }
 
     if (action === "sync") {
-      const [{ data: tasks, error: taskError }, { data: progress, error: progressError }] = await Promise.all([
-        admin.from("tracker_tasks").select("task_key,day_id,section,task,detail,sort_order,is_bonus,schedule_type,start_date,end_date,one_time_date,schedule_days,archived_at,paused_since,paused_until").eq("user_id", pairing.user_id).order("is_bonus").order("sort_order"),
+      const [{ data: tasks, error: taskError }, { data: progress, error: progressError }, { data: checkIn, error: checkInError }] = await Promise.all([
+        admin.from("tracker_tasks").select("task_key,day_id,section,task,detail,sort_order,is_bonus,schedule_type,start_date,end_date,one_time_date,schedule_days,archived_at,paused_since,paused_until,soft_label,tiny_label,estimated_minutes,essential_on_low_capacity").eq("user_id", pairing.user_id).order("is_bonus").order("sort_order"),
         admin.from("daily_progress").select("completed_keys").eq("user_id", pairing.user_id).eq("progress_date", date).maybeSingle(),
+        admin.from("daily_check_ins").select("day_type,mood,energy").eq("user_id", pairing.user_id).eq("check_date", date).maybeSingle(),
       ]);
       if (taskError) throw taskError;
       if (progressError) throw progressError;
+      if (checkInError) throw checkInError;
 
       const completed = new Set(Array.isArray(progress?.completed_keys) ? progress.completed_keys : []);
-      const todayTasks = (tasks || [])
+      const dayType = normalizedDayType(checkIn?.day_type);
+      const allTodayTasks = (tasks || [])
         .filter((task) => taskOccursToday(task, date, dayId))
         .map((task) => ({ ...task, watch_group: watchGroupForTask(task) }));
+      const todayTasks = visibleTasksForDay(allTodayTasks, dayType);
 
       const groups = WATCH_GROUPS
         .map((group) => ({ ...group, count: todayTasks.filter((task) => task.watch_group === group.id).length }))
@@ -177,6 +206,22 @@ Deno.serve(async (req) => {
         ? requestedGroup
         : fallbackOrder.find((group) => availableIds.has(group)) || smartGroup;
 
+      const requiredTasks = todayTasks.filter((task) => !task.is_bonus);
+      const progressTotal = requiredTasks.length;
+      const progressDone = requiredTasks.filter((task) => completed.has(task.task_key)).length;
+      const nextStepTask = requiredTasks
+        .filter((task) => !completed.has(task.task_key))
+        .sort((a, b) => {
+          const essentialDelta = Number(!!b.essential_on_low_capacity) - Number(!!a.essential_on_low_capacity);
+          if (essentialDelta) return essentialDelta;
+          const timeDelta = Number(b.watch_group === smartGroup) - Number(a.watch_group === smartGroup);
+          if (timeDelta) return timeDelta;
+          const minuteA = Number(a.estimated_minutes) || 999;
+          const minuteB = Number(b.estimated_minutes) || 999;
+          if (dayType !== "full" && minuteA !== minuteB) return minuteA - minuteB;
+          return (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0);
+        })[0] || null;
+
       const limit = normalizedLimit(body?.limit);
       const groupTasks = todayTasks.filter((task) => task.watch_group === activeGroup);
       const maxOffset = Math.max(0, Math.floor((Math.max(1, groupTasks.length) - 1) / limit) * limit);
@@ -184,7 +229,7 @@ Deno.serve(async (req) => {
       const offset = Math.min(requestedOffset, maxOffset);
       const page = groupTasks.slice(offset, offset + limit).map((task) => ({
         key: task.task_key,
-        label: task.task,
+        label: labelForDayType(task, dayType),
         detail: task.detail || "",
         section: task.section || "My tasks",
         group: task.watch_group,
@@ -195,9 +240,20 @@ Deno.serve(async (req) => {
         connected: true,
         date,
         day_id: dayId,
+        day_type: dayType,
+        mood: checkIn?.mood || null,
+        energy: checkIn?.energy || null,
         phone_time: String(body?.phone_time || ""),
         phone_hour: phoneHour,
         timezone_offset_minutes: Number(body?.timezone_offset_minutes) || 0,
+        progress_done: progressDone,
+        progress_total: progressTotal,
+        next_step: nextStepTask ? {
+          key: nextStepTask.task_key,
+          label: labelForDayType(nextStepTask, dayType),
+          group: nextStepTask.watch_group,
+          estimated_minutes: Number(nextStepTask.estimated_minutes) || null,
+        } : null,
         active_group: activeGroup,
         groups,
         offset,
