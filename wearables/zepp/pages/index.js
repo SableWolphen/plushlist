@@ -72,15 +72,30 @@ Page(BasePage({
       click_func: () => this.completeNextStep(),
     })
 
-    smallButton('✓ Tasks', 66, 258, 0x318c79, () => push({ url: 'pages/tasks' }))
-    smallButton('💜 Check in', 248, 258, 0x8f5bd4, () => push({ url: 'pages/checkin' }))
-    smallButton('🛟 Rescue', 66, 326, 0xb45283, () => push({ url: 'pages/rescue' }))
-    smallButton('🎯 Focus', 248, 326, 0x536ea6, () => push({ url: 'pages/focus' }))
+    this.tasksButton = smallButton('✓ Tasks', 66, 258, 0x318c79, () => push({ url: 'pages/tasks' }))
+    this.checkinButton = smallButton('💜 Check in', 248, 258, 0x8f5bd4, () => push({ url: 'pages/checkin' }))
+    this.rescueButton = smallButton('🛟 Rescue', 66, 326, 0xb45283, () => push({ url: 'pages/rescue' }))
+    this.focusButton = smallButton('🎯 Focus', 248, 326, 0x536ea6, () => push({ url: 'pages/focus' }))
     this.footer = title('Cached first. Phone sync happens quietly.', 397, 15, 0x81758b, 34)
 
     const cached = readJson(SUMMARY_KEY, null)
     if (cached) this.renderSummary(cached, true)
+    else this.applyFeelingPriority()
     this.refresh()
+  },
+  applyFeelingPriority() {
+    const mood = storage.getItem('mood', '')
+    const energy = storage.getItem('energy', '')
+    const needsGentle = ['Rough', 'Too much'].includes(mood) || energy === 'Low'
+    this.rescueButton.setProperty(widget.BUTTON, {
+      text: needsGentle ? '🛟 Rescue first' : '🛟 Rescue',
+      normal_color: needsGentle ? 0xc15a8d : 0xb45283,
+    })
+    this.focusButton.setProperty(widget.BUTTON, {
+      text: needsGentle ? '🎯 Gentle focus' : '🎯 Focus',
+      normal_color: needsGentle ? 0x4f4160 : 0x536ea6,
+    })
+    return needsGentle
   },
   renderSummary(summary, cached = false) {
     this.state.summary = summary
@@ -90,15 +105,16 @@ Page(BasePage({
     const mood = storage.getItem('mood', '')
     const energy = storage.getItem('energy', '')
     const localFeeling = mood ? ` · ${mood}${energy ? `/${energy}` : ''}` : ''
+    const needsGentle = this.applyFeelingPriority()
     this.modeText.setProperty(prop.TEXT, `${dayLabel(dayType)}${localFeeling}`)
     this.progressText.setProperty(prop.TEXT, total ? `${done} of ${total} cared for today` : (dayType === 'rest' ? 'Rest is the plan today.' : 'Nothing required right now.'))
 
     if (summary.next_step) {
       const label = String(summary.next_step.label || 'Next step').slice(0, 42)
-      this.nextCaption.setProperty(prop.TEXT, 'NEXT STEP · TAP WHEN DONE')
+      this.nextCaption.setProperty(prop.TEXT, needsGentle || ['soft', 'tiny', 'recovery'].includes(dayType) ? 'GENTLE NEXT STEP · TAP WHEN DONE' : 'NEXT STEP · TAP WHEN DONE')
       this.nextButton.setProperty(widget.BUTTON, {
         text: `✓ ${label}`,
-        normal_color: dayType === 'tiny' ? 0x6f55a8 : 0x318c79,
+        normal_color: dayType === 'tiny' || needsGentle ? 0x6f55a8 : 0x318c79,
       })
     } else {
       this.nextCaption.setProperty(prop.TEXT, dayType === 'rest' ? 'TODAY' : 'ALL CLEAR')
