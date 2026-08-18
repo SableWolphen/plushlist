@@ -1,4 +1,3 @@
-import { AppWidget } from '@zos/app'
 import { createWidget, widget, align, text_style, getAppWidgetSize, setAppWidgetSize } from '@zos/ui'
 import { LocalStorage } from '@zos/storage'
 import { launchApp } from '@zos/router'
@@ -51,7 +50,7 @@ AppWidget({
       color: 0xffffff,
       text_size: 18,
       text: next ? `✓ ${String(next.label || 'Next step').slice(0, 34)}` : '💜 Open PlushLife',
-      click_func: () => launchApp({ appId: APP_ID, url: 'pages/index' }),
+      click_func: () => launchApp({ appId: APP_ID, native: false, url: 'pages/index' }),
     })
     createWidget(widget.TEXT, {
       x: pad, y: 154, w: inner, h: 28,
