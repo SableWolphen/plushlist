@@ -59,7 +59,11 @@
       cursor: pointer;
     }
     button.secondary { border: 1px solid #b95fce; background: white; color: #a24bb8; }
+    button.google { display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #d9dce1;background:#fff;color:#3c4043;box-shadow:0 1px 2px rgba(60,64,67,.12); }
+    button.google .gmark { display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#4285f4 0 25%,#34a853 25% 50%,#fbbc05 50% 75%,#ea4335 75%);color:white;font-size:12px;font-weight:900; }
     button:disabled { cursor: wait; opacity: .65; }
+    .divider { display:flex;align-items:center;gap:10px;margin:15px 0 3px;color:#9a8aa8;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase; }
+    .divider::before,.divider::after { content:"";height:1px;flex:1;background:#eee4ef; }
     #message { min-height: 22px; margin-top: 14px; text-align: center; color: #8574a0; font-size: 13px; line-height: 1.45; }
     .back { display: block; margin-top: 17px; text-align: center; color: #8574a0; font-size: 13px; }
     .legal { margin-top: 18px; padding-top: 14px; border-top: 1px solid #f0d9ee; text-align: center; color: #8574a0; font-size: 11px; line-height: 1.7; }
@@ -71,6 +75,10 @@
     .preview-badge { padding:3px 7px;border-radius:999px;background:#f1e3f6;color:#8e4eaa;font-size:9px;font-weight:900;white-space:nowrap; }
     .tier-list { margin:8px 0 0;padding:0;list-style:none;display:grid;gap:5px;color:#756483;font-size:11.5px;line-height:1.35; }
     .tier-note { margin:-7px 0 18px;padding:9px 10px;border-radius:11px;background:#f7f2fa;color:#756483;font-size:11.5px;line-height:1.4;text-align:center; }
+    @media(prefers-color-scheme:dark){
+      body{color:#eee7f2;background:radial-gradient(circle at 8% 10%,#352039 0%,transparent 38%),radial-gradient(circle at 92% 8%,#18352e 0%,transparent 38%),#17131d}
+      main{background:rgba(32,26,39,.94);border-color:#4c3f54}.intro,.back,#message,.legal{color:#b7a9c1}.tier-card{background:#241e2b;border-color:#4c3f54}.tier-card.gold{background:linear-gradient(145deg,#2b2130,#1c2b28);border-color:#6a4d75}.tier-list,.tier-note{color:#c1b5c8}.tier-note{background:#211b28}.preview-badge{background:#3a2942;color:#deb7ec}input{background:#1d1823;border-color:#59485f;color:#f2ebf5}.divider{color:#aa9daf}.divider::before,.divider::after{background:#473a4e}button.google,button.secondary{background:#241e2b;color:#eee7f2;border-color:#5a4a62}.legal{border-color:#4c3f54}
+    }
     @media(max-width:560px){ .tier-grid{grid-template-columns:1fr} main{padding:20px} }
   </style>
 </head>
@@ -91,6 +99,9 @@
     </div>
     <div class="tier-note"><strong>No payment required right now.</strong> If Gold becomes paid later, the core Free experience stays available.</div>
 
+    <button id="googleSignIn" class="google" type="button"><span class="gmark" aria-hidden="true">G</span><span>Continue with Google</span></button>
+    <div class="divider">or use email</div>
+
     <label for="email">Email address</label>
     <input id="email" type="email" autocomplete="email" placeholder="you@example.com">
     <button id="send" type="button">Send my code</button>
@@ -99,7 +110,7 @@
     <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter the code">
     <button id="verify" class="secondary" type="button">Sign in</button>
 
-    <div id="message" role="status"></div>
+    <div id="message" role="status" aria-live="polite"></div>
     <a class="back" href="#" id="togglePassword">Have a password instead?</a>
     <div id="passwordSection" style="display:none">
       <label for="password">Password</label>
@@ -127,10 +138,77 @@
     const code = document.getElementById("code");
     const send = document.getElementById("send");
     const verify = document.getElementById("verify");
+    const googleSignIn = document.getElementById("googleSignIn");
     const message = document.getElementById("message");
+    const nativeApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+    const nativeRedirect = "plushlife://login-callback";
+    const webRedirect = new URL("./", window.location.href).href;
+
+    async function finishOAuthUrl(url) {
+      if (!url) return false;
+      let parsed;
+      try { parsed = new URL(url); } catch (_error) { return false; }
+      if (parsed.protocol !== "plushlife:" || parsed.host !== "login-callback") return false;
+      const hash = new URLSearchParams(parsed.hash.replace(/^#/, ""));
+      const query = parsed.searchParams;
+      const accessToken = hash.get("access_token") || query.get("access_token");
+      const refreshToken = hash.get("refresh_token") || query.get("refresh_token");
+      const authCode = query.get("code");
+      message.textContent = "Finishing Google sign-in…";
+      let error = null;
+      if (accessToken && refreshToken) {
+        ({ error } = await client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }));
+      } else if (authCode && client.auth.exchangeCodeForSession) {
+        ({ error } = await client.auth.exchangeCodeForSession(authCode));
+      } else {
+        message.textContent = "Google returned to PlushLife without a usable sign-in session. Please try again.";
+        return true;
+      }
+      if (error) {
+        message.textContent = "Google sign-in couldn't be completed. Please try again or use email.";
+        return true;
+      }
+      message.textContent = "Signed in with Google! Opening PlushLife…";
+      window.location.replace("./");
+      return true;
+    }
 
     client.auth.getSession().then(({ data }) => {
       if (data.session) window.location.replace("./");
+    });
+
+    if (nativeApp && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+      const App = window.Capacitor.Plugins.App;
+      App.addListener("appUrlOpen", ({ url }) => { void finishOAuthUrl(url); });
+      if (App.getLaunchUrl) App.getLaunchUrl().then((result) => { if (result && result.url) void finishOAuthUrl(result.url); }).catch(() => {});
+    }
+
+    googleSignIn.addEventListener("click", async () => {
+      googleSignIn.disabled = true;
+      message.textContent = "Opening Google sign-in…";
+      const { data, error } = await client.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: nativeApp ? nativeRedirect : webRedirect,
+          skipBrowserRedirect: nativeApp,
+        },
+      });
+      if (error) {
+        googleSignIn.disabled = false;
+        message.textContent = "Google sign-in isn't available right now. You can still use email.";
+        return;
+      }
+      if (nativeApp) {
+        if (!data || !data.url) {
+          googleSignIn.disabled = false;
+          message.textContent = "Google sign-in couldn't start. You can still use email.";
+          return;
+        }
+        const opened = window.open(data.url, "_system");
+        if (!opened) window.location.href = data.url;
+        message.textContent = "Finish signing in with Google, then PlushLife will reopen here.";
+        window.setTimeout(() => { googleSignIn.disabled = false; }, 2500);
+      }
     });
 
     code.addEventListener("input", () => {
@@ -225,4 +303,3 @@
   </script>
 </body>
 </html>
-
