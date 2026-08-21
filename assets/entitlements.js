@@ -17,6 +17,13 @@
       appearanceScript.defer = true;
       root.document.head.appendChild(appearanceScript);
     }
+    if (root.document && !root.__plushlifeNurseryThemeLoading) {
+      root.__plushlifeNurseryThemeLoading = true;
+      const nurseryThemeScript = root.document.createElement("script");
+      nurseryThemeScript.src = "./assets/nursery-theme.js";
+      nurseryThemeScript.defer = true;
+      root.document.head.appendChild(nurseryThemeScript);
+    }
   }
 })(typeof window !== "undefined" ? window : globalThis, function () {
   // Centralized future-subscription architecture. Nothing in this file is
