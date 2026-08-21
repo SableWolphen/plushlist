@@ -31,6 +31,13 @@
       experiencePolishScript.defer = true;
       root.document.head.appendChild(experiencePolishScript);
     }
+    if (root.document && !root.__plushlifeLandingMobileAuthLoading) {
+      root.__plushlifeLandingMobileAuthLoading = true;
+      const landingMobileAuthScript = root.document.createElement("script");
+      landingMobileAuthScript.src = "./assets/landing-mobile-auth.js";
+      landingMobileAuthScript.defer = true;
+      root.document.head.appendChild(landingMobileAuthScript);
+    }
   }
 })(typeof window !== "undefined" ? window : globalThis, function () {
   // Centralized future-subscription architecture. Nothing in this file is
