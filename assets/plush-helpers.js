@@ -47,9 +47,12 @@
 (function (root) {
   if (!root?.document?.head) return;
   const style = root.document.createElement("style");
-  style.id = "plushlife-baby-background";
+  style.id = "plushlife-nursery-appearance";
   style.textContent = `
     .baby-mode {
+      --nursery-page:#fff6fb;--nursery-surface:rgba(255,255,255,.82);--nursery-surface-strong:#fffafd;--nursery-surface-soft:#fbf2ff;
+      --nursery-border:#e6cdea;--nursery-divider:#f0e4f2;--nursery-text:#5f4b68;--nursery-muted:#8c7796;--nursery-accent:#a85ac0;
+      --nursery-shadow:0 10px 28px rgba(135,82,151,.10);
       background: #FFF5FB !important;
       background-image:
         radial-gradient(circle at 12% 8%, rgba(255,190,226,.42) 0%, transparent 30%),
@@ -73,6 +76,33 @@
       border-radius: 0 !important;
       box-shadow: none !important;
     }
+    .baby-mode .nursery-panel,.baby-mode .nursery-tabs,.baby-mode .nursery-week,.baby-mode .nursery-jobs,.baby-mode .nursery-schedule {
+      background:var(--nursery-surface) !important;border-color:var(--nursery-border) !important;box-shadow:var(--nursery-shadow) !important;
+    }
+    .baby-mode .nursery-panel { background:linear-gradient(135deg,var(--nursery-surface-soft),var(--nursery-surface-strong)) !important; }
+    .baby-mode .nursery-task-row { background:rgba(255,255,255,.68) !important;color:var(--nursery-text) !important;border-color:var(--nursery-divider) !important; }
+    .baby-mode .nursery-section-row { background:var(--nursery-surface-strong) !important;color:var(--nursery-accent) !important; }
+    .baby-mode section[aria-label="Weekly intention"] { background:linear-gradient(135deg,var(--nursery-surface-soft),var(--nursery-surface-strong)) !important;border-color:var(--nursery-border) !important;box-shadow:var(--nursery-shadow) !important; }
+    .baby-mode [aria-label="Baby Mode view"],.baby-mode [aria-label="Little jobs week"],.baby-mode section[aria-label="Little jobs"],.baby-mode section[aria-label$="gentle schedule"] { background:var(--nursery-surface) !important;border-color:var(--nursery-border) !important;box-shadow:var(--nursery-shadow) !important; }
+    .baby-mode section[aria-label="Little jobs"] > div:last-child > button { background:rgba(255,255,255,.68) !important;color:var(--nursery-text) !important;border-color:var(--nursery-divider) !important; }
+    html[data-plushlife-color-mode="dark"] .baby-mode {
+      --nursery-page:#241a35;--nursery-surface:rgba(57,43,78,.91);--nursery-surface-strong:#433255;--nursery-surface-soft:#352746;
+      --nursery-border:#745f8d;--nursery-divider:#554367;--nursery-text:#f8eef9;--nursery-muted:#cdbbd4;--nursery-accent:#ef9ee8;
+      --nursery-shadow:0 12px 32px rgba(8,5,18,.28);
+      background:#241a35 !important;
+      background-image:radial-gradient(circle at 9% 6%,rgba(207,107,190,.28) 0%,transparent 30%),radial-gradient(circle at 92% 8%,rgba(83,154,207,.26) 0%,transparent 31%),radial-gradient(circle at 80% 82%,rgba(117,91,174,.18) 0%,transparent 31%),linear-gradient(180deg,#281c3a 0%,#211a34 48%,#19172b 100%) !important;
+      color:var(--nursery-text) !important;
+    }
+    html[data-plushlife-color-mode="dark"] .baby-mode .baby-shell { background:rgba(44,32,61,.34) !important; }
+    html[data-plushlife-color-mode="dark"] .baby-mode .nursery-nook { background:linear-gradient(135deg,#4a3156 0%,#352c55 52%,#263d59 100%) !important;border-color:#806795 !important;box-shadow:inset 0 0 0 3px rgba(255,255,255,.06),var(--nursery-shadow) !important; }
+    html[data-plushlife-color-mode="dark"] .baby-mode .nursery-nook::before { opacity:.24 !important; }
+    html[data-plushlife-color-mode="dark"] .baby-mode .nursery-nook-label,html[data-plushlife-color-mode="dark"] .baby-mode .nursery-nook-caption,html[data-plushlife-color-mode="dark"] .baby-mode h1 { color:#f2b0ec !important;text-shadow:0 3px 14px rgba(239,158,232,.22) !important; }
+    html[data-plushlife-color-mode="dark"] .baby-mode .nursery-task-row { background:#382b49 !important;color:var(--nursery-text) !important; }
+    html[data-plushlife-color-mode="dark"] .baby-mode .nursery-section-row { background:#30243f !important;color:#e9a9e7 !important; }
+    html[data-plushlife-color-mode="dark"] .baby-mode section[aria-label="Little jobs"] > div:last-child > button { background:#382b49 !important;color:var(--nursery-text) !important;border-color:var(--nursery-divider) !important; }
+    html[data-plushlife-color-mode="dark"] .baby-mode button:not([aria-selected="true"]),html[data-plushlife-color-mode="dark"] .baby-mode input,html[data-plushlife-color-mode="dark"] .baby-mode textarea,html[data-plushlife-color-mode="dark"] .baby-mode select { background-color:#403051 !important;color:var(--nursery-text) !important;border-color:#715b87 !important; }
+    html[data-plushlife-color-mode="dark"] .baby-mode [style*="#5B4B6B"],html[data-plushlife-color-mode="dark"] .baby-mode [style*="#76558A"],html[data-plushlife-color-mode="dark"] .baby-mode [style*="#806B8D"] { color:var(--nursery-text) !important; }
+    html[data-plushlife-color-mode="dark"] .baby-mode [style*="#9A85A5"] { color:var(--nursery-muted) !important; }
   `;
   root.document.head.appendChild(style);
 })(typeof window !== "undefined" ? window : globalThis);

@@ -16,6 +16,14 @@ const checks = [
   [!source.includes(">📖 Journal</button>") && !source.includes(">📈 Progress</button>") && !source.includes(">⚙️ Tasks</button>"), "dashboard navigation shortcuts are removed"],
 ];
 
+const darkMode = fs.readFileSync(path.join(__dirname, "..", "assets", "dark-mode.js"), "utf8");
+const helpers = fs.readFileSync(path.join(__dirname, "..", "assets", "plush-helpers.js"), "utf8");
+checks.push(
+  [darkMode.includes('node.closest(".baby-mode")') && darkMode.includes("DARK_CLASSES.forEach"), "generic dark-mode classification exempts Nursery"],
+  [helpers.includes("plushlife-nursery-appearance") && helpers.includes('html[data-plushlife-color-mode="dark"] .baby-mode'), "Nursery has dedicated day and night palettes"],
+  [helpers.includes('section[aria-label="Weekly intention"]') && helpers.includes('section[aria-label="Little jobs"]'), "Nursery styling preserves and targets the existing content structure"],
+);
+
 const failures = checks.filter(([ok]) => !ok).map(([, label]) => label);
 if (failures.length) {
   console.error("Baby Mode focus checks failed:\n- " + failures.join("\n- "));

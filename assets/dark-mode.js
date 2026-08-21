@@ -61,6 +61,12 @@
 
   function classifyNode(node) {
     if (!(node instanceof Element) || node.closest("#plushlife-color-mode-control")) return;
+    // Nursery owns a complete light/night palette. The generic luminance
+    // classifier flattened its illustrated cards into identical dark blocks.
+    if (node.closest(".baby-mode")) {
+      DARK_CLASSES.forEach((className) => node.classList.remove(className));
+      return;
+    }
     if (["SCRIPT", "STYLE", "LINK", "META", "IMG", "VIDEO", "AUDIO", "CANVAS", "SVG", "PATH"].includes(node.tagName)) return;
     DARK_CLASSES.forEach((className) => node.classList.remove(className));
     const style = window.getComputedStyle(node);
@@ -162,6 +168,7 @@
   css.textContent = `
     html[data-plushlife-color-mode="dark"], html[data-plushlife-color-mode="dark"] body { background:#17131d !important; color-scheme:dark !important; }
     html[data-plushlife-color-mode="dark"] #root { background:#17131d !important; }
+    html[data-plushlife-color-mode="dark"] #root:has(.baby-mode) { background:#241a35 !important; }
     html[data-plushlife-color-mode="dark"] .plushlife-dark-surface { background-color:#241e2b !important; }
     html[data-plushlife-color-mode="dark"] .plushlife-dark-gradient { background-image:linear-gradient(145deg,#27202f,#1b1722) !important; }
     html[data-plushlife-color-mode="dark"] .plushlife-dark-text { color:#eee7f2 !important; }
