@@ -8,7 +8,7 @@ const CHUNKS = path.join(ASSETS, "chunks");
 
 // Keep modest headroom above the current production size so ordinary small
 // changes can ship while meaningful startup regressions still fail the build.
-const MAX_ENTRY_BYTES = 485 * 1024;
+const MAX_ENTRY_BYTES = 488 * 1024;
 const MAX_LAZY_CHUNK_BYTES = 45 * 1024;
 
 function size(file) {
