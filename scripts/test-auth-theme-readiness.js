@@ -18,12 +18,15 @@ function expect(value, message) {
 }
 
 expect(login.includes('id="googleSignIn"'), "Login must expose a Google sign-in button");
-expect(login.includes('provider: "google"'), "Login must call Supabase Google OAuth");
-expect(login.includes('redirectTo: nativeApp ? nativeRedirect : webRedirect'), "Google OAuth must use platform-specific redirect targets");
-expect(login.includes('skipBrowserRedirect: nativeApp'), "Native Google OAuth should obtain the authorization URL before leaving the app");
+expect(/provider\s*:\s*["']google["']/.test(login), "Login must call Supabase Google OAuth");
+expect(/redirectTo\s*:\s*nativeApp\s*\?\s*nativeRedirect\s*:\s*webRedirect/.test(login), "Google OAuth must use platform-specific redirect targets");
+expect(/skipBrowserRedirect\s*:\s*nativeApp/.test(login), "Native Google OAuth should obtain the authorization URL before leaving the app");
 expect(login.includes('client.auth.setSession') || login.includes('exchangeCodeForSession'), "Native OAuth callback must finish a Supabase session");
 expect(login.includes("signInWithOtp") && login.includes("signInWithPassword"), "Email code and password fallbacks must remain available");
 expect(login.includes("prefers-color-scheme:dark"), "Login screen should respect device dark appearance");
+expect(login.includes('id="mobileEmailToggle"') && login.includes('id="emailShell"'), "Mobile login must collapse email sign-in behind one compact control");
+expect(login.includes('.plans{display:none}') && login.includes('.intro{display:none}'), "Mobile login must hide desktop-only marketing content");
+expect(login.includes('body.mobile-code-ready .email-shell .code-stage{display:block}'), "Mobile email code field must stay hidden until needed");
 
 expect(manifest.includes('android:scheme="plushlife"'), "Android manifest must register the PlushLife auth callback scheme");
 expect(manifest.includes('android:host="login-callback"'), "Android manifest must register the login-callback host");
@@ -45,4 +48,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Auth/theme readiness checks passed: Google entry point, Android callback, fallbacks, and System/Light/Dark appearance are wired.");
+console.log("Auth/theme readiness checks passed: Google entry point, compact mobile login, Android callback, fallbacks, and System/Light/Dark appearance are wired.");
