@@ -60,7 +60,7 @@ const checks = [
   [today.includes("DAY {dayNumber} OF 3") && today.includes("activityDaysTotal >= 3") && today.includes("Now PlushLife starts noticing"), "new users get a focused three-day introduction"],
   [today.indexOf("<FirstDaysGuide") < today.indexOf("<TodayPanelCore"), "first-days guidance is promoted above the main Today flow"],
   [today.includes("homeSettings.insights") && today.includes("homeSettings.extras"), "deep smart insights and extra Today tools stay off the default surface"],
-  [calmHome.includes("I'm struggling") && calmHome.includes("Help me restart") && calmHome.includes("setCalmQuickOpen"), "Today has one visible struggle and restart entry point"],
+  [calmHome.includes("I'm struggling") && calmHome.includes("help me restart") && calmHome.includes("setCalmQuickOpen"), "Today has one visible struggle and restart entry point"],
   [calmHome.includes("make today tiny") && calmHome.includes("open care") && calmHome.includes("edit habits"), "calm commands translate plain-language needs into actions"],
   [calmHome.includes('window.addEventListener("online"') && calmHome.includes('window.addEventListener("offline"') && calmHome.includes("sync when you reconnect"), "offline status is explicit and reconnect behavior is reassuring"],
   [calmHome.includes("COMPANION TONE") && calmHome.includes("BACKGROUND FEEL") && calmHome.includes("plushlife:calm-home:v1"), "companion tone and background feel are customizable and persist locally"],

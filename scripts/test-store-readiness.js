@@ -6,13 +6,17 @@ const path = require("path");
 const root = path.join(__dirname, "..");
 const listingPath = path.join(root, "docs/play-store-listing.md");
 const completionPath = path.join(root, "src/components/completed-task-flow.jsx");
+const ratingMomentPath = path.join(root, "src/components/rating-moment.jsx");
 const failures = [];
 
 if (!fs.existsSync(listingPath)) failures.push("Missing docs/play-store-listing.md");
 if (!fs.existsSync(completionPath)) failures.push("Missing completed-task-flow.jsx");
 
 const listing = fs.existsSync(listingPath) ? fs.readFileSync(listingPath, "utf8") : "";
-const completion = fs.existsSync(completionPath) ? fs.readFileSync(completionPath, "utf8") : "";
+const completion = [completionPath, ratingMomentPath]
+  .filter((file) => fs.existsSync(file))
+  .map((file) => fs.readFileSync(file, "utf8"))
+  .join("\n");
 
 function section(markdown, heading, nextHeading) {
   const start = markdown.indexOf(`## ${heading}`);
