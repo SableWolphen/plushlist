@@ -10,6 +10,13 @@
       script.defer = true;
       root.document.head.appendChild(script);
     }
+    if (root.document && !root.__plushlifeDarkModeLoading) {
+      root.__plushlifeDarkModeLoading = true;
+      const appearanceScript = root.document.createElement("script");
+      appearanceScript.src = "./assets/dark-mode.js";
+      appearanceScript.defer = true;
+      root.document.head.appendChild(appearanceScript);
+    }
   }
 })(typeof window !== "undefined" ? window : globalThis, function () {
   // Centralized future-subscription architecture. Nothing in this file is
