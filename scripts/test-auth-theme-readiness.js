@@ -11,6 +11,7 @@ const login = read("login.html");
 const manifest = read("android/app/src/main/AndroidManifest.xml");
 const entitlements = read("assets/entitlements.js");
 const darkMode = read("assets/dark-mode.js");
+const landingMobileAuth = read("assets/landing-mobile-auth.js");
 const googleSetup = read("docs/google-sign-in-setup.md");
 
 function expect(value, message) {
@@ -27,6 +28,12 @@ expect(login.includes("prefers-color-scheme:dark"), "Login screen should respect
 expect(login.includes('id="mobileEmailToggle"') && login.includes('id="emailShell"'), "Mobile login must collapse email sign-in behind one compact control");
 expect(login.includes('.plans{display:none}') && login.includes('.intro{display:none}'), "Mobile login must hide desktop-only marketing content");
 expect(login.includes('body.mobile-code-ready .email-shell .code-stage{display:block}'), "Mobile email code field must stay hidden until needed");
+
+expect(entitlements.includes('./assets/landing-mobile-auth.js'), "Main app runtime must load the mobile landing sign-in compactor");
+expect(landingMobileAuth.includes('max-width: 680px') || landingMobileAuth.includes('max-width:680px'), "Landing sign-in compactor must be mobile-only");
+expect(landingMobileAuth.includes('start free') && landingMobileAuth.includes('start your list'), "Mobile landing start actions must route straight to compact sign-in");
+expect(landingMobileAuth.includes('./login.html'), "Mobile landing sign-in must use the standalone compact login page");
+expect(landingMobileAuth.includes('Create or open your private tracker') || landingMobileAuth.includes('create or open your private tracker'), "Already-open embedded landing auth must be detected and compacted");
 
 expect(manifest.includes('android:scheme="plushlife"'), "Android manifest must register the PlushLife auth callback scheme");
 expect(manifest.includes('android:host="login-callback"'), "Android manifest must register the login-callback host");
@@ -48,4 +55,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Auth/theme readiness checks passed: Google entry point, compact mobile login, Android callback, fallbacks, and System/Light/Dark appearance are wired.");
+console.log("Auth/theme readiness checks passed: Google entry point, compact mobile login and landing auth, Android callback, fallbacks, and System/Light/Dark appearance are wired.");
