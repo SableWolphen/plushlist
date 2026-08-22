@@ -19,7 +19,9 @@ expect(polish.includes('[role=\"dialog\"][aria-modal=\"true\"]'), "dialogs must 
 expect(polish.includes("place-items:center !important") && polish.includes("data-plushlife-dialog-panel"), "dialogs must stay centered instead of becoming bottom sheets");
 expect(!polish.includes("place-items:end center !important"), "dialogs must not regress to bottom-sheet alignment");
 expect(polish.includes("max-height:min(80dvh,700px)") && polish.includes("overscroll-behavior:contain"), "mobile dialogs must fit the viewport and scroll internally");
-expect(polish.includes('body:has([role=\"dialog\"][aria-modal=\"true\"]) [data-plushlife-qa-entry=\"true\"]'), "QA control must get out of the way while a dialog is open");
+expect(polish.includes("box-sizing:border-box !important") && polish.includes("calc(100vw - (var(--plush-mobile-gutter) * 2))"), "mobile dialog width must include padding and stay inside the viewport");
+expect(polish.includes("overflow-x:hidden !important") && polish.includes("min-width:0 !important"), "dialog panels must prevent horizontal overflow and fixed-width child clipping");
+expect(polish.includes("plushlife-modal-open") && polish.includes("visibility:hidden !important"), "QA control must get out of the way while a dialog is open");
 expect(polish.includes("overflow-x:auto !important") && polish.includes("scroll-snap-type:x proximity"), "mobile tab rows must remain usable without cramped wrapping");
 expect(polish.includes("input,select,textarea { font-size:16px !important; }"), "mobile form fields must avoid browser zoom and tiny text");
 expect(!polish.includes("fetch("), "experience polish must not add a third-party or analytics data flow");
@@ -37,4 +39,4 @@ if (failures.length) {
   console.error("Experience polish checks failed:\n- " + failures.join("\n- "));
   process.exit(1);
 }
-console.log(`Experience polish checks passed (${18} checks).`);
+console.log(`Experience polish checks passed (${20} checks).`);
