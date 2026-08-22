@@ -25,11 +25,15 @@
   style.textContent = `
     #plushlife-context-feedback{position:fixed;left:12px;bottom:calc(62px + env(safe-area-inset-bottom));z-index:2147483000;max-width:min(86vw,360px);padding:10px 12px;border-radius:15px;background:#fff8fc;border:1px solid #e2cfe9;box-shadow:0 8px 28px #5a416544;font:700 11.5px/1.4 system-ui,sans-serif;color:#6d5b79;display:none}
     #plushlife-context-feedback button{margin:7px 6px 0 0;border:1px solid #dec5e8;border-radius:999px;background:#fff;padding:6px 9px;color:#6f5480;font-weight:800;cursor:pointer}
-    #plushlife-qa-panel{position:fixed;inset:0;z-index:2147483005;background:#32243baa;display:grid;place-items:end center;padding:16px 12px calc(16px + env(safe-area-inset-bottom));font-family:system-ui,sans-serif}
-    #plushlife-qa-card{width:min(560px,100%);max-height:84vh;overflow:auto;border-radius:24px;background:#fff9fd;border:1px solid #ead7ef;padding:18px;color:#5b4b6b;box-shadow:0 20px 70px #26152f66}
+    #plushlife-qa-panel{position:fixed;inset:0;z-index:2147483005;background:#32243b73;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) 14px max(18px,env(safe-area-inset-bottom));font-family:system-ui,sans-serif;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+    #plushlife-qa-card{width:min(560px,92vw);max-height:min(82dvh,760px);overflow:auto;border-radius:22px;background:#fff9fd;border:1px solid #ead7ef;padding:18px;color:#5b4b6b;box-shadow:0 24px 70px #26152f55;overscroll-behavior:contain}
     .plushlife-qa-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px}
     .plushlife-qa-grid button{border:1px solid #dec5e8;border-radius:14px;background:#fff;padding:11px;text-align:left;color:#5b4b6b;font-weight:800;cursor:pointer}
     .plushlife-qa-log{margin-top:12px;padding:10px;border-radius:12px;background:#f3e9f7;font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;max-height:180px;overflow:auto}
+    [data-plushlife-qa-entry="true"]{opacity:.32;transition:opacity .15s ease,transform .15s ease}
+    [data-plushlife-qa-entry="true"]:hover,[data-plushlife-qa-entry="true"]:focus-visible{opacity:1}
+    body:has([role="dialog"][aria-modal="true"]),body:has(#plushlife-qa-panel){--plushlife-qa-hidden:1}
+    body:has([role="dialog"][aria-modal="true"]) [data-plushlife-qa-entry="true"],body:has(#plushlife-qa-panel) [data-plushlife-qa-entry="true"]{opacity:0!important;pointer-events:none!important;transform:scale(.82)!important}
   `;
   document.head.appendChild(style);
 
@@ -65,7 +69,6 @@
     }, { passive: true });
   };
 
-  // Enhance only the field the user actually interacts with. This avoids scanning every input after every React render.
   document.addEventListener("focusin", (event) => enhanceDraft(event.target), { passive: true });
   document.querySelectorAll("input,textarea").forEach(enhanceDraft);
 
@@ -91,7 +94,10 @@
     if (!isAdmin() || document.getElementById("plushlife-qa-panel")) return;
     const panel = document.createElement("div");
     panel.id = "plushlife-qa-panel";
-    panel.innerHTML = `<div id="plushlife-qa-card"><div style="display:flex;gap:12px"><div style="flex:1"><div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:#c45d74">PLUSHQA · ADMIN ONLY</div><h2 style="margin:5px 0">Safe test controls</h2></div><button type="button" data-close style="border:0;background:transparent;font-size:24px">×</button></div><div class="plushlife-qa-grid"><button data-action="clear">🧹 Clear local QA data</button><button data-action="logs">🔎 Refresh failed-request log</button></div><div class="plushlife-qa-log" data-log>No failed requests captured in this session.</div></div>`;
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-modal", "true");
+    panel.setAttribute("aria-label", "PlushQA admin tools");
+    panel.innerHTML = `<div id="plushlife-qa-card"><div style="display:flex;gap:12px"><div style="flex:1"><div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:#c45d74">PLUSHQA · ADMIN ONLY</div><h2 style="margin:5px 0">Safe test controls</h2></div><button type="button" data-close aria-label="Close PlushQA" style="border:0;background:transparent;font-size:24px">×</button></div><div class="plushlife-qa-grid"><button data-action="clear">🧹 Clear local QA data</button><button data-action="logs">🔎 Refresh failed-request log</button></div><div class="plushlife-qa-log" data-log>No failed requests captured in this session.</div></div>`;
     document.body.appendChild(panel);
     const log = panel.querySelector("[data-log]");
     const refreshLog = () => { log.textContent = failedRequests.length ? failedRequests.map((item) => `${item.at} ${item.method} ${item.status || item.error || "failed"} ${item.url}`).join("\n") : "No failed requests captured in this session."; };
@@ -112,10 +118,8 @@
     button.dataset.plushlifeQaEntry = "true";
     button.textContent = "🧪";
     button.setAttribute("aria-label", "Open PlushQA admin tools");
-    button.style.cssText = "position:fixed;right:14px;bottom:calc(66px + env(safe-area-inset-bottom));z-index:2147483000;border:1px solid #e4ccd9;border-radius:999px;background:#fff8fc;padding:9px 11px;box-shadow:0 5px 18px #5a416533;cursor:pointer";
+    button.style.cssText = "position:fixed;right:12px;bottom:calc(62px + env(safe-area-inset-bottom));z-index:2147483000;border:1px solid #e4ccd9;border-radius:999px;background:#fff8fc;padding:7px 9px;box-shadow:0 4px 14px #5a416526;cursor:pointer;font-size:13px";
     button.addEventListener("click", openQa);
     document.body.appendChild(button);
   }
-
-  // No document-wide MutationObserver. The previous observer repeatedly scanned the whole app on every button-driven React update.
 })();
