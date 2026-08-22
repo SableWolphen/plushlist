@@ -3,62 +3,23 @@
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) {
     root.PlushLifeEntitlements = api;
-    if (root.document && !root.__plushlifePremiumSmartLoading) {
-      root.__plushlifePremiumSmartLoading = true;
+    const load = (flag, src) => {
+      if (!root.document || root[flag]) return;
+      root[flag] = true;
       const script = root.document.createElement("script");
-      script.src = "./assets/premium-smart.js";
+      script.src = src;
       script.defer = true;
       root.document.head.appendChild(script);
-    }
-    if (root.document && !root.__plushlifeDarkModeLoading) {
-      root.__plushlifeDarkModeLoading = true;
-      const appearanceScript = root.document.createElement("script");
-      appearanceScript.src = "./assets/dark-mode.js";
-      appearanceScript.defer = true;
-      root.document.head.appendChild(appearanceScript);
-    }
-    if (root.document && !root.__plushlifeNurseryThemeLoading) {
-      root.__plushlifeNurseryThemeLoading = true;
-      const nurseryThemeScript = root.document.createElement("script");
-      nurseryThemeScript.src = "./assets/nursery-theme.js";
-      nurseryThemeScript.defer = true;
-      root.document.head.appendChild(nurseryThemeScript);
-    }
-    if (root.document && !root.__plushlifeExperiencePolishLoading) {
-      root.__plushlifeExperiencePolishLoading = true;
-      const experiencePolishScript = root.document.createElement("script");
-      experiencePolishScript.src = "./assets/experience-polish.js";
-      experiencePolishScript.defer = true;
-      root.document.head.appendChild(experiencePolishScript);
-    }
-    if (root.document && !root.__plushlifeGentleRewardLoading) {
-      root.__plushlifeGentleRewardLoading = true;
-      const gentleRewardScript = root.document.createElement("script");
-      gentleRewardScript.src = "./assets/gentle-reward.js";
-      gentleRewardScript.defer = true;
-      root.document.head.appendChild(gentleRewardScript);
-    }
-    if (root.document && !root.__plushlifeWeeklyReflectionLoading) {
-      root.__plushlifeWeeklyReflectionLoading = true;
-      const weeklyReflectionScript = root.document.createElement("script");
-      weeklyReflectionScript.src = "./assets/weekly-reflection-window.js";
-      weeklyReflectionScript.defer = true;
-      root.document.head.appendChild(weeklyReflectionScript);
-    }
-    if (root.document && !root.__plushlifeResumeContextLoading) {
-      root.__plushlifeResumeContextLoading = true;
-      const resumeContextScript = root.document.createElement("script");
-      resumeContextScript.src = "./assets/resume-context.js";
-      resumeContextScript.defer = true;
-      root.document.head.appendChild(resumeContextScript);
-    }
-    if (root.document && !root.__plushlifeLandingMobileAuthLoading) {
-      root.__plushlifeLandingMobileAuthLoading = true;
-      const landingMobileAuthScript = root.document.createElement("script");
-      landingMobileAuthScript.src = "./assets/landing-mobile-auth.js";
-      landingMobileAuthScript.defer = true;
-      root.document.head.appendChild(landingMobileAuthScript);
-    }
+    };
+    load("__plushlifePremiumSmartLoading", "./assets/premium-smart.js");
+    load("__plushlifeDarkModeLoading", "./assets/dark-mode.js");
+    load("__plushlifeNurseryThemeLoading", "./assets/nursery-theme.js");
+    load("__plushlifeExperiencePolishLoading", "./assets/experience-polish.js");
+    load("__plushlifeStatePolishLoading", "./assets/state-polish.js");
+    load("__plushlifeGentleRewardLoading", "./assets/gentle-reward.js");
+    load("__plushlifeWeeklyReflectionLoading", "./assets/weekly-reflection-window.js");
+    load("__plushlifeResumeContextLoading", "./assets/resume-context.js");
+    load("__plushlifeLandingMobileAuthLoading", "./assets/landing-mobile-auth.js");
   }
 })(typeof window !== "undefined" ? window : globalThis, function () {
   const PLUSH_PLANS = { FREE: "free", PLUSHPLUS: "plushplus", PLUSHFAMILY: "plushfamily" };
