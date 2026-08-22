@@ -31,6 +31,13 @@
       experiencePolishScript.defer = true;
       root.document.head.appendChild(experiencePolishScript);
     }
+    if (root.document && !root.__plushlifeGentleRewardLoading) {
+      root.__plushlifeGentleRewardLoading = true;
+      const gentleRewardScript = root.document.createElement("script");
+      gentleRewardScript.src = "./assets/gentle-reward.js";
+      gentleRewardScript.defer = true;
+      root.document.head.appendChild(gentleRewardScript);
+    }
     if (root.document && !root.__plushlifeWeeklyReflectionLoading) {
       root.__plushlifeWeeklyReflectionLoading = true;
       const weeklyReflectionScript = root.document.createElement("script");
@@ -54,57 +61,22 @@
     }
   }
 })(typeof window !== "undefined" ? window : globalThis, function () {
-  // Centralized future-subscription architecture. Nothing in this file is
-  // called anywhere in the app to actually restrict a real feature today —
-  // hasPlushFeature() always returns true unless explicitly told
-  // enforced: true. This lets PlushLife build and test premium capabilities
-  // before Play Billing is turned on, without taking anything away from beta users.
-
-  const PLUSH_PLANS = {
-    FREE: "free",
-    PLUSHPLUS: "plushplus",
-    PLUSHFAMILY: "plushfamily",
-  };
-
+  const PLUSH_PLANS = { FREE: "free", PLUSHPLUS: "plushplus", PLUSHFAMILY: "plushfamily" };
   const PLUSH_FEATURE_FLAGS = [
-    "plushUnlimitedHabits",
-    "plushAdvancedRoutines",
-    "plushAdvancedInsights",
-    "plushFullPathsLibrary",
-    "plushAdvancedJournal",
-    "plushFocusTools",
-    "plushCalmTools",
-    "plushSleepTools",
-    "plushCloudBackup",
-    "plushCrossDeviceSync",
-    "plushWidgets",
-    "plushSmartProgress",
-    "plushSmartFocus",
-    "plushSmartReminders",
-    "plushAdaptiveRoutines",
-    "plushPersonalizedCalm",
-    "plushJournalPatterns",
-    "plushSmartRecommendations",
-    "plushPersonalizedGuide",
-    "plushFamilyFeatures",
+    "plushUnlimitedHabits","plushAdvancedRoutines","plushAdvancedInsights","plushFullPathsLibrary","plushAdvancedJournal","plushFocusTools","plushCalmTools","plushSleepTools","plushCloudBackup","plushCrossDeviceSync","plushWidgets","plushSmartProgress","plushSmartFocus","plushSmartReminders","plushAdaptiveRoutines","plushPersonalizedCalm","plushJournalPatterns","plushSmartRecommendations","plushPersonalizedGuide","plushFamilyFeatures",
   ];
-
   const PLUSHPLUS_FEATURES = PLUSH_FEATURE_FLAGS.filter((flag) => flag !== "plushFamilyFeatures");
-
   const PLAN_FEATURES = {
     [PLUSH_PLANS.FREE]: [],
     [PLUSH_PLANS.PLUSHPLUS]: PLUSHPLUS_FEATURES,
     [PLUSH_PLANS.PLUSHFAMILY]: [...PLUSHPLUS_FEATURES, "plushFamilyFeatures"],
   };
-
   function hasPlushFeature(featureKey, context) {
     const { enforced = false, plan = PLUSH_PLANS.FREE, devPreviewPlan = null } = context || {};
     if (!enforced) return true;
-    const effectivePlan = devPreviewPlan || plan;
-    const features = PLAN_FEATURES[effectivePlan];
+    const features = PLAN_FEATURES[devPreviewPlan || plan];
     return Array.isArray(features) && features.includes(featureKey);
   }
-
   return { PLUSH_PLANS, PLUSH_FEATURE_FLAGS, PLAN_FEATURES, hasPlushFeature };
 });
 
@@ -114,12 +86,8 @@
     if (document.getElementById("plushlife-full-task-list-override")) return;
     const style = document.createElement("style");
     style.id = "plushlife-full-task-list-override";
-    style.textContent = `
-      [data-plushlife-home-overflow="true"] { display: flex !important; }
-      #plushlife-home-more { display: none !important; }
-    `;
+    style.textContent = `[data-plushlife-home-overflow="true"] { display:flex!important; } #plushlife-home-more { display:none!important; }`;
     document.head.appendChild(style);
   };
-  if (document.readyState === "loading") window.addEventListener("load", installOverride, { once: true });
-  else installOverride();
+  if (document.readyState === "loading") window.addEventListener("load", installOverride, { once: true }); else installOverride();
 })();
