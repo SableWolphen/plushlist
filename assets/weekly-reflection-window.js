@@ -43,6 +43,10 @@
     catch (_error) { return fallback; }
   }
 
+  function nurseryModeVisible() {
+    return Boolean(document.querySelector('.baby-arrival-ritual,.mamas-corner,[aria-label="Little space arrival"]'));
+  }
+
   function hasEnoughHistory() {
     const loop = safeJson(LOOP_KEY, {});
     const state = safeJson(HABIT_STATE_KEY, {});
@@ -79,6 +83,17 @@
     return lines.slice(0, 3);
   }
 
+  function nurseryLines(lines) {
+    return lines.map((line) => line
+      .replace("has been landing best around", "seems happiest around")
+      .replace("is looking steadier than it used to", "is getting easier to tuck in")
+      .replace("may work better with a gentler version or easier timing", "might like a tinier, softer version")
+      .replace("Low-energy days landed at", "Sleepy-energy days landed at")
+      .replace("on your usual-energy days", "on your more-awake days")
+      .replace("After a break, you usually find your rhythm again in about", "After time away, you usually settle back in within about")
+      .replace("caring completion", "cozy win"));
+  }
+
   function storageKey(now) { return `${STORAGE_PREFIX}:${reflectionWeekKey(now)}`; }
   function alreadySurfaced(now) {
     try { return window.localStorage.getItem(storageKey(now)) === "shown"; }
@@ -104,21 +119,22 @@
 
   function showWeeklyReflection(now) {
     if (document.getElementById("plushlife-weekly-reflection-ready")) return;
-    const lines = reflectionLines();
+    const nursery = nurseryModeVisible();
+    const lines = nursery ? nurseryLines(reflectionLines()) : reflectionLines();
     const modal = document.createElement("div");
     modal.id = "plushlife-weekly-reflection-ready";
     modal.setAttribute("role", "dialog");
     modal.setAttribute("aria-modal", "true");
     modal.setAttribute("aria-labelledby", "plushlife-weekly-reflection-title");
     modal.innerHTML = `
-      <div class="plushlife-weekly-reflection-card">
+      <div class="plushlife-weekly-reflection-card${nursery ? " is-nursery" : ""}">
         <button type="button" class="plushlife-weekly-reflection-close" aria-label="Close weekly reflection">×</button>
-        <div class="plushlife-weekly-reflection-icon" aria-hidden="true">💜</div>
-        <div class="plushlife-weekly-reflection-kicker">YOUR WEEK IS READY</div>
-        <h2 id="plushlife-weekly-reflection-title">Here’s what PlushLife noticed</h2>
+        <div class="plushlife-weekly-reflection-icon" aria-hidden="true">${nursery ? "🧸" : "💜"}</div>
+        <div class="plushlife-weekly-reflection-kicker">${nursery ? "YOUR COZY WEEK" : "YOUR WEEK IS READY"}</div>
+        <h2 id="plushlife-weekly-reflection-title">${nursery ? "Look what your little week taught us" : "Here’s what PlushLife noticed"}</h2>
         <div class="plushlife-weekly-reflection-lines">${lines.map((line) => `<div>${line}</div>`).join("")}</div>
-        <p>No score. No catching up. These are clues from your own patterns, not rules.</p>
-        <button type="button" class="plushlife-weekly-reflection-open">See the full week</button>
+        <p>${nursery ? "No catching up, baby. These are just little clues about what felt easiest and coziest." : "No score. No catching up. These are clues from your own patterns, not rules."}</p>
+        <button type="button" class="plushlife-weekly-reflection-open">${nursery ? "See my cozy week" : "See the full week"}</button>
         <button type="button" class="plushlife-weekly-reflection-later">Not now</button>
       </div>`;
     document.body.appendChild(modal);
@@ -146,6 +162,7 @@
   style.textContent = `
     #plushlife-weekly-reflection-ready {position:fixed;inset:0;z-index:2147482500;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));background:rgba(45,31,55,.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);box-sizing:border-box;}
     .plushlife-weekly-reflection-card {position:relative;box-sizing:border-box;width:min(92vw,430px);max-height:min(80dvh,620px);overflow:auto;padding:24px 20px 18px;border:1px solid #e3caed;border-radius:22px;background:linear-gradient(150deg,#fffafd,#f8f2ff 72%,#f3fbf8);color:#594766;box-shadow:0 24px 70px rgba(35,20,45,.30);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-align:center;}
+    .plushlife-weekly-reflection-card.is-nursery{background:linear-gradient(150deg,#fff9fc,#fff4f8 58%,#f4fbf8);border-color:#efd5e3;}
     .plushlife-weekly-reflection-close {position:absolute;right:10px;top:10px;width:44px;height:44px;border:1px solid #dfcbe8;border-radius:13px;background:#fff;color:#805296;font-size:27px;line-height:1;cursor:pointer;}
     .plushlife-weekly-reflection-icon {font-size:30px;line-height:1;margin-bottom:8px;}
     .plushlife-weekly-reflection-kicker {font-size:10px;letter-spacing:.14em;font-weight:900;color:#9b55b7;}
@@ -157,6 +174,7 @@
     .plushlife-weekly-reflection-open {margin-top:16px;border:0;background:#a65dc1;color:white;}.plushlife-weekly-reflection-later {margin-top:7px;border:1px solid #dfcbe8;background:transparent;color:#805f90;}
     html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-card {background:linear-gradient(150deg,#352747,#281e39 72%,#24343a);border-color:#715584;color:#f5edf8;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-card h2 {color:#fff7ff;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-card p {color:#d8cadf;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-lines > div {background:#30243e;border-color:#604b70;color:#e3d7e8;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-close {background:#413052;border-color:#715584;color:#f2c7ff;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-later {border-color:#715584;color:#e7d6ed;}
     @media (max-width:420px) {.plushlife-weekly-reflection-card {width:calc(100vw - 28px);padding:22px 16px 16px;border-radius:20px;}.plushlife-weekly-reflection-card h2 {font-size:20px;}}
+    @media (max-height:520px) and (orientation:landscape){.plushlife-weekly-reflection-card{max-height:calc(100dvh - 24px);padding-top:18px}.plushlife-weekly-reflection-icon{display:none}}
     @media (prefers-reduced-motion:reduce) {#plushlife-weekly-reflection-ready * {scroll-behavior:auto!important;transition:none!important;}}
   `;
   document.head.appendChild(style);
