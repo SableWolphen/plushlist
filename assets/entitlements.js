@@ -31,6 +31,13 @@
       experiencePolishScript.defer = true;
       root.document.head.appendChild(experiencePolishScript);
     }
+    if (root.document && !root.__plushlifeWeeklyReflectionLoading) {
+      root.__plushlifeWeeklyReflectionLoading = true;
+      const weeklyReflectionScript = root.document.createElement("script");
+      weeklyReflectionScript.src = "./assets/weekly-reflection-window.js";
+      weeklyReflectionScript.defer = true;
+      root.document.head.appendChild(weeklyReflectionScript);
+    }
     if (root.document && !root.__plushlifeLandingMobileAuthLoading) {
       root.__plushlifeLandingMobileAuthLoading = true;
       const landingMobileAuthScript = root.document.createElement("script");
