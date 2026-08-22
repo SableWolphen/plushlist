@@ -211,14 +211,19 @@
     }
     html[data-plushlife-color-mode="dark"] .plushlife-day-memory__label { color:#e9a4ee; }
     @media (max-width:640px) {
-      [role="dialog"][aria-modal="true"] { place-items:end center !important;padding:0 !important; }
+      [role="dialog"][aria-modal="true"] {
+        place-items:center !important;
+        padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom)) !important;
+      }
       [role="dialog"][aria-modal="true"] > div:first-child {
-        width:100% !important;
-        max-width:100% !important;
-        max-height:min(88dvh,760px) !important;
-        border-radius:22px 22px 0 0 !important;
-        margin:0 !important;
+        width:min(92vw,560px) !important;
+        max-width:560px !important;
+        max-height:calc(100dvh - max(36px,env(safe-area-inset-top)) - max(36px,env(safe-area-inset-bottom))) !important;
+        border-radius:22px !important;
+        margin:auto !important;
+        overflow:auto !important;
         overscroll-behavior:contain;
+        box-shadow:0 22px 70px rgba(45,28,56,.28) !important;
       }
     }
     @media (pointer:coarse) {
