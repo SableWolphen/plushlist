@@ -16,7 +16,9 @@ expect(polish.includes("plushlife:task-completion-feedback"), "mascot reactions 
 expect(polish.includes("plushlife-day-memory"), "calendar must expose a compact day memory");
 expect(polish.includes("prefers-reduced-motion:reduce"), "experience polish must respect reduced motion");
 expect(polish.includes("forced-colors:active"), "experience polish must support forced colors");
-expect(polish.includes('[role=\"dialog\"][aria-modal=\"true\"]'), "mobile dialogs should use the bottom-sheet treatment");
+expect(polish.includes('[role=\"dialog\"][aria-modal=\"true\"]'), "mobile dialogs must have a dedicated responsive treatment");
+expect(polish.includes("place-items:center !important") && polish.includes("width:min(92vw,560px) !important"), "mobile dialogs must stay centered instead of becoming bottom sheets");
+expect(!polish.includes("place-items:end center !important"), "mobile dialogs must not regress to bottom-sheet alignment");
 expect(!polish.includes("fetch("), "experience polish must not add a third-party or analytics data flow");
 expect(todayCore.includes("WELCOME BACK") && todayCore.includes("No catching up"), "return-after-break flow must remain present");
 expect(todayShell.includes("PlushLife noticed:"), "personalization explanations must remain visible");
@@ -32,4 +34,4 @@ if (failures.length) {
   console.error("Experience polish checks failed:\n- " + failures.join("\n- "));
   process.exit(1);
 }
-console.log(`Experience polish checks passed (${13} checks).`);
+console.log(`Experience polish checks passed (${15} checks).`);
