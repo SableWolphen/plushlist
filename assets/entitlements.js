@@ -38,6 +38,13 @@
       weeklyReflectionScript.defer = true;
       root.document.head.appendChild(weeklyReflectionScript);
     }
+    if (root.document && !root.__plushlifeResumeContextLoading) {
+      root.__plushlifeResumeContextLoading = true;
+      const resumeContextScript = root.document.createElement("script");
+      resumeContextScript.src = "./assets/resume-context.js";
+      resumeContextScript.defer = true;
+      root.document.head.appendChild(resumeContextScript);
+    }
     if (root.document && !root.__plushlifeLandingMobileAuthLoading) {
       root.__plushlifeLandingMobileAuthLoading = true;
       const landingMobileAuthScript = root.document.createElement("script");
@@ -101,11 +108,6 @@
   return { PLUSH_PLANS, PLUSH_FEATURE_FLAGS, PLAN_FEATURES, hasPlushFeature };
 });
 
-// Keep the normal Today task list fully visible without fighting the optional
-// discovery helper on a timer. That helper may still tag rows as home overflow,
-// but this late stylesheet makes that presentation tag inert. PlushRescue uses
-// a different data-plushlife-rescue-hidden attribute, so explicit Rescue modes
-// can still intentionally reduce the list.
 (function keepFullTodayTaskListStable() {
   if (typeof window === "undefined" || typeof document === "undefined") return;
   const installOverride = () => {
@@ -118,9 +120,6 @@
     `;
     document.head.appendChild(style);
   };
-  if (document.readyState === "loading") {
-    window.addEventListener("load", installOverride, { once: true });
-  } else {
-    installOverride();
-  }
+  if (document.readyState === "loading") window.addEventListener("load", installOverride, { once: true });
+  else installOverride();
 })();
