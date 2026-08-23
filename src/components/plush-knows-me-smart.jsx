@@ -45,8 +45,8 @@ export function SmartAdaptationPanel(props) {
 
   const jumpToSequenceTask = () => {
     try {
-      const escaped = typeof CSS !== "undefined" && CSS.escape ? CSS.escape(sequence.toKey) : sequence.toKey.replace(/"/g, "\\\"");
-      const node = document.querySelector(`[data-task-key="${escaped}"]`);
+      const node = Array.from(document.querySelectorAll("[data-task-key]"))
+        .find((candidate) => candidate.dataset.taskKey === sequence.toKey);
       node?.scrollIntoView?.({ behavior: "smooth", block: "center" });
       node?.focus?.({ preventScroll: true });
     } catch (_error) {}
