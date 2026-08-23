@@ -29,7 +29,7 @@ const checks = [
   [today.includes('Hi. Your stuff is still here.') && memory.includes('registerVisit'), "guilt-free return after inactivity is implemented"],
   [growth.includes('PlushMoments') && growth.includes('monthlyMoments') && memory.includes('recordMoment'), "monthly PlushMoments live in Growth"],
   [!companion.includes('sectionButton("PlushMoments"') && !companion.includes('openSection === "moments"'), "PlushMoments are absent from Today companion tools"],
-  [settings.includes('plushProfileSummary') && settings.includes('CORRECT LEARNED SUGGESTIONS'), "living profile corrections live in Settings"],
+  [settings.includes('plushProfileSummary') && settings.includes('CORRECT WHAT PLUSHLIFE LEARNED'), "living profile corrections live in Settings"],
   [profile.includes('profileContext') && profile.includes('sameContext'), "recommendation learning includes mood/energy/capacity/load/time context"],
   [profile.includes('Strong fit') && profile.includes('Growing clue') && profile.includes('Still learning'), "profile uses confidence tiers instead of one-shot certainty"],
   [profile.includes('beginRecommendation') && profile.includes('syncSessionOutcomes'), "recommendations can be linked to later real outcomes"],
