@@ -45,7 +45,7 @@ Historical one-off release workflows remain in `.github/workflows/` for auditabi
 
 ## Ownership and permitted use
 
-Copyright © 2026 Alexander Kemp Johnston. All rights reserved.
+Copyright © 2026 Sable Johnston. All rights reserved.
 
 PlushList™ and its original source code, mascot, artwork, interface, written content, and branding are proprietary. This public repository is available for viewing, but no permission is granted to copy, modify, redistribute, host, sell, or create derivative works from it.
 
