@@ -7,6 +7,9 @@
   const SIGN_IN_URL = "./login.html";
   let scheduled = false;
 
+  const nativeApp = Boolean(window.Capacitor?.isNativePlatform?.());
+  if (nativeApp) document.documentElement.classList.add("plushlife-native-landing");
+
   function isMobile() {
     return mobile.matches;
   }
@@ -64,6 +67,19 @@
   style.textContent = `
     [data-plushlife-mobile-auth-cta="true"] { display:none; }
     @media (max-width:680px) {
+      .plushlife-native-landing .plushlife-landing-root { min-height:100dvh !important; }
+      .plushlife-native-landing .plushlife-landing-nav { padding:14px 16px 8px !important; }
+      .plushlife-native-landing .plushlife-landing-hero { padding:10px 16px 8px !important; }
+      .plushlife-native-landing .plushlife-landing-hero > span { margin-bottom:10px !important; padding:4px 10px !important; font-size:9px !important; }
+      .plushlife-native-landing .plushlife-landing-hero h1 { margin-bottom:10px !important; font-size:32px !important; line-height:1.04 !important; }
+      .plushlife-native-landing .plushlife-landing-hero > p { margin-bottom:16px !important; font-size:14px !important; line-height:1.42 !important; }
+      .plushlife-native-landing .plushlife-landing-hero > div > button { padding:12px 22px !important; font-size:14px !important; }
+      .plushlife-native-landing .plushlife-landing-hero > div > button:last-child,
+      .plushlife-native-landing .plushlife-landing-mascot,
+      .plushlife-native-landing .landing-detail-section,
+      .plushlife-native-landing .plushlife-landing-footer { display:none !important; }
+      .plushlife-native-landing .landing-benefit-strip { margin-top:8px !important; padding:0 16px 16px !important; gap:6px !important; }
+      .plushlife-native-landing .landing-benefit-pill { min-height:38px !important; padding:6px 7px !important; font-size:10.5px !important; }
       .plushlife-landing-embedded-auth {
         max-width:420px !important;
         margin:14px auto 0 !important;

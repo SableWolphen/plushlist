@@ -12,6 +12,7 @@ const manifest = read("android/app/src/main/AndroidManifest.xml");
 const entitlements = read("assets/entitlements.js");
 const darkMode = read("assets/dark-mode.js");
 const landingMobileAuth = read("assets/landing-mobile-auth.js");
+const landing = read("src/components/landing.jsx");
 const googleSetup = read("docs/google-sign-in-setup.md");
 
 function expect(value, message) {
@@ -35,6 +36,8 @@ expect(entitlements.includes('./assets/landing-mobile-auth.js'), "Main app runti
 expect(landingMobileAuth.includes('max-width: 680px') || landingMobileAuth.includes('max-width:680px'), "Landing sign-in compactor must be mobile-only");
 expect(landingMobileAuth.includes('start free') && landingMobileAuth.includes('start your list'), "Mobile landing start actions must route straight to compact sign-in");
 expect(landingMobileAuth.includes('./login.html'), "Mobile landing sign-in must use the standalone compact login page");
+expect(landingMobileAuth.includes('window.Capacitor?.isNativePlatform?.()') && landingMobileAuth.includes('plushlife-native-landing'), "Signed-out native apps must show a concise welcome instead of the full marketing page");
+expect(landing.includes('landing-detail-section') && landingMobileAuth.includes('.landing-detail-section'), "Native welcome must hide long-form landing details while retaining the short PlushLife introduction");
 expect(landingMobileAuth.includes('Create or open your private tracker') || landingMobileAuth.includes('create or open your private tracker'), "Already-open embedded landing auth must be detected and compacted");
 
 expect(manifest.includes('android:scheme="plushlife"'), "Android manifest must register the PlushLife auth callback scheme");
