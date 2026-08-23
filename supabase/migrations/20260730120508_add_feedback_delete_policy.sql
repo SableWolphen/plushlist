@@ -1,0 +1,1 @@
+create policy "Admins delete feedback" on public.feedback_messages for delete to authenticated using (lower(coalesce((auth.jwt() ->> 'email'), '')) in ('johnston.alexander.k@gmail.com', 'johnston.alexander.k+plushlisttest@gmail.com'));
