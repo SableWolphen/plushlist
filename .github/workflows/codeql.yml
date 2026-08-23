@@ -23,7 +23,6 @@ jobs:
         language:
           - actions
           - javascript-typescript
-          - python
     steps:
       - name: Checkout
         uses: actions/checkout@v6
