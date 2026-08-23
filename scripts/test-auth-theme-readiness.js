@@ -25,9 +25,11 @@ expect(/skipBrowserRedirect\s*:\s*nativeApp/.test(login), "Native Google OAuth s
 expect(login.includes('client.auth.setSession') || login.includes('exchangeCodeForSession'), "Native OAuth callback must finish a Supabase session");
 expect(login.includes("signInWithOtp") && login.includes("signInWithPassword"), "Email code and password fallbacks must remain available");
 expect(login.includes("prefers-color-scheme:dark"), "Login screen should respect device dark appearance");
+expect(login.includes("main{width:min(100%,470px)") && login.includes(".plans{display:none}"), "Login stays focused on authentication instead of a long plan comparison");
+expect(login.includes(".code-stage{display:none}") && login.includes("body.mobile-code-ready .code-stage{display:block}"), "Email code input stays hidden until a code is requested");
 expect(login.includes('id="mobileEmailToggle"') && login.includes('id="emailShell"'), "Mobile login must collapse email sign-in behind one compact control");
 expect(login.includes('.plans{display:none}') && login.includes('.intro{display:none}'), "Mobile login must hide desktop-only marketing content");
-expect(login.includes('body.mobile-code-ready .email-shell .code-stage{display:block}'), "Mobile email code field must stay hidden until needed");
+expect(login.includes('body.mobile-code-ready .code-stage{display:block}'), "Email code field must stay hidden until needed at every viewport size");
 
 expect(entitlements.includes('./assets/landing-mobile-auth.js'), "Main app runtime must load the mobile landing sign-in compactor");
 expect(landingMobileAuth.includes('max-width: 680px') || landingMobileAuth.includes('max-width:680px'), "Landing sign-in compactor must be mobile-only");

@@ -119,7 +119,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
           </>}
         </div>
 
-        <div role="tablist" aria-label="Today view" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, marginBottom: 9, padding: 4, borderRadius: 12, background: "#FFFFFF99", border: "1px solid #EADCEC" }}>
+        <div className="plushlife-today-tabs" role="tablist" aria-label="Today view" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, marginBottom: 12, padding: 4, borderRadius: 12, background: "#FFFFFF99", border: "1px solid #EADCEC" }}>
           <button role="tab" aria-selected={todayCardIndex === 0} type="button" onClick={() => setTodayCardIndex(0)} style={{ padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 0 ? `${day.accent}22` : "transparent", color: todayCardIndex === 0 ? day.accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>🗓 Schedule</button>
           <button role="tab" aria-selected={todayCardIndex === 1} type="button" onClick={() => setTodayCardIndex(1)} style={{ padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 1 ? `${day.accent}22` : "transparent", color: todayCardIndex === 1 ? day.accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{babyMode ? "🧸 Little Jobs" : "✓ Tasks"}</button>
         </div>
@@ -300,7 +300,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
           </div>
         )}
         {todayCardIndex === 1 && rows.length > 0 && (!babyMode || isFutureView || isHistoricalView || selectedTaskViewIsRest) && (
-          <div style={{ marginBottom: 14, padding: 14, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: "1px solid #E6D4F2" }}>
+          <div className="plushlife-task-card" style={{ marginBottom: 14, padding: 14, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: "1px solid #E6D4F2" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 4 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 800 }}>{selectedTaskViewIsRest ? "REST DAY" : isFutureView ? `${selectedTaskDateLabel.toUpperCase()} TASKS` : isHistoricalView ? `${selectedTaskDateLabel.toUpperCase()} HISTORY` : "TODAY'S TASKS"}</div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 7, flexWrap: "wrap" }}>
@@ -444,7 +444,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
                         )}
                       </div>
                     )}
-                    <div
+                    <div className="plushlife-task-row"
                       data-plushlife-task-drop-key={draggableTodayTask ? r.sourceTask.task_key : undefined}
                       data-plushlife-task-drop-label={draggableTodayTask ? r.label : undefined}
                       data-plushlife-task-drop-section={draggableTodayTask ? r.sourceTask.section : undefined}

@@ -6583,7 +6583,8 @@ function GlowUpTracker() {
           if (Math.abs(deltaX) < 60 || Math.abs(deltaX) < Math.abs(deltaY) * 1.5) return;
           stepDashboard(deltaX < 0 ? 1 : -1);
         }}
-        style={{ maxWidth: 520, margin: "0 auto", touchAction: "pan-y" }}>
+        className="plushlife-app-column"
+        style={{ maxWidth: 640, margin: "0 auto", touchAction: "pan-y" }}>
         {/* The routine "signed in and synced" state moved into Settings — it
             doesn't need to occupy the top of every screen. A real problem
             (offline or a failed sync) still surfaces here since that's worth
@@ -6614,7 +6615,7 @@ function GlowUpTracker() {
             {signInMessage && <div style={{ marginTop: 8, fontSize: 12, color: "#8C6B9E" }}>{signInMessage}</div>}
           </div>
         )}
-        <div style={{ marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+        <div className="plushlife-app-header" style={{ marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "#B08AC7", fontWeight: 700 }}>{babyMode ? "WELCOME TO YOUR LITTLE NURSERY 🧸🍼✨" : dinoTheme ? "ONE LITTLE STEP AT A TIME 🦕✨" : "ONE LITTLE STEP AT A TIME ✨"}</div>
             <h1 className="app-title" style={{ fontSize: 28, margin: "6px 0 0", fontWeight: 800, letterSpacing: "-0.02em" }}>
@@ -6689,15 +6690,15 @@ function GlowUpTracker() {
           <>
 
         {/* Dashboards */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 14 }}>
-          <div role="tablist" aria-label="PlushLife dashboards" onKeyDown={(event) => {
+        <div className="plushlife-dashboard-nav" style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 14 }}>
+          <div className="plushlife-dashboard-tabs" role="tablist" aria-label="PlushLife dashboards" onKeyDown={(event) => {
             if (event.key === "ArrowRight") { event.preventDefault(); stepDashboard(1); }
             else if (event.key === "ArrowLeft") { event.preventDefault(); stepDashboard(-1); }
           }} style={{ flex: 1, display: "grid", gridTemplateColumns: `repeat(${dashboardItems.length}, minmax(0, 1fr))`, gap: 6, minWidth: 0 }}>
             {dashboardItems.map((item) => {
               const on = item.id === dashboard;
               const displayLabel = babyMode && item.id === "today" ? "Nursery" : item.label;
-              return <button key={item.id} id={`dashboard-tab-${item.id}`} role="tab" aria-selected={on} onClick={() => goToDashboard(item.id)} style={{ position: "relative", minHeight: 52, padding: "7px 3px", borderRadius: 13, border: on ? `2px solid ${item.accent}` : "2px solid #F3D9EC", background: on ? `${item.accent}22` : "#FFFFFF", color: on ? item.accent : "#8C6B9E", fontWeight: 900, fontSize: displayLabel.length > 10 ? 9.5 : 11, lineHeight: 1.15, overflowWrap: "break-word", wordBreak: "break-word", cursor: "pointer" }}>
+              return <button className="plushlife-dashboard-tab" key={item.id} id={`dashboard-tab-${item.id}`} role="tab" aria-selected={on} onClick={() => goToDashboard(item.id)} style={{ position: "relative", minHeight: 52, padding: "7px 3px", borderRadius: 13, border: on ? `2px solid ${item.accent}` : "2px solid #F3D9EC", background: on ? `${item.accent}22` : "#FFFFFF", color: on ? item.accent : "#8C6B9E", fontWeight: 900, fontSize: displayLabel.length > 10 ? 9.5 : 11, lineHeight: 1.15, overflowWrap: "break-word", wordBreak: "break-word", cursor: "pointer" }}>
                 <span style={{ display: "block", fontSize: 16, marginBottom: 2 }} aria-hidden="true">{item.icon}</span>{displayLabel}
               </button>;
             })}

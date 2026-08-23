@@ -204,6 +204,53 @@
       min-width:64px !important;
       white-space:nowrap !important;
     }
+    /* Launch polish: explicit app landmarks keep the broad compatibility
+       palette above from flattening every surface into the same purple card. */
+    .plushlife-app-column { width:100%; box-sizing:border-box; }
+    .plushlife-dashboard-tabs { padding:4px; border:1px solid var(--nursery-border,#ead7ef); border-radius:17px; background:rgba(255,255,255,.5); }
+    .plushlife-dashboard-tab { box-shadow:none !important; }
+    .plushlife-today-tabs { position:sticky; top:max(8px,env(safe-area-inset-top)); z-index:8; backdrop-filter:blur(12px); }
+    .plushlife-task-row { transition:border-color .16s ease,background-color .16s ease,transform .16s ease; }
+
+    html[data-plushlife-color-mode="dark"] .baby-mode .plushlife-dashboard-tabs,
+    html[data-plushlife-color-mode="dark"] .baby-mode .plushlife-today-tabs {
+      background:rgba(24,18,39,.9) !important;
+      border-color:#59456f !important;
+      box-shadow:0 8px 24px rgba(5,3,15,.2) !important;
+    }
+    html[data-plushlife-color-mode="dark"] .baby-mode .plushlife-dashboard-tab:not([aria-selected="true"]),
+    html[data-plushlife-color-mode="dark"] .baby-mode .plushlife-today-tabs button:not([aria-selected="true"]) {
+      background:transparent !important;
+      border-color:transparent !important;
+      color:#c9b8d2 !important;
+      box-shadow:none !important;
+    }
+    html[data-plushlife-color-mode="dark"] .baby-mode .plushlife-task-card {
+      background:rgba(35,27,55,.82) !important;
+      border-color:#59466e !important;
+      box-shadow:0 12px 30px rgba(5,3,15,.24) !important;
+    }
+    html[data-plushlife-color-mode="dark"] .baby-mode .plushlife-task-row {
+      background:#2c2241 !important;
+      border-color:#49395c !important;
+      box-shadow:none !important;
+    }
+    html[data-plushlife-color-mode="dark"] .baby-mode .plushlife-task-row:focus-within {
+      border-color:#d282df !important;
+    }
+    @media(min-width:900px) {
+      .plushlife-app-column { max-width:640px !important; }
+      .plushlife-dashboard-tab { min-height:56px !important; }
+    }
+    @media(max-width:520px) {
+      .baby-mode { padding-left:max(8px,env(safe-area-inset-left)) !important; padding-right:max(8px,env(safe-area-inset-right)) !important; }
+      .baby-mode .baby-shell { padding:6px !important; border-radius:24px !important; }
+      .plushlife-app-header { align-items:flex-start !important; }
+      .plushlife-dashboard-tabs { gap:3px !important; padding:3px; }
+      .plushlife-dashboard-tab { min-height:50px !important; padding:6px 2px !important; }
+      .plushlife-task-card { padding:10px !important; border-radius:14px !important; }
+      .plushlife-task-row > div:first-child { min-height:46px !important; padding:5px 6px !important; }
+    }
   `;
   document.head.appendChild(style);
 
