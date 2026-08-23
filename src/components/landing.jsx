@@ -26,7 +26,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
     setDemoCelebrating(false);
   };
   return (
-    <div style={{ minHeight: "100vh", background: colors.bg, backgroundImage: "radial-gradient(circle at 6% 8%, #FCE1F3 0%, transparent 38%), radial-gradient(circle at 96% 4%, #D8F3EC 0%, transparent 38%), radial-gradient(circle at 90% 92%, #FDF0D6 0%, transparent 42%)", color: colors.plum, fontFamily: "'Nunito','Segoe UI',sans-serif" }}>
+    <div className="plushlife-landing-root" style={{ minHeight: "100vh", background: colors.bg, backgroundImage: "radial-gradient(circle at 6% 8%, #FCE1F3 0%, transparent 38%), radial-gradient(circle at 96% 4%, #D8F3EC 0%, transparent 38%), radial-gradient(circle at 90% 92%, #FDF0D6 0%, transparent 42%)", color: colors.plum, fontFamily: "'Nunito','Segoe UI',sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap');
         @keyframes plushBob { 0%,100% { transform:translateY(0) rotate(-1.5deg) } 50% { transform:translateY(-10px) rotate(1.5deg) } }
@@ -58,7 +58,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         .landing-tier-list { margin:7px 0 0;padding:0;list-style:none;display:grid;gap:4px;color:#6E5A82;font-size:11px;line-height:1.35 }
         @media(max-width:560px){.landing-nav-links{display:none}.landing-benefit-strip{grid-template-columns:1fr 1fr;gap:7px;padding:0 14px}.landing-benefit-pill{border-radius:15px;font-size:11px;padding:7px}.landing-signin-row{flex-direction:column}.landing-signin-row button{width:100%}.landing-difference-cell{min-height:96px;padding:15px 13px}.landing-tier-grid{grid-template-columns:1fr}}
       `}</style>
-      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "26px 28px", maxWidth: 1080, margin: "0 auto" }}>
+      <nav className="plushlife-landing-nav" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "26px 28px", maxWidth: 1080, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "'Baloo 2',sans-serif", fontSize: 22, fontWeight: 800 }}>
           <span style={{ width: 34, height: 34, borderRadius: "50%", background: colors.orchid, boxShadow: "inset 0 0 0 8px #F2D8F5" }} /> PlushLife
         </div>
@@ -71,7 +71,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         </div>
       </nav>
 
-      <section style={{ padding: "40px 28px 20px", textAlign: "center" }}>
+      <section className="plushlife-landing-hero" style={{ padding: "40px 28px 20px", textAlign: "center" }}>
         <span style={{ display: "inline-block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", color: colors.orchid, background: "#F9E4F7", padding: "6px 16px", borderRadius: 999, marginBottom: 22 }}>ROUTINES · SELF-CARE · SUPPORT</span>
         <h1 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: "clamp(38px,6vw,64px)", fontWeight: 800, lineHeight: 1.05, margin: "0 0 18px" }}>Care that fits<br/><span style={{ color: colors.orchid }}>the day you’re having.</span></h1>
         <p style={{ fontSize: 18, color: colors.soft, maxWidth: 650, margin: "0 auto 30px", lineHeight: 1.6 }}>PlushLife brings your schedule, habits, self-care, check-ins, journal, and trusted support into one private daily companion. Unlike a rigid checklist, it adapts to the energy you actually have.</p>
@@ -124,7 +124,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
           </div>
         )}
 
-        <svg aria-hidden="true" viewBox="0 0 200 200" width="200" height="200" style={{ marginTop: 10, animation: "plushBob 3.2s ease-in-out infinite" }}>
+        <svg className="plushlife-landing-mascot" aria-hidden="true" viewBox="0 0 200 200" width="200" height="200" style={{ marginTop: 10, animation: "plushBob 3.2s ease-in-out infinite" }}>
           <path d="M155 130 Q185 120 180 90 Q178 75 160 80" fill="none" stroke={colors.amber} strokeWidth="14" strokeLinecap="round"/>
           <ellipse cx="100" cy="120" rx="62" ry="54" fill="#FCEFFB" stroke={colors.orchid} strokeWidth="3"/>
           <path d="M60 78 L68 58 L76 78 M86 72 L94 50 L102 72 M112 78 L120 58 L128 78" fill={colors.mint} stroke="#2FA88C" strokeWidth="2"/>
@@ -146,7 +146,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         <div className="landing-benefit-pill"><span aria-hidden="true">💜</span> No guilt or streak loss</div>
       </div>
 
-      <section id="landing-difference" style={{ padding: "68px 20px 34px", maxWidth: 920, margin: "0 auto" }}>
+      <section id="landing-difference" className="landing-detail-section" style={{ padding: "68px 20px 34px", maxWidth: 920, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{ color: colors.orchid, fontSize: 11, fontWeight: 900, letterSpacing: ".13em" }}>WHY PLUSHLIFE FEELS DIFFERENT</div>
           <h2 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: "clamp(28px,4vw,38px)", margin: "7px 0 9px" }}>Built for real capacity—not perfect streaks.</h2>
@@ -166,7 +166,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         </div>
       </section>
 
-      <section aria-labelledby="landing-devices-title" style={{ padding: "46px 20px 54px", maxWidth: 920, margin: "0 auto" }}>
+      <section className="landing-detail-section" aria-labelledby="landing-devices-title" style={{ padding: "46px 20px 54px", maxWidth: 920, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{ color: colors.orchid, fontSize: 11, fontWeight: 900, letterSpacing: ".13em" }}>PLUSHLIFE THROUGHOUT YOUR DAY</div>
           <h2 id="landing-devices-title" style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: "clamp(28px,4vw,38px)", margin: "7px 0 9px" }}>The full picture on your phone. Gentle help on your wrist.</h2>
@@ -212,7 +212,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         <div style={{ marginTop: 12, textAlign: "center", color: colors.soft, fontSize: 10.5 }}>Illustrative product preview. Watch features and availability may vary by supported device.</div>
       </section>
 
-      <section aria-label="Interactive PlushLife demo" style={{ padding: "34px 20px 70px", display: "grid", justifyItems: "center" }}>
+      <section className="landing-detail-section" aria-label="Interactive PlushLife demo" style={{ padding: "34px 20px 70px", display: "grid", justifyItems: "center" }}>
         <div style={{ textAlign: "center", marginBottom: 14 }}>
           <div style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 24, fontWeight: 800 }}>Try a tiny PlushLife 💛</div>
           <div style={{ marginTop: 3, color: colors.soft, fontSize: 13.5 }}>Tap the sample tasks. This demo doesn’t save anything.</div>
@@ -257,7 +257,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         </div>
       </section>
 
-      <section id="landing-features" style={{ padding: "20px 28px 80px", maxWidth: 1080, margin: "0 auto" }}>
+      <section id="landing-features" className="landing-detail-section" style={{ padding: "20px 28px 80px", maxWidth: 1080, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 44 }}>
           <h2 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: "clamp(28px,4vw,38px)", margin: "0 0 10px" }}>Everything soft, in one place</h2>
           <p style={{ color: colors.soft, fontSize: 16 }}>Real tools for planning, hard moments, reflection, and support—without guilt or paywalls.</p>
@@ -278,7 +278,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         </div>
       </section>
 
-      <section id="landing-how" style={{ padding: "0 28px 80px", maxWidth: 980, margin: "0 auto" }}>
+      <section id="landing-how" className="landing-detail-section" style={{ padding: "0 28px 80px", maxWidth: 980, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 30 }}>
           <div style={{ color: colors.orchid, fontSize: 11, fontWeight: 900, letterSpacing: ".13em" }}>HOW PLUSHLIFE HELPS</div>
           <h2 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: "clamp(27px,4vw,36px)", margin: "7px 0 9px" }}>Less pressure. More useful support.</h2>
@@ -303,7 +303,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         </div>
       </section>
 
-      <section style={{ padding: "0 28px 70px", maxWidth: 900, margin: "0 auto" }}>
+      <section className="landing-detail-section" style={{ padding: "0 28px 70px", maxWidth: 900, margin: "0 auto" }}>
         <div style={{ background: "linear-gradient(135deg, #EAF4FF, #F7ECFB)", borderRadius: 28, padding: "36px 30px", textAlign: "center" }}>
           <div style={{ fontSize: 32 }}>🔒</div>
           <h3 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 22, margin: "10px 0 8px", color: colors.plum }}>We will never sell your data. Ever.</h3>
@@ -316,7 +316,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
           </p>
         </div>
       </section>
-      <footer style={{ padding: "42px 28px", textAlign: "center", borderTop: `1px solid ${colors.line}`, color: colors.soft, fontSize: 13.5 }}>
+      <footer className="plushlife-landing-footer" style={{ padding: "42px 28px", textAlign: "center", borderTop: `1px solid ${colors.line}`, color: colors.soft, fontSize: 13.5 }}>
           <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 900, color: colors.plum }}>PlushLife—care that fits today.</div>
         <div style={{ marginTop: 4 }}>Made for days that need structure, and ones that need softness.</div>
         <div style={{ marginTop: 10 }}>© 2026 Sable Johnston · PlushLife™ · All rights reserved.</div>
