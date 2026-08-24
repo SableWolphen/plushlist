@@ -1,0 +1,51 @@
+diff --git a/capacitor/src/main/java/com/getcapacitor/MessageHandler.java b/capacitor/src/main/java/com/getcapacitor/MessageHandler.java
+index dc91c9b..6255a88 100644
+--- a/capacitor/src/main/java/com/getcapacitor/MessageHandler.java
++++ b/capacitor/src/main/java/com/getcapacitor/MessageHandler.java
+@@ -6,6 +6,7 @@ import androidx.webkit.JavaScriptReplyProxy;
+ import androidx.webkit.WebViewCompat;
+ import androidx.webkit.WebViewFeature;
+ import org.apache.cordova.PluginManager;
++import org.json.JSONObject;
+ 
+ /**
+  * MessageHandler handles messages from the WebView, dispatching them
+@@ -94,7 +95,10 @@ public class MessageHandler {
+                 this.callPluginMethod(callbackId, pluginId, methodName, methodData);
+             }
+         } catch (Exception ex) {
+-            Logger.error("Post message error:", ex);
++            // Don't log the exception message/stack trace here: postData can
++            // contain values that originated from web content, and Android
++            // log output isn't a safe place for that (CWE-209).
++            Logger.error("Post message error");
+         }
+     }
+ 
+@@ -131,7 +135,9 @@ public class MessageHandler {
+                 bridge.getApp().fireRestoredResult(data);
+             }
+         } catch (Exception ex) {
+-            Logger.error("sendResponseMessage: error: " + ex);
++            // Same reasoning as postMessage(): avoid echoing exception
++            // content (which can carry plugin-result data) into the log.
++            Logger.error("sendResponseMessage error");
+         }
+         if (!call.isKeptAlive()) {
+             call.release(bridge);
+@@ -139,7 +145,14 @@ public class MessageHandler {
+     }
+ 
+     private void legacySendResponseMessage(PluginResult data) {
+-        final String runScript = "window.Capacitor.fromNative(" + data.toString() + ")";
++        // Embed the payload as a properly-escaped JSON string literal (via
++        // org.json's quote(), which escapes quotes, backslashes, control
++        // characters and U+2028/U+2029) and reconstruct it with JSON.parse
++        // on the JS side, instead of splicing the raw JSON object text
++        // straight into the script we hand to evaluateJavascript(). This
++        // keeps a plugin result's data from ever being interpreted as JS
++        // source (CWE-79-style script injection).
++        final String runScript = "window.Capacitor.fromNative(JSON.parse(" + JSONObject.quote(data.toString()) + "))";
+         final WebView webView = this.webView;
+         webView.post(() -> webView.evaluateJavascript(runScript, null));
+     }
