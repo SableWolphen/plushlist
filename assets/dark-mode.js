@@ -46,12 +46,26 @@
     return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
   }
 
+  function contrastRatio(a, b) {
+    const light = Math.max(luminance(a), luminance(b));
+    const dark = Math.min(luminance(a), luminance(b));
+    return (light + 0.05) / (dark + 0.05);
+  }
+
   function saturation(rgb) {
     if (!rgb) return 0;
     const max = Math.max(rgb.r, rgb.g, rgb.b), min = Math.min(rgb.r, rgb.g, rgb.b);
     return max === 0 ? 0 : (max - min) / max;
   }
 
+  function gradientLuminance(value) {
+    const colors = String(value || "").match(/rgba?\([^)]*\)/gi) || [];
+    const visible = colors.map(parseRgb).filter((rgb) => rgb && rgb.a > 0.05);
+    if (!visible.length) return null;
+    return visible.reduce((sum, rgb) => sum + luminance(rgb), 0) / visible.length;
+  }
+
+  const DARK_SURFACE_RGB = { r: 36, g: 30, b: 43, a: 1 };
   const DARK_CLASSES = ["plushlife-dark-surface", "plushlife-dark-text", "plushlife-dark-border", "plushlife-dark-gradient", "plushlife-dark-control"];
 
   function clearClasses(root) {
@@ -76,12 +90,25 @@
     const backgroundLum = background && background.a > 0.05 ? luminance(background) : 0;
     const foregroundLum = foreground ? luminance(foreground) : 1;
     const borderLum = border ? luminance(border) : 0;
+    const hasGradient = style.backgroundImage && style.backgroundImage !== "none";
+    const gradientLum = hasGradient ? gradientLuminance(style.backgroundImage) : null;
 
     if (["INPUT", "TEXTAREA", "SELECT"].includes(node.tagName)) node.classList.add("plushlife-dark-control");
-    if (background && background.a > 0.05 && backgroundLum > 0.64) node.classList.add("plushlife-dark-surface");
-    if (style.backgroundImage && style.backgroundImage !== "none" && !["BUTTON", "INPUT", "TEXTAREA", "SELECT"].includes(node.tagName) && (!background || background.a < 0.1 || backgroundLum > 0.56)) node.classList.add("plushlife-dark-gradient");
-    if (foreground && foreground.a > 0.2 && foregroundLum < 0.48 && saturation(foreground) < 0.72) node.classList.add("plushlife-dark-text");
-    if (border && border.a > 0.08 && borderLum > 0.58) node.classList.add("plushlife-dark-border");
+    if (background && background.a > 0.05 && backgroundLum > 0.5) node.classList.add("plushlife-dark-surface");
+    if (hasGradient && !["BUTTON", "INPUT", "TEXTAREA", "SELECT"].includes(node.tagName) && (
+      gradientLum == null ? (!background || background.a < 0.1 || backgroundLum > 0.5) : gradientLum > 0.42
+    )) node.classList.add("plushlife-dark-gradient");
+
+    // Inline React colors are common throughout PlushLife. Judge them against
+    // the palette they will actually sit on in dark mode instead of only by
+    // saturation, otherwise muted purple/pink text can become unreadable.
+    if (foreground && foreground.a > 0.2) {
+      const darkContrast = contrastRatio(foreground, DARK_SURFACE_RGB);
+      if ((foregroundLum < 0.48 && saturation(foreground) < 0.72) || darkContrast < 4.5) {
+        node.classList.add("plushlife-dark-text");
+      }
+    }
+    if (border && border.a > 0.08 && borderLum > 0.45) node.classList.add("plushlife-dark-border");
   }
 
   function classifyTree(root) {
@@ -183,25 +210,26 @@
   `;
   document.head.appendChild(css);
 
-  const observer = new MutationObserver(function (mutations) {
+  const observer = new MutationObserver(function () {
     if (applying) return;
     if (!scheduled) {
       scheduled = true;
       window.requestAnimationFrame(function () {
         scheduled = false;
         installSettingsControl();
-        if (effectiveMode() === "dark") {
-          mutations.forEach((mutation) => mutation.addedNodes && mutation.addedNodes.forEach((node) => classifyTree(node)));
-        }
+        if (effectiveMode() === "dark") classifyTree(document.getElementById("root") || document.body);
       });
     }
   });
 
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  // React frequently changes inline style props on nodes that already exist.
+  // Watching style mutations keeps dark mode correct for modals, tab changes,
+  // dynamic cards, and other surfaces that do not create a brand-new node.
+  observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] });
   if (media) {
     const onSystemChange = function () { if (requestedMode === "system") applyMode(); };
     if (typeof media.addEventListener === "function") media.addEventListener("change", onSystemChange);
-    else if (typeof media.addListener === "function") media.addListener(onSystemChange);
+    else if (typeof media.addListener === "function") media.addListener("change", onSystemChange);
   }
   window.addEventListener("storage", function (event) { if (event.key === STORAGE_KEY) { requestedMode = readMode(); applyMode(); refreshSettingsControl(); } });
 
