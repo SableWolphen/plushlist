@@ -7,6 +7,7 @@ const files = [
   "assets/plushlife-completion.js",
   "assets/plush-guide.js",
   "assets/plush-tools-fix.js",
+  "assets/adaptive-habits-polish.js",
   "service-worker.js",
 ];
 
@@ -59,6 +60,20 @@ for (const required of [
 ]) {
   if (!toolsFix.includes(required)) throw new Error(`Missing Plush Tools repair marker: ${required}`);
 }
+
+const adaptive = fs.readFileSync("assets/adaptive-habits-polish.js", "utf8");
+for (const required of [
+  "TODAY'S CAPACITY",
+  "I can’t do today",
+  "20-second setup for tomorrow",
+  "Signature habit setup",
+  "Quick situations",
+  "Nudge me later",
+  "Medication stays exact",
+]) {
+  if (!adaptive.includes(required)) throw new Error(`Missing adaptive habits marker: ${required}`);
+}
+if (/new MutationObserver/.test(adaptive)) throw new Error("Adaptive habits polish must not install a document-wide MutationObserver");
 
 const worker = fs.readFileSync("service-worker.js", "utf8");
 if (!worker.includes("plushlife-completion.js") || !worker.includes("`${core}\\n;${completion}`")) {
