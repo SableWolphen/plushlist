@@ -1,4 +1,4 @@
-export const SMART_TASK_PROFILE_VERSION = 1;
+export const SMART_TASK_PROFILE_VERSION = 2;
 
 function number(value, fallback = 0) {
   const parsed = Number(value);
@@ -17,17 +17,53 @@ export function taskEstimatedMinutes(row) {
   return Math.max(0, number(row?.sourceTask?.estimated_minutes ?? row?.estimated_minutes, 0));
 }
 
+export function taskSoftLabel(row) {
+  return String(row?.sourceTask?.soft_label || row?.soft_label || "").trim();
+}
+
 export function taskTinyLabel(row) {
   return String(row?.sourceTask?.tiny_label || row?.tiny_label || row?.sourceTask?.soft_label || row?.soft_label || "").trim();
+}
+
+export function taskAdaptiveLabel(row, dayType = "full") {
+  const full = String(row?.sourceTask?.task || row?.task || row?.label || "").trim();
+  const soft = taskSoftLabel(row);
+  const tiny = taskTinyLabel(row);
+  const mode = String(dayType || "full").toLowerCase();
+  if (["tiny", "recovery"].includes(mode)) return tiny || soft || full;
+  if (mode === "soft") return soft || tiny || full;
+  return full;
 }
 
 export function taskIsEssential(row) {
   return !!(row?.isEssential || row?.essential || row?.sourceTask?.essential || row?.sourceTask?.is_essential || row?.sourceTask?.essential_on_low_capacity);
 }
 
+export function buildEnergyBudget({ rows = [], dayType = "full", energy = "", capacity = "" } = {}) {
+  const mode = String(dayType || "full").toLowerCase();
+  const energyKey = String(energy || "").toLowerCase();
+  const capacityKey = String(capacity || "").toLowerCase();
+  const explicit = { rest: 0, recovery: 15, tiny: 20, soft: 45, full: 90 }[mode] ?? 90;
+  const low = ["empty", "low"].includes(energyKey) || ["very_low", "low"].includes(capacityKey);
+  const high = ["high", "full", "great"].includes(energyKey) || ["high", "full"].includes(capacityKey);
+  const availableMinutes = mode === "rest" ? 0 : Math.max(10, Math.round(explicit * (low ? 0.7 : high ? 1.15 : 1)));
+  const required = (rows || []).filter((row) => row && !row.isBonus);
+  const estimatedMinutes = required.reduce((sum, row) => sum + (taskEstimatedMinutes(row) || 10), 0);
+  const essentials = required.filter(taskIsEssential);
+  const essentialMinutes = essentials.reduce((sum, row) => sum + (taskEstimatedMinutes(row) || 5), 0);
+  return {
+    availableMinutes,
+    estimatedMinutes,
+    essentialMinutes,
+    overBudget: availableMinutes > 0 && estimatedMinutes > availableMinutes,
+    suggestedVisibleCount: mode === "tiny" || mode === "recovery" ? Math.max(1, Math.min(3, essentials.length || 2)) : mode === "soft" ? 4 : 6,
+  };
+}
+
 export function buildSmartTaskProfile({ row, learned = {}, load = {}, nowPeriod = "", focusTaskId = "" } = {}) {
   const id = taskId(row);
   const estimatedMinutes = taskEstimatedMinutes(row);
+  const softLabel = taskSoftLabel(row);
   const tinyLabel = taskTinyLabel(row);
   const preferredPeriod = String(learned.preferredPeriod || "");
   const completionRate = Number.isFinite(Number(learned.completionRate)) ? Number(learned.completionRate) : null;
@@ -72,6 +108,7 @@ export function buildSmartTaskProfile({ row, learned = {}, load = {}, nowPeriod 
     isEssential,
     isFocus,
     estimatedMinutes,
+    softLabel,
     tinyLabel,
     preferredPeriod,
     preferredHour: learned.preferredHour ?? null,
@@ -101,15 +138,11 @@ export function rankSmartTask({ profile, index = 0, lowCapacity = false, fallbac
   if (profile.isFocus) { score += 70; reasons.push("it is your Focus Habit"); }
   if (profile.isEssential) { score += 26; reasons.push("it is one of today's essentials"); }
   if (fallback) score += 14;
-
-  // Balance “easy to do now” with “needs support” so PlushLife does not
-  // endlessly pick only easy wins or only difficult recovery tasks.
   score += Math.round((profile.completionLikelihood - 50) * 0.22);
   score += Math.round(profile.supportNeed * 0.18);
 
   if (profile.stability === "Recovering") reasons.push("it is rebuilding after a rough patch");
   else if (profile.stability === "Fragile") reasons.push("it could use a little support");
-
   if (profile.timingMatch && profile.confidence !== "learning") reasons.push(`this is usually a good ${profile.preferredPeriod} task for you`);
   if (profile.timingMismatch && profile.confidence !== "learning") score -= 4;
   if (profile.timingMismatch && profile.friction === "bad_timing") score -= 10;
@@ -119,23 +152,14 @@ export function rankSmartTask({ profile, index = 0, lowCapacity = false, fallbac
     if (profile.tinyLabel) { score += 8; reasons.push("it has a gentler version ready"); }
     if (profile.highEffort) score -= 12;
   }
-
-  // When the day is already crowded, prefer something finishable instead of
-  // blindly surfacing another large task. Essentials and Focus Habit still
-  // keep their stronger priority above this nudge.
   if (profile.overloaded) {
     if (profile.quickWin) { score += 9; reasons.push("it helps keep a crowded day manageable"); }
     if (profile.highEffort) score -= 9;
   }
-
-  // Late at night, avoid pushing a large task just because it ranked well
-  // earlier in the day. Small tasks can still be useful without creating a
-  // guilt-heavy end-of-day recommendation.
   if (profile.nowPeriod === "night") {
     if (profile.quickWin) { score += 5; reasons.push("it is a realistic size for this late in the day"); }
     if (profile.highEffort) score -= 14;
   }
-
   if (profile.reliable) score -= 3;
   return { score, reasons: [...new Set(reasons)] };
 }
