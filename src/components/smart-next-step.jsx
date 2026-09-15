@@ -1,5 +1,5 @@
 import { hasGoldFeature } from "../plush-gold.js";
-import { buildSmartTaskProfile, rankSmartTask, taskId } from "../task-intelligence.mjs";
+import { buildEnergyBudget, buildSmartTaskProfile, rankSmartTask, taskAdaptiveLabel, taskId } from "../task-intelligence.mjs";
 import { buildRecommendationLearning } from "../recommendation-learning.mjs";
 
 const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
@@ -113,11 +113,22 @@ export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckI
     const comfortableTaskCount = Number(recommendationLearning.capacity?.comfortableTaskCount);
     const requiredCount = (rows || []).filter((row) => row && !row.isBonus).length;
     const beyondPersonalCapacity = Number.isFinite(comfortableTaskCount) && comfortableTaskCount > 0 && requiredCount > comfortableTaskCount;
+    const energyBudget = buildEnergyBudget({ rows, dayType, energy, capacity });
+    const budgetCrowded = energyBudget.overBudget && dayType !== "rest";
     const capacityForecast = {
-      crowded: beyondPersonalCapacity,
+      ...energyBudget,
+      crowded: beyondPersonalCapacity || budgetCrowded,
       comfortableTaskCount: Number.isFinite(comfortableTaskCount) && comfortableTaskCount > 0 ? comfortableTaskCount : null,
-      suggestedDayType: dayType !== "full" ? dayType : (overwhelmed ? "tiny" : lowCapacity || beyondPersonalCapacity ? "soft" : "full"),
-      reason: overwhelmed ? "Your check-in suggests a very gentle day may fit better." : lowCapacity ? "Your current energy may fit a softer day." : beyondPersonalCapacity ? "Today has more visible tasks than your recent comfortable range." : "",
+      suggestedDayType: dayType !== "full" ? dayType : (overwhelmed ? "tiny" : lowCapacity || beyondPersonalCapacity || budgetCrowded ? "soft" : "full"),
+      reason: overwhelmed
+        ? "Your check-in suggests a very gentle day may fit better."
+        : lowCapacity
+          ? "Your current energy may fit a softer day."
+          : beyondPersonalCapacity
+            ? "Today has more visible tasks than your recent comfortable range."
+            : budgetCrowded
+              ? `Today's tasks look bigger than a comfortable ${energyBudget.availableMinutes}-minute energy budget.`
+              : "",
     };
 
     if (dayType === "rest") return { task: null, reason: "Rest is the plan today", dayModel, recommendationLearning, capacityForecast };
@@ -132,13 +143,7 @@ export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckI
     const ranked = candidates.map((row, index) => {
       const id = taskId(row);
       const learned = profiles[id] || {};
-      const profile = smartProfiles[id] || buildSmartTaskProfile({
-        row,
-        learned,
-        load: engine.load || {},
-        nowPeriod,
-        focusTaskId: anchorId,
-      });
+      const profile = smartProfiles[id] || buildSmartTaskProfile({ row, learned, load: engine.load || {}, nowPeriod, focusTaskId: anchorId });
       const rankedTask = rankSmartTask({ profile, index, lowCapacity: lowCapacity || dayType !== "full", fallback: row.key === fallbackKey });
       const prediction = dayModel.taskPredictions?.[id] || null;
       const dayAdjustment = Number.isFinite(Number(prediction?.adjustment)) ? Number(prediction.adjustment) : 0;
@@ -147,7 +152,7 @@ export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckI
       const sequenceBonus = Number(recommendationLearning.sequenceBonuses?.[id] || 0);
       const minutes = taskEstimatedMinutes(row);
       let capacityAdjustment = 0;
-      if (beyondPersonalCapacity) {
+      if (beyondPersonalCapacity || budgetCrowded) {
         if (profile.quickWin) capacityAdjustment += 5;
         if (profile.highEffort) capacityAdjustment -= 8;
       }
@@ -156,25 +161,17 @@ export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckI
       if (minutes && dayType === "soft" && minutes <= 10) capacityAdjustment += 4;
       if (minutes && ["tiny", "recovery"].includes(dayType) && minutes <= 5) capacityAdjustment += 8;
       if (profile.highEffort && ["soft", "tiny", "recovery"].includes(dayType)) capacityAdjustment -= 12;
-      return {
-        row,
-        prediction,
-        feedback,
-        sequenceBonus,
-        ...rankedTask,
-        score: rankedTask.score + dayAdjustment + feedbackAdjustment + sequenceBonus + capacityAdjustment,
-      };
+      return { row, prediction, feedback, sequenceBonus, ...rankedTask, score: rankedTask.score + dayAdjustment + feedbackAdjustment + sequenceBonus + capacityAdjustment };
     }).sort((a, b) => b.score - a.score);
 
     const winner = ranked[0];
+    const adaptiveLabel = taskAdaptiveLabel(winner.row, dayType);
+    const task = adaptiveLabel && adaptiveLabel !== winner.row?.label
+      ? { ...winner.row, label: adaptiveLabel, adaptiveOriginalLabel: winner.row?.label || "", adaptiveDayType: dayType }
+      : winner.row;
     return {
-      task: winner.row,
-      reason: conciseReason(
-        winner.reasons,
-        dayModelReason(winner.prediction),
-        feedbackReason(winner.feedback, winner.sequenceBonus),
-        adaptationReason(dayType, lowCapacity, overwhelmed),
-      ),
+      task,
+      reason: conciseReason(winner.reasons, dayModelReason(winner.prediction), feedbackReason(winner.feedback, winner.sequenceBonus), adaptationReason(dayType, lowCapacity, overwhelmed)),
       dayModel,
       prediction: winner.prediction,
       recommendationLearning,
