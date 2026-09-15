@@ -5,6 +5,7 @@
 
   const STORAGE_PREFIX = "plushlife:weekly-reflection-ready:v1";
   const LOOP_KEY = "plushlife:local-product-loop:v1";
+  const GROWTH_KEY = "plushlife:growth-loop:v1";
   const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
   let checkTimer = null;
   let shownThisSession = false;
@@ -49,9 +50,30 @@
 
   function hasEnoughHistory() {
     const loop = safeJson(LOOP_KEY, {});
+    const growth = safeJson(GROWTH_KEY, {});
     const state = safeJson(HABIT_STATE_KEY, {});
     const profiles = Object.values(state.meta?.__background_engine?.habitProfiles || {});
-    return Number(loop.visits || 0) >= 3 || Number(loop.completions || 0) >= 3 || profiles.some((profile) => Number(profile?.observedDays || 0) >= 3);
+    return Number(loop.visits || 0) >= 3 || Number(loop.completions || 0) >= 3 || Object.keys(growth.choicesByDate || {}).length >= 3 || profiles.some((profile) => Number(profile?.observedDays || 0) >= 3);
+  }
+
+  function adaptationLine() {
+    const growth = safeJson(GROWTH_KEY, {});
+    const choices = growth.choicesByDate || {};
+    const weekStart = mondayOfWeek(new Date());
+    weekStart.setDate(weekStart.getDate() - 7);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    const counts = { full: 0, soft: 0, tiny: 0 };
+    Object.entries(choices).forEach(([key, mode]) => {
+      const date = new Date(`${key}T12:00:00`);
+      if (date < weekStart || date > weekEnd || counts[mode] == null) return;
+      counts[mode] += 1;
+    });
+    const adapted = counts.soft + counts.tiny;
+    const total = counts.full + adapted;
+    if (!total) return "";
+    if (adapted > 0) return `💜 You adapted ${adapted} day${adapted === 1 ? "" : "s"} instead of forcing the same plan every day.`;
+    return `☀️ You chose Full on ${counts.full} day${counts.full === 1 ? "" : "s"} and kept working one step at a time.`;
   }
 
   function reflectionLines() {
@@ -62,6 +84,9 @@
     const cross = engine.crossPatterns || {};
     const recovery = engine.recovery || {};
     const lines = [];
+
+    const adapted = adaptationLine();
+    if (adapted) lines.push(adapted);
 
     const timed = profiles.filter((profile) => profile.preferredPeriod && profile.confidence !== "learning").sort((a, b) => (b.evidence || 0) - (a.evidence || 0))[0];
     if (timed) lines.push(`🕒 “${timed.label}” has been landing best around ${timed.preferredPeriod}.`);
@@ -85,6 +110,8 @@
 
   function nurseryLines(lines) {
     return lines.map((line) => line
+      .replace("You adapted", "You made")
+      .replace("instead of forcing the same plan every day", "so the plan could stay soft enough for you")
       .replace("has been landing best around", "seems happiest around")
       .replace("is looking steadier than it used to", "is getting easier to tuck in")
       .replace("may work better with a gentler version or easier timing", "might like a tinier, softer version")
@@ -117,6 +144,14 @@
     window.location.hash = "growth";
   }
 
+  function shareWeek(modal) {
+    closeModal(modal);
+    if (window.PlushLifeGrowthLoop?.showShareCard) return window.PlushLifeGrowthLoop.showShareCard();
+    const text = "I adapted my week with PlushLife instead of forcing every day to look the same. 💜";
+    if (navigator.share) navigator.share({ title: "My PlushLife week", text }).catch(() => {});
+    else navigator.clipboard?.writeText?.(text).catch(() => {});
+  }
+
   function showWeeklyReflection(now) {
     if (document.getElementById("plushlife-weekly-reflection-ready")) return;
     const nursery = nurseryModeVisible();
@@ -131,10 +166,11 @@
         <button type="button" class="plushlife-weekly-reflection-close" aria-label="Close weekly reflection">×</button>
         <div class="plushlife-weekly-reflection-icon" aria-hidden="true">${nursery ? "🧸" : "💜"}</div>
         <div class="plushlife-weekly-reflection-kicker">${nursery ? "YOUR COZY WEEK" : "YOUR WEEK IS READY"}</div>
-        <h2 id="plushlife-weekly-reflection-title">${nursery ? "Look what your little week taught us" : "Here’s what PlushLife noticed"}</h2>
+        <h2 id="plushlife-weekly-reflection-title">${nursery ? "Look what your little week taught us" : "You adapted instead of giving up"}</h2>
         <div class="plushlife-weekly-reflection-lines">${lines.map((line) => `<div>${line}</div>`).join("")}</div>
-        <p>${nursery ? "No catching up, baby. These are just little clues about what felt easiest and coziest." : "No score. No catching up. These are clues from your own patterns, not rules."}</p>
+        <p>${nursery ? "No catching up, baby. These are just little clues about what felt easiest and coziest." : "No score. No catching up. The useful part is noticing what made your week more doable."}</p>
         <button type="button" class="plushlife-weekly-reflection-open">${nursery ? "See my cozy week" : "See the full week"}</button>
+        <button type="button" class="plushlife-weekly-reflection-share">Share a private-safe win</button>
         <button type="button" class="plushlife-weekly-reflection-later">Not now</button>
       </div>`;
     document.body.appendChild(modal);
@@ -144,6 +180,7 @@
     modal.querySelector(".plushlife-weekly-reflection-close")?.addEventListener("click", close);
     modal.querySelector(".plushlife-weekly-reflection-later")?.addEventListener("click", close);
     modal.querySelector(".plushlife-weekly-reflection-open")?.addEventListener("click", () => openGrowth(modal));
+    modal.querySelector(".plushlife-weekly-reflection-share")?.addEventListener("click", () => shareWeek(modal));
     modal.addEventListener("click", (event) => { if (event.target === modal) close(); });
     modal.addEventListener("keydown", (event) => { if (event.key === "Escape") close(); });
     window.requestAnimationFrame(() => modal.querySelector(".plushlife-weekly-reflection-open")?.focus());
@@ -170,9 +207,9 @@
     .plushlife-weekly-reflection-lines {display:grid;gap:7px;margin:13px 0 0;text-align:left;}
     .plushlife-weekly-reflection-lines > div {padding:9px 10px;border:1px solid #eadff0;border-radius:11px;background:rgba(255,255,255,.74);font-size:11.5px;line-height:1.42;color:#695875;}
     .plushlife-weekly-reflection-card p {margin:11px auto 0;max-width:350px;font-size:11.5px;line-height:1.48;color:#88778f;}
-    .plushlife-weekly-reflection-open,.plushlife-weekly-reflection-later {width:100%;min-height:46px;border-radius:12px;font-weight:900;cursor:pointer;}
-    .plushlife-weekly-reflection-open {margin-top:16px;border:0;background:#a65dc1;color:white;}.plushlife-weekly-reflection-later {margin-top:7px;border:1px solid #dfcbe8;background:transparent;color:#805f90;}
-    html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-card {background:linear-gradient(150deg,#352747,#281e39 72%,#24343a);border-color:#715584;color:#f5edf8;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-card h2 {color:#fff7ff;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-card p {color:#d8cadf;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-lines > div {background:#30243e;border-color:#604b70;color:#e3d7e8;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-close {background:#413052;border-color:#715584;color:#f2c7ff;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-later {border-color:#715584;color:#e7d6ed;}
+    .plushlife-weekly-reflection-open,.plushlife-weekly-reflection-share,.plushlife-weekly-reflection-later {width:100%;min-height:46px;border-radius:12px;font-weight:900;cursor:pointer;}
+    .plushlife-weekly-reflection-open {margin-top:16px;border:0;background:#a65dc1;color:white;}.plushlife-weekly-reflection-share {margin-top:7px;border:1px solid #d8c1e2;background:#fff;color:#805f90}.plushlife-weekly-reflection-later {margin-top:7px;border:1px solid #dfcbe8;background:transparent;color:#805f90;}
+    html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-card {background:linear-gradient(150deg,#352747,#281e39 72%,#24343a);border-color:#715584;color:#f5edf8;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-card h2 {color:#fff7ff;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-card p {color:#d8cadf;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-lines > div {background:#30243e;border-color:#604b70;color:#e3d7e8;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-close {background:#413052;border-color:#715584;color:#f2c7ff;}html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-share,html[data-plushlife-color-mode="dark"] .plushlife-weekly-reflection-later {background:#30243e;border-color:#715584;color:#e7d6ed;}
     @media (max-width:420px) {.plushlife-weekly-reflection-card {width:calc(100vw - 28px);padding:22px 16px 16px;border-radius:20px;}.plushlife-weekly-reflection-card h2 {font-size:20px;}}
     @media (max-height:520px) and (orientation:landscape){.plushlife-weekly-reflection-card{max-height:calc(100dvh - 24px);padding-top:18px}.plushlife-weekly-reflection-icon{display:none}}
     @media (prefers-reduced-motion:reduce) {#plushlife-weekly-reflection-ready * {scroll-behavior:auto!important;transition:none!important;}}
