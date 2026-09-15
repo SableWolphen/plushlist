@@ -8,15 +8,35 @@ This is the ready-to-paste default English store listing for `com.PlushLife`.
 
 ## Short description
 
-**Gentle habit tracker for self-care, routines, tasks, and lower-energy days.**
+**A gentle habit tracker that adapts to the kind of day you’re actually having.**
 
 ## Full description
 
-PlushLife is a gentle, adaptive habit tracker for building routines, caring for yourself, and getting through real life without turning every day into a streak contest.
+PlushLife is a gentle, adaptive habit tracker for people whose energy, focus, and capacity do not look the same every day.
 
-Some days have plenty of energy. Some days do not. PlushLife lets your routine meet you where you are, with Full, Soft, Tiny, Recovery, and Rest days that help you keep moving without pretending every day should look the same.
+Instead of asking you to force the same routine no matter how you feel, PlushLife helps you choose the kind of day you are actually having and gives you one manageable Next Step.
 
-BUILD ROUTINES THAT FIT REAL LIFE
+Some days are Full. Some are Soft. Some need to be Tiny. Recovery and Rest count too.
+
+START WITH THE DAY YOU ACTUALLY HAVE
+
+Choose Full, Soft, or Tiny when you open PlushLife. The app can make the plan gentler immediately and point you toward one useful next step instead of a wall of tasks.
+
+• Full Day keeps your whole routine available.
+• Soft Day uses gentler versions and narrows the next step.
+• Tiny Day keeps the smallest meaningful actions visible.
+• Recovery Day focuses on rebuilding without catching up.
+• Rest Day pauses expectations without erasing progress.
+
+ONE NEXT STEP INSTEAD OF A WALL OF TASKS
+
+When a long list feels like too much, PlushLife can surface one useful Next Step. Suggestions can consider your day type, energy, timing, task length, low-capacity essentials, and patterns learned through normal use.
+
+PlushLife also explains why a step was suggested, so the adaptive behavior feels understandable instead of random.
+
+You stay in control. Make a suggestion easier, pick another task, hide it for the day, use Focus mode, or switch to a gentler day at any time.
+
+BUILD ROUTINES THAT BEND INSTEAD OF BREAKING
 
 • Create daily habits, recurring routines, one-time tasks, and personal care steps.
 • Organize tasks into the parts of your day that make sense to you.
@@ -25,23 +45,13 @@ BUILD ROUTINES THAT FIT REAL LIFE
 • Use natural-language scheduling for entries such as “weekdays at 8 PM” or “Tuesday and Friday.”
 • Start quickly with editable routine starter packs or import an existing task list.
 
-ONE NEXT STEP INSTEAD OF A WALL OF TASKS
-
-When a long list feels like too much, PlushLife can surface one useful Next Step. Suggestions can consider your day type, energy, timing, task length, low-capacity essentials, and the patterns you build through normal use.
-
-You stay in control. You can make a suggestion easier, pick another task, hide it for the day, use Focus mode, or switch to a gentler day at any time.
-
-SELF-CARE WITHOUT GUILT
+PROGRESS WITHOUT PUNISHMENT
 
 PlushLife is designed around consistency that can bend instead of breaking.
 
-• Full Day keeps your whole routine available.
-• Soft Day uses gentler versions and helps narrow the next step.
-• Tiny Day keeps the smallest meaningful actions visible.
-• Recovery Day focuses on what helps you rebuild.
-• Rest Day pauses expectations without erasing your progress.
+Missing a day does not create a backlog. Rest does not erase progress. Returning counts.
 
-If you come back after missing days, there is no backlog to punish you with. PlushLife focuses on today and helps you restart from where you actually are.
+After a completed step, PlushLife can ask whether it felt manageable. If it was too much, the next step can become smaller without taking away the progress you already made.
 
 MOOD, ENERGY, AND CAPACITY CHECK-INS
 
@@ -49,19 +59,19 @@ Use optional check-ins to record how the day feels and how much capacity you hav
 
 Your check-ins are not grades. They are context.
 
-SEE PROGRESS WITHOUT MAKING LIFE A SCORE
+WEEKLY REFLECTIONS THAT REWARD ADAPTING
 
-PlushGrowth turns your history into a calmer view of what is helping.
+PlushGrowth focuses on what helped rather than grading your week.
 
-• See completed care and habit activity over time.
+• Notice when you adapted the plan instead of abandoning it.
 • Review weekly patterns and personal takeaways.
-• Notice when certain times, routines, or gentler versions work better.
+• See when certain times, routines, or gentler versions work better.
 • Set one weekly intention without creating another checklist.
-• Keep completed tasks out of the way while still being able to undo mistakes.
+• Share a privacy-safe weekly win without including task names or private check-in details.
 
 TOOLS FOR OVERWHELMED DAYS
 
-PlushLife includes quick support for moments when the normal plan is too much. You can reduce the day, choose essentials only, open Care tools, or ask PlushLife what to do next.
+PlushLife includes quick support for moments when the normal plan is too much. Reduce the day, choose essentials only, open Care tools, or ask PlushLife what to do next.
 
 A simpler Home option can reduce visual decisions and optional extras while keeping your tasks and progress intact.
 
@@ -83,29 +93,38 @@ Choose larger text, reduced motion, higher contrast, simpler layouts, colorblind
 
 START SMALL
 
-You do not need to configure everything before PlushLife becomes useful. Add one habit, check in with your day, or choose one useful task. The app can unfold gradually as you use it.
+You do not need to configure everything before PlushLife becomes useful. Pick the kind of day you are having, do one manageable step, and let the app unfold gradually as you use it.
 
 PlushLife combines a habit tracker, routine tracker, self-care tracker, task manager, gentle reminders, mood and energy check-ins, and adaptive daily planning in one calmer place.
 
-Build habits when you can. Make them smaller when you need to. Rest when rest is the plan.
+**Work with the energy you have today, not against it.**
 
 ## Screenshot sequence
 
-Use the first three screenshots for the strongest conversion story:
+The first three screenshots should tell a problem → adaptation → success story rather than list features.
 
-1. **“Know what to do next”** — PlushHome with the Next Step card and today progress visible.
-2. **“Your routine can bend with your day”** — Soft/Tiny day with gentler task labels and the day-mode explanation.
-3. **“See patterns, not pressure”** — PlushGrowth showing a weekly takeaway or progress story.
-4. **“Check in with how today actually feels”** — mood/energy check-in.
-5. **“Help when the normal plan is too much”** — Care/Rescue experience.
-6. **“Your habits on your wrist and home screen”** — Android widget and Amazfit companion if the current release includes them.
+1. **“Too overwhelmed for your whole routine?”** — show a busy-looking normal day before the capacity choice.
+2. **“Make today Tiny.”** — show Full / Soft / Tiny with Tiny selected and the plan reduced immediately.
+3. **“Get one doable Next Step.”** — show the Next Step card plus its short “Why this” explanation.
+4. **“Keep progress without punishment.”** — show a completed Tiny/Soft-day win and the manageable feedback prompt.
+5. **“See how you adapted this week.”** — show the weekly reflection with a line such as “You adapted 4 days instead of giving up.”
+6. **“Share the win, keep the private stuff private.”** — show the privacy-safe weekly share card with only Full / Soft / Tiny totals.
+7. **“Help when the normal plan is too much.”** — show Care/Rescue.
+8. **“Your habits on your wrist and home screen.”** — Android widget and Amazfit companion if the current release includes them.
 
-Keep each overlay to one short benefit-led sentence. Avoid tiny feature lists in the artwork.
+Keep each screenshot overlay to one short benefit-led sentence. Do not put task names, private journal text, email addresses, or health-sensitive check-in details in marketing artwork.
 
 ## Store experiment order
 
-Test the first three screenshots first, then the short description. Keep the title stable while measuring screenshot conversion so the experiments remain interpretable.
+1. Test screenshots 1–3 as a set against the current first three screenshots.
+2. Test the short description after the screenshot winner is known.
+3. Test the screenshot 1 headline separately: “Too overwhelmed for your whole routine?” vs. “Your routine should fit your day.”
+4. Keep the title stable while measuring screenshot and short-description conversion so the experiments remain interpretable.
+
+## Positioning guardrail
+
+Lead with **adaptive habit tracker**, variable daily capacity, and one manageable Next Step. PlushLife can support self-care and difficult days, but store copy should not claim to diagnose, treat, cure, or prevent a medical or mental-health condition.
 
 ## Notes
 
-The listing intentionally uses the exact phrase **habit tracker** naturally in the title, short description, and full description while preserving PlushLife’s self-care positioning. The copy is sectioned and scannable rather than presented as one large paragraph.
+The listing intentionally uses **habit tracker** naturally in the title, short description, and full description while keeping PlushLife’s gentler self-care positioning. The copy is designed to make the difference understandable within the first few seconds of the listing.
