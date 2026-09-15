@@ -1,12 +1,8 @@
 name: Build signed Android App Bundle
 
-# Manual only — this never runs on a push. It builds app-release.aab and
-# always uploads it as a workflow artifact for you to download yourself.
-#
-# It will ALSO publish straight to Google Play if (and only if) the
-# PLAY_SERVICE_ACCOUNT_JSON secret is set — see docs/google-play-auto-publish.md
-# for how to create that service account. Without the secret, this workflow
-# behaves exactly as before: a downloadable .aab and nothing else.
+# Manual release workflow. The dedicated release branch below is a one-time
+# production trigger so the exact main build that passed closed testing can be
+# promoted without changing the normal main-branch publishing behavior.
 on:
   workflow_dispatch:
     inputs:
@@ -28,6 +24,9 @@ on:
           - alpha
           - beta
           - production
+  push:
+    branches:
+      - release-production-1-3-247
 
 permissions:
   contents: read
@@ -37,6 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HAS_PLAY_SECRET: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
+      RELEASE_VERSION_CODE: ${{ github.event_name == 'push' && '547' || inputs.versionCode }}
+      RELEASE_VERSION_NAME: ${{ github.event_name == 'push' && '1.3.247' || inputs.versionName }}
+      RELEASE_TRACK: ${{ github.event_name == 'push' && 'production' || inputs.track }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -72,8 +74,8 @@ jobs:
       - name: Set release version
         working-directory: android/app
         run: |
-          sed -i "s/versionCode 1/versionCode ${{ inputs.versionCode }}/" build.gradle
-          sed -i 's/versionName "1.0"/versionName "${{ inputs.versionName }}"/' build.gradle
+          sed -i "s/versionCode 1/versionCode ${RELEASE_VERSION_CODE}/" build.gradle
+          sed -i "s/versionName \"1.0\"/versionName \"${RELEASE_VERSION_NAME}\"/" build.gradle
 
       - name: Decode signing keystore
         run: |
@@ -121,7 +123,7 @@ jobs:
             --ks-pass=pass:"${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
             --key-pass=pass:"${{ secrets.ANDROID_KEY_PASSWORD }}"
           unzip -o app-release.apks -d app-release-apks
-          mv app-release-apks/universal.apk app-release-${{ inputs.versionCode }}.apk
+          mv app-release-apks/universal.apk app-release-${RELEASE_VERSION_CODE}.apk
 
       - name: Remove decoded keystore
         if: always()
@@ -130,20 +132,20 @@ jobs:
       - name: SHA-256 of the AAB and APK
         run: |
           sha256sum android/app/build/outputs/bundle/release/app-release.aab
-          sha256sum app-release-${{ inputs.versionCode }}.apk
+          sha256sum app-release-${RELEASE_VERSION_CODE}.apk
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-${{ inputs.versionCode }}
+          name: app-release-${{ env.RELEASE_VERSION_CODE }}
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
       - name: Upload universal APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-${{ inputs.versionCode }}-apk
-          path: app-release-${{ inputs.versionCode }}.apk
+          name: app-release-${{ env.RELEASE_VERSION_CODE }}-apk
+          path: app-release-${{ env.RELEASE_VERSION_CODE }}.apk
           retention-days: 30
 
       - name: Publish to Google Play
@@ -153,5 +155,5 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.PlushLife
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
-          track: ${{ inputs.track }}
+          track: ${{ env.RELEASE_TRACK }}
           status: completed
