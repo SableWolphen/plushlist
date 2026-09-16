@@ -1,14 +1,14 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { newestUpdates } from "../_shared/whats-new.ts";
+import { updatesForReturn } from "../_shared/whats-new.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const EMAIL_FROM = Deno.env.get("PLUSHLIFE_EMAIL_FROM") || "";
 const EMAIL_REPLY_TO = Deno.env.get("PLUSHLIFE_EMAIL_REPLY_TO") || "plushlife.app@gmail.com";
-const APP_URL = Deno.env.get("PLUSHLIFE_APP_URL") || "https://sablewolphen.github.io/plushlist/";
-const CRON_SECRET = Deno.env.get("COMEBACK_EMAIL_CRON_SECRET") || "";
-const UNSUBSCRIBE_SECRET = Deno.env.get("COMEBACK_UNSUBSCRIBE_SECRET") || "";
+const APP_URL = Deno.env.get("PLUSHLIFE_APP_URL") || "https://sablewolphen.github.io/plushlist/?source=comeback-email";
+const CRON_SECRET = Deno.env.get("COMEBACK_EMAIL_CRON_SECRET") || Deno.env.get("CRON_SECRET") || "";
+const UNSUBSCRIBE_SECRET = Deno.env.get("COMEBACK_UNSUBSCRIBE_SECRET") || Deno.env.get("CRON_SECRET") || "";
 
 if (!SUPABASE_URL || !SERVICE_ROLE_KEY) throw new Error("Supabase service credentials are missing.");
 
@@ -48,20 +48,14 @@ async function signUnsubscribe(userId: string) {
   return toBase64Url(new Uint8Array(signature));
 }
 
-async function latestActivity(user: any) {
-  const candidates = [user.last_sign_in_at, user.updated_at, user.created_at]
-    .filter(Boolean)
-    .map((value) => new Date(value).getTime())
-    .filter(Number.isFinite);
-
-  const [progress, checkIn] = await Promise.all([
-    admin.from("daily_progress").select("updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(1).maybeSingle(),
-    admin.from("daily_check_ins").select("updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(1).maybeSingle(),
-  ]);
-
-  if (progress.data?.updated_at) candidates.push(new Date(progress.data.updated_at).getTime());
-  if (checkIn.data?.updated_at) candidates.push(new Date(checkIn.data.updated_at).getTime());
-  return new Date(Math.max(...candidates)).toISOString();
+async function lastVisitForUser(user: any) {
+  const { data, error } = await admin.from("user_achievements")
+    .select("last_visit_date")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (error) throw error;
+  const fallback = user.last_sign_in_at || user.created_at;
+  return String(data?.last_visit_date || fallback || "");
 }
 
 function pickStage(daysAway: number) {
@@ -86,13 +80,17 @@ function ctaFor(stage: string) {
   return stage === "10d" ? "Come back Tiny" : "Check in today";
 }
 
-function renderEmail(stage: string, unsubscribeUrl: string) {
-  const updates = newestUpdates(3);
+function renderEmail(stage: string, lastVisit: string, unsubscribeUrl: string) {
+  const updates = updatesForReturn(lastVisit, 3);
   const cards = updates.map((update) => `
     <div style="margin:12px 0;padding:14px 16px;border:1px solid #eadff0;border-radius:14px;background:#fffafd">
       <div style="font-weight:800;color:#6d4a7c">${escapeHtml(update.title)}</div>
       <div style="margin-top:5px;color:#6f6276;line-height:1.55">${escapeHtml(update.summary)}</div>
     </div>`).join("");
+
+  const unsubscribe = unsubscribeUrl
+    ? `<a href="${escapeHtml(unsubscribeUrl)}" style="color:#8a5a9d">Stop comeback emails</a>.`
+    : "";
 
   return `<!doctype html>
   <html><body style="margin:0;background:#f8f4fa;font-family:Arial,Helvetica,sans-serif;color:#574b5d">
@@ -107,14 +105,39 @@ function renderEmail(stage: string, unsubscribeUrl: string) {
         <a href="${escapeHtml(APP_URL)}" style="display:inline-block;margin-top:4px;padding:13px 18px;border-radius:12px;background:#9d5db8;color:#fff;text-decoration:none;font-weight:800">${escapeHtml(ctaFor(stage))} →</a>
         <p style="margin:20px 0 0;font-size:13px;line-height:1.55;color:#7d7083">Your plan is still there. You do not have to restart anything.</p>
         <hr style="border:0;border-top:1px solid #eee4f2;margin:24px 0 14px">
-        <p style="margin:0;font-size:11px;line-height:1.5;color:#9a8ca0">You received this because you created a PlushLife account. ${unsubscribeUrl ? `<a href="${escapeHtml(unsubscribeUrl)}" style="color:#8a5a9d">Stop comeback emails</a>.` : ""}</p>
+        <p style="margin:0;font-size:11px;line-height:1.5;color:#9a8ca0">You received this because you created a PlushLife account. ${unsubscribe}</p>
       </div>
     </div>
   </body></html>`;
 }
 
-async function sendViaResend(to: string, stage: string, unsubscribeUrl: string) {
-  if (!RESEND_API_KEY || !EMAIL_FROM) throw new Error("RESEND_API_KEY or PLUSHLIFE_EMAIL_FROM is missing.");
+function renderText(stage: string, lastVisit: string, unsubscribeUrl: string) {
+  const updates = updatesForReturn(lastVisit, 3)
+    .map((update) => `• ${update.title}: ${update.summary}`)
+    .join("\n");
+  return [
+    "PlushLife",
+    "",
+    introFor(stage),
+    "",
+    "What got better:",
+    updates,
+    "",
+    "Your comeback can be one small thing. Full, Soft, Tiny, or just opening the app all count as showing up.",
+    "",
+    `${ctaFor(stage)}: ${APP_URL}`,
+    "",
+    "Your plan is still there. You do not have to restart anything.",
+    unsubscribeUrl ? `Stop comeback emails: ${unsubscribeUrl}` : "",
+  ].filter(Boolean).join("\n");
+}
+
+async function sendViaResend(to: string, stage: string, lastVisit: string, unsubscribeUrl: string) {
+  const headers: Record<string, string> = {};
+  if (unsubscribeUrl) {
+    headers["List-Unsubscribe"] = `<${unsubscribeUrl}>`;
+    headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click";
+  }
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
@@ -123,7 +146,9 @@ async function sendViaResend(to: string, stage: string, unsubscribeUrl: string) 
       to: [to],
       reply_to: EMAIL_REPLY_TO,
       subject: subjectFor(stage),
-      html: renderEmail(stage, unsubscribeUrl),
+      html: renderEmail(stage, lastVisit, unsubscribeUrl),
+      text: renderText(stage, lastVisit, unsubscribeUrl),
+      headers,
     }),
   });
   if (!response.ok) throw new Error(`Resend ${response.status}: ${await response.text()}`);
@@ -133,6 +158,10 @@ async function sendViaResend(to: string, stage: string, unsubscribeUrl: string) 
 Deno.serve(async (request) => {
   if (request.method !== "POST") return json({ error: "POST required" }, 405);
   if (!CRON_SECRET || request.headers.get("x-cron-secret") !== CRON_SECRET) return json({ error: "Unauthorized" }, 401);
+
+  if (!RESEND_API_KEY || !EMAIL_FROM) {
+    return json({ ok: true, configured: false, processed: 0, message: "Comeback email provider is not configured yet." });
+  }
 
   const dryRun = new URL(request.url).searchParams.get("dry_run") === "1";
   const now = Date.now();
@@ -150,13 +179,15 @@ Deno.serve(async (request) => {
         if (!user.email || !user.email_confirmed_at) continue;
         if (user.app_metadata?.comeback_email_opt_out === true) continue;
 
-        const activeAt = await latestActivity(user);
-        const daysAway = Math.floor((now - new Date(activeAt).getTime()) / DAY_MS);
+        const lastVisit = await lastVisitForUser(user);
+        const lastVisitMs = new Date(lastVisit).getTime();
+        if (!Number.isFinite(lastVisitMs)) continue;
+        const daysAway = Math.floor((now - lastVisitMs) / DAY_MS);
         const stage = pickStage(daysAway);
         if (!stage) continue;
 
         const state = user.app_metadata?.comeback_email_state || {};
-        const activityKey = activeAt.slice(0, 19);
+        const activityKey = String(lastVisit).slice(0, 10);
         const alreadySent = state?.activity_key === activityKey && state?.[`sent_${stage}`];
         if (alreadySent) continue;
 
@@ -166,7 +197,7 @@ Deno.serve(async (request) => {
           : "";
 
         if (!dryRun) {
-          const sent = await sendViaResend(user.email, stage, unsubscribeUrl);
+          const sent = await sendViaResend(user.email, stage, lastVisit, unsubscribeUrl);
           const nextState = {
             ...(state || {}),
             activity_key: activityKey,
@@ -188,5 +219,5 @@ Deno.serve(async (request) => {
     page += 1;
   }
 
-  return json({ ok: true, dry_run: dryRun, processed: results.length, results });
+  return json({ ok: true, configured: true, dry_run: dryRun, processed: results.length, results });
 });
