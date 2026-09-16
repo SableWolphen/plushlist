@@ -4,7 +4,7 @@ import { updatesForReturn } from "../_shared/whats-new.ts";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
-const EMAIL_FROM = Deno.env.get("PLUSHLIFE_EMAIL_FROM") || "";
+const EMAIL_FROM = Deno.env.get("PLUSHLIFE_EMAIL_FROM") || "PlushLife <onboarding@resend.dev>";
 const EMAIL_REPLY_TO = Deno.env.get("PLUSHLIFE_EMAIL_REPLY_TO") || "plushlife.app@gmail.com";
 const APP_URL = Deno.env.get("PLUSHLIFE_APP_URL") || "https://play.google.com/store/apps/details?id=com.PlushLife&utm_source=comeback_email&utm_medium=email&utm_campaign=gentle_return";
 const CRON_SECRET = Deno.env.get("COMEBACK_EMAIL_CRON_SECRET") || Deno.env.get("CRON_SECRET") || "";
@@ -26,7 +26,7 @@ function json(body: unknown, status = 200) {
 }
 
 function escapeHtml(value: string) {
-  return value.replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char] || char));
+  return value.replace(/[&<>'\"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '\"': "&quot;" }[char] || char));
 }
 
 function toBase64Url(bytes: Uint8Array) {
