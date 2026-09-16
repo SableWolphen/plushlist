@@ -5,10 +5,12 @@
     root.PlushLifeBilling = api;
     if (root.document && !root.__plushlifeCheckinThemeLoading) {
       root.__plushlifeCheckinThemeLoading = true;
-      const script = root.document.createElement("script");
-      script.src = "./assets/checkin-theme.js";
-      script.defer = true;
-      root.document.head.appendChild(script);
+      ["./assets/checkin-theme.js", "./assets/checkin-theme-mode.js"].forEach((src) => {
+        const script = root.document.createElement("script");
+        script.src = src;
+        script.defer = true;
+        root.document.head.appendChild(script);
+      });
     }
   }
 })(typeof window !== "undefined" ? window : globalThis, function () {
