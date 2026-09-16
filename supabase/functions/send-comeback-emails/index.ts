@@ -3,7 +3,7 @@ import { updatesForReturn } from "../_shared/whats-new.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
+const ENV_RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const EMAIL_FROM = Deno.env.get("PLUSHLIFE_EMAIL_FROM") || "PlushLife <onboarding@resend.dev>";
 const EMAIL_REPLY_TO = Deno.env.get("PLUSHLIFE_EMAIL_REPLY_TO") || "plushlife.app@gmail.com";
 const APP_URL = Deno.env.get("PLUSHLIFE_APP_URL") || "https://play.google.com/store/apps/details?id=com.PlushLife&utm_source=comeback_email&utm_medium=email&utm_campaign=gentle_return";
@@ -26,7 +26,14 @@ function json(body: unknown, status = 200) {
 }
 
 function escapeHtml(value: string) {
-  return value.replace(/[&<>'\"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '\"': "&quot;" }[char] || char));
+  return value.replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char] || char));
+}
+
+async function getResendApiKey() {
+  if (ENV_RESEND_API_KEY) return ENV_RESEND_API_KEY;
+  const { data, error } = await admin.rpc("plushlife_get_resend_api_key");
+  if (error) throw new Error(`Unable to read Resend key: ${error.message}`);
+  return String(data || "");
 }
 
 function toBase64Url(bytes: Uint8Array) {
@@ -137,7 +144,7 @@ function renderText(stage: string, lastVisit: string, unsubscribeUrl: string) {
   ].filter(Boolean).join("\n");
 }
 
-async function sendViaResend(to: string, stage: string, lastVisit: string, unsubscribeUrl: string) {
+async function sendViaResend(apiKey: string, to: string, stage: string, lastVisit: string, unsubscribeUrl: string) {
   const headers: Record<string, string> = {};
   if (unsubscribeUrl) {
     headers["List-Unsubscribe"] = `<${unsubscribeUrl}>`;
@@ -145,7 +152,7 @@ async function sendViaResend(to: string, stage: string, lastVisit: string, unsub
   }
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
-    headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+    headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       from: EMAIL_FROM,
       to: [to],
@@ -164,7 +171,14 @@ Deno.serve(async (request) => {
   if (request.method !== "POST") return json({ error: "POST required" }, 405);
   if (!CRON_SECRET || request.headers.get("x-cron-secret") !== CRON_SECRET) return json({ error: "Unauthorized" }, 401);
 
-  if (!RESEND_API_KEY || !EMAIL_FROM) {
+  let resendApiKey = "";
+  try {
+    resendApiKey = await getResendApiKey();
+  } catch (error) {
+    return json({ ok: false, configured: false, processed: 0, error: String(error?.message || error) }, 500);
+  }
+
+  if (!resendApiKey || !EMAIL_FROM) {
     return json({ ok: true, configured: false, processed: 0, message: "Comeback email provider is not configured yet." });
   }
 
@@ -202,7 +216,7 @@ Deno.serve(async (request) => {
           : "";
 
         if (!dryRun) {
-          const sent = await sendViaResend(user.email, stage, lastVisit, unsubscribeUrl);
+          const sent = await sendViaResend(resendApiKey, user.email, stage, lastVisit, unsubscribeUrl);
           const nextState = {
             ...(state || {}),
             activity_key: activityKey,
