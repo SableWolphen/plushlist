@@ -22,6 +22,7 @@
     load("__plushlifeLandingMobileAuthLoading", "./assets/landing-mobile-auth.js");
     load("__plushlifeGrowthLoopLoading", "./assets/growth-loop.js");
     load("__plushlifeAdaptiveHabitsPolishLoading", "./assets/adaptive-habits-polish.js");
+    load("__plushlifeComebackReminderLoading", "./assets/comeback-reminder.js");
   }
 })(typeof window !== "undefined" ? window : globalThis, function () {
   const PLUSH_PLANS = { FREE: "free", PLUSHPLUS: "plushplus", PLUSHFAMILY: "plushfamily" };
