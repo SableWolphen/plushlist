@@ -6,7 +6,7 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const EMAIL_FROM = Deno.env.get("PLUSHLIFE_EMAIL_FROM") || "";
 const EMAIL_REPLY_TO = Deno.env.get("PLUSHLIFE_EMAIL_REPLY_TO") || "plushlife.app@gmail.com";
-const APP_URL = Deno.env.get("PLUSHLIFE_APP_URL") || "https://sablewolphen.github.io/plushlist/?source=comeback-email";
+const APP_URL = Deno.env.get("PLUSHLIFE_APP_URL") || "https://play.google.com/store/apps/details?id=com.PlushLife&utm_source=comeback_email&utm_medium=email&utm_campaign=gentle_return";
 const CRON_SECRET = Deno.env.get("COMEBACK_EMAIL_CRON_SECRET") || Deno.env.get("CRON_SECRET") || "";
 const UNSUBSCRIBE_SECRET = Deno.env.get("COMEBACK_UNSUBSCRIBE_SECRET") || Deno.env.get("CRON_SECRET") || "";
 
@@ -49,13 +49,18 @@ async function signUnsubscribe(userId: string) {
 }
 
 async function lastVisitForUser(user: any) {
-  const { data, error } = await admin.from("user_achievements")
+  const { data: presence } = await admin.from("user_presence")
+    .select("last_active_at")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (presence?.last_active_at) return String(presence.last_active_at);
+
+  const { data: achievement } = await admin.from("user_achievements")
     .select("last_visit_date")
     .eq("user_id", user.id)
     .maybeSingle();
-  if (error) throw error;
   const fallback = user.last_sign_in_at || user.created_at;
-  return String(data?.last_visit_date || fallback || "");
+  return String(achievement?.last_visit_date || fallback || "");
 }
 
 function pickStage(daysAway: number) {
@@ -187,7 +192,7 @@ Deno.serve(async (request) => {
         if (!stage) continue;
 
         const state = user.app_metadata?.comeback_email_state || {};
-        const activityKey = String(lastVisit).slice(0, 10);
+        const activityKey = String(lastVisit);
         const alreadySent = state?.activity_key === activityKey && state?.[`sent_${stage}`];
         if (alreadySent) continue;
 
