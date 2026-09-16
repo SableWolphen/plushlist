@@ -11,8 +11,26 @@
 // global.
 import { ToolPanel } from "./shared.jsx";
 
+const OVERALL_ONBOARDING_STAGES = ["Profile & welcome", "Setup choices", "Starting point", "Goals & support", "Preferences", "Ready to begin"];
+const COZY_ONBOARDING_STAGES = ["Choose setup", "Comfort detail", "Starting point", "Goals & support", "Preferences", "Ready to begin"];
+const GUARDIAN_ONBOARDING_STAGES = ["Choose setup", "Add Guardian", "Comfort detail", "Starting point", "Goals & support", "Ready to begin"];
+
+function biggestDropoff(rows = [], labels = []) {
+  return rows.reduce((best, row) => {
+    const count = Number(row?.abandoned_here || 0);
+    if (!count || (best && best.count >= count)) return best;
+    const index = Math.max(0, Number(row?.step || 1) - 1);
+    return { count, label: labels[index] || `Step ${row?.step || "?"}` };
+  }, null);
+}
+
 export function AdminPanel({ open, onClose, loadAdminData, adminMessage, adminStats, adminOnline, adminFunnel, SUPPORTER_FEATURES_ENABLED, supporterEmailDraft, setSupporterEmailDraft, setSupporterStatus, supporterGrantMessage, reviewAccountRole, setReviewAccountRole, reviewAccountEmail, setReviewAccountEmail, reviewAccountPassword, setReviewAccountPassword, createOrUpdateReviewAccount, reviewAccountMessage, adminFeedback, resolveFeedback, adminErrors, clearAllErrors, devPreviewPlan, setDevPreviewPlan }) {
   if (!open) return null;
+  const funnelStarted = Number(adminFunnel?.started || 0);
+  const funnelCompleted = Number(adminFunnel?.completed || 0);
+  const funnelCompletionPct = funnelStarted ? Math.round((funnelCompleted / funnelStarted) * 100) : 0;
+  const funnelBiggestDropoff = biggestDropoff(adminFunnel?.by_step || [], OVERALL_ONBOARDING_STAGES);
+
   return (
           <ToolPanel title="🛠️ Admin" onClose={onClose}>
           <div style={{ marginBottom: 14 }}>
@@ -75,66 +93,106 @@ export function AdminPanel({ open, onClose, loadAdminData, adminMessage, adminSt
 
           {adminFunnel && (
             <div style={{ marginBottom: 16, padding: 16, borderRadius: 16, background: "rgba(255,255,255,0.82)", border: "1px solid #F0D5DB" }}>
-              <div style={{ fontSize: 12, fontWeight: 900, color: "#4C8FE8" }}>🚦 ONBOARDING FUNNEL</div>
-              <div style={{ marginTop: 4, fontSize: 10.5, color: "#8C6B9E", lineHeight: 1.45 }}>Separates Cozy and Guardian onboarding, distinguishes people who came back later, and only calls someone abandoned after 24 hours without finishing.</div>
-              <div style={{ marginTop: 8, padding: "8px 10px", borderRadius: 10, background: "#F7FBFF", border: "1px solid #DCEEFF", fontSize: 10.5, color: "#6B5A7D", lineHeight: 1.55 }}>
-                <b>{adminFunnel.started || 0}</b> tracked starters · <b>{adminFunnel.completed || 0}</b> finished · <b>{adminFunnel.returned_later || 0}</b> returned later · <b>{adminFunnel.abandoned || 0}</b> abandoned · <b>{adminFunnel.recent_unfinished || 0}</b> still recent
-              </div>
-              <div style={{ display: "grid", gap: 9, marginTop: 10 }}>
-                {(adminFunnel.by_step || []).map((row) => {
-                  const started = adminFunnel.started || 1;
-                  const pct = Math.round((row.reached / started) * 100);
-                  const abandonedHere = Number(row.abandoned_here || 0);
-                  const recentHere = Number(row.recent_here || 0);
-                  const stageNames = ["Profile & welcome", "Setup choices", "Starting point", "Goals & support", "Preferences", "Ready to begin"];
-                  const stageName = stageNames[Math.max(0, Number(row.step || 1) - 1)] || `Stage ${row.step}`;
-                  return (
-                    <div key={row.step}>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#6B5A7D", marginBottom: 3, gap: 8 }}>
-                        <span><b>{stageName}</b> <span style={{ fontSize: 9.5, color: "#9A86A7" }}>· Step {row.step}</span></span>
-                        <span>{row.reached} reached · {pct}%</span>
-                      </div>
-                      <div style={{ height: 8, borderRadius: 5, background: "#EAF4FF", overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${pct}%`, background: "#4C8FE8", borderRadius: 5 }} />
-                      </div>
-                      <div style={{ marginTop: 3, fontSize: 9.8, color: abandonedHere > 0 ? "#B06A7A" : recentHere > 0 ? "#A37A27" : "#7B9B8F" }}>
-                        {abandonedHere > 0 ? `${abandonedHere} abandoned here` : recentHere > 0 ? `${recentHere} currently paused here (under 24h)` : "No current stop here"}
-                      </div>
-                    </div>
-                  );
-                })}
-                <div style={{ marginTop: 4, paddingTop: 8, borderTop: "1px solid #EAF4FF", display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#318C79" }}>✓ Completed</span>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#318C79" }}>{adminFunnel.completed} / {adminFunnel.started} ({adminFunnel.started ? Math.round((adminFunnel.completed / adminFunnel.started) * 100) : 0}%)</span>
-                </div>
+              <div style={{ fontSize: 12, fontWeight: 900, color: "#4C8FE8" }}>🚦 ONBOARDING</div>
+              <div style={{ marginTop: 4, fontSize: 11, color: "#8C6B9E", lineHeight: 1.5 }}>This shows how many people make it through setup and exactly where people stop. Someone only counts as dropped after they have been gone for at least 24 hours.</div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 8, marginTop: 11 }}>
+                {[
+                  ["Started", funnelStarted, "Opened onboarding", "#4C8FE8", "#F2F7FF"],
+                  ["Finished", funnelCompleted, `${funnelCompletionPct}% completion rate`, "#318C79", "#F1FFF9"],
+                  ["Dropped", Number(adminFunnel.abandoned || 0), "Gone 24h+ without finishing", "#B06A7A", "#FFF5F7"],
+                  ["Came back", Number(adminFunnel.returned_later || 0), "Left, then returned later", "#8E4EAA", "#FCF7FE"],
+                ].map(([label, value, note, color, background]) => (
+                  <div key={label} style={{ padding: "10px 11px", borderRadius: 12, background, border: `1px solid ${color}2A` }}>
+                    <div style={{ fontSize: 19, lineHeight: 1, fontWeight: 900, color }}>{value}</div>
+                    <div style={{ marginTop: 5, fontSize: 10.8, fontWeight: 900, color: "#5B4B6B" }}>{label}</div>
+                    <div style={{ marginTop: 2, fontSize: 9.5, lineHeight: 1.35, color: "#8C6B9E" }}>{note}</div>
+                  </div>
+                ))}
               </div>
 
-              <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #E6D4F2", display: "grid", gap: 10 }}>
-                {(adminFunnel.by_mode || []).filter((mode) => Number(mode.started || 0) > 0).map((mode) => {
-                  const modeStarted = Number(mode.started || 0);
-                  const modePct = modeStarted ? Math.round((Number(mode.completed || 0) / modeStarted) * 100) : 0;
-                  const guardian = mode.mode === "guardian";
-                  const labels = guardian
-                    ? ["Choose setup", "Add Guardian", "Comfort detail", "Starting point", "Goals & support", "Ready to begin"]
-                    : ["Choose setup", "Comfort detail", "Starting point", "Goals & support", "Preferences", "Ready to begin"];
+              {Number(adminFunnel.recent_unfinished || 0) > 0 && (
+                <div style={{ marginTop: 8, padding: "8px 10px", borderRadius: 10, background: "#FFF9E9", border: "1px solid #F0D99E", color: "#7A653C", fontSize: 10.5, lineHeight: 1.4 }}>
+                  ⏳ <b>{adminFunnel.recent_unfinished}</b> {Number(adminFunnel.recent_unfinished) === 1 ? "person is" : "people are"} still in the first 24 hours, so {Number(adminFunnel.recent_unfinished) === 1 ? "they are" : "they are"} not counted as dropped yet.
+                </div>
+              )}
+
+              {funnelBiggestDropoff && (
+                <div style={{ marginTop: 8, padding: "9px 10px", borderRadius: 11, background: "#FFF5F7", border: "1px solid #F1D1D9", color: "#76505B", fontSize: 10.8, lineHeight: 1.4 }}>
+                  <b>Biggest drop-off:</b> {funnelBiggestDropoff.label} — {funnelBiggestDropoff.count} {funnelBiggestDropoff.count === 1 ? "person stopped" : "people stopped"} here.
+                </div>
+              )}
+
+              <div style={{ marginTop: 14, display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
+                <div style={{ fontSize: 11.5, fontWeight: 900, color: "#5B4B6B" }}>Overall setup path</div>
+                <div style={{ fontSize: 10, color: "#8C6B9E" }}>{funnelCompleted} of {funnelStarted} finished</div>
+              </div>
+              <div style={{ display: "grid", gap: 10, marginTop: 8 }}>
+                {(adminFunnel.by_step || []).map((row) => {
+                  const pct = funnelStarted ? Math.round((Number(row.reached || 0) / funnelStarted) * 100) : 0;
+                  const abandonedHere = Number(row.abandoned_here || 0);
+                  const recentHere = Number(row.recent_here || 0);
+                  const stageName = OVERALL_ONBOARDING_STAGES[Math.max(0, Number(row.step || 1) - 1)] || `Step ${row.step}`;
                   return (
-                    <div key={mode.mode} style={{ padding: "10px 11px", borderRadius: 12, background: guardian ? "#F4FAFF" : "#FCF7FE", border: guardian ? "1px solid #D9ECFA" : "1px solid #E8D8EF" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
-                        <b style={{ fontSize: 11.5, color: guardian ? "#4C8FE8" : "#8E4EAA" }}>{guardian ? "💛 WITH A GUARDIAN" : "🧸 MY OWN COZY SPACE"}</b>
-                        <span style={{ fontSize: 10.5, fontWeight: 900, color: "#6B5A7D" }}>{mode.completed}/{modeStarted} · {modePct}%</span>
+                    <div key={row.step} style={{ padding: "7px 0" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", fontSize: 11, color: "#6B5A7D", marginBottom: 4, gap: 10 }}>
+                        <span style={{ minWidth: 0 }}><span style={{ display: "inline-block", minWidth: 42, fontSize: 9.5, fontWeight: 900, color: "#9A86A7" }}>STEP {row.step}</span><b>{stageName}</b></span>
+                        <span style={{ flexShrink: 0, fontWeight: 800 }}>{row.reached} reached</span>
                       </div>
-                      <div style={{ marginTop: 4, fontSize: 9.8, color: "#8C6B9E" }}>{mode.returned_later || 0} returned later · {mode.abandoned || 0} abandoned · {mode.recent_unfinished || 0} recent</div>
-                      <div style={{ display: "grid", gap: 5, marginTop: 8 }}>
-                        {(mode.by_step || []).filter((row) => Number(row.reached || 0) > 0 || Number(row.abandoned_here || 0) > 0 || Number(row.recent_here || 0) > 0).map((row) => (
-                          <div key={row.step} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 10.2, color: "#6B5A7D" }}>
-                            <span>{labels[Math.max(0, Number(row.step || 1) - 1)] || `Step ${row.step}`}</span>
-                            <span>{row.reached} reached{Number(row.abandoned_here || 0) ? ` · ${row.abandoned_here} abandoned` : Number(row.recent_here || 0) ? ` · ${row.recent_here} recent` : ""}</span>
-                          </div>
-                        ))}
+                      <div style={{ height: 9, borderRadius: 6, background: "#EAF4FF", overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${Math.max(0, Math.min(100, pct))}%`, background: "#4C8FE8", borderRadius: 6 }} />
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginTop: 4, fontSize: 9.8 }}>
+                        <span style={{ color: "#8C6B9E" }}>{pct}% of starters made it here</span>
+                        <span style={{ textAlign: "right", color: abandonedHere > 0 ? "#B06A7A" : recentHere > 0 ? "#A37A27" : "#7B9B8F", fontWeight: abandonedHere > 0 || recentHere > 0 ? 800 : 600 }}>
+                          {abandonedHere > 0 ? `${abandonedHere} dropped here` : recentHere > 0 ? `${recentHere} still here (<24h)` : "0 confirmed drop-offs"}
+                        </span>
                       </div>
                     </div>
                   );
                 })}
+              </div>
+
+              <div style={{ marginTop: 12, padding: "10px 11px", borderRadius: 12, background: "#F7FBFF", border: "1px solid #DCEEFF" }}>
+                <div style={{ fontSize: 10.2, fontWeight: 900, color: "#5B4B6B" }}>How to read this</div>
+                <div style={{ marginTop: 4, fontSize: 9.8, color: "#7C6B88", lineHeight: 1.55 }}><b>Reached</b> = opened that step · <b>Dropped</b> = did not finish or return within 24h · <b>Came back</b> = left and returned later · <b>Recent</b> = still inside the 24-hour window.</div>
+              </div>
+
+              <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #E6D4F2" }}>
+                <div style={{ fontSize: 11.5, fontWeight: 900, color: "#5B4B6B" }}>Compare setup choices</div>
+                <div style={{ marginTop: 3, fontSize: 10, color: "#8C6B9E" }}>Completion and drop-off for people choosing their own Cozy space versus setting up with a Guardian.</div>
+                <div style={{ display: "grid", gap: 10, marginTop: 9 }}>
+                  {(adminFunnel.by_mode || []).filter((mode) => Number(mode.started || 0) > 0).map((mode) => {
+                    const modeStarted = Number(mode.started || 0);
+                    const modeCompleted = Number(mode.completed || 0);
+                    const modePct = modeStarted ? Math.round((modeCompleted / modeStarted) * 100) : 0;
+                    const guardian = mode.mode === "guardian";
+                    const labels = guardian ? GUARDIAN_ONBOARDING_STAGES : COZY_ONBOARDING_STAGES;
+                    const modeBiggestDropoff = biggestDropoff(mode.by_step || [], labels);
+                    return (
+                      <div key={mode.mode} style={{ padding: "11px 12px", borderRadius: 13, background: guardian ? "#F4FAFF" : "#FCF7FE", border: guardian ? "1px solid #D9ECFA" : "1px solid #E8D8EF" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline" }}>
+                          <b style={{ fontSize: 11.5, color: guardian ? "#4C8FE8" : "#8E4EAA" }}>{guardian ? "💛 Guardian setup" : "🧸 Cozy setup"}</b>
+                          <span style={{ fontSize: 11, fontWeight: 900, color: "#5B4B6B" }}>{modeCompleted} of {modeStarted} finished · {modePct}%</span>
+                        </div>
+                        <div style={{ marginTop: 4, fontSize: 9.8, color: "#8C6B9E", lineHeight: 1.4 }}>{mode.abandoned || 0} dropped · {mode.returned_later || 0} came back later{Number(mode.recent_unfinished || 0) ? ` · ${mode.recent_unfinished} still recent` : ""}</div>
+                        {modeBiggestDropoff && <div style={{ marginTop: 5, fontSize: 9.8, color: "#B06A7A", fontWeight: 800 }}>Biggest drop-off: {modeBiggestDropoff.label} ({modeBiggestDropoff.count})</div>}
+                        <div style={{ display: "grid", gap: 6, marginTop: 9 }}>
+                          {(mode.by_step || []).filter((row) => Number(row.reached || 0) > 0 || Number(row.abandoned_here || 0) > 0 || Number(row.recent_here || 0) > 0).map((row) => {
+                            const dropped = Number(row.abandoned_here || 0);
+                            const recent = Number(row.recent_here || 0);
+                            return (
+                              <div key={row.step} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 8, alignItems: "baseline", fontSize: 10.2, color: "#6B5A7D" }}>
+                                <span>{labels[Math.max(0, Number(row.step || 1) - 1)] || `Step ${row.step}`}</span>
+                                <span style={{ textAlign: "right" }}><b>{row.reached}</b> reached{dropped ? ` · ${dropped} dropped` : recent ? ` · ${recent} recent` : ""}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}
