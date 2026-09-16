@@ -32,8 +32,18 @@ export const PLUSHLIFE_UPDATES: PlushLifeUpdate[] = [
   },
 ];
 
+function sortedUpdates() {
+  return [...PLUSHLIFE_UPDATES].sort((a, b) => b.releasedAt.localeCompare(a.releasedAt));
+}
+
 export function newestUpdates(limit = 3) {
-  return [...PLUSHLIFE_UPDATES]
-    .sort((a, b) => b.releasedAt.localeCompare(a.releasedAt))
-    .slice(0, Math.max(1, limit));
+  return sortedUpdates().slice(0, Math.max(1, limit));
+}
+
+export function updatesForReturn(lastVisitDate: string | null | undefined, limit = 3) {
+  const normalized = String(lastVisitDate || "").slice(0, 10);
+  const available = sortedUpdates();
+  if (!normalized) return available.slice(0, Math.max(1, limit));
+  const sinceVisit = available.filter((update) => update.releasedAt > normalized);
+  return (sinceVisit.length ? sinceVisit : available).slice(0, Math.max(1, limit));
 }
