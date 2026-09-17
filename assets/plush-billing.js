@@ -5,7 +5,7 @@
     root.PlushLifeBilling = api;
     if (root.document && !root.__plushlifeCheckinThemeLoading) {
       root.__plushlifeCheckinThemeLoading = true;
-      ["./assets/checkin-theme.js", "./assets/checkin-theme-mode.js", "./assets/checkin-comfort-prompt.js", "./assets/unified-dark-home.js", "./assets/experience-system-v2.js"].forEach((src) => {
+      ["./assets/checkin-theme.js", "./assets/checkin-theme-mode.js", "./assets/checkin-comfort-prompt.js", "./assets/unified-dark-home.js", "./assets/experience-system-v2.js", "./assets/whats-new-panel.js"].forEach((src) => {
         const script = root.document.createElement("script");
         script.src = src;
         script.defer = true;
