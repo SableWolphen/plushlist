@@ -390,7 +390,7 @@
   }
 
   function installCapacityCard() {
-    if (isSignedOut() || nurseryVisible()) return;
+    if (isSignedOut()) return;
     const nextStep = document.getElementById("plushlife-smart-next-step");
     if (!nextStep || !visible(nextStep)) return;
     const pct = todayBudget();
@@ -432,7 +432,7 @@
   }
 
   function installTomorrowNote() {
-    if (isSignedOut() || nurseryVisible()) return;
+    if (isSignedOut()) return;
     const nextStep = document.getElementById("plushlife-smart-next-step");
     if (!nextStep || !visible(nextStep)) return;
     const today = dateKey(new Date());
@@ -461,7 +461,7 @@
   }
 
   function installTomorrowSetup() {
-    if (isSignedOut() || nurseryVisible()) return;
+    if (isSignedOut()) return;
     const now = new Date();
     if (now.getHours() < 18) return;
     const nextStep = document.getElementById("plushlife-smart-next-step");
