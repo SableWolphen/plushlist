@@ -302,7 +302,6 @@ export function TodayPanel(props) {
   }, [props.open, props.rows?.length]);
 
   if (!props.open) return null;
-  if (props.babyMode) return <>{weeklyReminder}{backgroundEngine}{liveRegion}<React.Suspense fallback={null}><LazyBabyToday {...modeProps} /></React.Suspense></>;
   if (lowScreen) return <>{weeklyReminder}{backgroundEngine}{liveRegion}{plushMemory}<React.Suspense fallback={null}><LazyLowScreenToday {...modeProps} /></React.Suspense><LowScreenJustCompleted rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={smartToggle} /><CompletedTaskArea rows={props.rows} viewDone={props.viewDone} lingerKeys={lingerKeys} toggle={smartToggle} compact /></>;
 
   return <>
