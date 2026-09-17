@@ -7,6 +7,42 @@ export type PlushLifeUpdate = {
 
 export const PLUSHLIFE_UPDATES: PlushLifeUpdate[] = [
   {
+    id: "checkin-redesign",
+    releasedAt: "2026-09-17",
+    title: "Check-in feels like PlushLife now",
+    summary: "The daily check-in was rebuilt with cleaner spacing, stronger selected states, theme-aware colors, and your own saved comfort item in the safety prompt.",
+  },
+  {
+    id: "theme-system",
+    releasedAt: "2026-09-17",
+    title: "Every theme has its own personality",
+    summary: "Soft Plush, Soft Light, Twilight, and Meadow now keep distinct palettes in both light and dark mode instead of feeling like recolors of the same screen.",
+  },
+  {
+    id: "calmer-today",
+    releasedAt: "2026-09-17",
+    title: "Today gets quieter when you need less",
+    summary: "Tiny, Recovery, Rest, tired, anxious, and overwhelmed moments can automatically reduce visual noise so the next useful step stays easiest to find.",
+  },
+  {
+    id: "one-overlay",
+    releasedAt: "2026-09-17",
+    title: "Less stuff fights for your attention",
+    summary: "Check-ins, comeback prompts, mascot reactions, and floating controls now coordinate so only the most important interruption gets the screen at once.",
+  },
+  {
+    id: "completed-today",
+    releasedAt: "2026-09-17",
+    title: "Finished tasks get out of the way",
+    summary: "Completed tasks still stay available to undo, but they settle into a quieter Completed Today area instead of crowding the plan you still need.",
+  },
+  {
+    id: "experience-polish-v2",
+    releasedAt: "2026-09-17",
+    title: "PlushLife is learning when to explain less",
+    summary: "Repeated helper text can quiet down with familiarity, touch targets are more consistent, reduced-motion preferences are respected, and Next Step has clearer visual priority.",
+  },
+  {
     id: "adaptive-capacity",
     releasedAt: "2026-09-15",
     title: "Full, Soft, and Tiny now shape your day",
