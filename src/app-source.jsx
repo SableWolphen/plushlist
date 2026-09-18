@@ -1,6 +1,6 @@
 import { ToolPanel, HabitTypeIcon } from "./components/shared.jsx";
-import { PlushMascot, NurseryNook, AppLoadingScreen } from "./components/mascot.jsx";
-import { BabyArrivalRitual, MamasCorner, BabyModeCareSuite } from "./components/baby-mode.jsx";
+import { PlushMascot, AppLoadingScreen } from "./components/mascot.jsx";
+import { MamasCorner } from "./components/baby-mode.jsx";
 import { LandingPage } from "./components/landing.jsx";
 import { ProfilePanel, SafetyPanel, HelpPanel, CalmPanel } from "./components/info-panels.jsx";
 import { MoodViewer, CarePathViewer, SleepToolViewer, JournalReflectionViewer, DailyJournalPanel } from "./components/viewer-panels.jsx";
