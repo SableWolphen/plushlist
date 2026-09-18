@@ -13,7 +13,6 @@
 // itself (not a module export), so -- same as the existing RewardsPanel
 // call site -- it's passed through as a prop rather than imported.
 import { HabitTypeIcon } from "./shared.jsx";
-import { BabyModeCareSuite } from "./baby-mode.jsx";
 import { CalmPanel } from "./info-panels.jsx";
 
 export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setReturnBannerDismissed, voice, setEssentialsPickerOpen, selectDayType, wellbeingPatternInsight, todayDayId, hardDayBannerDismissed, setHardDayBannerDismissed, dailyCheckIn, restDatesSet, period, toggleRestToday, nextStepTask, nextStepReason, FeatureTip, day, babyMode, nextStepHint, toggle, pickEasierSuggestion, nextStepMoreOpen, setNextStepMoreOpen, setNextStepSkipped, setNextStepDismissedToday, weeklyIntentionEditing, setWeeklyIntentionEditing, weeklyIntentionDraft, setWeeklyIntentionDraft, weeklyIntentionText, saveWeeklyIntentionEdit, weeklyIntentionMessage, todayCardIndex, setTodayCardIndex, taskWeekDates, selectedProgressDate, selectTaskPreviewDate, isFutureView, selectedTaskDateLabel, todaySwipeStartX, todaySwipeStartY, selectedSchedule, selectedScheduleExceptionEntries, scheduleDayId, manageSchedule, setManageSchedule, active, rows, viewDone, openTaskManager, todayRequiredDone, todayRequiredKeys, activityDaysTotal, careDaysTotal, babyCaregiverName, trackerProfile, openJournalForSelectedDate, isHistoricalView, focusHelperOpen, setFocusHelperOpen, pickRandomFocusTask, setFocusSuggestionKey, focusedEssential, focusChoices, selectedTaskViewIsRest, pct, requiredDoneCount, requiredRows, preferences, doneCount, focusModeShowAll, setFocusModeShowAll, isTaskPausedOnDate, openRow, setOpenRow, celebrateKey, pauseTrackerTask, resumeTrackerTask, taskListCollapsed, setTaskListCollapsed, recentlyCompletedKeys, moveTaskGroup, startPointerTaskDrag, movePointerTaskDrag, endPointerTaskDrag, cancelPointerTaskDrag, moveTaskToTomorrow, completedTodayExpanded, setCompletedTodayExpanded, calmQuickOpen, setCalmQuickOpen, currentCopingOption, reshuffle, setCareSection, goToDashboard }) {
@@ -212,7 +211,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
           </button>
         </div>
         )}
-        {dailyCheckIn.day_type !== "rest" && !babyMode && (() => {
+        {dailyCheckIn.day_type !== "rest" && (() => {
           // A small glance at what still needs doing, so leading with the
           // schedule doesn't mean losing sight of today's tasks entirely.
           const habitRowsToday = rows.filter((r) => r.habitType !== "regular");
@@ -245,23 +244,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
         })()}
         </>}
 
-        {todayCardIndex === 1 && babyMode && !isFutureView && !isHistoricalView && dailyCheckIn.day_type !== "rest" && (
-          <BabyModeCareSuite
-            date={period.date}
-            todayDone={todayRequiredDone}
-            todayTotal={todayRequiredKeys.length}
-            activityDays={activityDaysTotal}
-            careDays={careDaysTotal}
-            caregiverName={babyCaregiverName}
-            comfortItemName={trackerProfile?.comfort_item_name?.trim() || ""}
-            littleJobs={rows.filter((row) => !viewDone[row.key])}
-            onCompleteTask={(taskKey) => toggle(taskKey)}
-            onManageTasks={() => openTaskManager(dayIdForDate(period.date))}
-            onOpenJournal={openJournalForSelectedDate}
-          />
-        )}
-
-        {todayCardIndex === 1 && !babyMode && !isFutureView && rows.length > 0 && dailyCheckIn.day_type !== "rest" && (focusHelperOpen || !nextStepTask) && (
+        {todayCardIndex === 1 && !isFutureView && rows.length > 0 && dailyCheckIn.day_type !== "rest" && (focusHelperOpen || !nextStepTask) && (
           // Suppressed (unless already open) whenever the One Next Step card
           // above is already showing this same single-task suggestion — no
           // point offering "pick one thing for me" right under a card that's
@@ -299,7 +282,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
             )}
           </div>
         )}
-        {todayCardIndex === 1 && rows.length > 0 && (!babyMode || isFutureView || isHistoricalView || selectedTaskViewIsRest) && (
+        {todayCardIndex === 1 && rows.length > 0 && (
           <div className="plushlife-task-card" style={{ marginBottom: 14, padding: 14, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: "1px solid #E6D4F2" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 4 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 800 }}>{selectedTaskViewIsRest ? "REST DAY" : isFutureView ? `${selectedTaskDateLabel.toUpperCase()} TASKS` : isHistoricalView ? `${selectedTaskDateLabel.toUpperCase()} HISTORY` : "TODAY'S TASKS"}</div>
@@ -551,7 +534,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
             ))}
           </div>
         )}
-        {todayCardIndex === 1 && rows.length === 0 && !babyMode && (
+        {todayCardIndex === 1 && rows.length === 0 && (
           <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.5)", border: "1px dashed #C9B3DC", textAlign: "center", color: "#8C6B9E", fontSize: 12.5 }}>
             <div>No tasks for today yet. Build a list that fits your day. 🧸</div>
             <button type="button" onClick={() => openTaskManager(dayIdForDate(period.date))} style={{ marginTop: 10, padding: "8px 12px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>＋ Add today’s tasks</button>
