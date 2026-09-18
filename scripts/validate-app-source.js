@@ -138,7 +138,7 @@ const requiredRegressionMarkers = [
   '{ id: "week", label: "PlushCalendar"',
   '{ id: "care", label: "PlushCare"',
   '{ id: "progress", label: "PlushGrowth"',
-  'babyMode && item.id === "today" ? "Nursery" : item.label',
+  'const displayLabel = item.label;',
   'setJournalQuickOpen(true);',
   '📖 PLUSHJOURNAL HISTORY',
   'journalHistoryExpanded ? reflectionHistory.length : 5',
