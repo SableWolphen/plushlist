@@ -27,14 +27,16 @@
   const style = document.createElement("style");
   style.id = "plushlife-growth-loop-styles";
   style.textContent = `
-    #plushlife-growth-checkin{margin:0 0 10px;padding:14px;border-radius:16px;border:1px solid #ddcdea;background:linear-gradient(145deg,#fff9fd,#f4fbf8);box-shadow:0 7px 22px rgba(83,53,98,.08);font-family:system-ui,sans-serif;color:#5b4b6b}
-    #plushlife-growth-checkin strong{display:block;font-size:15px;line-height:1.25}
-    #plushlife-growth-checkin p{margin:5px 0 0;font-size:11.5px;line-height:1.45;color:#7b6888}
-    .plushlife-growth-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px}
-    .plushlife-growth-choice{min-height:54px;border:1px solid #dccbe5;border-radius:13px;background:#fff;color:#62516f;padding:7px 6px;font:800 11px/1.25 system-ui,sans-serif;cursor:pointer;transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease}
-    .plushlife-growth-choice:hover,.plushlife-growth-choice:focus-visible{transform:translateY(-1px);border-color:#b97bce;box-shadow:0 7px 16px rgba(104,67,120,.10)}
-    .plushlife-growth-choice span{display:block;font-size:17px;margin-bottom:2px}
-    .plushlife-growth-choice small{font-size:9.5px;font-weight:700;opacity:.78}
+    #plushlife-growth-checkin{position:fixed;inset:0;z-index:130;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));background:rgba(31,20,42,.55);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);font-family:system-ui,sans-serif}
+    #plushlife-growth-checkin .plushlife-growth-checkin-card{position:relative;width:min(100%,440px);padding:18px;border-radius:22px;border:1px solid var(--plush-border,#ddcdea);background:var(--plush-surface,#fff9fd);box-shadow:0 24px 70px rgba(40,24,52,.34);color:var(--plush-text,#5b4b6b)}
+    #plushlife-growth-checkin .plushlife-growth-checkin-close{position:absolute!important;top:10px!important;right:10px!important;width:40px!important;min-width:40px!important;max-width:40px!important;height:40px!important;min-height:40px!important;max-height:40px!important;padding:0!important;margin:0!important;display:grid!important;place-items:center!important;border:1px solid var(--plush-border-soft,#e6d8eb)!important;border-radius:12px!important;background:var(--plush-surface-2,#fff)!important;color:var(--plush-text,#5b4b6b)!important;box-shadow:none!important;font:700 23px/1 system-ui,sans-serif!important;transform:none!important}
+    #plushlife-growth-checkin strong{display:block;padding-right:46px;font-size:19px;line-height:1.22}
+    #plushlife-growth-checkin p{margin:7px 0 0;padding-right:28px;font-size:12px;line-height:1.48;color:var(--plush-copy,#7b6888)}
+    .plushlife-growth-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+    #plushlife-growth-checkin button.plushlife-growth-choice{min-height:82px!important;padding:10px 7px!important;border:1px solid var(--plush-border-soft,#dccbe5)!important;border-radius:15px!important;background:var(--plush-surface-2,#fff)!important;color:var(--plush-text,#62516f)!important;box-shadow:none!important;font:850 12px/1.28 system-ui,sans-serif!important;cursor:pointer!important;transform:none!important}
+    #plushlife-growth-checkin button.plushlife-growth-choice:focus-visible{outline:3px solid color-mix(in srgb,var(--plush-accent,#b97bce) 35%,transparent)!important;outline-offset:2px!important}
+    .plushlife-growth-choice span{display:block;font-size:24px;margin-bottom:4px}
+    .plushlife-growth-choice small{font-size:9.7px;font-weight:700;opacity:.78}
     #plushlife-next-step-reason{margin:8px 0 0;padding:7px 9px;border-radius:10px;background:rgba(166,93,193,.08);color:#745c82;font:700 10.5px/1.4 system-ui,sans-serif}
     #plushlife-growth-toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2147482900;width:min(430px,calc(100% - 24px));padding:13px;border-radius:17px;background:#fff9fd;border:1px solid #decce7;box-shadow:0 18px 55px rgba(54,34,65,.28);font-family:system-ui,sans-serif;color:#5b4b6b}
     #plushlife-growth-toast .title{font-weight:900;font-size:13px}
@@ -54,14 +56,14 @@
     .plushlife-share-actions button{flex:1;min-width:100px;min-height:44px;border-radius:12px;border:1px solid #d9c5e3;background:#fff;color:#76558a;font-weight:900;cursor:pointer}.plushlife-share-actions button.primary{background:#a65dc1;color:#fff;border-color:#a65dc1}
     [data-plushlife-growth-pulse="true"]{animation:plushlife-growth-pulse 1.4s ease 2}
     @keyframes plushlife-growth-pulse{0%,100%{box-shadow:0 0 0 0 rgba(166,93,193,0)}50%{box-shadow:0 0 0 5px rgba(166,93,193,.18)}}
-    html[data-plushlife-color-mode="dark"] #plushlife-growth-checkin,html[data-plushlife-color-mode="dark"] #plushlife-growth-toast{background:#251d2c!important;border-color:#56425f!important;color:#f3eaf6!important}
-    html[data-plushlife-color-mode="dark"] #plushlife-growth-checkin p,html[data-plushlife-color-mode="dark"] #plushlife-growth-toast .body{color:#c8b9ce!important}
-    html[data-plushlife-color-mode="dark"] .plushlife-growth-choice,html[data-plushlife-color-mode="dark"] #plushlife-growth-toast button{background:#1f1926!important;border-color:#57475f!important;color:#eee5f2!important}
+    html[data-plushlife-color-mode="dark"] #plushlife-growth-toast{background:#251d2c!important;border-color:#56425f!important;color:#f3eaf6!important}
+    html[data-plushlife-color-mode="dark"] #plushlife-growth-toast .body{color:#c8b9ce!important}
+    html[data-plushlife-color-mode="dark"] #plushlife-growth-toast button{background:#1f1926!important;border-color:#57475f!important;color:#eee5f2!important}
     html[data-plushlife-color-mode="dark"] #plushlife-growth-toast button.primary{background:#9460aa!important;color:#fff!important}
     html[data-plushlife-color-mode="dark"] #plushlife-next-step-reason{background:#33263f!important;color:#d9c9df!important}
     html[data-plushlife-color-mode="dark"] .plushlife-share-card{background:radial-gradient(circle at 92% 8%,#513451 0,transparent 34%),radial-gradient(circle at 6% 94%,#29453d 0,transparent 36%),linear-gradient(150deg,#352747,#281e39);border-color:#715584;color:#f5edf8}
     html[data-plushlife-color-mode="dark"] .plushlife-share-card p{color:#d6c8dc}html[data-plushlife-color-mode="dark"] .plushlife-share-stat{background:#30243e;border-color:#604b70}html[data-plushlife-color-mode="dark"] .plushlife-share-stat span{color:#cdbed4}html[data-plushlife-color-mode="dark"] .plushlife-share-actions button{background:#30243e;border-color:#604b70;color:#eee5f2}
-    @media(max-width:380px){.plushlife-growth-choices{grid-template-columns:1fr}.plushlife-growth-choice{min-height:46px}.plushlife-share-stats{grid-template-columns:1fr}}
+    @media(max-width:380px){#plushlife-growth-checkin .plushlife-growth-checkin-card{padding:16px}.plushlife-growth-choices{grid-template-columns:1fr}#plushlife-growth-checkin button.plushlife-growth-choice{min-height:58px!important}.plushlife-share-stats{grid-template-columns:1fr}}
     @media(prefers-reduced-motion:reduce){[data-plushlife-growth-pulse="true"]{animation:none!important}.plushlife-growth-choice{transition:none!important}}
   `;
   document.head.appendChild(style);
@@ -100,6 +102,16 @@
     return { ...(current.choicesByDate || {}), [today]: mode };
   }
 
+  function closeCapacityPicker(markPrompt = true) {
+    const modal = document.getElementById("plushlife-growth-checkin");
+    modal?.remove();
+    if (markPrompt) writeState({ promptShownDate: today });
+  }
+
+  function otherDialogOpen() {
+    return [...document.querySelectorAll('[role="dialog"][aria-modal="true"]')].some((node) => visible(node) && node.id !== "plushlife-growth-checkin");
+  }
+
   function chooseDay(mode) {
     const button = findDayModeButton(mode);
     if (button) button.click();
@@ -112,25 +124,38 @@
       onboardingDate: readState().onboardingDate || today,
       checkInDate: today,
     });
-    document.getElementById("plushlife-growth-checkin")?.remove();
+    closeCapacityPicker(false);
     window.setTimeout(() => { installNextStepReason(true); pulseNextStep(); }, 120);
   }
 
-  function installCheckIn() {
-    if (signedOut()) return;
-    const host = todayHost();
-    if (!host || document.getElementById("plushlife-growth-checkin")) return;
+  function openCapacityPicker(force = false) {
+    if (signedOut() || document.getElementById("plushlife-growth-checkin")) return false;
+    if (!force && otherDialogOpen()) return false;
     const current = readState();
-    if (current.checkInDate === today) return;
+    if (!force && (current.checkInDate === today || current.promptShownDate === today)) return false;
+
     const seenDates = Array.isArray(current.seenDates) ? current.seenDates : [];
     const isEarlyUse = seenDates.length < 3;
+    const overlay = document.createElement("div");
+    overlay.id = "plushlife-growth-checkin";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-labelledby", "plushlife-growth-checkin-title");
+    overlay.innerHTML = `<div class="plushlife-growth-checkin-card"><button type="button" class="plushlife-growth-checkin-close" aria-label="Not now">×</button><strong id="plushlife-growth-checkin-title">${isEarlyUse ? "How much room do you have today?" : "What kind of day is this?"}</strong><p>${isEarlyUse ? "Pick the amount of capacity you actually have. PlushLife will shape today around it." : "Choose what feels realistic right now. You can change it later in Settings."}</p><div class="plushlife-growth-choices"><button type="button" class="plushlife-growth-choice" data-mode="full"><span>☀️</span>Full<br><small>I've got some room</small></button><button type="button" class="plushlife-growth-choice" data-mode="soft"><span>🌤️</span>Soft<br><small>Keep it gentle</small></button><button type="button" class="plushlife-growth-choice" data-mode="tiny"><span>🌱</span>Tiny<br><small>Bare minimum is enough</small></button></div></div>`;
+    document.body.appendChild(overlay);
+    writeState({ promptShownDate: today });
 
-    const card = document.createElement("section");
-    card.id = "plushlife-growth-checkin";
-    card.setAttribute("aria-label", "Choose how much capacity you have today");
-    card.innerHTML = `<strong>${isEarlyUse ? "How much room do you have today?" : "What kind of day is this?"}</strong><p>${isEarlyUse ? "PlushLife works with the energy you have, not against it. Pick a size and I’ll point you to one useful next step." : "Pick the amount that feels realistic right now. You can change it later—this is just a gentler starting point."}</p><div class="plushlife-growth-choices"><button type="button" class="plushlife-growth-choice" data-mode="full"><span>☀️</span>Full<br><small>I've got some room</small></button><button type="button" class="plushlife-growth-choice" data-mode="soft"><span>🌤️</span>Soft<br><small>Keep it gentle</small></button><button type="button" class="plushlife-growth-choice" data-mode="tiny"><span>🌱</span>Tiny<br><small>Bare minimum is enough</small></button></div>`;
-    card.querySelectorAll("[data-mode]").forEach((button) => button.addEventListener("click", () => chooseDay(button.dataset.mode)));
-    host.insertBefore(card, host.firstChild);
+    overlay.querySelectorAll("[data-mode]").forEach((button) => button.addEventListener("click", () => chooseDay(button.dataset.mode)));
+    overlay.querySelector(".plushlife-growth-checkin-close")?.addEventListener("click", () => closeCapacityPicker(true));
+    overlay.addEventListener("click", (event) => { if (event.target === overlay) closeCapacityPicker(true); });
+    overlay.addEventListener("keydown", (event) => { if (event.key === "Escape") closeCapacityPicker(true); });
+    window.requestAnimationFrame(() => overlay.querySelector("[data-mode]")?.focus());
+    return true;
+  }
+
+  function installCheckIn() {
+    if (!todayHost()) return;
+    openCapacityPicker(false);
   }
 
   function nextStepReasonText() {
@@ -308,6 +333,6 @@
   new MutationObserver(refresh).observe(document.documentElement, { childList: true, subtree: true });
   window.addEventListener("focus", refresh);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refresh(); });
-  window.PlushLifeGrowthLoop = { refresh, showShareCard, shareWin, recentChoices, summary: shareSummary };
+  window.PlushLifeGrowthLoop = { refresh, showShareCard, shareWin, recentChoices, summary: shareSummary, openCapacityPicker: () => openCapacityPicker(true), closeCapacityPicker };
   refresh();
 })();
