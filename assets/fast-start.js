@@ -12,23 +12,15 @@
   var APPEARANCE_STORAGE_KEY = "plushlife:appearance-mode:v1";
   var MIN_VALIDITY_SECONDS = 30;
 
-  // Apply the saved/system appearance before React mounts so a dark-mode user
-  // does not get a bright opening shell while the full appearance runtime is
-  // still loading.
+  // PlushLife now uses light theme palettes only. Apply light before React
+  // mounts so there is never a system-dark flash during startup.
   try {
-    var requestedAppearance = window.localStorage.getItem(APPEARANCE_STORAGE_KEY) || "system";
-    var useDark = requestedAppearance === "dark" || (requestedAppearance === "system" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    document.documentElement.dataset.plushlifeColorMode = useDark ? "dark" : "light";
-    document.documentElement.dataset.plushlifeColorModePreference = requestedAppearance;
-    document.documentElement.style.colorScheme = useDark ? "dark" : "light";
+    window.localStorage.removeItem(APPEARANCE_STORAGE_KEY);
+    document.documentElement.dataset.plushlifeColorMode = "light";
+    document.documentElement.dataset.plushlifeColorModePreference = "light";
+    document.documentElement.style.colorScheme = "light";
     var themeMeta = document.querySelector('meta[name="theme-color"]');
-    if (themeMeta) themeMeta.setAttribute("content", useDark ? "#17131d" : "#b75acb");
-    if (useDark && !document.getElementById("plushlife-fast-dark-shell")) {
-      var earlyDarkStyle = document.createElement("style");
-      earlyDarkStyle.id = "plushlife-fast-dark-shell";
-      earlyDarkStyle.textContent = "html[data-plushlife-color-mode=dark],html[data-plushlife-color-mode=dark] body{background:#17131d!important;color-scheme:dark!important}html[data-plushlife-color-mode=dark] #plush-boot-shell{background:#17131d!important;color:#eee7f2!important}html[data-plushlife-color-mode=dark] #plush-boot-shell .boot-card{background:#241e2b!important;border-color:#504359!important}html[data-plushlife-color-mode=dark] #plush-boot-shell .boot-status{color:#b9aabd!important}";
-      document.head.appendChild(earlyDarkStyle);
-    }
+    if (themeMeta) themeMeta.setAttribute("content", "#b75acb");
   } catch (_error) {}
 
   var originalCreateClient = window.supabase && window.supabase.createClient;
