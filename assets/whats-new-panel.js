@@ -3,26 +3,29 @@
   if (window.__plushlifeWhatsNewInstalled) return;
   window.__plushlifeWhatsNewInstalled = true;
 
-  const VERSION = "2026-09-17-v3";
+  const VERSION = "2026-09-17-v4";
   const COUNT_KEY = "plushlife:whats-new-count:" + VERSION;
   const SESSION_KEY = "plushlife:whats-new-session:" + VERSION;
   const PANEL_ID = "plushlife-whats-new";
   const MAX_SHOWS = 3;
 
-  const latest = [
-    ["🧸", "Check-in feels like PlushLife now", "Cleaner spacing, stronger selected states, theme-aware colors, and your own saved comfort item in the safety prompt."],
-    ["🎨", "Every theme has its own personality", "Soft Plush, Soft Light, Twilight, and Meadow now each keep distinct light and dark palettes."],
-    ["🌙", "Today gets quieter when you need less", "Tiny, Recovery, Rest, tired, anxious, and overwhelmed moments can automatically reduce visual noise."],
-    ["✨", "Less stuff fights for your attention", "Check-ins, comeback prompts, mascot reactions, and floating controls now coordinate instead of stacking."],
-    ["✓", "Finished tasks get out of the way", "Completed tasks settle into a quieter Completed Today area while staying easy to undo."],
-    ["🎯", "Next Step is easier to spot", "Repeated helper text can quiet down, touch targets are more consistent, and the most useful next action gets clearer priority."],
+  const featured = [
+    ["🧸", "A better check-in", "Cleaner, theme-aware, and personalized with your saved comfort item."],
+    ["🎨", "Themes feel like themselves", "Soft Plush, Soft Light, Twilight, and Meadow keep distinct palettes."],
+    ["🌙", "A calmer Today", "Tiny, Recovery, Rest, tired, anxious, and overwhelmed moments can reduce visual noise."]
+  ];
+
+  const more = [
+    ["✨", "Less stacking", "Check-ins, comeback prompts, mascot reactions, and floating controls coordinate better."],
+    ["✓", "Completed tasks quiet down", "Finished tasks move into Completed Today while staying easy to undo."],
+    ["🎯", "Next Step stands out", "Less helper clutter, steadier touch targets, and clearer action priority."]
   ];
 
   const previous = [
-    ["Full, Soft, and Tiny now shape your day", "Your plan can use gentler task versions and a rough energy budget so it fits the capacity you actually have."],
-    ["Next Step got smarter", "Next Step weighs your capacity, task size, timing, and what has worked for you before."],
-    ["Coming back does not mean catching up", "Return and recovery flows help you restart gently instead of turning missed days into debt."],
-    ["Weekly progress celebrates adapting", "Weekly reflections can recognize when choosing a softer plan was the right call."],
+    ["Full, Soft, and Tiny shape your day", "Your plan can use gentler task versions and a rough energy budget."],
+    ["Smarter Next Step", "Next Step weighs capacity, task size, timing, and what has worked before."],
+    ["Gentler comeback flow", "Returning does not turn missed days into catch-up debt."],
+    ["Adaptive weekly progress", "Weekly reflections can recognize when choosing a softer plan was the right call."]
   ];
 
   function readCount() {
@@ -34,42 +37,55 @@
   }
   function markShown() {
     try {
-      const next = Math.min(MAX_SHOWS, readCount() + 1);
-      localStorage.setItem(COUNT_KEY, String(next));
+      localStorage.setItem(COUNT_KEY, String(Math.min(MAX_SHOWS, readCount() + 1)));
       sessionStorage.setItem(SESSION_KEY, "1");
     } catch (_) {}
   }
   function esc(value) {
     return String(value || "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
   }
+  function rowHtml([icon, title, body]) {
+    return `
+      <div class="plushlife-whats-new__row">
+        <span class="plushlife-whats-new__icon" aria-hidden="true">${esc(icon)}</span>
+        <span class="plushlife-whats-new__copy"><strong>${esc(title)}</strong><small>${esc(body)}</small></span>
+      </div>`;
+  }
+  function oldHtml([title, body]) {
+    return `<div class="plushlife-whats-new__old"><strong>${esc(title)}</strong><span>${esc(body)}</span></div>`;
+  }
 
   function modalHtml() {
-    const rows = latest.map(([icon,title,body], index) => `
-      <div class="plushlife-whats-new__item${index < 3 ? " is-featured" : ""}">
-        <span class="plushlife-whats-new__icon" aria-hidden="true">${esc(icon)}</span>
-        <span><strong>${esc(title)}</strong><small>${esc(body)}</small></span>
-      </div>`).join("");
-    const oldRows = previous.map(([title,body]) => `
-      <div class="plushlife-whats-new__old"><strong>${esc(title)}</strong><span>${esc(body)}</span></div>`).join("");
-
     return `
       <div id="${PANEL_ID}" class="plushlife-whats-new__backdrop" role="presentation">
         <section class="plushlife-whats-new__modal" role="dialog" aria-modal="true" aria-labelledby="plushlife-whats-new-title">
-          <button type="button" class="plushlife-whats-new__close" aria-label="Close what's new">×</button>
-          <div class="plushlife-whats-new__header">
+          <header class="plushlife-whats-new__header">
             <span class="plushlife-whats-new__spark" aria-hidden="true">✨</span>
             <span class="plushlife-whats-new__heading">
-              <strong id="plushlife-whats-new-title">What's new in PlushLife</strong>
-              <small>September 17 update</small>
+              <strong id="plushlife-whats-new-title">What's new</strong>
+              <small>September 17 · PlushLife</small>
             </span>
+            <button type="button" class="plushlife-whats-new__close" aria-label="Close what's new">×</button>
+          </header>
+
+          <div class="plushlife-whats-new__scroll">
+            <p class="plushlife-whats-new__intro">A cleaner, calmer PlushLife without changing your routines or progress.</p>
+            <div class="plushlife-whats-new__featured">${featured.map(rowHtml).join("")}</div>
+
+            <details class="plushlife-whats-new__details">
+              <summary>More improvements <span aria-hidden="true">⌄</span></summary>
+              <div class="plushlife-whats-new__more">${more.map(rowHtml).join("")}</div>
+            </details>
+
+            <details class="plushlife-whats-new__details plushlife-whats-new__previous">
+              <summary>Previous updates <span aria-hidden="true">⌄</span></summary>
+              <div class="plushlife-whats-new__previous-body">${previous.map(oldHtml).join("")}</div>
+            </details>
           </div>
-          <div class="plushlife-whats-new__intro">A cleaner, calmer PlushLife — with the same routines and progress underneath.</div>
-          <div class="plushlife-whats-new__grid">${rows}</div>
-          <details class="plushlife-whats-new__previous">
-            <summary>Previous updates</summary>
-            <div class="plushlife-whats-new__previous-body">${oldRows}</div>
-          </details>
-          <button type="button" class="plushlife-whats-new__done">Got it</button>
+
+          <footer class="plushlife-whats-new__footer">
+            <button type="button" class="plushlife-whats-new__done">Got it</button>
+          </footer>
         </section>
       </div>`;
   }
@@ -77,16 +93,14 @@
   function closeModal(panel) {
     if (!panel) return;
     panel.classList.add("is-closing");
-    window.setTimeout(() => panel.remove(), 140);
+    window.setTimeout(() => panel.remove(), 130);
   }
 
   function bind(panel) {
     if (!panel || panel.dataset.bound === "true") return;
     panel.dataset.bound = "true";
-    const modal = panel.querySelector(".plushlife-whats-new__modal");
     const done = panel.querySelector(".plushlife-whats-new__done");
     const close = panel.querySelector(".plushlife-whats-new__close");
-
     done?.addEventListener("click", () => closeModal(panel));
     close?.addEventListener("click", () => closeModal(panel));
     panel.addEventListener("click", (event) => {
@@ -111,8 +125,7 @@
   function installPanel() {
     if (document.getElementById(PANEL_ID)) return;
     if (readCount() >= MAX_SHOWS || sessionShown() || shouldWait()) return;
-    const home = document.querySelector("[data-plushlife-home-stack]");
-    if (!home) return;
+    if (!document.querySelector("[data-plushlife-home-stack]")) return;
 
     const wrap = document.createElement("div");
     wrap.innerHTML = modalHtml().trim();
@@ -127,34 +140,95 @@
   const style = document.createElement("style");
   style.id = "plushlife-whats-new-style";
   style.textContent = `
-    .plushlife-whats-new__backdrop{
-      position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));
-      background:rgba(24,15,34,.58);backdrop-filter:blur(10px);animation:plushWhatsNewFade .16s ease-out;
+    #${PANEL_ID}.plushlife-whats-new__backdrop{
+      position:fixed!important;inset:0!important;z-index:140!important;display:grid!important;place-items:center!important;
+      padding:max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom))!important;
+      background:rgba(20,13,30,.62)!important;backdrop-filter:blur(10px)!important;
+      animation:plushWhatsNewFade .15s ease-out!important;
     }
-    .plushlife-whats-new__backdrop.is-closing{opacity:0;transition:opacity .14s ease}
-    .plushlife-whats-new__modal{
-      position:relative;width:min(100%,520px);max-height:min(82vh,760px);overflow:auto;padding:18px;
-      border:1px solid var(--plush-border,#e7d5ec);border-radius:24px;background:var(--plush-surface,#fff);color:var(--plush-text,#50365a);
-      box-shadow:0 24px 80px rgba(24,15,34,.35);animation:plushWhatsNewPop .18s ease-out;
+    #${PANEL_ID}.is-closing{opacity:0!important;transition:opacity .13s ease!important}
+    #${PANEL_ID} .plushlife-whats-new__modal{
+      position:relative!important;width:min(100%,470px)!important;max-height:min(78vh,650px)!important;
+      display:grid!important;grid-template-rows:auto minmax(0,1fr) auto!important;overflow:hidden!important;
+      padding:0!important;border:1px solid var(--plush-border,#e7d5ec)!important;border-radius:22px!important;
+      background:var(--plush-surface,#fff)!important;color:var(--plush-text,#50365a)!important;
+      box-shadow:0 26px 80px rgba(20,13,30,.38)!important;animation:plushWhatsNewPop .16s ease-out!important;
     }
-    .plushlife-whats-new__close{
-      position:absolute;top:12px;right:12px;width:44px;height:44px;border:1px solid var(--plush-border-soft,#efe3f2);border-radius:14px;
-      background:var(--plush-surface-2,#fff);color:var(--plush-text,#50365a);font-size:26px;line-height:1;cursor:pointer;
+    #${PANEL_ID} .plushlife-whats-new__header{
+      display:grid!important;grid-template-columns:40px minmax(0,1fr) 38px!important;gap:10px!important;align-items:center!important;
+      min-height:68px!important;padding:12px 12px 12px 14px!important;border-bottom:1px solid var(--plush-border-soft,#efe3f2)!important;
+      background:color-mix(in srgb,var(--plush-surface,#fff) 94%,var(--plush-accent,#c77dd6) 6%)!important;
     }
-    .plushlife-whats-new__header{display:grid;grid-template-columns:44px minmax(0,1fr);gap:11px;align-items:center;padding-right:52px}
-    .plushlife-whats-new__spark{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--plush-accent,#c77dd6) 14%,var(--plush-surface-2,#fff));font-size:21px}
-    .plushlife-whats-new__heading strong{display:block;font-size:18px;line-height:1.2}.plushlife-whats-new__heading small{display:block;margin-top:3px;color:var(--plush-copy,#786681);font-size:12px;font-weight:800}
-    .plushlife-whats-new__intro{margin-top:14px;padding:10px 11px;border-radius:13px;background:var(--plush-surface-3,#f8eef9);color:var(--plush-copy,#786681);font-size:12px;line-height:1.45}
-    .plushlife-whats-new__grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:11px}
-    .plushlife-whats-new__item{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start;padding:11px;border:1px solid var(--plush-border-soft,#efe3f2);border-radius:14px;background:var(--plush-surface-2,#fff)}
-    .plushlife-whats-new__item.is-featured{border-color:color-mix(in srgb,var(--plush-accent,#c77dd6) 38%,var(--plush-border-soft,#efe3f2))}
-    .plushlife-whats-new__icon{font-size:19px;line-height:1.2}.plushlife-whats-new__item strong{display:block;font-size:12px;line-height:1.3}.plushlife-whats-new__item small{display:block;margin-top:3px;color:var(--plush-copy,#786681);font-size:10.4px;line-height:1.4}
-    .plushlife-whats-new__previous{margin-top:11px;border-top:1px solid var(--plush-border-soft,#efe3f2);padding-top:9px}.plushlife-whats-new__previous>summary{cursor:pointer;color:var(--plush-copy,#786681);font-size:11px;font-weight:900}
-    .plushlife-whats-new__previous-body{display:grid;gap:7px;margin-top:8px}.plushlife-whats-new__old{padding:8px 9px;border-radius:10px;background:var(--plush-surface-3,#f8eef9)}.plushlife-whats-new__old strong{display:block;font-size:10.8px}.plushlife-whats-new__old span{display:block;margin-top:2px;color:var(--plush-copy,#786681);font-size:9.9px;line-height:1.35}
-    .plushlife-whats-new__done{width:100%;min-height:48px;margin-top:12px;border:0;border-radius:13px;background:var(--plush-accent,#c77dd6);color:white;font-weight:900;font-size:13px;cursor:pointer}
-    @keyframes plushWhatsNewFade{from{opacity:0}to{opacity:1}} @keyframes plushWhatsNewPop{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
-    @media(max-width:480px){.plushlife-whats-new__grid{grid-template-columns:1fr}.plushlife-whats-new__modal{padding:16px;border-radius:22px;max-height:84vh}.plushlife-whats-new__heading strong{font-size:16px}}
-    @media(prefers-reduced-motion:reduce){.plushlife-whats-new__backdrop,.plushlife-whats-new__modal{animation:none}.plushlife-whats-new__backdrop.is-closing{transition:none}}
+    #${PANEL_ID} .plushlife-whats-new__spark{
+      width:40px!important;height:40px!important;display:grid!important;place-items:center!important;border-radius:13px!important;
+      background:color-mix(in srgb,var(--plush-accent,#c77dd6) 15%,var(--plush-surface-2,#fff))!important;font-size:20px!important;
+    }
+    #${PANEL_ID} .plushlife-whats-new__heading{display:block!important;min-width:0!important}
+    #${PANEL_ID} .plushlife-whats-new__heading strong{display:block!important;font-size:17px!important;line-height:1.18!important;font-weight:900!important}
+    #${PANEL_ID} .plushlife-whats-new__heading small{display:block!important;margin-top:2px!important;color:var(--plush-copy,#786681)!important;font-size:10.8px!important;font-weight:750!important}
+    #${PANEL_ID} button.plushlife-whats-new__close{
+      position:static!important;display:grid!important;place-items:center!important;width:38px!important;min-width:38px!important;max-width:38px!important;
+      height:38px!important;min-height:38px!important;max-height:38px!important;margin:0!important;padding:0!important;
+      border:1px solid var(--plush-border-soft,#efe3f2)!important;border-radius:12px!important;
+      background:var(--plush-surface-2,#fff)!important;color:var(--plush-text,#50365a)!important;
+      box-shadow:none!important;font:700 24px/1 system-ui,sans-serif!important;letter-spacing:0!important;cursor:pointer!important;
+      transform:none!important;
+    }
+    #${PANEL_ID} .plushlife-whats-new__scroll{
+      overflow:auto!important;overscroll-behavior:contain!important;padding:14px!important;
+    }
+    #${PANEL_ID} .plushlife-whats-new__intro{
+      margin:0 0 11px!important;padding:0!important;color:var(--plush-copy,#786681)!important;font-size:11.5px!important;line-height:1.45!important;
+    }
+    #${PANEL_ID} .plushlife-whats-new__featured{
+      display:grid!important;gap:0!important;border:1px solid var(--plush-border-soft,#efe3f2)!important;border-radius:16px!important;
+      overflow:hidden!important;background:var(--plush-surface-2,#fff)!important;
+    }
+    #${PANEL_ID} .plushlife-whats-new__row{
+      display:grid!important;grid-template-columns:30px minmax(0,1fr)!important;gap:9px!important;align-items:start!important;
+      padding:11px 12px!important;border:0!important;border-bottom:1px solid var(--plush-border-soft,#efe3f2)!important;
+      border-radius:0!important;background:transparent!important;box-shadow:none!important;
+    }
+    #${PANEL_ID} .plushlife-whats-new__row:last-child{border-bottom:0!important}
+    #${PANEL_ID} .plushlife-whats-new__icon{font-size:18px!important;line-height:1.25!important}
+    #${PANEL_ID} .plushlife-whats-new__copy strong{display:block!important;font-size:11.8px!important;line-height:1.3!important;font-weight:900!important}
+    #${PANEL_ID} .plushlife-whats-new__copy small{display:block!important;margin-top:2px!important;color:var(--plush-copy,#786681)!important;font-size:10.2px!important;line-height:1.38!important}
+    #${PANEL_ID} .plushlife-whats-new__details{
+      margin:10px 0 0!important;padding:0!important;border:1px solid var(--plush-border-soft,#efe3f2)!important;border-radius:13px!important;
+      background:var(--plush-surface-2,#fff)!important;overflow:hidden!important;
+    }
+    #${PANEL_ID} .plushlife-whats-new__details>summary{
+      min-height:44px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;
+      padding:9px 11px!important;cursor:pointer!important;list-style:none!important;color:var(--plush-copy,#786681)!important;
+      font-size:10.8px!important;font-weight:900!important;
+    }
+    #${PANEL_ID} .plushlife-whats-new__details>summary::-webkit-details-marker{display:none!important}
+    #${PANEL_ID} .plushlife-whats-new__details[open]>summary span{transform:rotate(180deg)!important}
+    #${PANEL_ID} .plushlife-whats-new__more{border-top:1px solid var(--plush-border-soft,#efe3f2)!important}
+    #${PANEL_ID} .plushlife-whats-new__previous-body{display:grid!important;gap:6px!important;padding:8px!important;border-top:1px solid var(--plush-border-soft,#efe3f2)!important}
+    #${PANEL_ID} .plushlife-whats-new__old{padding:8px 9px!important;border-radius:9px!important;background:var(--plush-surface-3,#f8eef9)!important}
+    #${PANEL_ID} .plushlife-whats-new__old strong{display:block!important;font-size:10.5px!important}
+    #${PANEL_ID} .plushlife-whats-new__old span{display:block!important;margin-top:2px!important;color:var(--plush-copy,#786681)!important;font-size:9.6px!important;line-height:1.35!important}
+    #${PANEL_ID} .plushlife-whats-new__footer{
+      padding:10px 14px 12px!important;border-top:1px solid var(--plush-border-soft,#efe3f2)!important;background:var(--plush-surface,#fff)!important;
+    }
+    #${PANEL_ID} button.plushlife-whats-new__done{
+      display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:46px!important;min-height:46px!important;max-height:46px!important;
+      margin:0!important;padding:0 16px!important;border:0!important;border-radius:13px!important;
+      background:var(--plush-accent,#c77dd6)!important;color:#fff!important;box-shadow:none!important;
+      font-size:12.5px!important;font-weight:900!important;line-height:1!important;cursor:pointer!important;transform:none!important;
+    }
+    @keyframes plushWhatsNewFade{from{opacity:0}to{opacity:1}}
+    @keyframes plushWhatsNewPop{from{opacity:0;transform:translateY(6px) scale(.99)}to{opacity:1;transform:none}}
+    @media(max-width:480px){
+      #${PANEL_ID} .plushlife-whats-new__modal{max-height:76vh!important;border-radius:20px!important}
+      #${PANEL_ID} .plushlife-whats-new__header{min-height:64px!important;padding:10px 10px 10px 12px!important}
+      #${PANEL_ID} .plushlife-whats-new__scroll{padding:12px!important}
+    }
+    @media(prefers-reduced-motion:reduce){
+      #${PANEL_ID}.plushlife-whats-new__backdrop,#${PANEL_ID} .plushlife-whats-new__modal{animation:none!important}
+      #${PANEL_ID}.is-closing{transition:none!important}
+    }
   `;
   document.head.appendChild(style);
 
