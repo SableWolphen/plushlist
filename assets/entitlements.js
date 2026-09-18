@@ -12,7 +12,6 @@
       root.document.head.appendChild(script);
     };
     load("__plushlifePremiumSmartLoading", "./assets/premium-smart.js");
-    load("__plushlifeDarkModeLoading", "./assets/dark-mode.js");
     load("__plushlifeNurseryThemeLoading", "./assets/nursery-theme.js");
     load("__plushlifeExperiencePolishLoading", "./assets/experience-polish.js");
     load("__plushlifeStatePolishLoading", "./assets/state-polish.js");
