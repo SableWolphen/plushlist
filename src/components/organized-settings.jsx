@@ -246,6 +246,13 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
       <DetailHeader title="Experience" onBack={() => setSection("home")} />
       <SectionTitle icon="✨" title="How PlushLife feels" description="These options save automatically." />
       <Card>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", paddingBottom: 12, marginBottom: 4, borderBottom: "1px solid #EEE3F1" }}>
+          <div>
+            <div style={{ fontSize: 12.5, fontWeight: 900, color: "#6E5480" }}>☀️ Today's capacity</div>
+            <div style={{ marginTop: 3, fontSize: 11, lineHeight: 1.4, color: "#8A7895" }}>Reopen the Full, Soft, or Tiny daily check-in whenever you want to change today's plan.</div>
+          </div>
+          <button type="button" onClick={() => window.PlushLifeGrowthLoop?.openCapacityPicker?.()} style={{ ...secondaryButton, flexShrink: 0 }}>Change</button>
+        </div>
         <ToggleRow checked={preferences.focus_mode} onChange={(event) => updatePreference({ focus_mode: event.target.checked })} title="🎯 PlushFocus — one task at a time" description="Show only your next task on Today when a full list feels like too much." />
         {[
           ["gentle_streaks", "Use gentle consistency tracking", "Keep progress language softer and less streak-focused."],
