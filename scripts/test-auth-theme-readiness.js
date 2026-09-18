@@ -10,7 +10,7 @@ const failures = [];
 const login = read("login.html");
 const manifest = read("android/app/src/main/AndroidManifest.xml");
 const entitlements = read("assets/entitlements.js");
-const darkMode = read("assets/dark-mode.js");
+const fastStart = read("assets/fast-start.js");
 const landingMobileAuth = read("assets/landing-mobile-auth.js");
 const landing = read("src/components/landing.jsx");
 const googleSetup = read("docs/google-sign-in-setup.md");
@@ -25,7 +25,7 @@ expect(/redirectTo\s*:\s*nativeApp\s*\?\s*nativeRedirect\s*:\s*webRedirect/.test
 expect(/skipBrowserRedirect\s*:\s*nativeApp/.test(login), "Native Google OAuth should obtain the authorization URL before leaving the app");
 expect(login.includes('client.auth.setSession') || login.includes('exchangeCodeForSession'), "Native OAuth callback must finish a Supabase session");
 expect(login.includes("signInWithOtp") && login.includes("signInWithPassword"), "Email code and password fallbacks must remain available");
-expect(login.includes("prefers-color-scheme:dark"), "Login screen should respect device dark appearance");
+expect(!login.includes("prefers-color-scheme:dark") && login.includes(":root{color-scheme:light}"), "Login screen must stay light-only");
 expect(login.includes("main{width:min(100%,470px)") && login.includes(".plans{display:none}"), "Login stays focused on authentication instead of a long plan comparison");
 expect(login.includes(".code-stage{display:none}") && login.includes("body.mobile-code-ready .code-stage{display:block}"), "Email code input stays hidden until a code is requested");
 expect(login.includes('id="mobileEmailToggle"') && login.includes('id="emailShell"'), "Mobile login must collapse email sign-in behind one compact control");
@@ -44,12 +44,9 @@ expect(manifest.includes('android:scheme="plushlife"'), "Android manifest must r
 expect(manifest.includes('android:host="login-callback"'), "Android manifest must register the login-callback host");
 expect(manifest.includes('android.intent.category.BROWSABLE'), "Android auth callback must be browsable");
 
-expect(entitlements.includes('./assets/dark-mode.js'), "Main app runtime must load dark-mode.js");
-expect(darkMode.includes('plushlife:appearance-mode:v1'), "Dark mode preference must persist locally");
-expect(darkMode.includes('prefers-color-scheme: dark'), "Dark mode must support following the device setting");
-expect(darkMode.includes('setMode: saveMode'), "Dark mode runtime must expose a programmatic mode setter");
-expect(darkMode.includes('System') && darkMode.includes('Light') && darkMode.includes('Dark'), "Settings control must expose System, Light, and Dark choices");
-expect(darkMode.includes('StatusBar.setStyle'), "Native status bar should follow light/dark appearance");
+expect(!entitlements.includes('./assets/dark-mode.js'), "Main app runtime must not load dark-mode.js");
+expect(fastStart.includes('dataset.plushlifeColorMode = "light"'), "Startup must force light appearance before React mounts");
+expect(fastStart.includes('removeItem(APPEARANCE_STORAGE_KEY)'), "Legacy dark appearance preference must be cleared");
 
 expect(googleSetup.includes('plushlife://login-callback'), "Google setup docs must name the Android redirect URI");
 expect(googleSetup.includes('https://sablewolphen.github.io/plushlist/**'), "Google setup docs must name the web redirect allow-list entry");
