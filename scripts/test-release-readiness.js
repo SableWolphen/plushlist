@@ -16,7 +16,7 @@ const syncWww = read("scripts/sync-www.js");
 
 const gates = [
   [today.includes("useCompletedTaskFlow") && completed.includes("CompletedTaskArea"), "shared task completion lifecycle"],
-  [today.includes("LazyBabyToday") && today.includes("LazyLowScreenToday"), "alternate Today modes remain lazy-loaded"],
+  [!today.includes("LazyBabyToday") && today.includes("LazyLowScreenToday"), "Nursery uses the shared Today implementation while low-screen mode remains lazy-loaded"],
   [app.includes("WARM_START_CACHE_VERSION") && app.includes("setSyncStatus(\"syncing\")"), "warm start still reconciles against server state"],
   [app.includes("navigator.onLine") || app.includes("online"), "offline-aware state remains present"],
   [shared.includes('role={inline ? "region" : "dialog"}') && shared.includes('aria-modal={inline ? undefined : "true"}'), "dialogs keep accessible dialog semantics"],
