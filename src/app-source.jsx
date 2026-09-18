@@ -6538,12 +6538,7 @@ function GlowUpTracker() {
         </div>
       )}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 0, overflow: "visible" }}>
-        {(preferences.simple_mode ? [] : (babyMode ? [
-          { e: "🧸", top: "2%", left: "4%", size: 52 }, { e: "🍼", top: "4%", left: "84%", size: 52 },
-          { e: "🌈", top: "24%", left: "6%", size: 42 }, { e: "⭐", top: "30%", left: "88%", size: 34 },
-          { e: "✦", top: "58%", left: "3%", size: 36 }, { e: "🐥", top: "64%", left: "90%", size: 40 },
-          { e: "🧸", top: "88%", left: "6%", size: 44 }, { e: "🍼", top: "92%", left: "84%", size: 40 },
-        ] : dinoTheme ? [
+        {(preferences.simple_mode ? [] : (dinoTheme ? [
           { e: "🦕", top: "2%", left: "4%", size: 54 }, { e: "🦖", top: "4%", left: "82%", size: 58 },
           { e: "🌴", top: "22%", left: "88%", size: 38 }, { e: "🥚", top: "28%", left: "6%", size: 28 },
           { e: "🦴", top: "56%", left: "4%", size: 26 }, { e: "🦕", top: "60%", left: "86%", size: 46 },
