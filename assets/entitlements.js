@@ -17,7 +17,6 @@
     load("__plushlifeStatePolishLoading", "./assets/state-polish.js");
     load("__plushlifeGentleRewardLoading", "./assets/gentle-reward.js");
     load("__plushlifeWeeklyReflectionLoading", "./assets/weekly-reflection-window.js");
-    load("__plushlifeResumeContextLoading", "./assets/resume-context.js");
     load("__plushlifeLandingMobileAuthLoading", "./assets/landing-mobile-auth.js");
     load("__plushlifeGrowthLoopLoading", "./assets/growth-loop.js");
     load("__plushlifeAdaptiveHabitsPolishLoading", "./assets/adaptive-habits-polish.js");
