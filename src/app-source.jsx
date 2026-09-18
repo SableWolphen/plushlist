@@ -598,7 +598,6 @@ function GlowUpTracker() {
   const newTaskNameInputRef = React.useRef(null);
   const restoreFileInputRef = React.useRef(null);
   const [todayCardIndex, setTodayCardIndex] = useState(0);
-  const [todayExtrasOpen, setTodayExtrasOpen] = useState(false);
   const [taskListCollapsed, setTaskListCollapsed] = useState(true);
   const [weekCardIndex, setWeekCardIndex] = useState(() => {
     try {
@@ -6624,7 +6623,6 @@ function GlowUpTracker() {
 
         {user && (betaBannerDismissed ? (
           <div style={{ marginBottom: 16, display: "flex", justifyContent: "flex-start", gap: 7, flexWrap: "wrap" }}>
-            {babyMode && dashboard === "today" && <button type="button" onClick={() => setTodayExtrasOpen((open) => !open)} aria-expanded={todayExtrasOpen} style={{ padding: "6px 11px", borderRadius: 999, border: "1px solid #E6D4F2", background: "#FFFFFFAA", color: "#8C6B9E", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>{todayExtrasOpen ? "🧸 Hide nursery greeting" : "🧸 Show nursery greeting"}</button>}
             <button type="button" onClick={goToFeedback} title="This is an early test build" style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 999, border: "1px solid #B9DCF6", background: "#EAF4FF99", color: "#2D6BB5", fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>🧪 Test build · Feedback</button>
           </div>
         ) : (
