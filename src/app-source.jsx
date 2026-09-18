@@ -5815,22 +5815,11 @@ function GlowUpTracker() {
           position: fixed; top: -10vh; z-index: 61; pointer-events: none;
           animation: confettiFall 2.4s linear forwards;
         }
-        .baby-mode button {
-          min-height: 38px;
-          border-radius: 14px;
-          box-shadow: 0 4px 10px rgba(166,93,193,.10);
-        }
-        .baby-mode input,
-        .baby-mode select,
-        .baby-mode textarea {
-          min-height: 38px;
-          border-radius: 14px;
-        }
         .baby-mode .baby-shell {
-          padding: 10px;
-          border-radius: 34px;
-          background: rgba(255,255,255,.28);
-          box-shadow: 0 18px 55px rgba(166,93,193,.12);
+          padding: 0;
+          border-radius: 0;
+          background: transparent;
+          box-shadow: none;
         }
         .baby-mode .nursery-nook {
           position: relative; isolation: isolate; display: block; width: 100%; min-height: 148px;
@@ -6617,7 +6606,7 @@ function GlowUpTracker() {
         )}
         <div className="plushlife-app-header" style={{ marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "#B08AC7", fontWeight: 700 }}>{babyMode ? "WELCOME TO YOUR LITTLE NURSERY 🧸🍼✨" : dinoTheme ? "ONE LITTLE STEP AT A TIME 🦕✨" : "ONE LITTLE STEP AT A TIME ✨"}</div>
+            <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "#B08AC7", fontWeight: 700 }}>{dinoTheme ? "ONE LITTLE STEP AT A TIME 🦕✨" : "ONE LITTLE STEP AT A TIME ✨"}</div>
             <h1 className="app-title" style={{ fontSize: 28, margin: "6px 0 0", fontWeight: 800, letterSpacing: "-0.02em" }}>
               {user ? personalPlushlistTitle : "PlushLife"} 💜
             </h1>
@@ -6632,30 +6621,6 @@ function GlowUpTracker() {
             </button>
           </div>}
         </div>
-
-        {user && babyMode && dashboard === "today" && !betaBannerDismissed && (
-          <div style={{ marginBottom: 14, display: "flex", justifyContent: "flex-start" }}>
-            <button type="button" onClick={() => setTodayExtrasOpen((open) => !open)} aria-expanded={todayExtrasOpen} style={{ padding: "6px 11px", borderRadius: 999, border: "1px solid #E6D4F2", background: "#FFFFFFAA", color: "#8C6B9E", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>
-              {todayExtrasOpen ? "🧸 Hide nursery greeting" : "🧸 Show nursery greeting"}
-            </button>
-          </div>
-        )}
-        {user && babyMode && dashboard === "today" && todayExtrasOpen && (
-          <NurseryNook
-            outfit={selectedOutfit}
-            mood={mascotMood}
-            activityDays={activityDaysTotal}
-            onOpenCloset={() => setCollectionOpen(true)}
-          />
-        )}
-        {user && babyMode && dashboard === "today" && todayExtrasOpen && (
-          <BabyArrivalRitual
-            comfortItemName={trackerProfile?.comfort_item_name?.trim() || ""}
-            onShowTinyThing={() => setTodayCardIndex(1)}
-            onSoftDay={() => selectDayType("soft")}
-            onShowPlanner={() => setTodayCardIndex(1)}
-          />
-        )}
 
         {user && (betaBannerDismissed ? (
           <div style={{ marginBottom: 16, display: "flex", justifyContent: "flex-start", gap: 7, flexWrap: "wrap" }}>
@@ -6697,7 +6662,7 @@ function GlowUpTracker() {
           }} style={{ flex: 1, display: "grid", gridTemplateColumns: `repeat(${dashboardItems.length}, minmax(0, 1fr))`, gap: 6, minWidth: 0 }}>
             {dashboardItems.map((item) => {
               const on = item.id === dashboard;
-              const displayLabel = babyMode && item.id === "today" ? "Nursery" : item.label;
+              const displayLabel = item.label;
               return <button className="plushlife-dashboard-tab" key={item.id} id={`dashboard-tab-${item.id}`} role="tab" aria-selected={on} onClick={() => goToDashboard(item.id)} style={{ position: "relative", minHeight: 52, padding: "7px 3px", borderRadius: 13, border: on ? `2px solid ${item.accent}` : "2px solid #F3D9EC", background: on ? `${item.accent}22` : "#FFFFFF", color: on ? item.accent : "#8C6B9E", fontWeight: 900, fontSize: displayLabel.length > 10 ? 9.5 : 11, lineHeight: 1.15, overflowWrap: "break-word", wordBreak: "break-word", cursor: "pointer" }}>
                 <span style={{ display: "block", fontSize: 16, marginBottom: 2 }} aria-hidden="true">{item.icon}</span>{displayLabel}
               </button>;
