@@ -7,7 +7,6 @@ import { HabitSuggestions } from "./habit-suggestions.jsx";
 import { PlushKnowsMe } from "./plush-knows-me.jsx";
 
 const LazyDailyCompanion = React.lazy(() => import("./daily-companion.jsx").then((module) => ({ default: module.DailyCompanion })));
-const LazyBabyToday = React.lazy(() => import("./baby-today.jsx").then((module) => ({ default: module.BabyToday })));
 const LazyLowScreenToday = React.lazy(() => import("./habit-retention.jsx").then((module) => ({ default: module.LowScreenToday })));
 const LazyHabitBackgroundEngine = React.lazy(() => import("./habit-background-engine.jsx").then((module) => ({ default: module.HabitBackgroundEngine })));
 const LazySmartAdaptationPanel = React.lazy(() => import("./plush-knows-me-smart.jsx").then((module) => ({ default: module.SmartAdaptationPanel })));
