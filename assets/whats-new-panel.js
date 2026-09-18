@@ -3,9 +3,11 @@
   if (window.__plushlifeWhatsNewInstalled) return;
   window.__plushlifeWhatsNewInstalled = true;
 
-  const VERSION = "2026-09-17-v2";
-  const SEEN_KEY = "plushlife:whats-new-seen:" + VERSION;
+  const VERSION = "2026-09-17-v3";
+  const COUNT_KEY = "plushlife:whats-new-count:" + VERSION;
+  const SESSION_KEY = "plushlife:whats-new-session:" + VERSION;
   const PANEL_ID = "plushlife-whats-new";
+  const MAX_SHOWS = 3;
 
   const latest = [
     ["🧸", "Check-in feels like PlushLife now", "Cleaner spacing, stronger selected states, theme-aware colors, and your own saved comfort item in the safety prompt."],
@@ -23,17 +25,25 @@
     ["Weekly progress celebrates adapting", "Weekly reflections can recognize when choosing a softer plan was the right call."],
   ];
 
-  function seen() {
-    try { return localStorage.getItem(SEEN_KEY) === "1"; } catch (_) { return false; }
+  function readCount() {
+    try { return Math.max(0, Number(localStorage.getItem(COUNT_KEY)) || 0); }
+    catch (_) { return MAX_SHOWS; }
   }
-  function markSeen() {
-    try { localStorage.setItem(SEEN_KEY, "1"); } catch (_) {}
+  function sessionShown() {
+    try { return sessionStorage.getItem(SESSION_KEY) === "1"; } catch (_) { return false; }
+  }
+  function markShown() {
+    try {
+      const next = Math.min(MAX_SHOWS, readCount() + 1);
+      localStorage.setItem(COUNT_KEY, String(next));
+      sessionStorage.setItem(SESSION_KEY, "1");
+    } catch (_) {}
   }
   function esc(value) {
     return String(value || "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
   }
 
-  function cardHtml() {
+  function modalHtml() {
     const rows = latest.map(([icon,title,body], index) => `
       <div class="plushlife-whats-new__item${index < 3 ? " is-featured" : ""}">
         <span class="plushlife-whats-new__icon" aria-hidden="true">${esc(icon)}</span>
@@ -41,14 +51,18 @@
       </div>`).join("");
     const oldRows = previous.map(([title,body]) => `
       <div class="plushlife-whats-new__old"><strong>${esc(title)}</strong><span>${esc(body)}</span></div>`).join("");
+
     return `
-      <section id="${PANEL_ID}" data-plushlife-secondary-section="true" aria-label="What's new in PlushLife">
-        <button type="button" class="plushlife-whats-new__summary" aria-expanded="${seen() ? "false" : "true"}">
-          <span class="plushlife-whats-new__spark" aria-hidden="true">✨</span>
-          <span class="plushlife-whats-new__heading"><strong>What's new in PlushLife</strong><small>September 17 update</small></span>
-          <span class="plushlife-whats-new__chev" aria-hidden="true">⌄</span>
-        </button>
-        <div class="plushlife-whats-new__body" ${seen() ? "hidden" : ""}>
+      <div id="${PANEL_ID}" class="plushlife-whats-new__backdrop" role="presentation">
+        <section class="plushlife-whats-new__modal" role="dialog" aria-modal="true" aria-labelledby="plushlife-whats-new-title">
+          <button type="button" class="plushlife-whats-new__close" aria-label="Close what's new">×</button>
+          <div class="plushlife-whats-new__header">
+            <span class="plushlife-whats-new__spark" aria-hidden="true">✨</span>
+            <span class="plushlife-whats-new__heading">
+              <strong id="plushlife-whats-new-title">What's new in PlushLife</strong>
+              <small>September 17 update</small>
+            </span>
+          </div>
           <div class="plushlife-whats-new__intro">A cleaner, calmer PlushLife — with the same routines and progress underneath.</div>
           <div class="plushlife-whats-new__grid">${rows}</div>
           <details class="plushlife-whats-new__previous">
@@ -56,73 +70,91 @@
             <div class="plushlife-whats-new__previous-body">${oldRows}</div>
           </details>
           <button type="button" class="plushlife-whats-new__done">Got it</button>
-        </div>
-      </section>`;
+        </section>
+      </div>`;
+  }
+
+  function closeModal(panel) {
+    if (!panel) return;
+    panel.classList.add("is-closing");
+    window.setTimeout(() => panel.remove(), 140);
   }
 
   function bind(panel) {
     if (!panel || panel.dataset.bound === "true") return;
     panel.dataset.bound = "true";
-    const summary = panel.querySelector(".plushlife-whats-new__summary");
-    const body = panel.querySelector(".plushlife-whats-new__body");
+    const modal = panel.querySelector(".plushlife-whats-new__modal");
     const done = panel.querySelector(".plushlife-whats-new__done");
-    summary?.addEventListener("click", () => {
-      const open = body?.hasAttribute("hidden");
-      if (!body) return;
-      if (open) body.removeAttribute("hidden"); else body.setAttribute("hidden", "");
-      summary.setAttribute("aria-expanded", open ? "true" : "false");
-      if (open) markSeen();
+    const close = panel.querySelector(".plushlife-whats-new__close");
+
+    done?.addEventListener("click", () => closeModal(panel));
+    close?.addEventListener("click", () => closeModal(panel));
+    panel.addEventListener("click", (event) => {
+      if (event.target === panel) closeModal(panel);
     });
-    done?.addEventListener("click", () => {
-      markSeen();
-      body?.setAttribute("hidden", "");
-      summary?.setAttribute("aria-expanded", "false");
+    document.addEventListener("keydown", function onKey(event) {
+      if (event.key !== "Escape" || !document.getElementById(PANEL_ID)) return;
+      document.removeEventListener("keydown", onKey);
+      closeModal(panel);
     });
+    window.setTimeout(() => close?.focus(), 20);
+  }
+
+  function shouldWait() {
+    return Boolean(
+      document.querySelector("#checkin-popup-title") ||
+      document.querySelector('[role="dialog"][aria-modal="true"]') ||
+      document.documentElement.hasAttribute("data-plushlife-checkin-open")
+    );
   }
 
   function installPanel() {
-    let panel = document.getElementById(PANEL_ID);
-    if (panel) { bind(panel); return; }
-    const stack = document.querySelector("[data-plushlife-home-stack]");
-    if (!stack) return;
+    if (document.getElementById(PANEL_ID)) return;
+    if (readCount() >= MAX_SHOWS || sessionShown() || shouldWait()) return;
+    const home = document.querySelector("[data-plushlife-home-stack]");
+    if (!home) return;
+
     const wrap = document.createElement("div");
-    wrap.innerHTML = cardHtml().trim();
-    panel = wrap.firstElementChild;
+    wrap.innerHTML = modalHtml().trim();
+    const panel = wrap.firstElementChild;
     if (!panel) return;
 
-    const nextStep = stack.querySelector("#plushlife-smart-next-step");
-    const anchor = nextStep?.parentElement === stack ? nextStep : null;
-    if (anchor?.nextSibling) stack.insertBefore(panel, anchor.nextSibling);
-    else if (anchor) stack.appendChild(panel);
-    else stack.prepend(panel);
+    document.body.appendChild(panel);
+    markShown();
     bind(panel);
   }
 
   const style = document.createElement("style");
   style.id = "plushlife-whats-new-style";
   style.textContent = `
-    #${PANEL_ID}{
-      margin:0!important;border:1px solid var(--plush-border,#e7d5ec)!important;border-radius:18px!important;
-      background:var(--plush-surface,#fff)!important;color:var(--plush-text,#50365a)!important;
-      overflow:hidden!important;box-shadow:none!important;
+    .plushlife-whats-new__backdrop{
+      position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));
+      background:rgba(24,15,34,.58);backdrop-filter:blur(10px);animation:plushWhatsNewFade .16s ease-out;
     }
-    .plushlife-whats-new__summary{width:100%;display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;padding:12px 13px;border:0;background:transparent;color:inherit;cursor:pointer}
-    .plushlife-whats-new__spark{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--plush-accent,#c77dd6) 14%,var(--plush-surface-2,#fff));font-size:18px}
-    .plushlife-whats-new__heading strong{display:block;font-size:13.5px;line-height:1.25}.plushlife-whats-new__heading small{display:block;margin-top:2px;color:var(--plush-copy,#786681);font-size:10.5px;font-weight:700}
-    .plushlife-whats-new__chev{font-size:18px;color:var(--plush-muted,#9988a1);transition:transform .16s ease}.plushlife-whats-new__summary[aria-expanded="true"] .plushlife-whats-new__chev{transform:rotate(180deg)}
-    .plushlife-whats-new__body{padding:0 13px 13px}.plushlife-whats-new__body[hidden]{display:none!important}
-    .plushlife-whats-new__intro{padding:9px 10px;border-radius:12px;background:var(--plush-surface-3,#f8eef9);color:var(--plush-copy,#786681);font-size:11.5px;line-height:1.45}
-    .plushlife-whats-new__grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-    .plushlife-whats-new__item{display:grid;grid-template-columns:27px minmax(0,1fr);gap:8px;align-items:start;padding:10px;border:1px solid var(--plush-border-soft,#efe3f2);border-radius:13px;background:var(--plush-surface-2,#fff)}
+    .plushlife-whats-new__backdrop.is-closing{opacity:0;transition:opacity .14s ease}
+    .plushlife-whats-new__modal{
+      position:relative;width:min(100%,520px);max-height:min(82vh,760px);overflow:auto;padding:18px;
+      border:1px solid var(--plush-border,#e7d5ec);border-radius:24px;background:var(--plush-surface,#fff);color:var(--plush-text,#50365a);
+      box-shadow:0 24px 80px rgba(24,15,34,.35);animation:plushWhatsNewPop .18s ease-out;
+    }
+    .plushlife-whats-new__close{
+      position:absolute;top:12px;right:12px;width:44px;height:44px;border:1px solid var(--plush-border-soft,#efe3f2);border-radius:14px;
+      background:var(--plush-surface-2,#fff);color:var(--plush-text,#50365a);font-size:26px;line-height:1;cursor:pointer;
+    }
+    .plushlife-whats-new__header{display:grid;grid-template-columns:44px minmax(0,1fr);gap:11px;align-items:center;padding-right:52px}
+    .plushlife-whats-new__spark{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--plush-accent,#c77dd6) 14%,var(--plush-surface-2,#fff));font-size:21px}
+    .plushlife-whats-new__heading strong{display:block;font-size:18px;line-height:1.2}.plushlife-whats-new__heading small{display:block;margin-top:3px;color:var(--plush-copy,#786681);font-size:12px;font-weight:800}
+    .plushlife-whats-new__intro{margin-top:14px;padding:10px 11px;border-radius:13px;background:var(--plush-surface-3,#f8eef9);color:var(--plush-copy,#786681);font-size:12px;line-height:1.45}
+    .plushlife-whats-new__grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:11px}
+    .plushlife-whats-new__item{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start;padding:11px;border:1px solid var(--plush-border-soft,#efe3f2);border-radius:14px;background:var(--plush-surface-2,#fff)}
     .plushlife-whats-new__item.is-featured{border-color:color-mix(in srgb,var(--plush-accent,#c77dd6) 38%,var(--plush-border-soft,#efe3f2))}
-    .plushlife-whats-new__icon{font-size:18px;line-height:1.2}.plushlife-whats-new__item strong{display:block;font-size:11.5px;line-height:1.3}.plushlife-whats-new__item small{display:block;margin-top:3px;color:var(--plush-copy,#786681);font-size:10.2px;line-height:1.38}
-    .plushlife-whats-new__previous{margin-top:10px;border-top:1px solid var(--plush-border-soft,#efe3f2);padding-top:8px}.plushlife-whats-new__previous>summary{cursor:pointer;color:var(--plush-copy,#786681);font-size:10.8px;font-weight:900}
-    .plushlife-whats-new__previous-body{display:grid;gap:7px;margin-top:8px}.plushlife-whats-new__old{padding:8px 9px;border-radius:10px;background:var(--plush-surface-3,#f8eef9)}.plushlife-whats-new__old strong{display:block;font-size:10.7px}.plushlife-whats-new__old span{display:block;margin-top:2px;color:var(--plush-copy,#786681);font-size:9.8px;line-height:1.35}
-    .plushlife-whats-new__done{width:100%;min-height:44px;margin-top:10px;border:0;border-radius:12px;background:var(--plush-accent,#c77dd6);color:white;font-weight:900;cursor:pointer}
-    html[data-plushlife-calm-home="true"] #${PANEL_ID}{display:none!important}
-    body.plushlife-modal-open #${PANEL_ID},html[data-plushlife-checkin-open] #${PANEL_ID}{pointer-events:none}
-    @media(max-width:480px){.plushlife-whats-new__grid{grid-template-columns:1fr}.plushlife-whats-new__summary{padding:11px 12px}.plushlife-whats-new__body{padding:0 12px 12px}}
-    @media(prefers-reduced-motion:reduce){.plushlife-whats-new__chev{transition:none}}
+    .plushlife-whats-new__icon{font-size:19px;line-height:1.2}.plushlife-whats-new__item strong{display:block;font-size:12px;line-height:1.3}.plushlife-whats-new__item small{display:block;margin-top:3px;color:var(--plush-copy,#786681);font-size:10.4px;line-height:1.4}
+    .plushlife-whats-new__previous{margin-top:11px;border-top:1px solid var(--plush-border-soft,#efe3f2);padding-top:9px}.plushlife-whats-new__previous>summary{cursor:pointer;color:var(--plush-copy,#786681);font-size:11px;font-weight:900}
+    .plushlife-whats-new__previous-body{display:grid;gap:7px;margin-top:8px}.plushlife-whats-new__old{padding:8px 9px;border-radius:10px;background:var(--plush-surface-3,#f8eef9)}.plushlife-whats-new__old strong{display:block;font-size:10.8px}.plushlife-whats-new__old span{display:block;margin-top:2px;color:var(--plush-copy,#786681);font-size:9.9px;line-height:1.35}
+    .plushlife-whats-new__done{width:100%;min-height:48px;margin-top:12px;border:0;border-radius:13px;background:var(--plush-accent,#c77dd6);color:white;font-weight:900;font-size:13px;cursor:pointer}
+    @keyframes plushWhatsNewFade{from{opacity:0}to{opacity:1}} @keyframes plushWhatsNewPop{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+    @media(max-width:480px){.plushlife-whats-new__grid{grid-template-columns:1fr}.plushlife-whats-new__modal{padding:16px;border-radius:22px;max-height:84vh}.plushlife-whats-new__heading strong{font-size:16px}}
+    @media(prefers-reduced-motion:reduce){.plushlife-whats-new__backdrop,.plushlife-whats-new__modal{animation:none}.plushlife-whats-new__backdrop.is-closing{transition:none}}
   `;
   document.head.appendChild(style);
 
@@ -134,5 +166,6 @@
   }
   new MutationObserver(queue).observe(document.documentElement, { childList:true, subtree:true });
   document.addEventListener("click", queue, true);
+  window.addEventListener("focus", queue);
   queue();
 })();
