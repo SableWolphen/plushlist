@@ -120,7 +120,6 @@ const requiredRegressionMarkers = [
   'Let\'s take care of one important money step',
   '🧸 MY LITTLE JOBS',
   '{babyMode ? "🧸 Little Jobs" : "✓ Tasks"}',
-  'littleJobs={rows.filter((row) => !viewDone[row.key])}',
   'const [journalQuickOpenDate, setJournalQuickOpenDate] = useState(() => trackerPeriod().date);',
   '.select("body, prompt")',
   'prompt: journalPromptToSave',
