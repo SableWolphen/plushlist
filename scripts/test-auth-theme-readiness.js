@@ -57,4 +57,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Auth/theme readiness checks passed: Google entry point, compact mobile login and landing auth, Android callback, fallbacks, and System/Light/Dark appearance are wired.");
+console.log("Auth/theme readiness checks passed: Google entry point, compact mobile login and landing auth, Android callback, fallbacks, and light-only appearance are wired.");
