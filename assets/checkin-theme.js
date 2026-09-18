@@ -208,14 +208,7 @@
   }
   function clean(value){return String(value||"").replace(/\s+/g," ").trim()}
   function detectScheme(){
-    const explicit=document.documentElement?.dataset?.plushlifeColorMode;
-    if(explicit==="dark"||explicit==="light") return explicit;
-    try{
-      const stored=localStorage.getItem("plushlife:appearance-mode:v1");
-      if(stored==="dark") return "dark";
-      if(stored==="light") return "light";
-    }catch(_){}
-    return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches?"dark":"light";
+    return "light";
   }
   function tagLeaf(root,regex,attr){
     const node=[...root.querySelectorAll("div,p,span")].find((item)=>!item.children.length&&regex.test(clean(item.textContent)));
@@ -281,7 +274,6 @@
     requestAnimationFrame(()=>{queued=false;polishDialog()});
   };
   new MutationObserver(queue).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["class","style","aria-pressed","data-plushlife-color-mode"]});
-  window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener?.("change",queue);
   window.addEventListener("storage",queue);
   document.addEventListener("click",queue,true);
   queue();
