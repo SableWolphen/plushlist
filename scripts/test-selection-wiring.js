@@ -36,11 +36,12 @@ const checks = [
 
   [!entitlements.includes("./assets/dark-mode.js"), "dark-mode runtime is not loaded"],
   [!billing.includes("./assets/checkin-theme-mode.js") && !billing.includes("./assets/unified-dark-home.js"), "dark check-in and dark-home detectors are not loaded"],
+  [!billing.includes("./assets/checkin-theme.js") && !billing.includes("./assets/checkin-comfort-prompt.js") && !billing.includes("./assets/daily-checkin-copy.js") && !billing.includes("./assets/experience-system-v2.js") && !billing.includes("./assets/nursery-layout-unifier.js"), "runtime must not mutate React-owned DOM after selections"],
   [fastStart.includes('dataset.plushlifeColorMode = "light"') && fastStart.includes('style.colorScheme = "light"'), "startup forces light mode before React"],
   [checkinTheme.includes('function detectScheme(){\n    return "light";'), "check-in styling is pinned to light palettes"],
 
   [(dailyCopy.match(/today\?"/g) || []).length >= 10 && dailyCopy.includes("const normal=[") && dailyCopy.includes("const baby=["), "daily check-in has a large rotating question bank for regular and Nursery wording"],
-  [dailyCopy.includes("86400000") && dailyCopy.includes("getFullYear()") && dailyCopy.includes("getDate()") && billing.includes("./assets/daily-checkin-copy.js"), "daily check-in question is stable for a date, changes day-to-day, and the runtime helper is loaded"],
+  [dailyCopy.includes("86400000") && dailyCopy.includes("getFullYear()") && dailyCopy.includes("getDate()"), "daily check-in rotation data remains available without owning React DOM"],
 
   [settings.includes('["focus_mode"') === false || settings.includes('checked={preferences.focus_mode}'), "Focus mode toggle remains controlled"],
   [settings.includes('["gentle_streaks"') && settings.includes('["large_text"') && settings.includes('["reduced_motion"') && settings.includes('["high_contrast"') && settings.includes('["simple_mode"') && settings.includes('["pattern_insights_enabled"') && settings.includes('["colorblind_mode"'), "all Experience toggles remain listed"],
