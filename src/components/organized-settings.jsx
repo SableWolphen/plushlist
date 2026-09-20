@@ -249,7 +249,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", paddingBottom: 12, marginBottom: 4, borderBottom: "1px solid #EEE3F1" }}>
           <div>
             <div style={{ fontSize: 12.5, fontWeight: 900, color: "#6E5480" }}>🎯 Today's check-in</div>
-            <div style={{ marginTop: 3, fontSize: 11, lineHeight: 1.4, color: "#8A7895" }}>Reopen today's feeling and Full, Soft, Tiny, Recovery, or Rest plan whenever you want to change it.</div>
+            <div style={{ marginTop: 3, fontSize: 11, lineHeight: 1.4, color: "#8A7895" }}>Reopen today's feeling and plan whenever you want.</div>
           </div>
           <button type="button" onClick={openDailyCheckIn} style={{ ...secondaryButton, flexShrink: 0 }}>Change</button>
         </div>
