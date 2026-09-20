@@ -225,30 +225,6 @@
     { id: "calm_tone", icon: "🎵", label: "Calm Tone" },
   ];
 
-  const DAILY_CHECKIN_PROMPTS = [
-    { normal: "What feels most true for you today?", baby: "How is my little self feeling today?" },
-    { normal: "What kind of energy are you bringing into today?", baby: "How much cozy energy does my little self have?" },
-    { normal: "Where are you at right now?", baby: "Where is my little self at right now?" },
-    { normal: "What does today feel like from the inside?", baby: "What does today feel like inside my little self?" },
-    { normal: "What feeling is taking up the most space today?", baby: "What feeling is biggest for my little self today?" },
-    { normal: "How is your mind and body meeting today?", baby: "How are my little mind and body doing today?" },
-    { normal: "What is your energy asking for today?", baby: "What is my little energy asking for today?" },
-    { normal: "How gentle does today need to be?", baby: "How soft does my little day need to be?" },
-    { normal: "What pace feels realistic today?", baby: "What pace feels comfy for my little self today?" },
-    { normal: "What is the closest match for how you feel?", baby: "Which feeling is closest for my little self?" },
-    { normal: "How much do you have to give today?", baby: "How much does my little self have to give today?" },
-    { normal: "What would fit the day you are actually having?", baby: "What would fit the little day I am actually having?" },
-    { normal: "What is your system telling you today?", baby: "What is my little body telling me today?" },
-    { normal: "How full is your battery today?", baby: "How full is my little battery today?" },
-    { normal: "What does your capacity look like today?", baby: "How much room does my little self have today?" },
-    { normal: "What kind of support would make today easier?", baby: "What would help my little self feel cared for today?" },
-    { normal: "How are you arriving into today?", baby: "How is my little self arriving into today?" },
-    { normal: "What feels manageable today?", baby: "What feels manageable for my little self today?" },
-    { normal: "What kind of day can you honestly hold?", baby: "What kind of little day can I comfortably hold?" },
-    { normal: "What does caring for yourself look like today?", baby: "What does caring for my little self look like today?" },
-    { normal: "What is your starting point today?", baby: "What is my little starting point today?" },
-  ];
-
   const GENTLE_AFFIRMATIONS = [
     "You are doing better than you give yourself credit for.",
     "Resting is taking care of yourself, not giving up.",
@@ -282,7 +258,6 @@
     SLEEP_TOOLS,
     SOUNDSCAPES,
     GENTLE_AFFIRMATIONS,
-    DAILY_CHECKIN_PROMPTS,
     COMFORT_TOOLS,
   };
 });
