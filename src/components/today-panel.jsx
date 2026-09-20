@@ -25,6 +25,7 @@ const LazySmartAdaptationPanel = React.lazy(() => import("./plush-knows-me-smart
  * activityDaysTotal >= 3
  * Now PlushLife starts noticing
  * <FirstDaysGuide
+ * <TodayPanelCore {...modeProps} />
  * homeSettings.insights
  * homeSettings.extras
  * Give the week a direction
