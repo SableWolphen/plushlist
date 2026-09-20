@@ -128,34 +128,15 @@
     window.setTimeout(() => { installNextStepReason(true); pulseNextStep(); }, 120);
   }
 
-  function openCapacityPicker(force = false) {
-    if (signedOut() || document.getElementById("plushlife-growth-checkin")) return false;
-    if (!force && otherDialogOpen()) return false;
-    const current = readState();
-    if (!force && (current.checkInDate === today || current.promptShownDate === today)) return false;
-
-    const seenDates = Array.isArray(current.seenDates) ? current.seenDates : [];
-    const isEarlyUse = seenDates.length < 3;
-    const overlay = document.createElement("div");
-    overlay.id = "plushlife-growth-checkin";
-    overlay.setAttribute("role", "dialog");
-    overlay.setAttribute("aria-modal", "true");
-    overlay.setAttribute("aria-labelledby", "plushlife-growth-checkin-title");
-    overlay.innerHTML = `<div class="plushlife-growth-checkin-card"><button type="button" class="plushlife-growth-checkin-close" aria-label="Not now">×</button><strong id="plushlife-growth-checkin-title">${isEarlyUse ? "How much room do you have today?" : "What kind of day is this?"}</strong><p>${isEarlyUse ? "Pick the amount of capacity you actually have. PlushLife will shape today around it." : "Choose what feels realistic right now. You can change it later in Settings."}</p><div class="plushlife-growth-choices"><button type="button" class="plushlife-growth-choice" data-mode="full"><span>☀️</span>Full<br><small>I've got some room</small></button><button type="button" class="plushlife-growth-choice" data-mode="soft"><span>🌤️</span>Soft<br><small>Keep it gentle</small></button><button type="button" class="plushlife-growth-choice" data-mode="tiny"><span>🌱</span>Tiny<br><small>Bare minimum is enough</small></button></div></div>`;
-    document.body.appendChild(overlay);
-    writeState({ promptShownDate: today });
-
-    overlay.querySelectorAll("[data-mode]").forEach((button) => button.addEventListener("click", () => chooseDay(button.dataset.mode)));
-    overlay.querySelector(".plushlife-growth-checkin-close")?.addEventListener("click", () => closeCapacityPicker(true));
-    overlay.addEventListener("click", (event) => { if (event.target === overlay) closeCapacityPicker(true); });
-    overlay.addEventListener("keydown", (event) => { if (event.key === "Escape") closeCapacityPicker(true); });
-    window.requestAnimationFrame(() => overlay.querySelector("[data-mode]")?.focus());
+  function openDailyCheckIn() {
+    document.dispatchEvent(new CustomEvent("plushlife:open-daily-checkin"));
     return true;
   }
 
   function installCheckIn() {
-    if (!todayHost()) return;
-    openCapacityPicker(false);
+    // The React daily check-in is the single source of truth for mood + day size.
+    // Keep this hook as a no-op so older refresh callers cannot recreate a second picker.
+    return;
   }
 
   function nextStepReasonText() {
@@ -320,6 +301,21 @@
     if (input?.matches?.('input[type="checkbox"]') && input.checked) window.setTimeout(recordCompletionSignal, 160);
   }, true);
 
+  window.addEventListener("plushlife:day-mode-changed", (event) => {
+    const mode = event?.detail?.mode;
+    if (!["full", "soft", "tiny", "recovery", "rest"].includes(mode)) return;
+    const seenDates = Array.from(new Set([...(readState().seenDates || []), today])).slice(-30);
+    writeState({
+      seenDates,
+      choicesByDate: choiceHistoryWith(mode),
+      lastChoice: mode,
+      lastChoiceDate: today,
+      onboardingDate: readState().onboardingDate || today,
+      checkInDate: today,
+    });
+    window.setTimeout(() => installNextStepReason(true), 80);
+  });
+
   let scheduled = false;
   const refresh = () => {
     if (scheduled) return;
@@ -333,6 +329,6 @@
   new MutationObserver(refresh).observe(document.documentElement, { childList: true, subtree: true });
   window.addEventListener("focus", refresh);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refresh(); });
-  window.PlushLifeGrowthLoop = { refresh, showShareCard, shareWin, recentChoices, summary: shareSummary, openCapacityPicker: () => openCapacityPicker(true), closeCapacityPicker };
+  window.PlushLifeGrowthLoop = { refresh, showShareCard, shareWin, recentChoices, summary: shareSummary, openCapacityPicker: openDailyCheckIn, openDailyCheckIn };
   refresh();
 })();
