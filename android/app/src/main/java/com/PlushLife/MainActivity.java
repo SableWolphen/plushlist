@@ -39,17 +39,23 @@ public class MainActivity extends BridgeActivity {
         // before onCreate(), so trying to suppress it here during a Recents
         // restore is too late. PlushLife's web boot shell handles cold-start
         // loading instead, which avoids a fake purple relaunch on warm return.
-        EdgeToEdge.enable(
-            this,
-            SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
-            SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT));
-        registerPlugin(WidgetBridgePlugin.class);
-        registerPlugin(NotificationPermissionPlugin.class);
-        registerPlugin(BuildInfoPlugin.class);
+        // Keep native startup defensive. A nonessential plugin or edge-to-edge
+        // failure must never take down the whole app on launch.
+        try { registerPlugin(WidgetBridgePlugin.class); } catch (Throwable ignored) {}
+        try { registerPlugin(NotificationPermissionPlugin.class); } catch (Throwable ignored) {}
+        try { registerPlugin(BuildInfoPlugin.class); } catch (Throwable ignored) {}
         // Temporarily disabled along with the FOREGROUND_SERVICE_DATA_SYNC
         // permission and <service> entry in AndroidManifest.xml.
         // registerPlugin(WatchSyncBridgePlugin.class);
+
         super.onCreate(savedInstanceState);
+
+        try {
+            EdgeToEdge.enable(
+                this,
+                SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+                SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT));
+        } catch (Throwable ignored) {}
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
@@ -59,17 +65,22 @@ public class MainActivity extends BridgeActivity {
         }
 
         if (savedInstanceState != null && bridge != null && bridge.getWebView() != null) {
-            Bundle webViewState = savedInstanceState.getBundle(WEBVIEW_STATE_KEY);
-            if (webViewState != null) {
-                bridge.getWebView().restoreState(webViewState);
+            try {
+                Bundle webViewState = savedInstanceState.getBundle(WEBVIEW_STATE_KEY);
+                if (webViewState != null) {
+                    bridge.getWebView().restoreState(webViewState);
+                }
+            } catch (Throwable ignored) {
+                // A stale/corrupt OEM WebView snapshot should fall back to a
+                // clean web load instead of crashing the native process.
             }
         }
 
-        if (!restoringExistingTask) {
-            checkForUpdate();
-        } else {
-            appUpdateManager = AppUpdateManagerFactory.create(this);
-        }
+        // Stability hotfix: do not start Play's in-app update flow during
+        // MainActivity startup. Play Store auto-update still works normally,
+        // and removing this launch-time dependency avoids a native failure
+        // before Capacitor has finished bringing up the WebView.
+        appUpdateManager = null;
     }
 
     private void checkForUpdate() {
@@ -110,13 +121,8 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onResume() {
         super.onResume();
-        if (appUpdateManager != null) {
-            appUpdateManager.getAppUpdateInfo().addOnSuccessListener(info -> {
-                if (info.installStatus() == InstallStatus.DOWNLOADED) {
-                    promptToRestartForUpdate();
-                }
-            });
-        }
+        // In-app update checks are intentionally disabled in the stability
+        // build; the Play Store remains responsible for normal updates.
     }
 
     @Override
