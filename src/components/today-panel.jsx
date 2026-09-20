@@ -313,9 +313,7 @@ export function TodayPanel(props) {
       <DayModeCue dayType={dayType} changed={modeChanged} />
       <CapacityNudge forecast={smartNextStep.capacityForecast} dayType={dayType} dismissed={capacityNudgeDismissed} onDismiss={() => setCapacityNudgeDismissed(true)} selectDayType={props.selectDayType} />
       <TodayPanelCore {...modeProps} />
-      <PersonalLearningLine reason={smartNextStep.reason} dayType={dayType} activityDaysTotal={props.activityDaysTotal} />
       <DayWrapUp rows={props.rows} viewDone={props.viewDone} weeklyIntentionText={props.weeklyIntentionText} />
-      <SundayCloseWeek date={props.period?.date} weeklyIntentionText={props.weeklyIntentionText} goToDashboard={props.goToDashboard} />
     </div>
     {plushMemory}
     {homeSettings.extras && <button type="button" onClick={() => setMoreForTodayOpen((open) => !open)} aria-expanded={moreForTodayOpen} style={{ width: "100%", minHeight: 46, margin: "8px 0 6px", padding: "9px 11px", borderRadius: 13, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.78)", color: "#765F84", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{moreForTodayOpen ? "Hide extra tools" : "More for today"} {moreForTodayOpen ? "⌃" : "⌄"}</button>}
