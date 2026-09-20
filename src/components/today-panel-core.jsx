@@ -181,14 +181,14 @@ export function TodayPanel({
   nextStepMoreOpen, setNextStepMoreOpen, setNextStepSkipped, setNextStepDismissedToday,
   selectedSchedule, selectedScheduleExceptionEntries, manageSchedule, setManageSchedule,
   rows, viewDone, openTaskManager, setCalmQuickOpen, calmQuickOpen, currentCopingOption,
-  reshuffle, setCareSection, goToDashboard, setTodayCardIndex
+  reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen
 }) {
   if (!open) return null;
 
   return (
     <>
       <style>{`
-        .pl-home-shell{display:grid;gap:14px;max-width:760px;margin:0 auto;padding:0 0 22px;color:${C.body}}
+        .pl-home-shell{display:grid;gap:14px;max-width:760px;margin:0 auto;padding:0 0 92px;color:${C.body}}
         .pl-home-hero{position:relative;min-height:345px;margin:-18px -14px 0;overflow:hidden;border-radius:0 0 28px 28px;background:linear-gradient(135deg,#FFF6F6 0%,#F8ECF8 54%,#EFE6F6 100%);box-shadow:inset 0 -10px 28px rgba(118,75,132,.04)}
         .pl-home-hero:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 15% 35%,rgba(255,244,221,.9),transparent 27%),radial-gradient(circle at 78% 20%,rgba(220,193,233,.42),transparent 33%),linear-gradient(90deg,rgba(255,255,255,.42),transparent 44%);pointer-events:none}
         .pl-home-window{position:absolute;left:10%;top:58px;width:39%;height:87px;border-radius:7px;background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,246,210,.78));box-shadow:inset 0 0 0 8px rgba(255,255,255,.22),0 10px 24px rgba(255,223,178,.17);opacity:.75}
@@ -204,6 +204,10 @@ export function TodayPanel({
         .pl-link-btn{border:0;background:transparent;color:#B44CC7;font-weight:900;cursor:pointer;font-size:12px}.pl-list{display:grid;gap:8px;margin-top:14px}.pl-list-row{min-height:58px;border-radius:15px;border:1px solid ${C.line2};background:rgba(255,255,255,.86);display:flex;align-items:center;gap:12px;padding:10px 14px}.pl-schedule-row{display:grid;grid-template-columns:90px 28px minmax(0,1fr) 16px}.pl-note-row{display:grid;grid-template-columns:28px minmax(0,1fr)}.pl-time{font-size:16px;font-weight:950;color:#B34CC8}.pl-row-icon{font-size:18px;text-align:center}.pl-row-text{min-width:0;color:#49385A;font-size:14.5px;font-weight:750;line-height:1.3;text-align:left}.pl-chevron{font-size:21px;color:#C783D6}.pl-habit-row{width:100%;cursor:pointer}.pl-check{width:26px;height:26px;border-radius:8px;border:2px solid #DEA8D9;background:white;flex:0 0 auto}
         .pl-home-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pl-shortcut{min-height:86px;border-radius:20px;border:1px solid ${C.line};background:rgba(255,255,255,.86);display:flex;align-items:center;gap:13px;padding:14px 16px;text-align:left;cursor:pointer}.pl-shortcut-icon{font-size:30px}.pl-shortcut-title{font-size:15px;font-weight:950;color:#3F2755}.pl-shortcut-sub{margin-top:2px;font-size:11.5px;color:#9A75A4}.pl-shortcut-arrow{margin-left:auto;font-size:22px;color:#A660B9}
         .pl-noticed{min-height:70px;border-radius:20px;border:1px solid ${C.line};background:linear-gradient(135deg,#FCF5FF,#F6ECFB);display:flex;align-items:center;gap:13px;padding:12px 17px}.pl-noticed-icon{font-size:28px}.pl-noticed-title{font-weight:950;color:#6C347E;font-size:13px}.pl-noticed-copy{margin-top:2px;color:#90709A;font-size:11.5px}.pl-noticed-arrow{margin-left:auto;color:#A65DBA;font-size:22px}
+        .pl-ref-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;min-height:76px;padding:9px 8px max(9px,env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid #F0E1F1;box-shadow:0 -8px 24px rgba(76,48,87,.07);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+        .pl-ref-nav-btn{appearance:none;border:0;background:transparent;min-height:58px;padding:4px 2px;color:#9A819F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:800;cursor:pointer}
+        .pl-ref-nav-btn .ico{font-size:24px;line-height:1}.pl-ref-nav-btn.active{color:#AF4FC6}.pl-ref-nav-add{width:54px;height:54px;min-height:54px;margin-top:-18px;border-radius:50%;background:linear-gradient(145deg,#C75BDD,#B94CCD);color:white;box-shadow:0 8px 20px rgba(178,71,199,.24);font-size:31px;line-height:1;display:flex;align-items:center;justify-content:center}
+        @media(min-width:760px){.pl-ref-bottom-nav{left:50%;right:auto;width:760px;transform:translateX(-50%);border-left:1px solid #F0E1F1;border-right:1px solid #F0E1F1;border-radius:24px 24px 0 0}}
         @media(max-width:520px){.pl-home-shell{gap:11px}.pl-home-hero{min-height:330px;margin:-16px -10px 0}.pl-home-brand{left:20px;top:23px}.pl-home-logo{font-size:29px}.pl-home-actions{right:15px;top:18px}.pl-home-date{font-size:11.5px;padding:9px 11px}.pl-home-settings{width:40px;height:40px}.pl-home-copy{left:20px;bottom:35px}.pl-home-copy h1{font-size:29px}.pl-home-copy p{font-size:16px}.pl-home-plush{right:-2px;width:51%}.pl-home-bubble{right:10px;bottom:7px;font-size:10.5px;padding:8px 11px}.pl-section-topline{align-items:flex-start}.pl-muted-note{max-width:48%}.pl-primary-task{font-size:19px}.pl-btn{padding:9px 11px;font-size:12px}.pl-schedule-row{grid-template-columns:78px 26px minmax(0,1fr) 12px}.pl-home-shortcuts{gap:8px}.pl-shortcut{padding:12px 12px}.pl-shortcut-title{font-size:13.5px}.pl-shortcut-sub{font-size:10.5px}}
       `}</style>
 
@@ -232,6 +236,14 @@ export function TodayPanel({
           <span className="pl-noticed-arrow">›</span>
         </div>
       </div>
+
+      <nav className="pl-ref-bottom-nav" aria-label="Main navigation">
+        <button type="button" className="pl-ref-nav-btn active" onClick={() => goToDashboard?.("today")}><span className="ico">⌂</span><span>Home</span></button>
+        <button type="button" className="pl-ref-nav-btn" onClick={() => goToDashboard?.("progress")}><span className="ico">▥</span><span>Progress</span></button>
+        <button type="button" className="pl-ref-nav-btn" aria-label="Add" onClick={() => openTaskManager?.(period?.date)}><span className="pl-ref-nav-add">＋</span><span>Add</span></button>
+        <button type="button" className="pl-ref-nav-btn" onClick={() => goToDashboard?.("care")}><span className="ico">♥</span><span>Care</span></button>
+        <button type="button" className="pl-ref-nav-btn" onClick={() => setProfileOpen?.(true)}><span className="ico">♟</span><span>Plush</span></button>
+      </nav>
 
       <CalmPanel open={calmQuickOpen} onClose={() => setCalmQuickOpen?.(false)} currentCopingOption={currentCopingOption} reshuffle={reshuffle} setCareSection={setCareSection} goToDashboard={goToDashboard} />
     </>
