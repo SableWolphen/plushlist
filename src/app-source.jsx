@@ -2903,24 +2903,10 @@ function GlowUpTracker() {
 
   const taskDropRows = (scope) => [...(scope || document).querySelectorAll("[data-plushlife-task-drop-key]")];
 
-  const animateTaskReflow = (before) => {
-    requestAnimationFrame(() => taskDropRows(before.scope).forEach((row) => {
-      const previousTop = before.get(row);
-      if (previousTop === undefined) return;
-      const delta = previousTop - row.getBoundingClientRect().top;
-      if (Math.abs(delta) > 1) row.animate(
-        [{ transform: `translateY(${delta}px)` }, { transform: "translateY(0)" }],
-        { duration: 170, easing: "cubic-bezier(.2,.8,.2,1)" }
-      );
-    }));
-  };
-
   const clearPointerTaskDrag = (drag) => {
     if (!drag) return;
     if (drag.activationTimer) clearTimeout(drag.activationTimer);
     if (drag.autoScrollFrame) cancelAnimationFrame(drag.autoScrollFrame);
-    (drag.wiggleAnimations || []).forEach((animation) => animation.cancel());
-    drag.preview?.remove();
     drag.placeholder?.remove();
     if (drag.row) {
       drag.row.style.height = drag.rowStyle.height;
@@ -2937,8 +2923,6 @@ function GlowUpTracker() {
 
   const placeTaskPlaceholder = (drag, clientX, clientY) => {
     if (!drag.active) return;
-    drag.preview.style.left = `${Math.max(10, Math.min(clientX + 14, window.innerWidth - drag.preview.offsetWidth - 10))}px`;
-    drag.preview.style.top = `${Math.max(10, Math.min(clientY - 52, window.innerHeight - drag.preview.offsetHeight - 10))}px`;
     const hit = document.elementFromPoint(clientX, clientY);
     const targetRow = hit?.closest?.("[data-plushlife-task-drop-key]");
     const targetSection = hit?.closest?.("[data-plushlife-task-drop-section]");
@@ -2946,7 +2930,6 @@ function GlowUpTracker() {
     let targetKey = null;
     let insertionParent = null;
     let insertionBefore = null;
-    let destination = "Drag to a task or group";
 
     if (targetRow && targetRow !== drag.row) {
       const rect = targetRow.getBoundingClientRect();
@@ -2957,29 +2940,22 @@ function GlowUpTracker() {
         const rowsInSection = taskDropRows(drag.scope).filter((row) => row !== drag.row && row.getAttribute("data-plushlife-task-drop-section") === section);
         const next = rowsInSection[rowsInSection.indexOf(targetRow) + 1] || null;
         targetKey = next?.getAttribute("data-plushlife-task-drop-key") || null;
-        destination = next?.getAttribute("data-plushlife-task-drop-label") ? `Place before ${next.getAttribute("data-plushlife-task-drop-label")}` : `Place at end of ${section}`;
       } else {
         targetKey = targetRow.getAttribute("data-plushlife-task-drop-key");
-        destination = `Place before ${targetRow.getAttribute("data-plushlife-task-drop-label") || "this task"}`;
       }
     } else if (targetSection) {
       const rowContainer = targetSection.querySelector("[data-plushlife-task-row-container]") || targetSection;
       insertionParent = rowContainer;
       insertionBefore = null;
-      destination = `Place at end of ${section}`;
     }
 
     const signature = `${section || ""}:${targetKey || "end"}:${insertionParent ? "target" : "none"}`;
     if (insertionParent && signature !== drag.destinationSignature) {
-      const before = new Map(taskDropRows(drag.scope).map((row) => [row, row.getBoundingClientRect().top]));
-      before.scope = drag.scope;
       insertionParent.insertBefore(drag.placeholder, insertionBefore);
       drag.destinationSignature = signature;
       drag.targetSection = section;
       drag.targetKey = targetKey;
-      animateTaskReflow(before);
     }
-    drag.preview.querySelector("[data-drag-destination]").textContent = destination;
   };
 
   const runTaskAutoScroll = (drag) => {
@@ -3011,30 +2987,6 @@ function GlowUpTracker() {
       overflow: drag.row.style.overflow, pointerEvents: drag.row.style.pointerEvents,
     };
     Object.assign(drag.row.style, { height: "0px", minHeight: "0px", margin: "0px", padding: "0px", borderWidth: "0px", opacity: "0", overflow: "hidden", pointerEvents: "none" });
-    drag.wiggleAnimations = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
-      ? []
-      : taskDropRows(drag.scope)
-        .filter((row) => row !== drag.row)
-        .map((row, index) => row.animate(
-          [
-            { translate: "-1px 0", rotate: "-0.12deg" },
-            { translate: "1px 0", rotate: "0.12deg" },
-          ],
-          { duration: 180, iterations: Infinity, direction: "alternate", easing: "ease-in-out", delay: -(index % 4) * 35 }
-        ));
-    const preview = document.createElement("div");
-    preview.setAttribute("role", "status");
-    preview.style.cssText = `position:fixed;z-index:9999;width:${Math.min(rect.width, 330)}px;box-sizing:border-box;padding:11px 13px;border:1px solid #E6D4F2;border-radius:12px;background:#FFFCFE;color:#5B4B6B;box-shadow:0 16px 34px rgba(66,42,78,.28);pointer-events:none;font-family:inherit;line-height:1.35`;
-    const title = document.createElement("strong");
-    title.textContent = drag.label;
-    title.style.cssText = "display:block;font-size:13px";
-    const destination = document.createElement("span");
-    destination.dataset.dragDestination = "true";
-    destination.textContent = "Choose a new position";
-    destination.style.cssText = "display:block;margin-top:3px;color:#9A4EAD;font-size:11px;font-weight:800";
-    preview.append(title, destination);
-    document.body.appendChild(preview);
-    drag.preview = preview;
     if (navigator.vibrate) navigator.vibrate(18);
     placeTaskPlaceholder(drag, drag.lastX, drag.lastY);
     runTaskAutoScroll(drag);
@@ -3051,7 +3003,7 @@ function GlowUpTracker() {
     const drag = {
       pointerId: event.pointerId, handle: event.currentTarget, row, scope: row.closest("[data-plushlife-task-drag-scope]") || document, taskKey, label: taskLabel,
       startX: event.clientX, startY: event.clientY, lastX: event.clientX, lastY: event.clientY,
-      active: false, destinationSignature: null, targetSection: null, targetKey: null, autoScrollFrame: null, activationTimer: null, wiggleAnimations: [],
+      active: false, destinationSignature: null, targetSection: null, targetKey: null, autoScrollFrame: null, activationTimer: null,
     };
     taskPointerDragRef.current = drag;
     if (event.pointerType === "touch" || event.pointerType === "pen") {
