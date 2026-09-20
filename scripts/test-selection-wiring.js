@@ -12,7 +12,7 @@ const entitlements = read("assets/entitlements.js");
 const billing = read("assets/plush-billing.js");
 const fastStart = read("assets/fast-start.js");
 const checkinTheme = read("assets/checkin-theme.js");
-const content = read("assets/plush-content.js");
+const dailyCopy = read("assets/daily-checkin-copy.js");
 
 const checks = [
   [settings.includes("APPEARANCE_THEMES.map((theme)") && settings.includes("onClick={() => selectAppearanceTheme(theme.id)}"), "every ambient theme button calls selectAppearanceTheme"],
@@ -39,8 +39,8 @@ const checks = [
   [fastStart.includes('dataset.plushlifeColorMode = "light"') && fastStart.includes('style.colorScheme = "light"'), "startup forces light mode before React"],
   [checkinTheme.includes('function detectScheme(){\n    return "light";'), "check-in styling is pinned to light palettes"],
 
-  [(content.match(/\{ normal: "/g) || []).length >= 21 && content.includes("DAILY_CHECKIN_PROMPTS"), "daily check-in has at least 21 rotating question sets"],
-  [app.includes("dailyPromptIndex") && app.includes("86400000") && app.includes("dailyCheckInPrompt.normal") && app.includes("dailyCheckInPrompt.baby"), "daily check-in question is stable for a date and rotates for both regular and Nursery wording"],
+  [(dailyCopy.match(/today\?"/g) || []).length >= 10 && dailyCopy.includes("const normal=[") && dailyCopy.includes("const baby=["), "daily check-in has a large rotating question bank for regular and Nursery wording"],
+  [dailyCopy.includes("86400000") && dailyCopy.includes("getFullYear()") && dailyCopy.includes("getDate()") && billing.includes("./assets/daily-checkin-copy.js"), "daily check-in question is stable for a date, changes day-to-day, and the runtime helper is loaded"],
 
   [settings.includes('["focus_mode"') === false || settings.includes('checked={preferences.focus_mode}'), "Focus mode toggle remains controlled"],
   [settings.includes('["gentle_streaks"') && settings.includes('["large_text"') && settings.includes('["reduced_motion"') && settings.includes('["high_contrast"') && settings.includes('["simple_mode"') && settings.includes('["pattern_insights_enabled"') && settings.includes('["colorblind_mode"'), "all Experience toggles remain listed"],
