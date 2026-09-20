@@ -626,8 +626,6 @@
     running = true;
     try {
       installStyle();
-      document.getElementById("plushlife-adaptive-capacity-card")?.remove();
-      document.getElementById("plushlife-growth-checkin")?.remove();
       installTomorrowNote();
       installTomorrowSetup();
       enhanceTaskManager();
