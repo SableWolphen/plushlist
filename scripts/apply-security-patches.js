@@ -103,6 +103,16 @@ patchFile(
         replace: "import org.apache.cordova.PluginManager;\nimport org.json.JSONObject;\n\n/**",
       },
       {
+        find: '                Logger.error("JavaScript Error: " + jsonStr);',
+        replace: '                Logger.error("JavaScript error received from WebView");',
+      },
+      {
+        find:
+          '                Logger.verbose(\n                    Logger.tags("Plugin"),\n                    "To native (Cordova plugin): callbackId: " +\n                        callbackId +\n                        ", service: " +\n                        service +\n                        ", action: " +\n                        action +\n                        ", actionArgs: " +\n                        actionArgs\n                );',
+        replace:
+          '                Logger.verbose(Logger.tags("Plugin"), "To native (Cordova plugin): request received");',
+      },
+      {
         find: '        } catch (Exception ex) {\n            Logger.error("Post message error:", ex);\n        }',
         replace:
           "        } catch (Exception ex) {\n" +
@@ -139,7 +149,8 @@ patchFile(
 );
 
 if (hadMismatch) {
-  console.warn(
-    "[apply-security-patches] one or more expected edits were skipped -- see warnings above."
+  console.error(
+    "[apply-security-patches] SECURITY PATCH MISMATCH: refusing to continue with unpatched vendored native code."
   );
+  process.exit(1);
 }
