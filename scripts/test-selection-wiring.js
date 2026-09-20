@@ -22,9 +22,9 @@ const checks = [
   [settings.includes('dino_theme: event.target.checked ? false : preferences.dino_theme'), "enabling Baby Mode disables Dino Theme"],
   [settings.includes('title="🦕 Dino Theme"') && settings.includes('nickname_style: event.target.checked ? "warm" : preferences.nickname_style'), "Dino Theme selection leaves the shared layout and exits Baby wording mode"],
 
-  [settings.includes("window.PlushLifeGrowthLoop?.openCapacityPicker?.()"), "Settings can reopen the unified daily check-in"],
+  [settings.includes("onClick={openDailyCheckIn}") && settings.includes("openDailyCheckIn, watchPairingCode"), "Settings can reopen the unified daily check-in directly"],
   [growth.includes('document.dispatchEvent(new CustomEvent("plushlife:open-daily-checkin"))') && growth.includes("openCapacityPicker: openDailyCheckIn"), "legacy capacity API routes into the unified daily check-in"],
-  [app.includes('document.addEventListener("plushlife:open-daily-checkin", openDailyCheckIn)') && app.includes("setCheckInPopupOpen(true)"), "the app receives unified daily check-in open requests"],
+  [app.includes('document.addEventListener("plushlife:open-daily-checkin", openDailyCheckIn)') && app.includes("setCheckInPopupOpen(true)") && app.includes("openDailyCheckIn={() => { setSettingsOpen(false);"), "the app receives unified daily check-in requests and wires Settings directly"],
   [app.includes("data-plushlife-day-type={value}") && app.includes("DAY_TYPES.map"), "all canonical day choices expose a stable selector"],
   [growth.includes('window.addEventListener("plushlife:day-mode-changed"') && growth.includes("choicesByDate: choiceHistoryWith(mode)"), "day choice history stays synchronized with the canonical check-in"],
   [!growth.includes('overlay.innerHTML = `<div class="plushlife-growth-checkin-card"'), "growth loop no longer renders a second capacity dialog"],
