@@ -70,7 +70,6 @@ const {
   SLEEP_TOOLS,
   SOUNDSCAPES,
   GENTLE_AFFIRMATIONS,
-  DAILY_CHECKIN_PROMPTS,
   COMFORT_TOOLS,
 } = window.PlushLifeContent;
 const {
@@ -5550,8 +5549,6 @@ function GlowUpTracker() {
   }, [user?.id, dashboard, supportViewMode]);
 
   const babyMode = preferences.nickname_style === "baby";
-  const dailyPromptIndex = Math.floor(new Date(`${period.date}T12:00:00`).getTime() / 86400000) % DAILY_CHECKIN_PROMPTS.length;
-  const dailyCheckInPrompt = DAILY_CHECKIN_PROMPTS[dailyPromptIndex] || DAILY_CHECKIN_PROMPTS[0];
   useEffect(() => {
     if (!user?.id || !preferences.onboarding_complete || !privateNoteLoaded || privateNote) return;
     if (!dailyCheckIn.capacity && !checkInPopupDismissedToday) return;
@@ -6049,7 +6046,7 @@ function GlowUpTracker() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
                 <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>{babyMode ? `🍼 ${babyCaregiverName.toUpperCase()} CHECK-IN` : "🎯 TODAY'S CHECK-IN"}</div>
-                <div id="checkin-popup-title" style={{ marginTop: 4, fontSize: 19, fontWeight: 900, color: "#75428C" }}>{babyMode ? dailyCheckInPrompt.baby : dailyCheckInPrompt.normal}</div>
+                <div id="checkin-popup-title" style={{ marginTop: 4, fontSize: 19, fontWeight: 900, color: "#75428C" }}>{babyMode ? "How does my little self feel?" : "How are you today?"}</div>
                 {babyMode && <div style={{ marginTop: 5, color: "#8C6B9E", fontSize: 11.5, lineHeight: 1.45 }}>Pick one feeling. We’ll shape today.</div>}
                 {babyMode && trackerProfile?.comfort_item_name?.trim() && <div style={{ marginTop: 6, padding: "6px 8px", borderRadius: 9, background: "#FFF8E8", color: "#806536", fontSize: 10.5, fontWeight: 800 }}>🧸 Is {trackerProfile.comfort_item_name.trim()} nearby?</div>}
               </div>
