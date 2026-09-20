@@ -23,7 +23,7 @@ const checks = [
   [settings.includes('title="🦕 Dino Theme"') && settings.includes('nickname_style: event.target.checked ? "warm" : preferences.nickname_style'), "Dino Theme selection leaves the shared layout and exits Baby wording mode"],
 
   [settings.includes("onClick={openDailyCheckIn}") && settings.includes("openDailyCheckIn, watchPairingCode"), "Settings can reopen the unified daily check-in directly"],
-  [growth.includes('document.querySelector(\'[data-plushlife-open-checkin="true"]\')') && growth.includes("openCapacityPicker: openDailyCheckIn"), "legacy capacity API routes into the unified daily check-in"],
+  [growth.includes('document.getElementById("plushlife-checkin-trigger")') && growth.includes("openCapacityPicker: openDailyCheckIn"), "legacy capacity API routes into the unified daily check-in"],
   [app.includes('id="plushlife-checkin-trigger"') && app.includes("openDailyCheckIn={() => { setSettingsOpen(false);"), "the app exposes one canonical daily check-in trigger and wires Settings directly"],
   [app.includes("data-plushlife-day-type={value}") && app.includes("DAY_TYPES.map"), "all canonical day choices expose a stable selector"],
   [growth.includes("choicesByDate: choiceHistoryWith(mode)") || growth.includes("nextStepReasonText"), "growth logic still retains day-mode reasoning support"],
