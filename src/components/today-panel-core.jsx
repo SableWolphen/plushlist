@@ -10,6 +10,10 @@ import { CalmPanel } from "./info-panels.jsx";
  * width: 38, height: 44, minHeight: 44
  * textOverflow: "ellipsis"
  * whiteSpace: "nowrap"
+ * No catching up. We're only looking at today.
+ * Resume normally
+ * Essentials only
+ * Lighter routine
  */
 
 const C = {
