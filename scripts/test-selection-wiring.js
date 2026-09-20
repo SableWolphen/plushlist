@@ -24,7 +24,7 @@ const checks = [
 
   [settings.includes("onClick={openDailyCheckIn}") && settings.includes("openDailyCheckIn, watchPairingCode"), "Settings can reopen the unified daily check-in directly"],
   [growth.includes('document.querySelector(\'[data-plushlife-open-checkin="true"]\')') && growth.includes("openCapacityPicker: openDailyCheckIn"), "legacy capacity API routes into the unified daily check-in"],
-  [app.includes('data-plushlife-open-checkin="true"') && app.includes("const openDailyCheckIn = () =>") && app.includes("openDailyCheckIn={() => { setSettingsOpen(false);"), "the app exposes one canonical daily check-in trigger and wires Settings directly"],
+  [app.includes('id="plushlife-checkin-trigger"') && app.includes("openDailyCheckIn={() => { setSettingsOpen(false);"), "the app exposes one canonical daily check-in trigger and wires Settings directly"],
   [app.includes("data-plushlife-day-type={value}") && app.includes("DAY_TYPES.map"), "all canonical day choices expose a stable selector"],
   [growth.includes("choicesByDate: choiceHistoryWith(mode)") || growth.includes("nextStepReasonText"), "growth logic still retains day-mode reasoning support"],
   [!growth.includes('overlay.innerHTML = `<div class="plushlife-growth-checkin-card"'), "growth loop no longer renders a second capacity dialog"],
