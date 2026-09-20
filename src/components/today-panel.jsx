@@ -20,7 +20,6 @@ const LazySmartAdaptationPanel = React.lazy(() => import("./plush-knows-me-smart
  * LowScreenJustCompleted
  * JUST COMPLETED
  * {backgroundEngine}
- * <TodayPanelCore {...modeProps} />
  * DAY {dayNumber} OF 3
  * activityDaysTotal >= 3
  * Now PlushLife starts noticing
