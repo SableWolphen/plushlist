@@ -105,7 +105,7 @@ function formatSyncStatus(online, syncStatus, lastSyncedAt) {
   try { return `Synced ${new Date(lastSyncedAt).toLocaleString()}`; } catch (_error) { return "Synced"; }
 }
 
-export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairingCode, connectWatch, watchPairingBusy, watchPairingMessage, localWatchSyncBusy, startLocalWatchSync, localWatchSyncMessage, dailyCheckIn, pct, rows, viewDone, weeklyOverallPct, widgetSyncMsg, setWidgetSyncMsg, displayNameDraft, setDisplayNameDraft, saveDisplayName, comfortItemDraft, setComfortItemDraft, saveComfortItem, preferences, appearanceTheme, selectAppearanceTheme, dinoTheme, updatePreference, enableNotifications, smartReminderSuggestion, restDatesSet, toggleRestToday, period, restRangeDraft, setRestRangeDraft, saveRestRange, restDates, feedbackText, setFeedbackText, submitFeedback, feedbackMessage, exportMyData, restoreFileInputRef, restoreFromBackup, deleteAllCheckIns, deleteAllReflections, user, online, syncStatus, lastSyncedAt, syncNow, emailChangeDraft, setEmailChangeDraft, requestEmailChange, signingOut, handleSignOut, signOutOtherDevices, deleteMyAccount, deviceBackupStatus, refreshDeviceBackup, deviceBackupBusy, verifyDeviceBackupNow, deviceBackupVerifyBusy, settingsMessage }) {
+export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCode, setWatchPairingCode, connectWatch, watchPairingBusy, watchPairingMessage, localWatchSyncBusy, startLocalWatchSync, localWatchSyncMessage, dailyCheckIn, pct, rows, viewDone, weeklyOverallPct, widgetSyncMsg, setWidgetSyncMsg, displayNameDraft, setDisplayNameDraft, saveDisplayName, comfortItemDraft, setComfortItemDraft, saveComfortItem, preferences, appearanceTheme, selectAppearanceTheme, dinoTheme, updatePreference, enableNotifications, smartReminderSuggestion, restDatesSet, toggleRestToday, period, restRangeDraft, setRestRangeDraft, saveRestRange, restDates, feedbackText, setFeedbackText, submitFeedback, feedbackMessage, exportMyData, restoreFileInputRef, restoreFromBackup, deleteAllCheckIns, deleteAllReflections, user, online, syncStatus, lastSyncedAt, syncNow, emailChangeDraft, setEmailChangeDraft, requestEmailChange, signingOut, handleSignOut, signOutOtherDevices, deleteMyAccount, deviceBackupStatus, refreshDeviceBackup, deviceBackupBusy, verifyDeviceBackupNow, deviceBackupVerifyBusy, settingsMessage }) {
   const [section, setSection] = React.useState("home");
   const [search, setSearch] = React.useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
@@ -251,7 +251,7 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
             <div style={{ fontSize: 12.5, fontWeight: 900, color: "#6E5480" }}>🎯 Today's check-in</div>
             <div style={{ marginTop: 3, fontSize: 11, lineHeight: 1.4, color: "#8A7895" }}>Reopen today's feeling and Full, Soft, Tiny, Recovery, or Rest plan whenever you want to change it.</div>
           </div>
-          <button type="button" onClick={() => window.PlushLifeGrowthLoop?.openCapacityPicker?.()} style={{ ...secondaryButton, flexShrink: 0 }}>Change</button>
+          <button type="button" onClick={openDailyCheckIn} style={{ ...secondaryButton, flexShrink: 0 }}>Change</button>
         </div>
         <ToggleRow checked={preferences.focus_mode} onChange={(event) => updatePreference({ focus_mode: event.target.checked })} title="🎯 PlushFocus — one task at a time" description="Show only your next task on Today when a full list feels like too much." />
         {[
