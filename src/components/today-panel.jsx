@@ -48,7 +48,8 @@ const LazySmartAdaptationPanel = React.lazy(() => import("./plush-knows-me-smart
  * today-interactive
  * background-intelligence-start
  */
-\nconst HABIT_STATE_KEY = "plushlife:habit-coach:v1";
+
+const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 
 function recordNextStepChoice(row, action, date) {
   const taskId = String(row?.sourceTask?.id || row?.task_id || row?.id || row?.key || "");
