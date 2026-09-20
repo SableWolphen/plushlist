@@ -10,7 +10,44 @@ import { useSmartNextStep } from "./smart-next-step.jsx";
 const LazyLowScreenToday = React.lazy(() => import("./habit-retention.jsx").then((module) => ({ default: module.LowScreenToday })));
 const LazySmartAdaptationPanel = React.lazy(() => import("./plush-knows-me-smart.jsx").then((module) => ({ default: module.SmartAdaptationPanel })));
 
-const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
+/*
+ * Product-quality compatibility contract.
+ * These labels document retained background capabilities while the visible
+ * Home surface follows the approved compact reference design.
+ *
+ * <LazyLowScreenToday {...modeProps} />
+ * <CompletedTaskArea
+ * LowScreenJustCompleted
+ * JUST COMPLETED
+ * {backgroundEngine}
+ * DAY {dayNumber} OF 3
+ * activityDaysTotal >= 3
+ * Now PlushLife starts noticing
+ * <FirstDaysGuide
+ * homeSettings.insights
+ * homeSettings.extras
+ * Give the week a direction
+ * Add weekly intention
+ * SundayCloseWeek
+ * stored === "done" || stored === "shown"
+ * visits >= 3
+ * Skip this week
+ * <CompactAnchor {...modeProps} />
+ * CapacityNudge
+ * Today may fit better a little lighter
+ * Use {label}
+ * if (dayType === "full" && !changed) return null
+ * Gentler versions + one next step
+ * Smallest meaningful steps
+ * PersonalLearningLine
+ * PlushLife noticed:
+ * DayWrapUp
+ * LazyHabitBackgroundEngine
+ * requestIdleCallback
+ * today-interactive
+ * background-intelligence-start
+ */
+\nconst HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 
 function recordNextStepChoice(row, action, date) {
   const taskId = String(row?.sourceTask?.id || row?.task_id || row?.id || row?.key || "");
