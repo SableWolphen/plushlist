@@ -96,11 +96,46 @@ patchFile(
 patchFile(
   "node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/MessageHandler.java",
   {
-    marker: "JSONObject.quote(data.toString())",
+    marker: "__capacitorPayloadBridge",
     edits: [
       {
         find: "import org.apache.cordova.PluginManager;\n\n/**",
-        replace: "import org.apache.cordova.PluginManager;\nimport org.json.JSONObject;\n\n/**",
+        replace:
+          "import org.apache.cordova.PluginManager;\n" +
+          "import java.util.concurrent.ConcurrentLinkedQueue;\n\n/**",
+      },
+      {
+        find:
+          "    private JavaScriptReplyProxy javaScriptReplyProxy;\n\n" +
+          "    public MessageHandler(Bridge bridge, WebView webView, PluginManager cordovaPluginManager) {",
+        replace:
+          "    private JavaScriptReplyProxy javaScriptReplyProxy;\n" +
+          "    private final ConcurrentLinkedQueue<String> legacyPayloadQueue = new ConcurrentLinkedQueue<>();\n\n" +
+          "    private final class LegacyPayloadBridge {\n" +
+          "        @JavascriptInterface\n" +
+          "        public String take() {\n" +
+          "            String payload = legacyPayloadQueue.poll();\n" +
+          "            return payload == null ? \"{}\" : payload;\n" +
+          "        }\n" +
+          "    }\n\n" +
+          "    public MessageHandler(Bridge bridge, WebView webView, PluginManager cordovaPluginManager) {",
+      },
+      {
+        find:
+          "        this.bridge = bridge;\n" +
+          "        this.webView = webView;\n" +
+          "        this.cordovaPluginManager = cordovaPluginManager;\n\n" +
+          "        if (WebViewFeature.isFeatureSupported",
+        replace:
+          "        this.bridge = bridge;\n" +
+          "        this.webView = webView;\n" +
+          "        this.cordovaPluginManager = cordovaPluginManager;\n" +
+          "        // Keep plugin response data out of dynamically-generated JavaScript.\n" +
+          "        // The constant script below pulls one queued JSON payload through this\n" +
+          "        // private bridge and parses it as data, so untrusted values never become\n" +
+          "        // JavaScript source text.\n" +
+          "        webView.addJavascriptInterface(new LegacyPayloadBridge(), \"__capacitorPayloadBridge\");\n\n" +
+          "        if (WebViewFeature.isFeatureSupported",
       },
       {
         find: '                Logger.error("JavaScript Error: " + jsonStr);',
@@ -108,7 +143,17 @@ patchFile(
       },
       {
         find:
-          '                Logger.verbose(\n                    Logger.tags("Plugin"),\n                    "To native (Cordova plugin): callbackId: " +\n                        callbackId +\n                        ", service: " +\n                        service +\n                        ", action: " +\n                        action +\n                        ", actionArgs: " +\n                        actionArgs\n                );',
+          '                Logger.verbose(\n' +
+          '                    Logger.tags("Plugin"),\n' +
+          '                    "To native (Cordova plugin): callbackId: " +\n' +
+          '                        callbackId +\n' +
+          '                        ", service: " +\n' +
+          '                        service +\n' +
+          '                        ", action: " +\n' +
+          '                        action +\n' +
+          '                        ", actionArgs: " +\n' +
+          '                        actionArgs\n' +
+          '                );',
         replace:
           '                Logger.verbose(Logger.tags("Plugin"), "To native (Cordova plugin): request received");',
       },
@@ -116,33 +161,36 @@ patchFile(
         find: '        } catch (Exception ex) {\n            Logger.error("Post message error:", ex);\n        }',
         replace:
           "        } catch (Exception ex) {\n" +
-          "            // Don't log the exception message/stack trace here: postData can\n" +
-          "            // contain values that originated from web content, and Android\n" +
-          "            // log output isn't a safe place for that (CWE-209).\n" +
-          '            Logger.error("Post message error");\n' +
+          "            Logger.error(\"Post message error\");\n" +
           "        }",
+      },
+      {
+        find: '                Logger.debug("Sending plugin error: " + data.toString());',
+        replace: '                Logger.debug("Sending plugin error");',
       },
       {
         find: '        } catch (Exception ex) {\n            Logger.error("sendResponseMessage: error: " + ex);\n        }',
         replace:
           "        } catch (Exception ex) {\n" +
-          "            // Same reasoning as postMessage(): avoid echoing exception\n" +
-          "            // content (which can carry plugin-result data) into the log.\n" +
-          '            Logger.error("sendResponseMessage error");\n' +
+          "            Logger.error(\"sendResponseMessage error\");\n" +
           "        }",
       },
       {
         find:
-          '        final String runScript = "window.Capacitor.fromNative(" + data.toString() + ")";',
+          '    private void legacySendResponseMessage(PluginResult data) {\n' +
+          '        final String runScript = "window.Capacitor.fromNative(" + data.toString() + ")";\n' +
+          '        final WebView webView = this.webView;\n' +
+          '        webView.post(() -> webView.evaluateJavascript(runScript, null));\n' +
+          '    }',
         replace:
-          "        // Embed the payload as a properly-escaped JSON string literal (via\n" +
-          "        // org.json's quote(), which escapes quotes, backslashes, control\n" +
-          "        // characters and U+2028/U+2029) and reconstruct it with JSON.parse\n" +
-          "        // on the JS side, instead of splicing the raw JSON object text\n" +
-          "        // straight into the script we hand to evaluateJavascript(). This\n" +
-          "        // keeps a plugin result's data from ever being interpreted as JS\n" +
-          "        // source (CWE-79-style script injection).\n" +
-          '        final String runScript = "window.Capacitor.fromNative(JSON.parse(" + JSONObject.quote(data.toString()) + "))";',
+          "    private void legacySendResponseMessage(PluginResult data) {\n" +
+          "        legacyPayloadQueue.add(data.toString());\n" +
+          "        final WebView webView = this.webView;\n" +
+          "        webView.post(() -> webView.evaluateJavascript(\n" +
+          "            \"window.Capacitor.fromNative(JSON.parse(window.__capacitorPayloadBridge.take()))\",\n" +
+          "            null\n" +
+          "        ));\n" +
+          "    }",
       },
     ],
   }
