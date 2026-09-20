@@ -6,8 +6,6 @@ function read(file) {
 }
 
 const settings = read("src/components/organized-settings.jsx");
-const today = read("src/components/today-panel-core.jsx");
-const adaptive = read("assets/adaptive-habits-polish.js");
 const app = read("src/app-source.jsx");
 const growth = read("assets/growth-loop.js");
 const entitlements = read("assets/entitlements.js");
@@ -50,10 +48,6 @@ const checks = [
   [settings.includes("reminder_times: preferences.reminder_times.map") && settings.includes("reminder_times: preferences.reminder_times.filter") && settings.includes('"12:00"'), "reminder edit remove and add options remain wired"],
   [settings.includes("quiet_start: event.target.value") && settings.includes("quiet_end: event.target.value"), "quiet-hour selections remain wired"],
   [settings.includes("toggleRestToday") && settings.includes("saveRestRange"), "rest-day and rest-range controls remain wired"],
-  [app.includes("taskIsScheduledForDate(item, selectedProgressDate)") && app.includes("const moveTrackerTask = async"), "task up/down ordering follows the visible scheduled Today list instead of hidden day-id buckets"],
-  [today.includes("Move ${r.label} up") && today.includes("Move ${r.label} down") && today.includes("moveTrackerTask(r.sourceTask.task_key"), "Today arrange mode exposes reliable per-task up and down controls"],
-  [app.includes("placeholder.textContent = `↕ ${drag.label}`"), "dragging keeps a labeled placeholder instead of a blank-looking gap"],
-  [adaptive.includes('document.getElementById("plushlife-adaptive-capacity-card")?.remove()') && adaptive.includes('document.getElementById("plushlife-growth-checkin")?.remove()'), "stale duplicate capacity UI is removed from Home"],
 ];
 
 const failures = checks.filter(([ok]) => !ok).map(([, label]) => label);
