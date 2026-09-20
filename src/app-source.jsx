@@ -6048,7 +6048,7 @@ function GlowUpTracker() {
               <div>
                 <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>{babyMode ? `🍼 ${babyCaregiverName.toUpperCase()} CHECK-IN` : "🎯 TODAY'S CHECK-IN"}</div>
                 <div id="checkin-popup-title" style={{ marginTop: 4, fontSize: 19, fontWeight: 900, color: "#75428C" }}>{babyMode ? "How does my little self feel?" : "How are you today?"}</div>
-                {babyMode && <div style={{ marginTop: 5, color: "#8C6B9E", fontSize: 11.5, lineHeight: 1.45 }}>You can pick one feeling, and we will make today soft enough to hold.</div>}
+                {babyMode && <div style={{ marginTop: 5, color: "#8C6B9E", fontSize: 11.5, lineHeight: 1.45 }}>Pick one feeling. We’ll shape today around it.</div>}
                 {babyMode && trackerProfile?.comfort_item_name?.trim() && <div style={{ marginTop: 6, padding: "6px 8px", borderRadius: 9, background: "#FFF8E8", color: "#806536", fontSize: 10.5, fontWeight: 800 }}>🧸 Is {trackerProfile.comfort_item_name.trim()} nearby?</div>}
               </div>
               <button type="button" onClick={() => { setCheckInPopupOpen(false); setCheckInPopupDismissedToday(true); }} aria-label="Close" style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>✕</button>
@@ -6070,7 +6070,7 @@ function GlowUpTracker() {
               </div>
             )}
             <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#4C8FE8", fontWeight: 900 }}>CHOOSE TODAY'S PLAN</div>
-            <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#6B7C99" }}>Pick the size of day you actually have. This changes task versions, never what you have already earned.</div>
+            <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#6B7C99" }}>Pick the day size you actually have. Your progress stays safe.</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(88px,1fr))", gap: 7, marginTop: 7 }}>
               {DAY_TYPES.map(([value, emoji, label, description]) => (
                 <button key={value} type="button" data-plushlife-day-type={value} onClick={() => selectDayType(value)} aria-pressed={dailyCheckIn.day_type === value} title={description} style={{ padding: "8px 5px", borderRadius: 11, border: dailyCheckIn.day_type === value ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: dailyCheckIn.day_type === value ? "#EAF4FF" : "white", cursor: "pointer" }}>
