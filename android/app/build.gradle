@@ -53,8 +53,12 @@ android {
             // previewLayout on the widget's provider XML, unrelated to
             // shrinking). Back on for the smaller release size; keep.xml
             // still protects the widget's resources as defense in depth.
-            minifyEnabled true
-            shrinkResources true
+            // Stability build: temporarily disable R8/resource shrinking so
+            // release-only stripping cannot remove classes/resources needed
+            // during startup on real devices. Re-enable after the crash is
+            // confirmed resolved.
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             ndk {
                 debugSymbolLevel 'FULL'
