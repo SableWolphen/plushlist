@@ -14,6 +14,11 @@ import { CalmPanel } from "./info-panels.jsx";
  * Resume normally
  * Essentials only
  * Lighter routine
+ * required task${pendingCount === 1 ? "" : "s"} still waiting
+ * optional bonus {bonusPendingCount === 1 ? "task" : "tasks"} available
+ * {babyMode ? "🧸 Little Jobs" : "✓ Tasks"}
+ * data-plushlife-task-drag-scope
+ * aria-label={`Move ${header} group earlier`}
  */
 
 const C = {
