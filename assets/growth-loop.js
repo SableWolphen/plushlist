@@ -129,7 +129,9 @@
   }
 
   function openDailyCheckIn() {
-    document.dispatchEvent(new CustomEvent("plushlife:open-daily-checkin"));
+    const trigger = document.querySelector('[data-plushlife-open-checkin="true"]');
+    if (!trigger) return false;
+    trigger.click();
     return true;
   }
 
@@ -300,21 +302,6 @@
     const input = event.target;
     if (input?.matches?.('input[type="checkbox"]') && input.checked) window.setTimeout(recordCompletionSignal, 160);
   }, true);
-
-  window.addEventListener("plushlife:day-mode-changed", (event) => {
-    const mode = event?.detail?.mode;
-    if (!["full", "soft", "tiny", "recovery", "rest"].includes(mode)) return;
-    const seenDates = Array.from(new Set([...(readState().seenDates || []), today])).slice(-30);
-    writeState({
-      seenDates,
-      choicesByDate: choiceHistoryWith(mode),
-      lastChoice: mode,
-      lastChoiceDate: today,
-      onboardingDate: readState().onboardingDate || today,
-      checkInDate: today,
-    });
-    window.setTimeout(() => installNextStepReason(true), 80);
-  });
 
   let scheduled = false;
   const refresh = () => {
