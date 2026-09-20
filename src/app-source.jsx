@@ -923,19 +923,12 @@ function GlowUpTracker() {
       setCheckInCustomizeOpen(false);
     }
   }, [checkInPopupOpen]);
-  useEffect(() => {
-    const openDailyCheckIn = () => {
-      setCheckInPopupDismissedToday(false);
-      setCheckInPopupOpen(true);
-    };
-    document.addEventListener("plushlife:open-daily-checkin", openDailyCheckIn);
-    return () => document.removeEventListener("plushlife:open-daily-checkin", openDailyCheckIn);
-  }, []);
   const [completedTodayExpanded, setCompletedTodayExpanded] = useState(false);
   const [comfortToolOpen, setComfortToolOpen] = useState(null);
   const [breathPhase, setBreathPhase] = useState("in");
   const [checkInPopupDismissedToday, setCheckInPopupDismissedToday] = useState(false);
   const [dailyCheckInLoaded, setDailyCheckInLoaded] = useState(false);
+  const openDailyCheckIn = () => { setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); };
 
   useEffect(() => {
     const filterValue = [
@@ -1994,9 +1987,6 @@ function GlowUpTracker() {
     const previous = dailyCheckIn;
     const next = { ...dailyCheckIn, ...patch };
     setDailyCheckIn(next);
-    if (next.day_type) {
-      window.dispatchEvent(new CustomEvent("plushlife:day-mode-changed", { detail: { mode: next.day_type } }));
-    }
     if (!user) return;
     const { error } = await supabase.from("daily_check_ins").upsert({
       user_id: user.id,
@@ -5561,9 +5551,6 @@ function GlowUpTracker() {
 
   const babyMode = preferences.nickname_style === "baby";
   useEffect(() => {
-    if (babyMode) setTodayCardIndex(1);
-  }, [babyMode]);
-  useEffect(() => {
     if (!user?.id || !preferences.onboarding_complete || !privateNoteLoaded || privateNote) return;
     if (!dailyCheckIn.capacity && !checkInPopupDismissedToday) return;
     const promptKey = `plushlife-journal-prompt-${user.id}-${period.date}`;
@@ -6676,7 +6663,7 @@ function GlowUpTracker() {
 
         {dashboard === "today" && (
           <div style={{ display: "flex", alignItems: "center", gap: 7, margin: "-2px 0 14px", flexWrap: "wrap" }}>
-            <button type="button" onClick={() => setCheckInPopupOpen(true)} style={{ flex: "1 1 220px", display: "flex", alignItems: "center", gap: 7, padding: "9px 11px", borderRadius: 11, border: "1px solid #E6D4F2", background: "#FFFFFFC7", color: "#76558A", fontWeight: 800, fontSize: 12, cursor: "pointer", textAlign: "left" }}>
+            <button type="button" data-plushlife-open-checkin="true" onClick={openDailyCheckIn} style={{ flex: "1 1 220px", display: "flex", alignItems: "center", gap: 7, padding: "9px 11px", borderRadius: 11, border: "1px solid #E6D4F2", background: "#FFFFFFC7", color: "#76558A", fontWeight: 800, fontSize: 12, cursor: "pointer", textAlign: "left" }}>
               {babyMode ? "🍼 How does my little self feel?" : "🎯"} {dailyCheckIn.mood ? `${CHECKIN_MOODS.find(([value]) => value === dailyCheckIn.mood)?.[1] || ""} ${CHECKIN_MOODS.find(([value]) => value === dailyCheckIn.mood)?.[2] || ""}` : dailyCheckIn.capacity ? { very_low: "😞 Very low", low: "😕 Low", usual: "🙂 Usual", high: "💪 High" }[dailyCheckIn.capacity] : babyMode ? "Tell me when you are ready" : "Check in"}
               {dailyCheckIn.day_type ? ` · ${DAY_TYPES.find(([value]) => value === dailyCheckIn.day_type)?.[2] || dailyCheckIn.day_type}` : ""}
               {dailyCheckIn.custom_essentials?.length ? ` · ${dailyCheckIn.custom_essentials.length} picked` : ""}
@@ -6702,7 +6689,7 @@ function GlowUpTracker() {
 
         <RewardsPanel open={collectionOpen} onClose={() => setCollectionOpen(false)} FeatureTip={FeatureTip} selectedOutfit={selectedOutfit} mascotMood={mascotMood} activityDaysTotal={activityDaysTotal} preferences={preferences} mascotGrowth={mascotGrowth} careDaysTotal={careDaysTotal} unlockedOutfits={unlockedOutfits} earnedBadgeIdSet={earnedBadgeIdSet} BADGE_DEFS={BADGE_DEFS} unlockedIdSet={unlockedIdSet} mascotRequirementProgress={mascotRequirementProgress} saveMascotCollection={saveMascotCollection} mascotCollection={mascotCollection} savedBestStreak={savedBestStreak} collectionTab={collectionTab} setCollectionTab={setCollectionTab} winsJarEntries={winsJarEntries} />
 
-        <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} openDailyCheckIn={() => { setSettingsOpen(false); setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); }} watchPairingCode={watchPairingCode} setWatchPairingCode={setWatchPairingCode} connectWatch={connectWatch} watchPairingBusy={watchPairingBusy} watchPairingMessage={watchPairingMessage} localWatchSyncBusy={localWatchSyncBusy} startLocalWatchSync={startLocalWatchSync} localWatchSyncMessage={localWatchSyncMessage} dailyCheckIn={dailyCheckIn} pct={pct} rows={rows} viewDone={viewDone} weeklyOverallPct={weeklyOverallPct} widgetSyncMsg={widgetSyncMsg} setWidgetSyncMsg={setWidgetSyncMsg} displayNameDraft={displayNameDraft} setDisplayNameDraft={setDisplayNameDraft} saveDisplayName={saveDisplayName} comfortItemDraft={comfortItemDraft} setComfortItemDraft={setComfortItemDraft} saveComfortItem={saveComfortItem} preferences={preferences} appearanceTheme={appearanceTheme} selectAppearanceTheme={selectAppearanceTheme} dinoTheme={dinoTheme} updatePreference={updatePreference} enableNotifications={enableNotifications} smartReminderSuggestion={smartReminderSuggestion} restDatesSet={restDatesSet} toggleRestToday={toggleRestToday} period={period} restRangeDraft={restRangeDraft} setRestRangeDraft={setRestRangeDraft} saveRestRange={saveRestRange} restDates={restDates} savePreferences={savePreferences} feedbackText={feedbackText} setFeedbackText={setFeedbackText} submitFeedback={submitFeedback} feedbackMessage={feedbackMessage} exportMyData={exportMyData} restoreFileInputRef={restoreFileInputRef} restoreFromBackup={restoreFromBackup} deleteAllCheckIns={deleteAllCheckIns} deleteAllReflections={deleteAllReflections} user={user} online={online} syncStatus={syncStatus} lastSyncedAt={lastSyncedAt} syncNow={syncNow} emailChangeDraft={emailChangeDraft} setEmailChangeDraft={setEmailChangeDraft} requestEmailChange={requestEmailChange} signingOut={signingOut} handleSignOut={handleSignOut} signOutOtherDevices={signOutOtherDevices} deleteMyAccount={deleteMyAccount} deviceBackupStatus={deviceBackupStatus} refreshDeviceBackup={refreshDeviceBackup} deviceBackupBusy={deviceBackupBusy} verifyDeviceBackupNow={verifyDeviceBackupNow} deviceBackupVerifyBusy={deviceBackupVerifyBusy} settingsMessage={settingsMessage} />
+        <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} openDailyCheckIn={() => { setSettingsOpen(false); openDailyCheckIn(); }} watchPairingCode={watchPairingCode} setWatchPairingCode={setWatchPairingCode} connectWatch={connectWatch} watchPairingBusy={watchPairingBusy} watchPairingMessage={watchPairingMessage} localWatchSyncBusy={localWatchSyncBusy} startLocalWatchSync={startLocalWatchSync} localWatchSyncMessage={localWatchSyncMessage} dailyCheckIn={dailyCheckIn} pct={pct} rows={rows} viewDone={viewDone} weeklyOverallPct={weeklyOverallPct} widgetSyncMsg={widgetSyncMsg} setWidgetSyncMsg={setWidgetSyncMsg} displayNameDraft={displayNameDraft} setDisplayNameDraft={setDisplayNameDraft} saveDisplayName={saveDisplayName} comfortItemDraft={comfortItemDraft} setComfortItemDraft={setComfortItemDraft} saveComfortItem={saveComfortItem} preferences={preferences} appearanceTheme={appearanceTheme} selectAppearanceTheme={selectAppearanceTheme} dinoTheme={dinoTheme} updatePreference={updatePreference} enableNotifications={enableNotifications} smartReminderSuggestion={smartReminderSuggestion} restDatesSet={restDatesSet} toggleRestToday={toggleRestToday} period={period} restRangeDraft={restRangeDraft} setRestRangeDraft={setRestRangeDraft} saveRestRange={saveRestRange} restDates={restDates} savePreferences={savePreferences} feedbackText={feedbackText} setFeedbackText={setFeedbackText} submitFeedback={submitFeedback} feedbackMessage={feedbackMessage} exportMyData={exportMyData} restoreFileInputRef={restoreFileInputRef} restoreFromBackup={restoreFromBackup} deleteAllCheckIns={deleteAllCheckIns} deleteAllReflections={deleteAllReflections} user={user} online={online} syncStatus={syncStatus} lastSyncedAt={lastSyncedAt} syncNow={syncNow} emailChangeDraft={emailChangeDraft} setEmailChangeDraft={setEmailChangeDraft} requestEmailChange={requestEmailChange} signingOut={signingOut} handleSignOut={handleSignOut} signOutOtherDevices={signOutOtherDevices} deleteMyAccount={deleteMyAccount} deviceBackupStatus={deviceBackupStatus} refreshDeviceBackup={refreshDeviceBackup} deviceBackupBusy={deviceBackupBusy} verifyDeviceBackupNow={verifyDeviceBackupNow} deviceBackupVerifyBusy={deviceBackupVerifyBusy} settingsMessage={settingsMessage} />
 
         <AdminPanel open={isAdminUser && adminOpen} onClose={() => setAdminOpen(false)} loadAdminData={loadAdminData} adminMessage={adminMessage} adminStats={adminStats} adminOnline={adminOnline} adminFunnel={adminFunnel} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} supporterEmailDraft={supporterEmailDraft} setSupporterEmailDraft={setSupporterEmailDraft} setSupporterStatus={setSupporterStatus} supporterGrantMessage={supporterGrantMessage} reviewAccountRole={reviewAccountRole} setReviewAccountRole={setReviewAccountRole} reviewAccountEmail={reviewAccountEmail} setReviewAccountEmail={setReviewAccountEmail} reviewAccountPassword={reviewAccountPassword} setReviewAccountPassword={setReviewAccountPassword} createOrUpdateReviewAccount={createOrUpdateReviewAccount} reviewAccountMessage={reviewAccountMessage} adminFeedback={adminFeedback} resolveFeedback={resolveFeedback} adminErrors={adminErrors} clearAllErrors={clearAllErrors} devPreviewPlan={devPreviewPlan} setDevPreviewPlan={setDevPreviewPlan} />
 
