@@ -2780,8 +2780,8 @@ function GlowUpTracker() {
     const target = trackerTasks.find((item) => item.task_key === taskKey);
     if (!target) return;
     const sectionTasks = trackerTasks
-      .filter((item) => item.section === target.section && taskIsScheduledForDate(item, selectedProgressDate))
-      .sort((a, b) => Number(a.sort_order) - Number(b.sort_order) || a.task_key.localeCompare(b.task_key));
+      .filter((item) => item.day_id === target.day_id && item.section === target.section)
+      .sort((a, b) => a.sort_order - b.sort_order || a.task_key.localeCompare(b.task_key));
     const currentIndex = sectionTasks.findIndex((item) => item.task_key === taskKey);
     const nextIndex = currentIndex + direction;
     if (currentIndex < 0 || nextIndex < 0 || nextIndex >= sectionTasks.length) return;
@@ -2903,10 +2903,24 @@ function GlowUpTracker() {
 
   const taskDropRows = (scope) => [...(scope || document).querySelectorAll("[data-plushlife-task-drop-key]")];
 
+  const animateTaskReflow = (before) => {
+    requestAnimationFrame(() => taskDropRows(before.scope).forEach((row) => {
+      const previousTop = before.get(row);
+      if (previousTop === undefined) return;
+      const delta = previousTop - row.getBoundingClientRect().top;
+      if (Math.abs(delta) > 1) row.animate(
+        [{ transform: `translateY(${delta}px)` }, { transform: "translateY(0)" }],
+        { duration: 170, easing: "cubic-bezier(.2,.8,.2,1)" }
+      );
+    }));
+  };
+
   const clearPointerTaskDrag = (drag) => {
     if (!drag) return;
     if (drag.activationTimer) clearTimeout(drag.activationTimer);
     if (drag.autoScrollFrame) cancelAnimationFrame(drag.autoScrollFrame);
+    (drag.wiggleAnimations || []).forEach((animation) => animation.cancel());
+    drag.preview?.remove();
     drag.placeholder?.remove();
     if (drag.row) {
       drag.row.style.height = drag.rowStyle.height;
@@ -2923,6 +2937,8 @@ function GlowUpTracker() {
 
   const placeTaskPlaceholder = (drag, clientX, clientY) => {
     if (!drag.active) return;
+    drag.preview.style.left = `${Math.max(10, Math.min(clientX + 14, window.innerWidth - drag.preview.offsetWidth - 10))}px`;
+    drag.preview.style.top = `${Math.max(10, Math.min(clientY - 52, window.innerHeight - drag.preview.offsetHeight - 10))}px`;
     const hit = document.elementFromPoint(clientX, clientY);
     const targetRow = hit?.closest?.("[data-plushlife-task-drop-key]");
     const targetSection = hit?.closest?.("[data-plushlife-task-drop-section]");
@@ -2930,6 +2946,7 @@ function GlowUpTracker() {
     let targetKey = null;
     let insertionParent = null;
     let insertionBefore = null;
+    let destination = "Drag to a task or group";
 
     if (targetRow && targetRow !== drag.row) {
       const rect = targetRow.getBoundingClientRect();
@@ -2940,22 +2957,29 @@ function GlowUpTracker() {
         const rowsInSection = taskDropRows(drag.scope).filter((row) => row !== drag.row && row.getAttribute("data-plushlife-task-drop-section") === section);
         const next = rowsInSection[rowsInSection.indexOf(targetRow) + 1] || null;
         targetKey = next?.getAttribute("data-plushlife-task-drop-key") || null;
+        destination = next?.getAttribute("data-plushlife-task-drop-label") ? `Place before ${next.getAttribute("data-plushlife-task-drop-label")}` : `Place at end of ${section}`;
       } else {
         targetKey = targetRow.getAttribute("data-plushlife-task-drop-key");
+        destination = `Place before ${targetRow.getAttribute("data-plushlife-task-drop-label") || "this task"}`;
       }
     } else if (targetSection) {
       const rowContainer = targetSection.querySelector("[data-plushlife-task-row-container]") || targetSection;
       insertionParent = rowContainer;
       insertionBefore = null;
+      destination = `Place at end of ${section}`;
     }
 
     const signature = `${section || ""}:${targetKey || "end"}:${insertionParent ? "target" : "none"}`;
     if (insertionParent && signature !== drag.destinationSignature) {
+      const before = new Map(taskDropRows(drag.scope).map((row) => [row, row.getBoundingClientRect().top]));
+      before.scope = drag.scope;
       insertionParent.insertBefore(drag.placeholder, insertionBefore);
       drag.destinationSignature = signature;
       drag.targetSection = section;
       drag.targetKey = targetKey;
+      animateTaskReflow(before);
     }
+    drag.preview.querySelector("[data-drag-destination]").textContent = destination;
   };
 
   const runTaskAutoScroll = (drag) => {
@@ -2977,8 +3001,7 @@ function GlowUpTracker() {
     const rect = drag.row.getBoundingClientRect();
     const placeholder = document.createElement("div");
     placeholder.setAttribute("aria-hidden", "true");
-    placeholder.textContent = `↕ ${drag.label}`;
-    placeholder.style.cssText = `height:${rect.height}px;box-sizing:border-box;display:flex;align-items:center;padding:0 12px;border:2px dashed #D9A6E3;border-radius:12px;background:rgba(249,231,247,.72);color:#76558A;font-weight:850;font-size:12px;margin:0 0 6px;transition:height .16s ease,transform .16s ease`;
+    placeholder.style.cssText = `height:${rect.height}px;box-sizing:border-box;border:2px dashed #D9A6E3;border-radius:12px;background:rgba(249,231,247,.58);margin:0 0 6px;transition:height .16s ease,transform .16s ease`;
     drag.row.parentNode.insertBefore(placeholder, drag.row);
     drag.placeholder = placeholder;
     drag.rowStyle = {
@@ -2987,6 +3010,30 @@ function GlowUpTracker() {
       overflow: drag.row.style.overflow, pointerEvents: drag.row.style.pointerEvents,
     };
     Object.assign(drag.row.style, { height: "0px", minHeight: "0px", margin: "0px", padding: "0px", borderWidth: "0px", opacity: "0", overflow: "hidden", pointerEvents: "none" });
+    drag.wiggleAnimations = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+      ? []
+      : taskDropRows(drag.scope)
+        .filter((row) => row !== drag.row)
+        .map((row, index) => row.animate(
+          [
+            { translate: "-1px 0", rotate: "-0.12deg" },
+            { translate: "1px 0", rotate: "0.12deg" },
+          ],
+          { duration: 180, iterations: Infinity, direction: "alternate", easing: "ease-in-out", delay: -(index % 4) * 35 }
+        ));
+    const preview = document.createElement("div");
+    preview.setAttribute("role", "status");
+    preview.style.cssText = `position:fixed;z-index:9999;width:${Math.min(rect.width, 330)}px;box-sizing:border-box;padding:11px 13px;border:1px solid #E6D4F2;border-radius:12px;background:#FFFCFE;color:#5B4B6B;box-shadow:0 16px 34px rgba(66,42,78,.28);pointer-events:none;font-family:inherit;line-height:1.35`;
+    const title = document.createElement("strong");
+    title.textContent = drag.label;
+    title.style.cssText = "display:block;font-size:13px";
+    const destination = document.createElement("span");
+    destination.dataset.dragDestination = "true";
+    destination.textContent = "Choose a new position";
+    destination.style.cssText = "display:block;margin-top:3px;color:#9A4EAD;font-size:11px;font-weight:800";
+    preview.append(title, destination);
+    document.body.appendChild(preview);
+    drag.preview = preview;
     if (navigator.vibrate) navigator.vibrate(18);
     placeTaskPlaceholder(drag, drag.lastX, drag.lastY);
     runTaskAutoScroll(drag);
@@ -3003,7 +3050,7 @@ function GlowUpTracker() {
     const drag = {
       pointerId: event.pointerId, handle: event.currentTarget, row, scope: row.closest("[data-plushlife-task-drag-scope]") || document, taskKey, label: taskLabel,
       startX: event.clientX, startY: event.clientY, lastX: event.clientX, lastY: event.clientY,
-      active: false, destinationSignature: null, targetSection: null, targetKey: null, autoScrollFrame: null, activationTimer: null,
+      active: false, destinationSignature: null, targetSection: null, targetKey: null, autoScrollFrame: null, activationTimer: null, wiggleAnimations: [],
     };
     taskPointerDragRef.current = drag;
     if (event.pointerType === "touch" || event.pointerType === "pen") {
@@ -6655,7 +6702,7 @@ function GlowUpTracker() {
 
         <>
         <DailyJournalPanel open={journalQuickOpen && (!dailyJournalPromptOpen || autoPopupToShow === "daily_journal")} onClose={() => { setJournalQuickOpen(false); setDailyJournalPromptOpen(false); setPrivateNoteEditing(false); }} dailyJournalPromptOpen={dailyJournalPromptOpen} journalQuickOpenDate={journalQuickOpenDate} journalDisplayedPrompt={journalDisplayedPrompt} privateNoteEditing={privateNoteEditing} setPrivateNoteEditing={setPrivateNoteEditing} privateNoteDraft={privateNoteDraft} setPrivateNoteDraft={setPrivateNoteDraft} savePrivateNote={savePrivateNote} privateNote={privateNote} privateNoteMessage={privateNoteMessage} />
-        <TodayPanel open={dashboard === "today"} returnGapDays={returnGapDays} returnBannerDismissed={returnBannerDismissed} setReturnBannerDismissed={setReturnBannerDismissed} voice={voice} setEssentialsPickerOpen={setEssentialsPickerOpen} selectDayType={selectDayType} wellbeingPatternInsight={wellbeingPatternInsight} todayDayId={todayDayId} hardDayBannerDismissed={hardDayBannerDismissed} setHardDayBannerDismissed={setHardDayBannerDismissed} dailyCheckIn={dailyCheckIn} restDatesSet={restDatesSet} period={period} toggleRestToday={toggleRestToday} nextStepTask={nextStepTask} FeatureTip={FeatureTip} day={day} babyMode={babyMode} nextStepHint={nextStepHint} toggle={toggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} weeklyIntentionMessage={weeklyIntentionMessage} todayCardIndex={todayCardIndex} setTodayCardIndex={setTodayCardIndex} taskWeekDates={taskWeekDates} selectedProgressDate={selectedProgressDate} selectTaskPreviewDate={selectTaskPreviewDate} isFutureView={isFutureView} selectedTaskDateLabel={selectedTaskDateLabel} todaySwipeStartX={todaySwipeStartX} todaySwipeStartY={todaySwipeStartY} selectedSchedule={selectedSchedule} selectedScheduleExceptionEntries={selectedScheduleExceptionEntries} scheduleDayId={scheduleDayId} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} active={active} rows={rows} viewDone={viewDone} openTaskManager={openTaskManager} todayRequiredDone={todayRequiredDone} todayRequiredKeys={todayRequiredKeys} activityDaysTotal={activityDaysTotal} careDaysTotal={careDaysTotal} babyCaregiverName={babyCaregiverName} trackerProfile={trackerProfile} openJournalForSelectedDate={openJournalForSelectedDate} isHistoricalView={isHistoricalView} focusHelperOpen={focusHelperOpen} setFocusHelperOpen={setFocusHelperOpen} pickRandomFocusTask={pickRandomFocusTask} setFocusSuggestionKey={setFocusSuggestionKey} focusedEssential={focusedEssential} focusChoices={focusChoices} selectedTaskViewIsRest={selectedTaskViewIsRest} pct={pct} requiredDoneCount={requiredDoneCount} requiredRows={requiredRows} preferences={preferences} doneCount={doneCount} focusModeShowAll={focusModeShowAll} setFocusModeShowAll={setFocusModeShowAll} isTaskPausedOnDate={isTaskPausedOnDate} openRow={openRow} setOpenRow={setOpenRow} celebrateKey={celebrateKey} pauseTrackerTask={pauseTrackerTask} resumeTrackerTask={resumeTrackerTask} taskListCollapsed={taskListCollapsed} setTaskListCollapsed={setTaskListCollapsed} recentlyCompletedKeys={recentlyCompletedKeys} moveTaskGroup={moveTaskGroup} moveTrackerTask={moveTrackerTask} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToTomorrow={moveTaskToTomorrow} completedTodayExpanded={completedTodayExpanded} setCompletedTodayExpanded={setCompletedTodayExpanded} calmQuickOpen={calmQuickOpen} setCalmQuickOpen={setCalmQuickOpen} currentCopingOption={currentCopingOption} reshuffle={reshuffle} setCareSection={setCareSection} goToDashboard={goToDashboard} />
+        <TodayPanel open={dashboard === "today"} returnGapDays={returnGapDays} returnBannerDismissed={returnBannerDismissed} setReturnBannerDismissed={setReturnBannerDismissed} voice={voice} setEssentialsPickerOpen={setEssentialsPickerOpen} selectDayType={selectDayType} wellbeingPatternInsight={wellbeingPatternInsight} todayDayId={todayDayId} hardDayBannerDismissed={hardDayBannerDismissed} setHardDayBannerDismissed={setHardDayBannerDismissed} dailyCheckIn={dailyCheckIn} restDatesSet={restDatesSet} period={period} toggleRestToday={toggleRestToday} nextStepTask={nextStepTask} FeatureTip={FeatureTip} day={day} babyMode={babyMode} nextStepHint={nextStepHint} toggle={toggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} weeklyIntentionMessage={weeklyIntentionMessage} todayCardIndex={todayCardIndex} setTodayCardIndex={setTodayCardIndex} taskWeekDates={taskWeekDates} selectedProgressDate={selectedProgressDate} selectTaskPreviewDate={selectTaskPreviewDate} isFutureView={isFutureView} selectedTaskDateLabel={selectedTaskDateLabel} todaySwipeStartX={todaySwipeStartX} todaySwipeStartY={todaySwipeStartY} selectedSchedule={selectedSchedule} selectedScheduleExceptionEntries={selectedScheduleExceptionEntries} scheduleDayId={scheduleDayId} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} active={active} rows={rows} viewDone={viewDone} openTaskManager={openTaskManager} todayRequiredDone={todayRequiredDone} todayRequiredKeys={todayRequiredKeys} activityDaysTotal={activityDaysTotal} careDaysTotal={careDaysTotal} babyCaregiverName={babyCaregiverName} trackerProfile={trackerProfile} openJournalForSelectedDate={openJournalForSelectedDate} isHistoricalView={isHistoricalView} focusHelperOpen={focusHelperOpen} setFocusHelperOpen={setFocusHelperOpen} pickRandomFocusTask={pickRandomFocusTask} setFocusSuggestionKey={setFocusSuggestionKey} focusedEssential={focusedEssential} focusChoices={focusChoices} selectedTaskViewIsRest={selectedTaskViewIsRest} pct={pct} requiredDoneCount={requiredDoneCount} requiredRows={requiredRows} preferences={preferences} doneCount={doneCount} focusModeShowAll={focusModeShowAll} setFocusModeShowAll={setFocusModeShowAll} isTaskPausedOnDate={isTaskPausedOnDate} openRow={openRow} setOpenRow={setOpenRow} celebrateKey={celebrateKey} pauseTrackerTask={pauseTrackerTask} resumeTrackerTask={resumeTrackerTask} taskListCollapsed={taskListCollapsed} setTaskListCollapsed={setTaskListCollapsed} recentlyCompletedKeys={recentlyCompletedKeys} moveTaskGroup={moveTaskGroup} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToTomorrow={moveTaskToTomorrow} completedTodayExpanded={completedTodayExpanded} setCompletedTodayExpanded={setCompletedTodayExpanded} calmQuickOpen={calmQuickOpen} setCalmQuickOpen={setCalmQuickOpen} currentCopingOption={currentCopingOption} reshuffle={reshuffle} setCareSection={setCareSection} goToDashboard={goToDashboard} />
 
         <WeekPanel open={dashboard === "week"} openTodayJournal={openTodayJournal} weekCardIndex={weekCardIndex} setWeekCardIndex={setWeekCardIndex} weekSwipeStartX={weekSwipeStartX} weekSwipeStartY={weekSwipeStartY} reflectionCalendarMonth={reflectionCalendarMonth} setReflectionCalendarMonth={setReflectionCalendarMonth} reflectionMonthDate={reflectionMonthDate} reflectionMonthStart={reflectionMonthStart} reflectionMonthDays={reflectionMonthDays} reflectionDateSet={reflectionDateSet} dailyCheckInHistory={dailyCheckInHistory} restDatesSet={restDatesSet} selectedProgressDate={selectedProgressDate} setSelectedProgressDate={setSelectedProgressDate} dayCompletionPct={dayCompletionPct} setDayViewDate={setDayViewDate} setActive={setActive} setReflectionViewerDate={setReflectionViewerDate} setCheckInViewerDate={setCheckInViewerDate} reflectionHistory={reflectionHistory} journalHistoryExpanded={journalHistoryExpanded} setJournalHistoryExpanded={setJournalHistoryExpanded} weeklyIntentionHistory={weeklyIntentionHistory} weeklyIntentionHistoryExpanded={weeklyIntentionHistoryExpanded} setWeeklyIntentionHistoryExpanded={setWeeklyIntentionHistoryExpanded} period={period} calendarWeekOffset={calendarWeekOffset} setCalendarWeekOffset={setCalendarWeekOffset} calendarWeekPreviewDate={calendarWeekPreviewDate} setCalendarWeekPreviewDate={setCalendarWeekPreviewDate} trackerTasks={trackerTasks} dayViewDate={dayViewDate} dayViewExpanded={dayViewExpanded} setDayViewExpanded={setDayViewExpanded} longHistoryByDate={longHistoryByDate} isTaskPausedOnDate={isTaskPausedOnDate} markPastTasksDone={markPastTasksDone} done={done} toggle={toggle} isHistoricalView={isHistoricalView} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} CHECKIN_MOODS={CHECKIN_MOODS} />
 
