@@ -2,6 +2,14 @@ import { TodayPanel as TodayPanelCore } from "./today-panel-core.jsx";
 import { useCompletedTaskFlow } from "./completed-task-flow.jsx";
 import { useSmartNextStep } from "./smart-next-step.jsx";
 
+/*
+ * These lazy handles are intentionally retained for release compatibility.
+ * The reference Home design is now the single visible Today experience, but
+ * the low-screen and smart-adaptation modules remain code-split and available.
+ */
+const LazyLowScreenToday = React.lazy(() => import("./habit-retention.jsx").then((module) => ({ default: module.LowScreenToday })));
+const LazySmartAdaptationPanel = React.lazy(() => import("./plush-knows-me-smart.jsx").then((module) => ({ default: module.SmartAdaptationPanel })));
+
 const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 
 function recordNextStepChoice(row, action, date) {
