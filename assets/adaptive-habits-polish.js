@@ -160,14 +160,7 @@
   }
 
   function reopenCapacityCheckIn() {
-    const growth = readGrowth();
-    saveGrowth({ ...growth, checkInDate: "" });
-    try { window.PlushLifeGrowthLoop?.refresh?.(); } catch (_error) {}
-    window.setTimeout(() => {
-      try { window.PlushLifeGrowthLoop?.refresh?.(); } catch (_error) {}
-      enhanceGrowthCheckIn();
-      document.getElementById("plushlife-growth-checkin")?.scrollIntoView?.({ behavior: "smooth", block: "center" });
-    }, 80);
+    document.dispatchEvent(new CustomEvent("plushlife:open-daily-checkin"));
   }
 
   function selectCapacity(pct, options) {
@@ -181,7 +174,7 @@
     });
 
     const apply = () => {
-      const checkInButton = document.querySelector(`#plushlife-growth-checkin .plushlife-growth-choice[data-mode="${option.mode}"]`);
+      const checkInButton = document.querySelector(`[data-plushlife-day-type="${option.mode}"]`);
       const modeButton = checkInButton && visible(checkInButton) ? checkInButton : findDayModeButton(option.mode);
       if (!modeButton) return false;
       modeButton.click();
@@ -618,9 +611,10 @@
   }
 
   function captureCapacityClicks(event) {
-    const button = event.target?.closest?.("#plushlife-growth-checkin .plushlife-growth-choice[data-mode]");
+    const button = event.target?.closest?.("[data-plushlife-day-type]");
     if (!button) return;
-    const pct = button.dataset.mode === "full" ? 100 : button.dataset.mode === "soft" ? 60 : 30;
+    const mode = button.getAttribute("data-plushlife-day-type");
+    const pct = mode === "full" ? 100 : mode === "soft" ? 60 : mode === "tiny" ? 30 : mode === "recovery" ? 25 : 10;
     const today = dateKey(new Date());
     const current = readState();
     saveState({ capacityByDate: { ...(current.capacityByDate || {}), [today]: pct }, lastCapacity: pct, lastCapacityDate: today });
@@ -632,8 +626,6 @@
     running = true;
     try {
       installStyle();
-      enhanceGrowthCheckIn();
-      installCapacityCard();
       installTomorrowNote();
       installTomorrowSetup();
       enhanceTaskManager();
@@ -644,6 +636,15 @@
 
   document.addEventListener("click", recordTooMuchClick, true);
   document.addEventListener("click", captureCapacityClicks, true);
+  window.addEventListener("plushlife:day-mode-changed", (event) => {
+    const mode = event?.detail?.mode;
+    if (!["full", "soft", "tiny", "recovery", "rest"].includes(mode)) return;
+    const pct = mode === "full" ? 100 : mode === "soft" ? 60 : mode === "tiny" ? 30 : mode === "recovery" ? 25 : 10;
+    const today = dateKey(new Date());
+    const current = readState();
+    saveState({ capacityByDate: { ...(current.capacityByDate || {}), [today]: pct }, lastCapacity: pct, lastCapacityDate: today });
+    window.setTimeout(refresh, 100);
+  });
   window.addEventListener("focus", refresh);
   window.addEventListener("plushlife-smart-ready", refresh);
   window.addEventListener("plushlife:habit-coach-updated", refresh);
