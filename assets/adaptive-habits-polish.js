@@ -160,7 +160,7 @@
   }
 
   function reopenCapacityCheckIn() {
-    document.querySelector('[data-plushlife-open-checkin="true"]')?.click();
+    document.getElementById("plushlife-checkin-trigger")?.click();
   }
 
   function selectCapacity(pct, options) {
