@@ -248,8 +248,8 @@ export function SettingsPanel({ open, onClose, watchPairingCode, setWatchPairing
       <Card>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", paddingBottom: 12, marginBottom: 4, borderBottom: "1px solid #EEE3F1" }}>
           <div>
-            <div style={{ fontSize: 12.5, fontWeight: 900, color: "#6E5480" }}>☀️ Today's capacity</div>
-            <div style={{ marginTop: 3, fontSize: 11, lineHeight: 1.4, color: "#8A7895" }}>Reopen the Full, Soft, or Tiny daily check-in whenever you want to change today's plan.</div>
+            <div style={{ fontSize: 12.5, fontWeight: 900, color: "#6E5480" }}>🎯 Today's check-in</div>
+            <div style={{ marginTop: 3, fontSize: 11, lineHeight: 1.4, color: "#8A7895" }}>Reopen today's feeling and Full, Soft, Tiny, Recovery, or Rest plan whenever you want to change it.</div>
           </div>
           <button type="button" onClick={() => window.PlushLifeGrowthLoop?.openCapacityPicker?.()} style={{ ...secondaryButton, flexShrink: 0 }}>Change</button>
         </div>
