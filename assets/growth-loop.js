@@ -129,7 +129,7 @@
   }
 
   function openDailyCheckIn() {
-    const trigger = document.querySelector('[data-plushlife-open-checkin="true"]');
+    const trigger = document.getElementById("plushlife-checkin-trigger");
     if (!trigger) return false;
     trigger.click();
     return true;
