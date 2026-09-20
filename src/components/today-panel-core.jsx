@@ -100,24 +100,6 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
           );
         })()}
 
-        <div data-plushlife-compact-card="plushweek" style={{ marginBottom: 9, padding: "8px 10px", borderRadius: 13, background: "linear-gradient(135deg,#FBF3FE,#FFF9FD)", border: "1px solid #E3C9EC" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                <div style={{ fontSize: 9.5, letterSpacing: "0.12em", fontWeight: 900, color: "#A65DC1" }}>📮 PLUSHWEEK</div>
-                {!weeklyIntentionEditing && <button type="button" onClick={() => { setWeeklyIntentionDraft(weeklyIntentionText); setWeeklyIntentionEditing(true); }} data-plushlife-compact-hit-target="plushweek-edit" style={{ minHeight: 44, margin: "-7px 0", padding: "11px 6px", border: 0, background: "transparent", color: "#8E4EAA", fontWeight: 900, fontSize: 10.5, cursor: "pointer", flexShrink: 0 }}>{weeklyIntentionText ? "Edit" : "Add"}</button>}
-              </div>
-              {!weeklyIntentionEditing && <div style={{ marginTop: 1, fontSize: 12.5, lineHeight: 1.3, color: weeklyIntentionText ? "#5B4B6B" : "#9A86A7", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{weeklyIntentionText || "Set one gentle direction for this week"}</div>}
-            </div>
-          </div>
-          {weeklyIntentionEditing && <>
-            <div style={{ marginTop: 4, fontSize: 10.5, lineHeight: 1.35, color: "#806B8D", fontStyle: "italic" }}>What do I want to carry with me this week?</div>
-            <textarea value={weeklyIntentionDraft} onChange={(event) => setWeeklyIntentionDraft(event.target.value)} maxLength={2000} placeholder="What do I want to carry with me this week?" style={{ width: "100%", boxSizing: "border-box", minHeight: 64, marginTop: 6, padding: 8, borderRadius: 9, border: "1px solid #D9B8E8", resize: "vertical" }} />
-            <div style={{ display: "flex", gap: 6, marginTop: 6 }}><button type="button" onClick={saveWeeklyIntentionEdit} style={{ padding: "6px 9px", borderRadius: 8, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save</button><button type="button" onClick={() => setWeeklyIntentionEditing(false)} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, cursor: "pointer" }}>Cancel</button></div>
-            {weeklyIntentionMessage && <div style={{ marginTop: 5, fontSize: 10.5, color: "#8C6B9E" }}>{weeklyIntentionMessage}</div>}
-          </>}
-        </div>
-
         <div className="plushlife-today-tabs" role="tablist" aria-label="Today view" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, marginBottom: 12, padding: 4, borderRadius: 12, background: "#FFFFFF99", border: "1px solid #EADCEC" }}>
           <button role="tab" aria-selected={todayCardIndex === 0} type="button" onClick={() => setTodayCardIndex(0)} style={{ padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 0 ? `${day.accent}22` : "transparent", color: todayCardIndex === 0 ? day.accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>🗓 Schedule</button>
           <button role="tab" aria-selected={todayCardIndex === 1} type="button" onClick={() => setTodayCardIndex(1)} style={{ padding: "8px 10px", borderRadius: 9, border: 0, background: todayCardIndex === 1 ? `${day.accent}22` : "transparent", color: todayCardIndex === 1 ? day.accent : "#8C6B9E", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{babyMode ? "🧸 Little Jobs" : "✓ Tasks"}</button>
@@ -211,38 +193,7 @@ export function TodayPanel({ open, returnGapDays, returnBannerDismissed, setRetu
           </button>
         </div>
         )}
-        {dailyCheckIn.day_type !== "rest" && (() => {
-          // A small glance at what still needs doing, so leading with the
-          // schedule doesn't mean losing sight of today's tasks entirely.
-          const habitRowsToday = rows.filter((r) => r.habitType !== "regular");
-          const previewHabits = habitRowsToday.filter((r) => !viewDone[r.key]).slice(0, 3);
-          if (habitRowsToday.length === 0) return null;
-          return (
-            <div style={{ marginTop: 14, padding: 14, borderRadius: 16, background: "rgba(255,255,255,0.58)", border: "1px solid #E6D4F2" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.18em", color: day.accent, fontWeight: 800 }}>🌱 HABITS TODAY</div>
-                <button type="button" onClick={() => openTaskManager(dayIdForDate(period.date))} style={{ padding: "5px 9px", borderRadius: 8, border: `1px solid ${day.accent}55`, background: "white", color: day.accent, fontWeight: 900, fontSize: 11, cursor: "pointer" }}>Manage habits ({habitRowsToday.length}) →</button>
-              </div>
-              <div style={{ display: "grid", gap: 5 }}>
-                {previewHabits.length > 0 ? previewHabits.map((r) => (
-                  <div key={r.key} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 9px", borderRadius: 9, background: "#FFFFFF99", border: "1px solid #F3D9EC", opacity: isFutureView ? 0.62 : 1 }}>
-                    <span onClick={() => { if (!isFutureView) toggle(r.key); }}
-                      role="checkbox" aria-checked={false} aria-label={r.label} tabIndex={isFutureView ? -1 : 0}
-                      onKeyDown={(e) => { if (isFutureView) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(r.key); } }}
-                      style={{ width: 18, height: 18, minWidth: 18, borderRadius: 6, border: "2px solid #E3B8D8", cursor: isFutureView ? "not-allowed" : "pointer" }} />
-                    <span style={{ fontSize: 13, color: "#5B4B6B", fontWeight: 500 }}>
-                      {r.sourceTask && <HabitTypeIcon task={r.sourceTask} />}
-                      {r.label}
-                    </span>
-                  </div>
-                )) : (
-                  <div style={{ padding: "9px 10px", borderRadius: 9, background: "#FFFFFF99", border: "1px solid #D7EEE2", fontSize: 12.5, color: "#318C79", fontWeight: 800 }}>All of today's habits are checked in. ✨</div>
-                )}
-              </div>
-            </div>
-          );
-        })()}
-        </>}
+
 
         {todayCardIndex === 1 && !isFutureView && rows.length > 0 && dailyCheckIn.day_type !== "rest" && (focusHelperOpen || !nextStepTask) && (
           // Suppressed (unless already open) whenever the One Next Step card
