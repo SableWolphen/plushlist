@@ -35,7 +35,7 @@ function escapeHtml(value: string) {
 async function getResendApiKey() {
   if (ENV_RESEND_API_KEY) return ENV_RESEND_API_KEY;
   const { data, error } = await admin.rpc("plushlife_get_resend_api_key");
-  if (error) throw new Error(`Unable to read Resend key: ${error.message}`);
+  if (error) throw new Error("Unable to read email provider configuration.");
   return String(data || "");
 }
 
@@ -142,7 +142,7 @@ async function sendViaResend(apiKey: string, to: string, stage: string, lastVisi
     headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({ from: EMAIL_FROM, to: [to], reply_to: EMAIL_REPLY_TO, subject: subjectFor(stage), html: renderEmail(stage, lastVisit, unsubscribeUrl), text: renderText(stage, lastVisit, unsubscribeUrl), headers }),
   });
-  if (!response.ok) throw new Error(`Resend ${response.status}: ${await response.text()}`);
+  if (!response.ok) { await response.text(); throw new Error("Email provider request failed."); }
   return await response.json();
 }
 
@@ -152,7 +152,7 @@ Deno.serve(async (request) => {
 
   let resendApiKey = "";
   try { resendApiKey = await getResendApiKey(); }
-  catch (error) { return json({ ok: false, configured: false, processed: 0, error: String(error?.message || error) }, 500); }
+  catch (_error) { return json({ ok: false, configured: false, processed: 0, error: "Email service unavailable." }, 500); }
   if (!resendApiKey || !EMAIL_FROM) return json({ ok: true, configured: false, processed: 0, message: "Comeback email provider is not configured yet." });
 
   const dryRun = new URL(request.url).searchParams.get("dry_run") === "1";
@@ -162,7 +162,7 @@ Deno.serve(async (request) => {
 
   while (true) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 100 });
-    if (error) return json({ error: error.message }, 500);
+    if (error) return json({ error: "Unable to list users." }, 500);
     const users = data?.users || [];
     if (!users.length) break;
 
@@ -190,7 +190,7 @@ Deno.serve(async (request) => {
         }
         results.push({ user_id: user.id, stage, days_away: daysAway, dry_run: dryRun });
       } catch (error) {
-        results.push({ user_id: user.id, error: String(error?.message || error) });
+        results.push({ user_id: user.id, error: "Processing failed." });
       }
     }
     if (users.length < 100) break;
