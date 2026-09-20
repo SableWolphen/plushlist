@@ -923,6 +923,14 @@ function GlowUpTracker() {
       setCheckInCustomizeOpen(false);
     }
   }, [checkInPopupOpen]);
+  useEffect(() => {
+    const openDailyCheckIn = () => {
+      setCheckInPopupDismissedToday(false);
+      setCheckInPopupOpen(true);
+    };
+    document.addEventListener("plushlife:open-daily-checkin", openDailyCheckIn);
+    return () => document.removeEventListener("plushlife:open-daily-checkin", openDailyCheckIn);
+  }, []);
   const [completedTodayExpanded, setCompletedTodayExpanded] = useState(false);
   const [comfortToolOpen, setComfortToolOpen] = useState(null);
   const [breathPhase, setBreathPhase] = useState("in");
@@ -1986,6 +1994,9 @@ function GlowUpTracker() {
     const previous = dailyCheckIn;
     const next = { ...dailyCheckIn, ...patch };
     setDailyCheckIn(next);
+    if (next.day_type) {
+      window.dispatchEvent(new CustomEvent("plushlife:day-mode-changed", { detail: { mode: next.day_type } }));
+    }
     if (!user) return;
     const { error } = await supabase.from("daily_check_ins").upsert({
       user_id: user.id,
@@ -6075,7 +6086,7 @@ function GlowUpTracker() {
             <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#6B7C99" }}>Pick the size of day you actually have. This changes task versions, never what you have already earned.</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(88px,1fr))", gap: 7, marginTop: 7 }}>
               {DAY_TYPES.map(([value, emoji, label, description]) => (
-                <button key={value} type="button" onClick={() => selectDayType(value)} aria-pressed={dailyCheckIn.day_type === value} title={description} style={{ padding: "8px 5px", borderRadius: 11, border: dailyCheckIn.day_type === value ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: dailyCheckIn.day_type === value ? "#EAF4FF" : "white", cursor: "pointer" }}>
+                <button key={value} type="button" data-plushlife-day-type={value} onClick={() => selectDayType(value)} aria-pressed={dailyCheckIn.day_type === value} title={description} style={{ padding: "8px 5px", borderRadius: 11, border: dailyCheckIn.day_type === value ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: dailyCheckIn.day_type === value ? "#EAF4FF" : "white", cursor: "pointer" }}>
                   <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ fontSize: 10.5, fontWeight: 900, color: "#4C6F98" }}>{label}</div>
                 </button>
               ))}
