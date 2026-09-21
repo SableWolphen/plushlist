@@ -13,6 +13,7 @@ const settings = read("src/components/organized-settings.jsx");
 const index = read("index.html");
 const serviceWorker = read("service-worker.js");
 const syncWww = read("scripts/sync-www.js");
+const mainActivity = read("android/app/src/main/java/com/PlushLife/MainActivity.java");
 
 const gates = [
   [today.includes("useCompletedTaskFlow") && completed.includes("CompletedTaskArea"), "shared task completion lifecycle"],
@@ -25,6 +26,8 @@ const gates = [
   [index.includes('backButton') && index.includes('KeyboardEvent("keydown", { key: "Escape" })'), "Android back button continues to close app panels"],
   [serviceWorker.includes("fetch") && serviceWorker.includes("cache"), "offline service-worker path remains present"],
   [syncWww.includes("check-bundle-budget") || read("package.json").includes("check-bundle-budget.js"), "bundle budget remains enforced"],
+  [mainActivity.includes("UpdateAvailability.UPDATE_AVAILABLE") && mainActivity.includes("PlushLife update available") && mainActivity.includes("Update now"), "older Android builds show an update prompt only when Google Play reports a newer version"],
+  [mainActivity.includes("postDelayed") && mainActivity.includes("2500") && !mainActivity.includes("checkForUpdate();\n        super.onCreate"), "in-app update checking stays out of the fragile Activity startup path"],
 ];
 
 const failures = gates.filter(([pass]) => !pass).map(([, label]) => label);
