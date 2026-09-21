@@ -216,23 +216,23 @@ export function TodayPanel({
         [data-plushlife-home-stack]>*{margin-top:0!important;margin-bottom:0!important}
 
         @media(max-width:520px){
-          .pl-home-shell{gap:8px;padding:0 12px 82px;margin:0}
-          .pl-home-hero{min-height:188px;margin:0 -12px;border-radius:0 0 22px 22px}
-          .pl-home-hero:before{background:radial-gradient(circle at 22% 20%,rgba(255,255,255,.82),transparent 30%),radial-gradient(circle at 76% 20%,rgba(227,202,239,.34),transparent 34%),linear-gradient(90deg,rgba(255,255,255,.28),transparent 45%)}
-          .pl-home-brand{left:18px;top:14px}.pl-home-logo{font-size:24px;letter-spacing:-1px}.pl-home-tagline{font-size:9.8px;margin-top:3px}
-          .pl-home-actions{right:10px;top:11px;gap:6px}.pl-home-date{font-size:8.8px;padding:6px 8px}.pl-home-settings{width:33px;height:33px;font-size:15px}
-          .pl-home-copy{left:18px;bottom:18px;width:54%}.pl-home-copy h1{font-size:21px;line-height:1.05;white-space:nowrap}.pl-home-copy .pl-heart{font-size:.82em}.pl-home-copy p{margin-top:6px;font-size:10.8px;line-height:1.32}
-          .pl-home-plush{right:5px;bottom:8px;width:34%;height:56%}.pl-home-plush img{width:min(112px,78%);max-height:102px;object-fit:contain}
-          .pl-home-bubble{right:9px;bottom:7px;max-width:132px;font-size:7.8px;padding:5px 7px;border-radius:11px;line-height:1.2;white-space:nowrap}
-          .pl-section-topline{align-items:center;gap:6px}.pl-kicker{font-size:9px;letter-spacing:.1em}.pl-muted-note{display:none}
-          [data-plushlife-compact-card="next-step"]{padding:11px 12px 12px!important}
-          .pl-primary-task{font-size:14.5px;margin-top:5px;line-height:1.18;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-          .pl-action-row{gap:5px;margin-top:8px}.pl-btn,.pl-more{min-height:36px;border-radius:11px}.pl-btn{padding:6px 7px;font-size:9.4px}.pl-btn-primary{flex:1.12}.pl-btn-ghost{flex:.9}.pl-more{width:38px;font-size:13px}
-          [data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Habits today"]{padding:11px 12px 12px!important}
-          .pl-list{margin-top:8px;gap:5px}.pl-list-row{min-height:38px;padding:5px 8px;border-radius:11px}.pl-schedule-row{grid-template-columns:58px 18px minmax(0,1fr) 9px}.pl-note-row{grid-template-columns:18px minmax(0,1fr)}.pl-time{font-size:11px}.pl-row-icon{font-size:13px}.pl-row-text{font-size:10.8px;line-height:1.22}.pl-chevron{font-size:15px}.pl-check{width:19px;height:19px;border-radius:6px}
-          .pl-home-shortcuts{gap:6px}.pl-shortcut{min-height:52px;padding:7px 8px;border-radius:14px}.pl-shortcut-icon{font-size:19px}.pl-shortcut-title{font-size:10.6px}.pl-shortcut-sub{font-size:8.2px}.pl-shortcut-arrow{font-size:15px}
-          .pl-noticed{min-height:44px;border-radius:14px;padding:7px 9px}.pl-noticed-icon{font-size:18px}.pl-noticed-title{font-size:9.8px}.pl-noticed-copy{font-size:8.4px}.pl-noticed-arrow{font-size:15px}
-          [data-plushlife-compact-card="next-step"],[data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Habits today"]{border-radius:16px!important}
+          .pl-home-shell{gap:7px;padding:0 8px 76px;margin:0}
+          .pl-home-hero{min-height:158px;margin:0 -8px;border-radius:0 0 18px 18px}
+          .pl-home-hero:before{background:radial-gradient(circle at 22% 20%,rgba(255,255,255,.78),transparent 30%),radial-gradient(circle at 76% 20%,rgba(227,202,239,.28),transparent 34%)}
+          .pl-home-brand{left:14px;top:11px}.pl-home-logo{font-size:20px;letter-spacing:-.8px}.pl-home-tagline{font-size:8.5px;margin-top:2px}
+          .pl-home-actions{right:8px;top:9px;gap:5px}.pl-home-date{font-size:7.8px;padding:5px 7px}.pl-home-settings{width:31px;height:31px;font-size:14px}
+          .pl-home-copy{left:14px;bottom:14px;width:56%}.pl-home-copy h1{font-size:18px;line-height:1.03;white-space:nowrap}.pl-home-copy .pl-heart{font-size:.78em}.pl-home-copy p{margin-top:5px;font-size:9.5px;line-height:1.28}
+          .pl-home-plush{right:4px;bottom:7px;width:31%;height:52%}.pl-home-plush img{width:min(92px,76%);max-height:84px;object-fit:contain}
+          .pl-home-bubble{right:7px;bottom:6px;max-width:116px;font-size:7px;padding:4px 6px;border-radius:10px;line-height:1.15;white-space:nowrap}
+          .pl-section-topline{align-items:center;gap:5px}.pl-kicker{font-size:8.4px;letter-spacing:.09em}.pl-muted-note{display:none}
+          [data-plushlife-compact-card="next-step"]{padding:9px 10px 10px!important}
+          .pl-primary-task{font-size:13px;margin-top:4px;line-height:1.16;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+          .pl-action-row{gap:5px;margin-top:7px}.pl-btn,.pl-more{min-height:34px;border-radius:10px}.pl-btn{padding:5px 6px;font-size:8.8px}.pl-btn-primary{flex:1.1}.pl-btn-ghost{flex:.88}.pl-more{width:36px;font-size:12px}
+          [data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Habits today"]{padding:9px 10px 10px!important}
+          .pl-list{margin-top:7px;gap:4px}.pl-list-row{min-height:36px;padding:5px 7px;border-radius:10px}.pl-schedule-row{grid-template-columns:54px 17px minmax(0,1fr) 8px}.pl-note-row{grid-template-columns:17px minmax(0,1fr)}.pl-time{font-size:10px}.pl-row-icon{font-size:12px}.pl-row-text{font-size:10px;line-height:1.18}.pl-chevron{font-size:14px}.pl-check{width:18px;height:18px;border-radius:5px}
+          .pl-home-shortcuts{gap:5px}.pl-shortcut{min-height:48px;padding:6px 7px;border-radius:13px}.pl-shortcut-icon{font-size:17px}.pl-shortcut-title{font-size:9.8px}.pl-shortcut-sub{font-size:7.5px}.pl-shortcut-arrow{font-size:14px}
+          .pl-noticed{min-height:40px;border-radius:13px;padding:6px 8px}.pl-noticed-icon{font-size:17px}.pl-noticed-title{font-size:9.2px}.pl-noticed-copy{font-size:7.8px}.pl-noticed-arrow{font-size:14px}
+          [data-plushlife-compact-card="next-step"],[data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Habits today"]{border-radius:15px!important}
         }
       `}</style>
 
