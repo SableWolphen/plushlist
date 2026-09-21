@@ -5796,6 +5796,16 @@ function GlowUpTracker() {
 
       <style>{`
         #main-content > :not(.pl-ambient-theme-layer):not(style) { position: relative; z-index: 1; }
+        /* compact-phone-shell */
+        @media(max-width:520px){
+          #main-content{
+            padding-top:0!important;
+            padding-left:0!important;
+            padding-right:0!important;
+            padding-bottom:calc(72px + env(safe-area-inset-bottom))!important;
+          }
+          .pl-unified-page-hero,.pl-unified-page-content{margin-left:12px!important;margin-right:12px!important}
+        }
         .pl-ambient-theme-layer{
           position:fixed;inset:0;z-index:0;pointer-events:none;
           background:
