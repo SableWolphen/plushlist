@@ -5787,10 +5787,10 @@ function GlowUpTracker() {
       "--pl-theme-glow-c": softLightPalette.glowC,
       "--pl-theme-glow-d": softLightPalette.glowD,
       "--pl-theme-wash": softLightPalette.wash,
-      boxShadow: ["soft", "soft-light"].includes(appearanceTheme) || babyMode ? "none" : `inset 0 0 0 8px ${selectedAppearanceTheme.accent}55`,
+      boxShadow: "none",
     }}>
       <div className="pl-ambient-theme-layer" aria-hidden="true" />
-      {!babyMode && !["soft", "soft-light"].includes(appearanceTheme) && <div aria-hidden="true" style={{ position: "absolute", zIndex: 2, top: 0, left: 0, right: 0, height: 8, background: `linear-gradient(90deg, ${selectedAppearanceTheme.accent}, ${selectedAppearanceTheme.glowB}, ${selectedAppearanceTheme.accent})`, boxShadow: `0 3px 14px ${selectedAppearanceTheme.accent}88`, pointerEvents: "none" }} />}
+
       <style>{`
         #main-content > :not(.pl-ambient-theme-layer):not(style) { position: relative; z-index: 1; }
         .pl-ambient-theme-layer{
