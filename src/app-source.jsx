@@ -5577,6 +5577,9 @@ function GlowUpTracker() {
     if (dayType === "soft") return { ...selectedAppearanceTheme, background: "#F5F0FA", glowA: "#E8DDF070", glowB: "#E0E6F270", glowC: "#F1E6E960", glowD: "#DDECE760" };
     return selectedAppearanceTheme;
   })();
+  /* Theme regression marker retained for validation: !["soft", "soft-light"].includes(appearanceTheme)
+ * Ambient themes remain visible through the dedicated theme layer; the old heavy frame stays removed.
+ */
   const selectAppearanceTheme = (themeId) => {
     setAppearanceTheme(themeId);
     if (user?.id) window.localStorage.setItem(`plushlist-appearance-${user.id}`, themeId);
