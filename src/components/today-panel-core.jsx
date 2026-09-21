@@ -124,13 +124,13 @@ function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = []
     }))
     .sort((a,b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")));
 
-  const visibleEntries = entries.slice(0, 3);
+  const visibleEntries = entries;
 
   return (
     <section data-plushlife-home-schedule-preview="true" style={{...card, padding: "15px 17px 16px"}} aria-label="Today schedule">
       <div className="pl-section-topline">
         <div className="pl-kicker">🗓️ &nbsp;TODAY</div>
-        <button type="button" className="pl-link-btn" onClick={() => setManageSchedule?.(!manageSchedule)}>View all →</button>
+        <button type="button" className="pl-link-btn" onClick={() => setManageSchedule?.(!manageSchedule)}>Edit schedule →</button>
       </div>
       <div className="pl-list">
         {visibleEntries.length ? visibleEntries.map((entry, index) => (
