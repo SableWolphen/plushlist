@@ -1,4 +1,4 @@
-name: Automatic Google Play closed testing
+name: Production release promotion
 
 on:
   workflow_dispatch: {}
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: google-play-alpha
+  group: google-play-production
   cancel-in-progress: false
 
 jobs:
@@ -103,12 +103,12 @@ jobs:
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
-      - name: Publish to Google Play closed testing
+      - name: Publish to Google Play production
         if: env.HAS_PLAY_SECRET == 'true'
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.PlushLife
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
-          track: alpha
+          track: production
           status: completed
