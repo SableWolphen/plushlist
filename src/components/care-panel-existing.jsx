@@ -23,7 +23,7 @@ export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverNa
                 <button type="button" onClick={() => setCheckInPopupOpen(true)} style={{ padding: "7px 10px", borderRadius: 10, border: "1px solid #73B7A8", background: "white", color: "#318C79", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>{babyMode ? `${babyCaregiverName} Check-In` : "Update check-in"}</button>
               </div>
               <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.5, color: "#607A73" }}>{babyMode ? "Pick a feeling, and we will make everything smaller and softer together." : "Choose what is happening. PlushLife will offer one short tool and one realistic next step."}</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 8, marginTop: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))", gap: 8, marginTop: 12 }}>
                 {HELP_ME_NOW_OPTIONS.slice(0, careSituationsExpanded ? HELP_ME_NOW_OPTIONS.length : 4).map((option) => (
                   <button key={option.id} type="button" onClick={() => { setCareMessage(option.next); openCareSession(option.tool); }} style={{ padding: "11px 10px", borderRadius: 13, border: "1px solid #CFE8E1", background: "#FFFFFFD9", color: "#4F625D", textAlign: "left", fontWeight: 800, fontSize: 12, lineHeight: 1.35, cursor: "pointer" }}><span style={{ fontSize: 19, marginRight: 6 }}>{option.icon}</span>{option.label}</button>
                 ))}
