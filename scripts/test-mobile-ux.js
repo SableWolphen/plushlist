@@ -36,6 +36,8 @@ const checks = [
   [care.includes(".plushcare-library section button{min-height:50px!important") && care.includes(".pl-care-shell{display:grid;gap:6px"), "Care library avoids oversized tiles and gaps"],
   [read("src/components/progress-panel-existing.jsx").includes(".pl-growth-stat{min-height:64px") && read("src/components/progress-panel-existing.jsx").includes(".pl-growth-heading{margin-top:2px;font-size:16px"), "Progress stays compact instead of dashboard-sized"],
   [read("src/components/week-panel.jsx").includes(".pl-calendar-cozy{display:grid;gap:7px") && read("src/components/week-panel.jsx").includes("border-radius:15px!important"), "Calendar keeps compact cards and spacing"],
+  [app.includes("const homeScheduleDayId = dayIdForDate(period.date);") && app.includes("selectedSchedule={homeSelectedSchedule}") && app.includes("selectedScheduleExceptionEntries={homeScheduleExceptionEntries}"), "Home schedule is pinned to the actual current date instead of stale selected-day state"],
+  [!today.includes("Long run with the girls") && !today.includes('firstTimed ?') && today.includes("No schedule set for today."), "Home schedule preview never invents placeholder schedule entries"],
   [settings.includes('placeholder="Search settings"') && settings.includes("Privacy & Data") && settings.includes("Experience") && settings.includes("Notifications & Reminders"), "Settings keeps high-complexity options organized and discoverable"],
 ];
 
