@@ -109,15 +109,22 @@ function OneTinyThing({ nextStepTask, nextStepReason, nextStepHint, toggle, pick
 
 function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = [], manageSchedule, setManageSchedule }) {
   const { legacyScheduleToEntries, formatTime12 } = window.PlushLifeSchedule || {};
-  const entries = [
-    ...((selectedSchedule?.entries?.length ? selectedSchedule.entries : legacyScheduleToEntries?.(selectedSchedule)) || []),
-    ...(selectedScheduleExceptionEntries || []),
-  ].sort((a,b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")));
+  const baseEntries = (selectedSchedule?.entries?.length
+    ? selectedSchedule.entries
+    : legacyScheduleToEntries?.(selectedSchedule)) || [];
 
-  const timed = entries.filter((x) => x.time);
-  const firstTimed = timed[0];
-  const note = entries.find((e) => !e.time)?.text
-    || (entries.length ? "Rest, cozy food, and a gentle reset for the week" : "Rest, cozy food, and a gentle reset for the week");
+  const entries = [
+    ...baseEntries,
+    ...(selectedScheduleExceptionEntries || []),
+  ]
+    .filter((entry) => entry && (entry.time || entry.text || entry.label || entry.title))
+    .map((entry) => ({
+      ...entry,
+      text: entry.text || entry.label || entry.title || "",
+    }))
+    .sort((a,b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")));
+
+  const visibleEntries = entries.slice(0, 3);
 
   return (
     <section data-plushlife-home-schedule-preview="true" style={{...card, padding: "15px 17px 16px"}} aria-label="Today schedule">
@@ -126,16 +133,28 @@ function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = []
         <button type="button" className="pl-link-btn" onClick={() => setManageSchedule?.(!manageSchedule)}>View all →</button>
       </div>
       <div className="pl-list">
-        <div className="pl-list-row pl-schedule-row">
-          <div className="pl-time">{firstTimed ? (formatTime12?.(firstTimed.time) || firstTimed.time) : "7:00 AM"}</div>
-          <div className="pl-row-icon">👟</div>
-          <div className="pl-row-text">{firstTimed?.text || "Long run with the girls"}</div>
-          <div className="pl-chevron">›</div>
-        </div>
-        <div className="pl-list-row pl-note-row">
-          <div className="pl-row-icon">🍃</div>
-          <div className="pl-row-text">{note}</div>
-        </div>
+        {visibleEntries.length ? visibleEntries.map((entry, index) => (
+          <div className={`pl-list-row ${entry.time ? "pl-schedule-row" : "pl-note-row"}`} key={entry.id || `${entry.time || "note"}-${index}-${entry.text}`}>
+            {entry.time ? (
+              <>
+                <div className="pl-time">{formatTime12?.(entry.time) || entry.time}</div>
+                <div className="pl-row-icon">{entry.isException ? "✨" : "🕒"}</div>
+                <div className="pl-row-text">{entry.text}</div>
+                <div className="pl-chevron">›</div>
+              </>
+            ) : (
+              <>
+                <div className="pl-row-icon">{entry.isException ? "✨" : "🍃"}</div>
+                <div className="pl-row-text">{entry.text}</div>
+              </>
+            )}
+          </div>
+        )) : (
+          <div className="pl-list-row pl-note-row">
+            <div className="pl-row-icon">🗓️</div>
+            <div className="pl-row-text">No schedule set for today.</div>
+          </div>
+        )}
       </div>
     </section>
   );
