@@ -11,6 +11,7 @@ const shared = read("src/components/shared.jsx");
 const today = read("src/components/today-panel-core.jsx");
 const care = read("src/components/care-panel.jsx");
 const careExisting = read("src/components/care-panel-existing.jsx");
+const progress = read("src/components/progress-panel-existing.jsx");
 const careSources = `${care}\n${careExisting}`;
 const tasks = read("src/components/tasks-panel.jsx");
 const settings = read("src/components/organized-settings.jsx");
@@ -39,6 +40,10 @@ const checks = [
   [app.includes("const homeScheduleDayId = dayIdForDate(period.date);") && app.includes("selectedSchedule={homeSelectedSchedule}") && app.includes("selectedScheduleExceptionEntries={homeScheduleExceptionEntries}"), "Home schedule is pinned to the actual current date instead of stale selected-day state"],
   [!today.includes("Long run with the girls") && !today.includes('firstTimed ?') && today.includes("No schedule set for today."), "Home schedule preview never invents placeholder schedule entries"],
   [today.includes("const visibleEntries = entries;") && !today.includes("entries.slice(0, 3)"), "Home shows the entire real schedule instead of truncating it"],
+  [today.includes('onClick={() => goToDashboard?.("week")}') && app.includes('onClick={() => goToDashboard("week")} aria-label="Open calendar"'), "date controls open the Calendar"],
+  [today.includes('onClick={() => setSettingsOpen?.(true)}') && app.includes('onClick={() => setSettingsOpen(true)} aria-label="Settings"'), "gear controls open Settings"],
+  [app.includes('onClick={() => setCollectionOpen(true)} aria-label="Open rewards"') && app.includes('<RewardsPanel open={collectionOpen}'), "bottom Plush button opens Rewards"],
+  [progress.includes('className="pl-growth-weekbar"') && progress.includes('role="progressbar"') && progress.includes("props.weeklyOverallPct"), "Progress shows the current weekly progress bar"],
   [settings.includes('placeholder="Search settings"') && settings.includes("Privacy & Data") && settings.includes("Experience") && settings.includes("Notifications & Reminders"), "Settings keeps high-complexity options organized and discoverable"],
 ];
 
