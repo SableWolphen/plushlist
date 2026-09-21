@@ -57,9 +57,6 @@ function greeting() {
 function Hero({ period, goToDashboard }) {
   return (
     <section className="pl-home-hero" aria-label="PlushLife welcome">
-      <div className="pl-home-window" aria-hidden="true" />
-      <div className="pl-home-plant plant-a" aria-hidden="true">🌿</div>
-      <div className="pl-home-plant plant-b" aria-hidden="true">🌱</div>
 
       <div className="pl-home-brand">
         <div className="pl-home-logo">PlushLife <span>♥</span></div>
@@ -72,18 +69,15 @@ function Hero({ period, goToDashboard }) {
       </div>
 
       <div className="pl-home-copy">
-        <h1>{greeting()} <span>♥</span></h1>
+        <h1>{greeting()} <span className="pl-heart">♥</span></h1>
         <p>You’re doing great.<br/>Let’s make today a little<br/>kinder for you.</p>
       </div>
 
       <div className="pl-home-plush" aria-hidden="true">
-        <div className="pl-home-pillow pl-pillow-one" />
-        <div className="pl-home-pillow pl-pillow-two" />
         <img src="assets/icon-foreground.png" alt="" />
-        <div className="pl-mini-plush">🐰</div>
       </div>
 
-      <div className="pl-home-bubble">🌱&nbsp;&nbsp;Taking care of<br/>yourself matters.</div>
+      <div className="pl-home-bubble">🌱 Taking care of yourself matters.</div>
     </section>
   );
 }
@@ -222,21 +216,23 @@ export function TodayPanel({
         [data-plushlife-home-stack]>*{margin-top:0!important;margin-bottom:0!important}
 
         @media(max-width:520px){
-          .pl-home-shell{gap:9px;padding-bottom:88px}
-          .pl-home-hero{min-height:226px;margin:-16px -10px 0;border-radius:0 0 22px 22px}
-          .pl-home-window{display:none}.pl-home-plant{opacity:.24}.plant-a{left:2px;top:74px;font-size:34px}.plant-b{right:15px;top:70px;font-size:31px}
-          .pl-home-brand{left:16px;top:15px}.pl-home-logo{font-size:24px;letter-spacing:-1px}.pl-home-tagline{font-size:10.5px;margin-top:4px}
-          .pl-home-actions{right:10px;top:12px;gap:6px}.pl-home-date{font-size:9.3px;padding:7px 9px}.pl-home-settings{width:35px;height:35px;font-size:16px}
-          .pl-home-copy{left:16px;bottom:22px;width:55%}.pl-home-copy h1{font-size:22px;line-height:1.06;white-space:nowrap}.pl-home-copy p{margin-top:7px;font-size:11.5px;line-height:1.35}
-          .pl-home-plush{right:-2px;bottom:2px;width:39%;height:58%}.pl-home-plush img{width:min(128px,74%);max-height:118px}.pl-pillow-one{width:145px;height:88px;bottom:-24px}.pl-pillow-two{width:102px;height:66px;right:48px;bottom:-12px}.pl-mini-plush{font-size:23px;left:20%;bottom:20px}
-          .pl-home-bubble{right:7px;bottom:8px;font-size:8.5px;padding:6px 8px;border-radius:12px;line-height:1.25}
-          .pl-section-topline{align-items:center;gap:7px}.pl-kicker{font-size:9.7px;letter-spacing:.11em}.pl-muted-note{display:none}
-          .pl-primary-task{font-size:15.5px;margin-top:6px;line-height:1.22;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-          .pl-action-row{gap:6px;margin-top:9px}.pl-btn,.pl-more{min-height:40px;border-radius:12px}.pl-btn{padding:7px 8px;font-size:10.2px}.pl-btn-primary{flex:1.15}.pl-btn-ghost{flex:.9}.pl-more{width:42px;font-size:14px}
-          .pl-list{margin-top:9px;gap:6px}.pl-list-row{min-height:42px;padding:6px 9px;border-radius:12px}.pl-schedule-row{grid-template-columns:63px 20px minmax(0,1fr) 10px}.pl-note-row{grid-template-columns:20px minmax(0,1fr)}.pl-time{font-size:12px}.pl-row-icon{font-size:14px}.pl-row-text{font-size:11.5px;line-height:1.25}.pl-chevron{font-size:17px}.pl-check{width:21px;height:21px;border-radius:6px}
-          .pl-home-shortcuts{gap:7px}.pl-shortcut{min-height:58px;padding:8px 9px;border-radius:15px}.pl-shortcut-icon{font-size:21px}.pl-shortcut-title{font-size:11.5px}.pl-shortcut-sub{font-size:8.8px}.pl-shortcut-arrow{font-size:17px}
-          .pl-noticed{min-height:48px;border-radius:15px;padding:8px 10px}.pl-noticed-icon{font-size:20px}.pl-noticed-title{font-size:10.5px}.pl-noticed-copy{font-size:9px}.pl-noticed-arrow{font-size:17px}
-          [data-plushlife-compact-card="next-step"],[data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Habits today"]{border-radius:18px!important}
+          .pl-home-shell{gap:8px;padding:0 12px 82px;margin:0}
+          .pl-home-hero{min-height:188px;margin:0 -12px;border-radius:0 0 22px 22px}
+          .pl-home-hero:before{background:radial-gradient(circle at 22% 20%,rgba(255,255,255,.82),transparent 30%),radial-gradient(circle at 76% 20%,rgba(227,202,239,.34),transparent 34%),linear-gradient(90deg,rgba(255,255,255,.28),transparent 45%)}
+          .pl-home-brand{left:18px;top:14px}.pl-home-logo{font-size:24px;letter-spacing:-1px}.pl-home-tagline{font-size:9.8px;margin-top:3px}
+          .pl-home-actions{right:10px;top:11px;gap:6px}.pl-home-date{font-size:8.8px;padding:6px 8px}.pl-home-settings{width:33px;height:33px;font-size:15px}
+          .pl-home-copy{left:18px;bottom:18px;width:54%}.pl-home-copy h1{font-size:21px;line-height:1.05;white-space:nowrap}.pl-home-copy .pl-heart{font-size:.82em}.pl-home-copy p{margin-top:6px;font-size:10.8px;line-height:1.32}
+          .pl-home-plush{right:5px;bottom:8px;width:34%;height:56%}.pl-home-plush img{width:min(112px,78%);max-height:102px;object-fit:contain}
+          .pl-home-bubble{right:9px;bottom:7px;max-width:132px;font-size:7.8px;padding:5px 7px;border-radius:11px;line-height:1.2;white-space:nowrap}
+          .pl-section-topline{align-items:center;gap:6px}.pl-kicker{font-size:9px;letter-spacing:.1em}.pl-muted-note{display:none}
+          [data-plushlife-compact-card="next-step"]{padding:11px 12px 12px!important}
+          .pl-primary-task{font-size:14.5px;margin-top:5px;line-height:1.18;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+          .pl-action-row{gap:5px;margin-top:8px}.pl-btn,.pl-more{min-height:36px;border-radius:11px}.pl-btn{padding:6px 7px;font-size:9.4px}.pl-btn-primary{flex:1.12}.pl-btn-ghost{flex:.9}.pl-more{width:38px;font-size:13px}
+          [data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Habits today"]{padding:11px 12px 12px!important}
+          .pl-list{margin-top:8px;gap:5px}.pl-list-row{min-height:38px;padding:5px 8px;border-radius:11px}.pl-schedule-row{grid-template-columns:58px 18px minmax(0,1fr) 9px}.pl-note-row{grid-template-columns:18px minmax(0,1fr)}.pl-time{font-size:11px}.pl-row-icon{font-size:13px}.pl-row-text{font-size:10.8px;line-height:1.22}.pl-chevron{font-size:15px}.pl-check{width:19px;height:19px;border-radius:6px}
+          .pl-home-shortcuts{gap:6px}.pl-shortcut{min-height:52px;padding:7px 8px;border-radius:14px}.pl-shortcut-icon{font-size:19px}.pl-shortcut-title{font-size:10.6px}.pl-shortcut-sub{font-size:8.2px}.pl-shortcut-arrow{font-size:15px}
+          .pl-noticed{min-height:44px;border-radius:14px;padding:7px 9px}.pl-noticed-icon{font-size:18px}.pl-noticed-title{font-size:9.8px}.pl-noticed-copy{font-size:8.4px}.pl-noticed-arrow{font-size:15px}
+          [data-plushlife-compact-card="next-step"],[data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Habits today"]{border-radius:16px!important}
         }
       `}</style>
 
