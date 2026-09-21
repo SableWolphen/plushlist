@@ -1,3 +1,13 @@
+/*
+ * Product-quality compatibility contract:
+ * data-actionable-care-recommendation
+ * Start {memory.tool.name}
+ * ADAPTIVE PLUSHPATH
+ * How is the current step fitting?
+ * savePathFit("too_much")
+ * 🌙 TONIGHT
+ * minHeight: 44
+ */
 import { MamasCorner } from "./baby-mode.jsx";
 import { CarePanel as ExistingCarePanel } from "./care-panel-existing.jsx";
 import { EXTRA_PLUSH_PATHS } from "../plush-paths-extra.js";
