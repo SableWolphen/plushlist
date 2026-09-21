@@ -6674,20 +6674,27 @@ function GlowUpTracker() {
         )}
 
         <style>{`
-          .pl-unified-page-shell{display:grid;gap:12px;margin:0 auto 94px;max-width:760px;color:#62506D}
-          .pl-unified-page-hero{position:relative;overflow:hidden;margin:-4px 0 2px;padding:18px 18px 20px;border-radius:26px;background:linear-gradient(145deg,#FFF6F8 0%,#F8ECFB 55%,#F0E8F8 100%);border:1px solid #E9D6EE;box-shadow:0 10px 28px rgba(101,63,115,.06)}
-          .pl-unified-page-hero:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 16% 25%,rgba(255,255,255,.9),transparent 27%),radial-gradient(circle at 84% 10%,rgba(225,195,237,.38),transparent 31%);pointer-events:none}
-          .pl-unified-topline,.pl-unified-page-title{position:relative;z-index:1}.pl-unified-topline{display:flex;align-items:center;justify-content:space-between;gap:12px}
-          .pl-unified-wordmark{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-size:27px;font-weight:900;color:#4A235F;letter-spacing:-1px}.pl-unified-wordmark span{color:#DB72B4}
-          .pl-unified-actions{display:flex;align-items:center;gap:8px}.pl-unified-date{padding:9px 12px;border-radius:999px;background:rgba(255,255,255,.82);border:1px solid #E9D6EE;color:#5B3D70;font-size:11px;font-weight:900}
-          .pl-unified-gear{width:40px;height:40px;border:1px solid #E9D6EE;border-radius:50%;background:rgba(255,255,255,.84);color:#765684;font-size:18px;cursor:pointer}
-          .pl-unified-page-title{margin-top:18px}.pl-unified-kicker{font-size:10px;letter-spacing:.15em;font-weight:950;color:#B44CC7}.pl-unified-page-title h2{margin:4px 0 0;font-size:28px;line-height:1.08;color:#402456;letter-spacing:-.6px}.pl-unified-page-title p{margin:7px 0 0;color:#725B7B;font-size:12.5px;line-height:1.45}
-          .pl-unified-page-content{display:grid;gap:11px}.pl-unified-page-content section{border-color:#E9D6EE!important;background:rgba(255,255,255,.88)!important;box-shadow:0 8px 24px rgba(101,63,115,.045)!important;border-radius:20px!important}
-          .pl-unified-page-content [role="tablist"]{background:#F7EDF9!important;border-color:#E9D6EE!important;border-radius:14px!important}
-          .pl-app-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:80;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;min-height:76px;padding:9px 8px max(9px,env(safe-area-inset-bottom));background:rgba(255,255,255,.97);border-top:1px solid #F0E1F1;box-shadow:0 -8px 24px rgba(76,48,87,.07);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-          .pl-app-nav-btn{appearance:none;border:0;background:transparent;min-height:58px;padding:4px 2px;color:#9A819F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:800;cursor:pointer}.pl-app-nav-btn.active{color:#AF4FC6}.pl-app-nav-btn .ico{font-size:24px;line-height:1}
-          .pl-app-nav-add{width:54px;height:54px;min-height:54px;margin-top:-18px;border-radius:50%;background:linear-gradient(145deg,#C75BDD,#B94CCD);color:white;box-shadow:0 8px 20px rgba(178,71,199,.24);font-size:31px;line-height:1;display:flex;align-items:center;justify-content:center}
+          .pl-unified-page-shell{display:grid;gap:11px;margin:0 auto 94px;max-width:760px;color:#62506D}
+          .pl-unified-page-hero{position:relative;overflow:hidden;margin:-4px 0 2px;padding:15px 16px 16px;min-height:152px;border-radius:26px;background:linear-gradient(145deg,#FFF7FA 0%,#FAEDFB 55%,#F2ECFF 100%);border:1px solid #EBD9F0;box-shadow:0 10px 28px rgba(101,63,115,.055)}
+          .pl-unified-page-hero:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 22%,rgba(255,255,255,.96),transparent 29%),radial-gradient(circle at 86% 15%,rgba(228,193,239,.36),transparent 31%);pointer-events:none}
+          .pl-unified-page-hero:after{content:"🧸";position:absolute;right:18px;bottom:10px;font-size:58px;opacity:.16;transform:rotate(8deg);filter:drop-shadow(0 5px 8px rgba(83,45,98,.1))}
+          .pl-unified-topline,.pl-unified-page-title{position:relative;z-index:1}.pl-unified-topline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+          .pl-unified-wordmark{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-size:25px;font-weight:900;color:#4A235F;letter-spacing:-1px}.pl-unified-wordmark span{color:#DB72B4}
+          .pl-unified-actions{display:flex;align-items:center;gap:7px}.pl-unified-date{padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.84);border:1px solid #E9D6EE;color:#6B4E75;font-size:10px;font-weight:900}
+          .pl-unified-gear{width:38px;height:38px;border:1px solid #E9D6EE;border-radius:50%;background:rgba(255,255,255,.88);color:#80588D;font-size:17px;cursor:pointer}
+          .pl-unified-page-title{margin-top:14px;max-width:76%}.pl-unified-kicker{font-size:9.6px;letter-spacing:.14em;font-weight:950;color:#B653C5}.pl-unified-page-title h2{margin:3px 0 0;font-size:24px;line-height:1.05;color:#472C54;letter-spacing:-.5px}.pl-unified-page-title p{margin:6px 0 0;color:#7C6684;font-size:11.5px;line-height:1.4}
+          .pl-unified-page-content{display:grid;gap:11px}
+          .pl-unified-page-content section,.pl-unified-page-content details{border-color:#EBD9F0!important;box-shadow:0 8px 22px rgba(101,63,115,.045)!important}
+          .pl-unified-page-content [role="tablist"]{background:linear-gradient(145deg,#F8EEFA,#FFF8FC)!important;border-color:#EAD9EE!important;border-radius:18px!important}
+          .pl-unified-page-content [role="tab"]{border-radius:14px!important}
+          .pl-unified-page-content button{transition:transform .15s ease,box-shadow .15s ease}
+          .pl-unified-page-content button:active{transform:scale(.98)}
+          .pl-unified-page-content input,.pl-unified-page-content textarea,.pl-unified-page-content select{border-color:#E4CEE9!important;border-radius:14px!important;background:#FFFDFE!important}
+          .pl-app-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:80;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;min-height:76px;padding:9px 8px max(9px,env(safe-area-inset-bottom));background:rgba(255,252,254,.97);border-top:1px solid #F0E1F1;box-shadow:0 -8px 24px rgba(76,48,87,.07);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+          .pl-app-nav-btn{appearance:none;border:0;background:transparent;min-height:58px;padding:4px 2px;color:#9A819F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.8px;font-weight:850;cursor:pointer}.pl-app-nav-btn.active{color:#B24CC5}.pl-app-nav-btn .ico{font-size:22px;line-height:1;filter:saturate(.8)}
+          .pl-app-nav-add{width:54px;height:54px;min-height:54px;margin-top:-18px;border-radius:50%;background:linear-gradient(145deg,#C75BDD,#E079C9);color:white;box-shadow:0 9px 22px rgba(178,71,199,.24);font-size:31px;line-height:1;display:flex;align-items:center;justify-content:center}
           @media(min-width:760px){.pl-app-bottom-nav{left:50%;right:auto;width:760px;transform:translateX(-50%);border-left:1px solid #F0E1F1;border-right:1px solid #F0E1F1;border-radius:24px 24px 0 0}}
+          @media(max-width:520px){.pl-unified-page-hero{min-height:138px;padding:13px 14px 14px}.pl-unified-wordmark{font-size:23px}.pl-unified-page-title{margin-top:11px;max-width:78%}.pl-unified-page-title h2{font-size:22px}.pl-unified-page-title p{font-size:10.8px}.pl-unified-page-hero:after{font-size:49px;right:12px}}
         `}</style>
 
         {dashboard !== "today" && (
@@ -6695,14 +6702,14 @@ function GlowUpTracker() {
             <div className="pl-unified-topline">
               <div className="pl-unified-wordmark">PlushLife <span>♥</span></div>
               <div className="pl-unified-actions">
-                <div className="pl-unified-date">▣&nbsp;&nbsp;{new Date(`${period.date}T12:00:00`).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}</div>
+                <div className="pl-unified-date">🗓️&nbsp;{new Date(`${period.date}T12:00:00`).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}</div>
                 <button type="button" className="pl-unified-gear" onClick={() => setSettingsOpen(true)} aria-label="Settings">⚙</button>
               </div>
             </div>
             <div className="pl-unified-page-title">
-              <div className="pl-unified-kicker">{dashboard === "progress" ? "✨ YOUR PROGRESS" : dashboard === "care" ? "💗 YOUR CARE" : dashboard === "week" ? "🗓️ YOUR CALENDAR" : "💜 PLUSHLIFE"}</div>
-              <h2>{dashboard === "progress" ? "Progress" : dashboard === "care" ? "Care" : dashboard === "week" ? "Calendar" : "PlushLife"}</h2>
-              <p>{dashboard === "progress" ? "See what is helping, what feels hard, and how your rhythm is changing." : dashboard === "care" ? "Choose the kind of support that fits right now." : dashboard === "week" ? "Look ahead, review your week, or open a specific day." : "Everything you need, in one soft place."}</p>
+              <div className="pl-unified-kicker">{dashboard === "progress" ? "✨ LITTLE WINS" : dashboard === "care" ? "💗 COZY CARE" : dashboard === "week" ? "🌷 YOUR DAYS" : "💜 PLUSHLIFE"}</div>
+              <h2>{dashboard === "progress" ? "Your little wins" : dashboard === "care" ? "A little care" : dashboard === "week" ? "Your calendar" : "PlushLife"}</h2>
+              <p>{dashboard === "progress" ? "Notice what is growing without turning it into a grade." : dashboard === "care" ? "Pick one soft thing that might feel nice right now." : dashboard === "week" ? "Your days, plans, and gentle reminders in one cozy place." : "Everything you need, in one soft place."}</p>
             </div>
           </section>
         )}
@@ -6742,11 +6749,11 @@ function GlowUpTracker() {
 
         {dashboard === "progress" && <div className="pl-unified-page-content"><ProgressPanel open={dashboard === "progress"} user={user} progressView={progressView} setProgressView={setProgressView} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} hasWeeklyActivity={hasWeeklyActivity} goToDashboard={goToDashboard} weeklyOverallPct={weeklyOverallPct} weekOverWeekDelta={weekOverWeekDelta} preferences={preferences} weeklyEssentialPct={weeklyEssentialPct} weeklyOverallDone={weeklyOverallDone} weeklyOverallPossible={weeklyOverallPossible} weeklyBonusDone={weeklyBonusDone} caringDays={caringDays} weeklyEssentialDone={weeklyEssentialDone} careStory={careStory} careAreas={careAreas} openTaskManager={openTaskManager} patternInsightCards={patternInsightCards} insightCardIndex={insightCardIndex} setInsightCardIndex={setInsightCardIndex} weeklyHighlights={weeklyHighlights} period={period} goWriteWeeklyIntention={goWriteWeeklyIntention} setShareCardOpen={setShareCardOpen} progressDetailsOpen={progressDetailsOpen} setProgressDetailsOpen={setProgressDetailsOpen} TREND_WEEKS={TREND_WEEKS} TREND_MONTHS={TREND_MONTHS} currentMonthKey={currentMonthKey} monthlyOverallPct={monthlyOverallPct} monthOverMonthDelta={monthOverMonthDelta} monthlyTrendPoints={monthlyTrendPoints} tappedTrendMonth={tappedTrendMonth} setTappedTrendMonth={setTappedTrendMonth} monthlyMostConsistent={monthlyMostConsistent} currentMonthDates={currentMonthDates} weeklyTrendPoints={weeklyTrendPoints} tappedTrendWeek={tappedTrendWeek} setTappedTrendWeek={setTappedTrendWeek} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} /></div>}
         <nav className="pl-app-bottom-nav" aria-label="Main navigation">
-          <button type="button" className={`pl-app-nav-btn ${dashboard === "today" ? "active" : ""}`} onClick={() => goToDashboard("today")}><span className="ico">⌂</span><span>Home</span></button>
-          <button type="button" className={`pl-app-nav-btn ${dashboard === "progress" ? "active" : ""}`} onClick={() => goToDashboard("progress")}><span className="ico">▥</span><span>Progress</span></button>
+          <button type="button" className={`pl-app-nav-btn ${dashboard === "today" ? "active" : ""}`} onClick={() => goToDashboard("today")}><span className="ico">🏠</span><span>Home</span></button>
+          <button type="button" className={`pl-app-nav-btn ${dashboard === "progress" ? "active" : ""}`} onClick={() => goToDashboard("progress")}><span className="ico">🌷</span><span>Progress</span></button>
           <button type="button" className="pl-app-nav-btn" aria-label="Add" onClick={() => openTaskManager(period.date)}><span className="pl-app-nav-add">＋</span><span>Add</span></button>
-          <button type="button" className={`pl-app-nav-btn ${dashboard === "care" ? "active" : ""}`} onClick={() => goToDashboard("care")}><span className="ico">♥</span><span>Care</span></button>
-          <button type="button" className="pl-app-nav-btn" onClick={() => setProfileOpen(true)}><span className="ico">♟</span><span>Plush</span></button>
+          <button type="button" className={`pl-app-nav-btn ${dashboard === "care" ? "active" : ""}`} onClick={() => goToDashboard("care")}><span className="ico">💗</span><span>Care</span></button>
+          <button type="button" className="pl-app-nav-btn" onClick={() => setProfileOpen(true)}><span className="ico">🧸</span><span>Plush</span></button>
         </nav>
 
         </>
