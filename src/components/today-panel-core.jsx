@@ -160,30 +160,62 @@ function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = []
   );
 }
 
+function isHabitRow(row) {
+  return row && !row.isBonus && String(row.habitType || row.sourceTask?.habit_type || "regular") !== "regular";
+}
+
+function TasksToday({ rows = [], viewDone = {}, toggle, openTaskManager, period }) {
+  const taskRows = rows.filter((row) => row && !row.isBonus && !isHabitRow(row));
+  const completed = taskRows.filter((row) => !!viewDone[row.key]).length;
+  const unfinished = taskRows.filter((row) => !viewDone[row.key]);
+  const shown = unfinished.slice(0, 4);
+
+  return (
+    <section style={{...card, padding: "15px 17px 16px"}} aria-label="Tasks today">
+      <div className="pl-section-topline">
+        <div className="pl-kicker">✓ &nbsp;TASKS TODAY · {completed} / {taskRows.length}</div>
+        <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)}>View all →</button>
+      </div>
+      <div className="pl-list">
+        {shown.length ? shown.map((row) => (
+          <button type="button" className="pl-list-row pl-habit-row" key={row.key} onClick={() => toggle?.(row.key)}>
+            <span className="pl-check" aria-hidden="true" />
+            <span className="pl-row-text">{row.sourceTask && <HabitTypeIcon task={row.sourceTask} />}{row.label}</span>
+          </button>
+        )) : (
+          <div className="pl-list-row pl-note-row">
+            <div className="pl-row-icon">{taskRows.length ? "✨" : "📝"}</div>
+            <div className="pl-row-text">{taskRows.length ? "All of today’s tasks are done." : "No tasks are scheduled for today."}</div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function Habits({ rows = [], viewDone = {}, toggle, openTaskManager, period }) {
-  const habitRows = rows.filter((r) => !r.isBonus);
+  const habitRows = rows.filter(isHabitRow);
   const completed = habitRows.filter((r) => !!viewDone[r.key]).length;
-  const fallback = [
-    { key: "__brush", label: "Brush teeth (morning)" },
-    { key: "__breakfast", label: "Eat breakfast" },
-    { key: "__comfort", label: "Choose a comfort item for today" },
-  ];
   const visible = habitRows.filter((r) => !viewDone[r.key]).slice(0, 3);
-  const shown = visible.length ? visible : fallback;
 
   return (
     <section style={{...card, padding: "15px 17px 16px"}} aria-label="Habits today">
       <div className="pl-section-topline">
-        <div className="pl-kicker">🌱 &nbsp;HABITS · {completed} / {habitRows.length || 9}</div>
+        <div className="pl-kicker">🌱 &nbsp;HABITS · {completed} / {habitRows.length}</div>
         <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)}>View all →</button>
       </div>
       <div className="pl-list">
-        {shown.map((r) => (
-          <button type="button" className="pl-list-row pl-habit-row" key={r.key} onClick={() => !String(r.key).startsWith("__") && toggle?.(r.key)}>
+        {visible.length ? visible.map((r) => (
+          <button type="button" className="pl-list-row pl-habit-row" key={r.key} onClick={() => toggle?.(r.key)}>
             <span className="pl-check" aria-hidden="true" />
             <span className="pl-row-text">{r.sourceTask && <HabitTypeIcon task={r.sourceTask} />}{r.label}</span>
           </button>
-        ))}
+        )) : (
+          <div className="pl-list-row pl-note-row">
+            <div className="pl-row-icon">{habitRows.length ? "🌷" : "🌱"}</div>
+            <div className="pl-row-text">{habitRows.length ? "All of today’s habits are done." : "No habits are scheduled for today."}</div>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -247,11 +279,11 @@ export function TodayPanel({
           [data-plushlife-compact-card="next-step"]{padding:9px 10px 10px!important}
           .pl-primary-task{font-size:13px;margin-top:4px;line-height:1.16;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
           .pl-action-row{gap:5px;margin-top:7px}.pl-btn,.pl-more{min-height:34px;border-radius:10px}.pl-btn{padding:5px 6px;font-size:8.8px}.pl-btn-primary{flex:1.1}.pl-btn-ghost{flex:.88}.pl-more{width:36px;font-size:12px}
-          [data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Habits today"]{padding:9px 10px 10px!important}
+          [data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Tasks today"],.pl-home-shell>section[aria-label="Habits today"]{padding:9px 10px 10px!important}
           .pl-list{margin-top:7px;gap:4px}.pl-list-row{min-height:36px;padding:5px 7px;border-radius:10px}.pl-schedule-row{grid-template-columns:54px 17px minmax(0,1fr) 8px}.pl-note-row{grid-template-columns:17px minmax(0,1fr)}.pl-time{font-size:10px}.pl-row-icon{font-size:12px}.pl-row-text{font-size:10px;line-height:1.18}.pl-chevron{font-size:14px}.pl-check{width:18px;height:18px;border-radius:5px}
           .pl-home-shortcuts{gap:5px}.pl-shortcut{min-height:48px;padding:6px 7px;border-radius:13px}.pl-shortcut-icon{font-size:17px}.pl-shortcut-title{font-size:9.8px}.pl-shortcut-sub{font-size:7.5px}.pl-shortcut-arrow{font-size:14px}
           .pl-noticed{min-height:40px;border-radius:13px;padding:6px 8px}.pl-noticed-icon{font-size:17px}.pl-noticed-title{font-size:9.2px}.pl-noticed-copy{font-size:7.8px}.pl-noticed-arrow{font-size:14px}
-          [data-plushlife-compact-card="next-step"],[data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Habits today"]{border-radius:15px!important}
+          [data-plushlife-compact-card="next-step"],[data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Tasks today"],.pl-home-shell>section[aria-label="Habits today"]{border-radius:15px!important}
         }
       `}</style>
 
@@ -259,6 +291,7 @@ export function TodayPanel({
         <Hero period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} />
         <OneTinyThing nextStepTask={nextStepTask} nextStepReason={nextStepReason} nextStepHint={nextStepHint} toggle={toggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} />
         <TodaySchedule selectedSchedule={selectedSchedule} selectedScheduleExceptionEntries={selectedScheduleExceptionEntries} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} />
+        <TasksToday rows={rows} viewDone={viewDone} toggle={toggle} openTaskManager={openTaskManager} period={period} />
         <Habits rows={rows} viewDone={viewDone} toggle={toggle} openTaskManager={openTaskManager} period={period} />
 
         <div className="pl-home-shortcuts">
