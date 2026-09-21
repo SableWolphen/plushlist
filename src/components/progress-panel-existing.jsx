@@ -94,6 +94,10 @@ function CompactGrowthOverview(props) {
         .pl-growth-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:4px;border-radius:14px;background:linear-gradient(145deg,#F8EEFA,#FFF8FC);border:1px solid #EAD9EE}
         .pl-growth-tabs button{min-height:42px;border-radius:11px;border:1px solid transparent;background:transparent;color:#80658A;font-size:9px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px}
         .pl-growth-tabs button.selected{background:#FFFDFE;border-color:#D591DE;color:#6E3E7A;box-shadow:0 5px 15px rgba(154,80,189,.08)}
+        .pl-growth-weekbar{padding:9px 10px;border-radius:14px;border:1px solid #EAD9EE;background:linear-gradient(145deg,#FFF9FD,#FAF3FF)}
+        .pl-growth-weekbar-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:9px;font-weight:900;color:#76567F}
+        .pl-growth-weekbar-track{height:8px;margin-top:6px;border-radius:999px;background:#EEDFF2;overflow:hidden}
+        .pl-growth-weekbar-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#C767D7,#E087C5);transition:width .25s ease}
         .pl-growth-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
         .pl-growth-stat{min-height:64px;padding:7px 5px;border-radius:14px;border:1px solid #EAD9EE;background:linear-gradient(145deg,#FFF9FD,#FAF3FF);text-align:center;cursor:pointer}
         .pl-growth-stat .emoji{font-size:18px}.pl-growth-stat .value{margin-top:3px;font-size:15.5px;font-weight:950;color:#A94EC0}.pl-growth-stat .label{margin-top:3px;font-size:8.4px;font-weight:850;color:#786281}
@@ -122,6 +126,16 @@ function CompactGrowthOverview(props) {
       </section>
 
       <ProgressTabs progressView={props.progressView} setProgressView={props.setProgressView} />
+
+      <section className="pl-growth-weekbar" aria-label="Weekly progress">
+        <div className="pl-growth-weekbar-head">
+          <span>🌷 This week</span>
+          <span>{Math.max(0, Math.min(100, Number(props.weeklyOverallPct) || 0))}%</span>
+        </div>
+        <div className="pl-growth-weekbar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.max(0, Math.min(100, Number(props.weeklyOverallPct) || 0))}>
+          <div className="pl-growth-weekbar-fill" style={{ width: `${Math.max(0, Math.min(100, Number(props.weeklyOverallPct) || 0))}%` }} />
+        </div>
+      </section>
 
       <section className="pl-growth-stats" aria-label="Weekly little wins">
         {[
