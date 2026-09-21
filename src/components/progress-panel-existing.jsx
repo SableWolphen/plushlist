@@ -9,28 +9,35 @@ const LazyWhatWorksForMe = React.lazy(() => import("./habit-retention.jsx").then
 const LazyResilienceProgress = React.lazy(() => import("./habit-resilience.jsx").then((module) => ({ default: module.ResilienceProgress })));
 
 function InsightToolsFallback() {
-  return <div role="status" style={{ padding: 10, color: "#71857F", fontSize: 11.5 }}>Loading deeper habit insights…</div>;
+  return <div role="status" style={{ padding: 10, color: "#8B7394", fontSize: 11 }}>✨ Getting your little wins ready…</div>;
 }
 
 const card = {
-  borderRadius: 14,
-  border: "1px solid rgba(220,204,230,.88)",
-  background: "rgba(255,255,255,.88)",
-  boxShadow: "0 3px 10px rgba(151,112,173,.05)",
+  borderRadius: 24,
+  border: "1px solid #EBD9F0",
+  background: "linear-gradient(145deg,rgba(255,255,255,.96),rgba(255,248,252,.93))",
+  boxShadow: "0 10px 28px rgba(101,63,115,.055)",
 };
 
 function ProgressTabs({ progressView, setProgressView }) {
   const tabs = [
-    { id: "overview", label: "Overview", icon: "📊" },
-    { id: "story", label: "Your story", icon: "📖" },
-    { id: "areas", label: "Care areas", icon: "🪴" },
+    { id: "overview", label: "Little wins", icon: "✨" },
+    { id: "story", label: "My story", icon: "📖" },
+    { id: "areas", label: "Care garden", icon: "🌷" },
   ];
-  return <div role="tablist" aria-label="Progress views" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 4, padding: 4, borderRadius: 13, background: "rgba(246,235,251,.68)", border: "1px solid #E5D4EE" }}>
-    {tabs.map((item) => {
-      const selected = progressView === item.id;
-      return <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} style={{ minHeight: 42, minWidth: 0, padding: "6px 4px", borderRadius: 10, border: selected ? "2px solid #9850BC" : "1px solid transparent", background: selected ? "#FFFFFF" : "transparent", color: selected ? "#53365F" : "#866895", boxShadow: selected ? "0 2px 7px rgba(154,80,189,.08)" : "none", fontSize: 10.2, fontWeight: 900, cursor: "pointer", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.icon} {item.label}</button>;
-    })}
-  </div>;
+  return (
+    <div role="tablist" aria-label="Progress views" className="pl-growth-tabs">
+      {tabs.map((item) => {
+        const selected = progressView === item.id;
+        return (
+          <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} className={selected ? "selected" : ""}>
+            <span aria-hidden="true">{item.icon}</span>
+            <span>{item.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 function buildTakeaways(props) {
@@ -40,21 +47,21 @@ function buildTakeaways(props) {
   const gentlest = areas.slice().sort((a, b) => (Number(a.pct) || 0) - (Number(b.pct) || 0))[0];
   const items = [];
 
-  if (highlights.mostConsistent?.task?.task) items.push({ icon: "🌱", label: "Helped", text: `${highlights.mostConsistent.task.task} was your steadiest routine.` });
-  else if (strongest) items.push({ icon: "🌱", label: "Helped", text: `${strongest.label} was your steadiest care area at ${strongest.pct}%.` });
+  if (highlights.mostConsistent?.task?.task) items.push({ icon: "🌱", label: "A steady little win", text: `${highlights.mostConsistent.task.task} kept showing up with you.` });
+  else if (strongest) items.push({ icon: "🌱", label: "Growing gently", text: `${strongest.label} has been one of your steadier care spots.` });
 
-  if (gentlest && Number(gentlest.pct) < 60) items.push({ icon: "🪶", label: "Harder", text: `${gentlest.label} was the heaviest area this week. Keeping it lighter may fit better.` });
+  if (gentlest && Number(gentlest.pct) < 60) items.push({ icon: "🪶", label: "Could use extra softness", text: `${gentlest.label} may feel nicer with a smaller version next time.` });
 
   if (props.weekOverWeekDelta != null) {
     const delta = Number(props.weekOverWeekDelta) || 0;
     items.push(delta < 0
-      ? { icon: "💜", label: "Notice", text: `This week was ${Math.abs(delta)}% lighter than last week. A softer week is still useful data.` }
+      ? { icon: "💗", label: "A softer week", text: "This week was lighter than the last one. That still counts as showing up." }
       : delta > 0
-        ? { icon: "✨", label: "Notice", text: `Your overall care was ${delta}% higher than last week. Notice the pattern without turning it into pressure.` }
-        : { icon: "🌙", label: "Notice", text: "Your rhythm was close to last week. Steady can be useful progress too." });
+        ? { icon: "✨", label: "More room for care", text: "You made a little more room for yourself this week." }
+        : { icon: "🌙", label: "Steady is lovely too", text: "Your rhythm stayed pretty similar. You do not need dramatic change for it to matter." });
   }
 
-  if (!items.length) items.push({ icon: "✨", label: "Learning", text: "PlushLife is still gathering enough history to make this more personal." });
+  if (!items.length) items.push({ icon: "🧸", label: "Still learning you", text: "PlushLife is gathering a little more history before making this personal." });
   return items.slice(0, 3);
 }
 
@@ -66,90 +73,159 @@ function CompactGrowthOverview(props) {
   const highlights = props.weeklyHighlights || {};
   const takeaways = buildTakeaways(props);
   const metricDetails = {
-    essentials: { icon: "💜", title: "Essentials", value: `${props.weeklyEssentialPct || 0}%`, tone: "#8F46AF", text: `You completed ${props.weeklyEssentialPct || 0}% of the things marked essential. Bonus items never lower this number.` },
-    core: { icon: "🗓️", title: "Core + scheduled", value: `${props.weeklyOverallDone || 0}/${props.weeklyOverallPossible || 0}`, tone: "#347FCF", text: `${props.weeklyOverallDone || 0} of ${props.weeklyOverallPossible || 0} core and scheduled items were completed this week.` },
-    bonus: { icon: "⭐", title: "Bonus wins", value: `${props.weeklyBonusDone || 0}`, tone: "#C88A00", text: `${props.weeklyBonusDone || 0} bonus ${Number(props.weeklyBonusDone) === 1 ? "win" : "wins"}. Bonus tasks are extra care and never count against you.` },
+    essentials: { icon: "💗", title: "Little essentials", value: `${props.weeklyEssentialPct || 0}%`, text: "These are the things you marked most important. Bonus items never count against you." },
+    core: { icon: "🌷", title: "Care steps", value: `${props.weeklyOverallDone || 0}/${props.weeklyOverallPossible || 0}`, text: "These are the everyday and scheduled care steps you had room for this week." },
+    bonus: { icon: "⭐", title: "Extra sparkles", value: `${props.weeklyBonusDone || 0}`, text: "Bonus wins are little extras. Skipping them never lowers anything." },
   };
 
-  return <div data-plushlife-growth-focus="true" style={{ display: "grid", gap: 8, width: "100%", margin: 0 }}>
-    <section style={{ ...card, padding: "13px 14px 12px", background: "linear-gradient(145deg,rgba(255,255,255,.95),rgba(252,247,255,.92))" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 9.5, letterSpacing: ".14em", fontWeight: 900, color: "#9850BC" }}>THIS WEEK · MON–SUN</div>
-          <div style={{ marginTop: 3, fontSize: 18, lineHeight: 1.08, fontWeight: 900, color: "#34283D" }}>PlushGrowth ✨</div>
+  return (
+    <div data-plushlife-growth-focus="true" className="pl-growth-shell">
+      <style>{`
+        .pl-growth-shell{display:grid;gap:11px}
+        .pl-growth-card{border:1px solid #EBD9F0;border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(255,248,252,.93));box-shadow:0 10px 28px rgba(101,63,115,.055);padding:15px}
+        .pl-growth-kicker{font-size:10px;letter-spacing:.14em;font-weight:950;color:#B653C5}
+        .pl-growth-heading{margin-top:4px;font-size:21px;font-weight:950;line-height:1.1;color:#4A3157}
+        .pl-growth-copy{margin-top:5px;font-size:11.8px;line-height:1.45;color:#806B89}
+        .pl-growth-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:6px;border-radius:20px;background:linear-gradient(145deg,#F8EEFA,#FFF8FC);border:1px solid #EAD9EE}
+        .pl-growth-tabs button{min-height:54px;border-radius:15px;border:1px solid transparent;background:transparent;color:#80658A;font-size:10.5px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px}
+        .pl-growth-tabs button.selected{background:#FFFDFE;border-color:#D591DE;color:#6E3E7A;box-shadow:0 5px 15px rgba(154,80,189,.08)}
+        .pl-growth-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+        .pl-growth-stat{min-height:84px;padding:10px 7px;border-radius:20px;border:1px solid #EAD9EE;background:linear-gradient(145deg,#FFF9FD,#FAF3FF);text-align:center;cursor:pointer}
+        .pl-growth-stat .emoji{font-size:22px}.pl-growth-stat .value{margin-top:3px;font-size:19px;font-weight:950;color:#A94EC0}.pl-growth-stat .label{margin-top:3px;font-size:9.7px;font-weight:850;color:#786281}
+        .pl-growth-notice{display:grid;gap:9px;margin-top:10px}.pl-growth-note{display:grid;grid-template-columns:28px 1fr;gap:8px;padding:10px 11px;border-radius:17px;background:#FFF9FD;border:1px solid #F0E1F2}
+        .pl-growth-note .icon{font-size:21px}.pl-growth-note strong{display:block;color:#604269;font-size:11px}.pl-growth-note span{display:block;margin-top:2px;color:#806E87;font-size:10.5px;line-height:1.4}
+        .pl-growth-soft-btn{min-height:42px;padding:8px 12px;border-radius:14px;border:1px solid #E4CEE9;background:#FFF9FD;color:#8A5598;font-weight:900;cursor:pointer}
+        .pl-growth-primary{min-height:42px;padding:8px 13px;border-radius:14px;border:0;background:linear-gradient(135deg,#C767D7,#E087C5);color:white;font-weight:950;cursor:pointer}
+        @media(max-width:520px){.pl-growth-card{padding:13px}.pl-growth-heading{font-size:19px}.pl-growth-tabs button{font-size:9.8px;min-height:50px}.pl-growth-stat{min-height:78px}.pl-growth-note{padding:9px 10px}}
+      `}</style>
+
+      <section className="pl-growth-card">
+        <div className="pl-growth-kicker">✨ THIS WEEK’S LITTLE WINS</div>
+        <div className="pl-growth-heading">PlushGrowth</div>
+        <div className="pl-growth-copy">
+          {props.caringDays
+            ? `You made a little room for yourself on ${props.caringDays} ${Number(props.caringDays) === 1 ? "day" : "days"} this week.`
+            : "No pressure to fill this up. One tiny care step is enough to begin."}
         </div>
-        <strong style={{ flexShrink: 0, fontSize: 29, lineHeight: .95, color: "#9442BC" }}>{props.weeklyOverallPct || 0}%</strong>
-      </div>
-      <div style={{ height: 7, marginTop: 10, overflow: "hidden", borderRadius: 99, background: "#EEE3F4" }}><div style={{ height: "100%", width: `${Math.max(0, Math.min(100, Number(props.weeklyOverallPct) || 0))}%`, borderRadius: 99, background: "linear-gradient(90deg,#A84DCA,#55B9EF)" }} /></div>
-      <div style={{ marginTop: 8, fontSize: 11.2, lineHeight: 1.4, color: "#665473" }}>You made room for essentials on <strong style={{ color: "#8E4EAA" }}>{props.caringDays || 0} caring {Number(props.caringDays) === 1 ? "day" : "days"}</strong>.</div>
-      {(highlights.mostConsistent || highlights.topMood) && <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 12px", marginTop: 7, paddingTop: 7, borderTop: "1px solid #EEE3F1", fontSize: 9.9, lineHeight: 1.35, color: "#786682" }}>
-        {highlights.mostConsistent && <span>🌱 Steady: <strong><HabitTypeIcon task={highlights.mostConsistent.task} />{highlights.mostConsistent.task.task}</strong></span>}
-        {highlights.topMood && <span>🙂 Check-in: <strong>{highlights.topMood}</strong></span>}
-      </div>}
-    </section>
 
-    <ProgressTabs progressView={props.progressView} setProgressView={props.setProgressView} />
+        {(highlights.mostConsistent || highlights.topMood) && (
+          <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 10 }}>
+            {highlights.mostConsistent && <span style={{ padding: "6px 9px", borderRadius: 999, background: "#FFF2FA", color: "#77547F", fontSize: 10.2, fontWeight: 850 }}>🌱 Steady: <HabitTypeIcon task={highlights.mostConsistent.task} />{highlights.mostConsistent.task.task}</span>}
+            {highlights.topMood && <span style={{ padding: "6px 9px", borderRadius: 999, background: "#F7F1FF", color: "#77547F", fontSize: 10.2, fontWeight: 850 }}>🙂 Most common check-in: {highlights.topMood}</span>}
+          </div>
+        )}
+      </section>
 
-    <section aria-label="Weekly growth summary" style={{ ...card, padding: "5px 7px", display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 4 }}>
-      {[
-        ["essentials", "💜", `${props.weeklyEssentialPct || 0}%`, "Essentials", "#A24BC7"],
-        ["core", "🗓️", `${props.weeklyOverallDone || 0}/${props.weeklyOverallPossible || 0}`, "Core", "#3E8EEB"],
-        ["bonus", "⭐", `${props.weeklyBonusDone || 0}`, "Bonus", "#D89900"],
-      ].map(([id, icon, value, label, accent]) => {
-        const selected = selectedMetric === id;
-        return <button key={id} type="button" aria-expanded={selected} aria-controls="plushgrowth-metric-detail" onClick={() => setSelectedMetric((current) => current === id ? null : id)} style={{ minWidth: 0, minHeight: 62, padding: "6px 3px", borderRadius: 10, border: selected ? `1px solid ${accent}` : "1px solid transparent", background: selected ? `${accent}0D` : "transparent", textAlign: "center", cursor: "pointer", font: "inherit" }}>
-          <div style={{ fontSize: 14 }}>{icon}</div><div style={{ marginTop: 2, fontSize: 16, lineHeight: 1, fontWeight: 900, color: accent }}>{value}</div><div style={{ marginTop: 4, fontSize: 9.1, color: "#6F5D7B", fontWeight: 800 }}>{label}</div>
-        </button>;
-      })}
-    </section>
+      <ProgressTabs progressView={props.progressView} setProgressView={props.setProgressView} />
 
-    {selectedMetric && (() => {
-      const detail = metricDetails[selectedMetric];
-      return <section id="plushgrowth-metric-detail" aria-live="polite" style={{ ...card, padding: "9px 11px", borderColor: `${detail.tone}44` }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}><div><strong style={{ fontSize: 10.5, color: detail.tone }}>{detail.icon} {detail.title} · {detail.value}</strong><div style={{ marginTop: 3, fontSize: 10.4, lineHeight: 1.4, color: "#675873" }}>{detail.text}</div></div><button type="button" aria-label="Close metric details" onClick={() => setSelectedMetric(null)} style={{ minWidth: 44, minHeight: 44, margin: "-8px -8px -8px 0", border: 0, background: "transparent", color: detail.tone, fontSize: 16, cursor: "pointer" }}>×</button></div>
-      </section>;
-    })()}
+      <section className="pl-growth-stats" aria-label="Weekly little wins">
+        {[
+          ["essentials", "💗", `${props.weeklyEssentialPct || 0}%`, "Little essentials"],
+          ["core", "🌷", `${props.weeklyOverallDone || 0}/${props.weeklyOverallPossible || 0}`, "Care steps"],
+          ["bonus", "⭐", `${props.weeklyBonusDone || 0}`, "Extra sparkles"],
+        ].map(([id, icon, value, label]) => (
+          <button key={id} type="button" className="pl-growth-stat" aria-expanded={selectedMetric === id} onClick={() => setSelectedMetric((current) => current === id ? null : id)}>
+            <div className="emoji">{icon}</div>
+            <div className="value">{value}</div>
+            <div className="label">{label}</div>
+          </button>
+        ))}
+      </section>
 
-    <section style={{ ...card, padding: "11px 12px", background: "linear-gradient(145deg,#F5FCF8,#FFFDF7)", borderColor: "#D4E7DB" }}>
-      <div style={{ fontSize: 13, fontWeight: 900, color: "#347B69" }}>✨ What PlushLife noticed</div>
-      <div style={{ display: "grid", gap: 7, marginTop: 7 }}>
-        {takeaways.map((item) => <div key={`${item.label}-${item.text}`} style={{ display: "grid", gridTemplateColumns: "19px 1fr", gap: 5, alignItems: "start" }}><span aria-hidden="true">{item.icon}</span><div style={{ fontSize: 10.6, lineHeight: 1.4, color: "#56645F" }}><strong style={{ color: "#3F544D" }}>{item.label}:</strong> {item.text}</div></div>)}
-      </div>
-      <div style={{ marginTop: 7, paddingTop: 7, borderTop: "1px solid #DDE9E1", fontSize: 9.5, color: "#6B8E82" }}>Patterns, not pressure.</div>
-    </section>
-
-    <section style={{ ...card, padding: "8px 10px", background: "rgba(252,248,255,.9)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-        <div style={{ minWidth: 0 }}><div style={{ fontSize: 9.8, fontWeight: 900, color: "#8A48A6" }}>📝 Weekly intention</div><div style={{ marginTop: 2, fontSize: 11.7, lineHeight: 1.25, color: "#3E3347", overflowWrap: "anywhere" }}>{props.weeklyIntentionText || "Set one gentle direction for the week"}</div></div>
-        <button type="button" onClick={() => { props.setWeeklyIntentionDraft(props.weeklyIntentionText || ""); props.setWeeklyIntentionEditing(true); }} style={{ minHeight: 40, padding: "6px 9px", borderRadius: 9, border: "1px solid #D7BCE3", background: "white", color: "#8948A6", fontWeight: 900, cursor: "pointer" }}>{props.weeklyIntentionText ? "Edit" : "Add"}</button>
-      </div>
-      {props.weeklyIntentionEditing && <div style={{ marginTop: 8 }}><textarea value={props.weeklyIntentionDraft} onChange={(event) => props.setWeeklyIntentionDraft(event.target.value)} maxLength={2000} style={{ width: "100%", boxSizing: "border-box", minHeight: 66, padding: 9, borderRadius: 10, border: "1px solid #D9B8E8", resize: "vertical" }} /><div style={{ display: "flex", gap: 7, marginTop: 7 }}><button type="button" onClick={props.saveWeeklyIntentionEdit} style={{ minHeight: 42, padding: "7px 11px", borderRadius: 10, border: 0, background: "#A65DC1", color: "white", fontWeight: 900 }}>Save</button><button type="button" onClick={() => props.setWeeklyIntentionEditing(false)} style={{ minHeight: 42, padding: "7px 11px", borderRadius: 10, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900 }}>Cancel</button></div></div>}
-    </section>
-
-    <details onToggle={(event) => setMonthlyOpen(event.currentTarget.open)} style={{ ...card, overflow: "hidden" }}>
-      <summary style={{ minHeight: 44, padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, cursor: "pointer", listStyle: "none", color: "#8847A5", fontSize: 10.8, fontWeight: 900 }}><span>🗓️ Month so far</span><span style={{ fontSize: 15 }}>{props.monthlyOverallPct || 0}% {monthlyOpen ? "▴" : "▾"}</span></summary>
-      <div style={{ padding: "0 12px 12px" }}>
-        <div style={{ height: 7, overflow: "hidden", borderRadius: 99, background: "#F2E8F8" }}><div style={{ width: `${Math.max(0, Math.min(100, Number(props.monthlyOverallPct) || 0))}%`, height: "100%", background: "linear-gradient(90deg,#C77DD6,#7FC8F8)" }} /></div>
-        <div style={{ marginTop: 7, fontSize: 10.4, lineHeight: 1.4, color: "#806B8D" }}>{props.monthOverMonthDelta == null ? "Your month is still taking shape." : props.monthOverMonthDelta > 0 ? `${props.monthOverMonthDelta}% ahead of this point last month.` : props.monthOverMonthDelta < 0 ? `${Math.abs(props.monthOverMonthDelta)}% lighter than this point last month.` : "About the same as this point last month."}</div>
-        {goldInsights && <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #EDE2F2" }}>
-          <React.Suspense fallback={<InsightToolsFallback />}><GrowthNextMove /></React.Suspense>
-          <details onToggle={(event) => setInsightsOpen(event.currentTarget.open)} style={{ marginTop: 8, borderRadius: 11, border: "1px solid #CFE8E1", background: "#F6FCFA", overflow: "hidden" }}>
-            <summary style={{ minHeight: 42, padding: "9px 10px", cursor: "pointer", color: "#3E746A", fontWeight: 900, listStyle: "none", fontSize: 10.4 }}>🌱 Deeper insights</summary>
-            <div style={{ padding: "0 9px 9px" }}>
-              <div style={{ marginBottom: 7, padding: "8px 9px", borderRadius: 9, background: "white", border: "1px solid #DDECE7", color: "#637B74", fontSize: 10.2, lineHeight: 1.42 }}><strong style={{ color: "#3E746A" }}>Why PlushLife thinks this:</strong> it uses your own recent habit and check-in history and stays in learning mode when evidence is thin.</div>
-              <React.Suspense fallback={<InsightToolsFallback />}><HabitHealth weeklyOverallPct={props.weeklyOverallPct} weeklyEssentialPct={props.weeklyEssentialPct} caringDays={props.caringDays} weekOverWeekDelta={props.weekOverWeekDelta} preferences={props.preferences} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} /></React.Suspense>
-              {insightsOpen && <React.Suspense fallback={<InsightToolsFallback />}><LazyWeeklyHabitReview open={props.open} openTaskManager={props.openTaskManager} goToDashboard={props.goToDashboard} /><LazyWhatWorksForMe open={props.open} openTaskManager={props.openTaskManager} /><LazyResilienceProgress open={props.open} /></React.Suspense>}
+      {selectedMetric && (() => {
+        const detail = metricDetails[selectedMetric];
+        return (
+          <section className="pl-growth-card" aria-live="polite">
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+              <div style={{ fontSize: 25 }}>{detail.icon}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 950, color: "#5C4067" }}>{detail.title} · {detail.value}</div>
+                <div className="pl-growth-copy">{detail.text}</div>
+              </div>
+              <button type="button" aria-label="Close" onClick={() => setSelectedMetric(null)} style={{ border: 0, background: "transparent", color: "#A768B5", fontSize: 20, cursor: "pointer" }}>×</button>
             </div>
-          </details>
-        </div>}
-      </div>
-    </details>
-  </div>;
+          </section>
+        );
+      })()}
+
+      <section className="pl-growth-card">
+        <div className="pl-growth-kicker">🧸 WHAT PLUSHLIFE NOTICED</div>
+        <div className="pl-growth-copy">Little patterns, not grades.</div>
+        <div className="pl-growth-notice">
+          {takeaways.map((item) => (
+            <div className="pl-growth-note" key={`${item.label}-${item.text}`}>
+              <div className="icon">{item.icon}</div>
+              <div><strong>{item.label}</strong><span>{item.text}</span></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="pl-growth-card">
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ fontSize: 26 }}>📝</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 11, fontWeight: 950, color: "#744A80" }}>A gentle direction for the week</div>
+            <div className="pl-growth-copy" style={{ marginTop: 2 }}>{props.weeklyIntentionText || "Choose one tiny thing you want this week to feel like."}</div>
+          </div>
+          <button type="button" className="pl-growth-soft-btn" onClick={() => { props.setWeeklyIntentionDraft(props.weeklyIntentionText || ""); props.setWeeklyIntentionEditing(true); }}>{props.weeklyIntentionText ? "Edit" : "Add"}</button>
+        </div>
+        {props.weeklyIntentionEditing && (
+          <div style={{ marginTop: 9 }}>
+            <textarea value={props.weeklyIntentionDraft} onChange={(event) => props.setWeeklyIntentionDraft(event.target.value)} maxLength={2000} style={{ width: "100%", boxSizing: "border-box", minHeight: 68, padding: 10, borderRadius: 14, border: "1px solid #E1CBE7", background: "#FFFDFE", color: "#5F4868", resize: "vertical" }} />
+            <div style={{ display: "flex", gap: 7, marginTop: 7 }}>
+              <button type="button" className="pl-growth-primary" onClick={props.saveWeeklyIntentionEdit}>Save</button>
+              <button type="button" className="pl-growth-soft-btn" onClick={() => props.setWeeklyIntentionEditing(false)}>Not now</button>
+            </div>
+          </div>
+        )}
+      </section>
+
+      <details onToggle={(event) => setMonthlyOpen(event.currentTarget.open)} className="pl-growth-card" style={{ padding: 0, overflow: "hidden" }}>
+        <summary style={{ minHeight: 48, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", listStyle: "none", color: "#7E568A", fontSize: 11.2, fontWeight: 900 }}>
+          <span>🗓️ A peek at this month</span>
+          <span>{monthlyOpen ? "Hide" : "Open"} ▾</span>
+        </summary>
+        <div style={{ padding: "0 14px 14px" }}>
+          <div className="pl-growth-copy">
+            {props.monthOverMonthDelta == null
+              ? "Your month is still taking shape."
+              : props.monthOverMonthDelta > 0
+                ? "You have made a little more room for care than this point last month."
+                : props.monthOverMonthDelta < 0
+                  ? "This month is running softer. That is still useful information."
+                  : "Your month is moving at about the same rhythm as last month."}
+          </div>
+          {goldInsights && (
+            <div style={{ marginTop: 10 }}>
+              <React.Suspense fallback={<InsightToolsFallback />}><GrowthNextMove /></React.Suspense>
+              <details onToggle={(event) => setInsightsOpen(event.currentTarget.open)} style={{ marginTop: 8, borderRadius: 16, border: "1px solid #E8D8EC", background: "#FFF9FD", overflow: "hidden" }}>
+                <summary style={{ minHeight: 44, padding: "10px 12px", cursor: "pointer", color: "#7B5684", fontWeight: 900, listStyle: "none", fontSize: 10.7 }}>✨ More things PlushLife noticed</summary>
+                <div style={{ padding: "0 10px 10px" }}>
+                  <React.Suspense fallback={<InsightToolsFallback />}><HabitHealth weeklyOverallPct={props.weeklyOverallPct} weeklyEssentialPct={props.weeklyEssentialPct} caringDays={props.caringDays} weekOverWeekDelta={props.weekOverWeekDelta} preferences={props.preferences} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} /></React.Suspense>
+                  {insightsOpen && <React.Suspense fallback={<InsightToolsFallback />}><LazyWeeklyHabitReview open={props.open} openTaskManager={props.openTaskManager} goToDashboard={props.goToDashboard} /><LazyWhatWorksForMe open={props.open} openTaskManager={props.openTaskManager} /><LazyResilienceProgress open={props.open} /></React.Suspense>}
+                </div>
+              </details>
+            </div>
+          )}
+        </div>
+      </details>
+    </div>
+  );
 }
 
 // Product-quality contract: <GrowthNextMove /> · Why PlushLife thinks this: · LazyWeeklyHabitReview · insightsOpen
 export function ProgressPanel(props) {
   if (!props.open) return null;
   if (props.progressView === "overview") return <CompactGrowthOverview {...props} />;
-  return <ProgressPanelCore {...props} />;
+  return (
+    <div className="pl-growth-deeper">
+      <style>{`
+        .pl-growth-deeper section{border-radius:22px!important;border-color:#EBD9F0!important;background:linear-gradient(145deg,#FFFDFE,#FAF4FF)!important;box-shadow:0 8px 22px rgba(101,63,115,.045)!important}
+        .pl-growth-deeper [role="tablist"]{background:#F8EEFA!important;border-color:#EAD9EE!important;border-radius:18px!important}
+        .pl-growth-deeper button{border-radius:14px!important}
+      `}</style>
+      <ProgressPanelCore {...props} />
+    </div>
+  );
 }
