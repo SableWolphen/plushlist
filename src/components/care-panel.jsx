@@ -5,11 +5,31 @@ import { hasGoldFeature } from "../plush-gold.js";
 import { addCaringDay, localDay, pathAdaptation, recordMoment, recordPathFeedback, sleepMemory, supportMemory } from "../plush-memory.js";
 import { beginRecommendation, profileContext, recommendationFit, recordRecommendationOutcome, syncSessionOutcomes } from "../plush-profile.js";
 
-const shellCard = { borderRadius: 14, border: "1px solid #CFE8E1", background: "linear-gradient(145deg,#F3FFFB,#FFF8FC)", boxShadow: "0 4px 14px rgba(49,140,121,.06)" };
-const smallButton = { minHeight: 44, padding: "7px 9px", borderRadius: 10, border: "1px solid #D7BFE4", background: "white", color: "#76558A", fontWeight: 900, fontSize: 10.2, cursor: "pointer" };
+const card = {
+  borderRadius: 24,
+  border: "1px solid #EBD9F0",
+  background: "linear-gradient(145deg,rgba(255,255,255,.95),rgba(255,248,252,.92))",
+  boxShadow: "0 10px 28px rgba(101,63,115,.055)",
+};
+
+const pill = {
+  minHeight: 42,
+  padding: "8px 12px",
+  borderRadius: 999,
+  border: "1px solid #E5CFEA",
+  background: "#FFF9FD",
+  color: "#7B548A",
+  fontWeight: 900,
+  cursor: "pointer",
+};
 
 function SituationButton({ option, selected, onClick }) {
-  return <button type="button" aria-pressed={selected} onClick={onClick} style={{ minHeight: 58, padding: "9px 10px", borderRadius: 12, border: selected ? "2px solid #4A9D8B" : "1px solid #CFE8E1", background: selected ? "#F0FFF9" : "rgba(255,255,255,.88)", color: "#4F625D", textAlign: "left", fontWeight: 850, fontSize: 11.4, lineHeight: 1.3, cursor: "pointer", boxShadow: selected ? "0 3px 9px rgba(49,140,121,.08)" : "none" }}><span aria-hidden="true" style={{ fontSize: 18, marginRight: 6 }}>{option.icon}</span>{option.label}</button>;
+  return (
+    <button type="button" aria-pressed={selected} onClick={onClick} className={`pl-care-feeling ${selected ? "selected" : ""}`}>
+      <span className="pl-care-feeling-icon" aria-hidden="true">{option.icon}</span>
+      <span>{option.label}</span>
+    </button>
+  );
 }
 
 export function CarePanel(props) {
@@ -18,8 +38,11 @@ export function CarePanel(props) {
   const userId = props.user?.id || "local";
   const goldPathsUnlocked = hasGoldFeature("guided_gold_paths");
   const goldMemoryUnlocked = hasGoldFeature("advanced_growth_insights");
+
   if (!PLUSH_PATHS.__plushlifeExpanded) {
-    const extras = EXTRA_PLUSH_PATHS.filter((path) => path.tier !== "gold" || goldPathsUnlocked).map((path) => path.tier === "gold" ? { ...path, title: `✨ Gold · ${path.title}` } : path);
+    const extras = EXTRA_PLUSH_PATHS
+      .filter((path) => path.tier !== "gold" || goldPathsUnlocked)
+      .map((path) => path.tier === "gold" ? { ...path, title: `✨ Gold · ${path.title}` } : path);
     const known = new Set(PLUSH_PATHS.map((path) => path.id));
     PLUSH_PATHS.push(...extras.filter((path) => !known.has(path.id)));
     Object.defineProperty(PLUSH_PATHS, "__plushlifeExpanded", { value: true, enumerable: false });
@@ -28,6 +51,7 @@ export function CarePanel(props) {
   const [selectedSituationId, setSelectedSituationId] = React.useState(null);
   const [pathFeedbackVersion, setPathFeedbackVersion] = React.useState(0);
   const [profileVersion, setProfileVersion] = React.useState(0);
+
   const options = Array.isArray(props.HELP_ME_NOW_OPTIONS) ? props.HELP_ME_NOW_OPTIONS : [];
   const visibleOptions = options.slice(0, props.careSituationsExpanded ? options.length : 4);
   const selectedSituation = options.find((option) => option.id === selectedSituationId) || null;
@@ -37,7 +61,9 @@ export function CarePanel(props) {
   const sleep = sleepMemory(Array.isArray(props.careSessionHistory) ? props.careSessionHistory : [], SLEEP_TOOLS);
   const careFit = memory.tool ? recommendationFit(userId, "care", memory.tool.id, context) : null;
   const sleepFit = sleep.tool ? recommendationFit(userId, "sleep", sleep.tool.id, context) : null;
-  const activeProgress = (Array.isArray(props.pathProgress) ? props.pathProgress : []).find((entry) => entry?.status !== "paused" && PLUSH_PATHS.some((path) => path.id === entry.path_id && (entry.completed_days?.length || 0) < path.days.length));
+  const activeProgress = (Array.isArray(props.pathProgress) ? props.pathProgress : []).find((entry) =>
+    entry?.status !== "paused" && PLUSH_PATHS.some((path) => path.id === entry.path_id && (entry.completed_days?.length || 0) < path.days.length)
+  );
   const activePath = activeProgress ? PLUSH_PATHS.find((path) => path.id === activeProgress.path_id) : null;
   const pathCoach = activePath ? pathAdaptation(userId, activePath.id) : null;
   void pathFeedbackVersion; void profileVersion;
@@ -65,28 +91,131 @@ export function CarePanel(props) {
     if (!activePath) return;
     recordPathFeedback(userId, activePath.id, Number(activeProgress?.current_day) || 1, feedback);
     recordRecommendationOutcome(userId, "path", activePath.id, feedback, context);
-    markCare(feedback === "helped" ? `You found a PlushPath step that helped in ${activePath.title}.` : feedback === "too_much" ? `You told PlushLife to make ${activePath.title} gentler.` : `You checked how ${activePath.title} was fitting instead of forcing an answer.`, "path");
+    markCare(
+      feedback === "helped" ? `You found a PlushPath step that helped in ${activePath.title}.`
+        : feedback === "too_much" ? `You told PlushLife to make ${activePath.title} gentler.`
+          : `You checked how ${activePath.title} was fitting instead of forcing an answer.`,
+      "path"
+    );
     setPathFeedbackVersion((value) => value + 1);
   };
 
-  return <div data-plushcare-redesign="true" style={{ marginBottom: 18, display: "grid", gap: 9 }}>
-    <section style={{ ...shellCard, padding: "13px 14px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, flexWrap: "wrap" }}><div style={{ minWidth: 0 }}><div style={{ fontSize: 10.2, letterSpacing: ".14em", color: "#318C79", fontWeight: 900 }}>{props.babyMode ? "🧸 LITTLE COMFORT CORNER" : "♥ PLUSHCARE"}</div><div style={{ marginTop: 3, fontSize: 17.5, lineHeight: 1.18, color: "#4F405C", fontWeight: 900 }}>{props.babyMode ? "What does my little self need?" : "What would help right now?"}</div></div><button type="button" onClick={() => props.setCheckInPopupOpen(true)} style={{ minHeight: 44, padding: "7px 10px", borderRadius: 10, border: "1px solid #73B7A8", background: "white", color: "#318C79", fontWeight: 900, fontSize: 10.7, cursor: "pointer", flexShrink: 0 }}>{props.babyMode ? `${props.babyCaregiverName} Check-In` : "Update check-in"}</button></div>
-      <div style={{ marginTop: 5, fontSize: 10.8, lineHeight: 1.45, color: "#607A73" }}>{props.babyMode ? "Pick what feels closest. We will choose one small thing together." : "Pick what feels closest. PlushLife will choose one small next step instead of giving you a whole menu."}</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 7, marginTop: 10 }}>{visibleOptions.map((option) => <SituationButton key={option.id} option={option} selected={selectedSituationId === option.id} onClick={() => chooseSituation(option)} />)}</div>
-      <button type="button" onClick={() => props.setCareSituationsExpanded((expanded) => !expanded)} aria-expanded={props.careSituationsExpanded} style={{ marginTop: 7, minHeight: 44, padding: "6px 9px", borderRadius: 9, border: "1px solid #73B7A8", background: "white", color: "#318C79", fontWeight: 900, fontSize: 10.5, cursor: "pointer" }}>{props.careSituationsExpanded ? "Show fewer situations" : "Show more situations"}</button>
-      {selectedSituation && <div aria-live="polite" style={{ marginTop: 9, padding: "10px 11px", borderRadius: 12, background: "#FFFFFFD9", border: "1px solid #CFE8E1" }}><div style={{ fontSize: 9.5, letterSpacing: ".11em", fontWeight: 900, color: "#318C79" }}>✨ BEST NEXT THING</div><div style={{ marginTop: 4, fontSize: 12.1, fontWeight: 900, color: "#4F625D" }}>{recommendedTool ? `${recommendedTool.icon} ${recommendedTool.name}` : `${selectedSituation.icon} One small care step`}</div><div style={{ marginTop: 4, fontSize: 10.6, lineHeight: 1.43, color: "#607A73" }}>{selectedSituation.next}</div><div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}><button type="button" onClick={() => startCare(selectedSituation.tool)} style={{ minHeight: 44, padding: "7px 11px", borderRadius: 10, border: 0, background: "linear-gradient(135deg,#52A792,#3E8C7D)", color: "white", fontWeight: 900, fontSize: 10.7, cursor: "pointer" }}>{props.babyMode ? "🧸 Do this with me" : "Start this"}</button><button type="button" onClick={() => props.setCareSection("quick")} style={{ minHeight: 44, padding: "7px 10px", borderRadius: 10, border: "1px solid #BFDCCF", background: "white", color: "#52736B", fontWeight: 850, fontSize: 10.3, cursor: "pointer" }}>🌿 Open PlushCalm</button></div></div>}
-    </section>
+  return (
+    <div data-plushcare-redesign="true" className="pl-care-shell">
+      <style>{`
+        .pl-care-shell{display:grid;gap:12px;margin-bottom:18px}
+        .pl-care-card{border:1px solid #EBD9F0;border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(255,248,252,.93));box-shadow:0 10px 28px rgba(101,63,115,.055);padding:16px}
+        .pl-care-kicker{font-size:10px;letter-spacing:.15em;font-weight:950;color:#B553C5}
+        .pl-care-title{margin-top:4px;font-size:21px;line-height:1.15;font-weight:950;color:#482E56}
+        .pl-care-copy{margin-top:5px;font-size:12px;line-height:1.45;color:#806A89}
+        .pl-care-feelings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+        .pl-care-feeling{min-height:68px;padding:11px 12px;border-radius:18px;border:1px solid #E9D9EE;background:#FFFDFE;color:#5D4867;text-align:left;font-weight:850;font-size:12px;line-height:1.3;cursor:pointer;box-shadow:0 4px 14px rgba(126,75,145,.035)}
+        .pl-care-feeling.selected{border-color:#CF80D9;background:linear-gradient(145deg,#FFF5FC,#F7ECFF);box-shadow:0 0 0 3px rgba(200,111,215,.10)}
+        .pl-care-feeling-icon{display:block;font-size:23px;margin-bottom:5px}
+        .pl-care-checkin{min-height:42px;padding:8px 12px;border-radius:999px;border:1px solid #E3CDEA;background:#FFF9FD;color:#8D53A2;font-weight:900;font-size:11px;cursor:pointer}
+        .pl-care-soft-btn{min-height:42px;padding:8px 12px;border-radius:14px;border:1px solid #E4CEE9;background:#FFF9FD;color:#8A5598;font-weight:900;cursor:pointer}
+        .pl-care-primary{min-height:44px;padding:9px 14px;border-radius:14px;border:0;background:linear-gradient(135deg,#C767D7,#E087C5);color:white;font-weight:950;cursor:pointer;box-shadow:0 8px 18px rgba(190,92,203,.18)}
+        .pl-care-reco{margin-top:11px;padding:13px;border-radius:18px;background:linear-gradient(145deg,#FFF5FC,#F8F1FF);border:1px solid #E6D0EC}
+        .pl-care-memory{padding:14px 15px;border-radius:22px;border:1px solid #EBD9F0;background:linear-gradient(145deg,#FFF8FC,#FAF3FF);box-shadow:0 8px 22px rgba(101,63,115,.045)}
+        .pl-care-memory strong{color:#704080}
+        .pl-care-spaces{padding:14px;border-radius:24px;border:1px solid #EBD9F0;background:linear-gradient(145deg,#FFF9FD,#F9F3FF);box-shadow:0 10px 28px rgba(101,63,115,.05)}
+        .pl-care-tonight{margin:10px 0;padding:13px 14px;border-radius:18px;background:linear-gradient(145deg,#F8F0FF,#FFF6FC);border:1px solid #DEC9EA;color:#654D73}
+        .pl-care-tonight .moon{font-size:10px;letter-spacing:.13em;font-weight:950;color:#A95CC0}
+        .pl-care-tabs .plushcare-library>div> :first-child{display:none!important}
+        .plushcare-library>div{gap:9px!important;margin-bottom:0!important}
+        .plushcare-library [role="tablist"]{margin-top:0!important;background:#F7ECFA!important;border:1px solid #E7D5EC!important;border-radius:18px!important;padding:5px!important}
+        .plushcare-library [role="tab"]{border-radius:14px!important;min-height:48px!important;color:#795780!important}
+        .plushcare-library [role="tab"][aria-selected="true"]{background:linear-gradient(145deg,#FFF7FD,#F3E8FA)!important;border-color:#D18ADC!important;box-shadow:0 4px 14px rgba(154,80,189,.08)!important}
+        .plushcare-library section{border-radius:20px!important;border-color:#EBD9F0!important;background:rgba(255,255,255,.92)!important;box-shadow:0 6px 18px rgba(101,63,115,.04)!important}
+        @media(max-width:520px){.pl-care-card{padding:14px}.pl-care-title{font-size:19px}.pl-care-feeling{min-height:62px;padding:10px;font-size:11.5px}.pl-care-feeling-icon{font-size:21px}}
+      `}</style>
 
-    {goldMemoryUnlocked && memory.tool && <section data-actionable-care-recommendation="true" style={{ ...shellCard, padding: "10px 11px", background: "linear-gradient(145deg,#F8F2FF,#FFFFFF)", borderColor: "#E3D2EC" }}><div style={{ fontSize: 12, fontWeight: 900, color: "#684E77" }}>{memory.tool.icon} Try {memory.tool.name}</div><div style={{ marginTop: 3, fontSize: 10.5, lineHeight: 1.42, color: "#806B8D" }}>A care option that may fit right now.</div><button type="button" onClick={() => startCare(memory.tool.id)} style={{ ...smallButton, marginTop: 7, border: 0, background: "#8E69B1", color: "white" }}>Start {memory.tool.name}</button>{memory.count >= 2 && <details style={{ marginTop: 5 }}><summary style={{ minHeight: 44, display: "flex", alignItems: "center", cursor: "pointer", color: "#806B8D", fontSize: 9.8, fontWeight: 850 }}>Why this?</summary><div style={{ fontSize: 9.7, lineHeight: 1.42, color: "#8C7A96" }}>You marked this helpful {memory.count} times{careFit?.confidence === "strong" && careFit.contextual >= 2 ? " in situations similar to right now" : ""}.</div></details>}</section>}
+      <section className="pl-care-card">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+          <div>
+            <div className="pl-care-kicker">🧸 A LITTLE SUPPORT</div>
+            <div className="pl-care-title">What would feel nicest right now?</div>
+          </div>
+          <button type="button" className="pl-care-checkin" onClick={() => props.setCheckInPopupOpen(true)}>
+            {props.babyMode ? `${props.babyCaregiverName} check-in` : "Check in"}
+          </button>
+        </div>
+        <div className="pl-care-copy">Pick what feels closest. PlushLife will help you choose one gentle thing — no big checklist.</div>
 
-    {props.isMamaCornerProfile && <details open={props.careExtraSupportOpen} onToggle={(event) => props.setCareExtraSupportOpen(event.currentTarget.open)} style={{ borderRadius: 13, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.72)", padding: "8px 10px" }}><summary style={{ minHeight: 44, display: "flex", alignItems: "center", color: "#76558A", fontWeight: 900, fontSize: 10.8, cursor: "pointer" }}>🧸 More cozy support</summary><div style={{ marginTop: 7 }}><MamasCorner userId={props.user.id} caregiverName={props.babyCaregiverName} parentVoice={props.preferences.baby_voice === "fatherly" ? "fatherly" : "motherly"} incompleteTasks={props.rows.filter((row) => !props.viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => props.toggle(taskKey)} supabase={props.supabase} /></div></details>}
+        <div className="pl-care-feelings">
+          {visibleOptions.map((option) => <SituationButton key={option.id} option={option} selected={selectedSituationId === option.id} onClick={() => chooseSituation(option)} />)}
+        </div>
 
-    <section aria-label="PlushCare main spaces" style={{ borderRadius: 14, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.72)", padding: "9px" }}>
-      <div style={{ padding: "2px 4px 8px" }}><div style={{ fontSize: 10.4, letterSpacing: ".12em", fontWeight: 900, color: "#8E4EAA" }}>✨ YOUR CARE SPACES</div><div style={{ marginTop: 3, fontSize: 10.4, lineHeight: 1.4, color: "#806B8D" }}>PlushCalm, PlushPaths, and PlushSleep are core parts of PlushCare — choose whichever kind of support fits right now.</div></div>
-      {goldMemoryUnlocked && props.careSection === "paths" && activePath && <div data-adaptive-plushpath="true" style={{ margin: "0 3px 8px", padding: "9px 10px", borderRadius: 11, background: "#FFF9E9", border: "1px solid #E9D58B" }}><div style={{ fontSize: 9.5, letterSpacing: ".1em", fontWeight: 900, color: "#9B7100" }}>✨ GOLD · ADAPTIVE PLUSHPATH</div><div style={{ marginTop: 4, fontSize: 10.7, fontWeight: 900, color: "#6B5A32" }}>{activePath.icon} {activePath.title}</div><div style={{ marginTop: 3, fontSize: 10.2, lineHeight: 1.42, color: "#7B6A48" }}>{pathCoach?.text}</div><div style={{ marginTop: 7, fontSize: 9.8, fontWeight: 900, color: "#8A7445" }}>How is the current step fitting?</div><div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 5 }}><button type="button" onClick={() => savePathFit("helped")} style={smallButton}>💜 Helped</button><button type="button" onClick={() => savePathFit("neutral")} style={smallButton}>🙂 Not sure</button><button type="button" onClick={() => savePathFit("too_much")} style={smallButton}>🪶 Too much</button></div></div>}
-      {goldMemoryUnlocked && <div style={{ margin: "0 3px 8px", padding: "8px 9px", borderRadius: 10, background: "#242D58", color: "#DCE3FA", border: "1px solid #3B4A85" }}><div style={{ fontSize: 9.4, letterSpacing: ".1em", fontWeight: 900, color: "#A9B9F5" }}>🌙 TONIGHT</div><div style={{ marginTop: 3, fontSize: 10.2, lineHeight: 1.4 }}>{sleep.text}</div>{sleep.tool && <><button type="button" onClick={() => { props.setCareSection("sleep"); startSleep(sleep.tool.id); }} style={{ ...smallButton, marginTop: 6, borderColor: "#6D80C3", background: "#344173", color: "white" }}>Try {sleep.tool.title}</button>{sleep.count >= 2 && <details style={{ marginTop: 4 }}><summary style={{ minHeight: 44, display: "flex", alignItems: "center", cursor: "pointer", color: "#A9B9F5", fontSize: 9.8, fontWeight: 850 }}>Why this?</summary><div style={{ fontSize: 9.6, lineHeight: 1.4 }}>{sleepFit?.confidence === "strong" && sleepFit.contextual >= 2 ? "This has helped on nights with a similar check-in." : `You marked this helpful ${sleep.count} times.`}</div></details>}</>}</div>}
-      <div className="plushcare-library"><style>{`.plushcare-library > div > :first-child{display:none!important}.plushcare-library > div{gap:9px!important;margin-bottom:0!important}.plushcare-library [role="tablist"]{margin-top:0!important}`}</style><ExistingCarePanel {...props} open={true} isMamaCornerProfile={false} openCareSession={startCare} setSleepToolOpen={startSleep} /></div>
-    </section>
-  </div>;
+        <button type="button" className="pl-care-soft-btn" onClick={() => props.setCareSituationsExpanded((expanded) => !expanded)} aria-expanded={props.careSituationsExpanded} style={{ marginTop: 9 }}>
+          {props.careSituationsExpanded ? "Show fewer" : "More ways I might feel"}
+        </button>
+
+        {selectedSituation && (
+          <div className="pl-care-reco" aria-live="polite">
+            <div className="pl-care-kicker">✨ A SOFT PLACE TO START</div>
+            <div style={{ marginTop: 5, fontSize: 15, fontWeight: 950, color: "#533960" }}>
+              {recommendedTool ? `${recommendedTool.icon} ${recommendedTool.name}` : `${selectedSituation.icon} One gentle step`}
+            </div>
+            <div className="pl-care-copy">{selectedSituation.next}</div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
+              <button type="button" className="pl-care-primary" onClick={() => startCare(selectedSituation.tool)}>Start now</button>
+              <button type="button" className="pl-care-soft-btn" onClick={() => props.setCareSection("quick")}>🌿 Open PlushCalm</button>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {goldMemoryUnlocked && memory.tool && (
+        <section data-actionable-care-recommendation="true" className="pl-care-memory">
+          <div className="pl-care-kicker">💗 SOMETHING THAT HELPED BEFORE</div>
+          <div style={{ marginTop: 5, fontSize: 15, fontWeight: 950, color: "#553B61" }}>{memory.tool.icon} {memory.tool.name}</div>
+          <div className="pl-care-copy">Want to use this cozy reset again?</div>
+          <button type="button" className="pl-care-primary" onClick={() => startCare(memory.tool.id)} style={{ marginTop: 9 }}>Try it again</button>
+          {memory.count >= 2 && <details style={{ marginTop: 6 }}><summary style={{ minHeight: 40, display: "flex", alignItems: "center", cursor: "pointer", color: "#8A6A95", fontSize: 10.5, fontWeight: 850 }}>Why this?</summary><div style={{ fontSize: 10.2, lineHeight: 1.45, color: "#8C7A96" }}>You marked this helpful {memory.count} times{careFit?.confidence === "strong" && careFit.contextual >= 2 ? " in moments like this" : ""}.</div></details>}
+        </section>
+      )}
+
+      {props.isMamaCornerProfile && (
+        <details open={props.careExtraSupportOpen} onToggle={(event) => props.setCareExtraSupportOpen(event.currentTarget.open)} className="pl-care-memory">
+          <summary style={{ minHeight: 44, display: "flex", alignItems: "center", color: "#76558A", fontWeight: 900, cursor: "pointer" }}>🧸 More cozy support</summary>
+          <div style={{ marginTop: 8 }}>
+            <MamasCorner userId={props.user.id} caregiverName={props.babyCaregiverName} parentVoice={props.preferences.baby_voice === "fatherly" ? "fatherly" : "motherly"} incompleteTasks={props.rows.filter((row) => !props.viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => props.toggle(taskKey)} supabase={props.supabase} />
+          </div>
+        </details>
+      )}
+
+      <section aria-label="PlushCare main spaces" className="pl-care-spaces">
+        <div className="pl-care-kicker">✨ YOUR COZY SPACES</div>
+        <div className="pl-care-copy">Pick the kind of support you want: calm down, follow a gentle path, or wind down for sleep.</div>
+
+        {goldMemoryUnlocked && props.careSection === "paths" && activePath && (
+          <div className="pl-care-reco" data-adaptive-plushpath="true">
+            <div className="pl-care-kicker">🗺️ YOUR CURRENT PLUSHPATH</div>
+            <div style={{ marginTop: 5, fontWeight: 950, color: "#5D4468" }}>{activePath.icon} {activePath.title}</div>
+            <div className="pl-care-copy">{pathCoach?.text}</div>
+            <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 8 }}>
+              <button type="button" style={pill} onClick={() => savePathFit("helped")}>💜 Helped</button>
+              <button type="button" style={pill} onClick={() => savePathFit("neutral")}>🙂 Not sure</button>
+              <button type="button" style={pill} onClick={() => savePathFit("too_much")}>🪶 Make it gentler</button>
+            </div>
+          </div>
+        )}
+
+        {goldMemoryUnlocked && (
+          <div className="pl-care-tonight">
+            <div className="moon">🌙 TONIGHT</div>
+            <div style={{ marginTop: 5, fontSize: 12.5, lineHeight: 1.45 }}>{sleep.text}</div>
+            {sleep.tool && <>
+              <button type="button" className="pl-care-soft-btn" onClick={() => { props.setCareSection("sleep"); startSleep(sleep.tool.id); }} style={{ marginTop: 9 }}>Try {sleep.tool.title}</button>
+              {sleep.count >= 2 && <details style={{ marginTop: 5 }}><summary style={{ minHeight: 40, display: "flex", alignItems: "center", cursor: "pointer", color: "#8A6A95", fontSize: 10.5, fontWeight: 850 }}>Why this?</summary><div style={{ fontSize: 10.2, lineHeight: 1.45 }}>{sleepFit?.confidence === "strong" && sleepFit.contextual >= 2 ? "This has helped on nights with a similar check-in." : `You marked this helpful ${sleep.count} times.`}</div></details>}
+            </>}
+          </div>
+        )}
+
+        <div className="plushcare-library pl-care-tabs">
+          <ExistingCarePanel {...props} open={true} isMamaCornerProfile={false} openCareSession={startCare} setSleepToolOpen={startSleep} />
+        </div>
+      </section>
+    </div>
+  );
 }
