@@ -5779,10 +5779,39 @@ function GlowUpTracker() {
       fontSize: babyMode ? "118%" : "100%",
       padding: "max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))",
       position: "relative",
+      isolation: "isolate",
+      "--pl-theme-bg": softLightPalette.background,
+      "--pl-theme-accent": selectedAppearanceTheme.accent,
+      "--pl-theme-glow-a": softLightPalette.glowA,
+      "--pl-theme-glow-b": softLightPalette.glowB,
+      "--pl-theme-glow-c": softLightPalette.glowC,
+      "--pl-theme-glow-d": softLightPalette.glowD,
+      "--pl-theme-wash": softLightPalette.wash,
       boxShadow: ["soft", "soft-light"].includes(appearanceTheme) || babyMode ? "none" : `inset 0 0 0 8px ${selectedAppearanceTheme.accent}55`,
     }}>
-      {!babyMode && !["soft", "soft-light"].includes(appearanceTheme) && <div aria-hidden="true" style={{ position: "absolute", top: 0, left: 0, right: 0, height: 8, background: `linear-gradient(90deg, ${selectedAppearanceTheme.accent}, ${selectedAppearanceTheme.glowB}, ${selectedAppearanceTheme.accent})`, boxShadow: `0 3px 14px ${selectedAppearanceTheme.accent}88`, pointerEvents: "none" }} />}
+      <div className="pl-ambient-theme-layer" aria-hidden="true" />
+      {!babyMode && !["soft", "soft-light"].includes(appearanceTheme) && <div aria-hidden="true" style={{ position: "absolute", zIndex: 2, top: 0, left: 0, right: 0, height: 8, background: `linear-gradient(90deg, ${selectedAppearanceTheme.accent}, ${selectedAppearanceTheme.glowB}, ${selectedAppearanceTheme.accent})`, boxShadow: `0 3px 14px ${selectedAppearanceTheme.accent}88`, pointerEvents: "none" }} />}
       <style>{`
+        #main-content > :not(.pl-ambient-theme-layer):not(style) { position: relative; z-index: 1; }
+        .pl-ambient-theme-layer{
+          position:fixed;inset:0;z-index:0;pointer-events:none;
+          background:
+            radial-gradient(circle at 12% 18%,var(--pl-theme-glow-a) 0%,transparent 34%),
+            radial-gradient(circle at 88% 12%,var(--pl-theme-glow-b) 0%,transparent 36%),
+            radial-gradient(circle at 86% 82%,var(--pl-theme-glow-c) 0%,transparent 40%),
+            radial-gradient(circle at 10% 84%,var(--pl-theme-glow-d) 0%,transparent 40%);
+          opacity:.72;
+        }
+        .appearance-twilight .pl-ambient-theme-layer,.appearance-meadow .pl-ambient-theme-layer{opacity:.94}
+        .appearance-twilight .pl-unified-page-hero,.appearance-meadow .pl-unified-page-hero,
+        .appearance-twilight .pl-unified-page-content section,.appearance-meadow .pl-unified-page-content section,
+        .appearance-twilight .pl-unified-page-content details,.appearance-meadow .pl-unified-page-content details{
+          background:rgba(255,255,255,.78)!important;
+          backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+        }
+        .appearance-twilight .pl-unified-page-hero,.appearance-meadow .pl-unified-page-hero{
+          box-shadow:0 10px 30px color-mix(in srgb,var(--pl-theme-accent) 18%,transparent)!important;
+        }
         @keyframes mascotBounce {
           0%, 100% { transform: translateY(0) rotate(0deg); }
           25% { transform: translateY(-12px) rotate(-4deg); }
