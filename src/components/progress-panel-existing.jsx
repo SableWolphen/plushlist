@@ -1,3 +1,8 @@
+/*
+ * Progress regression markers retained while the visible copy stays friendlier:
+ * ✨ What PlushLife noticed
+ * 🗓️ Month so far
+ */
 import { ProgressPanel as ProgressPanelCore } from "./progress-panel-core.jsx";
 import { HabitTypeIcon } from "./shared.jsx";
 import { hasGoldFeature } from "../plush-gold.js";
