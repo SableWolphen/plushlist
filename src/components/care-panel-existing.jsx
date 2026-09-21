@@ -41,26 +41,26 @@ export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverNa
             </details>
             )}
 
-            <div role="tablist" aria-label="Care library" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 7, padding: 6, borderRadius: 15, background: "#FFFFFF99", border: "1px solid #E6D4F2" }}>
+            <div role="tablist" aria-label="Care library" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 5, padding: 4, borderRadius: 13, background: "#FFFFFFB8", border: "1px solid #E6D4F2" }}>
               {[["quick", "🌿", "PlushCalm"], ["paths", "🗺️", "PlushPaths"], ["sleep", "🌙", "PlushSleep"]].map(([value, icon, label]) => (
-                <button key={value} type="button" role="tab" aria-selected={careSection === value} onClick={() => setCareSection(value)} style={{ minWidth: 0, padding: "9px 6px", borderRadius: 11, border: careSection === value ? "2px solid #A65DC1" : "1px solid transparent", background: careSection === value ? "#F7ECFB" : "transparent", color: careSection === value ? "#75428C" : "#7B6888", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>{icon} {label}</button>
+                <button key={value} type="button" role="tab" aria-selected={careSection === value} onClick={() => setCareSection(value)} style={{ minWidth: 0, padding: "7px 5px", minHeight: 38, borderRadius: 10, border: careSection === value ? "2px solid #C983D4" : "1px solid transparent", background: careSection === value ? "#FFF7FD" : "transparent", color: careSection === value ? "#75428C" : "#7B6888", fontWeight: 900, fontSize: 10.2, cursor: "pointer" }}>{icon} {label}</button>
               ))}
             </div>
 
-            {careSection === "quick" && <div style={{ padding: 17, borderRadius: 20, background: "#FFFFFFB8", border: "1px solid #E6D4F2" }}>
-              <div style={{ fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#A65DC1" }}>🌿 QUICK CARE SESSIONS</div>
-              <div style={{ marginTop: 5, fontSize: 12, color: "#7B6888" }}>Short, private, and always free. Tell PlushLife afterward whether it helped.</div>
+            {careSection === "quick" && <div style={{ padding: 11, borderRadius: 16, background: "#FFFFFFC7", border: "1px solid #E6D4F2" }}>
+              <div style={{ fontSize: 9.8, letterSpacing: ".12em", fontWeight: 900, color: "#A65DC1" }}>🌿 QUICK CARE SESSIONS</div>
+              <div style={{ marginTop: 3, fontSize: 10.5, lineHeight: 1.35, color: "#7B6888" }}>Short, private, and always free. Tell PlushLife afterward whether it helped.</div>
               {(() => {
                 const helpful = careSessionHistory.find((entry) => ["helped", "a_little"].includes(entry.outcome));
                 const tool = helpful && COMFORT_TOOLS.find((entry) => entry.id === helpful.session_id);
-                return tool ? <div style={{ marginTop: 9, padding: "8px 10px", borderRadius: 10, background: "#F2FFFB", color: "#4D746A", fontSize: 11.5 }}>You previously said <strong>{tool.name}</strong> helped. Want to use it again?</div> : null;
+                return tool ? <div style={{ marginTop: 7, padding: "7px 9px", borderRadius: 10, background: "#F7FFFC", color: "#5B746D", fontSize: 10.2, lineHeight: 1.35 }}>You previously said <strong>{tool.name}</strong> helped. Want to use it again?</div> : null;
               })()}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))", gap: 8, marginTop: 11 }}>
-                {COMFORT_TOOLS.map((tool) => <button key={tool.id} type="button" onClick={() => openCareSession(tool.id)} style={{ padding: "12px 8px", borderRadius: 13, border: "1px solid #E3C9EC", background: "#FFF9FD", color: "#6B5A7D", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}><div style={{ fontSize: 23 }}>{tool.icon}</div><div style={{ marginTop: 4 }}>{tool.name}</div></button>)}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 6, marginTop: 8 }}>
+                {COMFORT_TOOLS.map((tool) => <button key={tool.id} type="button" onClick={() => openCareSession(tool.id)} style={{ minHeight: 64, padding: "8px 6px", borderRadius: 12, border: "1px solid #E3C9EC", background: "#FFF9FD", color: "#6B5A7D", fontWeight: 900, fontSize: 10.2, cursor: "pointer" }}><div style={{ fontSize: 19 }}>{tool.icon}</div><div style={{ marginTop: 3, lineHeight: 1.2 }}>{tool.name}</div></button>)}
               </div>
             </div>}
 
-            {careSection === "paths" && <div style={{ padding: 17, borderRadius: 20, background: "#FFFDF4D9", border: "1px solid #E9C96E" }}>
+            {careSection === "paths" && <div style={{ padding: 11, borderRadius: 16, background: "#FFFDF4D9", border: "1px solid #E9D79A" }}>
               <div style={{ fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#A56D14" }}>🗺️ PLUSHPATHS</div>
               <div style={{ marginTop: 5, fontSize: 12, color: "#7B6888" }}>Guided programs that move at your pace. Pause, repeat, or leave any time. One is featured each week — try it, or pick any other.</div>
               <div style={{ display: "grid", gap: 9, marginTop: 11 }}>
@@ -85,12 +85,12 @@ export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverNa
             {careSection === "sleep" && (() => {
               const helpfulSleepEntry = careSessionHistory.find((entry) => entry.session_kind === "sleep" && ["helped", "a_little"].includes(entry.outcome));
               const helpfulSleepTool = helpfulSleepEntry && SLEEP_TOOLS.find((entry) => entry.id === helpfulSleepEntry.session_id);
-              return <div style={{ position: "relative", padding: 17, borderRadius: 20, overflow: "hidden", background: "linear-gradient(160deg,#1B2245,#2E3A6B 55%,#1B2245)", border: "1px solid #3B4A85" }}>
+              return <div style={{ position: "relative", padding: 11, borderRadius: 16, overflow: "hidden", background: "linear-gradient(145deg,#FAF2FF,#FFF8FC)", border: "1px solid #DECBE8" }}>
                 {["6%,10%", "18%,32%", "72%,14%", "88%,36%", "45%,6%", "60%,28%", "30%,20%"].map((position, index) => {
                   const [left, top] = position.split(",");
-                  return <span key={index} aria-hidden="true" style={{ position: "absolute", left, top, fontSize: 10, color: "#C7D5F3", opacity: 0.8 }}>✦</span>;
+                  return <span key={index} aria-hidden="true" style={{ position: "absolute", left, top, fontSize: 10, color: "#C596D5", opacity: 0.8 }}>✦</span>;
                 })}
-                <div style={{ position: "relative", fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#93A9F5" }}>{babyMode ? "🌙 BEDTIME NEST" : "🌙 PLUSHSLEEP"}</div>
+                <div style={{ position: "relative", fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#A15CB7" }}>{babyMode ? "🌙 BEDTIME NEST" : "🌙 PLUSHSLEEP"}</div>
                 <div style={{ position: "relative", marginTop: 5, fontSize: 12, color: "#C7D5F3" }}>{babyMode ? "A soft little landing for when it is time to get cozy and rest." : "Practical support for difficult nights—not a score and not a medical sleep assessment."}</div>
                 {helpfulSleepTool && <div style={{ position: "relative", marginTop: 9, padding: "8px 10px", borderRadius: 10, background: "#2E3A6B99", color: "#DCE3FA", fontSize: 11.5 }}>You previously said <strong>{helpfulSleepTool.title}</strong> helped. Want to use it again?</div>}
                 <div style={{ position: "relative", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(145px,1fr))", gap: 8, marginTop: 11 }}>
