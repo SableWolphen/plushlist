@@ -128,7 +128,7 @@ export function CarePanel(props) {
         .pl-care-reco{margin-top:6px;padding:8px;border-radius:13px;background:linear-gradient(145deg,#FFF5FC,#F8F1FF);border:1px solid #E6D0EC}
         .pl-care-memory{padding:8px 9px;border-radius:15px;border:1px solid #EBD9F0;background:linear-gradient(145deg,#FFF8FC,#FAF3FF);box-shadow:0 8px 22px rgba(101,63,115,.045)}
         .pl-care-memory strong{color:#704080}.pl-care-extra{padding:2px 4px;border:0;background:transparent;box-shadow:none}.pl-care-extra>div{padding:4px 2px 2px}
-        .pl-care-spaces{padding:8px;border-radius:16px;border:1px solid #EBD9F0;background:linear-gradient(145deg,#FFF9FD,#F9F3FF);box-shadow:0 10px 28px rgba(101,63,115,.05)}
+        .pl-care-spaces{padding:4px 0 0;border-radius:0;border:0;background:transparent;box-shadow:none}
         .pl-care-tonight{margin:5px 0;padding:8px 9px;border-radius:13px;background:linear-gradient(145deg,#F8F0FF,#FFF6FC);border:1px solid #DEC9EA;color:#654D73}
         .pl-care-tonight .moon{font-size:8.8px;letter-spacing:.12em;font-weight:950;color:#A95CC0}
         .pl-care-tabs .plushcare-library>div> :first-child{display:none!important}
@@ -141,7 +141,7 @@ export function CarePanel(props) {
         .plushcare-library section button span:first-child{font-size:18px!important}
         .plushcare-library section h2,.plushcare-library section h3{margin-top:0!important;margin-bottom:4px!important}
         .plushcare-library section p{margin-top:3px!important;margin-bottom:6px!important;line-height:1.35!important}
-        @media(max-width:520px){.pl-care-card{padding:8px}.pl-care-title{font-size:14.5px}.pl-care-feeling{min-height:44px;padding:6px 7px;font-size:9.2px}.pl-care-feeling-icon{font-size:15px}.pl-care-spaces{padding:7px}.pl-care-memory{padding:7px 8px}.pl-care-checkin,.pl-care-soft-btn,.pl-care-primary{font-size:9px}.pl-care-tonight{padding:7px 8px}.plushcare-library section button{min-height:48px!important}}
+        @media(max-width:520px){.pl-care-card{padding:7px;border-radius:12px}.pl-care-title{font-size:14px}.pl-care-copy{font-size:9.8px}.pl-care-feeling{min-height:42px;padding:6px 7px;font-size:9.6px}.pl-care-feeling-icon{font-size:15px}.pl-care-spaces{padding:2px 0 0}.pl-care-memory{padding:6px 7px;border-radius:12px}.pl-care-checkin,.pl-care-soft-btn,.pl-care-primary{font-size:9.4px}.pl-care-tonight{padding:6px 7px;border-radius:11px}.plushcare-library section button{min-height:44px!important}}
       `}</style>
 
       <section className="pl-care-card">
