@@ -91,39 +91,29 @@ function CompactGrowthOverview(props) {
         .pl-growth-kicker{font-size:8.6px;letter-spacing:.14em;font-weight:950;color:#B653C5}
         .pl-growth-heading{margin-top:2px;font-size:16px;font-weight:950;line-height:1.1;color:#4A3157}
         .pl-growth-copy{margin-top:3px;font-size:9.7px;line-height:1.45;color:#806B89}
-        .pl-growth-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:4px;border-radius:14px;background:linear-gradient(145deg,#F8EEFA,#FFF8FC);border:1px solid #EAD9EE}
-        .pl-growth-tabs button{min-height:42px;border-radius:11px;border:1px solid transparent;background:transparent;color:#80658A;font-size:9px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px}
+        .pl-growth-highlight-row{display:flex;gap:5px;flex-wrap:wrap}.pl-growth-highlight-row span{padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.62);border:1px solid #EAD9EE;color:#765F84;font-size:9px;font-weight:850}.pl-growth-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:3px;border-radius:12px;background:rgba(255,255,255,.5);border:1px solid #EAD9EE}
+        .pl-growth-tabs button{min-height:36px;border-radius:9px;border:1px solid transparent;background:transparent;color:#80658A;font-size:9px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px}
         .pl-growth-tabs button.selected{background:#FFFDFE;border-color:#D591DE;color:#6E3E7A;box-shadow:0 5px 15px rgba(154,80,189,.08)}
-        .pl-growth-weekbar{padding:9px 10px;border-radius:14px;border:1px solid #EAD9EE;background:linear-gradient(145deg,#FFF9FD,#FAF3FF)}
+        .pl-growth-weekbar{padding:7px 8px;border-radius:11px;border:1px solid #EAD9EE;background:linear-gradient(145deg,#FFF9FD,#FAF3FF)}
         .pl-growth-weekbar-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:9px;font-weight:900;color:#76567F}
         .pl-growth-weekbar-track{height:8px;margin-top:6px;border-radius:999px;background:#EEDFF2;overflow:hidden}
         .pl-growth-weekbar-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#C767D7,#E087C5);transition:width .25s ease}
         .pl-growth-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
-        .pl-growth-stat{min-height:64px;padding:7px 5px;border-radius:14px;border:1px solid #EAD9EE;background:linear-gradient(145deg,#FFF9FD,#FAF3FF);text-align:center;cursor:pointer}
+        .pl-growth-stat{min-height:54px;padding:6px 4px;border-radius:11px;border:1px solid #EAD9EE;background:linear-gradient(145deg,#FFF9FD,#FAF3FF);text-align:center;cursor:pointer}
         .pl-growth-stat .emoji{font-size:18px}.pl-growth-stat .value{margin-top:3px;font-size:15.5px;font-weight:950;color:#A94EC0}.pl-growth-stat .label{margin-top:3px;font-size:8.4px;font-weight:850;color:#786281}
         .pl-growth-notice{display:grid;gap:6px;margin-top:7px}.pl-growth-note{display:grid;grid-template-columns:22px 1fr;gap:6px;padding:7px 8px;border-radius:12px;background:#FFF9FD;border:1px solid #F0E1F2}
         .pl-growth-note .icon{font-size:17px}.pl-growth-note strong{display:block;color:#604269;font-size:9.4px}.pl-growth-note span{display:block;margin-top:2px;color:#806E87;font-size:9px;line-height:1.3}
         .pl-growth-soft-btn{min-height:36px;padding:6px 8px;border-radius:11px;border:1px solid #E4CEE9;background:#FFF9FD;color:#8A5598;font-weight:900;cursor:pointer}
         .pl-growth-primary{min-height:42px;padding:8px 13px;border-radius:14px;border:0;background:linear-gradient(135deg,#C767D7,#E087C5);color:white;font-weight:950;cursor:pointer}
-        @media(max-width:520px){.pl-growth-card{padding:8px}.pl-growth-heading{font-size:15px}.pl-growth-tabs button{font-size:8.4px;min-height:40px}.pl-growth-stat{min-height:60px}.pl-growth-note{padding:6px 7px}.pl-growth-copy{font-size:9px}}
+        @media(max-width:520px){.pl-growth-card{padding:7px;border-radius:12px}.pl-growth-heading{font-size:15px}.pl-growth-tabs button{font-size:9px;min-height:35px}.pl-growth-stat{min-height:52px}.pl-growth-note{padding:6px 7px}.pl-growth-copy{font-size:9.5px}.pl-growth-weekbar-head{font-size:9.5px}}
       `}</style>
 
-      <section className="pl-growth-card">
-        <div className="pl-growth-kicker">✨ THIS WEEK’S LITTLE WINS</div>
-        <div className="pl-growth-heading">PlushGrowth</div>
-        <div className="pl-growth-copy">
-          {props.caringDays
-            ? `You made a little room for yourself on ${props.caringDays} ${Number(props.caringDays) === 1 ? "day" : "days"} this week.`
-            : "No pressure to fill this up. One tiny care step is enough to begin."}
+      {(highlights.mostConsistent || highlights.topMood) && (
+        <div className="pl-growth-highlight-row" aria-label="Weekly highlights">
+          {highlights.mostConsistent && <span>🌱 <HabitTypeIcon task={highlights.mostConsistent.task} />{highlights.mostConsistent.task.task}</span>}
+          {highlights.topMood && <span>🙂 {highlights.topMood}</span>}
         </div>
-
-        {(highlights.mostConsistent || highlights.topMood) && (
-          <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 10 }}>
-            {highlights.mostConsistent && <span style={{ padding: "6px 9px", borderRadius: 999, background: "#FFF2FA", color: "#77547F", fontSize: 10.2, fontWeight: 850 }}>🌱 Steady: <HabitTypeIcon task={highlights.mostConsistent.task} />{highlights.mostConsistent.task.task}</span>}
-            {highlights.topMood && <span style={{ padding: "6px 9px", borderRadius: 999, background: "#F7F1FF", color: "#77547F", fontSize: 10.2, fontWeight: 850 }}>🙂 Most common check-in: {highlights.topMood}</span>}
-          </div>
-        )}
-      </section>
+      )}
 
       <ProgressTabs progressView={props.progressView} setProgressView={props.setProgressView} />
 
