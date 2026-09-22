@@ -267,23 +267,23 @@ export function TodayPanel({
         [data-plushlife-home-stack]>*{margin-top:0!important;margin-bottom:0!important}
 
         @media(max-width:520px){
-          .pl-home-shell{gap:7px;padding:0 8px 76px;margin:0}
-          .pl-home-hero{min-height:158px;margin:0 -8px;border-radius:0 0 18px 18px}
-          .pl-home-hero:before{background:radial-gradient(circle at 22% 20%,rgba(255,255,255,.78),transparent 30%),radial-gradient(circle at 76% 20%,rgba(227,202,239,.28),transparent 34%)}
-          .pl-home-brand{left:14px;top:11px}.pl-home-logo{font-size:20px;letter-spacing:-.8px}.pl-home-tagline{font-size:8.5px;margin-top:2px}
-          .pl-home-actions{right:8px;top:9px;gap:5px}.pl-home-date{font-size:7.8px;padding:5px 7px}.pl-home-settings{width:31px;height:31px;font-size:14px}
-          .pl-home-copy{left:14px;bottom:14px;width:56%}.pl-home-copy h1{font-size:18px;line-height:1.03;white-space:nowrap}.pl-home-copy .pl-heart{font-size:.78em}.pl-home-copy p{margin-top:5px;font-size:9.5px;line-height:1.28}
-          .pl-home-plush{right:4px;bottom:7px;width:31%;height:52%}.pl-home-plush img{width:min(92px,76%);max-height:84px;object-fit:contain}
-          .pl-home-bubble{right:7px;bottom:6px;max-width:116px;font-size:7px;padding:4px 6px;border-radius:10px;line-height:1.15;white-space:nowrap}
-          .pl-section-topline{align-items:center;gap:5px}.pl-kicker{font-size:8.4px;letter-spacing:.09em}.pl-muted-note{display:none}
-          [data-plushlife-compact-card="next-step"]{padding:9px 10px 10px!important}
-          .pl-primary-task{font-size:13px;margin-top:4px;line-height:1.16;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-          .pl-action-row{gap:5px;margin-top:7px}.pl-btn,.pl-more{min-height:34px;border-radius:10px}.pl-btn{padding:5px 6px;font-size:8.8px}.pl-btn-primary{flex:1.1}.pl-btn-ghost{flex:.88}.pl-more{width:36px;font-size:12px}
-          [data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Tasks today"],.pl-home-shell>section[aria-label="Habits today"]{padding:9px 10px 10px!important}
-          .pl-list{margin-top:7px;gap:4px}.pl-list-row{min-height:36px;padding:5px 7px;border-radius:10px}.pl-schedule-row{grid-template-columns:54px 17px minmax(0,1fr) 8px}.pl-note-row{grid-template-columns:17px minmax(0,1fr)}.pl-time{font-size:10px}.pl-row-icon{font-size:12px}.pl-row-text{font-size:10px;line-height:1.18}.pl-chevron{font-size:14px}.pl-check{width:18px;height:18px;border-radius:5px}
-          .pl-home-shortcuts{gap:5px}.pl-shortcut{min-height:48px;padding:6px 7px;border-radius:13px}.pl-shortcut-icon{font-size:17px}.pl-shortcut-title{font-size:9.8px}.pl-shortcut-sub{font-size:7.5px}.pl-shortcut-arrow{font-size:14px}
-          .pl-noticed{min-height:40px;border-radius:13px;padding:6px 8px}.pl-noticed-icon{font-size:17px}.pl-noticed-title{font-size:9.2px}.pl-noticed-copy{font-size:7.8px}.pl-noticed-arrow{font-size:14px}
-          [data-plushlife-compact-card="next-step"],[data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Tasks today"],.pl-home-shell>section[aria-label="Habits today"]{border-radius:15px!important}
+          .pl-home-shell{gap:6px;padding:0 8px 74px;margin:0}
+          .pl-home-hero{min-height:136px;margin:0 -8px;border-radius:0 0 16px 16px}
+          .pl-home-hero:before{background:radial-gradient(circle at 22% 20%,rgba(255,255,255,.72),transparent 30%),radial-gradient(circle at 76% 20%,rgba(227,202,239,.24),transparent 34%)}
+          .pl-home-brand{left:13px;top:10px}.pl-home-logo{font-size:20px;letter-spacing:-.7px}.pl-home-tagline{font-size:9.5px;margin-top:2px}
+          .pl-home-actions{right:8px;top:8px;gap:5px}.pl-home-date{font-size:9px;padding:5px 7px}.pl-home-settings{width:30px;height:30px;font-size:14px}
+          .pl-home-copy{left:13px;bottom:11px;width:57%}.pl-home-copy h1{font-size:18px;line-height:1.03;white-space:nowrap}.pl-home-copy .pl-heart{font-size:.78em}.pl-home-copy p{margin-top:4px;font-size:10.5px;line-height:1.22}
+          .pl-home-plush{right:3px;bottom:5px;width:29%;height:50%}.pl-home-plush img{width:min(82px,74%);max-height:76px;object-fit:contain}
+          .pl-home-bubble{right:6px;bottom:5px;max-width:122px;font-size:8px;padding:4px 6px;border-radius:9px;line-height:1.15;white-space:nowrap}
+          .pl-section-topline{align-items:center;gap:5px}.pl-kicker{font-size:9px;letter-spacing:.08em}.pl-muted-note{display:none}
+          [data-plushlife-compact-card="next-step"]{padding:8px 9px 9px!important}
+          .pl-primary-task{font-size:13.5px;margin-top:3px;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+          .pl-action-row{gap:4px;margin-top:6px}.pl-btn,.pl-more{min-height:32px;border-radius:9px}.pl-btn{padding:5px 6px;font-size:9.5px}.pl-btn-primary{flex:1.08}.pl-btn-ghost{flex:.86}.pl-more{width:34px;font-size:12px}
+          [data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Tasks today"],.pl-home-shell>section[aria-label="Habits today"]{padding:8px 9px 9px!important}
+          .pl-list{margin-top:6px;gap:3px}.pl-list-row{min-height:32px;padding:4px 6px;border-radius:9px}.pl-schedule-row{grid-template-columns:53px 16px minmax(0,1fr) 8px}.pl-note-row{grid-template-columns:16px minmax(0,1fr)}.pl-time{font-size:10px}.pl-row-icon{font-size:12px}.pl-row-text{font-size:10.5px;line-height:1.16}.pl-chevron{font-size:13px}.pl-check{width:17px;height:17px;border-radius:5px}
+          .pl-home-shortcuts{gap:4px}.pl-shortcut{min-height:44px;padding:6px 7px;border-radius:11px}.pl-shortcut-icon{font-size:16px}.pl-shortcut-title{font-size:10px}.pl-shortcut-sub{font-size:8.2px}.pl-shortcut-arrow{font-size:13px}
+          .pl-noticed{min-height:38px;border-radius:11px;padding:6px 7px}.pl-noticed-icon{font-size:16px}.pl-noticed-title{font-size:9.5px}.pl-noticed-copy{font-size:8.5px}.pl-noticed-arrow{font-size:13px}
+          [data-plushlife-compact-card="next-step"],[data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Tasks today"],.pl-home-shell>section[aria-label="Habits today"]{border-radius:13px!important;box-shadow:0 3px 10px rgba(86,54,98,.035)!important}
         }
       `}</style>
 
