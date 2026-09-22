@@ -127,7 +127,7 @@ export function CarePanel(props) {
         .pl-care-primary{min-height:36px;padding:6px 9px;border-radius:14px;border:0;background:linear-gradient(135deg,#C767D7,#E087C5);color:white;font-weight:950;cursor:pointer;box-shadow:0 8px 18px rgba(190,92,203,.18)}
         .pl-care-reco{margin-top:6px;padding:8px;border-radius:13px;background:linear-gradient(145deg,#FFF5FC,#F8F1FF);border:1px solid #E6D0EC}
         .pl-care-memory{padding:8px 9px;border-radius:15px;border:1px solid #EBD9F0;background:linear-gradient(145deg,#FFF8FC,#FAF3FF);box-shadow:0 8px 22px rgba(101,63,115,.045)}
-        .pl-care-memory strong{color:#704080}
+        .pl-care-memory strong{color:#704080}.pl-care-extra{padding:2px 4px;border:0;background:transparent;box-shadow:none}.pl-care-extra>div{padding:4px 2px 2px}
         .pl-care-spaces{padding:8px;border-radius:16px;border:1px solid #EBD9F0;background:linear-gradient(145deg,#FFF9FD,#F9F3FF);box-shadow:0 10px 28px rgba(101,63,115,.05)}
         .pl-care-tonight{margin:5px 0;padding:8px 9px;border-radius:13px;background:linear-gradient(145deg,#F8F0FF,#FFF6FC);border:1px solid #DEC9EA;color:#654D73}
         .pl-care-tonight .moon{font-size:8.8px;letter-spacing:.12em;font-weight:950;color:#A95CC0}
@@ -190,8 +190,8 @@ export function CarePanel(props) {
       )}
 
       {props.isMamaCornerProfile && (
-        <details open={props.careExtraSupportOpen} onToggle={(event) => props.setCareExtraSupportOpen(event.currentTarget.open)} className="pl-care-memory">
-          <summary style={{ minHeight: 44, display: "flex", alignItems: "center", color: "#76558A", fontWeight: 900, cursor: "pointer" }}>🧸 More cozy support</summary>
+        <details open={props.careExtraSupportOpen} onToggle={(event) => props.setCareExtraSupportOpen(event.currentTarget.open)} className="pl-care-extra">
+          <summary style={{ minHeight: 34, padding: "0 5px", display: "flex", alignItems: "center", color: "#76558A", fontWeight: 900, fontSize: 9.5, cursor: "pointer" }}>🧸 More cozy support</summary>
           <div style={{ marginTop: 8 }}>
             <MamasCorner userId={props.user.id} caregiverName={props.babyCaregiverName} parentVoice={props.preferences.baby_voice === "fatherly" ? "fatherly" : "motherly"} incompleteTasks={props.rows.filter((row) => !props.viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => props.toggle(taskKey)} supabase={props.supabase} />
           </div>
