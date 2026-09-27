@@ -18,6 +18,10 @@ const tasks = read("src/components/tasks-panel.jsx");
 const settings = read("src/components/organized-settings.jsx");
 
 const checks = [
+  [care.includes('.pl-care-tabs.plushcare-library>div> :first-child') && !care.includes('.pl-care-tabs .plushcare-library'), "Care hides its legacy duplicate intro with a selector matching the library wrapper"],
+  [careExisting.includes('className="pl-care-library-panel"') && care.includes('.plushcare-library .pl-care-library-panel'), "Care library styling targets its actual panels"],
+  [!app.includes('.pl-unified-page-content section,') && !app.includes('.pl-unified-page-content details{'), "ambient themes do not paint structural grids and disclosures as white sheets"],
+
   [index.includes("viewport-fit=cover"), "viewport respects Android/iOS safe areas"],
   [index.includes("@media (pointer: coarse)") && index.includes("min-height: 44px"), "coarse-pointer controls meet the 44px touch target"],
   [shared.includes("overflow-x: clip") && shared.includes("max-width: 100%"), "shared UI prevents accidental horizontal page overflow"],
@@ -35,7 +39,7 @@ const checks = [
   [!careExisting.includes("linear-gradient(160deg,#1B2245,#2E3A6B 55%,#1B2245)") && careExisting.includes("linear-gradient(145deg,#FAF2FF,#FFF8FC)"), "PlushSleep keeps the soft non-clinical Care styling"],
   [app.includes(".pl-ambient-theme-layer") && app.includes("--pl-theme-accent") && !app.includes("inset 0 0 0 8px"), "themes remain visible without restoring the heavy app frame"],
   [care.includes(".pl-care-title{margin-top:2px;font-size:15.5px") && care.includes(".pl-care-feeling{min-height:46px"), "Care cards stay compact on phones"],
-  [care.includes(".plushcare-library section button{min-height:50px!important") && care.includes(".pl-care-shell{display:grid;gap:6px") && care.includes(".pl-care-spaces{padding:4px 0 0;border-radius:0;border:0;background:transparent;box-shadow:none}"), "Care library avoids oversized tiles and gaps"],
+  [care.includes(".plushcare-library .pl-care-tool{min-height:50px!important") && care.includes(".pl-care-shell{display:grid;gap:6px") && care.includes(".pl-care-spaces{padding:4px 0 0;border-radius:0;border:0;background:transparent;box-shadow:none}"), "Care library avoids oversized tiles and gaps"],
   [read("src/components/progress-panel-existing.jsx").includes(".pl-growth-stat{min-height:54px") && read("src/components/progress-panel-existing.jsx").includes(".pl-growth-heading{margin-top:2px;font-size:16px"), "Progress stays compact instead of dashboard-sized"],
   [read("src/components/week-panel.jsx").includes(".pl-calendar-cozy{display:grid;gap:7px") && read("src/components/week-panel.jsx").includes("border-radius:15px!important"), "Calendar keeps compact cards and spacing"],
   [app.includes("const homeScheduleDayId = dayIdForDate(period.date);") && app.includes("selectedSchedule={homeSelectedSchedule}") && app.includes("selectedScheduleExceptionEntries={homeScheduleExceptionEntries}"), "Home schedule is pinned to the actual current date instead of stale selected-day state"],

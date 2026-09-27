@@ -66,7 +66,7 @@ const requiredRegressionMarkers = [
   'Import ${duplicateNames.length === 1 ? "it" : "them"} again anyway?',
   'const careAreas = (() => {',
   'const [progressView, setProgressView] = useState("overview");',
-  'const tabs = [\n    { id: "overview", label: "Overview", icon: "📊" },\n    { id: "story", label: "Your story", icon: "📖" },\n    { id: "areas", label: "Care areas", icon: "🪴" },\n  ];',
+  'const tabs = [\n    { id: "overview", label: "Little wins", icon: "✨" },\n    { id: "story", label: "My story", icon: "📖" },\n    { id: "areas", label: "Care garden", icon: "🌷" },\n  ];',
   'aria-label="Progress views"',
   'function CompactGrowthOverview(props)',
   'data-plushlife-growth-focus="true"',

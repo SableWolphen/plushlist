@@ -47,7 +47,7 @@ export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverNa
               ))}
             </div>
 
-            {careSection === "quick" && <div style={{ padding: 11, borderRadius: 16, background: "#FFFFFFC7", border: "1px solid #E6D4F2" }}>
+            {careSection === "quick" && <div className="pl-care-library-panel" style={{ padding: 11, borderRadius: 16, background: "#FFFFFFC7", border: "1px solid #E6D4F2" }}>
               <div style={{ fontSize: 9.8, letterSpacing: ".12em", fontWeight: 900, color: "#A65DC1" }}>🌿 QUICK CARE SESSIONS</div>
               <div style={{ marginTop: 3, fontSize: 10.5, lineHeight: 1.35, color: "#7B6888" }}>Short, private, and always free. Tell PlushLife afterward whether it helped.</div>
               {(() => {
@@ -56,11 +56,11 @@ export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverNa
                 return tool ? <div style={{ marginTop: 7, padding: "7px 9px", borderRadius: 10, background: "#F7FFFC", color: "#5B746D", fontSize: 10.2, lineHeight: 1.35 }}>You previously said <strong>{tool.name}</strong> helped. Want to use it again?</div> : null;
               })()}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 6, marginTop: 8 }}>
-                {COMFORT_TOOLS.map((tool) => <button key={tool.id} type="button" onClick={() => openCareSession(tool.id)} style={{ minHeight: 64, padding: "8px 6px", borderRadius: 12, border: "1px solid #E3C9EC", background: "#FFF9FD", color: "#6B5A7D", fontWeight: 900, fontSize: 10.2, cursor: "pointer" }}><div style={{ fontSize: 19 }}>{tool.icon}</div><div style={{ marginTop: 3, lineHeight: 1.2 }}>{tool.name}</div></button>)}
+                {COMFORT_TOOLS.map((tool) => <button key={tool.id} className="pl-care-tool" type="button" onClick={() => openCareSession(tool.id)} style={{ minHeight: 64, padding: "8px 6px", borderRadius: 12, border: "1px solid #E3C9EC", background: "#FFF9FD", color: "#6B5A7D", fontWeight: 900, fontSize: 10.2, cursor: "pointer" }}><div style={{ fontSize: 19 }}>{tool.icon}</div><div style={{ marginTop: 3, lineHeight: 1.2 }}>{tool.name}</div></button>)}
               </div>
             </div>}
 
-            {careSection === "paths" && <div style={{ padding: 11, borderRadius: 16, background: "#FFFDF4D9", border: "1px solid #E9D79A" }}>
+            {careSection === "paths" && <div className="pl-care-library-panel" style={{ padding: 11, borderRadius: 16, background: "#FFFDF4D9", border: "1px solid #E9D79A" }}>
               <div style={{ fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#A56D14" }}>🗺️ PLUSHPATHS</div>
               <div style={{ marginTop: 5, fontSize: 12, color: "#7B6888" }}>Guided programs that move at your pace. Pause, repeat, or leave any time. One is featured each week — try it, or pick any other.</div>
               <div style={{ display: "grid", gap: 9, marginTop: 11 }}>
@@ -85,26 +85,26 @@ export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverNa
             {careSection === "sleep" && (() => {
               const helpfulSleepEntry = careSessionHistory.find((entry) => entry.session_kind === "sleep" && ["helped", "a_little"].includes(entry.outcome));
               const helpfulSleepTool = helpfulSleepEntry && SLEEP_TOOLS.find((entry) => entry.id === helpfulSleepEntry.session_id);
-              return <div style={{ position: "relative", padding: 11, borderRadius: 16, overflow: "hidden", background: "linear-gradient(145deg,#FAF2FF,#FFF8FC)", border: "1px solid #DECBE8" }}>
+              return <div className="pl-care-library-panel" style={{ position: "relative", padding: 11, borderRadius: 16, overflow: "hidden", background: "linear-gradient(145deg,#FAF2FF,#FFF8FC)", border: "1px solid #DECBE8" }}>
                 {["6%,10%", "18%,32%", "72%,14%", "88%,36%", "45%,6%", "60%,28%", "30%,20%"].map((position, index) => {
                   const [left, top] = position.split(",");
                   return <span key={index} aria-hidden="true" style={{ position: "absolute", left, top, fontSize: 10, color: "#C596D5", opacity: 0.8 }}>✦</span>;
                 })}
                 <div style={{ position: "relative", fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#A15CB7" }}>{babyMode ? "🌙 BEDTIME NEST" : "🌙 PLUSHSLEEP"}</div>
-                <div style={{ position: "relative", marginTop: 5, fontSize: 12, color: "#C7D5F3" }}>{babyMode ? "A soft little landing for when it is time to get cozy and rest." : "Practical support for difficult nights—not a score and not a medical sleep assessment."}</div>
-                {helpfulSleepTool && <div style={{ position: "relative", marginTop: 9, padding: "8px 10px", borderRadius: 10, background: "#2E3A6B99", color: "#DCE3FA", fontSize: 11.5 }}>You previously said <strong>{helpfulSleepTool.title}</strong> helped. Want to use it again?</div>}
+                <div style={{ position: "relative", marginTop: 5, fontSize: 12, color: "#796386" }}>{babyMode ? "A soft little landing for when it is time to get cozy and rest." : "Practical support for difficult nights—not a score and not a medical sleep assessment."}</div>
+                {helpfulSleepTool && <div style={{ position: "relative", marginTop: 9, padding: "8px 10px", borderRadius: 10, background: "#F5ECFA", color: "#654D73", fontSize: 11.5 }}>You previously said <strong>{helpfulSleepTool.title}</strong> helped. Want to use it again?</div>}
                 <div style={{ position: "relative", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(145px,1fr))", gap: 8, marginTop: 11 }}>
-                  {SLEEP_TOOLS.map((tool) => <button key={tool.id} type="button" onClick={() => setSleepToolOpen(tool.id)} style={{ padding: "11px 10px", borderRadius: 13, border: "1px solid #3B4A85", background: "#2E3A6B99", color: "#DCE3FA", textAlign: "left", fontWeight: 800, fontSize: 12, cursor: "pointer" }}><span style={{ fontSize: 19, marginRight: 6 }}>{tool.icon}</span>{tool.title}</button>)}
+                  {SLEEP_TOOLS.map((tool) => <button key={tool.id} className="pl-care-tool" type="button" onClick={() => setSleepToolOpen(tool.id)} style={{ padding: "11px 10px", borderRadius: 13, border: "1px solid #DDC8EA", background: "#F5ECFA", color: "#654D73", textAlign: "left", fontWeight: 800, fontSize: 12, cursor: "pointer" }}><span style={{ fontSize: 19, marginRight: 6 }}>{tool.icon}</span>{tool.title}</button>)}
                 </div>
 
-                <div style={{ position: "relative", marginTop: 14, paddingTop: 13, borderTop: "1px solid #3B4A85" }}>
-                  <div style={{ fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#93A9F5" }}>🎧 SOUNDSCAPES</div>
-                  <div style={{ marginTop: 4, fontSize: 11.5, color: "#C7D5F3" }}>Gentle background sound for winding down. Keeps playing while you do other things.</div>
+                <div style={{ position: "relative", marginTop: 14, paddingTop: 13, borderTop: "1px solid #DDC8EA" }}>
+                  <div style={{ fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#9158A3" }}>🎧 SOUNDSCAPES</div>
+                  <div style={{ marginTop: 4, fontSize: 11.5, color: "#796386" }}>Gentle background sound for winding down. Keeps playing while you do other things.</div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(100px,1fr))", gap: 8, marginTop: 10 }}>
                     {SOUNDSCAPES.map((sound) => {
                       const active = soundscapePlaying === sound.id;
                       return (
-                        <button key={sound.id} type="button" data-plushlife-soundscape-id={sound.id} onClick={() => toggleSoundscape(sound.id)} style={{ padding: "10px 8px", borderRadius: 12, border: active ? "2px solid #93A9F5" : "1px solid #3B4A85", background: active ? "#93A9F533" : "#2E3A6B99", color: "#DCE3FA", textAlign: "center", fontWeight: 800, fontSize: 12, cursor: "pointer" }}>
+                        <button key={sound.id} type="button" data-plushlife-soundscape-id={sound.id} onClick={() => toggleSoundscape(sound.id)} style={{ padding: "10px 8px", borderRadius: 12, border: active ? "2px solid #BD77CE" : "1px solid #DDC8EA", background: active ? "#EDDCF6" : "#FFF9FD", color: "#654D73", textAlign: "center", fontWeight: 800, fontSize: 12, cursor: "pointer" }}>
                           <div style={{ fontSize: 20 }}>{sound.icon}</div>
                           <div style={{ marginTop: 3 }}>{active ? "⏸ Playing" : sound.label}</div>
                         </button>
@@ -113,23 +113,23 @@ export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverNa
                   </div>
                   {soundscapePlaying && (
                     <div style={{ marginTop: 10 }}>
-                      <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11.5, color: "#C7D5F3" }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11.5, color: "#796386" }}>
                         Volume
                         <input type="range" min="0" max="1" step="0.05" value={soundscapeVolume} onChange={(event) => changeSoundscapeVolume(parseFloat(event.target.value))} style={{ flex: 1 }} />
                       </label>
                       <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap", alignItems: "center" }}>
-                        <span style={{ fontSize: 11, color: "#93A9F5", fontWeight: 800 }}>Stop after:</span>
+                        <span style={{ fontSize: 11, color: "#9158A3", fontWeight: 800 }}>Stop after:</span>
                         {[15, 30, 60].map((minutes) => (
-                          <button key={minutes} type="button" onClick={() => setSoundscapeSleepTimer(minutes)} style={{ padding: "4px 9px", borderRadius: 999, border: soundscapeTimerMinutes === minutes ? "2px solid #93A9F5" : "1px solid #3B4A85", background: soundscapeTimerMinutes === minutes ? "#93A9F533" : "transparent", color: "#DCE3FA", fontWeight: 800, fontSize: 11, cursor: "pointer" }}>{minutes}m</button>
+                          <button key={minutes} type="button" onClick={() => setSoundscapeSleepTimer(minutes)} style={{ padding: "4px 9px", borderRadius: 999, border: soundscapeTimerMinutes === minutes ? "2px solid #BD77CE" : "1px solid #DDC8EA", background: soundscapeTimerMinutes === minutes ? "#93A9F533" : "transparent", color: "#654D73", fontWeight: 800, fontSize: 11, cursor: "pointer" }}>{minutes}m</button>
                         ))}
-                        <button type="button" onClick={() => setSoundscapeSleepTimer(null)} style={{ padding: "4px 9px", borderRadius: 999, border: !soundscapeTimerMinutes ? "2px solid #93A9F5" : "1px solid #3B4A85", background: !soundscapeTimerMinutes ? "#93A9F533" : "transparent", color: "#DCE3FA", fontWeight: 800, fontSize: 11, cursor: "pointer" }}>Off</button>
+                        <button type="button" onClick={() => setSoundscapeSleepTimer(null)} style={{ padding: "4px 9px", borderRadius: 999, border: !soundscapeTimerMinutes ? "2px solid #BD77CE" : "1px solid #DDC8EA", background: !soundscapeTimerMinutes ? "#93A9F533" : "transparent", color: "#654D73", fontWeight: 800, fontSize: 11, cursor: "pointer" }}>Off</button>
                       </div>
                     </div>
                   )}
                 </div>
-                <div style={{ position: "relative", marginTop: 14, paddingTop: 13, borderTop: "1px solid #3B4A85" }}>
-                  <div style={{ fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#93A9F5" }}>✨ GENTLE REMINDER</div>
-                  <div style={{ marginTop: 6, padding: "12px 14px", borderRadius: 14, background: "rgba(147, 169, 245, 0.12)", border: "1px dashed #4E5E9E", color: "#E0E7FD", fontSize: 13, fontStyle: "italic", lineHeight: 1.45, textAlign: "center" }}>
+                <div style={{ position: "relative", marginTop: 14, paddingTop: 13, borderTop: "1px solid #DDC8EA" }}>
+                  <div style={{ fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#9158A3" }}>✨ GENTLE REMINDER</div>
+                  <div style={{ marginTop: 6, padding: "12px 14px", borderRadius: 14, background: "rgba(147, 169, 245, 0.12)", border: "1px dashed #D5B9E2", color: "#796386", fontSize: 13, fontStyle: "italic", lineHeight: 1.45, textAlign: "center" }}>
                     "{GENTLE_AFFIRMATIONS[Math.floor((new Date().getDate() + (new Date().getMonth() * 31)) % GENTLE_AFFIRMATIONS.length)]}"
                   </div>
                 </div>

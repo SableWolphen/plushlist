@@ -9,14 +9,14 @@ const goldCard = {
 
 function GrowthTabs({ progressView, setProgressView }) {
   const tabs = [
-    { id: "overview", label: "Overview", icon: "📊" },
-    { id: "story", label: "Your story", icon: "📖" },
-    { id: "areas", label: "Care areas", icon: "🪴" },
+    { id: "overview", label: "Little wins", icon: "✨" },
+    { id: "story", label: "My story", icon: "📖" },
+    { id: "areas", label: "Care garden", icon: "🌷" },
   ];
   return <div role="tablist" aria-label="Progress views" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 4, padding: 4, borderRadius: 13, background: "rgba(246,235,251,.68)", border: "1px solid #E5D4EE", marginBottom: 9 }}>
     {tabs.map((item) => {
       const selected = progressView === item.id;
-      return <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} style={{ minHeight: 42, minWidth: 0, padding: "6px 4px", borderRadius: 10, border: selected ? "2px solid #9850BC" : "1px solid transparent", background: selected ? "#FFFFFF" : "transparent", color: selected ? "#53365F" : "#866895", boxShadow: selected ? "0 2px 7px rgba(154,80,189,.08)" : "none", fontSize: 10.2, fontWeight: 900, cursor: "pointer", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.icon} {item.label}</button>;
+      return <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} style={{ minHeight: 44, minWidth: 0, padding: "6px 4px", borderRadius: 10, border: selected ? "1px solid #D186DC" : "1px solid transparent", background: selected ? "linear-gradient(145deg,#FFFDFE,#F5ECFB)" : "transparent", color: selected ? "#53365F" : "#866895", boxShadow: selected ? "0 2px 7px rgba(154,80,189,.08)" : "none", fontSize: 10.2, fontWeight: 900, cursor: "pointer", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.icon} {item.label}</button>;
     })}
   </div>;
 }

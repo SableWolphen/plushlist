@@ -5807,12 +5807,13 @@ function GlowUpTracker() {
         /* compact-phone-shell */
         @media(max-width:520px){
           #main-content{
-            padding-top:0!important;
-            padding-left:0!important;
-            padding-right:0!important;
+            padding-top:env(safe-area-inset-top)!important;
+            padding-left:env(safe-area-inset-left)!important;
+            padding-right:env(safe-area-inset-right)!important;
             padding-bottom:calc(72px + env(safe-area-inset-bottom))!important;
           }
           .pl-unified-page-hero,.pl-unified-page-content{margin-left:8px!important;margin-right:8px!important}
+          .pl-unified-page-content{--pl-card-radius:16px!important}
         }
         .pl-ambient-theme-layer{
           position:fixed;inset:0;z-index:0;pointer-events:none;
@@ -5824,10 +5825,10 @@ function GlowUpTracker() {
           opacity:.72;
         }
         .appearance-twilight .pl-ambient-theme-layer,.appearance-meadow .pl-ambient-theme-layer{opacity:.94}
-        .appearance-twilight .pl-unified-page-content section,.appearance-meadow .pl-unified-page-content section,
-        .appearance-twilight .pl-unified-page-content details,.appearance-meadow .pl-unified-page-content details{
-          background:rgba(255,255,255,.78)!important;
-          backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+        /* Ambient color belongs behind content, never on structural sections. */
+        .pl-unified-page-content{--pl-card-radius:18px;--pl-card-line:#E8D7ED;--pl-card-fill:linear-gradient(145deg,#FFFAFD,#F7F0FC);--pl-card-shadow:0 4px 14px rgba(101,63,115,.055)}
+        .appearance-twilight .pl-unified-page-content,.appearance-meadow .pl-unified-page-content{
+          --pl-card-fill:linear-gradient(145deg,rgba(255,250,253,.97),rgba(246,239,252,.95));
         }
 
         @keyframes mascotBounce {
@@ -6593,7 +6594,7 @@ function GlowUpTracker() {
           </span>
         ))}
       </div>
-      <div className="baby-shell" style={{ position: "relative", zIndex: 1 }}>
+      <div className="baby-shell" style={{ position: "relative", zIndex: 1, maxWidth: 760, margin: "0 auto" }}>
 
       <div
         onTouchStart={(event) => { swipeStartX.current = event.touches[0]?.clientX ?? null; swipeStartY.current = event.touches[0]?.clientY ?? null; }}
@@ -6731,17 +6732,17 @@ function GlowUpTracker() {
           .pl-unified-gear{width:34px;height:34px;border:1px solid #E9D6EE;border-radius:50%;background:rgba(255,255,255,.88);color:#80588D;font-size:17px;cursor:pointer}
           .pl-unified-page-title{margin-top:6px;max-width:100%}.pl-unified-kicker{font-size:9.6px;letter-spacing:.14em;font-weight:950;color:#B653C5}.pl-unified-page-title h2{margin:2px 0 0;font-size:19px;line-height:1.05;color:#472C54;letter-spacing:-.5px}.pl-unified-page-title p{display:none}
           .pl-unified-page-content{display:grid;gap:8px}
-          .pl-unified-page-content section,.pl-unified-page-content details{border-color:#EBD9F0!important;box-shadow:0 8px 22px rgba(101,63,115,.045)!important}
+          .pl-unified-page-content :is(.pl-care-card,.pl-care-memory,.pl-growth-card,.pl-growth-weekbar){border-color:var(--pl-card-line);border-radius:var(--pl-card-radius);background:var(--pl-card-fill);box-shadow:var(--pl-card-shadow)}
           .pl-unified-page-content [role="tablist"]{background:linear-gradient(145deg,#F8EEFA,#FFF8FC)!important;border-color:#EAD9EE!important;border-radius:18px!important}
           .pl-unified-page-content [role="tab"]{border-radius:14px!important}
           .pl-unified-page-content button{transition:transform .15s ease,box-shadow .15s ease}
           .pl-unified-page-content button:active{transform:scale(.98)}
           .pl-unified-page-content input,.pl-unified-page-content textarea,.pl-unified-page-content select{border-color:#E4CEE9!important;border-radius:14px!important;background:#FFFDFE!important}
           .pl-app-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:80;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;min-height:50px;padding:3px 8px max(3px,env(safe-area-inset-bottom));background:rgba(255,252,254,.97);border-top:1px solid #F0E1F1;box-shadow:0 -4px 14px rgba(76,48,87,.05);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-          .pl-app-nav-btn{appearance:none;border:0;background:transparent;min-height:36px;padding:0 2px;color:#9A819F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:7.8px;font-weight:850;cursor:pointer}.pl-app-nav-btn.active{color:#B24CC5}.pl-app-nav-btn .ico{font-size:14px;line-height:1;filter:saturate(.8)}
+          .pl-app-nav-btn{appearance:none;border:0;background:transparent;min-height:36px;padding:0 2px;color:#9A819F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:7.8px;font-weight:850;cursor:pointer}.pl-app-nav-btn.active{color:#9D3FAE}.pl-app-nav-btn.active .ico{background:#F5E7F7;box-shadow:0 0 0 5px #F5E7F7;border-radius:8px}.pl-app-nav-btn .ico{font-size:14px;line-height:1;filter:saturate(.8)}
           .pl-app-nav-add{width:38px;height:38px;min-height:38px;margin-top:-10px;border-radius:50%;background:linear-gradient(145deg,#C75BDD,#E079C9);color:white;box-shadow:0 6px 14px rgba(178,71,199,.18);font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center}
           @media(min-width:760px){.pl-app-bottom-nav{left:50%;right:auto;width:760px;transform:translateX(-50%);border-left:1px solid #F0E1F1;border-right:1px solid #F0E1F1;border-radius:24px 24px 0 0}}
-          @media(max-width:520px){.pl-unified-page-shell{padding-bottom:calc(82px + env(safe-area-inset-bottom));gap:5px}.pl-app-bottom-nav{min-height:48px;padding-top:2px}.pl-app-nav-btn{min-height:34px;font-size:7.5px}.pl-app-nav-btn .ico{font-size:13px}.pl-app-nav-add{width:36px;height:36px;min-height:36px;font-size:19px;margin-top:-9px}.pl-unified-page-hero{min-height:0;padding:4px 2px 5px;border-radius:0}.pl-unified-wordmark{font-size:18px}.pl-unified-date{font-size:8px;padding:5px 7px}.pl-unified-gear{width:32px;height:32px;font-size:14px}.pl-unified-page-title{margin-top:4px;max-width:100%}.pl-unified-kicker{font-size:7.8px}.pl-unified-page-title h2{font-size:15px}.pl-unified-page-title p{display:none}.pl-unified-page-hero:after,.pl-unified-page-hero:before{display:none}}
+          @media(max-width:520px){.pl-unified-page-shell{padding-bottom:calc(82px + env(safe-area-inset-bottom));gap:5px}.pl-app-bottom-nav{min-height:48px;padding-top:2px}.pl-app-nav-btn{min-height:44px;font-size:9px}.pl-app-nav-btn .ico{font-size:16px}.pl-app-nav-add{width:36px;height:36px;min-height:36px;font-size:19px;margin-top:-9px}.pl-unified-page-hero{min-height:0;padding:4px 2px 5px;border-radius:0}.pl-unified-wordmark{font-size:20px;letter-spacing:-.7px}.pl-unified-date{font-size:9px;padding:5px 7px}.pl-unified-gear{width:44px;height:44px;font-size:16px}.pl-unified-page-title{margin-top:4px;max-width:100%}.pl-unified-kicker{font-size:7.8px}.pl-unified-page-title h2{font-size:15px}.pl-unified-page-title p{display:none}.pl-unified-page-hero:after,.pl-unified-page-hero:before{display:none}}
         `}</style>
 
         {dashboard !== "today" && (
@@ -6796,10 +6797,10 @@ function GlowUpTracker() {
 
         {dashboard === "progress" && <div className="pl-unified-page-content"><ProgressPanel open={dashboard === "progress"} user={user} progressView={progressView} setProgressView={setProgressView} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} hasWeeklyActivity={hasWeeklyActivity} goToDashboard={goToDashboard} weeklyOverallPct={weeklyOverallPct} weekOverWeekDelta={weekOverWeekDelta} preferences={preferences} weeklyEssentialPct={weeklyEssentialPct} weeklyOverallDone={weeklyOverallDone} weeklyOverallPossible={weeklyOverallPossible} weeklyBonusDone={weeklyBonusDone} caringDays={caringDays} weeklyEssentialDone={weeklyEssentialDone} careStory={careStory} careAreas={careAreas} openTaskManager={openTaskManager} patternInsightCards={patternInsightCards} insightCardIndex={insightCardIndex} setInsightCardIndex={setInsightCardIndex} weeklyHighlights={weeklyHighlights} period={period} goWriteWeeklyIntention={goWriteWeeklyIntention} setShareCardOpen={setShareCardOpen} progressDetailsOpen={progressDetailsOpen} setProgressDetailsOpen={setProgressDetailsOpen} TREND_WEEKS={TREND_WEEKS} TREND_MONTHS={TREND_MONTHS} currentMonthKey={currentMonthKey} monthlyOverallPct={monthlyOverallPct} monthOverMonthDelta={monthOverMonthDelta} monthlyTrendPoints={monthlyTrendPoints} tappedTrendMonth={tappedTrendMonth} setTappedTrendMonth={setTappedTrendMonth} monthlyMostConsistent={monthlyMostConsistent} currentMonthDates={currentMonthDates} weeklyTrendPoints={weeklyTrendPoints} tappedTrendWeek={tappedTrendWeek} setTappedTrendWeek={setTappedTrendWeek} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} /></div>}
         <nav className="pl-app-bottom-nav" aria-label="Main navigation">
-          <button type="button" className={`pl-app-nav-btn ${dashboard === "today" ? "active" : ""}`} onClick={() => goToDashboard("today")}><span className="ico">🏠</span><span>Home</span></button>
-          <button type="button" className={`pl-app-nav-btn ${dashboard === "progress" ? "active" : ""}`} onClick={() => goToDashboard("progress")}><span className="ico">🌷</span><span>Progress</span></button>
+          <button type="button" aria-current={dashboard === "today" ? "page" : undefined} className={`pl-app-nav-btn ${dashboard === "today" ? "active" : ""}`} onClick={() => goToDashboard("today")}><span className="ico">🏠</span><span>Home</span></button>
+          <button type="button" aria-current={dashboard === "progress" ? "page" : undefined} className={`pl-app-nav-btn ${dashboard === "progress" ? "active" : ""}`} onClick={() => goToDashboard("progress")}><span className="ico">🌷</span><span>Progress</span></button>
           <button type="button" className="pl-app-nav-btn" aria-label="Add" onClick={() => openTaskManager(period.date)}><span className="pl-app-nav-add">＋</span><span>Add</span></button>
-          <button type="button" className={`pl-app-nav-btn ${dashboard === "care" ? "active" : ""}`} onClick={() => goToDashboard("care")}><span className="ico">💗</span><span>Care</span></button>
+          <button type="button" aria-current={dashboard === "care" ? "page" : undefined} className={`pl-app-nav-btn ${dashboard === "care" ? "active" : ""}`} onClick={() => goToDashboard("care")}><span className="ico">💗</span><span>Care</span></button>
           <button type="button" className="pl-app-nav-btn" onClick={() => setCollectionOpen(true)} aria-label="Open rewards"><span className="ico">🧸</span><span>Plush</span></button>
         </nav>
 
