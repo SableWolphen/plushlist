@@ -27,6 +27,15 @@ if (typeof document !== "undefined" && !document.getElementById("plushlife-mobil
       [role="tablist"] { gap: 4px !important; }
       [role="tab"] { padding-left: 4px !important; padding-right: 4px !important; }
     }
+    .pl-tool-backdrop{background:rgba(68,43,78,.40)!important;backdrop-filter:blur(9px) saturate(1.05)!important;-webkit-backdrop-filter:blur(9px) saturate(1.05)!important}
+    .pl-tool-panel{position:relative;background:linear-gradient(155deg,#FFFDFE 0%,#FFF7FC 48%,#F5F0FF 100%)!important;border:1px solid rgba(226,201,234,.92)!important;box-shadow:0 24px 70px rgba(71,42,88,.28),inset 0 1px 0 rgba(255,255,255,.95)!important}
+    .pl-tool-panel:before{content:"";position:absolute;inset:0 0 auto auto;width:130px;height:130px;border-radius:0 22px 0 100%;background:radial-gradient(circle at 65% 25%,rgba(255,192,228,.28),rgba(219,206,255,.13) 55%,transparent 73%);pointer-events:none}
+    .pl-tool-header{background:linear-gradient(145deg,rgba(255,252,254,.96),rgba(248,241,255,.92))!important;border-bottom:1px solid rgba(230,209,236,.88)!important}
+    .pl-tool-title{font-size:15.5px!important;color:#563B63!important;letter-spacing:-.01em}
+    .pl-tool-close{border-radius:999px!important;border-color:#E3CDE9!important;background:linear-gradient(145deg,#FFFDFE,#F8F0FF)!important;color:#81548F!important;box-shadow:0 4px 12px rgba(92,59,110,.06)}
+    .pl-tool-body{position:relative}
+    .pl-tool-body>div>section,.pl-tool-body>section{border-radius:20px}
+    @media(max-width:520px){.pl-tool-backdrop{padding:8px 7px max(8px,env(safe-area-inset-bottom))!important}.pl-tool-panel{border-radius:22px!important;max-height:calc(100dvh - 16px)!important}.pl-tool-header{padding:11px 12px!important}.pl-tool-body{padding:11px!important}}
   `;
   document.head.appendChild(style);
 }
@@ -104,6 +113,7 @@ export function ToolPanel({ title, onClose, children, inline = false, hideClose 
       onMouseDown={(event) => {
         if (!inline && event.target === event.currentTarget) onClose();
       }}
+      className={inline ? undefined : "pl-tool-backdrop"}
       style={inline ? { margin: "0 0 18px" } : {
         position: "fixed", inset: 0, zIndex: 2000,
         padding: "max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom))",
@@ -112,6 +122,7 @@ export function ToolPanel({ title, onClose, children, inline = false, hideClose 
     >
       <div
         ref={panelRef}
+        className="pl-tool-panel"
         onMouseDown={(event) => event.stopPropagation()}
         style={inline ? {
           width: "100%", borderRadius: 22, background: "#FFF9FD", border: "1px solid #E8D5EF",
@@ -122,13 +133,13 @@ export function ToolPanel({ title, onClose, children, inline = false, hideClose 
           boxShadow: "0 24px 70px rgba(62,35,75,.34)", overscrollBehavior: "contain",
         }}
       >
-        <div style={{
+        <div className="pl-tool-header" style={{
           position: "sticky", top: 0, zIndex: 2, display: "flex", justifyContent: "space-between", alignItems: "center",
           gap: 12, padding: "13px 15px", background: "rgba(255,249,253,.96)", borderBottom: "1px solid #E8D5EF",
           backdropFilter: "blur(8px)",
         }}>
-          <div style={{ minWidth: 0, fontSize: 15, fontWeight: 900, color: "#5B4B6B" }}>{title}</div>
-          {!hideClose && <button type="button" onClick={onClose} aria-label={`Close ${title}`} style={{
+          <div className="pl-tool-title" style={{ minWidth: 0, fontSize: 15, fontWeight: 900, color: "#5B4B6B" }}>{title}</div>
+          {!hideClose && <button type="button" className="pl-tool-close" onClick={onClose} aria-label={`Close ${title}`} style={{
             minWidth: 58, minHeight: 44, padding: "7px 11px", borderRadius: 11, border: "1px solid #D9C5E2",
             background: "white", color: "#7A598C", fontWeight: 900, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, overflowWrap: "normal",
           }}>{inline ? "Back to tracker" : "Close"}</button>}
@@ -138,7 +149,7 @@ export function ToolPanel({ title, onClose, children, inline = false, hideClose 
             💡 Simple Layout reduces ambient theme effects and decorative backgrounds. Turn it off in <strong>Experience</strong> to see the full theme.
           </div>
         )}
-        <div style={{ padding: "14px" }}><PanelErrorBoundary label={title}>{children}</PanelErrorBoundary></div>
+        <div className="pl-tool-body" style={{ padding: "14px" }}><PanelErrorBoundary label={title}>{children}</PanelErrorBoundary></div>
       </div>
     </div>
   );
