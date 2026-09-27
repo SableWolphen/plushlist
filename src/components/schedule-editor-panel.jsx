@@ -20,16 +20,16 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
     <ToolPanel title="Change my schedule" onClose={onClose}>
       <div className="schedule-panel">
         <style>{`
-          .schedule-panel{--blue:#4C8FE8;--blue-dark:#2D6BB5;--ink:#53657B;--line:#D9E6F2;--rose:#C45D74;--green:#318C79;display:grid;gap:12px;padding-bottom:4px}
+          .schedule-panel{--blue:#B85CC7;--blue-dark:#74417F;--ink:#66536E;--line:#E7D7EB;--rose:#C45D74;--green:#6E9C88;display:grid;gap:12px;padding-bottom:4px}
           .schedule-panel *{box-sizing:border-box}
           .schedule-panel button{min-height:0!important;line-height:1.15!important;box-shadow:none!important}
-          .schedule-card{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.82);padding:13px}
-          .schedule-card.day-picker{background:linear-gradient(145deg,#F7FBFF,#FFF9FD);border-color:#B9DCF6}
+          .schedule-card{border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,rgba(255,253,254,.94),rgba(250,244,255,.9));padding:13px;box-shadow:0 7px 18px rgba(97,62,115,.045)}
+          .schedule-card.day-picker{background:linear-gradient(145deg,#FFF7FC,#F4F0FF);border-color:#DFC9E6}
           .schedule-eyebrow{font-size:10.5px;font-weight:900;letter-spacing:.055em;color:var(--blue);text-transform:uppercase}
           .schedule-helper{margin-top:3px;font-size:10.75px;line-height:1.38;color:#6B7C91}
           .schedule-day-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:9px}
-          .schedule-day{padding:6px 2px!important;border-radius:9px!important;border:1px solid #CFE1EF!important;background:#fff!important;color:#61738A!important;font-size:10px!important;font-weight:900!important;cursor:pointer}
-          .schedule-day.selected{border:2px solid var(--blue)!important;background:#E7F2FF!important;color:var(--blue-dark)!important;padding:5px 1px!important}
+          .schedule-day{padding:6px 2px!important;border-radius:11px!important;border:1px solid #E3D4E8!important;background:#FFFDFE!important;color:#735D7B!important;font-size:10px!important;font-weight:900!important;cursor:pointer}
+          .schedule-day.selected{border:2px solid var(--blue)!important;background:#F5E8F8!important;color:var(--blue-dark)!important;padding:5px 1px!important;box-shadow:0 4px 10px rgba(184,92,199,.08)!important}
           .schedule-day .check{font-size:9px;opacity:.65}
           .schedule-intro{margin-top:6px;padding:7px 9px;border-radius:10px;background:#F5FAFE;color:#677A90;font-size:10.75px;line-height:1.38}
           .schedule-entry-list{display:grid;gap:7px;margin-top:9px}
