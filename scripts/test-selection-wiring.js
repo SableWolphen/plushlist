@@ -16,12 +16,12 @@ const dailyCopy = read("assets/daily-checkin-copy.js");
 
 const checks = [
   [settings.includes("APPEARANCE_THEMES.map((theme)") && settings.includes("onClick={() => selectAppearanceTheme(theme.id)}"), "every ambient theme button calls selectAppearanceTheme"],
-  [app.includes("const selectAppearanceTheme = (themeId) => {") && app.includes("setAppearanceTheme(themeId);") && app.includes("plushlist-appearance-"), "theme selection updates state and persists per user"],
+  [app.includes("const selectAppearanceTheme = (themeId) => {") && app.includes("setAppearanceTheme(validTheme);") && app.includes("plushlist-appearance-"), "theme selection updates state and persists per user"],
   [app.includes("const updatePreference = (patch) => {") && app.includes("savePreferences(next);"), "preference toggles persist through savePreferences"],
 
-  [settings.includes('title="🍼 Baby Mode"') && settings.includes('nickname_style: event.target.checked ? "baby" : "warm"'), "Baby Mode toggle updates nickname style"],
-  [settings.includes('dino_theme: event.target.checked ? false : preferences.dino_theme'), "enabling Baby Mode disables Dino Theme"],
-  [settings.includes('title="🦕 Dino Theme"') && settings.includes('nickname_style: event.target.checked ? "warm" : preferences.nickname_style'), "Dino Theme selection leaves the shared layout and exits Baby wording mode"],
+  [settings.includes('onClick={() => updatePreference({ nickname_style: "baby", dino_theme: false })}'), "Baby Mode toggle updates nickname style"],
+  [settings.includes('nickname_style: "baby", dino_theme: false'), "enabling Baby Mode disables Dino Theme"],
+  [settings.includes('onClick={() => updatePreference({ dino_theme: true, nickname_style: "warm" })}'), "Dino Theme selection leaves the shared layout and exits Baby wording mode"],
 
   [settings.includes("onClick={openDailyCheckIn}") && settings.includes("openDailyCheckIn, watchPairingCode"), "Settings can reopen the unified daily check-in directly"],
   [growth.includes('document.getElementById("plushlife-checkin-trigger")') && growth.includes("openCapacityPicker: openDailyCheckIn"), "legacy capacity API routes into the unified daily check-in"],

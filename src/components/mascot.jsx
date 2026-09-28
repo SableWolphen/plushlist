@@ -13,24 +13,32 @@ const DEFAULT_ACCESSORY_POSITION = { left: "50%", top: "1%", transform: "transla
 const SPARKLE_LEFT = [6, 88, 12, 82];
 const SPARKLE_TOP = [4, 8, 78, 74];
 
-export const PlushMascot = React.memo(function PlushMascot({ outfit = MASCOT_OUTFITS[0], size = 150, celebrating = false, mood = "neutral", activityDays = 0 }) {
+export const PlushMascot = React.memo(function PlushMascot({ outfit = MASCOT_OUTFITS[0], size = 150, celebrating = false, mood = "neutral", activityDays = 0, theme = "soft" }) {
   const accessorySize = Math.round(size * 0.23);
   const accessoryPos = ACCESSORY_POSITIONS[outfit.id] || DEFAULT_ACCESSORY_POSITION;
   const growth = mascotGrowthStageForDays(activityDays);
+  const dino = theme === "dino";
+  const palette = {
+    pink: ["#FFF0F7", "#D755A6", "#F7B7D7"], meadow: ["#F0FFF5", "#4AAE86", "#B6E8D1"],
+    peach: ["#FFF3E9", "#E57D72", "#FFD3B8"], twilight: ["#EDE9FF", "#7867CF", "#C5B8F5"],
+    strawberry: ["#FFF0F4", "#E44E86", "#FFBDD1"], "soft-light": ["#F4F9FF", "#7999C9", "#D3E5FA"],
+    baby: ["#FFF0FA", "#E66CB6", "#F8C9E4"], dino: ["#FFEAF7", "#B64CCB", "#F5A8DC"],
+  }[theme] || ["#F7EDFF", "#A85BC5", "#E4BBED"];
+  const [fur, outline, blush] = palette;
   return (
     <div className={celebrating ? "plush-mascot mascot-celebrating" : "plush-mascot"} style={{ width: size, height: size, position: "relative", borderRadius: "50%", boxShadow: growth.glow }}>
       {growth.sparkles.map((sparkle, index) => (
         <span key={index} aria-hidden="true" style={{ position: "absolute", fontSize: Math.round(size * 0.16), left: `${SPARKLE_LEFT[index % 4]}%`, top: `${SPARKLE_TOP[index % 4]}%`, pointerEvents: "none" }}>{sparkle}</span>
       ))}
       <svg viewBox="0 0 240 220" role="img" aria-label={`PlushLife mascot wearing ${outfit.name}, looking ${mood}`} style={{ width: "100%", height: "100%", display: "block" }}>
-        <path d="M184 72 C222 43 233 63 222 91 C214 112 202 127 187 139" fill="none" stroke="#FFA510" strokeWidth="17" strokeLinecap="round" />
-        <circle cx="120" cy="117" r="80" fill="#FFEAF7" stroke="#B64CCB" strokeWidth="7" />
-        <circle cx="61" cy="60" r="25" fill="#FFF4FB" stroke="#B64CCB" strokeWidth="7" />
-        <circle cx="179" cy="60" r="25" fill="#FFF4FB" stroke="#B64CCB" strokeWidth="7" />
-        <ellipse cx="77" cy="190" rx="30" ry="20" fill="#FFF4FB" stroke="#B64CCB" strokeWidth="7" />
-        <ellipse cx="163" cy="190" rx="30" ry="20" fill="#FFF4FB" stroke="#B64CCB" strokeWidth="7" />
-        <path d="M91 43 L101 10 L116 45 Z M124 41 L139 16 L151 50 Z" fill="#12C8AA" stroke="#12A88F" strokeWidth="3" />
-        <circle cx="120" cy="116" r="61" fill="#FFFFFF" stroke="#B64CCB" strokeWidth="7" />
+        {dino && <path d="M184 72 C222 43 233 63 222 91 C214 112 202 127 187 139" fill="none" stroke="#FFA510" strokeWidth="17" strokeLinecap="round" />}
+        <circle cx="120" cy="117" r="80" fill={fur} stroke={outline} strokeWidth="7" />
+        <circle cx="61" cy="60" r="25" fill={fur} stroke={outline} strokeWidth="7" />
+        <circle cx="179" cy="60" r="25" fill={fur} stroke={outline} strokeWidth="7" />
+        <ellipse cx="77" cy="190" rx="30" ry="20" fill={fur} stroke={outline} strokeWidth="7" />
+        <ellipse cx="163" cy="190" rx="30" ry="20" fill={fur} stroke={outline} strokeWidth="7" />
+        {dino ? <path d="M91 43 L101 10 L116 45 Z M124 41 L139 16 L151 50 Z" fill="#12C8AA" stroke="#12A88F" strokeWidth="3" /> : <path d="M102 39 Q119 22 138 40" fill="none" stroke={outline} strokeWidth="5" strokeLinecap="round" />}
+        <circle cx="120" cy="116" r="61" fill="#FFFFFF" stroke={outline} strokeWidth="7" />
         {mood === "tired" ? (
           <>
             <path d="M88 106 Q98 113 108 106" stroke="#50405F" strokeWidth="6" fill="none" strokeLinecap="round" />
@@ -44,8 +52,8 @@ export const PlushMascot = React.memo(function PlushMascot({ outfit = MASCOT_OUT
             <circle cx="139" cy="101" r="3" fill="#FFFFFF" />
           </>
         )}
-        <circle cx="82" cy="132" r="10" fill="#F5A8DC" />
-        <circle cx="158" cy="132" r="10" fill="#F5A8DC" />
+        <circle cx="82" cy="132" r="10" fill={blush} />
+        <circle cx="158" cy="132" r="10" fill={blush} />
         {mood === "tired" ? (
           <path d="M107 142 Q120 146 133 142" fill="none" stroke="#50405F" strokeWidth="6" strokeLinecap="round" />
         ) : mood === "excited" ? (

@@ -313,7 +313,10 @@
 #main-content .pl-home-actions{
   top:16px!important;right:14px!important;gap:6px!important;
 }
-#main-content .pl-home-date{display:none!important}
+#main-content .pl-home-date{
+  display:inline-flex!important;position:absolute;right:0;top:54px;
+  white-space:nowrap;font-size:10px!important;padding:7px 10px!important;
+}
 #main-content .pl-home-timer{display:none!important}
 #main-content .pl-home-settings{
   width:44px!important;height:44px!important;min-height:44px!important;
@@ -893,6 +896,19 @@
 
 /* Theme identity lock: every ambient theme is its own world.
    Dinosaur artwork is legal only under .dino-theme. */
+/* Keep the five navigation actions centered on wide screens. Earlier mobile
+   offsets override the desktop width and leave half the bar off screen. */
+@media (min-width:760px){
+  #main-content .pl-app-bottom-nav,
+  #main-content.dino-theme .pl-app-bottom-nav,
+  #main-content.baby-mode .pl-app-bottom-nav{
+    left:50%!important;right:auto!important;width:min(660px,calc(100% - 24px))!important;
+    transform:translateX(-50%)!important;
+  }
+}
+@media (max-width:759px){
+  #main-content .pl-app-bottom-nav{transform:none!important}
+}
 #main-content:not(.dino-theme) [style*="dino-garden"],
 #main-content:not(.dino-theme) [style*="dino-care"],
 #main-content:not(.dino-theme) [style*="dino-clouds"],

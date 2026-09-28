@@ -1,6 +1,7 @@
 import { ToolPanel } from "./shared.jsx";
 import { PlushGoldPreview } from "./plush-gold-preview.jsx";
 import { RecommendationSettings } from "./recommendation-settings.jsx";
+import { PlushMascot } from "./mascot.jsx";
 
 const cardStyle = {
   background: "linear-gradient(145deg,rgba(255,253,254,.96),rgba(249,243,255,.92))",
@@ -218,18 +219,18 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
         <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#8A7895" }}>Pick the world that feels like you. Every option keeps the same PlushLife layout and your same data.</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8, marginTop: 10 }}>
           <button type="button" onClick={() => updatePreference({ dino_theme: true, nickname_style: "warm" })} aria-pressed={!!dinoTheme} style={{ position: "relative", overflow: "hidden", minHeight: 102, padding: 0, borderRadius: 16, border: dinoTheme ? "2px solid #9B67C6" : "1px solid #E4D8E8", background: "linear-gradient(145deg,#F1E8FF,#ECF8EF)", color: "#5D3F73", fontWeight: 900, cursor: "pointer", boxShadow: dinoTheme ? "0 7px 18px rgba(155,103,198,.22)" : "0 4px 12px rgba(96,62,108,.05)" }}>
-            <span aria-hidden="true" style={{ display: "grid", placeItems: "center", minHeight: 69, fontSize: 32, background: "radial-gradient(circle at 30% 30%,#FFF6D5,transparent 42%),linear-gradient(145deg,#EFE5FF,#E8F6ED)" }}>🦕</span>
+            <span aria-hidden="true" style={{ display: "grid", placeItems: "center", minHeight: 69, background: "radial-gradient(circle at 30% 30%,#FFF6D5,transparent 42%),linear-gradient(145deg,#EFE5FF,#E8F6ED)" }}><PlushMascot theme="dino" size={58} /></span>
             <span style={{ display: "block", padding: "6px 4px 8px", background: "rgba(255,255,255,.72)", borderTop: "1px solid rgba(255,255,255,.65)", fontSize: 10.5 }}>Dino{dinoTheme ? " ✓" : ""}</span>
           </button>
           <button type="button" onClick={() => updatePreference({ nickname_style: "baby", dino_theme: false })} aria-pressed={preferences.nickname_style === "baby"} style={{ position: "relative", overflow: "hidden", minHeight: 102, padding: 0, borderRadius: 16, border: preferences.nickname_style === "baby" ? "2px solid #E572B7" : "1px solid #E4D8E8", background: "linear-gradient(145deg,#FFF0F7,#F1E9FF)", color: "#743B6D", fontWeight: 900, cursor: "pointer", boxShadow: preferences.nickname_style === "baby" ? "0 7px 18px rgba(229,114,183,.20)" : "0 4px 12px rgba(96,62,108,.05)" }}>
-            <span aria-hidden="true" style={{ display: "grid", placeItems: "center", minHeight: 69, fontSize: 32, background: "radial-gradient(circle at 72% 26%,#FFF4B8,transparent 34%),linear-gradient(145deg,#FFF0F7,#F1E9FF)" }}>🍼</span>
+            <span aria-hidden="true" style={{ display: "grid", placeItems: "center", minHeight: 69, background: "radial-gradient(circle at 72% 26%,#FFF4B8,transparent 34%),linear-gradient(145deg,#FFF0F7,#F1E9FF)" }}><PlushMascot theme="baby" size={58} /></span>
             <span style={{ display: "block", padding: "6px 4px 8px", background: "rgba(255,255,255,.72)", borderTop: "1px solid rgba(255,255,255,.65)", fontSize: 10.5 }}>Baby Mode{preferences.nickname_style === "baby" ? " ✓" : ""}</span>
           </button>
           {APPEARANCE_THEMES.map((theme) => {
             const selected = !dinoTheme && preferences.nickname_style !== "baby" && appearanceTheme === theme.id;
             return <button key={theme.id} type="button" onClick={() => selectAppearanceTheme(theme.id)} aria-pressed={selected} style={{ position: "relative", overflow: "hidden", padding: 0, minHeight: 102, borderRadius: 16, border: selected ? `2px solid ${theme.accent}` : "1px solid #E4D8E8", background: theme.background, color: theme.ink || "#695474", fontWeight: 900, cursor: "pointer", boxShadow: selected ? `0 7px 18px ${theme.accent}33` : "0 4px 12px rgba(96,62,108,.05)" }}>
               <span aria-hidden="true" style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 18% 18%,${theme.glowA} 0%,transparent 48%),radial-gradient(circle at 82% 18%,${theme.glowB} 0%,transparent 48%),radial-gradient(circle at 75% 88%,${theme.glowC} 0%,transparent 52%)` }} />
-              <span aria-hidden="true" style={{ position: "relative", display: "grid", placeItems: "center", minHeight: 69, fontSize: 31, filter: "drop-shadow(0 4px 8px rgba(73,47,88,.10))" }}>{theme.icon}</span>
+              <span aria-hidden="true" style={{ position: "relative", display: "grid", placeItems: "center", minHeight: 69, filter: "drop-shadow(0 4px 8px rgba(73,47,88,.10))" }}><PlushMascot theme={theme.id} size={58} /></span>
               <span style={{ position: "relative", display: "block", padding: "6px 4px 8px", background: "rgba(255,255,255,.72)", borderTop: "1px solid rgba(255,255,255,.65)", fontSize: 10.5 }}>{theme.label}{selected ? " ✓" : ""}</span>
             </button>;
           })}

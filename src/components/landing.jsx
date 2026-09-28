@@ -76,6 +76,7 @@ function LandingDemo({ colors }) {
 
 export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, setShowSignIn, sendSignInLink, verifySignInCode, signInMessage, codeCooldown, password, setPassword, showPasswordField, setShowPasswordField, signInWithPassword }) {
   const colors = { bg: "#FFF8FC", plum: "#4A3A5C", soft: "#8574A0", orchid: "#B95FCE", mint: "#3FC7A6", amber: "#F2A93B", line: "#F0D9EE" };
+  const [codeStep, setCodeStep] = useState(false);
   return (
     <div className="plushlife-landing-root" style={{ minHeight: "100vh", background: colors.bg, backgroundImage: "radial-gradient(circle at 6% 8%, #FCE1F3 0%, transparent 38%), radial-gradient(circle at 96% 4%, #D8F3EC 0%, transparent 38%), radial-gradient(circle at 90% 92%, #FDF0D6 0%, transparent 42%)", color: colors.plum, fontFamily: "'Nunito','Segoe UI',sans-serif" }}>
       <style>{`
@@ -102,6 +103,19 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         .landing-device-stage > div { display:none }
         .landing-demo-task:hover { border-color:#D9A6E3 !important; transform:translateY(-1px) }
         .landing-demo-task:focus-visible { outline:3px solid #E7B8F0;outline-offset:2px }
+        .landing-auth-card { position:relative;max-width:430px;margin:24px auto 0;padding:24px;border:1px solid #ead7ee;border-radius:28px;background:linear-gradient(165deg,#fffafd,#fff 58%,#f5fcfa);box-shadow:0 24px 60px -32px rgba(83,46,111,.42);text-align:left }
+        .landing-auth-card::before { content:'✦';position:absolute;right:24px;top:20px;color:#ddaddf;font-size:23px }
+        .landing-auth-badge { display:inline-flex;align-items:center;gap:8px;padding:5px 10px;border-radius:999px;background:#f8e9f8;color:#914da6;font-size:11px;font-weight:900;letter-spacing:.03em }
+        .landing-auth-card h2 { margin:12px 0 3px;font:800 25px/1.14 'Baloo 2',sans-serif;color:#4a3a5c }
+        .landing-auth-card p { margin:0 0 17px;color:#8574a0;font-size:13px;line-height:1.4 }
+        .landing-auth-card label { display:block;margin:13px 0 6px;color:#624f75;font-size:12px;font-weight:900 }
+        .landing-auth-card input { display:block;width:100%;min-height:48px;padding:11px 14px;border:1px solid #e8d3e9;border-radius:14px;background:#fff;color:#4a3a5c;font:700 15px 'Nunito',sans-serif;outline:none;box-sizing:border-box }
+        .landing-auth-card input:focus { border-color:#b95fce;box-shadow:0 0 0 3px #b95fce25 }
+        .landing-auth-card button.auth-action { width:100%;min-height:47px;margin-top:11px;border:0;border-radius:14px;background:#b95fce;color:#fff;font:900 14px 'Nunito',sans-serif;cursor:pointer;box-shadow:0 10px 22px -14px #a64ab7 }
+        .landing-auth-card button.auth-action:disabled { opacity:.58;cursor:wait }
+        .landing-auth-card .auth-back { display:inline-block;margin-top:14px;border:0;background:transparent;color:#8d579f;font:800 12px 'Nunito',sans-serif;cursor:pointer;text-decoration:underline }
+        .landing-auth-card .auth-status { margin-top:12px;padding:9px 11px;border-radius:12px;background:#f7f0fa;color:#694b7b;font-size:12px;line-height:1.4 }
+        @media(max-width:560px){.landing-auth-card{padding:18px;border-radius:22px;margin-top:18px}.landing-auth-card h2{font-size:22px}}
         @media(max-width:800px){.plush-feature-grid,.landing-how-grid{grid-template-columns:1fr}.landing-benefit-strip{grid-template-columns:repeat(2,1fr)}.landing-device-stage{border-radius:24px}}
         .landing-tier-grid { display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px;text-align:left }
         .landing-tier-card { padding:12px;border-radius:14px;border:1px solid #EADCEC;background:#FFF }
@@ -132,27 +146,31 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         </div>
 
         {showSignIn && (
-          <div style={{ maxWidth: 660, margin: "22px auto 0", padding: 16, borderRadius: 18, background: "rgba(255,255,255,.86)", border: `1px solid ${colors.line}`, boxShadow: "0 18px 38px -24px rgba(90,50,110,.35)" }}>
-            <div style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 20, fontWeight: 800 }}>Create or open your private tracker</div>
-            <div style={{ marginTop: 3, fontSize: 13, color: colors.soft }}>Everything in PlushLife is unlocked for you right now — no tiers, no paywalls, no payment needed.</div>
-            <div style={{ marginTop: 11, fontSize: 12.5, color: colors.soft }}>We’ll email you a secure one-time sign-in code.</div>
-            <div className="landing-signin-row" style={{ display: "flex", gap: 8, marginTop: 11 }}>
-              <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" aria-label="Email address" style={{ flex: 1, minWidth: 0, padding: "11px 12px", borderRadius: 11, border: `1px solid ${colors.line}`, fontSize: 14 }} />
-              <button onClick={sendSignInLink} disabled={codeCooldown > 0} style={{ padding: "11px 14px", borderRadius: 11, border: 0, background: colors.orchid, color: "white", fontWeight: 800, cursor: codeCooldown > 0 ? "not-allowed" : "pointer", opacity: codeCooldown > 0 ? 0.55 : 1 }}>{codeCooldown > 0 ? `Wait ${codeCooldown}s` : "Send code"}</button>
-            </div>
-            <div className="landing-signin-row" style={{ display: "flex", gap: 8, marginTop: 9 }}>
-              <input inputMode="numeric" autoComplete="one-time-code" value={otpCode} onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, "").slice(0, 8))} placeholder="Email code" aria-label="Email sign-in code" style={{ flex: 1, minWidth: 0, padding: "11px 12px", borderRadius: 11, border: `1px solid ${colors.line}`, fontSize: 16, letterSpacing: "0.16em" }} />
-              <button onClick={verifySignInCode} style={{ padding: "11px 14px", borderRadius: 11, border: `1px solid ${colors.orchid}`, background: "white", color: colors.orchid, fontWeight: 800, cursor: "pointer" }}>Sign in</button>
-            </div>
-            {signInMessage && <div style={{ marginTop: 9, fontSize: 12.5, color: colors.soft }}>{signInMessage}</div>}
-            {codeCooldown > 0 && <div style={{ marginTop: 5, fontSize: 11.5, color: colors.soft }}>One code is active. Check your inbox before requesting another.</div>}
-            <a href="#" onClick={(event) => { event.preventDefault(); setShowPasswordField((shown) => !shown); }} style={{ display: "block", marginTop: 10, fontSize: 12.5, color: colors.soft }}>{showPasswordField ? "Use the emailed code instead" : "Have a password instead?"}</a>
-            {showPasswordField && (
-              <div style={{ display: "flex", gap: 8, marginTop: 9 }}>
-                <input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Your password" aria-label="Password" style={{ flex: 1, minWidth: 0, padding: "11px 12px", borderRadius: 11, border: `1px solid ${colors.line}`, fontSize: 14 }} />
-                <button onClick={signInWithPassword} style={{ padding: "11px 14px", borderRadius: 11, border: `1px solid ${colors.orchid}`, background: "white", color: colors.orchid, fontWeight: 800, cursor: "pointer" }}>Sign in</button>
-              </div>
+          <div className="landing-auth-card" role="region" aria-label="PlushLife sign in">
+            <span className="landing-auth-badge" aria-hidden="true">🧸 YOUR LITTLE SPACE</span>
+            <h2>Create or open your private tracker</h2>
+            <p>{showPasswordField ? "Welcome back. Your space is right where you left it." : codeStep ? "Check your inbox for your one-time code." : "One small step, then you're home. We'll email you a secure code."}</p>
+            <div style={{ color: colors.soft, fontSize: 11, fontWeight: 800 }}>Everything is open right now — no tiers, no paywalls.</div>
+            <label htmlFor="landing-email">Email address</label>
+            <input id="landing-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" />
+            {showPasswordField ? (
+              <>
+                <label htmlFor="landing-password">Password</label>
+                <input id="landing-password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Your password" />
+                <button className="auth-action" type="button" onClick={signInWithPassword}>Sign in to PlushLife</button>
+              </>
+            ) : codeStep ? (
+              <>
+                <label htmlFor="landing-code">Email code</label>
+                <input id="landing-code" inputMode="numeric" autoComplete="one-time-code" value={otpCode} onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, "").slice(0, 8))} placeholder="Enter your code" style={{ letterSpacing: ".14em" }} />
+                <button className="auth-action" type="button" onClick={verifySignInCode}>Open my space</button>
+                <button className="auth-back" type="button" disabled={codeCooldown > 0} onClick={sendSignInLink}>{codeCooldown > 0 ? `Send another code in ${codeCooldown}s` : "Send another code"}</button>
+              </>
+            ) : (
+              <button className="auth-action" type="button" disabled={codeCooldown > 0} onClick={() => { if (email.trim().includes("@")) setCodeStep(true); sendSignInLink(); }}>Email me a code</button>
             )}
+            {signInMessage && <div className="auth-status" role="status" aria-live="polite">{signInMessage}</div>}
+            <div><button className="auth-back" type="button" onClick={() => { setShowPasswordField((shown) => !shown); setCodeStep(false); }}>{showPasswordField ? "Use an email code instead" : "Have a password instead?"}</button></div>
           </div>
         )}
 

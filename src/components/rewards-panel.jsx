@@ -9,7 +9,7 @@
 import { ToolPanel } from "./shared.jsx";
 import { PlushMascot } from "./mascot.jsx";
 
-export function RewardsPanel({ open, onClose, FeatureTip, selectedOutfit, mascotMood, activityDaysTotal, preferences, mascotGrowth, careDaysTotal, unlockedOutfits, earnedBadgeIdSet, BADGE_DEFS, unlockedIdSet, mascotRequirementProgress, saveMascotCollection, mascotCollection, savedBestStreak, collectionTab, setCollectionTab, winsJarEntries }) {
+export function RewardsPanel({ open, onClose, FeatureTip, selectedOutfit, mascotMood, activityDaysTotal, preferences, mascotGrowth, careDaysTotal, unlockedOutfits, earnedBadgeIdSet, BADGE_DEFS, unlockedIdSet, mascotRequirementProgress, saveMascotCollection, mascotCollection, savedBestStreak, collectionTab, setCollectionTab, winsJarEntries, theme }) {
   if (!open) return null;
   const { MASCOT_OUTFITS } = window.PlushLifeContent;
   return (
@@ -17,7 +17,7 @@ export function RewardsPanel({ open, onClose, FeatureTip, selectedOutfit, mascot
           <FeatureTip id="rewards_panel" text="Everything here is earned from all kinds of care, not just streaks — and once unlocked, nothing is ever taken away." />
           <div style={{ marginBottom: 18, padding: 17, borderRadius: 20, background: "linear-gradient(145deg,#FFF8FC 0%,#F4EEFF 55%,#FFF7E8 100%)", border: "1px solid #E6D2E8", boxShadow: "0 12px 30px rgba(100,62,118,.08), inset 0 1px 0 rgba(255,255,255,.9)" }}>
             <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
-              <PlushMascot outfit={selectedOutfit} size={132} mood={mascotMood} activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
+              <PlushMascot outfit={selectedOutfit} theme={theme} size={132} mood={mascotMood} activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
               <div style={{ flex: "1 1 190px" }}>
                 <div style={{ fontSize: 10.5, fontWeight: 950, letterSpacing: ".15em", color: "#A957B7" }}>YOUR PLUSH CORNER</div>
                 <div style={{ marginTop: 4, fontSize: 20, fontWeight: 900, color: "#5B4B6B" }}>{selectedOutfit.name}</div>

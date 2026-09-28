@@ -57,7 +57,7 @@ function greeting() {
   return "Good evening";
 }
 
-function Hero({ period, goToDashboard, setSettingsOpen, reducedMotion, selectedOutfit, activityDaysTotal, darkMode }) {
+function Hero({ period, goToDashboard, setSettingsOpen, reducedMotion, selectedOutfit, activityDaysTotal, darkMode, appearanceTheme, dinoTheme, babyMode }) {
   // The living mascot reacts to task completions: the completed-task flow
   // dispatches plushlife:task-completion-feedback on window, and the mascot
   // celebrates (happy face + bounce) for the same 2.2s as the gentle glow.
@@ -97,7 +97,7 @@ function Hero({ period, goToDashboard, setSettingsOpen, reducedMotion, selectedO
       </div>
 
       <div className="pl-home-plush" aria-hidden="true">
-        <PlushMascot outfit={selectedOutfit} size={120} celebrating={mascotCelebrating && !reducedMotion} mood={mascotCelebrating ? "excited" : "neutral"} activityDays={activityDaysTotal} darkMode={darkMode} />
+        <PlushMascot outfit={selectedOutfit} theme={dinoTheme ? "dino" : babyMode ? "baby" : appearanceTheme} size={120} celebrating={mascotCelebrating && !reducedMotion} mood={mascotCelebrating ? "excited" : "neutral"} activityDays={activityDaysTotal} darkMode={darkMode} />
       </div>
 
       <div className="pl-home-bubble">🌱 Taking care of yourself matters.</div>
@@ -280,7 +280,7 @@ export function TodayPanel({
   rows, viewDone, openTaskManager, setCalmQuickOpen, calmQuickOpen, currentCopingOption,
   reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen, setSettingsOpen,
   completedTodayExpanded, setCompletedTodayExpanded, tomorrowTasksCount, preferences,
-  activityDaysTotal, selectedOutfit
+  activityDaysTotal, selectedOutfit, appearanceTheme, dinoTheme, babyMode
 }) {
   // Wraps the app toggle with the shared completion flow: newly completed
   // tasks linger briefly for undo, and every completion dispatches
@@ -349,7 +349,7 @@ export function TodayPanel({
       `}</style>
 
       <div data-plushlife-home-stack className="pl-home-shell">
-        <Hero period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} />
+        <Hero period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} />
         <OneTinyThing nextStepTask={nextStepTask} nextStepReason={nextStepReason} nextStepHint={nextStepHint} toggle={unifiedToggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} />
         <TodaySchedule selectedSchedule={selectedSchedule} selectedScheduleExceptionEntries={selectedScheduleExceptionEntries} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} />
         <TasksToday rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />
