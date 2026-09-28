@@ -15,7 +15,7 @@ export function RewardsPanel({ open, onClose, FeatureTip, selectedOutfit, mascot
   return (
           <ToolPanel title="Rewards" onClose={onClose}>
           <FeatureTip id="rewards_panel" text="Everything here is earned from all kinds of care, not just streaks — and once unlocked, nothing is ever taken away." />
-          <div style={{ marginBottom: 18, padding: 17, borderRadius: 20, background: "linear-gradient(145deg,rgba(255,255,255,.88),rgba(255,245,218,.8))", border: "1px solid #E9C96E", boxShadow: "0 10px 28px rgba(166,109,20,.11)" }}>
+          <div style={{ marginBottom: 18, padding: 17, borderRadius: 20, background: "linear-gradient(145deg,#FFF8FC 0%,#F4EEFF 55%,#FFF7E8 100%)", border: "1px solid #E6D2E8", boxShadow: "0 12px 30px rgba(100,62,118,.08), inset 0 1px 0 rgba(255,255,255,.9)" }}>
             <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
               <PlushMascot outfit={selectedOutfit} size={132} mood={mascotMood} activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
               <div style={{ flex: "1 1 190px" }}>
@@ -35,9 +35,9 @@ export function RewardsPanel({ open, onClose, FeatureTip, selectedOutfit, mascot
             </div>
 
             <div style={{ display: "flex", gap: 6, marginTop: 14 }}>
-              <button type="button" onClick={() => setCollectionTab("mascot")} style={{ flex: 1, padding: "8px 6px", borderRadius: 10, border: collectionTab === "mascot" ? "2px solid #A65DC1" : "1px solid #E4D7B4", background: collectionTab === "mascot" ? "#F8ECFC" : "white", color: "#5B4B6B", fontWeight: 800, cursor: "pointer" }}>🧸 Closet</button>
-              <button type="button" onClick={() => setCollectionTab("badges")} style={{ flex: 1, padding: "8px 10px", borderRadius: 10, border: collectionTab === "badges" ? "2px solid #A65DC1" : "1px solid #E4D7B4", background: collectionTab === "badges" ? "#F8ECFC" : "white", color: "#5B4B6B", fontWeight: 800, cursor: "pointer" }}>🏅 Badges</button>
-              <button type="button" onClick={() => setCollectionTab("wins")} style={{ flex: 1, padding: "8px 6px", borderRadius: 10, border: collectionTab === "wins" ? "2px solid #A65DC1" : "1px solid #E4D7B4", background: collectionTab === "wins" ? "#F8ECFC" : "white", color: "#5B4B6B", fontWeight: 800, cursor: "pointer" }}>🫙 Jar</button>
+              <button type="button" onClick={() => setCollectionTab("mascot")} style={{ flex: 1, padding: "8px 6px", borderRadius: 10, border: collectionTab === "mascot" ? "2px solid #A65DC1" : "1px solid #E4D7B4", background: collectionTab === "mascot" ? "linear-gradient(145deg,#FFF5FC,#F2EBFF)" : "#FFFDFE", color: "#5B4B6B", fontWeight: 800, cursor: "pointer" }}>🧸 Closet</button>
+              <button type="button" onClick={() => setCollectionTab("badges")} style={{ flex: 1, padding: "8px 10px", borderRadius: 10, border: collectionTab === "badges" ? "2px solid #A65DC1" : "1px solid #E4D7B4", background: collectionTab === "badges" ? "linear-gradient(145deg,#FFF5FC,#F2EBFF)" : "#FFFDFE", color: "#5B4B6B", fontWeight: 800, cursor: "pointer" }}>🏅 Badges</button>
+              <button type="button" onClick={() => setCollectionTab("wins")} style={{ flex: 1, padding: "8px 6px", borderRadius: 10, border: collectionTab === "wins" ? "2px solid #A65DC1" : "1px solid #E4D7B4", background: collectionTab === "wins" ? "linear-gradient(145deg,#FFF5FC,#F2EBFF)" : "#FFFDFE", color: "#5B4B6B", fontWeight: 800, cursor: "pointer" }}>🫙 Jar</button>
             </div>
 
             {collectionTab === "mascot" && (
@@ -109,7 +109,7 @@ export function RewardsPanel({ open, onClose, FeatureTip, selectedOutfit, mascot
 
             {collectionTab === "wins" && (
             <div style={{ marginTop: 14 }}>
-              <div style={{ padding: "12px 13px", borderRadius: 14, background: "linear-gradient(135deg,#F4F9FF,#FFF5FB)", border: "1px solid #D9D4F2" }}>
+              <div style={{ padding: "12px 13px", borderRadius: 14, background: "linear-gradient(145deg,#FFF5FB,#F3EEFF)", border: "1px solid #E2D3E8" }}>
                 <div style={{ fontSize: 12, fontWeight: 900, color: "#76558A" }}>🫙 YOUR WINS JAR</div>
                 <div style={{ marginTop: 4, fontSize: 12, lineHeight: 1.5, color: "#7B6888" }}>Little care is worth keeping. These are gentle notes from days you showed up—no streaks to protect, no points to lose.</div>
               </div>
