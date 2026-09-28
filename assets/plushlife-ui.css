@@ -723,10 +723,18 @@
   background:url("./dino-clouds.jpg") center 46%/cover no-repeat!important;
 }
 #main-content.baby-mode .pl-unified-page-hero{
-  background:url("./dino-clouds.jpg") center 48%/cover no-repeat!important;
+  background:
+    radial-gradient(circle at 82% 24%,#FFF0B8 0 8%,transparent 18%),
+    radial-gradient(circle at 72% 74%,#FFDCEB 0 13%,transparent 31%),
+    radial-gradient(circle at 20% 20%,#FFF9FC 0 17%,transparent 35%),
+    linear-gradient(145deg,#FFF0F7 0%,#F5ECFF 54%,#FFF1E7 100%)!important;
 }
 #main-content.baby-night .pl-unified-page-hero{
-  background:url("./dino-night.jpg") center 44%/cover no-repeat!important;
+  background:
+    radial-gradient(circle at 78% 22%,#FFE17E 0 8%,transparent 9%),
+    radial-gradient(circle at 78% 22%,#FFF0AF 0 12%,transparent 19%),
+    radial-gradient(circle at 18% 20%,rgba(255,255,255,.12) 0 15%,transparent 31%),
+    linear-gradient(180deg,#20265A 0%,#343778 52%,#5A4B97 100%)!important;
 }
 #main-content.dino-theme .pl-unified-page-hero:before,
 #main-content.baby-mode .pl-unified-page-hero:before{
@@ -880,4 +888,61 @@
   #main-content .pl-unified-page-content{margin:0 8px!important}
   #main-content .pl-growth-stat{min-height:84px!important}
   #main-content .pl-care-feeling{min-height:50px!important}
+}
+
+
+/* Theme identity lock: every ambient theme is its own world.
+   Dinosaur artwork is legal only under .dino-theme. */
+#main-content:not(.dino-theme) [style*="dino-garden"],
+#main-content:not(.dino-theme) [style*="dino-care"],
+#main-content:not(.dino-theme) [style*="dino-clouds"],
+#main-content:not(.dino-theme) [style*="dino-night"]{
+  background-image:none!important;
+}
+
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-unified-page-hero{
+  background:
+    radial-gradient(circle at 84% 18%,#FFF1C7 0 7%,transparent 16%),
+    radial-gradient(circle at 76% 74%,#EAD8FF 0 17%,transparent 36%),
+    linear-gradient(145deg,#FAF5FF,#F3EBFF 58%,#FFF1F8)!important;
+}
+#main-content.appearance-pink:not(.dino-theme):not(.baby-mode) .pl-unified-page-hero{
+  background:
+    radial-gradient(circle at 82% 22%,#FFD7E8 0 13%,transparent 29%),
+    radial-gradient(circle at 20% 22%,#FFF9FC 0 16%,transparent 34%),
+    linear-gradient(145deg,#FFF1F7,#FFE5F0 58%,#F5E8FF)!important;
+}
+#main-content.appearance-meadow:not(.dino-theme):not(.baby-mode) .pl-unified-page-hero{
+  background:
+    radial-gradient(circle at 83% 20%,#FFF6C9 0 7%,transparent 16%),
+    radial-gradient(circle at 78% 72%,#D4F1E0 0 17%,transparent 36%),
+    linear-gradient(145deg,#F5FFF9,#E9F8F0 58%,#EDF6FF)!important;
+}
+#main-content.appearance-peach:not(.dino-theme):not(.baby-mode) .pl-unified-page-hero{
+  background:
+    radial-gradient(circle at 82% 20%,#FFDABF 0 14%,transparent 31%),
+    radial-gradient(circle at 18% 22%,#FFF7D9 0 12%,transparent 28%),
+    linear-gradient(145deg,#FFF7EF,#FFE9D8 58%,#FFE6E9)!important;
+}
+#main-content.appearance-strawberry:not(.dino-theme):not(.baby-mode) .pl-unified-page-hero{
+  background:
+    radial-gradient(circle at 84% 22%,#FFC4D8 0 13%,transparent 30%),
+    radial-gradient(circle at 74% 72%,#FFE6ED 0 18%,transparent 38%),
+    linear-gradient(145deg,#FFF5F8,#FFE1EB 58%,#F8E7FF)!important;
+}
+#main-content.appearance-soft-light:not(.dino-theme):not(.baby-mode) .pl-unified-page-hero{
+  background:
+    radial-gradient(circle at 82% 18%,#FFF3C4 0 6%,transparent 15%),
+    radial-gradient(circle at 76% 75%,#DDEBFF 0 18%,transparent 38%),
+    linear-gradient(145deg,#F8FCFF,#EAF4FF 56%,#F4EDFF)!important;
+}
+#main-content.appearance-twilight:not(.dino-theme):not(.baby-mode) .pl-unified-page-hero{
+  background:
+    radial-gradient(circle at 80% 20%,#FFE37D 0 8%,transparent 9%),
+    radial-gradient(circle at 80% 20%,#FFF0AD 0 12%,transparent 18%),
+    radial-gradient(circle at 18% 24%,rgba(255,255,255,.11) 0 15%,transparent 32%),
+    linear-gradient(180deg,#191E4D,#292D70 55%,#4C408C)!important;
+}
+#main-content.appearance-twilight:not(.dino-theme):not(.baby-mode) .pl-unified-page-hero:after{
+  content:"✦  ★  ☾"!important;color:#FFD96F!important;opacity:.88!important;
 }
