@@ -214,14 +214,19 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
         </label>
       </Card>
       <Card>
-        <div style={{ fontSize: 11.5, fontWeight: 900, color: "#745D81" }}>AMBIENT THEME</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 7, marginTop: 8 }}>
+        <div style={{ fontSize: 11.5, fontWeight: 900, color: "#745D81" }}>THEMES</div>
+        <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#8A7895" }}>Same PlushLife layout, a different cozy little world.</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8, marginTop: 10 }}>
           {APPEARANCE_THEMES.map((theme) => {
             const selected = appearanceTheme === theme.id;
-            return <button key={theme.id} type="button" onClick={() => selectAppearanceTheme(theme.id)} aria-pressed={selected} style={{ padding: "10px 6px", borderRadius: 11, border: selected ? "2px solid #9660AF" : "1px solid #DED2E3", background: selected ? "#F7EEFA" : "white", color: "#695474", fontWeight: 900, cursor: "pointer" }}>{theme.icon} {theme.label}</button>;
+            return <button key={theme.id} type="button" onClick={() => selectAppearanceTheme(theme.id)} aria-pressed={selected} style={{ position: "relative", overflow: "hidden", padding: 0, minHeight: 94, borderRadius: 16, border: selected ? `2px solid ${theme.accent}` : "1px solid #E4D8E8", background: theme.background, color: theme.ink || "#695474", fontWeight: 900, cursor: "pointer", boxShadow: selected ? `0 7px 18px ${theme.accent}33` : "0 4px 12px rgba(96,62,108,.05)" }}>
+              <span aria-hidden="true" style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 18% 18%,${theme.glowA} 0%,transparent 48%),radial-gradient(circle at 82% 18%,${theme.glowB} 0%,transparent 48%),radial-gradient(circle at 75% 88%,${theme.glowC} 0%,transparent 52%)` }} />
+              <span aria-hidden="true" style={{ position: "relative", display: "grid", placeItems: "center", minHeight: 61, fontSize: 29, filter: "drop-shadow(0 4px 8px rgba(73,47,88,.10))" }}>{theme.icon}</span>
+              <span style={{ position: "relative", display: "block", padding: "6px 4px 8px", background: "rgba(255,255,255,.68)", borderTop: "1px solid rgba(255,255,255,.62)", fontSize: 10.5 }}>{theme.label}{selected ? " ✓" : ""}</span>
+            </button>;
           })}
         </div>
-        <ToggleRow checked={preferences.nickname_style === "baby"} onChange={(event) => updatePreference({ nickname_style: event.target.checked ? "baby" : "warm", dino_theme: event.target.checked ? false : preferences.dino_theme })} title="🍼 Baby Mode" description="Bigger words, rounder controls, and candy-soft decoration. Your tasks and progress do not change." />
+        <ToggleRow checked={preferences.nickname_style === "baby"} onChange={(event) => updatePreference({ nickname_style: event.target.checked ? "baby" : "warm", dino_theme: event.target.checked ? false : preferences.dino_theme })} title="🍼 Baby Mode" description="The same PlushLife, made extra soft: gentler wording, bigger cozy controls, bedtime stars, and comfort-first cards. Your tasks and progress never change." />
         <BabyModeExplainer />
         {preferences.nickname_style === "baby" && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, padding: "8px 0 2px" }}>
@@ -229,7 +234,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
             <button type="button" onClick={() => updatePreference({ baby_voice: "fatherly" })} style={{ ...secondaryButton, border: preferences.baby_voice === "fatherly" ? "2px solid #4C8FE8" : secondaryButton.border }}>👨 Fatherly voice</button>
           </div>
         )}
-        <ToggleRow checked={dinoTheme} onChange={(event) => updatePreference({ dino_theme: event.target.checked, nickname_style: event.target.checked ? "warm" : preferences.nickname_style })} title="🦕 Dino Theme" description="Friendly dinosaur decorations on the cozy theme." />
+        <ToggleRow checked={dinoTheme} onChange={(event) => updatePreference({ dino_theme: event.target.checked, nickname_style: event.target.checked ? "warm" : preferences.nickname_style })} title="🦕 Dino Theme" description="The illustrated dinosaur world from the PlushLife reference: garden scenes, soft clouds, stars, plants, and dino companions." />
       </Card>
     </>
   );
