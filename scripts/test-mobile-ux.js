@@ -49,7 +49,7 @@ const checks = [
   [today.includes('onClick={() => setSettingsOpen?.(true)}') && app.includes('onClick={() => setSettingsOpen(true)} aria-label="Settings"'), "gear controls open Settings"],
   [app.includes('onClick={() => setCollectionOpen(true)} aria-label="Open rewards"') && app.includes('<RewardsPanel open={collectionOpen}'), "bottom Plush button opens Rewards"],
   [progress.includes('className="pl-growth-weekbar"') && progress.includes('role="progressbar"') && progress.includes("props.weeklyOverallPct"), "Progress shows the current weekly progress bar"],
-  [today.includes('aria-label="Tasks today"') && today.includes("function TasksToday") && today.includes("TASKS TODAY"), "Home includes a dedicated Today tasks section"],
+  [today.includes('aria-label="Tasks today"') && today.includes("function TasksToday") && today.includes("little tasks"), "Home includes a dedicated Today tasks section"],
   [today.includes("function isHabitRow") && today.includes("!isHabitRow(row)") && today.includes("rows.filter(isHabitRow)"), "Home separates regular tasks from habits instead of mixing them"],
   [app.includes(".pl-unified-page-hero{position:relative;overflow:visible") && app.includes("min-height:0;border-radius:0;background:transparent;border:0;box-shadow:none"), "non-Home page headers stay compact and do not become giant title cards"],
   [progress.includes('className="pl-growth-highlight-row"') && !progress.includes('✨ THIS WEEK’S LITTLE WINS</div>\n        <div className="pl-growth-heading">PlushGrowth'), "Progress avoids duplicating the page title in another card"],

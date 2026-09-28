@@ -35,10 +35,10 @@ const C = {
 };
 
 const card = {
-  borderRadius: 22,
-  border: `1px solid ${C.line}`,
+  borderRadius: 26,
+  border: "2px solid #F3DDF2",
   background: C.card,
-  boxShadow: "0 8px 26px rgba(101,63,115,.045)",
+  boxShadow: "0 10px 24px rgba(190,120,200,.10)",
   backdropFilter: "blur(14px)",
 };
 
@@ -110,7 +110,7 @@ function OneTinyThing({ nextStepTask, nextStepReason, nextStepHint, toggle, pick
   return (
     <section data-plushlife-compact-card="next-step" id="plushlife-smart-next-step" style={{...card, padding: "15px 17px 16px"}} aria-label="Today's gentle pick">
       <div className="pl-section-topline">
-        <div className="pl-kicker">✦ &nbsp;TODAY&rsquo;S GENTLE PICK</div>
+        <div className="pl-kicker">✦ &nbsp;Today&rsquo;s gentle pick</div>
         <div className="pl-muted-note">{nextStepReason || "Rebuilding gently · Good fit right now"}</div>
       </div>
       <div className="pl-primary-task">{nextStepTask.sourceTask && <HabitTypeIcon task={nextStepTask.sourceTask} />}{nextStepTask.label}</div>
@@ -152,7 +152,7 @@ function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = []
   return (
     <section data-plushlife-home-schedule-preview="true" style={{...card, padding: "15px 17px 16px"}} aria-label="Today schedule">
       <div className="pl-section-topline">
-        <div className="pl-kicker">🗓️ &nbsp;TODAY</div>
+        <div className="pl-kicker">🗓️ &nbsp;Today&rsquo;s plan</div>
         <button type="button" className="pl-link-btn" onClick={() => setManageSchedule?.(!manageSchedule)}>Edit schedule →</button>
       </div>
       <div className="pl-list">
@@ -225,7 +225,7 @@ function TasksToday({ rows = [], viewDone = {}, toggle, openTaskManager, period 
   return (
     <section style={{...card, padding: "15px 17px 16px"}} aria-label="Tasks today">
       <div className="pl-section-topline">
-        <div className="pl-kicker">✓ &nbsp;TASKS TODAY · {completed} / {taskRows.length}</div>
+        <div className="pl-kicker">🧸 &nbsp;Today&rsquo;s little tasks · {completed}/{taskRows.length}</div>
         <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)}>View all →</button>
       </div>
       <div className="pl-list">
@@ -253,7 +253,7 @@ function Habits({ rows = [], viewDone = {}, toggle, openTaskManager, period }) {
   return (
     <section style={{...card, padding: "15px 17px 16px"}} aria-label="Habits today">
       <div className="pl-section-topline">
-        <div className="pl-kicker">🌱 &nbsp;HABITS · {completed} / {habitRows.length}</div>
+        <div className="pl-kicker">🌱 &nbsp;Little habits · {completed}/{habitRows.length}</div>
         <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)}>View all →</button>
       </div>
       <div className="pl-list">
@@ -301,12 +301,13 @@ export function TodayPanel({
         .pl-home-brand{left:24px;top:20px}.pl-home-logo{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:900;font-size:31px;line-height:1;color:#4A235F;letter-spacing:-1.6px}.pl-home-logo span,.pl-home-copy h1 span{color:#DB72B4}.pl-home-tagline{margin-top:7px;font-size:13px;font-weight:700;color:#785F85}
         .pl-home-actions{right:18px;top:18px;display:flex;align-items:center;gap:10px}.pl-home-date{appearance:none;cursor:pointer;padding:11px 15px;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid rgba(234,214,238,.9);font-weight:800;color:#5B3D70}.pl-home-settings{width:45px;height:45px;border:0;border-radius:50%;background:rgba(255,255,255,.72);color:#765684;font-size:21px;cursor:pointer}.pl-home-timer{width:45px;height:45px;border:1px solid rgba(228,207,240,.95);border-radius:50%;background:linear-gradient(135deg,#C75EDB,#D97DDC);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 6px 16px rgba(166,93,193,.32);display:grid;place-items:center}
         .pl-home-copy{left:24px;bottom:24px;width:50%;}.pl-home-copy h1{margin:0;font-size:29px;line-height:1.08;color:#402456;font-weight:950;letter-spacing:-1px}.pl-home-copy p{margin:8px 0 0;font-size:14.5px;line-height:1.38;color:#60486F;font-weight:650}
-        .pl-home-plush{right:4px;bottom:-2px;width:43%;height:64%;display:flex;align-items:flex-end;justify-content:center}.pl-home-plush img{position:relative;z-index:3;width:min(180px,78%);max-height:164px;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(73,39,87,.12))}.pl-home-pillow{position:absolute;border-radius:50%;background:radial-gradient(circle at 40% 35%,#FCEBED,#EEDAF5 58%,#D9C2E6);box-shadow:inset 0 0 38px rgba(255,255,255,.72)}.pl-pillow-one{right:-10px;bottom:-32px;width:268px;height:170px;transform:rotate(-7deg)}.pl-pillow-two{right:80px;bottom:-18px;width:185px;height:118px;transform:rotate(9deg);opacity:.9}.pl-mini-plush{position:absolute;z-index:4;left:26%;bottom:31px;font-size:42px;transform:rotate(-9deg);filter:drop-shadow(0 4px 5px rgba(90,57,102,.16))}
+        @keyframes plushlife-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+        .pl-home-plush{right:4px;bottom:-2px;width:43%;height:64%;display:flex;align-items:flex-end;justify-content:center;animation:plushlife-float 4.5s ease-in-out infinite}.pl-home-plush img{position:relative;z-index:3;width:min(180px,78%);max-height:164px;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(73,39,87,.12))}.pl-home-pillow{position:absolute;border-radius:50%;background:radial-gradient(circle at 40% 35%,#FCEBED,#EEDAF5 58%,#D9C2E6);box-shadow:inset 0 0 38px rgba(255,255,255,.72)}.pl-pillow-one{right:-10px;bottom:-32px;width:268px;height:170px;transform:rotate(-7deg)}.pl-pillow-two{right:80px;bottom:-18px;width:185px;height:118px;transform:rotate(9deg);opacity:.9}.pl-mini-plush{position:absolute;z-index:4;left:26%;bottom:31px;font-size:42px;transform:rotate(-9deg);filter:drop-shadow(0 4px 5px rgba(90,57,102,.16))}
         .pl-home-bubble{right:12px;bottom:9px;padding:8px 11px;border-radius:18px;background:rgba(255,255,255,.92);border:1px solid rgba(233,216,237,.9);color:#5A4271;font-size:12px;font-weight:700;line-height:1.35}
-        .pl-section-topline{display:flex;align-items:center;justify-content:space-between;gap:12px}.pl-kicker{font-size:12px;letter-spacing:.13em;font-weight:950;color:#B44CC7}.pl-muted-note{font-size:10.5px;color:#90709A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pl-primary-task{margin-top:7px;font-size:17.5px;line-height:1.25;font-weight:950;color:#3E2458;letter-spacing:-.25px}.pl-action-row{display:flex;gap:8px;margin-top:11px}.pl-btn,.pl-more{min-height:44px;border-radius:14px;font-weight:900;cursor:pointer}.pl-btn{padding:9px 13px;border:1px solid ${C.line};font-size:13px}.pl-btn-primary{flex:1.05;border:0;color:white;background:linear-gradient(135deg,#C75EDB,#D97DDC);box-shadow:0 8px 18px rgba(190,92,203,.2)}.pl-btn-ghost{flex:.9;background:white;color:#A452BD}.pl-more{width:50px;border:1px solid ${C.line};background:white;color:#9D61B1;font-size:16px}.pl-more-row{display:flex;gap:8px;margin-top:8px}.pl-more-row button{padding:7px 10px;border-radius:10px;border:1px solid ${C.line};background:white;color:#8B6797;font-weight:800}.pl-easier-hint{margin-top:8px;padding:8px 10px;border-radius:10px;background:#FBF6FC;color:#795D86;font-size:12px}
-        .pl-link-btn{border:0;background:transparent;color:#B44CC7;font-weight:900;cursor:pointer;font-size:12px}.pl-list{display:grid;gap:7px;margin-top:11px}.pl-list-row{min-height:44px;border-radius:15px;border:1px solid ${C.line2};background:rgba(255,255,255,.80);display:flex;align-items:center;gap:9px;padding:7px 10px}.pl-schedule-row{display:grid;grid-template-columns:82px 26px minmax(0,1fr) 14px}.pl-note-row{display:grid;grid-template-columns:28px minmax(0,1fr)}.pl-time{font-size:15px;font-weight:950;color:#B34CC8}.pl-row-icon{font-size:18px;text-align:center}.pl-row-text{min-width:0;color:#49385A;font-size:13.5px;font-weight:750;line-height:1.3;text-align:left}.pl-chevron{font-size:21px;color:#C783D6}.pl-habit-row{width:100%;cursor:pointer}.pl-check{width:24px;height:24px;border-radius:8px;border:2px solid #DEA8D9;background:white;flex:0 0 auto}
-        .pl-home-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pl-shortcut{min-height:64px;border-radius:20px;border:1px solid ${C.line};background:rgba(255,255,255,.86);display:flex;align-items:center;gap:11px;padding:11px 13px;text-align:left;cursor:pointer}.pl-shortcut-icon{font-size:26px}.pl-shortcut-title{font-size:14px;font-weight:950;color:#3F2755}.pl-shortcut-sub{margin-top:2px;font-size:11.5px;color:#9A75A4}.pl-shortcut-arrow{margin-left:auto;font-size:22px;color:#A660B9}
-        .pl-noticed{min-height:58px;border-radius:20px;border:1px solid ${C.line};background:linear-gradient(135deg,#FCF5FF,#F6ECFB);display:flex;align-items:center;gap:10px;padding:10px 14px}.pl-noticed-icon{font-size:28px}.pl-noticed-title{font-weight:950;color:#6C347E;font-size:13px}.pl-noticed-copy{margin-top:2px;color:#90709A;font-size:11.5px}.pl-noticed-arrow{margin-left:auto;color:#A65DBA;font-size:22px}
+        .pl-section-topline{display:flex;align-items:center;justify-content:space-between;gap:12px}.pl-kicker{font-size:12.5px;letter-spacing:.05em;font-weight:900;color:#C05BD1}.pl-muted-note{font-size:10.5px;color:#90709A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pl-primary-task{margin-top:7px;font-size:17.5px;line-height:1.25;font-weight:950;color:#3E2458;letter-spacing:-.25px}.pl-action-row{display:flex;gap:8px;margin-top:11px}.pl-btn,.pl-more{min-height:44px;border-radius:999px;font-weight:900;cursor:pointer}.pl-btn{padding:9px 13px;border:1px solid ${C.line};font-size:13px}.pl-btn-primary{flex:1.05;border:0;color:white;background:linear-gradient(135deg,#C75EDB,#D97DDC);box-shadow:0 8px 18px rgba(190,92,203,.2),0 3px 0 #A34DB4;transition:transform .08s ease,box-shadow .08s ease}.pl-btn-primary:active{transform:translateY(2px);box-shadow:0 4px 10px rgba(190,92,203,.18),0 1px 0 #A34DB4}.pl-btn-ghost{flex:.9;background:white;color:#A452BD}.pl-more{width:50px;border-radius:50%;border:1px solid ${C.line};background:white;color:#9D61B1;font-size:16px}.pl-more-row{display:flex;gap:8px;margin-top:8px}.pl-more-row button{padding:7px 10px;border-radius:10px;border:1px solid ${C.line};background:white;color:#8B6797;font-weight:800}.pl-easier-hint{margin-top:8px;padding:8px 10px;border-radius:10px;background:#FBF6FC;color:#795D86;font-size:12px}
+        .pl-link-btn{border:0;background:transparent;color:#B44CC7;font-weight:900;cursor:pointer;font-size:12px}.pl-list{display:grid;gap:8px;margin-top:11px}.pl-list-row{min-height:44px;border-radius:20px;border:2px solid #F3DDF2;background:rgba(255,255,255,.86);display:flex;align-items:center;gap:9px;padding:8px 12px;box-shadow:0 4px 12px rgba(190,120,200,.06)}.pl-schedule-row{display:grid;grid-template-columns:86px 26px minmax(0,1fr) 14px}.pl-note-row{display:grid;grid-template-columns:28px minmax(0,1fr)}.pl-time{font-size:12.5px;font-weight:950;color:#A63DBD;background:#FBE7FA;border-radius:999px;padding:5px 8px;text-align:center;white-space:nowrap}.pl-row-icon{font-size:18px;text-align:center}.pl-row-text{min-width:0;color:#49385A;font-size:13.5px;font-weight:750;line-height:1.3;text-align:left}.pl-chevron{font-size:21px;color:#C783D6}.pl-habit-row{width:100%;cursor:pointer}.pl-check{width:24px;height:24px;border-radius:50%;border:2px solid #DEA8D9;background:white;flex:0 0 auto;box-shadow:inset 0 2px 4px rgba(190,120,200,.12)}
+        .pl-home-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pl-shortcut{min-height:64px;border-radius:24px;border:2px solid #F3DDF2;background:rgba(255,255,255,.88);display:flex;align-items:center;gap:11px;padding:11px 13px;text-align:left;cursor:pointer;box-shadow:0 6px 16px rgba(190,120,200,.07)}.pl-shortcut-icon{font-size:26px}.pl-shortcut-title{font-size:14px;font-weight:950;color:#3F2755}.pl-shortcut-sub{margin-top:2px;font-size:11.5px;color:#9A75A4}.pl-shortcut-arrow{margin-left:auto;font-size:22px;color:#A660B9}
+        .pl-noticed{min-height:58px;border-radius:24px;border:2px solid #F3DDF2;background:linear-gradient(135deg,#FCF5FF,#F6ECFB);display:flex;align-items:center;gap:10px;padding:10px 14px;box-shadow:0 6px 16px rgba(190,120,200,.07)}.pl-noticed-icon{font-size:28px}.pl-noticed-title{font-weight:950;color:#6C347E;font-size:13px}.pl-noticed-copy{margin-top:2px;color:#90709A;font-size:11.5px}.pl-noticed-arrow{margin-left:auto;color:#A65DBA;font-size:22px}
         #plushlife-next-step-reason,#plushlife-tomorrow-setup,#plushlife-adaptive-capacity-card{display:none!important}
         .pl-home-plush .plush-mascot{position:relative;z-index:3;filter:drop-shadow(0 10px 14px rgba(73,39,87,.12))}
         .appearance-twilight .pl-home-hero,.appearance-meadow .pl-home-hero{
@@ -338,9 +339,9 @@ export function TodayPanel({
           .pl-section-topline{align-items:center;gap:5px}.pl-kicker{font-size:9px;letter-spacing:.08em}.pl-muted-note{display:none}
           [data-plushlife-compact-card="next-step"]{padding:8px 9px 9px!important}
           .pl-primary-task{font-size:13.5px;margin-top:3px;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-          .pl-action-row{gap:4px;margin-top:6px}.pl-btn,.pl-more{min-height:32px;border-radius:9px}.pl-btn{padding:5px 6px;font-size:9.5px}.pl-btn-primary{flex:1.08}.pl-btn-ghost{flex:.86}.pl-more{width:34px;font-size:12px}
+          .pl-action-row{gap:4px;margin-top:6px}.pl-btn,.pl-more{min-height:32px;border-radius:999px}.pl-btn{padding:5px 6px;font-size:9.5px}.pl-btn-primary{flex:1.08}.pl-btn-ghost{flex:.86}.pl-more{width:34px;font-size:12px}
           [data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Tasks today"],.pl-home-shell>section[aria-label="Habits today"]{padding:8px 9px 9px!important}
-          .pl-list{margin-top:6px;gap:3px}.pl-list-row{min-height:32px;padding:4px 6px;border-radius:9px}.pl-schedule-row{grid-template-columns:53px 16px minmax(0,1fr) 8px}.pl-note-row{grid-template-columns:16px minmax(0,1fr)}.pl-time{font-size:10px}.pl-row-icon{font-size:12px}.pl-row-text{font-size:10.5px;line-height:1.16}.pl-chevron{font-size:13px}.pl-check{width:17px;height:17px;border-radius:5px}
+          .pl-list{margin-top:6px;gap:3px}.pl-list-row{min-height:32px;padding:4px 6px;border-radius:14px}.pl-schedule-row{grid-template-columns:53px 16px minmax(0,1fr) 8px}.pl-note-row{grid-template-columns:16px minmax(0,1fr)}.pl-time{font-size:10px}.pl-row-icon{font-size:12px}.pl-row-text{font-size:10.5px;line-height:1.16}.pl-chevron{font-size:13px}.pl-check{width:17px;height:17px;border-radius:50%}
           .pl-home-shortcuts{gap:4px}.pl-shortcut{min-height:44px;padding:6px 7px;border-radius:11px}.pl-shortcut-icon{font-size:16px}.pl-shortcut-title{font-size:10px}.pl-shortcut-sub{font-size:8.2px}.pl-shortcut-arrow{font-size:13px}
           .pl-noticed{min-height:38px;border-radius:11px;padding:6px 7px}.pl-noticed-icon{font-size:16px}.pl-noticed-title{font-size:9.5px}.pl-noticed-copy{font-size:8.5px}.pl-noticed-arrow{font-size:13px}
           [data-plushlife-compact-card="next-step"],[data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Tasks today"],.pl-home-shell>section[aria-label="Habits today"]{border-radius:13px!important;box-shadow:0 3px 10px rgba(86,54,98,.035)!important}
