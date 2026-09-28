@@ -63,22 +63,22 @@ if (typeof document !== "undefined" && !document.getElementById("plushlife-mobil
     .pl-tool-body details[open]>summary{color:#74417F!important}
 
     /* Older utility screens inherit the same cozy card treatment without changing their behavior. */
-    [aria-label="Change my tasks"] .pl-tool-body>div>div,
-    [aria-label="Rewards"] .pl-tool-body>div>div,
+    [aria-label="🌷 Add & organize"] .pl-tool-body>div>div,
+    [aria-label="🧸 Plush & Keepsakes"] .pl-tool-body>div>div,
     [aria-label="Guardian"] .pl-tool-body>div>div,
     [aria-label="My Guardians"] .pl-tool-body>div>div{
       border-color:var(--pl-line)!important;
       box-shadow:var(--pl-shadow)!important;
     }
-    [aria-label="Change my tasks"] .pl-tool-body>div>div{
+    [aria-label="🌷 Add & organize"] .pl-tool-body>div>div{
       border-radius:18px!important;
     }
-    [aria-label="Rewards"] .pl-tool-body>div>div{
+    [aria-label="🧸 Plush & Keepsakes"] .pl-tool-body>div>div{
       border-radius:20px!important;
     }
 
-    [aria-label="Change my tasks"] .pl-tool-body button[aria-pressed="true"],
-    [aria-label="Rewards"] .pl-tool-body button[aria-pressed="true"],
+    [aria-label="🌷 Add & organize"] .pl-tool-body button[aria-pressed="true"],
+    [aria-label="🧸 Plush & Keepsakes"] .pl-tool-body button[aria-pressed="true"],
     [aria-label="Settings"] .pl-tool-body button[aria-pressed="true"]{
       border-color:#C779D3!important;background:linear-gradient(145deg,#FFF3FB,#F1E9FF)!important;color:#74417F!important;
     }
