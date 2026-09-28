@@ -2,8 +2,9 @@
 // docs/module-split-plan.md).
 const { useState } = React;
 
-export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, setShowSignIn, sendSignInLink, verifySignInCode, signInMessage, codeCooldown, password, setPassword, showPasswordField, setShowPasswordField, signInWithPassword }) {
-  const colors = { bg: "#FFF8FC", plum: "#4A3A5C", soft: "#8574A0", orchid: "#B95FCE", mint: "#3FC7A6", amber: "#F2A93B", line: "#F0D9EE" };
+// The interactive demo, extracted as a local helper so it renders immediately
+// below the hero instead of several sections down.
+function LandingDemo({ colors }) {
   const demoTasks = [
     ["💧", "Drink some water"],
     ["🦷", "Brush my teeth"],
@@ -25,6 +26,56 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
     setDemoDone(demoTasks.map(() => false));
     setDemoCelebrating(false);
   };
+  return (
+    <section className="landing-detail-section" aria-label="Interactive PlushLife demo" style={{ padding: "10px 20px 44px", display: "grid", justifyItems: "center" }}>
+      <div style={{ textAlign: "center", marginBottom: 14 }}>
+        <h2 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 24, fontWeight: 800, margin: 0 }}>Try a tiny PlushLife <span aria-hidden="true">💛</span></h2>
+        <div style={{ marginTop: 3, color: colors.soft, fontSize: 13.5 }}>Tap the sample tasks. This demo doesn’t save anything.</div>
+      </div>
+      <div style={{ width: "min(100%, 390px)", background: "#FFFFFFEE", borderRadius: 32, padding: 14, boxSizing: "border-box", boxShadow: "0 22px 55px -22px rgba(90,50,110,.3)", border: `1px solid ${colors.line}` }}>
+        <div style={{ position: "relative", overflow: "hidden", background: "linear-gradient(160deg,#FDECFA,#E8F8F2 60%,#FFF6E2)", borderRadius: 22, padding: "18px 16px", minHeight: 340 }}>
+          {demoCelebrating && (
+            <div role="status" aria-live="polite" style={{ position: "absolute", inset: 0, zIndex: 3, display: "grid", placeItems: "center", padding: 18, background: "rgba(255,250,253,.93)", textAlign: "center", animation: "demoPop .45s ease-out" }}>
+              <div>
+                <div aria-hidden="true" style={{ fontSize: 54, animation: "demoSparkle .8s ease-in-out infinite" }}>🧸✨</div>
+                <div style={{ marginTop: 4, fontFamily: "'Baloo 2',sans-serif", fontSize: 25, fontWeight: 800, color: colors.orchid }}>You finished the demo!</div>
+                <div style={{ marginTop: 4, color: colors.soft, fontSize: 13, lineHeight: 1.45 }}>That’s how a completed PlushLife day feels—warm progress, no pressure.</div>
+                <button type="button" onClick={resetDemo} style={{ marginTop: 13, padding: "10px 17px", borderRadius: 999, border: 0, background: colors.orchid, color: "white", fontWeight: 900, cursor: "pointer" }}>Try it again</button>
+              </div>
+            </div>
+          )}
+          <div style={{ display: "flex", alignItems: "end", justifyContent: "space-between", gap: 10 }}>
+            <div>
+              <div style={{ fontSize: 9, letterSpacing: ".18em", color: colors.soft, fontWeight: 800 }}>DEMO DAILY LIST</div>
+              <div style={{ fontSize: 18, fontWeight: 900, marginTop: 3 }}>A gentle little day ✨</div>
+            </div>
+            <div style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 19, fontWeight: 800, color: colors.orchid }}>{demoPercent}%</div>
+          </div>
+          <div role="progressbar" aria-label="Demo progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={demoPercent} style={{ height: 10, background: "white", borderRadius: 6, overflow: "hidden", margin: "11px 0 13px", border: `1px solid ${colors.line}` }}>
+            <div style={{ height: "100%", width: `${demoPercent}%`, background: `linear-gradient(90deg,${colors.orchid},${colors.mint})`, transition: "width .3s ease" }}/>
+          </div>
+          {demoTasks.map(([icon, label], index) => {
+            const done = demoDone[index];
+            return (
+              <button key={label} type="button" className="landing-demo-task" aria-pressed={done} onClick={() => toggleDemoTask(index)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 9, background: done ? "#F3FFF9" : "white", border: `1px solid ${done ? "#9EDFCF" : colors.line}`, borderRadius: 12, padding: "10px", marginBottom: 7, fontFamily: "inherit", fontSize: 13, fontWeight: 800, color: done ? colors.soft : colors.plum, textAlign: "left", textDecoration: done ? "line-through" : "none", cursor: "pointer", transition: "transform .15s ease,border-color .15s ease,background .2s ease" }}>
+                <span aria-hidden="true" style={{ fontSize: 18 }}>{icon}</span>
+                <span style={{ width: 20, height: 20, flex: "0 0 auto", borderRadius: 7, border: `2px solid ${done ? colors.mint : "#D8BBD8"}`, background: done ? colors.mint : "transparent", color: "white", display: "grid", placeItems: "center", fontSize: 12 }}>{done ? "✓" : ""}</span>
+                <span>{label}</span>
+              </button>
+            );
+          })}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 10 }}>
+            <div style={{ color: colors.soft, fontSize: 11.5, fontWeight: 700 }}>{demoCompleted}/{demoTasks.length} gentle steps complete</div>
+            {demoCompleted > 0 && <button type="button" onClick={resetDemo} style={{ padding: "6px 10px", borderRadius: 999, border: `1px solid ${colors.line}`, background: "white", color: colors.soft, fontWeight: 800, cursor: "pointer" }}>Reset</button>}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, setShowSignIn, sendSignInLink, verifySignInCode, signInMessage, codeCooldown, password, setPassword, showPasswordField, setShowPasswordField, signInWithPassword }) {
+  const colors = { bg: "#FFF8FC", plum: "#4A3A5C", soft: "#8574A0", orchid: "#B95FCE", mint: "#3FC7A6", amber: "#F2A93B", line: "#F0D9EE" };
   return (
     <div className="plushlife-landing-root" style={{ minHeight: "100vh", background: colors.bg, backgroundImage: "radial-gradient(circle at 6% 8%, #FCE1F3 0%, transparent 38%), radial-gradient(circle at 96% 4%, #D8F3EC 0%, transparent 38%), radial-gradient(circle at 90% 92%, #FDF0D6 0%, transparent 42%)", color: colors.plum, fontFamily: "'Nunito','Segoe UI',sans-serif" }}>
       <style>{`
@@ -83,26 +134,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         {showSignIn && (
           <div style={{ maxWidth: 660, margin: "22px auto 0", padding: 16, borderRadius: 18, background: "rgba(255,255,255,.86)", border: `1px solid ${colors.line}`, boxShadow: "0 18px 38px -24px rgba(90,50,110,.35)" }}>
             <div style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 20, fontWeight: 800 }}>Create or open your private tracker</div>
-            <div style={{ marginTop: 3, fontSize: 13, color: colors.soft }}>Choose the level of support that fits you. <strong>Gold is included free for everyone during preview.</strong></div>
-            <div className="landing-tier-grid" aria-label="PlushLife Free and Plush Gold comparison">
-              <div className="landing-tier-card">
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                  <strong style={{ fontSize: 13.5 }}>🧸 PlushLife Free</strong><span style={{ fontSize: 10, fontWeight: 900, color: colors.mint }}>CORE</span>
-                </div>
-                <ul className="landing-tier-list">
-                  <li>✓ Today, habits & tasks</li><li>✓ Focus Habit & check-ins</li><li>✓ Basic reminders & progress</li><li>✓ Baby Mode, Low Screen & care tools</li>
-                </ul>
-              </div>
-              <div className="landing-tier-card gold">
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                  <strong style={{ fontSize: 13.5 }}>✨ Plush Gold</strong><span style={{ padding: "2px 6px", borderRadius: 999, background: "#F2E4F7", color: "#8E4EAA", fontSize: 9.5, fontWeight: 900 }}>FREE PREVIEW</span>
-                </div>
-                <ul className="landing-tier-list">
-                  <li>✓ Everything in Free</li><li>✓ Smarter Next Step intelligence</li><li>✓ Advanced PlushGrowth insights</li><li>✓ Adaptive coaching & recovery patterns</li>
-                </ul>
-              </div>
-            </div>
-            <div style={{ marginTop: 8, fontSize: 11.5, color: colors.soft }}>No payment is required right now. If Gold becomes paid later, the core Free experience will stay available.</div>
+            <div style={{ marginTop: 3, fontSize: 13, color: colors.soft }}>Everything in PlushLife is unlocked for you right now — no tiers, no paywalls, no payment needed.</div>
             <div style={{ marginTop: 11, fontSize: 12.5, color: colors.soft }}>We’ll email you a secure one-time sign-in code.</div>
             <div className="landing-signin-row" style={{ display: "flex", gap: 8, marginTop: 11 }}>
               <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" aria-label="Email address" style={{ flex: 1, minWidth: 0, padding: "11px 12px", borderRadius: 11, border: `1px solid ${colors.line}`, fontSize: 14 }} />
@@ -138,6 +170,8 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
           <ellipse cx="75" cy="168" rx="16" ry="10" fill="#FCEFFB" stroke={colors.orchid} strokeWidth="3"/><ellipse cx="125" cy="168" rx="16" ry="10" fill="#FCEFFB" stroke={colors.orchid} strokeWidth="3"/>
         </svg>
       </section>
+
+      <LandingDemo colors={colors} />
 
       <div aria-label="PlushLife benefits" className="landing-benefit-strip">
         <div className="landing-benefit-pill"><span aria-hidden="true">🌤️</span> Adapts to your energy</div>
@@ -212,51 +246,6 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
         <div style={{ marginTop: 12, textAlign: "center", color: colors.soft, fontSize: 10.5 }}>Illustrative product preview. Watch features and availability may vary by supported device.</div>
       </section>
 
-      <section className="landing-detail-section" aria-label="Interactive PlushLife demo" style={{ padding: "34px 20px 70px", display: "grid", justifyItems: "center" }}>
-        <div style={{ textAlign: "center", marginBottom: 14 }}>
-          <div style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 24, fontWeight: 800 }}>Try a tiny PlushLife 💛</div>
-          <div style={{ marginTop: 3, color: colors.soft, fontSize: 13.5 }}>Tap the sample tasks. This demo doesn’t save anything.</div>
-        </div>
-        <div style={{ width: "min(100%, 390px)", background: "#FFFFFFEE", borderRadius: 32, padding: 14, boxSizing: "border-box", boxShadow: "0 22px 55px -22px rgba(90,50,110,.3)", border: `1px solid ${colors.line}` }}>
-          <div style={{ position: "relative", overflow: "hidden", background: "linear-gradient(160deg,#FDECFA,#E8F8F2 60%,#FFF6E2)", borderRadius: 22, padding: "18px 16px", minHeight: 340 }}>
-            {demoCelebrating && (
-              <div role="status" aria-live="polite" style={{ position: "absolute", inset: 0, zIndex: 3, display: "grid", placeItems: "center", padding: 18, background: "rgba(255,250,253,.93)", textAlign: "center", animation: "demoPop .45s ease-out" }}>
-                <div>
-                  <div aria-hidden="true" style={{ fontSize: 54, animation: "demoSparkle .8s ease-in-out infinite" }}>🧸✨</div>
-                  <div style={{ marginTop: 4, fontFamily: "'Baloo 2',sans-serif", fontSize: 25, fontWeight: 800, color: colors.orchid }}>You finished the demo!</div>
-                  <div style={{ marginTop: 4, color: colors.soft, fontSize: 13, lineHeight: 1.45 }}>That’s how a completed PlushLife day feels—warm progress, no pressure.</div>
-                  <button type="button" onClick={resetDemo} style={{ marginTop: 13, padding: "10px 17px", borderRadius: 999, border: 0, background: colors.orchid, color: "white", fontWeight: 900, cursor: "pointer" }}>Try it again</button>
-                </div>
-              </div>
-            )}
-            <div style={{ display: "flex", alignItems: "end", justifyContent: "space-between", gap: 10 }}>
-              <div>
-                <div style={{ fontSize: 9, letterSpacing: ".18em", color: colors.soft, fontWeight: 800 }}>DEMO DAILY LIST</div>
-                <div style={{ fontSize: 18, fontWeight: 900, marginTop: 3 }}>A gentle little day ✨</div>
-              </div>
-              <div style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 19, fontWeight: 800, color: colors.orchid }}>{demoPercent}%</div>
-            </div>
-            <div aria-label={`${demoPercent}% complete`} style={{ height: 10, background: "white", borderRadius: 6, overflow: "hidden", margin: "11px 0 13px", border: `1px solid ${colors.line}` }}>
-              <div style={{ height: "100%", width: `${demoPercent}%`, background: `linear-gradient(90deg,${colors.orchid},${colors.mint})`, transition: "width .3s ease" }}/>
-            </div>
-            {demoTasks.map(([icon, label], index) => {
-              const done = demoDone[index];
-              return (
-                <button key={label} type="button" className="landing-demo-task" aria-pressed={done} onClick={() => toggleDemoTask(index)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 9, background: done ? "#F3FFF9" : "white", border: `1px solid ${done ? "#9EDFCF" : colors.line}`, borderRadius: 12, padding: "10px", marginBottom: 7, fontFamily: "inherit", fontSize: 13, fontWeight: 800, color: done ? colors.soft : colors.plum, textAlign: "left", textDecoration: done ? "line-through" : "none", cursor: "pointer", transition: "transform .15s ease,border-color .15s ease,background .2s ease" }}>
-                  <span aria-hidden="true" style={{ fontSize: 18 }}>{icon}</span>
-                  <span style={{ width: 20, height: 20, flex: "0 0 auto", borderRadius: 7, border: `2px solid ${done ? colors.mint : "#D8BBD8"}`, background: done ? colors.mint : "transparent", color: "white", display: "grid", placeItems: "center", fontSize: 12 }}>{done ? "✓" : ""}</span>
-                  <span>{label}</span>
-                </button>
-              );
-            })}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 10 }}>
-              <div style={{ color: colors.soft, fontSize: 11.5, fontWeight: 700 }}>{demoCompleted}/{demoTasks.length} gentle steps complete</div>
-              {demoCompleted > 0 && <button type="button" onClick={resetDemo} style={{ padding: "6px 10px", borderRadius: 999, border: `1px solid ${colors.line}`, background: "white", color: colors.soft, fontWeight: 800, cursor: "pointer" }}>Reset</button>}
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section id="landing-features" className="landing-detail-section" style={{ padding: "20px 28px 80px", maxWidth: 1080, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 44 }}>
           <h2 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: "clamp(28px,4vw,38px)", margin: "0 0 10px" }}>Everything soft, in one place</h2>
@@ -272,7 +261,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
             ["💛","Guardian Support","Invite support on your terms","A trusted person can check in and send encouragement. You decide what they can see, and you can pause or remove access anytime."],
           ].map(([icon,tag,title,text]) => (
             <div className="landing-feature-card" key={title} style={{ background: "white", border: `1px solid ${colors.line}`, borderRadius: 24, padding: "27px 26px", boxShadow: "0 12px 30px -18px rgba(90,50,110,.2)" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}><span style={{ fontSize: 34 }}>{icon}</span><span className="landing-feature-tag">{tag}</span></div><h3 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 20, margin: "14px 0 10px" }}>{title}</h3><p style={{ color: colors.soft, fontSize: 14.5, lineHeight: 1.6, margin: 0 }}>{text}</p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}><span aria-hidden="true" style={{ fontSize: 34 }}>{icon}</span><span className="landing-feature-tag">{tag}</span></div><h3 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 20, margin: "14px 0 10px" }}>{title}</h3><p style={{ color: colors.soft, fontSize: 14.5, lineHeight: 1.6, margin: 0 }}>{text}</p>
             </div>
           ))}
         </div>
@@ -327,7 +316,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
           <span aria-hidden="true"> · </span>
           <a href="./legal.html#about" style={{ color: colors.orchid }}>About</a>
           <span aria-hidden="true"> · </span>
-          <a href="./support.html" style={{ color: colors.orchid }}>Support</a>
+          <a href="./support.html" style={{ color: colors.orchid }}>Get support</a>
         </div>
       </footer>
     </div>

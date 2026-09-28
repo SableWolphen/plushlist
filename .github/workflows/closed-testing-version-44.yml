@@ -1,9 +1,11 @@
-name: Production release promotion
+name: Production release promotion (MANUAL ONLY)
+
+# NOTE: this workflow can publish to the Google Play production track.
+# It is intentionally limited to manual dispatch only — never add a push
+# trigger back without an explicit release review.
 
 on:
   workflow_dispatch: {}
-  push:
-    branches: [main]
 
 permissions:
   contents: read

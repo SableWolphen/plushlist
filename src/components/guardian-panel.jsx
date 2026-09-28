@@ -11,11 +11,25 @@
 // as a window global.
 import { ToolPanel } from "./shared.jsx";
 
-export function GuardianPanel({ open, onClose, isGuardianAccount, hasOwnGuardian, supportViewMode, setSupportViewMode, isSupportAdult, selectedSupportName, guardianSupportRequests, supportOwnerId, updateGuardianSupportRequest, pendingSupportInvites, supportPeople, acceptSupportInvitation, declineSupportInvitation, canUseCaretakerDashboard, invitedSupportLinks, loadSupportOwner, loadSupportData, user, supportAchievements, period, ownerIsRestingToday, restDatesSet, todayRequiredDone, supportProgress, activeSupportLink, canViewSupportProgress, canViewSupportTasks, canViewSupportSchedule, canViewSupportMood, supportTrackerTasks = [], supportSchedules = [], supportScheduleExceptions = [], supportMoodSummary, supportProgressView, setSupportProgressView, supportTodayDayLabel, displayedSupportPercent, displayedSupportCompleted, displayedSupportPossible, supportDailyEssentialCompleted, supportDailyEssentialKeys, supportScheduledTodayCompleted, supportScheduledTodayKeys, canSendSupportNotes, newNote, setNewNote, addSupportNote, suggestComfortTool, canAddSupportRewards, rewardTitle, setRewardTitle, rewardDetails, setRewardDetails, rewardTarget, setRewardTarget, rewardTargetPeriod, setRewardTargetPeriod, rewardApprovalRequired, setRewardApprovalRequired, addSupportReward, suggestedTask, setSuggestedTask, suggestedTaskDay, setSuggestedTaskDay, submitTaskSuggestion, inviteEmail, setInviteEmail, inviteSupportAdult, GUARDIAN_ROLE_PRESETS, guardianRolePreset, setGuardianRolePreset, ownedSupportLinks, supportRelationships, setSupportAdultActive, removeSupportAdult, updateCaretakerPermission, updateCareAgreement, supportRequestGuardian, setSupportRequestGuardian, supportRequestType, setSupportRequestType, supportRequestText, setSupportRequestText, sendGuardianSupportRequest, taskSuggestions, suggestionSectionsById, setSuggestionSectionsById, taskSectionsForDay, decideTaskSuggestion, supportMessage, supportRewards, supportWeeklyPercent, supportPercent, updateRewardStatus, supportNotes, setComfortToolOpen, deleteSupportNote }) {
+export function GuardianPanel({ open, onClose, isGuardianAccount, hasOwnGuardian, supportViewMode, setSupportViewMode, isSupportAdult, selectedSupportName, guardianSupportRequests, supportOwnerId, updateGuardianSupportRequest, pendingSupportInvites, supportPeople, acceptSupportInvitation, declineSupportInvitation, canUseCaretakerDashboard, invitedSupportLinks, loadSupportOwner, loadSupportData, user, supportAchievements, period, ownerIsRestingToday, restDatesSet, todayRequiredDone, supportProgress, activeSupportLink, canViewSupportProgress, canViewSupportTasks, canViewSupportSchedule, canViewSupportMood, supportTrackerTasks = [], supportSchedules = [], supportScheduleExceptions = [], supportMoodSummary, supportProgressView, setSupportProgressView, supportTodayDayLabel, displayedSupportPercent, displayedSupportCompleted, displayedSupportPossible, supportDailyEssentialCompleted, supportDailyEssentialKeys, supportScheduledTodayCompleted, supportScheduledTodayKeys, canSendSupportNotes, newNote, setNewNote, addSupportNote, suggestComfortTool, canAddSupportRewards, rewardTitle, setRewardTitle, rewardDetails, setRewardDetails, rewardTarget, setRewardTarget, rewardTargetPeriod, setRewardTargetPeriod, rewardApprovalRequired, setRewardApprovalRequired, addSupportReward, suggestedTask, setSuggestedTask, suggestedTaskDay, setSuggestedTaskDay, submitTaskSuggestion, inviteEmail, setInviteEmail, inviteSupportAdult, GUARDIAN_ROLE_PRESETS, guardianRolePreset, setGuardianRolePreset, ownedSupportLinks, supportRelationships, setSupportAdultActive, removeSupportAdult, updateCaretakerPermission, updateCareAgreement, supportRequestGuardian, setSupportRequestGuardian, supportRequestType, setSupportRequestType, supportRequestText, setSupportRequestText, sendGuardianSupportRequest, taskSuggestions, suggestionSectionsById, setSuggestionSectionsById, taskSectionsForDay, decideTaskSuggestion, supportMessage, supportRewards, supportWeeklyPercent, supportPercent, updateRewardStatus, supportNotes, setComfortToolOpen, deleteSupportNote, onOpenSettings }) {
   if (!open) return null;
   const { DAYS, COMFORT_TOOLS } = window.PlushLifeContent;
   const { formatRelativeTime } = window.PlushLifeHelpers;
   const { daysBetweenDates, dayIdForDate, legacyScheduleToEntries, formatTime12 } = window.PlushLifeSchedule;
+
+  // Pending invitations have no expiry in the schema; derive a gentle age
+  // from created_at so users know how long an invite has been waiting.
+  const formatInviteAge = (iso) => {
+    if (!iso) return "recently";
+    const diffMs = Date.now() - new Date(iso).getTime();
+    if (!Number.isFinite(diffMs) || diffMs < 0) return "recently";
+    const days = Math.floor(diffMs / 86400000);
+    if (days <= 0) {
+      const hours = Math.floor(diffMs / 3600000);
+      return hours <= 0 ? "just now" : `${hours} hour${hours === 1 ? "" : "s"} ago`;
+    }
+    return days === 1 ? "yesterday" : `${days} days ago`;
+  };
   const sharedTaskKeys = new Set([...(supportDailyEssentialKeys || []), ...(supportScheduledTodayKeys || [])]);
   const sharedTodayTasks = (supportTrackerTasks || []).filter((task) => sharedTaskKeys.has(task.task_key));
   const supportDayId = dayIdForDate?.(period.date);
@@ -25,7 +39,7 @@ export function GuardianPanel({ open, onClose, isGuardianAccount, hasOwnGuardian
     ...(supportScheduleExceptions || []).flatMap((item) => (item.entries || []).map((entry) => ({ ...entry, isException: true }))),
   ].sort((a, b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")));
   return (
-          <ToolPanel inline title={isGuardianAccount ? "Guardian" : (supportViewMode === "caretaker" ? "Supporting" : (hasOwnGuardian ? "Guardian" : "Add a Guardian"))} onClose={onClose}>
+          <ToolPanel inline title="Guardian support" onClose={onClose}>
           <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.72)", border: "1px solid #B9DCF6", boxShadow: "0 8px 24px rgba(76,143,232,0.10)" }}>
             {isGuardianAccount && (
               <div style={{ marginBottom: 14, padding: "13px 14px", borderRadius: 14, background: "linear-gradient(135deg,#EAF6F1,#F4FAFF)", border: "1px solid #B9E0D0" }}>
@@ -70,7 +84,7 @@ export function GuardianPanel({ open, onClose, isGuardianAccount, hasOwnGuardian
             )}
             {canUseCaretakerDashboard && (
               <div role="tablist" aria-label="Guardian views" style={{ display: "flex", gap: 6, marginBottom: 14 }}>
-                <button type="button" role="tab" aria-selected={supportViewMode === "mine"} onClick={() => setSupportViewMode("mine")} style={{ flex: 1, padding: "8px 6px", borderRadius: 10, border: supportViewMode === "mine" ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: supportViewMode === "mine" ? "#EAF4FF" : "white", color: "#2D6BB5", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{isGuardianAccount ? "🧸 My Guardians" : "🧸 My Support"}</button>
+                <button type="button" role="tab" aria-selected={supportViewMode === "mine"} onClick={() => setSupportViewMode("mine")} style={{ flex: 1, padding: "8px 6px", borderRadius: 10, border: supportViewMode === "mine" ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: supportViewMode === "mine" ? "#EAF4FF" : "white", color: "#2D6BB5", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>🧸 My Guardians</button>
                 <button type="button" role="tab" aria-selected={supportViewMode === "caretaker"} onClick={() => { setSupportViewMode("caretaker"); if (invitedSupportLinks[0]) loadSupportOwner(invitedSupportLinks[0].owner_user_id); }} style={{ flex: 1, padding: "8px 6px", borderRadius: 10, border: supportViewMode === "caretaker" ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: supportViewMode === "caretaker" ? "#EAF4FF" : "white", color: "#2D6BB5", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>💛 People I Support</button>
               </div>
             )}
@@ -263,7 +277,9 @@ export function GuardianPanel({ open, onClose, isGuardianAccount, hasOwnGuardian
                           )}
                         </div>
                       )}
-                      {!pending && <div style={{ marginTop: 4, fontSize: 10.5, color: "#8C6B9E" }}>👀 Last checked in: {formatRelativeTime(link.last_viewed_at)}</div>}
+                      {pending && <div style={{ marginTop: 4, fontSize: 11, lineHeight: 1.45, color: "#8C6B9E" }}>Sent {formatInviteAge(link.created_at)}. You can cancel this invitation and send a fresh one anytime.</div>}
+                      {!pending && <div style={{ marginTop: 5, fontSize: 12, fontWeight: 800, color: "#5B3D70" }}>👀 Last checked in: {formatRelativeTime(link.last_viewed_at)}</div>}
+                      {!pending && onOpenSettings && <button type="button" onClick={onOpenSettings} style={{ marginTop: 4, padding: 0, border: 0, background: "transparent", color: "#4C8FE8", fontSize: 11, fontWeight: 800, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 2 }}>Want quieter alerts? Settings → Notifications → Discreet lock-screen wording</button>}
                       <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
                         {!pending && <button onClick={() => setSupportAdultActive(link.id, !link.active)} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #B9DCF6", background: "#F7FBFF", color: "#4C8FE8", fontWeight: 800, cursor: "pointer" }}>{link.active ? "Pause access" : "Resume access"}</button>}
                         <button onClick={() => removeSupportAdult(link.id)} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #F0B8C4", background: "#FFF7F9", color: "#C45D74", fontWeight: 800, cursor: "pointer" }}>{pending ? "Cancel invitation" : "End relationship"}</button>
@@ -290,7 +306,7 @@ export function GuardianPanel({ open, onClose, isGuardianAccount, hasOwnGuardian
                           {[["can_view_progress","Progress"],["can_view_tasks","Today's tasks"],["can_view_schedule","Schedule"],["can_view_mood","Mood summary"],["can_send_notes","Notes"],["can_add_rewards","Rewards"],["can_suggest_tasks","Task suggestions"]].filter(([key]) => link[key]).map(([key,label]) => <span key={key} style={{ padding: "3px 7px", borderRadius: 999, background: "#EEF7FF", color: "#416D98", fontSize: 9.5, fontWeight: 800 }}>{label}</span>)}
                           {![["can_view_progress"],["can_view_tasks"],["can_view_schedule"],["can_view_mood"],["can_send_notes"],["can_add_rewards"],["can_suggest_tasks"]].some(([key]) => link[key]) && <span style={{ fontSize: 10.5, color: "#8C6B9E" }}>Nothing shared right now.</span>}
                         </div>
-                        {!pending && <div style={{ marginTop: 5, fontSize: 9.8, color: "#8C6B9E" }}>Last Guardian view: {formatRelativeTime(link.last_viewed_at)} · Pause access anytime.</div>}
+                        {!pending && <div style={{ marginTop: 5, fontSize: 11, fontWeight: 800, color: "#5B3D70" }}>Last Guardian view: {formatRelativeTime(link.last_viewed_at)} · Pause access anytime.</div>}
                       </div>
                       <label style={{ display: "grid", gap: 5, marginTop: 10, paddingTop: 9, borderTop: "1px solid #D9ECFA", fontSize: 10.5, fontWeight: 900, color: "#4C8FE8" }}>
                         CARE AGREEMENT · WHAT HELPS AND WHAT TO AVOID

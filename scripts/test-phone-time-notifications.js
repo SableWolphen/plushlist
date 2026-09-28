@@ -5,12 +5,12 @@ function read(relativePath) {
   return fs.readFileSync(path.join(__dirname, "..", relativePath), "utf8").replace(/\r\n/g, "\n");
 }
 
-const index = read("index.html");
+const bridge = read("src/native-bridge.js");
 const gentleUi = read("assets/gentle-discovery-ui.js");
 
 const checks = [
-  [index.includes('at.setHours(parts[0], parts[1], 0, 0)'), "daily reminders are built from the phone's local wall-clock hour"],
-  [index.includes('date.setHours(Math.floor(taskAtMinutes / 60), taskAtMinutes % 60, 0, 0)'), "task reminders are built from the phone's local wall-clock hour"],
+  [bridge.includes('at.setHours(parts[0], parts[1], 0, 0)'), "daily reminders are built from the phone's local wall-clock hour"],
+  [bridge.includes('date.setHours(Math.floor(taskAtMinutes / 60), taskAtMinutes % 60, 0, 0)'), "task reminders are built from the phone's local wall-clock hour"],
   [gentleUi.includes('Intl.DateTimeFormat().resolvedOptions().timeZone'), "reminder guard reads the phone IANA timezone"],
   [gentleUi.includes('new Date().getTimezoneOffset()'), "reminder guard tracks the phone UTC offset for DST changes"],
   [gentleUi.includes('plushlife:notification-phone-timezone:v1'), "phone timezone signature is persisted locally"],

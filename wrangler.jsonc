@@ -4,6 +4,10 @@
   "main": "src/worker.js",
   "compatibility_date": "2026-08-06",
   "ai": { "binding": "AI" },
+  // REQUIRED env var (set in the Cloudflare dashboard or via `wrangler secret`):
+  //   OWNER_USER_ID — the auth.users id (immutable UUID) of the profile allowed
+  //   to use /api/mamas-corner. Intentionally not committed to the repo; the
+  //   Worker refuses all requests while it is unset.
   "assets": {
     "directory": "./www"
   }

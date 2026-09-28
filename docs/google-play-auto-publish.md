@@ -16,13 +16,16 @@ publish releases to your app without going through the Play Console UI.
 Treat it like the signing keystore secrets already in this repo — it only
 belongs in GitHub Actions secrets, never committed, never logged.
 
-Given that PlushLife's Android app now loads its content live from GitHub
-Pages (see the `server.url` change in `capacitor.config.json`), you should
-rarely need a new Android release at all — only for native-level changes
+Note: `capacitor.config.json` currently sets no `server.url`, so the Android
+app serves its bundled `www/` build rather than loading live from GitHub
+Pages. Web-content changes therefore only reach the installed app through a
+new Android release (the GitHub Pages and Cloudflare web deployments update
+on their own). A new release is always needed for native-level changes
 (permissions, app icon, splash screen, push notification plumbing, the
-widget). If those are infrequent for you, doing that occasional upload by
-hand may be simpler than maintaining this credential. If you'd rather not set
-this up, just keep using the workflow as-is.
+widget) — and, with the current config, for web changes too. If native-level
+changes are infrequent for you, doing that occasional upload by hand may be
+simpler than maintaining this credential. If you'd rather not set this up,
+just keep using the workflow as-is.
 
 ## Setup steps (one-time)
 

@@ -97,7 +97,7 @@ export function BabyToday({
         <div style={{ minWidth: 0, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
           <div style={{ minWidth: 0, flex: "1 1 auto", overflow: "hidden" }}>
             <div style={{ fontSize: 9.5, letterSpacing: ".12em", fontWeight: 900, color: "#A65DC1" }}>📮 PLUSHWEEK</div>
-            {!weeklyIntentionEditing && <div title={weeklyIntentionText || "Pick one gentle direction for this week"} style={{ display: "block", maxWidth: "100%", marginTop: 2, fontSize: 11.5, lineHeight: 1.3, fontWeight: 800, color: weeklyIntentionText ? "#5B4B6B" : "#9A86A7", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{weeklyIntentionText || "Pick one gentle direction for this week"}</div>}
+            {!weeklyIntentionEditing && <div title={weeklyIntentionText || "Pick one gentle direction for this week"} style={{ display: "block", maxWidth: "100%", marginTop: 2, fontSize: 11.5, lineHeight: 1.3, fontWeight: 800, color: weeklyIntentionText ? "#5B4B6B" : "#9A86A7", overflowWrap: "break-word" }}>{weeklyIntentionText || "Pick one gentle direction for this week"}</div>}
           </div>
           {!weeklyIntentionEditing && <button type="button" onClick={() => { setWeeklyIntentionDraft?.(weeklyIntentionText || ""); setWeeklyIntentionEditing?.(true); }} style={{ minWidth: 48, minHeight: 38, padding: "7px 8px", borderRadius: 9, border: "1px solid #E2CDEB", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 10.5, cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap", overflowWrap: "normal" }}>{weeklyIntentionText ? "Edit" : "Add"}</button>}
         </div>
@@ -117,7 +117,7 @@ export function BabyToday({
       </div>
 
       {todayCardIndex === 1 && taskWeekDates.length > 0 && <>
-        <div role="tablist" aria-label="Little jobs week" style={{ display: "grid", gridTemplateColumns: "repeat(7,minmax(0,1fr))", gap: 4, padding: 5, borderRadius: 13, background: "rgba(255,255,255,.72)", border: "1px solid #EADCEC", minWidth: 0, width: "100%" }}>
+        <div role="group" aria-label="Little jobs week" style={{ display: "grid", gridTemplateColumns: "repeat(7,minmax(0,1fr))", gap: 4, padding: 5, borderRadius: 13, background: "rgba(255,255,255,.72)", border: "1px solid #EADCEC", minWidth: 0, width: "100%" }}>
           {taskWeekDates.map((date) => {
             const selected = selectedDate === date;
             const isTodayDate = date === period?.date;
@@ -126,7 +126,7 @@ export function BabyToday({
             const shortDay = dateValue.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }).slice(0, 2);
             const dayNumber = dateValue.toLocaleDateString("en-US", { day: "numeric", timeZone: "UTC" });
             const fullDay = dateValue.toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" });
-            return <button key={date} role="tab" aria-selected={selected} type="button" onClick={() => selectTaskPreviewDate?.(date)} title={`${fullDay}${isTodayDate ? " · Today" : isUpcomingDate ? " · Preview" : ""}`} style={{ minWidth: 0, minHeight: 48, padding: "5px 2px", borderRadius: 9, border: selected ? `2px solid ${accent}` : "1px solid transparent", background: selected ? `${accent}18` : "transparent", color: selected ? accent : "#806B8D", cursor: "pointer", display: "grid", placeItems: "center", alignContent: "center", gap: 1, position: "relative" }}>
+            return <button key={date} aria-pressed={selected} type="button" onClick={() => selectTaskPreviewDate?.(date)} title={`${fullDay}${isTodayDate ? " · Today" : isUpcomingDate ? " · Preview" : ""}`} style={{ minWidth: 0, minHeight: 48, padding: "5px 2px", borderRadius: 9, border: selected ? `2px solid ${accent}` : "1px solid transparent", background: selected ? `${accent}18` : "transparent", color: selected ? accent : "#806B8D", cursor: "pointer", display: "grid", placeItems: "center", alignContent: "center", gap: 1, position: "relative" }}>
               <span style={{ fontSize: 9.5, fontWeight: 900, letterSpacing: ".04em", textTransform: "uppercase" }}>{shortDay}</span>
               <span style={{ fontSize: 12, fontWeight: 900, lineHeight: 1 }}>{dayNumber}</span>
               {isTodayDate && <span aria-hidden="true" style={{ position: "absolute", bottom: 2, fontSize: 9, lineHeight: 1, color: accent }}>●</span>}
@@ -163,7 +163,7 @@ export function BabyToday({
                 {showSection && <div style={{ padding: index === 0 ? "6px 11px 3px" : "7px 11px 3px", background: "#FCF8FD", color: "#A06AB0", fontSize: 8.8, lineHeight: 1.1, letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 900 }}>{section}</div>}
                 <button type="button" disabled={isFutureView} onClick={() => !isFutureView && toggle(task.key)} aria-label={doneNow ? `Mark ${task.label} incomplete` : `Mark ${task.label} complete`} style={{ width: "100%", minHeight: 38, display: "grid", gridTemplateColumns: "22px minmax(0,1fr)", gap: 8, alignItems: "center", padding: "6px 11px", border: 0, borderTop: "1px solid #F4EDF5", background: doneNow ? "#FAF6FC" : "rgba(255,255,255,.72)", color: doneNow ? "#A081AD" : "#5B4B6B", textAlign: "left", cursor: isFutureView ? "default" : "pointer", opacity: isFutureView ? .68 : 1, fontFamily: "inherit" }}>
                   <span aria-hidden="true" style={{ boxSizing: "border-box", width: 20, height: 20, borderRadius: "50%", border: doneNow ? "2px solid #A65DC1" : "2px solid #B878CB", background: doneNow ? "#A65DC1" : "white", color: "white", display: "grid", placeItems: "center", fontSize: 11, fontWeight: 900 }}>{doneNow ? "✓" : ""}</span>
-                  <span style={{ minWidth: 0, fontSize: 11.6, lineHeight: 1.25, fontWeight: 800, textDecoration: doneNow ? "line-through" : "none", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{task.label}</span>
+                  <span style={{ minWidth: 0, fontSize: 11.6, lineHeight: 1.25, fontWeight: 800, textDecoration: doneNow ? "line-through" : "none", overflowWrap: "break-word" }}>{task.label}</span>
                 </button>
               </React.Fragment>;
             })}

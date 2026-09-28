@@ -40,9 +40,14 @@ const checks = [
   [deviceBackup.includes("caregiver_links") === false && deviceBackup.includes("push_subscriptions") === false && deviceBackup.includes("supporter_payments") === false, "device backup excludes relationship, push-token and payment rows"],
   [appSource.includes("scheduleAutomaticDeviceBackup") && appSource.includes("refreshDeviceBackup") && !appSource.includes("email: user.email || null"), "app creates device backups and minimizes presence data"],
   [settings.includes("On-device backup") && settings.includes("Nothing is deleted from the cloud automatically"), "Privacy & Data explains lossless device backup behavior"],
-  [landing.includes("PlushLife Free") && landing.includes("Plush Gold") && landing.includes("FREE PREVIEW"), "signed-out landing compares Free and Gold"],
-  [loginPage.includes("PlushLife Free") && loginPage.includes("Plush Gold") && loginPage.includes("FREE PREVIEW"), "dedicated login page compares Free and Gold"],
-  [landing.includes("No payment is required right now") && loginPage.includes("No payment required right now"), "login tier comparison clearly keeps Gold free during preview"],
+  // The tier comparison was removed from the signed-out landing intentionally
+  // (review directive): the sign-in panel now states everything is unlocked
+  // with no tiers or paywalls instead of comparing Free and Gold.
+  [!landing.includes("PlushLife Free") && !landing.includes("Plush Gold") && !landing.includes("FREE PREVIEW") && landing.includes("no tiers, no paywalls"), "signed-out landing omits the removed Free/Gold tier comparison"],
+  // The dedicated login page no longer duplicates the Free/Gold tier comparison
+  // (hidden comparison HTML and its tier CSS were removed intentionally).
+  [!loginPage.includes("PlushLife Free") && !loginPage.includes("Plush Gold") && !loginPage.includes("tier-grid"), "dedicated login page omits the removed Free/Gold tier comparison"],
+  [!loginPage.includes("FREE PREVIEW"), "login page omits the removed tier preview banner"],
   [goldAccess.includes('PLUSH_GOLD_ACCESS_MODE = "free_preview"') && goldAccess.includes("PLUSH_GOLD_BILLING_ENABLED = false"), "Plush Gold stays fully unlocked with billing disabled during preview"],
   [goldAccess.includes("advanced_growth_insights") && goldAccess.includes("smart_next_step") && goldAccess.includes("adaptive_habit_coaching") && goldAccess.includes("advanced_reminders") && goldAccess.includes("habit_experiments") && goldAccess.includes("recovery_intelligence") && goldAccess.includes("expanded_growth_history") && goldAccess.includes("multiple_focus_habits") && goldAccess.includes("advanced_planning") && goldAccess.includes("advanced_personalization") && goldAccess.includes("priority_history_protection") && goldAccess.includes("gold_reports"), "Plush Gold has one central registry for current and reserved premium capabilities"],
   [goldPreview.includes("Everything is included free for now") && goldPreview.includes("Billing off · free preview"), "Plush Gold preview stays discoverable during the free preview"],
@@ -91,7 +96,7 @@ const checks = [
   [background.includes("suggestedRamp") && background.includes("suggestedVisibleCount"), "background engine learns recovery and daily load"],
   [background.includes("crossPatterns") && background.includes("experimentResults"), "background engine evaluates cross-patterns and experiments"],
   [background.includes("maintenanceDue") && background.includes("MAX_EVENTS") && background.includes("450"), "background engine prunes, maintains and throttles work"],
-  [progress.includes("<GrowthNextMove />") && growthMove.includes("BEST NEXT ADJUSTMENT") && growthMove.includes("observed days"), "PlushGrowth puts one evidence-backed adjustment before deeper analytics"],
+  [progress.includes("<GrowthNextMove />") && growthMove.includes("PLUSH COACH") && growthMove.includes("observed days"), "PlushGrowth puts one evidence-backed adjustment before deeper analytics"],
   [progress.includes("Why PlushLife thinks this:"), "habit insights explain their evidence"],
   [progress.includes("LazyWeeklyHabitReview") && progress.includes("insightsOpen"), "deep PlushGrowth tools wait until Habit Insights is opened"],
   [settings.includes("REMINDER LOAD") && settings.includes("This suggestion comes from your own recent check-in timing."), "reminders include quiet load guidance and evidence for timing suggestions"],

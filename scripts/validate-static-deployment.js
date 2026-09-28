@@ -49,8 +49,28 @@ function read(relativePath) {
 
 if (fs.existsSync(path.join(ROOT, "service-worker.js"))) {
   const serviceWorker = read("service-worker.js");
-  if (!serviceWorker.includes('const CACHE_NAME = "plushlife-v66"')) {
-    failures.push("Service worker cache is not set to plushlife-v66.");
+  // The cache name is versioned by hand; read it from the source of truth
+  // instead of pinning a value here, so a legitimate bump never requires
+  // editing this validator.
+  const cacheNameMatch = serviceWorker.match(/const CACHE_NAME = "([^"]+)"/);
+  if (!cacheNameMatch) {
+    failures.push("Service worker does not declare a CACHE_NAME constant.");
+  } else {
+    const cacheName = cacheNameMatch[1];
+    if (!/^plushlife-v\d+$/.test(cacheName)) {
+      failures.push(`Service worker CACHE_NAME "${cacheName}" does not follow the plushlife-vNN versioning convention.`);
+    }
+    const hardcodedUses = serviceWorker.match(/caches\.(open|delete)\("plushlife-v\d+"\)/g) || [];
+    if (hardcodedUses.length > 0) {
+      failures.push("Service worker hardcodes a cache name instead of using the CACHE_NAME constant.");
+    }
+    const builtWorker = path.join(ROOT, "www", "service-worker.js");
+    if (fs.existsSync(builtWorker)) {
+      const built = fs.readFileSync(builtWorker, "utf8");
+      if (!built.includes(`const CACHE_NAME = "${cacheName}"`)) {
+        failures.push(`Built www/service-worker.js does not match the source CACHE_NAME ("${cacheName}"). Re-run the web build.`);
+      }
+    }
   }
   if (!serviceWorker.includes('["script", "style", "manifest"].includes(event.request.destination)')) failures.push("Executable app resources are not network-first.");
   for (const shellFile of [
@@ -58,6 +78,11 @@ if (fs.existsSync(path.join(ROOT, "service-worker.js"))) {
     "oauth.html",
     "support.html",
     "account-deletion.html",
+    "vendor/react.production.min.js",
+    "vendor/react-dom.production.min.js",
+    "vendor/supabase.min.js",
+    "assets/fast-start.js",
+    "assets/plush-tools-fix.js",
     "assets/care-upgrades.js",
     "assets/entitlements.js",
     "assets/plush-content.js",
@@ -68,7 +93,6 @@ if (fs.existsSync(path.join(ROOT, "service-worker.js"))) {
     "assets/prefetch-manifest.json",
     "assets/cloudflare-primary.js",
     "assets/plush-guide.js",
-    "assets/thunderstorm.mp3",
     "assets/app.bundle.js",
   ]) {
     if (!serviceWorker.includes(`./${shellFile}`)) failures.push(`Service worker app shell does not include ${shellFile}.`);

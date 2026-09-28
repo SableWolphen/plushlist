@@ -1,5 +1,7 @@
 import { HabitTypeIcon } from "./shared.jsx";
 import { CalmPanel } from "./info-panels.jsx";
+import { PlushMascot } from "./mascot.jsx";
+import { CompletedTaskArea, useCompletedTaskFlow } from "./completed-task-flow.jsx";
 
 /*
  * Reference-home compatibility markers kept deliberately:
@@ -54,7 +56,26 @@ function greeting() {
   return "Good evening";
 }
 
-function Hero({ period, goToDashboard, setSettingsOpen }) {
+function Hero({ period, goToDashboard, setSettingsOpen, reducedMotion, selectedOutfit, activityDaysTotal, darkMode }) {
+  // The living mascot reacts to task completions: the completed-task flow
+  // dispatches plushlife:task-completion-feedback on window, and the mascot
+  // celebrates (happy face + bounce) for the same 2.2s as the gentle glow.
+  const [mascotCelebrating, setMascotCelebrating] = React.useState(false);
+  const celebrateTimer = React.useRef(null);
+  React.useEffect(() => {
+    const onCompletion = (event) => {
+      if (event.detail?.completed === false) return;
+      setMascotCelebrating(true);
+      if (celebrateTimer.current) window.clearTimeout(celebrateTimer.current);
+      celebrateTimer.current = window.setTimeout(() => setMascotCelebrating(false), 2200);
+    };
+    window.addEventListener("plushlife:task-completion-feedback", onCompletion);
+    return () => {
+      window.removeEventListener("plushlife:task-completion-feedback", onCompletion);
+      if (celebrateTimer.current) window.clearTimeout(celebrateTimer.current);
+    };
+  }, []);
+
   return (
     <section className="pl-home-hero" aria-label="PlushLife welcome">
 
@@ -74,7 +95,7 @@ function Hero({ period, goToDashboard, setSettingsOpen }) {
       </div>
 
       <div className="pl-home-plush" aria-hidden="true">
-        <img src="assets/icon-foreground.png" alt="" />
+        <PlushMascot outfit={selectedOutfit} size={120} celebrating={mascotCelebrating && !reducedMotion} mood={mascotCelebrating ? "excited" : "neutral"} activityDays={activityDaysTotal} darkMode={darkMode} />
       </div>
 
       <div className="pl-home-bubble">🌱 Taking care of yourself matters.</div>
@@ -85,9 +106,9 @@ function Hero({ period, goToDashboard, setSettingsOpen }) {
 function OneTinyThing({ nextStepTask, nextStepReason, nextStepHint, toggle, pickEasierSuggestion, nextStepMoreOpen, setNextStepMoreOpen, setNextStepSkipped, setNextStepDismissedToday }) {
   if (!nextStepTask) return null;
   return (
-    <section data-plushlife-compact-card="next-step" id="plushlife-smart-next-step" style={{...card, padding: "15px 17px 16px"}} aria-label="One tiny thing">
+    <section data-plushlife-compact-card="next-step" id="plushlife-smart-next-step" style={{...card, padding: "15px 17px 16px"}} aria-label="Today's gentle pick">
       <div className="pl-section-topline">
-        <div className="pl-kicker">✦ &nbsp;ONE TINY THING</div>
+        <div className="pl-kicker">✦ &nbsp;TODAY&rsquo;S GENTLE PICK</div>
         <div className="pl-muted-note">{nextStepReason || "Rebuilding gently · Good fit right now"}</div>
       </div>
       <div className="pl-primary-task">{nextStepTask.sourceTask && <HabitTypeIcon task={nextStepTask.sourceTask} />}{nextStepTask.label}</div>
@@ -160,6 +181,35 @@ function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = []
   );
 }
 
+function TomorrowNote({ tomorrowTasksCount }) {
+  if (!Number.isFinite(tomorrowTasksCount)) return null;
+  return (
+    <div id="plushlife-tomorrow-note" style={{...card, padding: "12px 15px", display: "flex", alignItems: "center", gap: 10}} aria-label="Tomorrow is ready">
+      <span aria-hidden="true" style={{ fontSize: 20 }}>🌙</span>
+      <div style={{ fontSize: 12.5, lineHeight: 1.45, color: "#6B5A7D" }}>
+        <strong style={{ color: "#5B3D70" }}>Tomorrow is ready.</strong>{" "}
+        {tomorrowTasksCount === 0
+          ? "Nothing scheduled yet — rest easy."
+          : `${tomorrowTasksCount} gentle ${tomorrowTasksCount === 1 ? "task is" : "tasks are"} waiting for you.`}
+      </div>
+    </div>
+  );
+}
+
+function CompletedToday({ rows = [], viewDone = {}, lingerKeys = [], toggle, expanded, setExpanded }) {
+  const count = rows.filter((row) => row && !row.isBonus && !!viewDone?.[row.key]).length;
+  if (!count) return null;
+  return (
+    <section style={{...card, padding: "8px 12px 10px"}} aria-label="Completed today">
+      <button type="button" onClick={() => setExpanded?.((value) => !value)} aria-expanded={!!expanded} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, minHeight: 44, border: 0, background: "transparent", cursor: "pointer", padding: "4px 2px" }}>
+        <span style={{ fontSize: 11, letterSpacing: ".11em", fontWeight: 900, color: "#8D7898" }}>✓ COMPLETED TODAY · {count}</span>
+        <span aria-hidden="true" style={{ color: "#A660B9", fontWeight: 900 }}>{expanded ? "▾" : "›"}</span>
+      </button>
+      {expanded && <CompletedTaskArea rows={rows} viewDone={viewDone} lingerKeys={lingerKeys} toggle={toggle} title="Completed today" compact />}
+    </section>
+  );
+}
+
 function isHabitRow(row) {
   return row && !row.isBonus && String(row.habitType || row.sourceTask?.habit_type || "regular") !== "regular";
 }
@@ -226,8 +276,14 @@ export function TodayPanel({
   nextStepMoreOpen, setNextStepMoreOpen, setNextStepSkipped, setNextStepDismissedToday,
   selectedSchedule, selectedScheduleExceptionEntries, manageSchedule, setManageSchedule,
   rows, viewDone, openTaskManager, setCalmQuickOpen, calmQuickOpen, currentCopingOption,
-  reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen, setSettingsOpen
+  reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen, setSettingsOpen,
+  completedTodayExpanded, setCompletedTodayExpanded, tomorrowTasksCount, preferences,
+  activityDaysTotal, selectedOutfit
 }) {
+  // Wraps the app toggle with the shared completion flow: newly completed
+  // tasks linger briefly for undo, and every completion dispatches
+  // plushlife:task-completion-feedback so the hero mascot celebrates.
+  const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(toggle, viewDone, rows);
   if (!open) return null;
 
   return (
@@ -249,7 +305,8 @@ export function TodayPanel({
         .pl-link-btn{border:0;background:transparent;color:#B44CC7;font-weight:900;cursor:pointer;font-size:12px}.pl-list{display:grid;gap:7px;margin-top:11px}.pl-list-row{min-height:44px;border-radius:15px;border:1px solid ${C.line2};background:rgba(255,255,255,.80);display:flex;align-items:center;gap:9px;padding:7px 10px}.pl-schedule-row{display:grid;grid-template-columns:82px 26px minmax(0,1fr) 14px}.pl-note-row{display:grid;grid-template-columns:28px minmax(0,1fr)}.pl-time{font-size:15px;font-weight:950;color:#B34CC8}.pl-row-icon{font-size:18px;text-align:center}.pl-row-text{min-width:0;color:#49385A;font-size:13.5px;font-weight:750;line-height:1.3;text-align:left}.pl-chevron{font-size:21px;color:#C783D6}.pl-habit-row{width:100%;cursor:pointer}.pl-check{width:24px;height:24px;border-radius:8px;border:2px solid #DEA8D9;background:white;flex:0 0 auto}
         .pl-home-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pl-shortcut{min-height:64px;border-radius:20px;border:1px solid ${C.line};background:rgba(255,255,255,.86);display:flex;align-items:center;gap:11px;padding:11px 13px;text-align:left;cursor:pointer}.pl-shortcut-icon{font-size:26px}.pl-shortcut-title{font-size:14px;font-weight:950;color:#3F2755}.pl-shortcut-sub{margin-top:2px;font-size:11.5px;color:#9A75A4}.pl-shortcut-arrow{margin-left:auto;font-size:22px;color:#A660B9}
         .pl-noticed{min-height:58px;border-radius:20px;border:1px solid ${C.line};background:linear-gradient(135deg,#FCF5FF,#F6ECFB);display:flex;align-items:center;gap:10px;padding:10px 14px}.pl-noticed-icon{font-size:28px}.pl-noticed-title{font-weight:950;color:#6C347E;font-size:13px}.pl-noticed-copy{margin-top:2px;color:#90709A;font-size:11.5px}.pl-noticed-arrow{margin-left:auto;color:#A65DBA;font-size:22px}
-        #plushlife-next-step-reason,#plushlife-tomorrow-setup,#plushlife-tomorrow-note,#plushlife-adaptive-capacity-card{display:none!important}
+        #plushlife-next-step-reason,#plushlife-tomorrow-setup,#plushlife-adaptive-capacity-card{display:none!important}
+        .pl-home-plush .plush-mascot{position:relative;z-index:3;filter:drop-shadow(0 10px 14px rgba(73,39,87,.12))}
         .appearance-twilight .pl-home-hero,.appearance-meadow .pl-home-hero{
           background:linear-gradient(135deg,rgba(255,249,252,.82),rgba(248,239,250,.74),rgba(243,237,251,.72));
           border-bottom:1px solid color-mix(in srgb,var(--pl-theme-accent) 24%,transparent);
@@ -274,6 +331,7 @@ export function TodayPanel({
           .pl-home-actions{right:8px;top:8px;gap:5px}.pl-home-date{font-size:9px;padding:5px 7px}.pl-home-settings{width:44px;height:44px;font-size:16px}
           .pl-home-copy{left:13px;bottom:11px;width:57%}.pl-home-copy h1{font-size:18px;line-height:1.03;white-space:nowrap}.pl-home-copy .pl-heart{font-size:.78em}.pl-home-copy p{margin-top:4px;font-size:10.5px;line-height:1.22}
           .pl-home-plush{right:3px;bottom:5px;width:29%;height:50%}.pl-home-plush img{width:min(82px,74%);max-height:76px;object-fit:contain}
+          .pl-home-plush .plush-mascot{width:82px!important;height:82px!important}
           .pl-home-bubble{right:6px;bottom:5px;max-width:122px;font-size:8px;padding:4px 6px;border-radius:9px;line-height:1.15;white-space:nowrap}
           .pl-section-topline{align-items:center;gap:5px}.pl-kicker{font-size:9px;letter-spacing:.08em}.pl-muted-note{display:none}
           [data-plushlife-compact-card="next-step"]{padding:8px 9px 9px!important}
@@ -288,11 +346,13 @@ export function TodayPanel({
       `}</style>
 
       <div data-plushlife-home-stack className="pl-home-shell">
-        <Hero period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} />
-        <OneTinyThing nextStepTask={nextStepTask} nextStepReason={nextStepReason} nextStepHint={nextStepHint} toggle={toggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} />
+        <Hero period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} />
+        <OneTinyThing nextStepTask={nextStepTask} nextStepReason={nextStepReason} nextStepHint={nextStepHint} toggle={unifiedToggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} />
         <TodaySchedule selectedSchedule={selectedSchedule} selectedScheduleExceptionEntries={selectedScheduleExceptionEntries} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} />
-        <TasksToday rows={rows} viewDone={viewDone} toggle={toggle} openTaskManager={openTaskManager} period={period} />
-        <Habits rows={rows} viewDone={viewDone} toggle={toggle} openTaskManager={openTaskManager} period={period} />
+        <TasksToday rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />
+        <Habits rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />
+        <TomorrowNote tomorrowTasksCount={tomorrowTasksCount} />
+        <CompletedToday rows={rows} viewDone={viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} expanded={completedTodayExpanded} setExpanded={setCompletedTodayExpanded} />
 
         <div className="pl-home-shortcuts">
           <button type="button" className="pl-shortcut" onClick={() => setTodayCardIndex?.(1)}>
@@ -314,6 +374,7 @@ export function TodayPanel({
         </div>
       </div>
 
+      {announcement && <div role="status" aria-live="polite" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }}>{announcement}</div>}
 
       <CalmPanel open={calmQuickOpen} onClose={() => setCalmQuickOpen?.(false)} currentCopingOption={currentCopingOption} reshuffle={reshuffle} setCareSection={setCareSection} goToDashboard={goToDashboard} />
     </>

@@ -28,6 +28,20 @@ async function signatureFor(userId: string) {
   return toBase64Url(new Uint8Array(signature));
 }
 
+// Constant-time string comparison for HMAC signatures. A plain `!==`
+// short-circuits on the first differing byte, which lets a remote caller
+// measure timing differences and forge a signature byte-by-byte. Both
+// inputs are fixed-length base64url HMAC outputs, so the length check
+// below does not leak anything useful.
+function signaturesMatch(provided: string, expected: string): boolean {
+  const a = new TextEncoder().encode(provided);
+  const b = new TextEncoder().encode(expected);
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+  return diff === 0;
+}
+
 function page(title: string, body: string, status = 200) {
   return new Response(`<!doctype html><html><meta name="viewport" content="width=device-width,initial-scale=1"><body style="margin:0;background:#f8f4fa;font-family:Arial,Helvetica,sans-serif;color:#574b5d"><main style="max-width:520px;margin:64px auto;padding:22px"><div style="background:white;border:1px solid #eadff0;border-radius:18px;padding:24px"><div style="font-size:13px;font-weight:800;letter-spacing:.08em;color:#a45dbf">PLUSHLIFE</div><h1 style="font-size:24px">${title}</h1><p style="line-height:1.6">${body}</p></div></main></body></html>`, {
     status,
@@ -43,7 +57,7 @@ Deno.serve(async (request) => {
   if (!userId || !sig) return page("Invalid link", "This unsubscribe link is incomplete.", 400);
 
   const expected = await signatureFor(userId);
-  if (sig !== expected) return page("Invalid link", "This unsubscribe link is no longer valid.", 403);
+  if (!signaturesMatch(sig, expected)) return page("Invalid link", "This unsubscribe link is no longer valid.", 403);
 
   const { data, error } = await admin.auth.admin.getUserById(userId);
   if (error || !data?.user) return page("Account not found", "We could not find that PlushLife account.", 404);

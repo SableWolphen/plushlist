@@ -97,6 +97,31 @@ function DetailHeader({ title, onBack }) {
   );
 }
 
+// One-time explainer next to the Baby Mode opt-in: surfaces once per device
+// (localStorage flag) so users understand the mode before enabling it.
+function BabyModeExplainer() {
+  const [dismissed, setDismissed] = React.useState(() => {
+    try {
+      return window.localStorage.getItem("plushlife:baby-mode:explainer-seen:v1") === "1";
+    } catch (_error) {
+      return true;
+    }
+  });
+  if (dismissed) return null;
+  const dismiss = () => {
+    try {
+      window.localStorage.setItem("plushlife:baby-mode:explainer-seen:v1", "1");
+    } catch (_error) {}
+    setDismissed(true);
+  };
+  return (
+    <div style={{ marginTop: 8, padding: "10px 12px", borderRadius: 12, background: "#FDF6FF", border: "1px solid #EBD6F2", fontSize: 11.5, lineHeight: 1.5, color: "#6B5A7D" }}>
+      <strong style={{ color: "#5B3D70" }}>What is Baby Mode?</strong> Baby Mode is a simplified comfort view: bigger words, rounder controls, and candy-soft decoration on the Home screen. Your tasks and progress do not change — everything is still there when you switch back.
+      <button type="button" onClick={dismiss} style={{ marginTop: 6, display: "block", minHeight: 32, padding: "4px 10px", borderRadius: 8, border: "1px solid #DCC8E6", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>Got it</button>
+    </div>
+  );
+}
+
 function formatSyncStatus(online, syncStatus, lastSyncedAt) {
   if (!online || syncStatus === "offline") return "Offline — changes will sync when you're connected";
   if (syncStatus === "syncing") return "Syncing…";
@@ -108,6 +133,16 @@ function formatSyncStatus(online, syncStatus, lastSyncedAt) {
 export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCode, setWatchPairingCode, connectWatch, watchPairingBusy, watchPairingMessage, localWatchSyncBusy, startLocalWatchSync, localWatchSyncMessage, dailyCheckIn, pct, rows, viewDone, weeklyOverallPct, widgetSyncMsg, setWidgetSyncMsg, displayNameDraft, setDisplayNameDraft, saveDisplayName, comfortItemDraft, setComfortItemDraft, saveComfortItem, preferences, appearanceTheme, selectAppearanceTheme, dinoTheme, updatePreference, enableNotifications, smartReminderSuggestion, restDatesSet, toggleRestToday, period, restRangeDraft, setRestRangeDraft, saveRestRange, restDates, feedbackText, setFeedbackText, submitFeedback, feedbackMessage, exportMyData, restoreFileInputRef, restoreFromBackup, deleteAllCheckIns, deleteAllReflections, user, online, syncStatus, lastSyncedAt, syncNow, emailChangeDraft, setEmailChangeDraft, requestEmailChange, signingOut, handleSignOut, signOutOtherDevices, deleteMyAccount, deviceBackupStatus, refreshDeviceBackup, deviceBackupBusy, verifyDeviceBackupNow, deviceBackupVerifyBusy, settingsMessage }) {
   const [section, setSection] = React.useState("home");
   const [search, setSearch] = React.useState("");
+  const [comebackOptOut, setComebackOptOut] = React.useState(() => {
+    try { return !!window.PlushLifeComebackReminder?.isOptedOut?.(); } catch (_error) { return false; }
+  });
+  React.useEffect(() => {
+    const resync = () => {
+      try { setComebackOptOut(!!window.PlushLifeComebackReminder?.isOptedOut?.()); } catch (_error) {}
+    };
+    window.addEventListener("plushlife:comeback-reminder-optout-changed", resync);
+    return () => window.removeEventListener("plushlife:comeback-reminder-optout-changed", resync);
+  }, []);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = React.useState("");
   const [deletingAccount, setDeletingAccount] = React.useState(false);
@@ -187,6 +222,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
           })}
         </div>
         <ToggleRow checked={preferences.nickname_style === "baby"} onChange={(event) => updatePreference({ nickname_style: event.target.checked ? "baby" : "warm", dino_theme: event.target.checked ? false : preferences.dino_theme })} title="🍼 Baby Mode" description="Bigger words, rounder controls, and candy-soft decoration. Your tasks and progress do not change." />
+        <BabyModeExplainer />
         {preferences.nickname_style === "baby" && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, padding: "8px 0 2px" }}>
             <button type="button" onClick={() => updatePreference({ baby_voice: "motherly" })} style={{ ...secondaryButton, border: (preferences.baby_voice || "motherly") === "motherly" ? "2px solid #9660AF" : secondaryButton.border }}>👩 Motherly voice</button>
@@ -237,6 +273,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
         </div>
         <ToggleRow checked={preferences.discreet_notifications} onChange={(event) => updatePreference({ discreet_notifications: event.target.checked })} title="Discreet lock-screen wording" description="Also hides Guardian note previews." />
         <ToggleRow checked={preferences.nurturing_checkins} onChange={(event) => updatePreference({ nurturing_checkins: event.target.checked })} title="Nurturing check-ins" description="Allow PlushLife to use the warmer check-in style." />
+        <ToggleRow checked={!comebackOptOut} onChange={(event) => { try { window.PlushLifeComebackReminder?.setOptOut?.(!event.target.checked); } catch (_error) {} setComebackOptOut(!event.target.checked); }} title="Gentle comeback nudges" description="One kind note if you've been away a couple of days. Turn off anytime — no guilt either way." />
       </Card>
     </>
   );

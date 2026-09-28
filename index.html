@@ -6,15 +6,19 @@
 <meta name="theme-color" content="#b75acb">
 <meta name="color-scheme" content="light only">
 <meta name="description" content="PlushLife is a gentle, private care and routine companion that adapts to the day you are actually having.">
+<!-- Interim Content Security Policy: allows the app's own inline scripts and
+     the pinned CDN SDKs. Once inline scripts are replaced with hashed external
+     files, tighten this to hash-based script-src and drop 'unsafe-inline'. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'">
 <meta property="og:title" content="PlushLife — Care that fits today.">
-<meta property="og:description" content="Adaptive routines, private progress, grounding tools, guided paths, sleep support, and optional Guardian care.">
+<meta property="og:description" content="Adaptive routines, private progress, grounding tools, guided paths, and optional Guardian care.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="./social-preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="PlushLife — Care that fits today.">
-<meta name="twitter:description" content="Adaptive routines, private progress, grounding tools, guided paths, sleep support, and optional Guardian care.">
+<meta name="twitter:description" content="Adaptive routines, private progress, grounding tools, guided paths, and optional Guardian care.">
 <meta name="twitter:image" content="./social-preview.png">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg?v=2" type="image/svg+xml">
@@ -36,339 +40,20 @@
 <div id="root"></div>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js" integrity="sha384-faMlYZUtkJj+Sh6Bmu/L0GzPcraRWN6CW+9RH3GUrK/Z0WS9tgaNNt0tHiLxsbdb sha384-/E7xfJz9bbCsrwJAbrt9CO5JB1REPVQjuSrQT4Cpz2BQBocDVsGLB2/VMAEzYaf+" crossorigin="anonymous"></script>
+<!-- Two SRI hashes (either may match): the bytes vendored to ./vendor/ by
+     the web build (currently @supabase/supabase-js 2.111.0 per package-lock)
+     and the pinned jsDelivr 2.57.0 bytes served to this root copy. -->
 <script src="./assets/care-upgrades.js"></script>
 <script src="./assets/entitlements.js"></script>
 <script src="./assets/plush-content.js"></script>
 <script src="./assets/plush-helpers.js"></script>
 <script src="./assets/plush-schedule.js"></script>
 <script src="./assets/plush-billing.js"></script>
-<script>
-(function () {
-  if (!window.Capacitor || !window.Capacitor.Plugins) return;
-  var Plugins = window.Capacitor.Plugins;
-
-  if (Plugins.StatusBar) Plugins.StatusBar.setStyle({ style: "DARK" }).catch(function () {});
-
-  if (Plugins.App) {
-    var exitArmed = false;
-    Plugins.App.addListener("backButton", function (state) {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      if (state && state.canGoBack) {
-        window.history.back();
-        return;
-      }
-      if (exitArmed) {
-        Plugins.App.exitApp();
-        return;
-      }
-      exitArmed = true;
-      window.setTimeout(function () { exitArmed = false; }, 2000);
-    });
-  }
-
-  window.addEventListener("load", function () {
-    if (Plugins.SplashScreen) Plugins.SplashScreen.hide().catch(function () {});
-  });
-
-  if (Plugins.PushNotifications) {
-    Plugins.PushNotifications.createChannel({
-      id: "plushlife-care",
-      name: "PlushLife care reminders",
-      description: "Gentle check-ins and Guardian support chosen in PlushLife",
-      importance: 3,
-      visibility: 1,
-      vibration: true,
-    }).catch(function () {});
-    Plugins.PushNotifications.addListener("registration", function (token) {
-      window.__plushlifeNativePushToken = token && token.value;
-      document.dispatchEvent(new CustomEvent("plushlife-native-push-token"));
-    });
-    Plugins.PushNotifications.addListener("registrationError", function () {});
-    Plugins.PushNotifications.addListener("pushNotificationActionPerformed", function (event) {
-      var target = event && event.notification && event.notification.data && event.notification.data.url;
-      if (typeof target === "string" && /^https:\/\/sablewolphen\.github\.io\/plushlist\/?/.test(target)) window.location.href = target;
-    });
-  }
-
-  if (Plugins.LocalNotifications) {
-    var LocalNotifications = Plugins.LocalNotifications;
-    var reminderChannelId = "plushlife-reminders";
-    LocalNotifications.createChannel({
-      id: reminderChannelId,
-      name: "PlushLife reminders",
-      description: "Private routine reminders scheduled on this device",
-      importance: 3,
-      visibility: 1,
-      vibration: true,
-    }).catch(function () {});
-    LocalNotifications.registerActionTypes({
-      types: [{
-        id: "PLUSHLIFE_REMINDER",
-        actions: [
-          { id: "DONE", title: "Done" },
-          { id: "TINY", title: "Tiny version" },
-          { id: "SKIP", title: "Skip today" },
-          { id: "SNOOZE_10", title: "10 min" },
-          { id: "SNOOZE_30", title: "30 min" },
-          { id: "SNOOZE_60", title: "1 hour" },
-        ],
-      }],
-    }).catch(function () {});
-
-    var scheduleLocalReminder = function (details) {
-      var at = details.at instanceof Date ? details.at : new Date(details.at);
-      if (!Number.isFinite(at.getTime()) || at.getTime() <= Date.now()) return Promise.resolve();
-      return LocalNotifications.schedule({ notifications: [{
-        id: details.id,
-        title: details.title || "A gentle PlushLife reminder",
-        body: details.body || "Open PlushLife when you're ready.",
-        schedule: { at: at, allowWhileIdle: true },
-        channelId: reminderChannelId,
-        actionTypeId: "PLUSHLIFE_REMINDER",
-        autoCancel: true,
-        extra: details.extra || {},
-      }] });
-    };
-
-    var taskMinutes = function (task) {
-      if (!task || !task.time) return null;
-      var parts = String(task.time).slice(0, 5).split(":").map(Number);
-      if (parts.length !== 2 || parts.some(function (part) { return !Number.isFinite(part); })) return null;
-      if (parts[0] < 0 || parts[0] > 23 || parts[1] < 0 || parts[1] > 59) return null;
-      return parts[0] * 60 + parts[1];
-    };
-
-    var timeBucket = function (minutes) {
-      var hour = Math.floor(minutes / 60);
-      if (hour >= 5 && hour < 12) return "morning";
-      if (hour >= 12 && hour < 15) return "midday";
-      if (hour >= 15 && hour < 18) return "afternoon";
-      if (hour >= 18 && hour < 22) return "evening";
-      return "night";
-    };
-
-    var titleForTime = function (at) {
-      var bucket = timeBucket(at.getHours() * 60 + at.getMinutes());
-      if (bucket === "morning") return "Good morning 🌤️";
-      if (bucket === "midday") return "A little midday check-in 💜";
-      if (bucket === "afternoon") return "One small win? 🧸";
-      if (bucket === "evening") return "Time to wind down 🌙";
-      return "One gentle step before rest ✨";
-    };
-
-    var taskAppliesToDate = function (task, date) {
-      if (!task || task.done || task.completed || task.isDone) return false;
-      var dayId = window.PlushLifeCare.DAY_IDS[date.getDay()];
-      return !(Array.isArray(task.scheduleDays) && task.scheduleDays.length && !task.scheduleDays.includes(dayId));
-    };
-
-    var pickTaskForReminder = function (taskReminders, at) {
-      var reminderMinutes = at.getHours() * 60 + at.getMinutes();
-      var reminderBucket = timeBucket(reminderMinutes);
-      var candidates = (Array.isArray(taskReminders) ? taskReminders : []).map(function (task, index) {
-        var minutes = taskMinutes(task);
-        if (minutes === null || !taskAppliesToDate(task, at) || !task.label) return null;
-        var diff = minutes - reminderMinutes;
-        var sameBucket = timeBucket(minutes) === reminderBucket;
-        var distance = Math.abs(diff);
-        var score = distance;
-        if (!sameBucket) score += 180;
-        if (diff < -180) score += 240;
-        if (diff > 360) score += 180;
-        return { task: task, score: score, index: index };
-      }).filter(Boolean);
-      candidates.sort(function (a, b) { return a.score - b.score || a.index - b.index; });
-      if (!candidates.length) return null;
-      var winner = candidates[0];
-      var winnerMinutes = taskMinutes(winner.task);
-      var winnerDistance = Math.abs(winnerMinutes - reminderMinutes);
-      if (timeBucket(winnerMinutes) !== reminderBucket && winnerDistance > 180) return null;
-      return winner.task;
-    };
-
-    var formatMinutes = function (minutes) {
-      var safe = ((minutes % 1440) + 1440) % 1440;
-      var hour = Math.floor(safe / 60);
-      var minute = safe % 60;
-      return String(hour).padStart(2, "0") + ":" + String(minute).padStart(2, "0");
-    };
-
-    var automaticReminderTimes = function (taskReminders) {
-      var groups = { morning: [], daytime: [], evening: [] };
-      (Array.isArray(taskReminders) ? taskReminders : []).forEach(function (task) {
-        if (!task || task.done || task.completed || task.isDone) return;
-        var minutes = taskMinutes(task);
-        if (minutes === null) return;
-        if (minutes >= 300 && minutes < 720) groups.morning.push(minutes);
-        else if (minutes >= 720 && minutes < 1080) groups.daytime.push(minutes);
-        else groups.evening.push(minutes);
-      });
-      var chosen = [];
-      [groups.morning, groups.daytime, groups.evening].forEach(function (group) {
-        if (!group.length) return;
-        group.sort(function (a, b) { return a - b; });
-        var middle = group[Math.floor((group.length - 1) / 2)];
-        var reminder = Math.floor(Math.max(0, middle - 15) / 15) * 15;
-        chosen.push(formatMinutes(reminder));
-      });
-      return chosen.length ? chosen.slice(0, 3) : ["08:30", "13:00", "19:30"];
-    };
-
-    window.PlushLifeNativeNotifications = {
-      syncDailyReminders: async function (options) {
-        var pending = await LocalNotifications.getPending();
-        var old = (pending.notifications || []).filter(function (item) {
-          return item.extra && (item.extra.plushlifeKind === "daily-reminder" || item.extra.plushlifeKind === "task-reminder");
-        });
-        if (old.length) await LocalNotifications.cancel({ notifications: old.map(function (item) { return { id: item.id }; }) });
-        if (!options || !options.enabled) return;
-        var taskReminders = Array.isArray(options.taskReminders) ? options.taskReminders : [];
-        var suppliedTimes = Array.isArray(options.times) ? options.times.slice(0, 8) : [];
-        var legacyDefaults = ["08:00", "12:30", "17:30", "20:30"];
-        var isLegacyDefaultSchedule = suppliedTimes.length === legacyDefaults.length && suppliedTimes.every(function (time, index) {
-          return String(time).slice(0, 5) === legacyDefaults[index];
-        });
-        var times = (!suppliedTimes.length || isLegacyDefaultSchedule) ? automaticReminderTimes(taskReminders) : suppliedTimes;
-        var restDates = new Set(Array.isArray(options.restDates) ? options.restDates : []);
-        var notifications = [];
-        var coveredTasks = new Set();
-        var duplicateWindowMinutes = 45;
-        var completedTaskKeys = new Set(taskReminders.filter(function (task) { return task && (task.done || task.completed || task.isDone); }).map(function (task) { return task.taskKey; }));
-        var firedAnchorKey = "plushlife:anchor-reminders-fired:v1";
-        var firedAnchors = {};
-        try { firedAnchors = JSON.parse(localStorage.getItem(firedAnchorKey) || "{}") || {}; } catch (_error) {}
-
-        taskReminders.forEach(function (task) {
-          if (!task || !task.taskKey || !task.anchorTaskKey || task.done || !completedTaskKeys.has(task.anchorTaskKey)) return;
-          var todayKey = window.PlushLifeCare.localDateString(new Date());
-          var fingerprint = todayKey + "::" + task.anchorTaskKey + "::" + task.taskKey;
-          if (firedAnchors[fingerprint]) return;
-          var at = new Date(Date.now() + 15000);
-          notifications.push({
-            id: window.PlushLifeCare.notificationId("anchor-" + fingerprint),
-            title: "Ready for the next gentle step?",
-            body: options.discreet ? "You have something waiting in PlushLife." : task.label,
-            schedule: { at: at, allowWhileIdle: true }, channelId: reminderChannelId,
-            actionTypeId: "PLUSHLIFE_REMINDER", autoCancel: true,
-            extra: { plushlifeKind: "task-reminder", taskKey: task.taskKey, taskLabel: task.label, tinyLabel: task.tinyLabel || "", anchorTaskKey: task.anchorTaskKey }
-          });
-          firedAnchors[fingerprint] = new Date().toISOString();
-        });
-        try { localStorage.setItem(firedAnchorKey, JSON.stringify(firedAnchors)); } catch (_error) {}
-
-        for (var dayOffset = 0; dayOffset < 7; dayOffset += 1) {
-          for (var timeIndex = 0; timeIndex < times.length; timeIndex += 1) {
-            var parts = String(times[timeIndex]).split(":").map(Number);
-            if (parts.length !== 2 || parts.some(function (part) { return !Number.isFinite(part); })) continue;
-            var at = new Date();
-            at.setDate(at.getDate() + dayOffset);
-            at.setHours(parts[0], parts[1], 0, 0);
-            if (at.getTime() <= Date.now()) continue;
-            var dateKey = window.PlushLifeCare.localDateString(at);
-            if (restDates.has(dateKey)) continue;
-            var suggestedTask = pickTaskForReminder(taskReminders, at);
-            if (suggestedTask && suggestedTask.taskKey) {
-              var suggestedMinutes = taskMinutes(suggestedTask);
-              var reminderMinutes = at.getHours() * 60 + at.getMinutes();
-              if (suggestedMinutes !== null && Math.abs(suggestedMinutes - reminderMinutes) <= duplicateWindowMinutes) {
-                coveredTasks.add(dateKey + "::" + suggestedTask.taskKey);
-              }
-            }
-            notifications.push({
-              id: window.PlushLifeCare.notificationId("daily-" + dateKey + "-" + timeIndex),
-              title: options.discreet ? "A gentle PlushLife reminder" : (suggestedTask ? titleForTime(at) : "A gentle PlushLife reminder"),
-              body: options.discreet
-                ? "You have something waiting in PlushLife."
-                : (suggestedTask ? "Your next gentle step: " + suggestedTask.label : "One caring step is enough. Open your PlushList when you're ready."),
-              schedule: { at: at, allowWhileIdle: true },
-              channelId: reminderChannelId,
-              actionTypeId: "PLUSHLIFE_REMINDER",
-              autoCancel: true,
-              extra: suggestedTask
-                ? { plushlifeKind: "daily-reminder", reminderTime: times[timeIndex], taskKey: suggestedTask.taskKey, taskLabel: suggestedTask.label, automaticSchedule: isLegacyDefaultSchedule || !suppliedTimes.length }
-                : { plushlifeKind: "daily-reminder", reminderTime: times[timeIndex], automaticSchedule: isLegacyDefaultSchedule || !suppliedTimes.length },
-            });
-          }
-
-          taskReminders.forEach(function (task) {
-            if (!task || !task.time || task.done || task.completed || task.isDone) return;
-            var date = new Date();
-            date.setDate(date.getDate() + dayOffset);
-            var dateKey = window.PlushLifeCare.localDateString(date);
-            if (restDates.has(dateKey) || !taskAppliesToDate(task, date)) return;
-            if (task.taskKey && coveredTasks.has(dateKey + "::" + task.taskKey)) return;
-            var taskAtMinutes = taskMinutes(task);
-            if (taskAtMinutes === null) return;
-            date.setHours(Math.floor(taskAtMinutes / 60), taskAtMinutes % 60, 0, 0);
-            if (date.getTime() <= Date.now()) return;
-            notifications.push({
-              id: window.PlushLifeCare.notificationId("task-" + task.taskKey + "-" + dateKey),
-              title: "Ready for one caring step?",
-              body: options.discreet ? "You have something waiting in PlushLife." : task.label,
-              schedule: { at: date, allowWhileIdle: true },
-              channelId: reminderChannelId,
-              actionTypeId: "PLUSHLIFE_REMINDER",
-              autoCancel: true,
-              extra: { plushlifeKind: "task-reminder", taskKey: task.taskKey, taskLabel: task.label },
-            });
-          });
-        }
-        if (notifications.length) await LocalNotifications.schedule({ notifications: notifications });
-      },
-      snoozeTask: function (options) {
-        var minutes = Math.max(1, Math.min(1440, Number(options && options.minutes) || 10));
-        var at = new Date(Date.now() + minutes * 60000);
-        return scheduleLocalReminder({
-          id: window.PlushLifeCare.notificationId((options && options.taskKey) || "task", at.getTime() % 2147483647),
-          title: "Ready for one caring step?",
-          body: options && options.label ? options.label : "Your PlushLife task is waiting when you're ready.",
-          at: at,
-          extra: { plushlifeKind: "task-snooze", taskKey: options && options.taskKey, taskLabel: options && options.label },
-        });
-      },
-    };
-
-    LocalNotifications.addListener("localNotificationActionPerformed", function (event) {
-      var minutesByAction = { SNOOZE_10: 10, SNOOZE_30: 30, SNOOZE_60: 60 };
-      var minutes = minutesByAction[event && event.actionId];
-      var notification = event && event.notification;
-      var taskAction = event && ["DONE", "TINY", "SKIP"].includes(event.actionId) ? event.actionId.toLowerCase() : "";
-      if (notification) {
-        try {
-          var storedEvents = JSON.parse(localStorage.getItem("plushlife:notification-events:v1") || "[]");
-          storedEvents.push({
-            id: String(notification.id || "") + ":" + Date.now(),
-            action: minutes ? "snoozed" : "opened",
-            actionId: event && event.actionId || "tap",
-            taskKey: notification.extra && notification.extra.taskKey || "",
-            kind: notification.extra && notification.extra.plushlifeKind || "",
-            at: new Date().toISOString()
-          });
-          localStorage.setItem("plushlife:notification-events:v1", JSON.stringify(storedEvents.slice(-120)));
-          window.dispatchEvent(new CustomEvent("plushlife:notification-interaction"));
-        } catch (_error) {}
-      }
-      if (taskAction && notification && notification.extra && notification.extra.taskKey) {
-        try {
-          localStorage.setItem("plushlife:pending-notification-action:v1", JSON.stringify({ action: taskAction, taskKey: notification.extra.taskKey, at: new Date().toISOString() }));
-          document.dispatchEvent(new CustomEvent("plushlife-notification-task-action"));
-        } catch (_error) {}
-      }
-      if (minutes && notification) {
-        scheduleLocalReminder({
-          id: window.PlushLifeCare.notificationId("action-snooze", Date.now() % 2147483647),
-          title: notification.title,
-          body: notification.body,
-          at: new Date(Date.now() + minutes * 60000),
-          extra: notification.extra || {},
-        }).catch(function () {});
-        document.dispatchEvent(new CustomEvent("plushlife-notification-snoozed", { detail: { minutes: minutes } }));
-      }
-    });
-  }
-})();
-</script>
+<!-- Native bridge: the Capacitor back-button, splash, push-channel, and
+     on-device notification scheduler code that used to live in an inline
+     <script> here now lives in src/native-bridge.js, imported at the top of
+     src/app-source.jsx so esbuild bundles it ahead of the app code. -->
 <script src="./assets/app.bundle.js"></script>
 <script>
 if ("serviceWorker" in navigator) {

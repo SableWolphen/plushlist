@@ -1,7 +1,21 @@
+// Threat model for on-device backup encryption:
+// - Protects against: casual snooping of the IndexedDB snapshot records —
+//   anyone with brief access to the unlocked app or a plain file copy of the
+//   browser profile sees only AES-256-GCM ciphertext, not reflections,
+//   private notes, or chat content.
+// - NOT a defense against: a rooted/jailbroken device, forensic imaging of a
+//   device where the key is stored alongside the data, or malware running as
+//   the app. The encryption key lives in the same IndexedDB as the backups
+//   (per-install, randomly generated), so this is at-rest obfuscation against
+//   opportunistic access, not full-disk encryption.
+// - Encryption fails closed: if WebCrypto is unavailable, backup creation
+//   throws instead of silently writing plaintext.
 const DB_NAME = "plushlife-device-backup";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = "backups";
-const BACKUP_VERSION = 2;
+const KEY_STORE_NAME = "keys";
+const BACKUP_KEY_NAME = "backup-encryption-key";
+const BACKUP_VERSION = 3;
 const AUTO_BACKUP_MAX_AGE_MS = 6 * 60 * 60 * 1000;
 const BACKUP_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
 const MAX_DEVICE_SNAPSHOTS = 3;
@@ -42,6 +56,7 @@ function openDatabase() {
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath: "userId" });
+      if (!db.objectStoreNames.contains(KEY_STORE_NAME)) db.createObjectStore(KEY_STORE_NAME, { keyPath: "name" });
     };
     request.onsuccess = () => resolve(request.result);
   });
@@ -74,6 +89,75 @@ async function putBackup(record) {
   } finally {
     db.close();
   }
+}
+
+function cryptoSubtle() {
+  const subtle = window.crypto?.subtle;
+  if (!subtle || typeof TextEncoder === "undefined") {
+    throw new Error("On-device backup encryption is not supported on this device.");
+  }
+  return subtle;
+}
+
+function toBase64(bytes) {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
+function fromBase64(text) {
+  const binary = atob(text);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index++) bytes[index] = binary.charCodeAt(index);
+  return bytes;
+}
+
+async function getOrCreateBackupKey() {
+  const subtle = cryptoSubtle();
+  const db = await openDatabase();
+  try {
+    const stored = await new Promise((resolve, reject) => {
+      const tx = db.transaction(KEY_STORE_NAME, "readonly");
+      const request = tx.objectStore(KEY_STORE_NAME).get(BACKUP_KEY_NAME);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error("Could not read backup encryption key."));
+    });
+    if (stored?.jwk) {
+      return subtle.importKey("jwk", stored.jwk, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+    }
+    const key = await subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+    const jwk = await subtle.exportKey("jwk", key);
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(KEY_STORE_NAME, "readwrite");
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error("Could not save backup encryption key."));
+      tx.objectStore(KEY_STORE_NAME).put({ name: BACKUP_KEY_NAME, jwk, createdAt: new Date().toISOString() });
+    });
+    return key;
+  } finally {
+    db.close();
+  }
+}
+
+async function encryptSnapshotPayload(payload) {
+  const subtle = cryptoSubtle();
+  const key = await getOrCreateBackupKey();
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const bytes = new TextEncoder().encode(stablePayloadText(payload));
+  const ciphertext = await subtle.encrypt({ name: "AES-GCM", iv }, key, bytes);
+  return { iv: toBase64(iv), ciphertext: toBase64(new Uint8Array(ciphertext)) };
+}
+
+async function decryptSnapshotPayload(snapshot) {
+  if (!snapshot?.ciphertext) return snapshot?.payload || null;
+  const subtle = cryptoSubtle();
+  const key = await getOrCreateBackupKey();
+  const bytes = await subtle.decrypt(
+    { name: "AES-GCM", iv: fromBase64(snapshot.iv) },
+    key,
+    fromBase64(snapshot.ciphertext)
+  );
+  return JSON.parse(new TextDecoder().decode(bytes));
 }
 
 function normalizeSnapshots(record) {
@@ -125,6 +209,12 @@ export async function getDeviceBackupStatus(userId) {
     if (!latest) return { exists: false, savedAt: null, verified: false, snapshotCount: 0 };
     const savedTime = new Date(latest.savedAt || 0).getTime();
     const stale = !Number.isFinite(savedTime) || Date.now() - savedTime > BACKUP_STALE_AFTER_MS;
+    let payload = null;
+    try {
+      payload = await decryptSnapshotPayload(latest);
+    } catch (_decryptError) {
+      return { exists: false, savedAt: null, verified: false, snapshotCount: 0, unavailable: true };
+    }
     return {
       exists: true,
       savedAt: latest.savedAt || null,
@@ -133,7 +223,7 @@ export async function getDeviceBackupStatus(userId) {
       verifiedAt: record?.verifiedAt || null,
       snapshotCount: snapshots.length,
       stale,
-      counts: rowCounts(latest.payload),
+      counts: rowCounts(payload),
     };
   } catch (_error) {
     return { exists: false, savedAt: null, verified: false, snapshotCount: 0, unavailable: true };
@@ -146,9 +236,15 @@ export async function verifyDeviceBackup(userId) {
   const snapshots = normalizeSnapshots(record);
   const latest = snapshots[0] || null;
   if (!latest) return { ok: false, reason: "No on-device backup exists yet." };
-  if (!payloadLooksValid(latest.payload)) return { ok: false, reason: "The latest on-device backup is incomplete." };
+  let payload;
+  try {
+    payload = await decryptSnapshotPayload(latest);
+  } catch (_decryptError) {
+    return { ok: false, reason: "The latest on-device backup could not be decrypted on this device." };
+  }
+  if (!payloadLooksValid(payload)) return { ok: false, reason: "The latest on-device backup is incomplete." };
 
-  const checksum = await checksumPayload(latest.payload);
+  const checksum = await checksumPayload(payload);
   if (latest.checksum && checksum && latest.checksum !== checksum) {
     return { ok: false, reason: "The latest on-device backup failed its integrity check." };
   }
@@ -190,10 +286,14 @@ export async function createDeviceBackup(supabase, user) {
   const savedAt = new Date().toISOString();
   const payload = Object.fromEntries(results);
   const checksum = await checksumPayload(payload);
+  // Encrypt the snapshot before it touches IndexedDB; the checksum is
+  // computed over the plaintext payload above so integrity verification
+  // stays meaningful after decryption.
+  const encrypted = await encryptSnapshotPayload(payload);
   const previous = await getBackupRecord(user.id).catch(() => null);
   const previousSnapshots = normalizeSnapshots(previous);
   const snapshots = [
-    { version: BACKUP_VERSION, savedAt, payload, checksum },
+    { version: BACKUP_VERSION, savedAt, iv: encrypted.iv, ciphertext: encrypted.ciphertext, checksum },
     ...previousSnapshots.filter((item) => item?.savedAt !== savedAt),
   ].slice(0, MAX_DEVICE_SNAPSHOTS);
 
@@ -201,8 +301,6 @@ export async function createDeviceBackup(supabase, user) {
     userId: String(user.id),
     version: BACKUP_VERSION,
     savedAt,
-    payload,
-    checksum,
     snapshots,
     verifiedAt: checksum ? savedAt : null,
     lastVerifiedChecksum: checksum,

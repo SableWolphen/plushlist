@@ -1,6 +1,28 @@
 const SUPABASE_URL = "https://pvitdhixycegmcovapyh.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_SScDCEHovc68ITiEUu6lCg_mHPe2oaI";
-const MAMA_EMAIL = "johnston.alexander.k@gmail.com";
+
+// Per-isolate, in-memory rate limiter for the AI proxy below.
+// Allows MAMAS_CORNER_MAX_REQUESTS requests per MAMAS_CORNER_WINDOW_MS
+// per user id. This blunts accidental or abusive overuse on the owner's
+// billing; it is not a distributed limit (each Worker isolate tracks its
+// own window), which is acceptable for a single-invitee endpoint.
+const MAMAS_CORNER_MAX_REQUESTS = 20;
+const MAMAS_CORNER_WINDOW_MS = 10 * 60 * 1000;
+const mamasCornerRateState = new Map();
+
+function mamasCornerRateLimited(userId) {
+  const now = Date.now();
+  const windowStart = now - MAMAS_CORNER_WINDOW_MS;
+  let hits = mamasCornerRateState.get(userId) || [];
+  hits = hits.filter((timestamp) => timestamp > windowStart);
+  if (hits.length >= MAMAS_CORNER_MAX_REQUESTS) {
+    mamasCornerRateState.set(userId, hits);
+    return true;
+  }
+  hits.push(now);
+  mamasCornerRateState.set(userId, hits);
+  return false;
+}
 
 const caregiverInstructions = (caregiverName, caregiverStyle) => `You are ${caregiverName}'s Corner: a warm, playful, ${caregiverStyle} AI companion in this user's private PlushLife profile. You are here to make ordinary care feel softer, smaller, and more doable.
 
@@ -67,7 +89,17 @@ export default {
     if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
 
     const user = await authenticatedUser(request);
-    if ((user?.email || "").trim().toLowerCase() !== MAMA_EMAIL) return json({ error: "Mommy's Corner is private to its invited profile." }, 403);
+    // Gate on the immutable auth user id, configured outside the source via
+    // the OWNER_USER_ID Worker env var (see wrangler.jsonc). The previous
+    // email-based gate broke whenever the owner's email changed, and email
+    // is a mutable identifier.
+    const ownerUserId = (env.OWNER_USER_ID || "").trim();
+    if (!ownerUserId || user?.id !== ownerUserId) {
+      return json({ error: "Mommy's Corner is private to its invited profile." }, 403);
+    }
+    if (mamasCornerRateLimited(user.id)) {
+      return json({ error: "Mommy's Corner is resting for a little while. Please try again soon." }, 429);
+    }
 
     let body;
     try { body = await request.json(); } catch (_error) { return json({ error: "Please send a valid message." }, 400); }

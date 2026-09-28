@@ -1,2 +1,0 @@
-PlushLife 1.0.39 closed-testing release trigger.
-Includes the PlushGuide performance fix that removes artificial waits and shows the tour card immediately while the spotlight attaches asynchronously.

@@ -1,4 +1,4 @@
-const CACHE_NAME = "plushlife-v66";
+const CACHE_NAME = "plushlife-v67";
 const APP_SHELL = [
   "./",
   "./login.html",
@@ -7,6 +7,11 @@ const APP_SHELL = [
   "./support.html",
   "./account-deletion.html",
   "./manifest.webmanifest",
+  "./vendor/react.production.min.js",
+  "./vendor/react-dom.production.min.js",
+  "./vendor/supabase.min.js",
+  "./assets/fast-start.js",
+  "./assets/plush-tools-fix.js",
   "./assets/care-upgrades.js",
   "./assets/entitlements.js",
   "./assets/plush-content.js",
@@ -19,7 +24,6 @@ const APP_SHELL = [
   "./assets/plushlife-completion.js",
   "./assets/cloudflare-primary.js",
   "./assets/plush-guide.js",
-  "./assets/thunderstorm.mp3",
   "./assets/app.bundle.js",
   "./icon.svg?v=2",
   "./icon-192.png",
@@ -27,6 +31,10 @@ const APP_SHELL = [
   "./icon-maskable-192.png",
   "./icon-maskable-512.png",
 ];
+// NOTE: ./assets/thunderstorm.mp3 is intentionally NOT precached — at 1.6MB it
+// would force every user to re-download it on each cache-version bump. Audio
+// requests are cached stale-while-revalidate on first play (see the fetch
+// handler below), which is the right tradeoff for a large media file.
 const PRIVATE_TRACKER_URL = new URL("./", self.registration.scope).href;
 
 function privateTrackerUrl(candidate) {
