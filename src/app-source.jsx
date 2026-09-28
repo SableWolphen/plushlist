@@ -6032,7 +6032,7 @@ function GlowUpTracker() {
   })();
 
   return (
-    <div id="main-content" tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""}${babyMode && isNightHour ? " baby-night" : ""} appearance-${appearanceTheme}`} style={{
+    <div id="main-content" tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""}${babyMode && isNightHour ? " baby-night" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
       background: babyMode ? "#FFF0FA" : dinoPalette.background,
       backgroundImage: babyMode && isNightHour ? `
