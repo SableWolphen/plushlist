@@ -5830,6 +5830,18 @@ function GlowUpTracker() {
     if (dayType === "soft") return { ...selectedAppearanceTheme, background: "#F5F0FA", glowA: "#E8DDF070", glowB: "#E0E6F270", glowC: "#F1E6E960", glowD: "#DDECE760" };
     return selectedAppearanceTheme;
   })();
+  /* Dino Theme palette: pastel dino-meadow washes (pink/lavender/mint) so the
+     cute look from the design reference sticks instead of reverting. */
+  const dinoPalette = dinoTheme ? {
+    ...softLightPalette,
+    background: "#FFF4F9",
+    glowA: "#FFD3E870",
+    glowB: "#DCC9F570",
+    glowC: "#FFE9C970",
+    glowD: "#CDEEDD70",
+    wash: "#FFF7FBDD",
+    accent: "#C77DD6",
+  } : softLightPalette;
   /* Theme regression marker retained for validation: !["soft", "soft-light"].includes(appearanceTheme)
  * Ambient themes remain visible through the dedicated theme layer; the old heavy frame stays removed.
  */
@@ -6017,32 +6029,32 @@ function GlowUpTracker() {
   return (
     <div id="main-content" tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
-      background: babyMode ? "#FFF0FA" : softLightPalette.background,
+      background: babyMode ? "#FFF0FA" : dinoPalette.background,
       backgroundImage: preferences.simple_mode ? "none" : babyMode ? `
         radial-gradient(circle at 8% 9%, #FFBFE4 0%, transparent 34%),
         radial-gradient(circle at 93% 8%, #BDEBFF 0%, transparent 35%),
         radial-gradient(circle at 88% 91%, #FFF0A8 0%, transparent 38%),
         radial-gradient(circle at 9% 88%, #C8F4DE 0%, transparent 38%)
       ` : `
-        linear-gradient(135deg, ${softLightPalette.wash}, transparent 64%),
-        radial-gradient(circle at 8% 12%, ${softLightPalette.glowA} 0%, transparent 42%),
-        radial-gradient(circle at 92% 8%, ${softLightPalette.glowB} 0%, transparent 42%),
-        radial-gradient(circle at 85% 90%, ${softLightPalette.glowC} 0%, transparent 48%),
-        radial-gradient(circle at 10% 85%, ${softLightPalette.glowD} 0%, transparent 48%)
+        linear-gradient(135deg, ${dinoPalette.wash}, transparent 64%),
+        radial-gradient(circle at 8% 12%, ${dinoPalette.glowA} 0%, transparent 42%),
+        radial-gradient(circle at 92% 8%, ${dinoPalette.glowB} 0%, transparent 42%),
+        radial-gradient(circle at 85% 90%, ${dinoPalette.glowC} 0%, transparent 48%),
+        radial-gradient(circle at 10% 85%, ${dinoPalette.glowD} 0%, transparent 48%)
       `,
-      fontFamily: babyMode ? "'Comic Sans MS','Nunito','Segoe UI',sans-serif" : "'Avenir Next','Segoe UI',system-ui,sans-serif",
+      fontFamily: babyMode ? "'Comic Sans MS','Nunito','Segoe UI',sans-serif" : dinoTheme ? "'Baloo 2','Nunito','Avenir Next','Segoe UI',system-ui,sans-serif" : "'Avenir Next','Segoe UI',system-ui,sans-serif",
       color: preferences.high_contrast ? "#2D2038" : "#5B4B6B",
       fontSize: babyMode ? "118%" : "100%",
       padding: "max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))",
       position: "relative",
       isolation: "isolate",
-      "--pl-theme-bg": softLightPalette.background,
-      "--pl-theme-accent": selectedAppearanceTheme.accent,
-      "--pl-theme-glow-a": softLightPalette.glowA,
-      "--pl-theme-glow-b": softLightPalette.glowB,
-      "--pl-theme-glow-c": softLightPalette.glowC,
-      "--pl-theme-glow-d": softLightPalette.glowD,
-      "--pl-theme-wash": softLightPalette.wash,
+      "--pl-theme-bg": dinoPalette.background,
+      "--pl-theme-accent": dinoTheme ? "#C77DD6" : selectedAppearanceTheme.accent,
+      "--pl-theme-glow-a": dinoPalette.glowA,
+      "--pl-theme-glow-b": dinoPalette.glowB,
+      "--pl-theme-glow-c": dinoPalette.glowC,
+      "--pl-theme-glow-d": dinoPalette.glowD,
+      "--pl-theme-wash": dinoPalette.wash,
       boxShadow: "none",
     }}>
       <div className="pl-ambient-theme-layer" aria-hidden="true" />
@@ -6225,6 +6237,35 @@ function GlowUpTracker() {
         .appearance-meadow:not(.baby-mode):not(.dino-theme) button {
           box-shadow: 0 3px 10px rgba(55,43,102,.12);
         }
+        /* ============ Dino Theme: pastel dino-meadow look (matches design reference) ============
+           Sticker cards, toy-pill buttons, circle checkboxes, floating dino touches. */
+        .dino-theme .pl-unified-wordmark{font-family:"Baloo 2","Nunito","Avenir Next",sans-serif;font-style:normal;color:#E0609A;letter-spacing:-.5px;text-shadow:0 2px 0 rgba(255,255,255,.7)}
+        .dino-theme .pl-unified-wordmark span{color:#F06BA7;filter:drop-shadow(0 2px 4px rgba(240,107,167,.25))}
+        .dino-theme .pl-home-brand{font-family:"Baloo 2","Nunito",sans-serif;color:#E0609A}
+        .dino-theme .pl-unified-page-title h2{font-family:"Baloo 2","Nunito",sans-serif;color:#4A2E5E;letter-spacing:-.3px}
+        .dino-theme .pl-kicker{color:#C05BD1}
+        .dino-theme [data-plushlife-compact-card],
+        .dino-theme section[aria-label="Tasks today"],
+        .dino-theme section[aria-label="Habits today"],
+        .dino-theme section[aria-label="Today schedule"]{border-radius:26px!important;border:2px solid #F3DDF2!important;box-shadow:0 10px 24px rgba(190,120,200,.10)!important;background:#fff!important}
+        .dino-theme .pl-list-row{border-radius:20px!important;border:2px solid #F3DDF2!important;background:rgba(255,255,255,.92)!important;box-shadow:0 4px 12px rgba(190,120,200,.06)!important}
+        .dino-theme .pl-check{border-radius:50%!important;border:2px solid #DEA8D9!important;background:#fff!important}
+        .dino-theme .pl-btn-primary{background:linear-gradient(135deg,#C75EDB,#D97DDC)!important;color:#fff!important;border-radius:999px!important;box-shadow:0 8px 18px rgba(190,92,203,.2),0 3px 0 #A34DB4!important}
+        .dino-theme .pl-btn-primary:active{transform:translateY(2px);box-shadow:0 4px 10px rgba(190,92,203,.18),0 1px 0 #A34DB4!important}
+        .dino-theme .pl-btn-ghost{background:#fff!important;color:#A452BD!important;border-radius:999px!important}
+        .dino-theme .pl-time{background:#FBE7FA!important;color:#A63DBD!important;border-radius:999px!important}
+        .dino-theme .pl-app-bottom-nav{background:linear-gradient(180deg,rgba(255,253,254,.97),rgba(255,240,250,.97))!important;border-top:2px solid #F3DDF2!important;box-shadow:0 -5px 18px rgba(190,120,200,.10)!important}
+        .dino-theme .pl-app-nav-add{background:linear-gradient(135deg,#C75EDB,#D97DDC)!important;box-shadow:0 8px 18px rgba(190,92,203,.28),0 3px 0 #A34DB4!important;color:#fff!important}
+        .dino-theme .pl-app-nav-btn{color:#9A7BA8}
+        .dino-theme .pl-app-nav-btn[aria-current="page"],.dino-theme .pl-app-nav-btn.active{color:#B44CC7}
+        .dino-theme .pl-home-hero{position:relative}
+        .dino-theme .pl-home-hero:after{content:"🦕";position:absolute;right:10px;top:6px;font-size:30px;opacity:.9;pointer-events:none;animation:pl-dino-bob 3.2s ease-in-out infinite}
+        .dino-theme .pl-unified-page-hero{position:relative}
+        .dino-theme .pl-unified-page-hero:after{content:"🦕✨";position:absolute;right:12px;top:8px;font-size:26px;opacity:.85;pointer-events:none;animation:pl-dino-bob 3.2s ease-in-out infinite}
+        @keyframes pl-dino-bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-7px) rotate(4deg)}}
+        .dino-theme .pl-noticed{border:2px solid #F3DDF2!important;border-radius:22px!important;background:#FFFBFE!important}
+        .dino-theme input,.dino-theme textarea,.dino-theme select{border-radius:16px!important;border:2px solid #F3DDF2!important}
+        .dino-theme .pl-link-btn{color:#B44CC7!important}
         .dash-arrow { flex-shrink: 0; }
         @media (max-width: 640px) {
           .dash-arrow { display: none; }
