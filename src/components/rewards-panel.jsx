@@ -13,17 +13,17 @@ export function RewardsPanel({ open, onClose, FeatureTip, selectedOutfit, mascot
   if (!open) return null;
   const { MASCOT_OUTFITS } = window.PlushLifeContent;
   return (
-          <ToolPanel title="Rewards" onClose={onClose}>
+          <ToolPanel title="🧸 Plush & Keepsakes" onClose={onClose}>
           <FeatureTip id="rewards_panel" text="Everything here is earned from all kinds of care, not just streaks — and once unlocked, nothing is ever taken away." />
           <div style={{ marginBottom: 18, padding: 17, borderRadius: 20, background: "linear-gradient(145deg,#FFF8FC 0%,#F4EEFF 55%,#FFF7E8 100%)", border: "1px solid #E6D2E8", boxShadow: "0 12px 30px rgba(100,62,118,.08), inset 0 1px 0 rgba(255,255,255,.9)" }}>
             <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
               <PlushMascot outfit={selectedOutfit} size={132} mood={mascotMood} activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
               <div style={{ flex: "1 1 190px" }}>
-                <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: ".16em", color: "#A56D14" }}>MASCOT CLOSET + BADGES</div>
+                <div style={{ fontSize: 10.5, fontWeight: 950, letterSpacing: ".15em", color: "#A957B7" }}>YOUR PLUSH CORNER</div>
                 <div style={{ marginTop: 4, fontSize: 20, fontWeight: 900, color: "#5B4B6B" }}>{selectedOutfit.name}</div>
                 {mascotGrowth.label !== "new" && <div style={{ marginTop: 2, fontSize: 12, fontWeight: 800, color: "#A65DC1" }}>Your companion is {mascotGrowth.label} ✨</div>}
                 <div style={{ marginTop: 7, fontSize: 12.5, lineHeight: 1.5, color: "#7B6888" }}>
-                  Your collection follows your signed-in account. Rewards can come from showing up, completing care, building a helpful habit, or gently reducing a habit. Once unlocked, each reward stays yours.
+                  Every little bit of care helps your PlushLife grow. Outfits, badges, and keepsakes celebrate showing up — without taking anything away when life gets messy.
                 </div>
                 <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 9 }}>
                   <span style={{ padding: "5px 9px", borderRadius: 999, background: "#FFF4CF", color: "#94600D", fontWeight: 900, fontSize: 11.5 }}>👋 Active days: {activityDaysTotal}</span>
