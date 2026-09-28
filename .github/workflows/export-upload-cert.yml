@@ -1,0 +1,39 @@
+name: Export upload key certificate
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  export-cert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Decode signing keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > /tmp/release.keystore
+
+      - name: Export upload certificate (PEM)
+        env:
+          PLUSHLIFE_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          PLUSHLIFE_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          keytool -exportcert -rfc -keystore /tmp/release.keystore \
+            -storepass "$PLUSHLIFE_KEYSTORE_PASSWORD" \
+            -alias "$PLUSHLIFE_KEY_ALIAS" > upload-key-cert.pem
+          keytool -printcert -file upload-key-cert.pem | head -8
+          rm -f /tmp/release.keystore
+
+      - name: Upload certificate artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: upload-key-cert
+          path: upload-key-cert.pem
+          retention-days: 30
