@@ -37,6 +37,8 @@ const focusTimer = read("src/components/focus-timer.jsx");
 const quickCapture = read("src/components/quick-capture.jsx");
 const onboardingArc = read("src/components/onboarding-arc.jsx");
 const eveningGratitude = read("src/components/evening-gratitude.jsx");
+const shareCard = read("src/components/share-card.js");
+const shareWinModal = read("src/components/share-win-modal.jsx");
 const tasksPanel = read("src/components/tasks-panel.jsx");
 
 const checks = [
@@ -128,6 +130,10 @@ const checks = [
   [appSource.includes('paused_until: someday ? "2099-12-31"') , "Someday quick-adds park as paused-indefinite tasks (resumable, no schema change)"],
   [onboardingArc.includes("plushlife:onboarding-arc:v1") && onboardingArc.includes("DAY {dayIndex} OF 7"), "the 7-day onboarding arc tracks one dismissible nudge per day locally"],
   [eveningGratitude.includes("plushlife:gratitude") && appSource.includes('addEventListener("plushlife:gratitude"') && appSource.includes("One good thing:"), "evening gratitude flows into today's private note via the existing upsert"],
+  // Share-a-win growth loop: real shareable cards, no screenshot instructions
+  [shareCard.includes("drawWinCard") && shareCard.includes("drawWeeklyCard") && shareCard.includes("sharePngFile") && shareCard.includes("PLUSH_APP_URL"), "share-card lib renders win + weekly cards and shares via Web Share API with fallbacks"],
+  [eveningGratitude.includes("ShareWinModalLazy") && eveningGratitude.includes("React.lazy") && eveningGratitude.includes("Share your win") && shareWinModal.includes("outside your private journal"), "evening gratitude offers an explicit, privacy-noted share action after saving (lazy-loaded)"],
+  [appSource.includes("shareWeeklyCard") && appSource.includes("drawWeeklyCard") && !appSource.includes("Take a screenshot to share"), "weekly share card shares a real image instead of asking for a screenshot"],
 ];
 
 const failures = checks.filter(([ok]) => !ok).map(([, label]) => label);

@@ -9,6 +9,10 @@
 const GRATITUDE_STORAGE_KEY = "plushlife:evening-gratitude:v1";
 const EVENING_HOUR = 18;
 
+// The share modal (and its canvas renderer) loads on first tap, never at
+// startup — sharing is a rare action and must not cost the critical path.
+const ShareWinModalLazy = React.lazy(() => import("./share-win-modal.jsx").then((module) => ({ default: module.ShareWinModal })));
+
 function readGratitudeState() {
   try { return JSON.parse(window.localStorage.getItem(GRATITUDE_STORAGE_KEY) || "{}") || {}; }
   catch (_error) { return {}; }
@@ -29,6 +33,7 @@ export function EveningGratitude() {
   const [text, setText] = React.useState("");
   const [saved, setSaved] = React.useState(false);
   const [hidden, setHidden] = React.useState(true);
+  const [shareOpen, setShareOpen] = React.useState(false);
 
   React.useEffect(() => {
     const state = readGratitudeState();
@@ -82,12 +87,26 @@ export function EveningGratitude() {
           </div>
         </>
       ) : (
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span aria-hidden="true" style={{ fontSize: 26 }}>💜</span>
-          <div style={{ fontSize: 13, lineHeight: 1.5, color: "#6B5A7D" }}>
-            <strong style={{ color: "#3E2458" }}>Tucked away.</strong> Your wins jar holds it now — sleep well.
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span aria-hidden="true" style={{ fontSize: 26 }}>💜</span>
+            <div style={{ fontSize: 13, lineHeight: 1.5, color: "#6B5A7D", flex: 1 }}>
+              <strong style={{ color: "#3E2458" }}>Tucked away.</strong> Your wins jar holds it now — sleep well.
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={() => setShareOpen(true)}
+            style={{ marginTop: 10, width: "100%", padding: "10px 12px", minHeight: 44, borderRadius: 12, border: "1px solid #D994E7", background: "white", color: "#75428C", fontWeight: 900, fontSize: 13, cursor: "pointer" }}
+          >
+            Share your win 🌟
+          </button>
         </div>
+      )}
+      {shareOpen && (
+        <React.Suspense fallback={null}>
+          <ShareWinModalLazy winText={text.trim()} onClose={() => setShareOpen(false)} />
+        </React.Suspense>
       )}
     </section>
   );

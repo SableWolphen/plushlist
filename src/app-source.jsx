@@ -912,6 +912,41 @@ function GlowUpTracker() {
 
   const [collectionOpen, setCollectionOpen] = useState(false);
   const [shareCardOpen, setShareCardOpen] = useState(false);
+  // Share-card rendering stays out of the critical entry bundle: the canvas
+  // module loads on first share tap, never at startup.
+  const loadShareCardModule = () => import("./components/share-card.js");
+  const weeklyShareRangeLabel = () => {
+    try {
+      const fmt = (d) => new Date(`${d}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      return `${fmt(period.weekStart)} – ${fmt(period.date)}`;
+    } catch (_error) { return ""; }
+  };
+  const renderWeeklyShareCanvas = async () => {
+    const mod = await loadShareCardModule();
+    const canvas = mod.makeShareCanvas();
+    mod.drawWeeklyCard(canvas, {
+      pct: weeklyOverallPct,
+      careDays: careDaysTotal,
+      badges: earnedBadgeIdSet.size,
+      caringDays,
+      rangeLabel: weeklyShareRangeLabel(),
+    });
+    return { mod, canvas };
+  };
+  const shareWeeklyCard = async () => {
+    try {
+      const { mod, canvas } = await renderWeeklyShareCanvas();
+      const text = mod.buildWeeklyShareText({ pct: weeklyOverallPct, careDays: careDaysTotal });
+      const result = await mod.sharePngFile({ canvas, filename: mod.weeklyCardFilename(), title: "My PlushLife week", text });
+      if (result === "fallback") await mod.downloadPng(canvas, mod.weeklyCardFilename());
+    } catch (_error) {}
+  };
+  const saveWeeklyCard = async () => {
+    try {
+      const { mod, canvas } = await renderWeeklyShareCanvas();
+      await mod.downloadPng(canvas, mod.weeklyCardFilename());
+    } catch (_error) {}
+  };
   const [dailyCheckIn, setDailyCheckIn] = useState({ capacity: null, mood: null, energy: null, day_type: "full", support_preference: null, soft_day: false, custom_essentials: null });
   const [dailyCheckInHistory, setDailyCheckInHistory] = useState([]);
   const [careSessionHistory, setCareSessionHistory] = useState([]);
@@ -6257,7 +6292,10 @@ function GlowUpTracker() {
               <div style={{ marginTop: 18, fontSize: 11, color: "#8C6B9E" }}>{new Date(`${period.weekStart}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })} – {new Date(`${period.date}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>
             </div>
             <div style={{ marginTop: 12, textAlign: "center" }}>
-              <div style={{ fontSize: 11.5, color: "rgba(255,255,255,0.85)" }}>Take a screenshot to share 💛</div>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+                <button type="button" onClick={shareWeeklyCard} style={{ padding: "10px 18px", minHeight: 44, borderRadius: 12, border: 0, background: "linear-gradient(135deg,#B95DCA,#DB78BF)", color: "white", fontWeight: 900, fontSize: 13, cursor: "pointer" }}>Share 💜</button>
+                <button type="button" onClick={saveWeeklyCard} style={{ padding: "10px 18px", minHeight: 44, borderRadius: 12, border: "1px solid rgba(255,255,255,0.4)", background: "transparent", color: "white", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>Save image</button>
+              </div>
               <button type="button" onClick={() => setShareCardOpen(false)} style={{ marginTop: 8, padding: "9px 16px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.4)", background: "transparent", color: "white", fontWeight: 800, cursor: "pointer" }}>Close</button>
             </div>
           </div>
