@@ -18,10 +18,12 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const UPDATES = [
+  { releasedAt: "2026-09-28", title: "Low-energy days get a kinder plan", summary: "When your check-in says energy is low, PlushLife now shapes a small, time-boxed version of your day from the tasks you marked essential — nothing is ever rewritten or erased." },
+  { releasedAt: "2026-09-28", title: "Rest days finally feel like rest", summary: "Tap rest and the day becomes a calm screen with a gentle affirmation and comfort suggestions. Rest counts as care here." },
+  { releasedAt: "2026-09-28", title: "A gentle timer that never scolds", summary: "Start a 2, 5, 10, or 25-minute pocket of time with a soft chime at the end. Stopping early is always okay." },
+  { releasedAt: "2026-09-28", title: "Park a thought in seconds", summary: "Quick capture adds a task for today, tomorrow, or someday with one field — no forms, no decisions." },
   { releasedAt: "2026-09-15", title: "Full, Soft, and Tiny now shape your day", summary: "PlushLife can use gentler task versions and a rough energy budget so your plan fits the capacity you actually have." },
-  { releasedAt: "2026-09-15", title: "Next Step got smarter", summary: "Next Step now weighs your current capacity, task size, timing, and what has worked for you before." },
   { releasedAt: "2026-09-15", title: "Coming back does not mean catching up", summary: "Return and recovery flows are designed to help you restart gently instead of making missed days feel like debt." },
-  { releasedAt: "2026-09-15", title: "Weekly progress celebrates adapting", summary: "Weekly reflections can now recognize when you chose a softer plan instead of forcing the same routine every day." },
 ];
 
 function json(body: unknown, status = 200) {
