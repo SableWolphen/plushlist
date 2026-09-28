@@ -265,3 +265,367 @@
   #main-content .pl-home-bubble{right:8px!important;bottom:7px!important;font-size:8px!important;max-width:130px!important}
   #main-content [data-plushlife-home-stack]>section:not(.pl-home-hero){border-radius:16px!important}
 }
+
+
+/* 2026 reference-lock pass: geometry and scene treatment match the approved mockups. */
+#main-content{
+  --pl-phone-max:760px;
+}
+#main-content .pl-home-shell,
+#main-content .pl-unified-page-shell{
+  width:min(100%,var(--pl-phone-max));
+  margin-inline:auto;
+}
+#main-content .pl-home-hero{
+  position:relative;
+  overflow:hidden;
+  min-height:280px!important;
+  border-radius:0 0 28px 28px!important;
+  border:0!important;
+  box-shadow:inset 0 -1px 0 color-mix(in srgb,var(--pl-theme-line) 70%,transparent);
+}
+#main-content .pl-home-hero:before{
+  content:"";
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 110%,rgba(255,255,255,.95) 0 18%,transparent 42%),
+    radial-gradient(circle at 14% 58%,rgba(255,255,255,.52),transparent 25%),
+    radial-gradient(circle at 86% 48%,rgba(255,255,255,.44),transparent 27%);
+}
+#main-content .pl-home-brand{
+  left:50%!important;right:auto!important;top:18px!important;
+  transform:translateX(-50%);
+  width:max-content;max-width:74%;
+  text-align:center;
+}
+#main-content .pl-home-logo{
+  font-size:34px!important;
+  line-height:1!important;
+  text-shadow:0 3px 10px rgba(106,64,128,.10);
+}
+#main-content .pl-home-tagline{
+  margin-top:7px!important;
+  font-size:12px!important;
+  font-weight:850!important;
+  letter-spacing:.01em!important;
+  color:var(--pl-theme-muted)!important;
+}
+#main-content .pl-home-actions{
+  top:16px!important;right:14px!important;gap:6px!important;
+}
+#main-content .pl-home-date{display:none!important}
+#main-content .pl-home-timer{display:none!important}
+#main-content .pl-home-settings{
+  width:44px!important;height:44px!important;min-height:44px!important;
+  border-radius:50%!important;font-size:18px!important;
+}
+#main-content .pl-home-copy{
+  left:18px!important;bottom:20px!important;
+  width:43%!important;z-index:4!important;
+}
+#main-content .pl-home-copy h1{
+  font-size:24px!important;
+  line-height:1.05!important;
+  letter-spacing:-.02em!important;
+  color:var(--pl-theme-ink)!important;
+}
+#main-content .pl-home-copy p{
+  margin-top:7px!important;
+  font-size:12px!important;line-height:1.32!important;font-weight:760!important;
+}
+#main-content .pl-home-plush{
+  width:47%!important;height:61%!important;
+  right:5%!important;bottom:2%!important;
+  display:flex!important;align-items:flex-end!important;justify-content:center!important;
+}
+#main-content .pl-home-plush .plush-mascot{
+  width:146px!important;height:146px!important;
+  filter:drop-shadow(0 12px 18px rgba(73,39,87,.14))!important;
+}
+#main-content .pl-home-bubble{
+  right:14px!important;bottom:15px!important;
+  max-width:160px!important;
+  border-radius:999px!important;
+  padding:6px 10px!important;
+  background:rgba(255,255,255,.74)!important;
+  border:1px solid color-mix(in srgb,var(--pl-theme-line) 88%,white)!important;
+  color:var(--pl-theme-ink)!important;
+  font-size:9.5px!important;font-weight:850!important;
+  box-shadow:0 5px 14px color-mix(in srgb,var(--pl-theme-accent) 9%,transparent)!important;
+}
+#main-content [data-plushlife-home-stack]{
+  gap:10px!important;
+}
+#main-content [data-plushlife-home-stack]>section:not(.pl-home-hero),
+#main-content .pl-home-shortcuts>button,
+#main-content .pl-noticed{
+  border-radius:22px!important;
+  border-width:1px!important;
+  border-color:color-mix(in srgb,var(--pl-theme-line) 88%,white)!important;
+  background:linear-gradient(145deg,
+    color-mix(in srgb,var(--pl-theme-surface) 96%,transparent),
+    color-mix(in srgb,var(--pl-theme-surface-2) 88%,transparent))!important;
+  box-shadow:0 10px 24px color-mix(in srgb,var(--pl-theme-accent) 8%,transparent)!important;
+}
+#main-content .pl-list{gap:5px!important}
+#main-content .pl-list-row{
+  border-width:1px!important;
+  border-radius:16px!important;
+  border-color:color-mix(in srgb,var(--pl-theme-line) 80%,white)!important;
+  background:rgba(255,255,255,.76)!important;
+  box-shadow:none!important;
+}
+#main-content .pl-check{
+  width:22px!important;height:22px!important;
+  border-width:2px!important;
+  border-color:color-mix(in srgb,var(--pl-theme-accent) 58%,white)!important;
+}
+#main-content .pl-kicker{
+  color:var(--pl-theme-ink)!important;
+  font-size:12px!important;
+  letter-spacing:0!important;
+  text-transform:none!important;
+}
+#main-content .pl-row-text{
+  color:var(--pl-theme-ink)!important;
+  font-weight:750!important;
+}
+#main-content .pl-home-shortcuts{
+  gap:10px!important;
+}
+#main-content .pl-shortcut{
+  min-height:76px!important;
+}
+#main-content .pl-noticed{
+  min-height:68px!important;
+}
+
+/* Lavender is the signature visual world. */
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-home-hero{
+  background:
+    radial-gradient(circle at 18% 22%,rgba(255,255,255,.88),transparent 23%),
+    radial-gradient(circle at 78% 24%,#FFF4CE 0 5%,transparent 12%),
+    linear-gradient(155deg,#F2E8FF 0%,#F8EEFF 42%,#FFEFF8 100%)!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-home-hero:after{
+  content:"✦  ♡  ☾  ✦";position:absolute;inset:auto 8% 18% auto;
+  color:#C17BD7;font-size:21px;letter-spacing:8px;opacity:.55;pointer-events:none;
+}
+
+/* Pink reference: warm blush, clouds and soft heart accents. */
+#main-content.appearance-pink:not(.baby-mode) .pl-home-hero{
+  background:
+    radial-gradient(circle at 12% 26%,#FFF6FB 0 13%,transparent 31%),
+    radial-gradient(circle at 88% 35%,#FFF2F8 0 15%,transparent 33%),
+    linear-gradient(150deg,#FFDCEB 0%,#FFEAF4 48%,#F5E6FF 100%)!important;
+}
+#main-content.appearance-pink .pl-home-hero:after{
+  content:"♡  ♥  ✦";position:absolute;right:11%;top:34%;color:#F079B6;
+  font-size:24px;letter-spacing:8px;opacity:.48;
+}
+
+/* Mint reference: airy garden world. */
+#main-content.appearance-meadow:not(.dino-theme) .pl-home-hero{
+  background:
+    radial-gradient(circle at 18% 18%,#FFFBD7 0 4%,transparent 13%),
+    radial-gradient(circle at 80% 22%,rgba(255,255,255,.8),transparent 24%),
+    linear-gradient(150deg,#E9F8EF 0%,#F0FFF8 45%,#E6F3FF 100%)!important;
+}
+#main-content.appearance-meadow .pl-home-hero:after{
+  content:"☘  ✦  ♡";position:absolute;right:9%;top:38%;font-size:24px;
+  color:#62A77E;letter-spacing:8px;opacity:.58;
+}
+
+/* Peach reference: warm sunrise / bedroom glow. */
+#main-content.appearance-peach .pl-home-hero{
+  background:
+    radial-gradient(circle at 16% 20%,#FFF8D7 0 9%,transparent 20%),
+    radial-gradient(circle at 82% 24%,#FFE4C8 0 12%,transparent 28%),
+    linear-gradient(150deg,#FFE5D1 0%,#FFF1E2 50%,#FFD9E3 100%)!important;
+}
+#main-content.appearance-peach .pl-home-hero:after{
+  content:"🍑  ♡  ✦";position:absolute;right:8%;top:36%;font-size:22px;
+  letter-spacing:7px;opacity:.5;
+}
+
+/* Strawberry reference: pinker, playful, berry-soft. */
+#main-content.appearance-strawberry .pl-home-hero{
+  background:
+    radial-gradient(circle at 22% 18%,#FFF8FB 0 12%,transparent 26%),
+    radial-gradient(circle at 80% 20%,#FFD4E2 0 10%,transparent 25%),
+    linear-gradient(150deg,#FFCFE0 0%,#FFE7EF 48%,#F3DFFF 100%)!important;
+}
+#main-content.appearance-strawberry .pl-home-hero:after{
+  content:"🍓  ♡  ✦";position:absolute;right:9%;top:35%;font-size:22px;
+  letter-spacing:7px;opacity:.52;
+}
+
+/* Cloud / blue reference. */
+#main-content.appearance-soft-light:not(.baby-mode) .pl-home-hero{
+  background:
+    radial-gradient(circle at 14% 23%,rgba(255,255,255,.95) 0 16%,transparent 34%),
+    radial-gradient(circle at 83% 18%,#FFF7CB 0 5%,transparent 13%),
+    linear-gradient(150deg,#E9F3FF 0%,#EEF1FF 45%,#F6E9FF 100%)!important;
+}
+#main-content.appearance-soft-light .pl-home-hero:after{
+  content:"☁  ✦  ♡";position:absolute;right:9%;top:36%;font-size:23px;
+  letter-spacing:7px;color:#7A8FD8;opacity:.46;
+}
+
+/* Night reference: truly turns the top half into a glowing bedroom sky. */
+#main-content.appearance-twilight:not(.baby-mode) .pl-home-hero{
+  background:
+    radial-gradient(circle at 77% 22%,#FFE688 0 8%,transparent 9%),
+    radial-gradient(circle at 74% 21%,#FFF1B0 0 11%,transparent 17%),
+    radial-gradient(circle at 16% 22%,rgba(255,255,255,.10),transparent 24%),
+    linear-gradient(180deg,#171B4D 0%,#262B70 48%,#4B408E 100%)!important;
+}
+#main-content.appearance-twilight:not(.baby-mode) .pl-home-hero:after{
+  content:"✦  ★  ✧  ★  ✦";position:absolute;right:8%;top:28%;
+  color:#FFD56B;font-size:21px;letter-spacing:9px;opacity:.95;
+}
+#main-content.appearance-twilight:not(.baby-mode) .pl-home-brand,
+#main-content.appearance-twilight:not(.baby-mode) .pl-home-copy{
+  color:white!important;
+}
+#main-content.appearance-twilight:not(.baby-mode) .pl-home-logo,
+#main-content.appearance-twilight:not(.baby-mode) .pl-home-tagline,
+#main-content.appearance-twilight:not(.baby-mode) .pl-home-copy h1,
+#main-content.appearance-twilight:not(.baby-mode) .pl-home-copy p{
+  color:white!important;
+}
+
+/* Dino reference: use the actual repo illustration as the hero world. */
+#main-content.dino-theme .pl-home-hero{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.03),rgba(245,235,255,.14)),
+    url("./dino-garden.jpg") center 48% / cover no-repeat!important;
+  min-height:305px!important;
+}
+#main-content.dino-theme .pl-home-hero:before{
+  background:linear-gradient(180deg,rgba(255,255,255,.20),transparent 30%,rgba(255,248,253,.24) 100%)!important;
+}
+#main-content.dino-theme .pl-home-copy{
+  background:rgba(255,255,255,.58);
+  border:1px solid rgba(255,255,255,.72);
+  border-radius:18px;padding:8px 10px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+#main-content.dino-theme .pl-home-hero:after{
+  content:"🦕  🌱  ✦";right:8%;top:44%;font-size:22px!important;opacity:.78!important;
+}
+
+/* Baby Mode reference: nursery peach/pink with a comfort-first hero. */
+#main-content.baby-mode .pl-home-hero{
+  min-height:320px!important;
+  background:
+    radial-gradient(circle at 78% 18%,#FFF2A7 0 5%,transparent 11%),
+    radial-gradient(circle at 18% 22%,#FFF8FB 0 13%,transparent 29%),
+    linear-gradient(155deg,#FFF2F8 0%,#F4ECFF 42%,#FFE8DC 100%)!important;
+}
+#main-content.baby-mode .pl-home-brand{
+  top:18px!important;
+}
+#main-content.baby-mode .pl-home-tagline:after{
+  content:" · Baby Mode";
+  color:#E66CB6;
+}
+#main-content.baby-mode .pl-home-copy h1{
+  font-size:25px!important;
+}
+#main-content.baby-mode .pl-home-copy p{
+  font-size:12.5px!important;
+}
+#main-content.baby-mode .pl-home-hero:after{
+  content:"☾  ★  ♡";right:9%;top:36%;font-size:24px;letter-spacing:8px;
+  color:#E596C8;opacity:.72;
+}
+#main-content.baby-night .pl-home-hero{
+  background:
+    radial-gradient(circle at 75% 20%,#FFE27D 0 8%,transparent 9%),
+    radial-gradient(circle at 76% 20%,#FFF1B6 0 11%,transparent 17%),
+    linear-gradient(180deg,#24295E 0%,#3B3A82 48%,#6752A3 100%)!important;
+}
+#main-content.baby-night .pl-home-logo,
+#main-content.baby-night .pl-home-tagline,
+#main-content.baby-night .pl-home-copy h1,
+#main-content.baby-night .pl-home-copy p{color:white!important}
+
+/* Focus/Simple reference: less art, larger task-first content, still unmistakably PlushLife. */
+#main-content.simple-mode .pl-home-hero{
+  min-height:230px!important;
+}
+#main-content.simple-mode .pl-home-brand{
+  left:18px!important;transform:none!important;text-align:left!important;
+  max-width:55%!important;
+}
+#main-content.simple-mode .pl-home-copy{
+  left:18px!important;bottom:22px!important;width:46%!important;
+}
+#main-content.simple-mode .pl-home-bubble{display:none!important}
+#main-content.simple-mode .pl-home-hero:after{opacity:.22!important}
+
+/* Guardians / PlushSupport reference. */
+#main-content.guardian-view .pl-unified-page-hero{
+  min-height:190px!important;
+  border-radius:0 0 28px 28px!important;
+  background:
+    radial-gradient(circle at 80% 38%,#F6D8FF 0 16%,transparent 38%),
+    radial-gradient(circle at 14% 50%,rgba(255,255,255,.82),transparent 28%),
+    linear-gradient(150deg,#F2E9FF,#FFF2F9)!important;
+  padding:20px 18px!important;
+}
+#main-content.guardian-view .pl-unified-page-hero:after{
+  content:"🧸  ♡  ✦";display:block!important;position:absolute;right:10%;bottom:14%;
+  font-size:26px;color:#C977D6;opacity:.7;
+}
+
+/* Theme-aware bottom bar matches the approved references. */
+#main-content .pl-app-bottom-nav{
+  min-height:64px!important;
+  padding:5px 8px max(5px,env(safe-area-inset-bottom))!important;
+  border-radius:24px 24px 0 0!important;
+  box-shadow:0 -8px 24px color-mix(in srgb,var(--pl-theme-accent) 10%,transparent)!important;
+}
+#main-content .pl-app-nav-btn{
+  min-height:48px!important;
+  border-radius:14px!important;
+  font-size:9.5px!important;
+  font-weight:900!important;
+}
+#main-content .pl-app-nav-btn .ico{font-size:18px!important}
+#main-content .pl-app-nav-add{
+  width:48px!important;height:48px!important;min-height:48px!important;
+  margin-top:-14px!important;font-size:27px!important;
+  box-shadow:0 8px 20px color-mix(in srgb,var(--pl-theme-accent) 30%,transparent),0 0 0 4px rgba(255,255,255,.86)!important;
+}
+
+@media(max-width:520px){
+  #main-content .pl-home-shell{padding:0 8px 82px!important;gap:7px!important}
+  #main-content .pl-home-hero{min-height:235px!important;margin:0 -8px!important;border-radius:0 0 22px 22px!important}
+  #main-content.dino-theme .pl-home-hero{min-height:255px!important}
+  #main-content.baby-mode .pl-home-hero{min-height:270px!important}
+  #main-content.simple-mode .pl-home-hero{min-height:205px!important}
+  #main-content .pl-home-brand{top:14px!important}
+  #main-content .pl-home-logo{font-size:27px!important}
+  #main-content .pl-home-tagline{font-size:10px!important;margin-top:4px!important}
+  #main-content .pl-home-actions{top:12px!important;right:8px!important}
+  #main-content .pl-home-settings{width:40px!important;height:40px!important;min-height:40px!important}
+  #main-content .pl-home-copy{left:14px!important;bottom:16px!important;width:46%!important}
+  #main-content .pl-home-copy h1{font-size:20px!important}
+  #main-content .pl-home-copy p{font-size:10.5px!important;line-height:1.28!important}
+  #main-content .pl-home-plush{width:48%!important;height:60%!important;right:2%!important;bottom:1%!important}
+  #main-content .pl-home-plush .plush-mascot{width:112px!important;height:112px!important}
+  #main-content .pl-home-bubble{display:none!important}
+  #main-content [data-plushlife-home-stack]>section:not(.pl-home-hero),
+  #main-content .pl-home-shortcuts>button,
+  #main-content .pl-noticed{border-radius:16px!important}
+  #main-content .pl-shortcut{min-height:54px!important}
+  #main-content .pl-noticed{min-height:48px!important}
+  #main-content .pl-kicker{font-size:10px!important}
+  #main-content .pl-row-text{font-size:11px!important}
+  #main-content .pl-list-row{min-height:38px!important;border-radius:13px!important}
+  #main-content .pl-app-bottom-nav{min-height:58px!important}
+  #main-content .pl-app-nav-btn{min-height:44px!important;font-size:8.8px!important}
+  #main-content .pl-app-nav-add{width:44px!important;height:44px!important;min-height:44px!important;margin-top:-12px!important;font-size:24px!important}
+}
