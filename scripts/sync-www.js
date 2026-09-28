@@ -4,6 +4,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const esbuild = require("esbuild");
 
 const ROOT = path.join(__dirname, "..");
@@ -225,9 +226,33 @@ async function compileAppSource() {
   return { emittedFiles: emittedFiles.length, chunkCount, prefetchCount: prefetchFiles.length, entryBytes, largestChunkBytes };
 }
 
+// The jsDelivr SRI hash pinned on the Supabase CDN tag does not match the
+// npm-vendored bytes, so after rewriting the URL to ./vendor we must also
+// rewrite the integrity attribute. A stale hash makes the browser block the
+// SDK, leaving window.supabase undefined and every login button dead.
+function supabaseVendorIntegrity() {
+  const bytes = fs.readFileSync(
+    path.join(ROOT, "node_modules", "@supabase", "supabase-js", "dist", "umd", "supabase.js")
+  );
+  return "sha384-" + crypto.createHash("sha384").update(bytes).digest("base64");
+}
+
+function rewriteVendorSupabaseIntegrity(content) {
+  if (!content.includes("./vendor/supabase.min.js")) return content;
+  const integrity = supabaseVendorIntegrity();
+  return content.replace(
+    /<script\b[^>]*\.\/vendor\/supabase\.min\.js[^>]*>/g,
+    (tag) =>
+      tag.includes("integrity=")
+        ? tag.replace(/integrity="[^"]*"/, `integrity="${integrity}"`)
+        : tag.replace(/<script\b/, `<script integrity="${integrity}"`)
+  );
+}
+
 function prepareHtml(file, source) {
   let content = source;
   for (const [from, to] of CDN_REPLACEMENTS) content = content.split(from).join(to);
+  content = rewriteVendorSupabaseIntegrity(content);
 
   if (file === "index.html") {
     if (content.includes("babel.min.js") || content.includes('id="app-source"') || content.includes("Babel.transform")) {
@@ -314,6 +339,25 @@ async function main() {
   }
 
   if (missingVendorFiles) process.exitCode = 1;
+
+  // Fail loudly if any shipped HTML pins a Supabase SRI hash that doesn't
+  // match the vendored bytes — a mismatch silently kills every login button.
+  const expectedIntegrity = supabaseVendorIntegrity();
+  for (const htmlFile of SITE_FILES.filter((file) => /\.html$/.test(file))) {
+    const htmlPath = path.join(WWW, htmlFile);
+    if (!fs.existsSync(htmlPath)) continue;
+    const html = fs.readFileSync(htmlPath, "utf8");
+    const tags = html.match(/<script\b[^>]*\.\/vendor\/supabase\.min\.js[^>]*>/g) || [];
+    for (const tag of tags) {
+      const match = tag.match(/integrity="([^"]*)"/);
+      if (!match || !match[1].split(/\s+/).includes(expectedIntegrity)) {
+        throw new Error(
+          `${htmlFile}: vendored Supabase SRI mismatch — the browser would block the SDK and login buttons would be dead.`
+        );
+      }
+    }
+  }
+
   console.log(`www/ synced (${copiedFiles} files, ${copiedDirectories} directories, ${VENDOR_FILES.length} vendored scripts, ${bundleStats.emittedFiles} app outputs, ${bundleStats.chunkCount} lazy chunks, ${bundleStats.prefetchCount} idle-prefetch chunks).`);
   console.log(`Critical app entry: ${formatKb(bundleStats.entryBytes)}; largest lazy chunk: ${formatKb(bundleStats.largestChunkBytes)}.`);
 }
