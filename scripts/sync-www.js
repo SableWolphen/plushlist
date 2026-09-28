@@ -96,7 +96,8 @@ const LAZY_PANEL_MODULES = new Map([
   ["./components/rewards-panel.jsx", ["RewardsPanel"]],
   ["./components/admin-panel.jsx", ["AdminPanel"]],
   ["./components/settings-panel.jsx", ["SettingsPanel"]],
-  ["./components/tasks-panel.jsx", ["TasksPanel"]],
+  // Tasks is opened from Home's View all and the primary Add action. Keep it
+  // in the entry bundle so a missing lazy asset cannot crash core navigation.
   ["./components/guardian-panel.jsx", ["GuardianPanel"]],
   ["./components/care-panel.jsx", ["CarePanel"]],
   ["./components/progress-panel.jsx", ["ProgressPanel"]],
