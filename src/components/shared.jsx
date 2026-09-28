@@ -218,3 +218,51 @@ export const HabitTypeIcon = React.memo(function HabitTypeIcon({ task }) {
     </span>
   );
 });
+
+// Promise-based replacement for window.confirm(). Call `ask({ title, message,
+// confirmLabel, cancelLabel, danger })` from any async event handler and
+// `await` the boolean result. Renders one app-styled, accessible dialog.
+export function useConfirmation() {
+  const [request, setRequest] = React.useState(null);
+  const resolverRef = React.useRef(null);
+  const cancelButtonRef = React.useRef(null);
+
+  const ask = React.useCallback(({ title, message, confirmLabel = "Continue", cancelLabel = "Never mind", danger = false }) => {
+    return new Promise((resolve) => {
+      resolverRef.current = resolve;
+      setRequest({ title, message, confirmLabel, cancelLabel, danger });
+    });
+  }, []);
+
+  const answer = React.useCallback((value) => {
+    setRequest(null);
+    const resolve = resolverRef.current;
+    resolverRef.current = null;
+    if (resolve) resolve(value);
+  }, []);
+
+  React.useEffect(() => {
+    if (!request) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") answer(false);
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    window.setTimeout(() => cancelButtonRef.current?.focus?.({ preventScroll: true }), 0);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [request, answer]);
+
+  const dialog = request ? (
+    <div role="dialog" aria-modal="true" aria-labelledby="plushlife-confirm-title" aria-describedby="plushlife-confirm-message" onMouseDown={(event) => { if (event.target === event.currentTarget) answer(false); }} style={{ position: "fixed", inset: 0, zIndex: 70, display: "grid", placeItems: "center", padding: 18, background: "rgba(45,32,56,.45)", backdropFilter: "blur(4px)" }}>
+      <div style={{ width: "min(100%, 390px)", padding: 20, borderRadius: 22, background: "#FFFDFE", border: "1px solid #E3C9EC", boxShadow: "0 24px 70px rgba(45,32,56,.25)" }}>
+        <div id="plushlife-confirm-title" style={{ fontSize: 19, fontWeight: 900, color: "#5B3D70" }}>{request.title}</div>
+        <div id="plushlife-confirm-message" style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: "#6B5A7D", whiteSpace: "pre-wrap" }}>{request.message}</div>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
+          <button ref={cancelButtonRef} type="button" onClick={() => answer(false)} style={{ minHeight: 44, padding: "8px 14px", borderRadius: 10, border: "1px solid #D8C8E2", background: "white", color: "#76558A", fontWeight: 900, cursor: "pointer" }}>{request.cancelLabel}</button>
+          <button type="button" onClick={() => answer(true)} style={{ minHeight: 44, padding: "8px 14px", borderRadius: 10, border: 0, background: request.danger ? "#C45D74" : "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>{request.confirmLabel}</button>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  return [ask, dialog];
+}

@@ -59,11 +59,16 @@ const requiredRegressionMarkers = [
   '🧸 My Guardians',
   '💛 People I Support',
   'Nothing is shared until they accept, and you choose every permission.',
-  'STARTER PACKS · ADD A GENTLE HEAD START',
+  // The starter-pack section heading moved to src/components/tasks-panel.jsx
+  // during the module split; its monolith-era wording no longer exists.
+  '✨ GENTLE STARTER PACKS',
   'const addStarterPack = async () => {',
   'Nothing you already had was changed.',
   'Add another one anyway?',
-  'Import ${duplicateNames.length === 1 ? "it" : "them"} again anyway?',
+  // The duplicate-import guard now goes through the app confirmation dialog
+  // (askConfirmation) instead of window.confirm(); the regression marker is
+  // the dialog title it passes.
+  'title: "Import duplicates anyway?"',
   'const careAreas = (() => {',
   'const [progressView, setProgressView] = useState("overview");',
   'const tabs = [\n    { id: "overview", label: "Little wins", icon: "✨" },\n    { id: "story", label: "My story", icon: "📖" },\n    { id: "areas", label: "Care garden", icon: "🌷" },\n  ];',

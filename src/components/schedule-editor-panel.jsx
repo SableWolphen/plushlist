@@ -11,9 +11,12 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
   const currentDay = DAYS.find((item) => item.id === scheduleEditingDayId);
   const hasCurrentSchedule = personalSchedules.some((entry) => entry.day_id === scheduleEditingDayId);
 
-  const confirmCopyToAllDays = () => {
-    if (!window.confirm("Copy this schedule to all 7 days? This can overwrite schedules on other days.")) return;
-    copyScheduleToAllDays();
+  // copyScheduleToAllDays (app-source) already shows the app-styled
+  // confirmation, so the panel calls it directly — no local native prompt.
+  const formatExceptionDate = (iso) => {
+    const parsed = new Date(`${iso}T12:00:00Z`);
+    if (Number.isNaN(parsed.getTime())) return iso;
+    return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
   };
 
   return (
@@ -22,20 +25,20 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
         <style>{`
           .schedule-panel{--blue:#B85CC7;--blue-dark:#74417F;--ink:#66536E;--line:#E7D7EB;--rose:#C45D74;--green:#6E9C88;display:grid;gap:12px;padding-bottom:4px}
           .schedule-panel *{box-sizing:border-box}
-          .schedule-panel button{min-height:0!important;line-height:1.15!important;box-shadow:none!important}
+          .schedule-panel button{min-height:44px!important;line-height:1.15!important;box-shadow:none!important}
           .schedule-card{border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,rgba(255,253,254,.94),rgba(250,244,255,.9));padding:13px;box-shadow:0 7px 18px rgba(97,62,115,.045)}
           .schedule-card.day-picker{background:linear-gradient(145deg,#FFF7FC,#F4F0FF);border-color:#DFC9E6}
           .schedule-eyebrow{font-size:10.5px;font-weight:900;letter-spacing:.055em;color:var(--blue);text-transform:uppercase}
           .schedule-helper{margin-top:3px;font-size:10.75px;line-height:1.38;color:#6B7C91}
           .schedule-day-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:9px}
-          .schedule-day{padding:6px 2px!important;border-radius:11px!important;border:1px solid #E3D4E8!important;background:#FFFDFE!important;color:#735D7B!important;font-size:10px!important;font-weight:900!important;cursor:pointer}
+          .schedule-day{display:flex!important;align-items:center;justify-content:center;gap:2px;padding:4px 2px!important;border-radius:11px!important;border:1px solid #E3D4E8!important;background:#FFFDFE!important;color:#735D7B!important;font-size:10px!important;font-weight:900!important;cursor:pointer}
           .schedule-day.selected{border:2px solid var(--blue)!important;background:#F5E8F8!important;color:var(--blue-dark)!important;padding:5px 1px!important;box-shadow:0 4px 10px rgba(184,92,199,.08)!important}
           .schedule-day .check{font-size:9px;opacity:.65}
           .schedule-intro{margin-top:6px;padding:7px 9px;border-radius:10px;background:#F5FAFE;color:#677A90;font-size:10.75px;line-height:1.38}
           .schedule-entry-list{display:grid;gap:7px;margin-top:9px}
-          .schedule-entry{display:grid;grid-template-columns:108px minmax(0,1fr) 32px;gap:6px;align-items:center}
+          .schedule-entry{display:grid;grid-template-columns:108px minmax(0,1fr) 44px;gap:6px;align-items:center}
           .schedule-panel input[type="time"],.schedule-panel input[type="date"],.schedule-panel input:not([type]){min-width:0;width:100%;height:38px;padding:7px 9px;border:1px solid #D5E3EE;border-radius:10px;background:#fff;font-size:13px}
-          .schedule-remove{width:32px;height:32px!important;padding:0!important;border-radius:9px!important;border:1px solid #EFC5CF!important;background:#FFF8FA!important;color:var(--rose)!important;font-size:14px!important;font-weight:900!important;cursor:pointer}
+          .schedule-remove{width:44px;height:44px!important;padding:0!important;border-radius:9px!important;border:1px solid #EFC5CF!important;background:#FFF8FA!important;color:var(--rose)!important;font-size:14px!important;font-weight:900!important;cursor:pointer}
           .schedule-toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px}
           .schedule-btn{padding:7px 10px!important;border-radius:10px!important;font-size:10.75px!important;font-weight:900!important;cursor:pointer}
           .schedule-btn.primary{border:0!important;background:var(--blue)!important;color:#fff!important}
@@ -44,7 +47,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
           .schedule-copy{margin-top:11px;padding-top:10px;border-top:1px solid #E8EEF5}
           .schedule-copy-title{display:flex;align-items:center;justify-content:space-between;gap:8px}
           .schedule-copy-days{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;margin-top:8px}
-          .schedule-copy-day{padding:6px 2px!important;border-radius:8px!important;border:1px solid #D6E0EC!important;background:#fff!important;color:#6B7C99!important;font-size:9.75px!important;font-weight:900!important;cursor:pointer}
+          .schedule-copy-day{display:flex!important;align-items:center;justify-content:center;padding:4px 2px!important;border-radius:8px!important;border:1px solid #D6E0EC!important;background:#fff!important;color:#6B7C99!important;font-size:9.75px!important;font-weight:900!important;cursor:pointer}
           .schedule-copy-day.selected{border:2px solid var(--blue)!important;background:#E7F2FF!important;color:var(--blue-dark)!important;padding:5px 1px!important}
           .schedule-copy-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:8px}
           .schedule-copy-selected{padding:7px 10px!important;border-radius:9px!important;border:1px solid #BFD5EF!important;background:#EEF6FF!important;color:var(--blue-dark)!important;font-size:10.5px!important;font-weight:900!important;cursor:pointer}
@@ -56,7 +59,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
           .schedule-date-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
           .schedule-date-label{font-size:10.25px;font-weight:900;color:#52746E}
           .schedule-date-label input{display:block;margin-top:4px;border-color:#B9E0D0!important}
-          .schedule-extra-entry{display:grid;grid-template-columns:108px minmax(0,1fr) 32px;gap:6px;align-items:center}
+          .schedule-extra-entry{display:grid;grid-template-columns:108px minmax(0,1fr) 44px;gap:6px;align-items:center}
           .schedule-btn.green{border:0!important;background:var(--green)!important;color:#fff!important}
           .schedule-btn.green-outline{border:1px dashed #58A997!important;background:#fff!important;color:var(--green)!important}
           .schedule-saved{margin-top:10px;padding-top:9px;border-top:1px solid #D2E9E2}
@@ -65,11 +68,11 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
           @media(max-width:520px){
             .schedule-panel{gap:10px}
             .schedule-card{padding:11px;border-radius:16px}
-            .schedule-day-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+            .schedule-day-grid{grid-template-columns:repeat(7,minmax(0,1fr))}
+            .schedule-day{font-size:9px!important;padding:4px 1px!important}
             .schedule-copy-days{grid-template-columns:repeat(3,minmax(0,1fr))}
-            .schedule-entry,.schedule-extra-entry{grid-template-columns:94px minmax(0,1fr) 30px;gap:5px}
+            .schedule-entry,.schedule-extra-entry{grid-template-columns:94px minmax(0,1fr) 44px;gap:5px}
             .schedule-panel input[type="time"],.schedule-panel input[type="date"],.schedule-panel input:not([type]){height:36px;padding:6px 8px;font-size:12px}
-            .schedule-remove{width:30px;height:30px!important}
             .schedule-toolbar{gap:6px}
             .schedule-btn{padding:6px 9px!important;font-size:10.25px!important}
           }
@@ -135,7 +138,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
               <button type="button" onClick={copyScheduleToSelectedDays} disabled={copyToDayIds.length === 0} className="schedule-copy-selected">
                 {copyToDayIds.length === 0 ? "Copy to selected" : `Copy to ${copyToDayIds.map((id) => DAYS.find((d) => d.id === id)?.label).join(", ")}`}
               </button>
-              <button type="button" onClick={confirmCopyToAllDays} className="schedule-copy-all">Copy to all 7 instead…</button>
+              <button type="button" onClick={copyScheduleToAllDays} className="schedule-copy-all">Copy to all 7 instead…</button>
             </div>
           </div>
 
@@ -177,7 +180,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
               <div className="schedule-eyebrow">Saved extras</div>
               {scheduleExceptions.map((item) => (
                 <div key={item.id} className="schedule-saved-row">
-                  <span>{item.start_date === item.end_date ? item.start_date : `${item.start_date} – ${item.end_date}`} · {(item.entries || []).map((entry) => entry.text).filter(Boolean).join(" · ")}</span>
+                  <span>{item.start_date === item.end_date ? formatExceptionDate(item.start_date) : `${formatExceptionDate(item.start_date)} – ${formatExceptionDate(item.end_date)}`} · {(item.entries || []).map((entry) => entry.text).filter(Boolean).join(" · ")}</span>
                   <button type="button" onClick={() => deleteScheduleException(item.id)} className="schedule-remove-link">Remove</button>
                 </div>
               ))}

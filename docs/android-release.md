@@ -28,7 +28,9 @@ The repository has these encrypted Actions secrets:
 - `ANDROID_KEY_ALIAS`
 - `ANDROID_KEY_PASSWORD`
 
-They are exposed only to the manual release workflow. The decoded CI keystore
+They are exposed to the manual release workflow and to the
+closed-testing-version-43 / closed-testing-version-44 workflows, which also
+decode the keystore to sign their builds. The decoded CI keystore
 is deleted after every run, including failed runs.
 
 ## Run a release build

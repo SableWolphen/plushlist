@@ -13,6 +13,10 @@ const settings = read("src/components/organized-settings.jsx");
 const index = read("index.html");
 const serviceWorker = read("service-worker.js");
 const syncWww = read("scripts/sync-www.js");
+// The Capacitor back-button handler moved from an inline index.html <script>
+// to src/native-bridge.js; the gate follows the code, not the file.
+const nativeBridgePath = path.join(__dirname, "..", "src", "native-bridge.js");
+const backButtonSource = fs.existsSync(nativeBridgePath) ? read("src/native-bridge.js") : index;
 const mainActivity = read("android/app/src/main/java/com/PlushLife/MainActivity.java");
 
 const gates = [
@@ -23,7 +27,7 @@ const gates = [
   [shared.includes('role={inline ? "region" : "dialog"}') && shared.includes('aria-modal={inline ? undefined : "true"}'), "dialogs keep accessible dialog semantics"],
   [shared.includes("previousActive") && shared.includes("firstFocusable"), "modal focus enters and restores correctly"],
   [settings.includes("Privacy & Data") && settings.includes("Restore from backup") && settings.includes("Delete all check-ins"), "data recovery and deletion controls remain reachable"],
-  [index.includes('backButton') && index.includes('KeyboardEvent("keydown", { key: "Escape" })'), "Android back button continues to close app panels"],
+  [backButtonSource.includes('backButton') && backButtonSource.includes('KeyboardEvent("keydown", { key: "Escape" })'), "Android back button continues to close app panels"],
   [serviceWorker.includes("fetch") && serviceWorker.includes("cache"), "offline service-worker path remains present"],
   [syncWww.includes("check-bundle-budget") || read("package.json").includes("check-bundle-budget.js"), "bundle budget remains enforced"],
   [mainActivity.includes("UpdateAvailability.UPDATE_AVAILABLE") && mainActivity.includes("PlushLife update available") && mainActivity.includes("Update now"), "older Android builds show an update prompt only when Google Play reports a newer version"],

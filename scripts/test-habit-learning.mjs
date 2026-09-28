@@ -38,12 +38,16 @@ const withReminders = buildHabitLearning({ rows, completionEvents, history, remi
 assert.equal(withReminders.reminderEffectiveness.stretch.rate, 0);
 assert.ok(withReminders.suggestions.some((item) => item.type === "adjust_reminder" && item.habitId === "stretch"));
 
-const index = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
-assert.match(index, /plushlifeKind === "daily-reminder" \|\| item\.extra\.plushlifeKind === "task-reminder"/);
-assert.match(index, /extra: \{ plushlifeKind: "task-reminder"/);
-assert.match(index, /\{ id: "DONE", title: "Done" \}/);
-assert.match(index, /plushlife:pending-notification-action:v1/);
-assert.match(index, /anchorTaskKey/);
+// The native notification scheduler moved from an inline index.html <script>
+// to src/native-bridge.js; the assertions follow the code.
+const bridge = fs.readFileSync(new URL("../src/native-bridge.js", import.meta.url), "utf8");
+assert.match(bridge, /plushlifeKind === "daily-reminder" \|\| item\.extra\.plushlifeKind === "task-reminder"/);
+assert.match(bridge, /extra: \{ plushlifeKind: "task-reminder"/);
+assert.match(bridge, /\{ id: "DONE", title: "Done" \}/);
+assert.match(bridge, /plushlife:pending-notification-action:v1/);
+// The 15-second anchor follow-up nudge was intentionally removed: finishing an
+// anchor task no longer schedules an interruption-style reminder.
+assert.doesNotMatch(bridge, /Date\.now\(\) \+ 15000/);
 
 const app = fs.readFileSync(new URL("../src/app-source.jsx", import.meta.url), "utf8");
 assert.match(app, /measurableMatch = task\.match/);

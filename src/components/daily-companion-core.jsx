@@ -1,6 +1,7 @@
 const { useEffect, useState } = React;
 
 const FIRST_SEEN_KEY = "plushlife:companion:first-seen:v1";
+const FIRST_WEEK_SURFACED_KEY = "plushlife:companion:firstweek-surfaced:v1";
 const HISTORY_KEY = "plushlife:companion:history:v1";
 
 function safeRead(key, fallback) {
@@ -49,6 +50,16 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
     safeWrite(FIRST_SEEN_KEY, dateKey);
     return dateKey;
   });
+
+  // On the genuine first day only, open the First-Week Guide once so new
+  // users notice it. The surfaced flag guarantees it happens a single time;
+  // after that the guide stays manually accessible for the rest of the week.
+  useEffect(() => {
+    if (!open || firstSeen !== dateKey) return;
+    if (safeRead(FIRST_WEEK_SURFACED_KEY, "")) return;
+    safeWrite(FIRST_WEEK_SURFACED_KEY, dateKey);
+    setOpenSection("firstweek");
+  }, [open, firstSeen, dateKey]);
 
   useEffect(() => {
     setGentleDone(safeRead(`plushlife:gentle-day:${dateKey}`, {}));

@@ -28,9 +28,12 @@ function chooseMove(state) {
     const confidence = dayModel.confidence === "learning" ? "Still learning from your real days." : `${dayModel.evidence || 0}% evidence confidence · ${dayModel.state || "today's pattern"}.`;
     return { icon: dayModel.intervention.kind === "comeback" ? "↺" : dayModel.intervention.kind === "trim" ? "🪶" : dayModel.intervention.kind === "smaller" ? "🌱" : "🧭", title: dayModel.intervention.title, text: dayModel.intervention.text, evidence: `${confidence} ${dayModel.uncertainty || ""}`.trim(), reason: "Your recent day pattern changed enough for PlushLife to recommend a different amount of effort." };
   }
-  if (recovery.recentGap >= 2) {
+  // Restart advice is gated behind stronger history: a computed usual return
+  // from previous return gaps, not a single recent gap. Copy stays cautious —
+  // one gap is never treated as a reliable pattern.
+  if (recovery.recentGap >= 2 && recovery.usualReturnDays) {
     const label = recovery.suggestedRamp === "essentials" ? "restart with essentials only" : recovery.suggestedRamp === "lighter" ? "use a lighter routine for a couple of days" : "resume normally";
-    return { icon: "↺", title: "Make the restart easy", text: `Your recent gap suggests you may do better if you ${label}.`, evidence: recovery.usualReturnDays ? `Based on your previous return gaps; your usual return is about ${recovery.usualReturnDays} days.` : "Based on your recent return pattern.", reason: "PlushLife noticed a break in your usual rhythm and is avoiding catch-up pressure." };
+    return { icon: "↺", title: "Make the restart easy", text: `After a break, ${label} is a gentle way back in.`, evidence: `Based on your previous return gaps; your usual return is about ${recovery.usualReturnDays} days. One gap is not a pattern, so treat this as a suggestion, not a rule.`, reason: "PlushLife noticed a break in your usual rhythm and is avoiding catch-up pressure." };
   }
   if (load.level === "overloaded") return { icon: "🪶", title: "Reduce today's load", text: `Your current plan looks crowded. Keeping about ${Math.max(1, Number(load.suggestedVisibleCount) || 4)} important things visible may make the day easier to start.`, evidence: `Based on ${load.active || 0} active items, ${load.incomplete || 0} unfinished items, and today's energy/capacity.`, reason: "The amount still open today is higher than the load PlushLife thinks is comfortable right now." };
 
@@ -113,9 +116,9 @@ export function GrowthNextMove() {
       <div style={{ marginTop: 3, fontSize: 10.2, lineHeight: 1.4, color: "#8A7895" }}>{recentChange.reason}</div>
     </section>}
 
-    <section aria-label="Best next adjustment" style={{ marginBottom: 12, padding: "13px 14px", borderRadius: 16, border: "1px solid #D8E7E2", background: "linear-gradient(145deg,#F6FCFA,#FFF9FD)" }}>
-      <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#3E746A" }}>{move.icon} BEST NEXT ADJUSTMENT</div>
-      <div style={{ marginTop: 4, fontSize: 15, fontWeight: 900, color: "#4F405C" }}>{move.title}</div>
+    <section aria-label="Plush Coach: best next adjustment" style={{ marginBottom: 12, padding: "13px 14px", borderRadius: 16, border: "1px solid #D8E7E2", background: "linear-gradient(145deg,#F6FCFA,#FFF9FD)" }}>
+      <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#3E746A" }}>🧭 PLUSH COACH</div>
+      <div style={{ marginTop: 4, fontSize: 15, fontWeight: 900, color: "#4F405C" }}>{move.icon} {move.title}</div>
       <div style={{ marginTop: 5, fontSize: 12, lineHeight: 1.5, color: "#637B74" }}>{move.text}</div>
       <details style={{ marginTop: 7 }}><summary style={{ minHeight: 44, display: "flex", alignItems: "center", cursor: "pointer", color: "#765F84", fontSize: 11, fontWeight: 900 }}>Why this suggestion?</summary><div style={{ padding: "7px 9px", borderRadius: 10, background: "rgba(255,255,255,.68)", color: "#766981", fontSize: 10.7, lineHeight: 1.45 }}><strong>Why PlushLife changed this:</strong> {move.reason}<div style={{ marginTop: 4, color: "#8A9A95" }}>{move.evidence}</div></div></details>
     </section>

@@ -7,7 +7,15 @@
 
   const REMINDER_ID = 730300001;
   const STATE_KEY = "plushlife:comeback-reminder:v1";
+  // Per-user opt-out, separate from task/daily reminders. The settings UI
+  // toggles this via window.PlushLifeComebackReminder.setOptOut(boolean).
+  const OPT_OUT_KEY = "plushlife:comeback-reminder-optout:v1";
   const AWAY_MS = 60 * 60 * 1000 * 60; // 60 hours = 2.5 days
+
+  function isOptedOut() {
+    try { return window.localStorage.getItem(OPT_OUT_KEY) === "1"; }
+    catch (_error) { return false; }
+  }
 
   function readState() {
     try { return JSON.parse(localStorage.getItem(STATE_KEY) || "{}") || {}; }
@@ -66,6 +74,11 @@
   }
 
   async function scheduleReminder() {
+    if (isOptedOut()) {
+      // Respect the opt-out: clear any previously scheduled nudge and stop.
+      await cancelReminder();
+      return;
+    }
     if (isSignedOut()) return;
     const target = plugin();
     if (!target?.schedule) return;
@@ -117,4 +130,21 @@
   } catch (_error) {}
 
   if (document.visibilityState === "visible") markActive();
+
+  // Public API for the settings UI: a visible per-user opt-out for the
+  // comeback nudge, independent of the task/daily reminder toggles.
+  window.PlushLifeComebackReminder = {
+    isOptedOut,
+    setOptOut(value) {
+      try {
+        if (value) window.localStorage.setItem(OPT_OUT_KEY, "1");
+        else window.localStorage.removeItem(OPT_OUT_KEY);
+      } catch (_error) {}
+      if (value) cancelReminder();
+      window.dispatchEvent(new CustomEvent("plushlife:comeback-reminder-optout-changed", {
+        detail: { optedOut: !!value },
+      }));
+      return !!value;
+    },
+  };
 })();
