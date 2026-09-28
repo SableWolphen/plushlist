@@ -54,10 +54,16 @@
   ];
 
   const APPEARANCE_THEMES = [
-    { id: "soft", label: "Soft Plush Theme", icon: "💜", background: "#FFF6FB", glowA: "#FFD9EC", glowB: "#C9ECFF", glowC: "#FFF3D6", glowD: "#D6F5E3", wash: "#FFF9FCDD", accent: "#C77DD6" },
-    { id: "soft-light", label: "Soft Light", icon: "☁️", background: "#FFF8FB", glowA: "#F4DDEA70", glowB: "#E4E6F570", glowC: "#F5EAD970", glowD: "#DDEFE970", wash: "#FFFDFEA8", accent: "#B999C7" },
-    { id: "twilight", label: "Twilight Theme", icon: "🌙", background: "#DDD4FF", glowA: "#9784E6", glowB: "#7FADE8", glowC: "#D99BE8", glowD: "#AAB7F2", wash: "#EEE9FFB8", accent: "#6950B6" },
-    { id: "meadow", label: "Meadow Theme", icon: "🌿", background: "#D9F2DE", glowA: "#77C98B", glowB: "#75C7C1", glowC: "#E8C95D", glowD: "#9BD17D", wash: "#ECFAEEB8", accent: "#328660" },
+    // These seven appearance themes plus Dino Theme and Baby Mode are the
+    // locked PlushLife visual family. Legacy IDs stay stable so existing users
+    // keep their saved selection after the visual refresh.
+    { id: "soft", label: "Lavender", icon: "💜", background: "#F5F0FF", glowA: "#E7D7FF", glowB: "#FFD9EC", glowC: "#FFF0C9", glowD: "#D9F2E4", wash: "#FBF8FFDD", accent: "#A85BC5", accent2: "#E47CC4", surface: "#FFFDFE", surface2: "#F7F1FF", ink: "#48275F", muted: "#816B91", line: "#E4D4EB", nav: "#FFFDFEF2", art: "lavender" },
+    { id: "pink", label: "Pink", icon: "🌸", background: "#FFF0F6", glowA: "#FFCAE0", glowB: "#F6D9FF", glowC: "#FFF0C7", glowD: "#DFF4E6", wash: "#FFF8FBDD", accent: "#D755A6", accent2: "#F28BC5", surface: "#FFFDFE", surface2: "#FFF1F7", ink: "#6D2752", muted: "#946D83", line: "#F0D5E3", nav: "#FFFDFEF2", art: "pink" },
+    { id: "meadow", label: "Mint", icon: "🍀", background: "#EAFBF3", glowA: "#C8F0DA", glowB: "#D5F6EE", glowC: "#FFF0B9", glowD: "#DCEBFF", wash: "#F7FFFBDE", accent: "#4AAE86", accent2: "#72C9A9", surface: "#FDFFFE", surface2: "#F0FAF5", ink: "#285D4D", muted: "#66877C", line: "#CFE9DD", nav: "#FDFFFEF2", art: "mint" },
+    { id: "peach", label: "Peach", icon: "🍑", background: "#FFF2E7", glowA: "#FFD2B8", glowB: "#FFE3D0", glowC: "#FFF0B5", glowD: "#DDF2DF", wash: "#FFF9F3DE", accent: "#E57D72", accent2: "#F2A17F", surface: "#FFFEFC", surface2: "#FFF3EA", ink: "#6E3D43", muted: "#92736E", line: "#F0D7C9", nav: "#FFFEFCF2", art: "peach" },
+    { id: "twilight", label: "Night", icon: "🌙", background: "#171B4C", glowA: "#483D9E", glowB: "#5D65C7", glowC: "#E2A8E7", glowD: "#314D87", wash: "#24285ABF", accent: "#A787FF", accent2: "#F083CE", surface: "#F9F7FF", surface2: "#EEE9FF", ink: "#392A69", muted: "#756A9E", line: "#D8D0F3", nav: "#FCFAFFF2", art: "night" },
+    { id: "strawberry", label: "Strawberry", icon: "🍓", background: "#FFF0F4", glowA: "#FFBDD1", glowB: "#FFDCE8", glowC: "#FFF0BD", glowD: "#DDF2DC", wash: "#FFF7F9DD", accent: "#E44E86", accent2: "#F58AA9", surface: "#FFFDFE", surface2: "#FFF1F5", ink: "#74264B", muted: "#986D81", line: "#F1D2DF", nav: "#FFFDFEF2", art: "strawberry" },
+    { id: "soft-light", label: "Cloud / Blue", icon: "☁️", background: "#EEF6FF", glowA: "#D9E9FF", glowB: "#E8DBFF", glowC: "#FFF0BD", glowD: "#E2F5F0", wash: "#F8FBFFDE", accent: "#6E8FE8", accent2: "#C078DD", surface: "#FEFFFF", surface2: "#F1F6FF", ink: "#3C487B", muted: "#7180A0", line: "#D8E3F4", nav: "#FEFFFFF2", art: "cloud" },
   ];
 
   const MASCOT_GROWTH_STAGES = [
