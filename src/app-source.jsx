@@ -6375,6 +6375,168 @@ function GlowUpTracker() {
           .baby-mode .nursery-mobile { right: 12%; transform: scale(.8); transform-origin: top center; }
           .baby-mode .nursery-nook-caption { right: 10px; bottom: 7px; font-size: 8.5px; }
         }
+
+        /* ---- FINAL REFERENCE LOCK OVERRIDES ----
+           Keep the live Android app aligned with the approved PlushLife mockups.
+           These intentionally come last so older theme experiments cannot leak through. */
+        #main-content.dino-theme{
+          background:#F8F3FC!important;
+          background-image:linear-gradient(180deg,#F9F5FD 0%,#F7F1FB 58%,#FFF8FC 100%)!important;
+          color:#4F3A5E!important;
+        }
+        #main-content.dino-theme .pl-ambient-theme-layer{
+          opacity:.12!important;
+          background:radial-gradient(circle at 15% 12%,#EEDFFF 0%,transparent 34%),radial-gradient(circle at 88% 18%,#E2F3E7 0%,transparent 38%),radial-gradient(circle at 82% 88%,#FFE7F1 0%,transparent 40%)!important;
+        }
+        #main-content.dino-theme.dashboard-care,
+        #main-content.dino-theme.dashboard-progress,
+        #main-content.dino-theme.dashboard-week,
+        #main-content.dino-theme.dashboard-today{
+          background:#F8F3FC!important;
+          background-image:linear-gradient(180deg,#F9F5FD,#FFF9FC)!important;
+        }
+        #main-content.dino-theme.appearance-twilight:not(.baby-mode){
+          background:#F8F3FC!important;
+          color:#4F3A5E!important;
+        }
+
+        /* Non-night themes never inherit the old navy stage. */
+        #main-content:not(.appearance-twilight):not(.baby-night){
+          background-color:var(--pl-theme-bg,#F8F3FC)!important;
+        }
+
+        /* Remove giant decorative bubbles that were bleeding through Care library cards. */
+        #main-content .pl-care-library-panel:before,
+        #main-content .pl-care-library-panel:after,
+        #main-content .plushcare-library:before,
+        #main-content .plushcare-library:after{
+          content:none!important;display:none!important;
+        }
+        #main-content .pl-care-library-panel{
+          position:relative!important;
+          overflow:hidden!important;
+          background:linear-gradient(145deg,#FFFDFE,#F8F2FF)!important;
+          border:1px solid #E6D7EC!important;
+          box-shadow:0 8px 22px rgba(88,56,106,.06)!important;
+        }
+        #main-content .plushcare-library [role="tablist"]{
+          position:sticky!important;top:0!important;z-index:3!important;
+          background:rgba(255,251,254,.94)!important;
+          border:1px solid #E5D5EB!important;
+          backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;
+        }
+        #main-content .plushcare-library [role="tab"][aria-selected="true"]{
+          background:linear-gradient(135deg,var(--pl-theme-accent,#C65FD3),var(--pl-theme-accent-2,#E781BF))!important;
+          color:white!important;border-color:transparent!important;
+        }
+        #main-content .pl-care-spaces{
+          color:var(--pl-theme-ink,#5B4666)!important;
+        }
+        #main-content .pl-care-spaces .pl-care-copy{
+          color:var(--pl-theme-muted,#816B91)!important;
+        }
+
+        /* Keep page content clear of the floating nav instead of letting cards slide underneath it. */
+        #main-content .pl-unified-page-shell{
+          padding-bottom:calc(108px + env(safe-area-inset-bottom))!important;
+        }
+        #main-content.dashboard-care .pl-care-shell,
+        #main-content.dashboard-progress .pl-growth-shell,
+        #main-content.dashboard-week .pl-calendar-cozy{
+          padding-bottom:26px!important;
+        }
+
+        /* Final compact Android navigation geometry. */
+        #main-content .pl-app-bottom-nav,
+        #main-content.dino-theme .pl-app-bottom-nav,
+        #main-content.baby-mode .pl-app-bottom-nav{
+          left:12px!important;right:12px!important;
+          bottom:max(8px,env(safe-area-inset-bottom))!important;
+          height:64px!important;min-height:64px!important;max-height:64px!important;
+          padding:4px 8px!important;
+          border-radius:24px!important;
+          border:1px solid rgba(229,214,235,.92)!important;
+          background:rgba(255,253,254,.97)!important;
+          box-shadow:0 10px 28px rgba(69,43,84,.14)!important;
+        }
+        #main-content .pl-app-nav-btn{
+          min-height:48px!important;height:48px!important;max-height:48px!important;
+          font-size:8.8px!important;gap:2px!important;
+          background:transparent!important;
+        }
+        #main-content .pl-app-nav-btn.active{
+          background:linear-gradient(145deg,#FFF5FB,#F4ECFF)!important;
+          color:#713E80!important;
+        }
+        #main-content .pl-app-nav-btn.active .ico{
+          background:transparent!important;box-shadow:none!important;
+        }
+        #main-content .pl-app-nav-add{
+          width:48px!important;height:48px!important;min-height:48px!important;max-height:48px!important;
+          margin-top:-10px!important;
+        }
+
+        /* Plush should read as an app screen, not a desktop modal dropped over the tracker. */
+        @media(max-width:520px){
+          #main-content.rewards-open [data-plush-panel="🧸 Plush & Keepsakes"].pl-tool-backdrop{
+            inset:0 0 82px 0!important;
+            padding:max(8px,env(safe-area-inset-top)) 8px 0!important;
+            background:linear-gradient(180deg,#F9F4FC,#FFF9FC)!important;
+            backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+          }
+          #main-content.rewards-open [data-plush-panel="🧸 Plush & Keepsakes"] .pl-tool-panel{
+            border-radius:22px 22px 0 0!important;
+            background:linear-gradient(180deg,#FFFDFE,#FAF4FF)!important;
+          }
+          #main-content.rewards-open [data-plush-panel="🧸 Plush & Keepsakes"] .pl-tool-header{
+            min-height:52px!important;
+            padding:8px 11px!important;
+          }
+          #main-content.rewards-open [data-plush-panel="🧸 Plush & Keepsakes"] .pl-tool-title{
+            font-size:0!important;
+          }
+          #main-content.rewards-open [data-plush-panel="🧸 Plush & Keepsakes"] .pl-tool-title:after{
+            content:"PlushLife ♥"!important;
+            font-family:Georgia,"Times New Roman",serif!important;
+            font-style:italic!important;
+            font-size:23px!important;
+            color:#63327A!important;
+            letter-spacing:-.7px!important;
+          }
+          #main-content.rewards-open [data-plush-panel="🧸 Plush & Keepsakes"] .pl-tool-close{
+            min-width:38px!important;width:38px!important;height:38px!important;min-height:38px!important;
+            padding:0!important;border-radius:50%!important;font-size:0!important;
+          }
+          #main-content.rewards-open [data-plush-panel="🧸 Plush & Keepsakes"] .pl-tool-close:after{
+            content:"×";font-size:21px;line-height:1;color:#744A80;
+          }
+          #main-content.rewards-open [data-plush-panel="🧸 Plush & Keepsakes"] .pl-tool-body{
+            padding:8px!important;
+          }
+        }
+
+        /* The approved Home references are light except Night mode. */
+        #main-content.dino-theme.dashboard-today .pl-home-hero{
+          background:url(assets/dino-garden.jpg) center 34%/cover no-repeat!important;
+          border:0!important;border-radius:0 0 24px 24px!important;
+          box-shadow:0 10px 26px rgba(80,55,96,.09)!important;
+        }
+        #main-content.dino-theme.dashboard-today .pl-home-hero:before,
+        #main-content.dino-theme.dashboard-today .pl-home-hero:after{
+          display:none!important;
+        }
+        #main-content.dino-theme.dashboard-today .pl-home-copy{
+          background:rgba(255,255,255,.70)!important;
+          border:1px solid rgba(255,255,255,.85)!important;
+          color:#533B63!important;
+          box-shadow:0 6px 16px rgba(88,57,105,.07)!important;
+        }
+        #main-content.dino-theme.dashboard-today .pl-home-logo,
+        #main-content.dino-theme.dashboard-today .pl-home-copy h1,
+        #main-content.dino-theme.dashboard-today .pl-home-copy p{
+          color:#573568!important;
+          text-shadow:0 2px 10px rgba(255,255,255,.9)!important;
+        }
       `}</style>
       {preferences.reduced_motion && <style>{`*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}`}</style>}
       {swUpdateReady && !swUpdateDismissed && autoPopupToShow === null && (
