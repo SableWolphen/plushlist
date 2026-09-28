@@ -3,15 +3,6 @@
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) {
     root.PlushLifeBilling = api;
-    if (root.document && !root.__plushlifeCheckinThemeLoading) {
-      root.__plushlifeCheckinThemeLoading = true;
-      ["./assets/whats-new-panel.js"].forEach((src) => {
-        const script = root.document.createElement("script");
-        script.src = src;
-        script.defer = true;
-        root.document.head.appendChild(script);
-      });
-    }
   }
 })(typeof window !== "undefined" ? window : globalThis, function () {
   // Billing-provider architecture placeholder — moved out of the main

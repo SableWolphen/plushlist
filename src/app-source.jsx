@@ -550,15 +550,15 @@ const BILLING_PRODUCT_IDS = { monthly: "plushplus_monthly", yearly: "plushplus_y
 //   manageSubscription(): Promise<void>  // opens the platform's own subscription-management UI
 
 
-const CURRENT_CHANGELOG_VERSION = "2026-08-02-progress-insights";
+const CURRENT_CHANGELOG_VERSION = "2026-09-28-refresh";
 const CHANGELOG_ITEMS = [
-  "📊 New multi-week trend chart on Progress — see your last 8 weeks at a glance, not just this week vs. last",
-  "⚡ New Energy insight compares how much you complete on higher- vs. lower-energy days",
-  "🔥 Habit streaks are now shown right on your Habit Garden tasks, with your all-time best",
-  "🎧 New Soundscapes on PlushSleep — Rain, Ocean, White Noise, and Calm Tone, generated live so they work offline",
-  "🎭 The Guardian role picker now explains exactly what each role can and can't do",
-  "🧸 New \"Feeling stuck? Pick one thing for me\" helper gently chooses one required task when your list feels like too much",
-  "🚀 Faster, smoother app launch — no more flash of the sign-in screen before your list appears",
+  "🌿 New Shape-my-day — on low-capacity days PlushLife builds you one kind, ~30-minute plan instead of the whole list",
+  "😴 New rest-day experience — rest days get their own cozy card with comfort tools, no guilt attached",
+  "⏱️ Gentle focus timer (2/5/10/25 min) now lives in the Home header — no more floating button covering your list",
+  "⚡ New quick capture — jot into Today, Tomorrow, or Someday in one tap from the + button",
+  "🌙 Evening “one good thing” — after 6pm, save one small win; share it as a pretty card if you like",
+  "🌱 New 7-day onboarding arc — tiny guided steps across your first week",
+  "✨ The app now lets you know when a fresher version is ready, so you never run an old copy by accident",
 ];
 
 
@@ -912,6 +912,17 @@ function GlowUpTracker() {
 
   const [collectionOpen, setCollectionOpen] = useState(false);
   const [shareCardOpen, setShareCardOpen] = useState(false);
+  // A newer build is waiting in the service worker. We show one gentle,
+  // dismissible banner instead of silently running the old version forever
+  // in a long-lived tab.
+  const [swUpdateReady, setSwUpdateReady] = useState(false);
+  const [swUpdateDismissed, setSwUpdateDismissed] = useState(false);
+  useEffect(() => {
+    const onUpdateReady = () => setSwUpdateReady(true);
+    if (window.__plushlifeSwUpdateReady) setSwUpdateReady(true);
+    window.addEventListener("plushlife:sw-update-ready", onUpdateReady);
+    return () => window.removeEventListener("plushlife:sw-update-ready", onUpdateReady);
+  }, []);
   // Share-card rendering stays out of the critical entry bundle: the canvas
   // module loads on first share tap, never at startup.
   const loadShareCardModule = () => import("./components/share-card.js");
@@ -6210,6 +6221,13 @@ function GlowUpTracker() {
         }
       `}</style>
       {preferences.reduced_motion && <style>{`*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}`}</style>}
+      {swUpdateReady && !swUpdateDismissed && (
+        <div role="status" style={{ position: "fixed", top: "max(10px, env(safe-area-inset-top))", left: "50%", transform: "translateX(-50%)", zIndex: 150, display: "flex", alignItems: "center", gap: 10, maxWidth: "min(92vw, 430px)", padding: "10px 12px 10px 14px", borderRadius: 16, background: "rgba(255,253,255,.97)", border: "1px solid #E4CFF0", boxShadow: "0 12px 32px rgba(73,43,90,.18)", backdropFilter: "blur(10px)" }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#5B4B6B", lineHeight: 1.4 }}>✨ A fresher PlushLife is ready</span>
+          <button type="button" onClick={() => window.location.reload()} style={{ flexShrink: 0, padding: "8px 14px", borderRadius: 12, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, fontSize: 12.5, cursor: "pointer" }}>Refresh</button>
+          <button type="button" onClick={() => setSwUpdateDismissed(true)} aria-label="Dismiss update notice" style={{ flexShrink: 0, padding: "8px 10px", borderRadius: 12, border: "1px solid #E4CFF0", background: "white", color: "#8C6B9E", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>Later</button>
+        </div>
+      )}
       {autoPopupToShow === "weekly_kickoff" && (
         <div role="dialog" aria-modal="true" aria-labelledby="weekly-kickoff-title" style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
           <div style={{ width: "min(100%, 420px)", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>

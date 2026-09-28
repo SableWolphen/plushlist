@@ -36,6 +36,13 @@ function formatClock(totalSeconds) {
   return `${m}:${String(rest).padStart(2, "0")}`;
 }
 
+// The timer dialog is opened by dispatching this event (home header button,
+// Shape-my-day card, …). Keeping the trigger as an event means the floating
+// button never has to overlap page content.
+export function startFocusTimer() {
+  window.dispatchEvent(new CustomEvent("plushlife:start-focus-timer"));
+}
+
 export function FocusTimer() {
   const [open, setOpen] = React.useState(false);
   const [durationMin, setDurationMin] = React.useState(5);
@@ -105,16 +112,6 @@ export function FocusTimer() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => { setFinished(false); setRunning(false); setRemaining(durationMin * 60); setOpen(true); }}
-        aria-label="Start a gentle timer"
-        title="Start a gentle timer"
-        style={{ position: "fixed", right: 14, bottom: "calc(88px + env(safe-area-inset-bottom))", zIndex: 60, width: 56, height: 56, borderRadius: "50%", border: "1px solid #E4CFF0", background: "linear-gradient(135deg,#C75EDB,#D97DDC)", color: "white", fontSize: 24, cursor: "pointer", boxShadow: "0 10px 26px rgba(166,93,193,.35)", display: "grid", placeItems: "center" }}
-      >
-        ⏱
-      </button>
-
       {open && (
         <div role="dialog" aria-modal="true" aria-label="Gentle timer" style={{ position: "fixed", inset: 0, zIndex: 200, display: "grid", placeItems: "center", padding: 20, background: "rgba(43,29,52,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
           <div style={{ width: "min(400px, 100%)", borderRadius: 24, border: "1px solid #E4CFF0", background: "linear-gradient(150deg,#FFFDFF,#F7EFFB)", boxShadow: "0 24px 70px rgba(42,26,52,.35)", padding: 24, textAlign: "center", color: "#5B4B6B" }}>

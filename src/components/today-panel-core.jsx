@@ -2,6 +2,7 @@ import { HabitTypeIcon } from "./shared.jsx";
 import { CalmPanel } from "./info-panels.jsx";
 import { PlushMascot } from "./mascot.jsx";
 import { CompletedTaskArea, useCompletedTaskFlow } from "./completed-task-flow.jsx";
+import { startFocusTimer } from "./focus-timer.jsx";
 
 /*
  * Reference-home compatibility markers kept deliberately:
@@ -86,6 +87,7 @@ function Hero({ period, goToDashboard, setSettingsOpen, reducedMotion, selectedO
 
       <div className="pl-home-actions">
         <button type="button" className="pl-home-date" onClick={() => goToDashboard?.("week")} aria-label="Open calendar">▣&nbsp;&nbsp;{formatDate(period?.date)}</button>
+        <button type="button" className="pl-home-timer" onClick={startFocusTimer} aria-label="Start a gentle timer" title="Start a gentle timer">⏱</button>
         <button type="button" className="pl-home-settings" onClick={() => setSettingsOpen?.(true)} aria-label="Settings">⚙</button>
       </div>
 
@@ -297,7 +299,7 @@ export function TodayPanel({
         .pl-home-plant{position:absolute;z-index:1;filter:blur(.1px);opacity:.42}.plant-a{left:4px;top:90px;font-size:60px;transform:rotate(-12deg)}.plant-b{right:34px;top:86px;font-size:50px;transform:rotate(10deg)}
         .pl-home-brand,.pl-home-actions,.pl-home-copy,.pl-home-plush,.pl-home-bubble{position:absolute;z-index:3}
         .pl-home-brand{left:24px;top:20px}.pl-home-logo{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:900;font-size:31px;line-height:1;color:#4A235F;letter-spacing:-1.6px}.pl-home-logo span,.pl-home-copy h1 span{color:#DB72B4}.pl-home-tagline{margin-top:7px;font-size:13px;font-weight:700;color:#785F85}
-        .pl-home-actions{right:18px;top:18px;display:flex;align-items:center;gap:10px}.pl-home-date{appearance:none;cursor:pointer;padding:11px 15px;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid rgba(234,214,238,.9);font-weight:800;color:#5B3D70}.pl-home-settings{width:45px;height:45px;border:0;border-radius:50%;background:rgba(255,255,255,.72);color:#765684;font-size:21px;cursor:pointer}
+        .pl-home-actions{right:18px;top:18px;display:flex;align-items:center;gap:10px}.pl-home-date{appearance:none;cursor:pointer;padding:11px 15px;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid rgba(234,214,238,.9);font-weight:800;color:#5B3D70}.pl-home-settings{width:45px;height:45px;border:0;border-radius:50%;background:rgba(255,255,255,.72);color:#765684;font-size:21px;cursor:pointer}.pl-home-timer{width:45px;height:45px;border:1px solid rgba(228,207,240,.95);border-radius:50%;background:linear-gradient(135deg,#C75EDB,#D97DDC);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 6px 16px rgba(166,93,193,.32);display:grid;place-items:center}
         .pl-home-copy{left:24px;bottom:24px;width:50%;}.pl-home-copy h1{margin:0;font-size:29px;line-height:1.08;color:#402456;font-weight:950;letter-spacing:-1px}.pl-home-copy p{margin:8px 0 0;font-size:14.5px;line-height:1.38;color:#60486F;font-weight:650}
         .pl-home-plush{right:4px;bottom:-2px;width:43%;height:64%;display:flex;align-items:flex-end;justify-content:center}.pl-home-plush img{position:relative;z-index:3;width:min(180px,78%);max-height:164px;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(73,39,87,.12))}.pl-home-pillow{position:absolute;border-radius:50%;background:radial-gradient(circle at 40% 35%,#FCEBED,#EEDAF5 58%,#D9C2E6);box-shadow:inset 0 0 38px rgba(255,255,255,.72)}.pl-pillow-one{right:-10px;bottom:-32px;width:268px;height:170px;transform:rotate(-7deg)}.pl-pillow-two{right:80px;bottom:-18px;width:185px;height:118px;transform:rotate(9deg);opacity:.9}.pl-mini-plush{position:absolute;z-index:4;left:26%;bottom:31px;font-size:42px;transform:rotate(-9deg);filter:drop-shadow(0 4px 5px rgba(90,57,102,.16))}
         .pl-home-bubble{right:12px;bottom:9px;padding:8px 11px;border-radius:18px;background:rgba(255,255,255,.92);border:1px solid rgba(233,216,237,.9);color:#5A4271;font-size:12px;font-weight:700;line-height:1.35}
@@ -328,7 +330,7 @@ export function TodayPanel({
           .pl-home-hero{min-height:136px;margin:0 -8px;border-radius:0 0 16px 16px}
           .pl-home-hero:before{background:radial-gradient(circle at 22% 20%,rgba(255,255,255,.72),transparent 30%),radial-gradient(circle at 76% 20%,rgba(227,202,239,.24),transparent 34%)}
           .pl-home-brand{left:13px;top:10px}.pl-home-logo{font-size:20px;letter-spacing:-.7px}.pl-home-tagline{font-size:9.5px;margin-top:2px}
-          .pl-home-actions{right:8px;top:8px;gap:5px}.pl-home-date{font-size:9px;padding:5px 7px}.pl-home-settings{width:44px;height:44px;font-size:16px}
+          .pl-home-actions{right:8px;top:8px;gap:5px}.pl-home-date{font-size:9px;padding:5px 7px}.pl-home-settings{width:44px;height:44px;font-size:16px}.pl-home-timer{width:44px;height:44px;font-size:16px}
           .pl-home-copy{left:13px;bottom:11px;width:57%}.pl-home-copy h1{font-size:18px;line-height:1.03;white-space:nowrap}.pl-home-copy .pl-heart{font-size:.78em}.pl-home-copy p{margin-top:4px;font-size:10.5px;line-height:1.22}
           .pl-home-plush{right:3px;bottom:5px;width:29%;height:50%}.pl-home-plush img{width:min(82px,74%);max-height:76px;object-fit:contain}
           .pl-home-plush .plush-mascot{width:82px!important;height:82px!important}
