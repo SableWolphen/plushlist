@@ -8,7 +8,11 @@ const CHUNKS = path.join(ASSETS, "chunks");
 
 // Keep modest headroom above the current production size so ordinary small
 // changes can ship while meaningful startup regressions still fail the build.
-const MAX_ENTRY_BYTES = 488 * 1024;
+// Raised deliberately from 488KB: the storybook visual layer (Dino Theme +
+// Baby Mode night variant + Guardian/Focus/Rewards styling the user asked for)
+// added ~10KB of CSS, taking the entry to ~498KB. 512KB is still a tight
+// budget for the critical startup entry.
+const MAX_ENTRY_BYTES = 512 * 1024;
 // Raised deliberately from 45KB: the settings-panel lazy chunk sits at 43.9KB,
 // leaving only 1.1KB of headroom — any small addition to settings would fail
 // the build for no real performance reason. 60KB is still a tight budget for a
