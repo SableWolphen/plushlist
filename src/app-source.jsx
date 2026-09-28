@@ -6063,7 +6063,7 @@ function GlowUpTracker() {
       `,
       fontFamily: babyMode ? "'Comic Sans MS','Nunito','Segoe UI',sans-serif" : dinoTheme ? "'Baloo 2','Nunito','Avenir Next','Segoe UI',system-ui,sans-serif" : "'Avenir Next','Segoe UI',system-ui,sans-serif",
       color: preferences.high_contrast ? "#2D2038" : "#5B4B6B",
-      fontSize: babyMode ? "118%" : "100%",
+      fontSize: babyMode ? "104%" : "100%",
       padding: "max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))",
       position: "relative",
       isolation: "isolate",
@@ -6091,7 +6091,7 @@ function GlowUpTracker() {
         /* compact-phone-shell */
         @media(max-width:520px){
           #main-content{
-            padding-top:env(safe-area-inset-top)!important;
+            padding-top:max(12px,env(safe-area-inset-top))!important;
             padding-left:env(safe-area-inset-left)!important;
             padding-right:env(safe-area-inset-right)!important;
             padding-bottom:calc(72px + env(safe-area-inset-bottom))!important;
