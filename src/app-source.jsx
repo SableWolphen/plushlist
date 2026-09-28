@@ -6035,6 +6035,14 @@ function GlowUpTracker() {
         radial-gradient(circle at 93% 8%, #BDEBFF 0%, transparent 35%),
         radial-gradient(circle at 88% 91%, #FFF0A8 0%, transparent 38%),
         radial-gradient(circle at 9% 88%, #C8F4DE 0%, transparent 38%)
+      ` : dinoTheme ? `
+        linear-gradient(180deg, #FFF6FB 0%, #FDF1FF 46%, #F4EDFF 100%),
+        radial-gradient(circle at 10% 6%, #FFD3E8 0%, transparent 40%),
+        radial-gradient(circle at 90% 4%, #D9C9F7 0%, transparent 42%),
+        radial-gradient(circle at 96% 44%, #C9ECFF 0%, transparent 38%),
+        radial-gradient(circle at 4% 52%, #D6F5E3 0%, transparent 38%),
+        radial-gradient(circle at 88% 94%, #FFE9C9 0%, transparent 44%),
+        radial-gradient(circle at 8% 92%, #FFD9EC 0%, transparent 44%)
       ` : `
         linear-gradient(135deg, ${dinoPalette.wash}, transparent 64%),
         radial-gradient(circle at 8% 12%, ${dinoPalette.glowA} 0%, transparent 42%),
@@ -6259,13 +6267,25 @@ function GlowUpTracker() {
         .dino-theme .pl-app-nav-btn{color:#9A7BA8}
         .dino-theme .pl-app-nav-btn[aria-current="page"],.dino-theme .pl-app-nav-btn.active{color:#B44CC7}
         .dino-theme .pl-home-hero{position:relative}
-        .dino-theme .pl-home-hero:after{content:"🦕";position:absolute;right:10px;top:6px;font-size:30px;opacity:.9;pointer-events:none;animation:pl-dino-bob 3.2s ease-in-out infinite}
         .dino-theme .pl-unified-page-hero{position:relative}
-        .dino-theme .pl-unified-page-hero:after{content:"🦕✨";position:absolute;right:12px;top:8px;font-size:26px;opacity:.85;pointer-events:none;animation:pl-dino-bob 3.2s ease-in-out infinite}
         @keyframes pl-dino-bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-7px) rotate(4deg)}}
         .dino-theme .pl-noticed{border:2px solid #F3DDF2!important;border-radius:22px!important;background:#FFFBFE!important}
         .dino-theme input,.dino-theme textarea,.dino-theme select{border-radius:16px!important;border:2px solid #F3DDF2!important}
         .dino-theme .pl-link-btn{color:#B44CC7!important}
+        /* ---- Dino Theme storybook layer (dreamy pastel storybook look) ---- */
+        .dino-theme .pl-unified-page-hero{background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,247,253,.55))!important;border:2px solid #F6E3F4!important;border-radius:28px!important;box-shadow:0 14px 34px rgba(190,120,200,.14),inset 0 2px 0 rgba(255,255,255,.95)!important;overflow:hidden}
+        .dino-theme .pl-unified-page-hero:before{content:"☁️  ✨  ☁️";position:absolute;left:10px;bottom:4px;font-size:20px;opacity:.7;pointer-events:none;animation:pl-dino-drift 7s ease-in-out infinite}
+        .dino-theme .pl-unified-page-hero:after{content:"🦕";position:absolute;right:12px;top:8px;font-size:34px;opacity:.95;pointer-events:none;animation:pl-dino-bob 3.2s ease-in-out infinite;filter:drop-shadow(0 6px 8px rgba(190,120,200,.25))}
+        @keyframes pl-dino-drift{0%,100%{transform:translateX(0)}50%{transform:translateX(10px)}}
+        .dino-theme .pl-home-hero{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,247,253,.6))!important;border:2px solid #F6E3F4!important;border-radius:28px!important;box-shadow:0 14px 34px rgba(190,120,200,.14),inset 0 2px 0 rgba(255,255,255,.95)!important;overflow:hidden}
+        .dino-theme .pl-home-hero:before{content:"🌷🌱";position:absolute;left:8px;bottom:6px;font-size:22px;opacity:.85;pointer-events:none}
+        .dino-theme .pl-home-hero:after{content:"🦕";position:absolute;right:10px;top:6px;font-size:38px;opacity:.95;pointer-events:none;animation:pl-dino-bob 3.2s ease-in-out infinite;filter:drop-shadow(0 6px 8px rgba(190,120,200,.25))}
+        .dino-theme .pl-unified-page-title h2{font-size:24px!important;text-shadow:0 2px 0 rgba(255,255,255,.8)}
+        .dino-theme .pl-unified-kicker{color:#C05BD1!important;letter-spacing:.14em!important}
+        .dino-theme [data-plushlife-compact-card]{box-shadow:0 14px 30px rgba(190,120,200,.12),inset 0 2px 0 rgba(255,255,255,.95)!important}
+        .dino-theme .pl-list-row{box-shadow:0 6px 14px rgba(190,120,200,.08),inset 0 1px 0 rgba(255,255,255,.9)!important}
+        .dino-theme .pl-app-bottom-nav{border-radius:26px 26px 0 0!important}
+        .dino-theme ::selection{background:#F3DDF2}
         .dash-arrow { flex-shrink: 0; }
         @media (max-width: 640px) {
           .dash-arrow { display: none; }
