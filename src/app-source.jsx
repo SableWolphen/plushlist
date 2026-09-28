@@ -6203,6 +6203,79 @@ function GlowUpTracker() {
           box-shadow:0 7px 17px color-mix(in srgb,var(--pl-theme-accent) 22%,transparent)!important;
         }
 
+        /* Main content panels share the exact same card/material language. */
+        #main-content .pl-growth-shell,
+        #main-content .pl-care-shell,
+        #main-content .pl-calendar-cozy{
+          color:var(--pl-theme-ink)!important;
+        }
+        #main-content :is(.pl-growth-card,.pl-growth-stat,.pl-growth-weekbar,.pl-care-card,.pl-care-reco,.pl-care-memory,.pl-care-extra,.pl-care-tonight,.pl-calendar-cozy>div,.pl-calendar-cozy>section,.pl-calendar-cozy details){
+          background:linear-gradient(145deg,color-mix(in srgb,var(--pl-theme-surface) 96%,transparent),color-mix(in srgb,var(--pl-theme-surface-2) 90%,transparent))!important;
+          border-color:var(--pl-theme-line)!important;
+          box-shadow:0 8px 22px color-mix(in srgb,var(--pl-theme-accent) 8%,transparent)!important;
+          backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+        }
+        #main-content :is(.pl-growth-kicker,.pl-care-kicker){color:var(--pl-theme-accent)!important}
+        #main-content :is(.pl-growth-copy,.pl-care-copy,.pl-growth-note){color:var(--pl-theme-muted)!important}
+        #main-content :is(.pl-growth-tabs,.pl-care-tabs){
+          background:color-mix(in srgb,var(--pl-theme-surface-2) 84%,white)!important;
+          border:1px solid var(--pl-theme-line)!important;
+          border-radius:999px!important;padding:4px!important;
+        }
+        #main-content :is(.pl-growth-tabs,.pl-care-tabs) button{
+          border-radius:999px!important;border:0!important;color:var(--pl-theme-muted)!important;background:transparent!important;
+        }
+        #main-content :is(.pl-growth-tabs,.pl-care-tabs) button[aria-selected="true"],
+        #main-content :is(.pl-growth-tabs,.pl-care-tabs) button.active{
+          background:linear-gradient(135deg,var(--pl-theme-accent),var(--pl-theme-accent-2))!important;
+          color:white!important;box-shadow:0 5px 14px color-mix(in srgb,var(--pl-theme-accent) 20%,transparent)!important;
+        }
+        #main-content :is(.pl-growth-primary,.pl-care-primary){
+          background:linear-gradient(135deg,var(--pl-theme-accent),var(--pl-theme-accent-2))!important;
+          color:white!important;border:0!important;border-radius:999px!important;
+          box-shadow:0 7px 18px color-mix(in srgb,var(--pl-theme-accent) 20%,transparent)!important;
+        }
+        #main-content :is(.pl-growth-soft-btn,.pl-care-soft-btn){
+          background:color-mix(in srgb,var(--pl-theme-surface) 92%,transparent)!important;
+          color:var(--pl-theme-ink)!important;border-color:var(--pl-theme-line)!important;border-radius:999px!important;
+        }
+        #main-content .pl-growth-weekbar-fill{
+          background:linear-gradient(90deg,var(--pl-theme-accent),var(--pl-theme-accent-2))!important;
+        }
+        #main-content .pl-care-feelings button{
+          border-color:var(--pl-theme-line)!important;
+          background:color-mix(in srgb,var(--pl-theme-surface) 94%,transparent)!important;
+          color:var(--pl-theme-ink)!important;border-radius:16px!important;
+        }
+        #main-content .pl-care-feelings button[aria-pressed="true"]{
+          border-color:var(--pl-theme-accent)!important;
+          background:color-mix(in srgb,var(--pl-theme-accent) 12%,var(--pl-theme-surface))!important;
+        }
+        #main-content .pl-calendar-cozy>button{
+          border-color:var(--pl-theme-line)!important;
+          background:linear-gradient(145deg,var(--pl-theme-surface),var(--pl-theme-surface-2))!important;
+          color:var(--pl-theme-ink)!important;border-radius:14px!important;
+        }
+
+        /* Task editor + rewards inherit the active theme rather than looking like a separate utility. */
+        [data-plush-panel="🌷 Add & organize"] .pl-tool-panel,
+        [data-plush-panel="🧸 Plush & Keepsakes"] .pl-tool-panel,
+        [data-plush-panel="Settings"] .pl-tool-panel{
+          background:linear-gradient(155deg,var(--pl-theme-surface,#FFFDFE),var(--pl-theme-surface-2,#F7F1FF))!important;
+          border-color:var(--pl-theme-line,#E6D6EB)!important;
+        }
+        [data-plush-panel="🌷 Add & organize"] .pl-tool-body>div,
+        [data-plush-panel="🧸 Plush & Keepsakes"] .pl-tool-body>div{
+          border-color:var(--pl-theme-line,#E6D6EB)!important;
+          box-shadow:0 7px 22px color-mix(in srgb,var(--pl-theme-accent,#B85BC9) 7%,transparent)!important;
+        }
+        [data-plush-panel="🌷 Add & organize"] button[aria-pressed="true"],
+        [data-plush-panel="🧸 Plush & Keepsakes"] button[aria-selected="true"]{
+          border-color:var(--pl-theme-accent,#B85BC9)!important;
+          background:color-mix(in srgb,var(--pl-theme-accent,#B85BC9) 11%,white)!important;
+          color:var(--pl-theme-ink,#5B4666)!important;
+        }
+
         /* Theme identities: same layout, different world. */
         #main-content.appearance-pink .pl-ambient-theme-layer{
           background:radial-gradient(circle at 12% 14%,#FFC7DE 0%,transparent 34%),radial-gradient(circle at 88% 10%,#F0D7FF 0%,transparent 36%),radial-gradient(circle at 85% 84%,#FFE7F0 0%,transparent 42%),radial-gradient(circle at 9% 86%,#DDF4E4 0%,transparent 38%);
