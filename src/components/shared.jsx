@@ -197,11 +197,6 @@ export function ToolPanel({ title, onClose, children, inline = false, hideClose 
             background: "white", color: "#7A598C", fontWeight: 900, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, overflowWrap: "normal",
           }}>{inline ? "Back to tracker" : "Close"}</button>}
         </div>
-        {title === "Settings" && (
-          <div style={{ margin: "12px 14px 0", padding: "9px 11px", borderRadius: 11, background: "#F8F2FA", border: "1px solid #E3D5E9", color: "#755D82", fontSize: 11.5, lineHeight: 1.45 }}>
-            💡 Simple Layout reduces ambient theme effects and decorative backgrounds. Turn it off in <strong>Experience</strong> to see the full theme.
-          </div>
-        )}
         <div className="pl-tool-body" style={{ padding: "14px" }}><PanelErrorBoundary label={title}>{children}</PanelErrorBoundary></div>
       </div>
     </div>

@@ -118,7 +118,7 @@ const checks = [
   [packageJson.includes("check-bundle-budget.js"), "production sync enforces the permanent bundle budget"],
   [shared.includes("previousActive") && shared.includes("firstFocusable"), "dialogs restore and manage keyboard focus"],
   [shared.includes("minHeight: 44"), "shared dialog action meets minimum touch target"],
-  [shared.includes("Simple Layout reduces ambient theme effects"), "Simple Layout/theme interaction is explained"],
+  [settings.includes("Reduce visual decisions, ambient theme effects, and extra decoration."), "Simple Layout/theme interaction is explained"],
   // Compassionate proactive triage + rest as a feature (2026-09-28 pass)
   [today.includes("<ShapeMyDay") && today.includes("<RestDayCard") && today.includes("<FocusTimer") && today.includes("<OnboardingArc") && today.includes("<EveningGratitude"), "Home renders the proactive care layer above the reference layout"],
   [shapeMyDay.includes("essential_on_low_capacity") && shapeMyDay.includes("estimated_minutes") && shapeMyDay.includes("plushlife:shape-my-day:v1"), "Shape-my-day builds its plan from low-capacity metadata and remembers dismissal per date"],

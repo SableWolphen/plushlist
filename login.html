@@ -26,10 +26,16 @@
     .email-shell{display:block}.code-stage{display:none}body.mobile-code-ready .code-stage{display:block}#message{min-height:20px;margin-top:9px;text-align:center;color:#8574a0;font-size:12px;line-height:1.4}.back{display:block;margin-top:11px;text-align:center;color:#8574a0;font-size:12px}.legal{margin-top:14px;padding-top:11px;border-top:1px solid #f0d9ee;text-align:center;color:#8574a0;font-size:10.5px;line-height:1.55}.legal a{color:#9c5fb5}
 
     .mobile-email-toggle,.mobile-mini-note{display:none}
+    .brand-mark{display:grid;place-items:center;width:56px;height:56px;margin:0 auto 11px;border:1px solid #e7c4e9;border-radius:20px;background:linear-gradient(145deg,#f9dff4,#e5f8f1);box-shadow:0 10px 23px -16px #9b6bab;font-size:27px}
+    .brand h1{font-family:'Baloo 2','Segoe UI',sans-serif;font-weight:800;color:#4a3a5c}.brand h1 span{color:#ab59bc}
+    main{border-radius:30px;background:linear-gradient(160deg,#fffafd,#fff 67%,#f7fcfa);box-shadow:0 24px 65px -35px rgba(90,50,110,.45)}
+    .auth-card{border-radius:21px;background:#fffafd}.auth-subtitle{font-size:13px}
+    button:not(.google){box-shadow:0 10px 22px -16px rgba(160,70,181,.7)}button:focus-visible,a:focus-visible{outline:3px solid #d99be5;outline-offset:3px}
+    .comfort-note{margin:13px 0 0;text-align:center;color:#846c95;font-size:11px;font-weight:700}
     @media(max-width:680px){
       body{display:block;min-height:100dvh;padding:max(10px,env(safe-area-inset-top)) 12px max(10px,env(safe-area-inset-bottom));background:radial-gradient(circle at 6% 3%,#fce1f3 0%,transparent 28%),radial-gradient(circle at 96% 5%,#d8f3ec 0%,transparent 28%),#fff8fc}
       main{width:100%;min-height:0;padding:14px;border-radius:20px}.brand{margin-bottom:10px}h1{font-size:22px}.intro{display:none}.login-layout{display:block}.plans{display:none}.auth-card{padding:0;border:0;background:transparent;box-shadow:none}.auth-title{display:none}
-      button{min-height:46px;margin-top:7px}.google{margin-top:0!important}.mobile-email-toggle{display:block;margin-top:9px;border:1px solid #d9c7e4;background:rgba(255,255,255,.82);color:#8e4eaa}.email-shell{display:none}.email-shell.is-open{display:block}.divider{display:none}
+      button{min-height:46px;margin-top:7px}.google{margin-top:0!important}.mobile-email-toggle{display:none}.email-shell{display:block}.divider{display:flex}
       .email-shell label{margin-top:8px}.email-shell input{min-height:46px}
       #message{min-height:0;margin-top:8px;font-size:11.5px}.back{margin-top:9px}.back-home{display:none}.mobile-mini-note{display:block;margin-top:10px;text-align:center;font-size:10.5px;line-height:1.35}.legal{margin-top:10px;padding-top:9px;font-size:9.5px;line-height:1.45}.legal>div{display:none}.legal a:nth-of-type(3),.legal a:nth-of-type(4){display:none}
       #passwordSection{padding-top:1px}
@@ -39,10 +45,10 @@
 </head>
 <body>
   <main>
-    <div class="brand"><h1>Welcome to PlushLife 💛</h1><p class="intro">Sign in to your private tracker. Google is fastest, or use your email.</p></div>
+    <div class="brand"><div class="brand-mark" aria-hidden="true">🧸</div><h1>Welcome <span>back</span> 💛</h1><p class="intro">Your little space is ready whenever you are.</p></div>
     <div class="login-layout">
       <section class="auth-card" aria-label="Sign in options">
-        <div class="auth-title">Sign in</div><p class="auth-subtitle">Use the same account on your phone and the web.</p>
+        <div class="auth-title">Open your space</div><p class="auth-subtitle">Your day, your pace. Sign in with Google or an email code.</p>
         <button id="googleSignIn" class="google" type="button"><span class="gmark" aria-hidden="true">G</span><span>Continue with Google</span></button>
         <button id="mobileEmailToggle" class="mobile-email-toggle" type="button" aria-expanded="false">Use email instead</button>
         <div class="email-shell" id="emailShell">
@@ -53,6 +59,7 @@
           <div id="passwordSection" style="display:none"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Your password"><button id="passwordSignIn" class="secondary" type="button">Sign in with password</button></div>
         </div>
         <div id="message" role="status" aria-live="polite"></div>
+        <div class="comfort-note">🔒 Your routines and reflections stay private.</div>
         <a class="back back-home" href="./">Back to PlushLife</a>
         <div class="mobile-mini-note">Private account · Free core experience</div>
       </section>
