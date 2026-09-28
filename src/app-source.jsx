@@ -6307,6 +6307,34 @@ function GlowUpTracker() {
         .baby-mode.baby-night .pl-unified-page-hero:after{content:"🌙✨"}
         .baby-mode.baby-night .pl-home-hero:after{content:"🦕💤"}
         .baby-mode.baby-night .pl-unified-page-hero:before{content:"✨  🌟  ✨"}
+        /* ---- Illustrated storybook scenes (custom dino artwork) ---- */
+        .dino-theme .pl-home-hero{background:url(assets/dino-garden.jpg) center 32%/cover no-repeat!important}
+        .dino-theme .pl-home-hero:before,.dino-theme .pl-home-hero:after{display:none!important}
+        .dino-theme .pl-home-plush{display:none!important}
+        .dino-theme .pl-home-logo{text-shadow:0 2px 10px rgba(255,255,255,.92)}
+        .dino-theme .pl-home-copy h1{text-shadow:0 2px 12px rgba(255,255,255,.95)}
+        .dino-theme .pl-home-copy p{text-shadow:0 1px 8px rgba(255,255,255,.95)}
+        .dino-theme .pl-unified-page-hero{background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,247,253,.72)),url(assets/dino-garden.jpg) center 35%/cover no-repeat!important}
+        .baby-mode .pl-home-hero{background:url(assets/dino-clouds.jpg) center 32%/cover no-repeat!important}
+        .baby-mode .pl-home-hero:before,.baby-mode .pl-home-hero:after{display:none!important}
+        .baby-mode .pl-home-plush{display:none!important}
+        .baby-mode .pl-home-logo{text-shadow:0 2px 10px rgba(255,255,255,.92)}
+        .baby-mode .pl-home-copy h1{text-shadow:0 2px 12px rgba(255,255,255,.95)}
+        .baby-mode .pl-home-copy p{text-shadow:0 1px 8px rgba(255,255,255,.95)}
+        .baby-mode.baby-night .pl-home-hero{background:url(assets/dino-night.jpg) center 32%/cover no-repeat!important}
+        .baby-mode.baby-night .pl-home-logo{color:#FFF7EA;text-shadow:0 2px 12px rgba(35,28,75,.7)}
+        .baby-mode.baby-night .pl-home-tagline{color:#D9D0EA}
+        .baby-mode.baby-night .pl-home-copy h1{color:#FFF7EA;text-shadow:0 2px 12px rgba(35,28,75,.7)}
+        .baby-mode.baby-night .pl-home-copy p{color:#EDE6F8;text-shadow:0 1px 8px rgba(35,28,75,.7)}
+        .baby-mode .pl-unified-page-hero{background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,240,250,.72)),url(assets/dino-clouds.jpg) center 35%/cover no-repeat!important}
+        .baby-mode.baby-night .pl-unified-page-hero{background:linear-gradient(180deg,rgba(255,255,255,.80),rgba(240,235,250,.66)),url(assets/dino-night.jpg) center 35%/cover no-repeat!important}
+        .dino-theme .pl-app-bottom-nav,.baby-mode .pl-app-bottom-nav{left:12px!important;right:12px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;border-radius:28px!important;border:2px solid #F3DDF2!important;box-shadow:0 12px 30px rgba(190,120,200,.20)!important}
+        .simple-mode .pl-home-hero{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(250,246,252,.9))!important}
+        .simple-mode .pl-home-plush{display:block!important}
+        .simple-mode .pl-home-logo,.simple-mode .pl-home-copy h1,.simple-mode .pl-home-copy p{text-shadow:none}
+        .simple-mode .pl-unified-page-hero{background:rgba(255,255,255,.9)!important}
+        /* Dino Theme rewards: illustrated care scene behind the panel header. */
+        .dino-theme [data-plush-panel="🧸 Plush & Keepsakes"] .pl-tool-header{background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(255,249,253,.94)),url(assets/dino-care.jpg) center 28%/cover no-repeat!important}
         /* ---- Storybook layer: Guardian view ---- */
         .guardian-view{background:#FFFAF5!important;background-image:linear-gradient(180deg,#FFFBF6 0%,#FFF6EE 60%,#FDF1F8 100%),radial-gradient(circle at 12% 8%,#FFE9C9 0%,transparent 38%),radial-gradient(circle at 88% 10%,#FFD9E8 0%,transparent 38%),radial-gradient(circle at 85% 90%,#E3D4F5 0%,transparent 42%)!important}
         .guardian-view .pl-tool-panel{background:linear-gradient(180deg,#FFFDFB,#FFF8F3)!important;border:2px solid #F3E2D2!important;border-radius:26px!important;box-shadow:0 18px 44px rgba(200,150,110,.18),inset 0 2px 0 rgba(255,255,255,.95)!important}
