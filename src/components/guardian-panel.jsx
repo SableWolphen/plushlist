@@ -39,8 +39,14 @@ export function GuardianPanel({ open, onClose, isGuardianAccount, hasOwnGuardian
     ...(supportScheduleExceptions || []).flatMap((item) => (item.entries || []).map((entry) => ({ ...entry, isException: true }))),
   ].sort((a, b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")));
   return (
-          <ToolPanel inline title="Guardian support" onClose={onClose}>
-          <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.72)", border: "1px solid #B9DCF6", boxShadow: "0 8px 24px rgba(76,143,232,0.10)" }}>
+          <ToolPanel inline title="💛 PlushSupport" onClose={onClose}>
+          <div className="pl-support-hero" style={{ marginBottom: 10, padding: "17px 16px", borderRadius: 22, background: "linear-gradient(145deg,#FFF6FC,#F2ECFF)", border: "1px solid #E7D4EC", boxShadow: "0 8px 24px rgba(100,62,118,.07)", position: "relative", overflow: "hidden" }}>
+            <div aria-hidden="true" style={{ position: "absolute", right: -8, top: -16, fontSize: 64, opacity: .18 }}>🧸</div>
+            <div style={{ position: "relative", fontSize: 10.5, letterSpacing: ".14em", fontWeight: 950, color: "#B15BC3" }}>💗 PLUSHSUPPORT</div>
+            <div style={{ position: "relative", marginTop: 4, fontSize: 20, lineHeight: 1.12, fontWeight: 950, color: "#573563" }}>{isSupportAdult ? `Supporting ${selectedSupportName}` : "You’re not alone."}</div>
+            <div style={{ position: "relative", marginTop: 5, maxWidth: 470, fontSize: 12, lineHeight: 1.5, color: "#806A8C" }}>{isSupportAdult ? "Encourage, check in, and help within the boundaries they chose." : "Share your journey with people you trust. You stay in control of what each Guardian can see."}</div>
+          </div>
+          <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "rgba(255,255,255,0.72)", border: "1px solid #E5D3EB", boxShadow: "0 8px 24px rgba(92,57,108,0.07)" }}>
             {isGuardianAccount && (
               <div style={{ marginBottom: 14, padding: "13px 14px", borderRadius: 14, background: "linear-gradient(135deg,#EAF6F1,#F4FAFF)", border: "1px solid #B9E0D0" }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.11em", fontWeight: 900, color: "#318C79" }}>💛 GUARDIAN SUPPORT DASHBOARD</div>
