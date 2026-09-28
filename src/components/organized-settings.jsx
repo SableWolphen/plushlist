@@ -214,7 +214,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
         </label>
       </Card>
       <Card>
-        <div style={{ fontSize: 11.5, fontWeight: 900, color: "#745D81" }}>THEMES</div>
+        <div style={{ fontSize: 11.5, fontWeight: 900, color: "#745D81" }}>AMBIENT THEME</div>
         <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#8A7895" }}>Same PlushLife layout, a different cozy little world.</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8, marginTop: 10 }}>
           {APPEARANCE_THEMES.map((theme) => {
