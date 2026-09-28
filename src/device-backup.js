@@ -262,7 +262,7 @@ export async function verifyDeviceBackup(userId) {
     savedAt: latest.savedAt,
     verifiedAt,
     snapshotCount: snapshots.length,
-    counts: rowCounts(latest.payload),
+    counts: rowCounts(payload),
   };
 }
 

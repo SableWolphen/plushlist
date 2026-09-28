@@ -40,7 +40,7 @@ const VENDOR_FILES = [
 const CDN_REPLACEMENTS = [
   ["https://unpkg.com/react@18/umd/react.production.min.js", "./vendor/react.production.min.js"],
   ["https://unpkg.com/react-dom@18/umd/react-dom.production.min.js", "./vendor/react-dom.production.min.js"],
-  ["https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js", "./vendor/supabase.min.js"],
+  [/https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@[^/]+\/dist\/umd\/supabase\.min\.js/, "./vendor/supabase.min.js"],
 ];
 
 const GENERATED_INDEX_PRELOADS = [

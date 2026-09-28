@@ -21,7 +21,9 @@ import { TodayPanel } from "./components/today-panel.jsx";
 import { createDeviceBackup, getDeviceBackupStatus, scheduleAutomaticDeviceBackup, verifyDeviceBackup } from "./device-backup.js";
 
 const { useState, useEffect } = React;
-const supabase = window.supabase.createClient(
+// The SDK script tag can fail (offline, blocked CDN, SRI mismatch). Never let
+// that turn into a blank white page: degrade to a friendly retry screen.
+const supabase = window.supabase ? window.supabase.createClient(
   "https://pvitdhixycegmcovapyh.supabase.co",
   "sb_publishable_SScDCEHovc68ITiEUu6lCg_mHPe2oaI",
   {
@@ -31,7 +33,7 @@ const supabase = window.supabase.createClient(
       detectSessionInUrl: true,
     },
   }
-);
+) : null;
 const SUPABASE_AUTH_STORAGE_KEY = "sb-pvitdhixycegmcovapyh-auth-token";
 const WARM_START_CACHE_VERSION = 1;
 const WARM_START_CACHE_MAX_AGE_MS = 2 * 60 * 60 * 1000;
@@ -599,7 +601,7 @@ const RESTORABLE_DATA_TABLES = [
   { payloadKey: "weekly_intention_checkins", table: "weekly_intention_checkins", onConflict: "user_id,week_start", stripId: true },
   { payloadKey: "weekly_intentions", table: "weekly_intentions", onConflict: "user_id,week_start" },
   { payloadKey: "task_completion_history", table: "tracker_progress", onConflict: "user_id,task_key" },
-  { payloadKey: "care_session_history", table: "care_session_logs", stripId: true },
+  { payloadKey: "care_session_history", table: "care_session_logs", stripId: true, dedupeBy: ["session_id", "completed_at"] },
   { payloadKey: "private_mommy_chats", table: "mommy_chat_threads", onConflict: "id" },
   { payloadKey: "profile", table: "tracker_profiles", onConflict: "user_id", single: true },
   { payloadKey: "preferences", table: "app_preferences", onConflict: "user_id", single: true },
@@ -805,6 +807,7 @@ function GlowUpTracker() {
   const [naturalSchedulePreview, setNaturalSchedulePreview] = useState(null);
   const [taskAdvancedOpen, setTaskAdvancedOpen] = useState(false);
   const [taskMessage, setTaskMessage] = useState("");
+  const [quickAddMessage, setQuickAddMessage] = useState("");
   const [editingTaskKey, setEditingTaskKey] = useState(null);
   const [dragTaskKey, setDragTaskKey] = useState(null);
   const [dragOverTaskKey, setDragOverTaskKey] = useState(null);
@@ -2465,6 +2468,40 @@ function GlowUpTracker() {
     setPrivateNoteMessage("");
   };
 
+  // Evening "one good thing" (Home card) — appends privately to today's
+  // private note via the existing private_notes upsert. No new table.
+  React.useEffect(() => {
+    const onGratitude = async (event) => {
+      const text = String(event.detail?.text || "").trim();
+      if (!user || !text || !supabase) return;
+      const date = period.date;
+      try {
+        const { data: existing } = await supabase.from("private_notes")
+          .select("body, prompt").eq("user_id", user.id).eq("note_date", date).maybeSingle();
+        const prior = String(existing?.body || "").trim();
+        const line = `🌟 One good thing: ${text}`;
+        if (prior.includes(line)) return;
+        const body = prior ? `${prior}\n\n${line}` : line;
+        const { error } = await supabase.from("private_notes").upsert({
+          user_id: user.id,
+          note_date: date,
+          body,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id,note_date" });
+        if (error) return;
+        setReflectionDates((dates) => Array.from(new Set([...(dates || []), date])));
+        setReflectionHistory((entries) => {
+          const nextEntry = { note_date: date, body, prompt: existing?.prompt || "", updated_at: new Date().toISOString() };
+          return [nextEntry, ...(entries || []).filter((entry) => entry.note_date !== date)]
+            .sort((a, b) => String(b.note_date).localeCompare(String(a.note_date)));
+        });
+        if (journalQuickOpenDate === date && !privateNoteEditing) setPrivateNote(body);
+      } catch (_error) {}
+    };
+    window.addEventListener("plushlife:gratitude", onGratitude);
+    return () => window.removeEventListener("plushlife:gratitude", onGratitude);
+  }, [user, supabase, period.date, journalQuickOpenDate, privateNoteEditing]);
+
   const taskSectionsForDay = (dayId) => {
     const sectionsForSelectedList = trackerTasks
       .filter((item) => item.day_id === dayId)
@@ -2771,6 +2808,74 @@ function GlowUpTracker() {
     setActive(newTaskDay);
     setSelectedProgressDate(dateForDayId(newTaskDay, period));
     setTaskMessage(`Added “${task}” inside ${section} ✨`);
+  };
+
+  // Quick capture: one-field brain dump from the top of Add & organize.
+  // Same insert semantics as addTrackerTask (dedup, supporter cap, order),
+  // but with smart defaults so it never asks a question. "someday" creates
+  // the task paused indefinitely — resumable from the list anytime.
+  const quickAddTrackerTask = async (name, when) => {
+    if (!user) {
+      setQuickAddMessage("Sign in first, then your quick adds will save.");
+      return false;
+    }
+    const task = String(name || "").trim();
+    if (!task) return false;
+    const targetDayId = when === "tomorrow" ? dayIdForDate(offsetDate(period.date, 1)) : todayDayId;
+    const matchingTask = trackerTasks.find((item) =>
+      !item.archived_at &&
+      (item.day_id === targetDayId || (targetDayId !== "daily" && item.day_id === "daily")) &&
+      item.task.trim().toLocaleLowerCase() === task.toLocaleLowerCase()
+    );
+    if (matchingTask) {
+      setQuickAddMessage(`You already have “${matchingTask.task}” — kept the original.`);
+      return false;
+    }
+    if (SUPPORTER_FEATURES_ENABLED && !isSupporterAccount) {
+      const combinedDayTaskCount = trackerTasks.filter((item) => item.day_id === "daily" || item.day_id === targetDayId).length;
+      if (combinedDayTaskCount >= FREE_TASK_LIMIT_PER_DAY) {
+        setQuickAddMessage(`🌟 Free accounts can have up to ${FREE_TASK_LIMIT_PER_DAY} tasks for this day.`);
+        return false;
+      }
+    }
+    const someday = when === "someday";
+    const sections = taskSectionsForDay(targetDayId);
+    const section = sections[0] || "My tasks";
+    const taskKey = `custom-${crypto.randomUUID()}`;
+    const dayTasks = trackerTasks
+      .filter((item) => item.day_id === targetDayId)
+      .sort((a, b) => Number(a.sort_order) - Number(b.sort_order) || String(a.task_key).localeCompare(String(b.task_key)));
+    const row = {
+      user_id: user.id,
+      task_key: taskKey,
+      day_id: targetDayId,
+      section,
+      task,
+      detail: encodeTaskDetail("regular"),
+      sort_order: dayTasks.length + 1,
+      is_bonus: sectionIsOptional(targetDayId, section),
+      schedule_type: "weekly",
+      start_date: null,
+      end_date: null,
+      one_time_date: null,
+      schedule_days: [],
+      reminder_time: null,
+      why_note: "",
+      soft_label: null,
+      tiny_label: null,
+      estimated_minutes: null,
+      essential_on_low_capacity: false,
+      paused_since: someday ? period.date : null,
+      paused_until: someday ? "2099-12-31" : null,
+    };
+    const { error } = await supabase.from("tracker_tasks").insert(row);
+    if (error) {
+      setQuickAddMessage("Couldn't save that just now — try again?");
+      return false;
+    }
+    setTrackerTasks((tasks) => [...tasks.filter((item) => item.day_id !== targetDayId), ...dayTasks, row]);
+    setQuickAddMessage("");
+    return true;
   };
 
   const [recentlyDeletedTask, setRecentlyDeletedTask] = useState(null);
@@ -4187,9 +4292,23 @@ function GlowUpTracker() {
         if (spec.stripId) delete clean.id;
         return clean;
       });
+      // Tables without a unique constraint (no onConflict) would duplicate
+      // rows if a restore is retried. Dedupe client-side on a natural key.
+      let toWrite = prepared;
+      if (spec.dedupeBy && spec.dedupeBy.length > 0 && prepared.length > 0) {
+        try {
+          const { data: existing } = await supabase.from(spec.table)
+            .select(spec.dedupeBy.join(",")).eq("user_id", user.id).limit(2000);
+          const seen = new Set((existing || []).map((row) =>
+            spec.dedupeBy.map((key) => String(row[key] ?? "")).join("\u0001")));
+          toWrite = prepared.filter((row) =>
+            !seen.has(spec.dedupeBy.map((key) => String(row[key] ?? "")).join("\u0001")));
+        } catch (_dedupeError) { /* fall through and write; duplicates beat data loss */ }
+      }
+      if (toWrite.length === 0) { restoredTables.push(spec.table); continue; }
       const { error } = spec.onConflict
-        ? await supabase.from(spec.table).upsert(prepared, { onConflict: spec.onConflict })
-        : await supabase.from(spec.table).insert(prepared);
+        ? await supabase.from(spec.table).upsert(toWrite, { onConflict: spec.onConflict })
+        : await supabase.from(spec.table).insert(toWrite);
       if (error) failedTables.push(spec.table); else restoredTables.push(spec.table);
     }
     if (failedTables.length === 0 && restoredTables.length === 0) {
@@ -6840,7 +6959,7 @@ function GlowUpTracker() {
 
         <JournalReflectionViewer reflectionViewerDate={reflectionViewerDate} onClose={() => setReflectionViewerDate(null)} reflectionViewerPrompt={reflectionViewerPrompt} reflectionViewerLoading={reflectionViewerLoading} reflectionViewerNote={reflectionViewerNote} />
 
-        <TasksPanel open={manageTasks} onClose={() => setManageTasks(false)} newTaskDay={newTaskDay} setNewTaskDay={setNewTaskDay} taskSectionsForDay={taskSectionsForDay} setNewTaskSection={setNewTaskSection} setNewTaskCustomSection={setNewTaskCustomSection} starterPackId={starterPackId} setStarterPackId={setStarterPackId} trackerTasks={trackerTasks} setStarterPackMessage={setStarterPackMessage} addStarterPack={addStarterPack} starterPackMessage={starterPackMessage} importOpen={importOpen} setImportOpen={setImportOpen} newTaskSection={newTaskSection} importText={importText} setImportText={setImportText} importTasksFromText={importTasksFromText} importMessage={importMessage} newTaskNameInputRef={newTaskNameInputRef} newTaskName={newTaskName} setNewTaskName={setNewTaskName} taskMessage={taskMessage} setTaskMessage={setTaskMessage} naturalScheduleText={naturalScheduleText} setNaturalScheduleText={setNaturalScheduleText} naturalSchedulePreview={naturalSchedulePreview} setNaturalSchedulePreview={setNaturalSchedulePreview} applyNaturalSchedule={applyNaturalSchedule} newTaskSectionOptions={newTaskSectionOptions} newTaskCustomSection={newTaskCustomSection} taskAdvancedOpen={taskAdvancedOpen} setTaskAdvancedOpen={setTaskAdvancedOpen} newTaskWhy={newTaskWhy} setNewTaskWhy={setNewTaskWhy} newTaskSoftLabel={newTaskSoftLabel} setNewTaskSoftLabel={setNewTaskSoftLabel} newTaskTinyLabel={newTaskTinyLabel} setNewTaskTinyLabel={setNewTaskTinyLabel} newTaskEstimatedMinutes={newTaskEstimatedMinutes} setNewTaskEstimatedMinutes={setNewTaskEstimatedMinutes} newTaskEssentialOnLow={newTaskEssentialOnLow} setNewTaskEssentialOnLow={setNewTaskEssentialOnLow} newTaskKind={newTaskKind} setNewTaskKind={setNewTaskKind} newTaskScheduleType={newTaskScheduleType} setNewTaskScheduleType={setNewTaskScheduleType} newTaskScheduleDays={newTaskScheduleDays} setNewTaskScheduleDays={setNewTaskScheduleDays} newTaskReminderTime={newTaskReminderTime} setNewTaskReminderTime={setNewTaskReminderTime} newTaskStartDate={newTaskStartDate} setNewTaskStartDate={setNewTaskStartDate} newTaskEndDate={newTaskEndDate} setNewTaskEndDate={setNewTaskEndDate} newTaskOneTimeDate={newTaskOneTimeDate} setNewTaskOneTimeDate={setNewTaskOneTimeDate} selectedProgressDate={selectedProgressDate} addTrackerTask={addTrackerTask} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} isSupporterAccount={isSupporterAccount} FREE_TASK_LIMIT_PER_DAY={FREE_TASK_LIMIT_PER_DAY} taskSearchQuery={taskSearchQuery} setTaskSearchQuery={setTaskSearchQuery} isTaskPausedOnDate={isTaskPausedOnDate} period={period} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToSection={moveTaskToSection} startEditingTask={startEditingTask} resumeTrackerTask={resumeTrackerTask} pauseTrackerTask={pauseTrackerTask} archiveTrackerTask={archiveTrackerTask} setPendingTaskDelete={setPendingTaskDelete} showArchivedTasks={showArchivedTasks} setShowArchivedTasks={setShowArchivedTasks} restoreArchivedTask={restoreArchivedTask} />
+        <TasksPanel open={manageTasks} onClose={() => setManageTasks(false)} newTaskDay={newTaskDay} setNewTaskDay={setNewTaskDay} taskSectionsForDay={taskSectionsForDay} setNewTaskSection={setNewTaskSection} setNewTaskCustomSection={setNewTaskCustomSection} starterPackId={starterPackId} setStarterPackId={setStarterPackId} trackerTasks={trackerTasks} setStarterPackMessage={setStarterPackMessage} addStarterPack={addStarterPack} starterPackMessage={starterPackMessage} importOpen={importOpen} setImportOpen={setImportOpen} newTaskSection={newTaskSection} importText={importText} setImportText={setImportText} importTasksFromText={importTasksFromText} importMessage={importMessage} newTaskNameInputRef={newTaskNameInputRef} newTaskName={newTaskName} setNewTaskName={setNewTaskName} taskMessage={taskMessage} setTaskMessage={setTaskMessage} naturalScheduleText={naturalScheduleText} setNaturalScheduleText={setNaturalScheduleText} naturalSchedulePreview={naturalSchedulePreview} setNaturalSchedulePreview={setNaturalSchedulePreview} applyNaturalSchedule={applyNaturalSchedule} newTaskSectionOptions={newTaskSectionOptions} newTaskCustomSection={newTaskCustomSection} taskAdvancedOpen={taskAdvancedOpen} setTaskAdvancedOpen={setTaskAdvancedOpen} newTaskWhy={newTaskWhy} setNewTaskWhy={setNewTaskWhy} newTaskSoftLabel={newTaskSoftLabel} setNewTaskSoftLabel={setNewTaskSoftLabel} newTaskTinyLabel={newTaskTinyLabel} setNewTaskTinyLabel={setNewTaskTinyLabel} newTaskEstimatedMinutes={newTaskEstimatedMinutes} setNewTaskEstimatedMinutes={setNewTaskEstimatedMinutes} newTaskEssentialOnLow={newTaskEssentialOnLow} setNewTaskEssentialOnLow={setNewTaskEssentialOnLow} newTaskKind={newTaskKind} setNewTaskKind={setNewTaskKind} newTaskScheduleType={newTaskScheduleType} setNewTaskScheduleType={setNewTaskScheduleType} newTaskScheduleDays={newTaskScheduleDays} setNewTaskScheduleDays={setNewTaskScheduleDays} newTaskReminderTime={newTaskReminderTime} setNewTaskReminderTime={setNewTaskReminderTime} newTaskStartDate={newTaskStartDate} setNewTaskStartDate={setNewTaskStartDate} newTaskEndDate={newTaskEndDate} setNewTaskEndDate={setNewTaskEndDate} newTaskOneTimeDate={newTaskOneTimeDate} setNewTaskOneTimeDate={setNewTaskOneTimeDate} selectedProgressDate={selectedProgressDate} addTrackerTask={addTrackerTask} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} isSupporterAccount={isSupporterAccount} FREE_TASK_LIMIT_PER_DAY={FREE_TASK_LIMIT_PER_DAY} taskSearchQuery={taskSearchQuery} setTaskSearchQuery={setTaskSearchQuery} isTaskPausedOnDate={isTaskPausedOnDate} period={period} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToSection={moveTaskToSection} startEditingTask={startEditingTask} resumeTrackerTask={resumeTrackerTask} pauseTrackerTask={pauseTrackerTask} archiveTrackerTask={archiveTrackerTask} setPendingTaskDelete={setPendingTaskDelete} showArchivedTasks={showArchivedTasks} setShowArchivedTasks={setShowArchivedTasks} restoreArchivedTask={restoreArchivedTask} quickAddTrackerTask={quickAddTrackerTask} quickAddMessage={quickAddMessage} />
 
         <ScheduleEditorPanel open={manageSchedule} onClose={() => setManageSchedule(false)} scheduleEditingDayId={scheduleEditingDayId} setScheduleEditDayId={setScheduleEditDayId} personalSchedules={personalSchedules} scheduleDraft={scheduleDraft} updateScheduleEntry={updateScheduleEntry} removeScheduleEntry={removeScheduleEntry} addScheduleEntry={addScheduleEntry} savePersonalSchedule={savePersonalSchedule} copyScheduleToAllDays={copyScheduleToAllDays} clearPersonalSchedule={clearPersonalSchedule} copyToDayIds={copyToDayIds} toggleCopyToDay={toggleCopyToDay} copyScheduleToSelectedDays={copyScheduleToSelectedDays} scheduleMessage={scheduleMessage} scheduleExceptionDraft={scheduleExceptionDraft} setScheduleExceptionDraft={setScheduleExceptionDraft} updateScheduleExceptionEntry={updateScheduleExceptionEntry} removeScheduleExceptionEntry={removeScheduleExceptionEntry} addScheduleExceptionEntry={addScheduleExceptionEntry} saveScheduleException={saveScheduleException} scheduleExceptionMessage={scheduleExceptionMessage} scheduleExceptions={scheduleExceptions} deleteScheduleException={deleteScheduleException} />
 
@@ -6929,6 +7048,7 @@ class AppErrorBoundary extends React.Component {
   }
   componentDidCatch(error, info) {
     console.error("PlushLife crashed:", error, info);
+    if (!supabase) return;
     supabase.auth.getUser().then(({ data }) => {
       supabase.from("app_error_logs").insert({
         user_id: data?.user?.id || null,
@@ -6955,4 +7075,19 @@ class AppErrorBoundary extends React.Component {
   }
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<AppErrorBoundary><GlowUpTracker /></AppErrorBoundary>);
+function BootFailureScreen() {
+  return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "system-ui, sans-serif", textAlign: "center", background: "linear-gradient(180deg, #FBF7FF 0%, #F3EAFB 100%)" }}>
+      <div style={{ maxWidth: 360 }}>
+        <div style={{ fontSize: 44 }}>🧸💤</div>
+        <h1 style={{ fontSize: 19, color: "#5B4B6B", margin: "12px 0 6px" }}>PlushLife couldn't wake up</h1>
+        <p style={{ fontSize: 14, color: "#8C6B9E", lineHeight: 1.55 }}>A piece PlushLife needs didn't load — usually a lost connection. Your data is safe. Check your connection and try again.</p>
+        <button onClick={() => window.location.reload()} style={{ marginTop: 14, padding: "12px 22px", borderRadius: 12, border: 0, background: "#A65DC1", color: "white", fontWeight: 800, fontSize: 15, cursor: "pointer" }}>Try again</button>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  supabase ? <AppErrorBoundary><GlowUpTracker /></AppErrorBoundary> : <BootFailureScreen />
+);

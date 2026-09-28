@@ -31,6 +31,13 @@ const goldPreview = read("src/components/plush-gold-preview.jsx");
 const landing = read("src/components/landing.jsx");
 const loginPage = read("login.html");
 const calmHome = read("src/components/calm-home-controls.jsx");
+const shapeMyDay = read("src/components/shape-my-day.jsx");
+const restDay = read("src/components/rest-day.jsx");
+const focusTimer = read("src/components/focus-timer.jsx");
+const quickCapture = read("src/components/quick-capture.jsx");
+const onboardingArc = read("src/components/onboarding-arc.jsx");
+const eveningGratitude = read("src/components/evening-gratitude.jsx");
+const tasksPanel = read("src/components/tasks-panel.jsx");
 
 const checks = [
   [deviceBackup.includes("indexedDB") && deviceBackup.includes("DEVICE_BACKUP_TABLES") && deviceBackup.includes("cloudDataDeleted: false"), "on-device backup is additive and never deletes cloud data"],
@@ -110,6 +117,17 @@ const checks = [
   [shared.includes("previousActive") && shared.includes("firstFocusable"), "dialogs restore and manage keyboard focus"],
   [shared.includes("minHeight: 44"), "shared dialog action meets minimum touch target"],
   [shared.includes("Simple Layout reduces ambient theme effects"), "Simple Layout/theme interaction is explained"],
+  // Compassionate proactive triage + rest as a feature (2026-09-28 pass)
+  [today.includes("<ShapeMyDay") && today.includes("<RestDayCard") && today.includes("<FocusTimer") && today.includes("<OnboardingArc") && today.includes("<EveningGratitude"), "Home renders the proactive care layer above the reference layout"],
+  [shapeMyDay.includes("essential_on_low_capacity") && shapeMyDay.includes("estimated_minutes") && shapeMyDay.includes("plushlife:shape-my-day:v1"), "Shape-my-day builds its plan from low-capacity metadata and remembers dismissal per date"],
+  [shapeMyDay.includes("plushlife:start-focus-timer") && focusTimer.includes("plushlife:start-focus-timer"), "the gentle timer opens from Shape-my-day via a decoupled event"],
+  [shapeMyDay.includes("Nothing is erased"), "Shape-my-day promises it never rewrites the task list"],
+  [restDay.includes("GENTLE_AFFIRMATIONS") && restDay.includes("COMFORT_TOOLS") && restDay.includes("careDaysTotal"), "rest day pairs an affirmation with comfort tools and the care-day count"],
+  [focusTimer.includes("AudioContext") && focusTimer.includes("Stopping early is always okay"), "gentle timer chimes softly and never scolds for stopping"],
+  [tasksPanel.includes("<QuickCapture") && quickCapture.includes("someday") && appSource.includes("quickAddTrackerTask"), "quick capture sits atop Add & organize with Today/Tomorrow/Someday routing"],
+  [appSource.includes('paused_until: someday ? "2099-12-31"') , "Someday quick-adds park as paused-indefinite tasks (resumable, no schema change)"],
+  [onboardingArc.includes("plushlife:onboarding-arc:v1") && onboardingArc.includes("DAY {dayIndex} OF 7"), "the 7-day onboarding arc tracks one dismissible nudge per day locally"],
+  [eveningGratitude.includes("plushlife:gratitude") && appSource.includes('addEventListener("plushlife:gratitude"') && appSource.includes("One good thing:"), "evening gratitude flows into today's private note via the existing upsert"],
 ];
 
 const failures = checks.filter(([ok]) => !ok).map(([, label]) => label);

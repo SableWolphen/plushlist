@@ -8,13 +8,19 @@
 // the setters/handlers that open them (setPendingTaskDelete,
 // startEditingTask), not the modals themselves.
 import { ToolPanel, HabitTypeIcon } from "./shared.jsx";
+import { QuickCapture } from "./quick-capture.jsx";
 
-export function TasksPanel({ open, onClose, newTaskDay, setNewTaskDay, taskSectionsForDay, setNewTaskSection, setNewTaskCustomSection, starterPackId, setStarterPackId, trackerTasks, setStarterPackMessage, addStarterPack, starterPackMessage, importOpen, setImportOpen, newTaskSection, importText, setImportText, importTasksFromText, importMessage, newTaskNameInputRef, newTaskName, setNewTaskName, taskMessage, setTaskMessage, naturalScheduleText, setNaturalScheduleText, naturalSchedulePreview, setNaturalSchedulePreview, applyNaturalSchedule, newTaskSectionOptions, newTaskCustomSection, taskAdvancedOpen, setTaskAdvancedOpen, newTaskWhy, setNewTaskWhy, newTaskSoftLabel, setNewTaskSoftLabel, newTaskTinyLabel, setNewTaskTinyLabel, newTaskEstimatedMinutes, setNewTaskEstimatedMinutes, newTaskEssentialOnLow, setNewTaskEssentialOnLow, newTaskKind, setNewTaskKind, newTaskScheduleType, setNewTaskScheduleType, newTaskScheduleDays, setNewTaskScheduleDays, newTaskReminderTime, setNewTaskReminderTime, newTaskStartDate, setNewTaskStartDate, newTaskEndDate, setNewTaskEndDate, newTaskOneTimeDate, setNewTaskOneTimeDate, selectedProgressDate, addTrackerTask, SUPPORTER_FEATURES_ENABLED, isSupporterAccount, FREE_TASK_LIMIT_PER_DAY, taskSearchQuery, setTaskSearchQuery, isTaskPausedOnDate, period, startPointerTaskDrag, movePointerTaskDrag, endPointerTaskDrag, cancelPointerTaskDrag, moveTaskToSection, startEditingTask, resumeTrackerTask, pauseTrackerTask, archiveTrackerTask, setPendingTaskDelete, showArchivedTasks, setShowArchivedTasks, restoreArchivedTask }) {
+export function TasksPanel({ open, onClose, newTaskDay, setNewTaskDay, taskSectionsForDay, setNewTaskSection, setNewTaskCustomSection, starterPackId, setStarterPackId, trackerTasks, setStarterPackMessage, addStarterPack, starterPackMessage, importOpen, setImportOpen, newTaskSection, importText, setImportText, importTasksFromText, importMessage, newTaskNameInputRef, newTaskName, setNewTaskName, taskMessage, setTaskMessage, naturalScheduleText, setNaturalScheduleText, naturalSchedulePreview, setNaturalSchedulePreview, applyNaturalSchedule, newTaskSectionOptions, newTaskCustomSection, taskAdvancedOpen, setTaskAdvancedOpen, newTaskWhy, setNewTaskWhy, newTaskSoftLabel, setNewTaskSoftLabel, newTaskTinyLabel, setNewTaskTinyLabel, newTaskEstimatedMinutes, setNewTaskEstimatedMinutes, newTaskEssentialOnLow, setNewTaskEssentialOnLow, newTaskKind, setNewTaskKind, newTaskScheduleType, setNewTaskScheduleType, newTaskScheduleDays, setNewTaskScheduleDays, newTaskReminderTime, setNewTaskReminderTime, newTaskStartDate, setNewTaskStartDate, newTaskEndDate, setNewTaskEndDate, newTaskOneTimeDate, setNewTaskOneTimeDate, selectedProgressDate, addTrackerTask, SUPPORTER_FEATURES_ENABLED, isSupporterAccount, FREE_TASK_LIMIT_PER_DAY, taskSearchQuery, setTaskSearchQuery, isTaskPausedOnDate, period, startPointerTaskDrag, movePointerTaskDrag, endPointerTaskDrag, cancelPointerTaskDrag, moveTaskToSection, startEditingTask, resumeTrackerTask, pauseTrackerTask, archiveTrackerTask, setPendingTaskDelete, showArchivedTasks, setShowArchivedTasks, restoreArchivedTask, quickAddTrackerTask, quickAddMessage }) {
   if (!open) return null;
   const { DAYS, TEMPLATE_PACKS } = window.PlushLifeContent;
   const { WEEKDAY_PRESET_IDS, WEEKEND_PRESET_IDS, scheduleLabelForTask } = window.PlushLifeSchedule;
+  const scrollToFullForm = () => {
+    const target = document.getElementById("plushlife-full-task-form");
+    if (target && target.scrollIntoView) target.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   return (
           <ToolPanel title="🌷 Add & organize" onClose={onClose}>
+          <QuickCapture onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage} onMoreOptions={scrollToFullForm} />
           <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "linear-gradient(145deg,#FFF8FC,#F5F0FF)", border: "1px solid #DFCBE7", boxShadow: "0 8px 22px rgba(103,65,122,.06), inset 0 1px 0 rgba(255,255,255,.9)" }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: "#76558A" }}>PICK A COZY SPOT</div>
             <div style={{ marginTop: 5, fontSize: 11.5, lineHeight: 1.45, color: "#7B6888" }}>Choose where this belongs. PlushLife will keep the rest tidy for you.</div>
@@ -73,7 +79,7 @@ export function TasksPanel({ open, onClose, newTaskDay, setNewTaskDay, taskSecti
               </div>
             )}
           </div>
-          <div style={{ marginBottom: 18, padding: 16, borderRadius: 16, background: "rgba(255,255,255,0.72)", border: "1px solid #E6D4F2" }}>
+          <div id="plushlife-full-task-form" style={{ marginBottom: 18, padding: 16, borderRadius: 16, background: "rgba(255,255,255,0.72)", border: "1px solid #E6D4F2" }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: "#A65DC1" }}>ADD ONE LITTLE THING</div>
             <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>
               TASK NAME
