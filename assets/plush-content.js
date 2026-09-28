@@ -63,7 +63,7 @@
     { id: "peach", label: "Peach", icon: "🍑", background: "#FFF2E7", glowA: "#FFD2B8", glowB: "#FFE3D0", glowC: "#FFF0B5", glowD: "#DDF2DF", wash: "#FFF9F3DE", accent: "#E57D72", accent2: "#F2A17F", surface: "#FFFEFC", surface2: "#FFF3EA", ink: "#6E3D43", muted: "#92736E", line: "#F0D7C9", nav: "#FFFEFCF2", art: "peach" },
     { id: "twilight", label: "Night", icon: "🌙", background: "#171B4C", glowA: "#483D9E", glowB: "#5D65C7", glowC: "#E2A8E7", glowD: "#314D87", wash: "#24285ABF", accent: "#A787FF", accent2: "#F083CE", surface: "#F9F7FF", surface2: "#EEE9FF", ink: "#392A69", muted: "#756A9E", line: "#D8D0F3", nav: "#FCFAFFF2", art: "night" },
     { id: "strawberry", label: "Strawberry", icon: "🍓", background: "#FFF0F4", glowA: "#FFBDD1", glowB: "#FFDCE8", glowC: "#FFF0BD", glowD: "#DDF2DC", wash: "#FFF7F9DD", accent: "#E44E86", accent2: "#F58AA9", surface: "#FFFDFE", surface2: "#FFF1F5", ink: "#74264B", muted: "#986D81", line: "#F1D2DF", nav: "#FFFDFEF2", art: "strawberry" },
-    { id: "soft-light", label: "Cloud / Blue", icon: "☁️", background: "#EEF6FF", glowA: "#D9E9FF", glowB: "#E8DBFF", glowC: "#FFF0BD", glowD: "#E2F5F0", wash: "#F8FBFFDE", accent: "#6E8FE8", accent2: "#C078DD", surface: "#FEFFFF", surface2: "#F1F6FF", ink: "#3C487B", muted: "#7180A0", line: "#D8E3F4", nav: "#FEFFFFF2", art: "cloud" },
+    { id: "soft-light", label: "Cloud / Blue", icon: "☁️", background: "#FFF8FB", glowA: "#D9E9FF70", glowB: "#E8DBFF70", glowC: "#FFF0BD70", glowD: "#E2F5F070", wash: "#F8FBFFDE", accent: "#6E8FE8", accent2: "#C078DD", surface: "#FEFFFF", surface2: "#F1F6FF", ink: "#3C487B", muted: "#7180A0", line: "#D8E3F4", nav: "#FEFFFFF2", art: "cloud" },
   ];
 
   const MASCOT_GROWTH_STAGES = [
