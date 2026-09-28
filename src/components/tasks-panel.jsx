@@ -15,7 +15,7 @@ export function TasksPanel({ open, onClose, newTaskDay, setNewTaskDay, taskSecti
   const { WEEKDAY_PRESET_IDS, WEEKEND_PRESET_IDS, scheduleLabelForTask } = window.PlushLifeSchedule;
   return (
           <ToolPanel title="Change my tasks" onClose={onClose}>
-          <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "linear-gradient(145deg,#FFF9FD,#F3FAFF)", border: "2px solid #DCC9E8", boxShadow: "0 8px 22px rgba(118,85,138,.09)" }}>
+          <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "linear-gradient(145deg,#FFF8FC,#F5F0FF)", border: "1px solid #DFCBE7", boxShadow: "0 8px 22px rgba(103,65,122,.06), inset 0 1px 0 rgba(255,255,255,.9)" }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: "#76558A" }}>STEP 1 · CHOOSE A LIST</div>
             <div style={{ marginTop: 5, fontSize: 11.5, lineHeight: 1.45, color: "#7B6888" }}>Everything below — adding, editing, deleting — applies to this list.</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 7, marginTop: 10 }}>
@@ -35,7 +35,7 @@ export function TasksPanel({ open, onClose, newTaskDay, setNewTaskDay, taskSecti
             </div>
           </div>
 
-          <div style={{ marginBottom: 14, padding: 16, borderRadius: 16, background: "#F7FCFA", border: "1px solid #CFE8E1" }}>
+          <div style={{ marginBottom: 14, padding: 16, borderRadius: 16, background: "linear-gradient(145deg,#FAFFF9,#F4FBF7)", border: "1px solid #D4E8DE" }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: "#318C79" }}>STARTER PACKS · ADD A GENTLE HEAD START</div>
             <div style={{ marginTop: 5, fontSize: 11.5, lineHeight: 1.45, color: "#6B7F78" }}>Add a pack whenever you want. It only adds missing every-day tasks — your current list stays exactly as it is.</div>
             {(() => {
@@ -61,14 +61,14 @@ export function TasksPanel({ open, onClose, newTaskDay, setNewTaskDay, taskSecti
 
           <div style={{ marginBottom: 14, padding: 16, borderRadius: 16, background: "rgba(255,255,255,0.72)", border: "1px solid #E6D4F2" }}>
             <button type="button" onClick={() => setImportOpen((open) => !open)} aria-expanded={importOpen} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: 0, padding: 0, cursor: "pointer" }}>
-              <span style={{ fontSize: 13, fontWeight: 900, color: "#4C8FE8" }}>📥 Import a list of tasks</span>
-              <span style={{ color: "#4C8FE8", fontSize: 12, transform: importOpen ? "rotate(180deg)" : "none", transition: "transform .2s" }}>▾</span>
+              <span style={{ fontSize: 13, fontWeight: 900, color: "#9A57AC" }}>📥 Import a list of tasks</span>
+              <span style={{ color: "#9A57AC", fontSize: 12, transform: importOpen ? "rotate(180deg)" : "none", transition: "transform .2s" }}>▾</span>
             </button>
             {importOpen && (
               <div style={{ marginTop: 10 }}>
                 <div style={{ fontSize: 11.5, color: "#7B6888", lineHeight: 1.45 }}>Paste one task per line — switching from another app? Just paste your list here. They'll all go into "{newTaskDay === "daily" ? "Every day" : DAYS.find((d) => d.id === newTaskDay)?.label}" under {newTaskSection || "your first section"}.</div>
-                <textarea value={importText} onChange={(event) => setImportText(event.target.value)} placeholder={"Drink water\nTake medication\nStretch for 5 minutes"} style={{ width: "100%", boxSizing: "border-box", minHeight: 90, marginTop: 8, padding: 9, borderRadius: 10, border: "1px solid #B9DCF6", resize: "vertical" }} />
-                <button type="button" onClick={importTasksFromText} style={{ marginTop: 8, padding: "8px 12px", borderRadius: 10, border: 0, background: "#4C8FE8", color: "white", fontWeight: 900, cursor: "pointer" }}>Import tasks</button>
+                <textarea value={importText} onChange={(event) => setImportText(event.target.value)} placeholder={"Drink water\nTake medication\nStretch for 5 minutes"} style={{ width: "100%", boxSizing: "border-box", minHeight: 90, marginTop: 8, padding: 9, borderRadius: 10, border: "1px solid #DDD0EA", resize: "vertical" }} />
+                <button type="button" onClick={importTasksFromText} style={{ marginTop: 8, padding: "8px 12px", borderRadius: 10, border: 0, background: "linear-gradient(135deg,#B95DCA,#DB78BF)", color: "white", fontWeight: 900, cursor: "pointer" }}>Import tasks</button>
                 {importMessage && <div style={{ marginTop: 8, fontSize: 12, color: "#8C6B9E" }}>{importMessage}</div>}
               </div>
             )}
@@ -79,12 +79,12 @@ export function TasksPanel({ open, onClose, newTaskDay, setNewTaskDay, taskSecti
               TASK NAME
               <input ref={newTaskNameInputRef} value={newTaskName} onChange={(event) => { setNewTaskName(event.target.value); if (taskMessage === "Give the task a name first.") setTaskMessage(""); }} maxLength={240} placeholder="Example: Brush my teeth" aria-label="New task name" aria-invalid={taskMessage === "Give the task a name first."} aria-describedby={taskMessage ? "task-form-message" : undefined} style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: taskMessage === "Give the task a name first." ? "2px solid #C45D74" : "1px solid #E3C9EC" }} />
             </label>
-            <div style={{ marginTop: 8, padding: 10, borderRadius: 12, background: "#F4FAFF", border: "1px solid #B9DCF6" }}>
-              <label style={{ display: "grid", gap: 4, fontSize: 10.5, fontWeight: 900, color: "#4C78A8" }}>
+            <div style={{ marginTop: 8, padding: 10, borderRadius: 12, background: "linear-gradient(145deg,#FFF7FC,#F2F0FF)", border: "1px solid #DDD0EA" }}>
+              <label style={{ display: "grid", gap: 4, fontSize: 10.5, fontWeight: 900, color: "#7B5D89" }}>
                 SAY WHEN IT SHOULD HAPPEN · OPTIONAL
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  <input value={naturalScheduleText} onChange={(event) => { setNaturalScheduleText(event.target.value); setNaturalSchedulePreview(null); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); applyNaturalSchedule(); } }} placeholder="Weekdays at 8 PM" aria-label="Schedule in everyday language" style={{ flex: "1 1 190px", minWidth: 0, padding: 9, borderRadius: 9, border: "1px solid #B9DCF6" }} />
-                  <button type="button" onClick={applyNaturalSchedule} style={{ padding: "8px 11px", borderRadius: 9, border: 0, background: "#4C8FE8", color: "white", fontWeight: 900, cursor: "pointer" }}>Read it</button>
+                  <input value={naturalScheduleText} onChange={(event) => { setNaturalScheduleText(event.target.value); setNaturalSchedulePreview(null); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); applyNaturalSchedule(); } }} placeholder="Weekdays at 8 PM" aria-label="Schedule in everyday language" style={{ flex: "1 1 190px", minWidth: 0, padding: 9, borderRadius: 9, border: "1px solid #DDD0EA" }} />
+                  <button type="button" onClick={applyNaturalSchedule} style={{ padding: "8px 11px", borderRadius: 9, border: 0, background: "linear-gradient(135deg,#B95DCA,#DB78BF)", color: "white", fontWeight: 900, cursor: "pointer" }}>Read it</button>
                 </div>
               </label>
               {naturalSchedulePreview && (
@@ -261,7 +261,7 @@ export function TasksPanel({ open, onClose, newTaskDay, setNewTaskDay, taskSecti
                               <option value="">Move to…</option>
                               {taskSectionsForDay(task.day_id).filter((name) => name !== task.section).map((name) => <option key={name} value={name}>{name}</option>)}
                             </select>}
-                            <button type="button" onClick={() => startEditingTask(task)} aria-label={`Edit ${task.task}`} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #B9DCF6", background: "#F7FBFF", color: "#4C8FE8", fontWeight: 900, cursor: "pointer" }}>✏️ Edit</button>
+                            <button type="button" onClick={() => startEditingTask(task)} aria-label={`Edit ${task.task}`} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #DDD0EA", background: "#F7FBFF", color: "#4C8FE8", fontWeight: 900, cursor: "pointer" }}>✏️ Edit</button>
                             {isTaskPausedOnDate(task, period.date) ? (
                               <button type="button" onClick={() => resumeTrackerTask(task.task_key)} aria-label={`Resume ${task.task}`} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid #BFE5D2", background: "#F4FBF8", color: "#318C79", fontWeight: 900, cursor: "pointer" }}>▶️ Resume</button>
                             ) : (
