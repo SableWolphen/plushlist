@@ -41,6 +41,52 @@ if (typeof document !== "undefined" && !document.getElementById("plushlife-mobil
     .pl-tool-body summary{border-radius:14px}
     .pl-tool-body ::selection{background:#EED8F4;color:#543760}
     .pl-tool-panel::-webkit-scrollbar{width:8px}.pl-tool-panel::-webkit-scrollbar-thumb{background:#E0C9E7;border-radius:999px;border:2px solid #FFF7FC}.pl-tool-panel::-webkit-scrollbar-track{background:transparent}
+
+    /* PlushLife visual language: soft, playful, compact, and consistent. */
+    .pl-tool-panel{
+      --pl-ink:#5B4666;--pl-muted:#89748F;--pl-accent:#B95CC8;--pl-accent-2:#E178BD;
+      --pl-line:#E7D5EC;--pl-soft:#FFF8FC;--pl-lilac:#F5EFFF;--pl-mint:#F3FBF7;
+      --pl-shadow:0 8px 24px rgba(94,58,111,.07);
+    }
+    .pl-tool-header:after{
+      content:"✦";margin-left:auto;margin-right:4px;color:#D68BD9;font-size:12px;
+      filter:drop-shadow(0 2px 4px rgba(194,101,199,.14));
+    }
+    .pl-tool-title{display:flex!important;align-items:center!important;gap:6px!important}
+    .pl-tool-body :is(h1,h2,h3){color:#563B63}
+    .pl-tool-body :is(p,small){color:var(--pl-muted)}
+    .pl-tool-body :is(button,[role="button"]){-webkit-tap-highlight-color:transparent}
+    .pl-tool-body :is(button,[role="button"]):not(:disabled):hover{filter:brightness(1.015);box-shadow:0 6px 16px rgba(102,62,119,.07)}
+    .pl-tool-body :is(input,select,textarea):focus{outline:0!important;border-color:#C982D4!important;box-shadow:0 0 0 3px rgba(194,105,207,.10)!important}
+    .pl-tool-body [role="tablist"]{box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+    .pl-tool-body [role="tab"][aria-selected="true"]{box-shadow:0 5px 14px rgba(155,79,180,.09)!important}
+    .pl-tool-body details[open]>summary{color:#74417F!important}
+
+    /* Older utility screens inherit the same cozy card treatment without changing their behavior. */
+    [aria-label="Change my tasks"] .pl-tool-body>div>div,
+    [aria-label="Rewards"] .pl-tool-body>div>div,
+    [aria-label="Guardian"] .pl-tool-body>div>div,
+    [aria-label="My Guardians"] .pl-tool-body>div>div{
+      border-color:var(--pl-line)!important;
+      box-shadow:var(--pl-shadow)!important;
+    }
+    [aria-label="Change my tasks"] .pl-tool-body>div>div{
+      border-radius:18px!important;
+    }
+    [aria-label="Rewards"] .pl-tool-body>div>div{
+      border-radius:20px!important;
+    }
+
+    [aria-label="Change my tasks"] .pl-tool-body button[aria-pressed="true"],
+    [aria-label="Rewards"] .pl-tool-body button[aria-pressed="true"],
+    [aria-label="Settings"] .pl-tool-body button[aria-pressed="true"]{
+      border-color:#C779D3!important;background:linear-gradient(145deg,#FFF3FB,#F1E9FF)!important;color:#74417F!important;
+    }
+
+    @keyframes plSoftPop{0%{transform:scale(.96)}70%{transform:scale(1.025)}100%{transform:scale(1)}}
+    @keyframes plTinyFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+    .pl-tool-body button:focus-visible{outline:2px solid #D99AE1!important;outline-offset:2px}
+    .pl-tool-body button[aria-pressed="true"],.pl-tool-body [role="tab"][aria-selected="true"]{animation:plSoftPop .2s ease-out}
     @media(max-width:520px){.pl-tool-backdrop{padding:8px 7px max(8px,env(safe-area-inset-bottom))!important}.pl-tool-panel{border-radius:22px!important;max-height:calc(100dvh - 16px)!important}.pl-tool-header{padding:11px 12px!important}.pl-tool-body{padding:11px!important}}
   `;
   document.head.appendChild(style);
@@ -116,6 +162,7 @@ export function ToolPanel({ title, onClose, children, inline = false, hideClose 
       role={inline ? "region" : "dialog"}
       aria-modal={inline ? undefined : "true"}
       aria-label={title}
+      data-plush-panel={title}
       onMouseDown={(event) => {
         if (!inline && event.target === event.currentTarget) onClose();
       }}
