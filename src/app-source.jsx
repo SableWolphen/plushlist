@@ -563,15 +563,17 @@ const BILLING_PRODUCT_IDS = { monthly: "plushplus_monthly", yearly: "plushplus_y
 //   manageSubscription(): Promise<void>  // opens the platform's own subscription-management UI
 
 
-const CURRENT_CHANGELOG_VERSION = "2026-09-28-refresh";
+const CURRENT_CHANGELOG_VERSION = "2026-09-28-cute";
 const CHANGELOG_ITEMS = [
-  "🌿 New Shape-my-day — on low-capacity days PlushLife builds you one kind, ~30-minute plan instead of the whole list",
-  "😴 New rest-day experience — rest days get their own cozy card with comfort tools, no guilt attached",
-  "⏱️ Gentle focus timer (2/5/10/25 min) now lives in the Home header — no more floating button covering your list",
-  "⚡ New quick capture — jot into Today, Tomorrow, or Someday in one tap from the + button",
-  "🌙 Evening “one good thing” — after 6pm, save one small win; share it as a pretty card if you like",
-  "🌱 New 7-day onboarding arc — tiny guided steps across your first week",
-  "✨ The app now lets you know when a fresher version is ready, so you never run an old copy by accident",
+  "🧸 Baby-soft makeover — sticker cards, squishy toy buttons, circle checkboxes, floating plush",
+  "🗓️ The weekly popup now takes “not right now” for an answer — no more Monday nagging",
+  "⏱️ Focus timer (2/5/10/25 min) moved to the Home header — no more floating button over your list",
+  "🌿 Shape-my-day — on low-capacity days, one kind ~30-minute plan instead of the whole list",
+  "😴 Rest-day mode — a cozy card with comfort tools, zero guilt",
+  "⚡ Quick capture — jot into Today, Tomorrow, or Someday from the + button",
+  "🌙 Evening “one good thing” — save one small win after 6pm, share it as a card",
+  "🌱 7-day onboarding — tiny guided steps across your first week",
+  "✨ Fresh-version notice — you'll know when a newer app is ready",
 ];
 
 
@@ -6286,10 +6288,10 @@ function GlowUpTracker() {
             <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid #E6D0F0", textAlign: "center" }}>
               <div style={{ fontSize: 14, fontWeight: 800, color: "#6B5A7D" }}>Ready for this week?</div>
               <div style={{ marginTop: 4, fontSize: 12, lineHeight: 1.45, color: "#8C6B9E" }}>Write down one intention for the week ahead — just one small thing you want to carry with you.</div>
-              <button type="button" onClick={goWriteWeeklyIntention} style={{ marginTop: 10, width: "100%", padding: "11px 14px", borderRadius: 12, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>📝 Write my intention for the week</button>
+              <button type="button" onClick={goWriteWeeklyIntention} style={{ marginTop: 10, width: "100%", padding: "11px 14px", borderRadius: 999, border: 0, background: "linear-gradient(135deg,#C75EDB,#D97DDC)", color: "white", fontWeight: 900, cursor: "pointer", boxShadow: "0 3px 0 #A34DB4" }}>📝 Write my intention for the week</button>
             </div>
             {weeklyKickoffMessage && <div style={{ marginTop: 10, fontSize: 11.5, color: "#8C6B9E", textAlign: "center" }}>{weeklyKickoffMessage}</div>}
-            <button type="button" onClick={() => { markWeeklyKickoffDone(period.weekStart); setWeeklyKickoffOpen(false); }} style={{ marginTop: 10, width: "100%", padding: "9px 14px", borderRadius: 12, border: "1px solid #D8C8E2", background: "transparent", color: "#8C6B9E", fontWeight: 800, cursor: "pointer" }}>Not right now</button>
+            <button type="button" onClick={() => { markWeeklyKickoffDone(period.weekStart); setWeeklyKickoffOpen(false); }} style={{ marginTop: 10, width: "100%", padding: "9px 14px", borderRadius: 999, border: "1px solid #D8C8E2", background: "transparent", color: "#8C6B9E", fontWeight: 800, cursor: "pointer" }}>Not right now</button>
           </div>
         </div>
       )}
@@ -6303,7 +6305,7 @@ function GlowUpTracker() {
                 <div key={item} style={{ fontSize: 13, lineHeight: 1.5, color: "#5B4B6B" }}>{item}</div>
               ))}
             </div>
-            <button type="button" onClick={() => updatePreference({ last_seen_changelog: CURRENT_CHANGELOG_VERSION })} style={{ marginTop: 16, width: "100%", padding: "11px 14px", borderRadius: 12, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Got it! 💛</button>
+            <button type="button" onClick={() => updatePreference({ last_seen_changelog: CURRENT_CHANGELOG_VERSION })} style={{ marginTop: 16, width: "100%", padding: "11px 14px", borderRadius: 999, border: 0, background: "linear-gradient(135deg,#C75EDB,#D97DDC)", color: "white", fontWeight: 900, cursor: "pointer", boxShadow: "0 3px 0 #A34DB4" }}>Got it! 💛</button>
           </div>
         </div>
       )}

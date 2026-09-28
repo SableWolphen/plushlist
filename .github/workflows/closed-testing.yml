@@ -1,4 +1,4 @@
-name: Closed testing (version 44)
+name: Closed testing (version 45)
 
 on:
   workflow_dispatch: {}
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build-and-publish:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release-44]')
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release-45]')
     runs-on: ubuntu-latest
     env:
       HAS_PLAY_SECRET: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
@@ -49,8 +49,8 @@ jobs:
       - name: Set release version
         working-directory: android/app
         run: |
-          sed -i "s/versionCode 1/versionCode 44/" build.gradle
-          sed -i 's/versionName "1.0"/versionName "1.0.44"/' build.gradle
+          sed -i "s/versionCode 1/versionCode 45/" build.gradle
+          sed -i 's/versionName "1.0"/versionName "1.0.45"/' build.gradle
 
       - name: Decode signing keystore
         run: |
@@ -87,7 +87,7 @@ jobs:
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-44
+          name: app-release-45
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
