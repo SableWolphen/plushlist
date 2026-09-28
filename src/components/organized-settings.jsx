@@ -3,29 +3,29 @@ import { PlushGoldPreview } from "./plush-gold-preview.jsx";
 import { RecommendationSettings } from "./recommendation-settings.jsx";
 
 const cardStyle = {
-  background: "rgba(255,255,255,.86)",
-  border: "1px solid #E8DCEB",
-  borderRadius: 18,
+  background: "linear-gradient(145deg,rgba(255,253,254,.96),rgba(249,243,255,.92))",
+  border: "1px solid #E6D4EB",
+  borderRadius: 20,
   overflow: "hidden",
-  boxShadow: "0 4px 16px rgba(74,48,84,.05)",
+  boxShadow: "0 8px 22px rgba(87,53,104,.06), inset 0 1px 0 rgba(255,255,255,.9)",
 };
 
 const inputStyle = {
   width: "100%",
   boxSizing: "border-box",
   padding: "11px 12px",
-  borderRadius: 11,
-  border: "1px solid #DCCFE1",
-  background: "white",
+  borderRadius: 13,
+  border: "1px solid #E0CEE6",
+  background: "linear-gradient(145deg,#FFFDFE,#FFF9FC)",
   color: "#51425E",
   fontSize: 14,
 };
 
 const primaryButton = {
   padding: "10px 13px",
-  borderRadius: 11,
+  borderRadius: 13,
   border: 0,
-  background: "#9660AF",
+  background: "linear-gradient(135deg,#B85BC9,#DE78BE)",
   color: "white",
   fontWeight: 900,
   cursor: "pointer",
@@ -33,9 +33,9 @@ const primaryButton = {
 
 const secondaryButton = {
   padding: "9px 12px",
-  borderRadius: 11,
-  border: "1px solid #D9CBE0",
-  background: "white",
+  borderRadius: 13,
+  border: "1px solid #E1D0E6",
+  background: "linear-gradient(145deg,#FFFDFE,#FAF4FF)",
   color: "#755D82",
   fontWeight: 800,
   cursor: "pointer",
@@ -60,10 +60,10 @@ function SettingsHomeRow({ icon, title, description, onClick, badge }) {
   return (
     <button type="button" onClick={onClick} style={{
       width: "100%", border: 0, borderBottom: "1px solid #F0E8F2", background: "transparent",
-      padding: "15px 14px", display: "grid", gridTemplateColumns: "38px 1fr auto", gap: 10,
+      padding: "13px 14px", display: "grid", gridTemplateColumns: "38px 1fr auto", gap: 10,
       alignItems: "center", textAlign: "left", cursor: "pointer", color: "inherit",
     }}>
-      <span aria-hidden="true" style={{ width: 38, height: 38, borderRadius: 12, display: "grid", placeItems: "center", background: "#F8F2FA", fontSize: 19 }}>{icon}</span>
+      <span aria-hidden="true" style={{ width: 38, height: 38, borderRadius: 13, display: "grid", placeItems: "center", background: "linear-gradient(145deg,#FFF4FB,#F1EBFF)", border: "1px solid #E9D8ED", boxShadow: "0 4px 10px rgba(102,66,119,.05)", fontSize: 19 }}>{icon}</span>
       <span style={{ minWidth: 0 }}>
         <span style={{ display: "block", fontSize: 14.5, fontWeight: 900, color: "#5B4B6B" }}>{title}</span>
         <span style={{ display: "block", marginTop: 2, fontSize: 11.5, lineHeight: 1.4, color: "#8A7895" }}>{description}</span>
