@@ -158,6 +158,19 @@ const {
 } = window.PlushLifeSchedule;
 const { getBillingProvider } = window.PlushLifeBilling;
 
+// The Monday weekly-kickoff popup must not nag: once the user has engaged
+// with it for a given Monday (rated last week, went to write this week's
+// intention, or dismissed it), it stays quiet until next Monday. The
+// check-in row alone isn't enough — "Write my intention" and "Not right now"
+// never wrote one, so the popup kept reappearing on every navigation.
+const weeklyKickoffDoneKey = (weekStart) => `plushlife:weekly-kickoff-done:${weekStart}`;
+function isWeeklyKickoffDone(weekStart) {
+  try { return window.localStorage.getItem(weeklyKickoffDoneKey(weekStart)) === "1"; } catch { return false; }
+}
+function markWeeklyKickoffDone(weekStart) {
+  try { window.localStorage.setItem(weeklyKickoffDoneKey(weekStart), "1"); } catch { /* private mode */ }
+}
+
 
 
 
@@ -1980,18 +1993,25 @@ function GlowUpTracker() {
     // that's ending), which is when this used to fire despite talking about
     // "the week ahead." Since today is now the day AFTER the week closed,
     // "last week" means yesterday's Sunday and the week before this one.
+    // Stays quiet when the user already engaged this Monday (flag), already
+    // reflected on the closing week (check-in row), or already wrote this
+    // week's intention — any of those means the popup did its job.
     if (!user || dayIdForDate(period.date) !== "mon") { setWeeklyKickoffOpen(false); return; }
+    if (isWeeklyKickoffDone(period.weekStart)) { setWeeklyKickoffOpen(false); return; }
     let alive = true;
     const closingWeekStart = offsetDate(period.weekStart, -7);
     (async () => {
-      const [{ data: noteRow }, { data: checkinRow }] = await Promise.all([
+      const [{ data: noteRow }, { data: checkinRow }, { data: thisWeekRow }] = await Promise.all([
         supabase.from("weekly_intentions").select("body").eq("user_id", user.id).eq("week_start", closingWeekStart).maybeSingle(),
         supabase.from("weekly_intention_checkins").select("id").eq("user_id", user.id).eq("week_start", closingWeekStart).maybeSingle(),
+        supabase.from("weekly_intentions").select("id").eq("user_id", user.id).eq("week_start", period.weekStart).maybeSingle(),
       ]);
       if (!alive) return;
-      if (!checkinRow) {
+      if (!checkinRow && !thisWeekRow && !isWeeklyKickoffDone(period.weekStart)) {
         setWeeklyKickoffNote(noteRow?.body || "");
         setWeeklyKickoffOpen(true);
+      } else {
+        setWeeklyKickoffOpen(false);
       }
     })();
     return () => { alive = false; };
@@ -2410,6 +2430,7 @@ function GlowUpTracker() {
   };
 
   const goWriteWeeklyIntention = () => {
+    markWeeklyKickoffDone(period.weekStart);
     setWeeklyKickoffOpen(false);
     setDashboard("progress");
     setWeeklyIntentionEditing(true);
@@ -2439,6 +2460,7 @@ function GlowUpTracker() {
       setWeeklyKickoffMessage(`Couldn't save that: ${error.message}`);
       return;
     }
+    markWeeklyKickoffDone(period.weekStart);
     setWeeklyKickoffOpen(false);
     setWeeklyKickoffMessage("");
   };
@@ -6221,9 +6243,9 @@ function GlowUpTracker() {
         }
       `}</style>
       {preferences.reduced_motion && <style>{`*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}`}</style>}
-      {swUpdateReady && !swUpdateDismissed && (
-        <div role="status" style={{ position: "fixed", top: "max(10px, env(safe-area-inset-top))", left: "50%", transform: "translateX(-50%)", zIndex: 150, display: "flex", alignItems: "center", gap: 10, maxWidth: "min(92vw, 430px)", padding: "10px 12px 10px 14px", borderRadius: 16, background: "rgba(255,253,255,.97)", border: "1px solid #E4CFF0", boxShadow: "0 12px 32px rgba(73,43,90,.18)", backdropFilter: "blur(10px)" }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#5B4B6B", lineHeight: 1.4 }}>✨ A fresher PlushLife is ready</span>
+      {swUpdateReady && !swUpdateDismissed && autoPopupToShow === null && (
+        <div role="status" style={{ position: "fixed", top: "max(10px, env(safe-area-inset-top))", left: "50%", transform: "translateX(-50%)", zIndex: 150, display: "flex", alignItems: "center", gap: 10, width: "max-content", maxWidth: "min(92vw, 430px)", padding: "10px 12px 10px 14px", borderRadius: 16, background: "rgba(255,253,255,.97)", border: "1px solid #E4CFF0", boxShadow: "0 12px 32px rgba(73,43,90,.18)", backdropFilter: "blur(10px)" }}>
+          <span style={{ flex: "1 1 auto", minWidth: 0, fontSize: 13, fontWeight: 700, color: "#5B4B6B", lineHeight: 1.4 }}>✨ A fresher PlushLife is ready</span>
           <button type="button" onClick={() => window.location.reload()} style={{ flexShrink: 0, padding: "8px 14px", borderRadius: 12, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, fontSize: 12.5, cursor: "pointer" }}>Refresh</button>
           <button type="button" onClick={() => setSwUpdateDismissed(true)} aria-label="Dismiss update notice" style={{ flexShrink: 0, padding: "8px 10px", borderRadius: 12, border: "1px solid #E4CFF0", background: "white", color: "#8C6B9E", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>Later</button>
         </div>
@@ -6267,7 +6289,7 @@ function GlowUpTracker() {
               <button type="button" onClick={goWriteWeeklyIntention} style={{ marginTop: 10, width: "100%", padding: "11px 14px", borderRadius: 12, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>📝 Write my intention for the week</button>
             </div>
             {weeklyKickoffMessage && <div style={{ marginTop: 10, fontSize: 11.5, color: "#8C6B9E", textAlign: "center" }}>{weeklyKickoffMessage}</div>}
-            <button type="button" onClick={() => setWeeklyKickoffOpen(false)} style={{ marginTop: 10, width: "100%", padding: "9px 14px", borderRadius: 12, border: "1px solid #D8C8E2", background: "transparent", color: "#8C6B9E", fontWeight: 800, cursor: "pointer" }}>Not right now</button>
+            <button type="button" onClick={() => { markWeeklyKickoffDone(period.weekStart); setWeeklyKickoffOpen(false); }} style={{ marginTop: 10, width: "100%", padding: "9px 14px", borderRadius: 12, border: "1px solid #D8C8E2", background: "transparent", color: "#8C6B9E", fontWeight: 800, cursor: "pointer" }}>Not right now</button>
           </div>
         </div>
       )}
