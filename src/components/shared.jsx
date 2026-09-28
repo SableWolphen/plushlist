@@ -35,6 +35,12 @@ if (typeof document !== "undefined" && !document.getElementById("plushlife-mobil
     .pl-tool-close{border-radius:999px!important;border-color:#E3CDE9!important;background:linear-gradient(145deg,#FFFDFE,#F8F0FF)!important;color:#81548F!important;box-shadow:0 4px 12px rgba(92,59,110,.06)}
     .pl-tool-body{position:relative}
     .pl-tool-body>div>section,.pl-tool-body>section{border-radius:20px}
+    .pl-tool-body button{transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
+    .pl-tool-body button:active{transform:scale(.985)}
+    .pl-tool-body input,.pl-tool-body select,.pl-tool-body textarea{border-color:#E3D3E8!important;background:linear-gradient(145deg,#FFFDFE,#FFFAFD)!important;color:#5C4967!important;box-shadow:inset 0 1px 2px rgba(90,57,105,.035)!important}
+    .pl-tool-body summary{border-radius:14px}
+    .pl-tool-body ::selection{background:#EED8F4;color:#543760}
+    .pl-tool-panel::-webkit-scrollbar{width:8px}.pl-tool-panel::-webkit-scrollbar-thumb{background:#E0C9E7;border-radius:999px;border:2px solid #FFF7FC}.pl-tool-panel::-webkit-scrollbar-track{background:transparent}
     @media(max-width:520px){.pl-tool-backdrop{padding:8px 7px max(8px,env(safe-area-inset-bottom))!important}.pl-tool-panel{border-radius:22px!important;max-height:calc(100dvh - 16px)!important}.pl-tool-header{padding:11px 12px!important}.pl-tool-body{padding:11px!important}}
   `;
   document.head.appendChild(style);
