@@ -14,10 +14,10 @@ export function TasksPanel({ open, onClose, newTaskDay, setNewTaskDay, taskSecti
   const { DAYS, TEMPLATE_PACKS } = window.PlushLifeContent;
   const { WEEKDAY_PRESET_IDS, WEEKEND_PRESET_IDS, scheduleLabelForTask } = window.PlushLifeSchedule;
   return (
-          <ToolPanel title="Change my tasks" onClose={onClose}>
+          <ToolPanel title="🌷 Add & organize" onClose={onClose}>
           <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "linear-gradient(145deg,#FFF8FC,#F5F0FF)", border: "1px solid #DFCBE7", boxShadow: "0 8px 22px rgba(103,65,122,.06), inset 0 1px 0 rgba(255,255,255,.9)" }}>
-            <div style={{ fontSize: 13, fontWeight: 900, color: "#76558A" }}>STEP 1 · CHOOSE A LIST</div>
-            <div style={{ marginTop: 5, fontSize: 11.5, lineHeight: 1.45, color: "#7B6888" }}>Everything below — adding, editing, deleting — applies to this list.</div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "#76558A" }}>PICK A COZY SPOT</div>
+            <div style={{ marginTop: 5, fontSize: 11.5, lineHeight: 1.45, color: "#7B6888" }}>Choose where this belongs. PlushLife will keep the rest tidy for you.</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 7, marginTop: 10 }}>
               {[{ id: "daily", label: "Every day" }, ...DAYS].map((item) => {
                 const selected = newTaskDay === item.id;
@@ -36,7 +36,7 @@ export function TasksPanel({ open, onClose, newTaskDay, setNewTaskDay, taskSecti
           </div>
 
           <div style={{ marginBottom: 14, padding: 16, borderRadius: 16, background: "linear-gradient(145deg,#FAFFF9,#F4FBF7)", border: "1px solid #D4E8DE" }}>
-            <div style={{ fontSize: 13, fontWeight: 900, color: "#318C79" }}>STARTER PACKS · ADD A GENTLE HEAD START</div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "#318C79" }}>✨ GENTLE STARTER PACKS</div>
             <div style={{ marginTop: 5, fontSize: 11.5, lineHeight: 1.45, color: "#6B7F78" }}>Add a pack whenever you want. It only adds missing every-day tasks — your current list stays exactly as it is.</div>
             {(() => {
               const selectedPack = TEMPLATE_PACKS.find((pack) => pack.id === starterPackId) || TEMPLATE_PACKS[0];
@@ -74,7 +74,7 @@ export function TasksPanel({ open, onClose, newTaskDay, setNewTaskDay, taskSecti
             )}
           </div>
           <div style={{ marginBottom: 18, padding: 16, borderRadius: 16, background: "rgba(255,255,255,0.72)", border: "1px solid #E6D4F2" }}>
-            <div style={{ fontSize: 13, fontWeight: 900, color: "#A65DC1" }}>STEP 2 · ADD A TASK</div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: "#A65DC1" }}>ADD ONE LITTLE THING</div>
             <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>
               TASK NAME
               <input ref={newTaskNameInputRef} value={newTaskName} onChange={(event) => { setNewTaskName(event.target.value); if (taskMessage === "Give the task a name first.") setTaskMessage(""); }} maxLength={240} placeholder="Example: Brush my teeth" aria-label="New task name" aria-invalid={taskMessage === "Give the task a name first."} aria-describedby={taskMessage ? "task-form-message" : undefined} style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: taskMessage === "Give the task a name first." ? "2px solid #C45D74" : "1px solid #E3C9EC" }} />
