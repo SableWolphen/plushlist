@@ -5832,27 +5832,55 @@ function GlowUpTracker() {
     if (dayType === "soft") return { ...selectedAppearanceTheme, background: "#F5F0FA", glowA: "#E8DDF070", glowB: "#E0E6F270", glowC: "#F1E6E960", glowD: "#DDECE760" };
     return selectedAppearanceTheme;
   })();
-  /* Dino Theme palette: pastel dino-meadow washes (pink/lavender/mint) so the
-     cute look from the design reference sticks instead of reverting. */
-  const dinoPalette = dinoTheme ? {
-    ...softLightPalette,
-    background: "#FFF4F9",
-    glowA: "#FFD3E870",
-    glowB: "#DCC9F570",
-    glowC: "#FFE9C970",
-    glowD: "#CDEEDD70",
-    wash: "#FFF7FBDD",
-    accent: "#C77DD6",
-  } : softLightPalette;
+  /* Special modes are full visual worlds. Never inherit colors or art from
+     the previously-selected ambient theme — that was the source of Dino/Night
+     styling leaking into unrelated themes. */
+  const dinoPalette = {
+    background: "#F8F3FC",
+    glowA: "#E7D8FF70",
+    glowB: "#DDF3E870",
+    glowC: "#FFE6F070",
+    glowD: "#FFF0C970",
+    wash: "#FBF7FCDD",
+    accent: "#9F62C4",
+    accent2: "#E37DBE",
+    surface: "#FFFDFE",
+    surface2: "#F6F0FC",
+    ink: "#513862",
+    muted: "#7F6C8A",
+    line: "#E5D6EB",
+    nav: "#FFFDFEF5",
+    art: "dino",
+  };
+  const babyPalette = {
+    background: isNightHour ? "#25285E" : "#FFF5FA",
+    glowA: isNightHour ? "#4C4A9A70" : "#FFD4E770",
+    glowB: isNightHour ? "#6359B270" : "#E4D8FF70",
+    glowC: isNightHour ? "#FFD87850" : "#FFF0BC70",
+    glowD: isNightHour ? "#7359A650" : "#DFF3E670",
+    wash: isNightHour ? "#2B2D66C8" : "#FFF8FBDD",
+    accent: "#E66CB6",
+    accent2: "#C978E4",
+    surface: "#FFFDFE",
+    surface2: "#FFF1F7",
+    ink: "#62366F",
+    muted: "#8C7096",
+    line: "#EED6E9",
+    nav: "#FFFDFEF5",
+    art: isNightHour ? "baby-night" : "baby",
+  };
+  const activeThemePalette = babyMode ? babyPalette : dinoTheme ? dinoPalette : softLightPalette;
   /* Theme regression marker retained for validation: !["soft", "soft-light"].includes(appearanceTheme)
  * Ambient themes remain visible through the dedicated theme layer; the old heavy frame stays removed.
  */
   const selectAppearanceTheme = (themeId) => {
-    setAppearanceTheme(themeId);
+    const validTheme = APPEARANCE_THEMES.some((theme) => theme.id === themeId) ? themeId : "soft";
+    setAppearanceTheme(validTheme);
+    // Ambient themes, Dino, and Baby are mutually exclusive visual worlds.
     if (preferences.dino_theme || preferences.nickname_style === "baby") {
       updatePreference({ dino_theme: false, nickname_style: "warm" });
     }
-    if (user?.id) window.localStorage.setItem(`plushlist-appearance-${user.id}`, themeId);
+    if (user?.id) window.localStorage.setItem(`plushlist-appearance-${user.id}`, validTheme);
   };
 
   const BADGE_DEFS = [
@@ -6034,7 +6062,7 @@ function GlowUpTracker() {
   return (
     <div id="main-content" tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""}${babyMode && isNightHour ? " baby-night" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
-      background: babyMode ? "#FFF0FA" : dinoPalette.background,
+      background: activeThemePalette.background,
       backgroundImage: babyMode && isNightHour ? `
         linear-gradient(180deg, #F7F1FC 0%, #EFEBF9 55%, #E8E3F7 100%),
         radial-gradient(circle at 85% 8%, #D9C9F2 0%, transparent 36%),
@@ -6058,11 +6086,11 @@ function GlowUpTracker() {
         radial-gradient(circle at 88% 94%, #FFE9C9 0%, transparent 44%),
         radial-gradient(circle at 8% 92%, #FFD9EC 0%, transparent 44%)
       ` : `
-        linear-gradient(135deg, ${dinoPalette.wash}, transparent 64%),
-        radial-gradient(circle at 8% 12%, ${dinoPalette.glowA} 0%, transparent 42%),
-        radial-gradient(circle at 92% 8%, ${dinoPalette.glowB} 0%, transparent 42%),
-        radial-gradient(circle at 85% 90%, ${dinoPalette.glowC} 0%, transparent 48%),
-        radial-gradient(circle at 10% 85%, ${dinoPalette.glowD} 0%, transparent 48%)
+        linear-gradient(135deg, ${activeThemePalette.wash}, transparent 64%),
+        radial-gradient(circle at 8% 12%, ${activeThemePalette.glowA} 0%, transparent 42%),
+        radial-gradient(circle at 92% 8%, ${activeThemePalette.glowB} 0%, transparent 42%),
+        radial-gradient(circle at 85% 90%, ${activeThemePalette.glowC} 0%, transparent 48%),
+        radial-gradient(circle at 10% 85%, ${activeThemePalette.glowD} 0%, transparent 48%)
       `,
       fontFamily: babyMode ? "'Comic Sans MS','Nunito','Segoe UI',sans-serif" : dinoTheme ? "'Baloo 2','Nunito','Avenir Next','Segoe UI',system-ui,sans-serif" : "'Avenir Next','Segoe UI',system-ui,sans-serif",
       color: preferences.high_contrast ? "#2D2038" : "#5B4B6B",
@@ -6070,21 +6098,21 @@ function GlowUpTracker() {
       padding: "max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))",
       position: "relative",
       isolation: "isolate",
-      "--pl-theme-bg": dinoPalette.background,
-      "--pl-theme-accent": dinoTheme ? "#C77DD6" : selectedAppearanceTheme.accent,
-      "--pl-theme-accent-2": dinoTheme ? "#E47CC4" : (selectedAppearanceTheme.accent2 || selectedAppearanceTheme.accent),
-      "--pl-theme-surface": selectedAppearanceTheme.surface || "#FFFDFE",
-      "--pl-theme-surface-2": selectedAppearanceTheme.surface2 || "#F7F1FF",
-      "--pl-theme-ink": selectedAppearanceTheme.ink || "#4A2D5E",
-      "--pl-theme-muted": selectedAppearanceTheme.muted || "#826E8E",
-      "--pl-theme-line": selectedAppearanceTheme.line || "#E6D7EB",
-      "--pl-theme-nav": selectedAppearanceTheme.nav || "#FFFDFEF2",
-      "--pl-theme-art": selectedAppearanceTheme.art || "lavender",
-      "--pl-theme-glow-a": dinoPalette.glowA,
-      "--pl-theme-glow-b": dinoPalette.glowB,
-      "--pl-theme-glow-c": dinoPalette.glowC,
-      "--pl-theme-glow-d": dinoPalette.glowD,
-      "--pl-theme-wash": dinoPalette.wash,
+      "--pl-theme-bg": activeThemePalette.background,
+      "--pl-theme-accent": activeThemePalette.accent,
+      "--pl-theme-accent-2": activeThemePalette.accent2 || activeThemePalette.accent,
+      "--pl-theme-surface": activeThemePalette.surface || "#FFFDFE",
+      "--pl-theme-surface-2": activeThemePalette.surface2 || "#F7F1FF",
+      "--pl-theme-ink": activeThemePalette.ink || "#4A2D5E",
+      "--pl-theme-muted": activeThemePalette.muted || "#826E8E",
+      "--pl-theme-line": activeThemePalette.line || "#E6D7EB",
+      "--pl-theme-nav": activeThemePalette.nav || "#FFFDFEF2",
+      "--pl-theme-art": activeThemePalette.art || "lavender",
+      "--pl-theme-glow-a": activeThemePalette.glowA,
+      "--pl-theme-glow-b": activeThemePalette.glowB,
+      "--pl-theme-glow-c": activeThemePalette.glowC,
+      "--pl-theme-glow-d": activeThemePalette.glowD,
+      "--pl-theme-wash": activeThemePalette.wash,
       boxShadow: "none",
     }}>
       <div className="pl-ambient-theme-layer" aria-hidden="true" />
