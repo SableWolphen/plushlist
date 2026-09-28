@@ -5849,6 +5849,9 @@ function GlowUpTracker() {
  */
   const selectAppearanceTheme = (themeId) => {
     setAppearanceTheme(themeId);
+    if (preferences.dino_theme || preferences.nickname_style === "baby") {
+      updatePreference({ dino_theme: false, nickname_style: "warm" });
+    }
     if (user?.id) window.localStorage.setItem(`plushlist-appearance-${user.id}`, themeId);
   };
 
