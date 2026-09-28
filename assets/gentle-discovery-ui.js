@@ -4,7 +4,10 @@
   window.__plushlifeGentleDiscoveryUiInstalled = true;
 
   const STORAGE_KEY = "plushlife-rescue-v6";
-  const TODAY = new Date().toISOString().slice(0, 10);
+  // Local calendar day (not UTC): the "day" must not flip at 6-7pm for US users.
+  const TODAY = (window.PlushLifeCare && window.PlushLifeCare.localDateString
+    ? window.PlushLifeCare.localDateString(new Date())
+    : (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; })());
   const state = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch (_) { return {}; } })();
   const saveState = (patch) => { Object.assign(state, patch); try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} };
   const visible = (node) => !!(node && node.getClientRects && node.getClientRects().length);

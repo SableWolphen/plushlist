@@ -20,7 +20,10 @@
 
   function recordVisit() {
     const state = safeRead();
-    const today = new Date().toISOString().slice(0, 10);
+    // Local calendar day (not UTC midnight) so a single evening isn't split in two.
+    const today = (window.PlushLifeCare && window.PlushLifeCare.localDateString)
+      ? window.PlushLifeCare.localDateString(new Date())
+      : (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; })();
     const previousDay = String(state.lastVisitDay || "");
     const visits = Number(state.visits || 0) + (previousDay === today ? 0 : 1);
     safeWrite({

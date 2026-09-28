@@ -1,4 +1,9 @@
 import { TodayPanel as TodayPanelCore } from "./today-panel-core.jsx";
+import { ShapeMyDay } from "./shape-my-day.jsx";
+import { RestDayCard } from "./rest-day.jsx";
+import { FocusTimer } from "./focus-timer.jsx";
+import { OnboardingArc } from "./onboarding-arc.jsx";
+import { EveningGratitude } from "./evening-gratitude.jsx";
 import { useCompletedTaskFlow } from "./completed-task-flow.jsx";
 import { useSmartNextStep } from "./smart-next-step.jsx";
 
@@ -127,7 +132,20 @@ export function TodayPanel(props) {
   };
 
   return (
-    <TodayPanelCore
+    <React.Fragment>
+      {/* Proactive care layer: shaped day plan / rest experience, a gentle
+          7-day onboarding arc, and the evening "one good thing" — session-only
+          companions that sit above the reference Home layout. */}
+      <div style={{ maxWidth: 760, margin: "0 auto 18px" }}>
+        {props.selectedTaskViewIsRest ? (
+          <RestDayCard careDaysTotal={props.careDaysTotal} goToDashboard={props.goToDashboard} period={props.period} />
+        ) : (
+          <ShapeMyDay rows={props.rows} viewDone={props.viewDone} toggle={smartToggle} dailyCheckIn={props.dailyCheckIn} period={props.period} />
+        )}
+        <OnboardingArc onboardingComplete={!!props.preferences?.onboarding_complete} />
+        <EveningGratitude />
+      </div>
+      <TodayPanelCore
       {...props}
       toggle={smartToggle}
       recentlyCompletedKeys={recentlyCompletedKeys}
@@ -138,5 +156,7 @@ export function TodayPanel(props) {
       setNextStepSkipped={setNextStepSkipped}
       setNextStepDismissedToday={setNextStepDismissedToday}
     />
+      <FocusTimer />
+    </React.Fragment>
   );
 }

@@ -1,0 +1,169 @@
+// A gentle "do it with me" timer.
+//
+// Focus mode isolates one task but there was no time container for starting.
+// This is a soft timer — 2/5/10/25 minutes — with the mascot present and a
+// soft Web Audio chime at the end. The copy never scolds: cancelling or
+// ignoring it is always fine. Session-only, nothing is persisted.
+const TIMER_DURATIONS = [2, 5, 10, 25];
+
+function playGentleChime() {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const now = ctx.currentTime;
+    // Two soft sine notes, like a tiny music box. Nothing startling.
+    [[523.25, 0], [783.99, 0.35]].forEach(([freq, offset]) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.22, now + offset + 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 1.4);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + offset);
+      osc.stop(now + offset + 1.5);
+    });
+    window.setTimeout(() => { try { ctx.close(); } catch (_e) {} }, 2200);
+  } catch (_error) {}
+}
+
+function formatClock(totalSeconds) {
+  const s = Math.max(0, Math.ceil(totalSeconds));
+  const m = Math.floor(s / 60);
+  const rest = s % 60;
+  return `${m}:${String(rest).padStart(2, "0")}`;
+}
+
+export function FocusTimer() {
+  const [open, setOpen] = React.useState(false);
+  const [durationMin, setDurationMin] = React.useState(5);
+  const [remaining, setRemaining] = React.useState(5 * 60);
+  const [running, setRunning] = React.useState(false);
+  const [finished, setFinished] = React.useState(false);
+  const timerRef = React.useRef(null);
+
+  const clearTimer = () => {
+    if (timerRef.current) window.clearInterval(timerRef.current);
+    timerRef.current = null;
+  };
+
+  React.useEffect(() => {
+    const onStart = () => {
+      setFinished(false);
+      setRunning(false);
+      setRemaining(durationMin * 60);
+      setOpen(true);
+    };
+    window.addEventListener("plushlife:start-focus-timer", onStart);
+    return () => {
+      window.removeEventListener("plushlife:start-focus-timer", onStart);
+      clearTimer();
+    };
+  }, [durationMin]);
+
+  React.useEffect(() => () => clearTimer(), []);
+
+  const start = () => {
+    clearTimer();
+    setFinished(false);
+    setRemaining(durationMin * 60);
+    setRunning(true);
+    const endAt = Date.now() + durationMin * 60 * 1000;
+    timerRef.current = window.setInterval(() => {
+      const left = Math.max(0, Math.round((endAt - Date.now()) / 1000));
+      setRemaining(left);
+      if (left <= 0) {
+        clearTimer();
+        setRunning(false);
+        setFinished(true);
+        playGentleChime();
+      }
+    }, 500);
+  };
+
+  const stop = (done) => {
+    clearTimer();
+    setRunning(false);
+    if (done) {
+      setFinished(true);
+      playGentleChime();
+    } else {
+      setOpen(false);
+    }
+  };
+
+  const close = () => {
+    clearTimer();
+    setRunning(false);
+    setOpen(false);
+    setFinished(false);
+  };
+
+  const progress = durationMin > 0 ? 1 - remaining / (durationMin * 60) : 0;
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => { setFinished(false); setRunning(false); setRemaining(durationMin * 60); setOpen(true); }}
+        aria-label="Start a gentle timer"
+        title="Start a gentle timer"
+        style={{ position: "fixed", right: 14, bottom: "calc(88px + env(safe-area-inset-bottom))", zIndex: 60, width: 56, height: 56, borderRadius: "50%", border: "1px solid #E4CFF0", background: "linear-gradient(135deg,#C75EDB,#D97DDC)", color: "white", fontSize: 24, cursor: "pointer", boxShadow: "0 10px 26px rgba(166,93,193,.35)", display: "grid", placeItems: "center" }}
+      >
+        ⏱
+      </button>
+
+      {open && (
+        <div role="dialog" aria-modal="true" aria-label="Gentle timer" style={{ position: "fixed", inset: 0, zIndex: 200, display: "grid", placeItems: "center", padding: 20, background: "rgba(43,29,52,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
+          <div style={{ width: "min(400px, 100%)", borderRadius: 24, border: "1px solid #E4CFF0", background: "linear-gradient(150deg,#FFFDFF,#F7EFFB)", boxShadow: "0 24px 70px rgba(42,26,52,.35)", padding: 24, textAlign: "center", color: "#5B4B6B" }}>
+            <div style={{ fontSize: 40 }} aria-hidden="true">🧸</div>
+            {!finished ? (
+              <>
+                <div style={{ marginTop: 6, fontSize: 12, letterSpacing: ".13em", fontWeight: 950, color: "#B44CC7" }}>A GENTLE TIMER</div>
+                <div style={{ marginTop: 10, fontSize: 52, fontWeight: 950, color: "#3E2458", letterSpacing: "-1px", fontVariantNumeric: "tabular-nums" }}>{formatClock(remaining)}</div>
+                <div style={{ height: 8, borderRadius: 999, background: "#EFE2F5", marginTop: 10, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${Math.min(100, Math.max(0, progress * 100))}%`, borderRadius: 999, background: "linear-gradient(90deg,#C75EDB,#D97DDC)", transition: "width .5s linear" }} />
+                </div>
+                <p style={{ margin: "12px 0 0", fontSize: 13, lineHeight: 1.55, color: "#7B6888" }}>
+                  {running
+                    ? "No rush — the timer is just keeping you company. Stopping early is always okay."
+                    : "Pick a little pocket of time. The timer won\u2019t scold you; it\u2019s just here to sit with you while you start."}
+                </p>
+                {!running && (
+                  <div style={{ display: "flex", gap: 7, justifyContent: "center", marginTop: 14, flexWrap: "wrap" }}>
+                    {TIMER_DURATIONS.map((mins) => (
+                      <button
+                        key={mins}
+                        type="button"
+                        onClick={() => { setDurationMin(mins); setRemaining(mins * 60); }}
+                        aria-pressed={durationMin === mins}
+                        style={{ minWidth: 56, minHeight: 44, padding: "8px 12px", borderRadius: 12, border: durationMin === mins ? "2px solid #A65DC1" : "1px solid #E4CFF0", background: durationMin === mins ? "#F2DEFA" : "white", color: durationMin === mins ? "#7E3D99" : "#6B5A7D", fontWeight: 900, fontSize: 13, cursor: "pointer" }}
+                      >
+                        {mins}m
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+                  {!running
+                    ? <button type="button" onClick={start} style={{ flex: 1, minHeight: 48, borderRadius: 14, border: 0, background: "linear-gradient(135deg,#C75EDB,#D97DDC)", color: "white", fontWeight: 900, fontSize: 14, cursor: "pointer" }}>Start softly ⏱</button>
+                    : <button type="button" onClick={() => stop(true)} style={{ flex: 1, minHeight: 48, borderRadius: 14, border: 0, background: "linear-gradient(135deg,#C75EDB,#D97DDC)", color: "white", fontWeight: 900, fontSize: 14, cursor: "pointer" }}>I&rsquo;m done ✓</button>}
+                  <button type="button" onClick={close} style={{ minHeight: 48, padding: "0 18px", borderRadius: 14, border: "1px solid #E4CFF0", background: "white", color: "#8B6797", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>{running ? "Stop" : "Close"}</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 44 }} aria-hidden="true">🌷</div>
+                <div style={{ marginTop: 8, fontSize: 19, fontWeight: 950, color: "#3E2458" }}>Done for now</div>
+                <p style={{ margin: "8px 0 0", fontSize: 13.5, lineHeight: 1.55, color: "#7B6888" }}>You showed up — that&rsquo;s what counts. The rest of the day can wait.</p>
+                <button type="button" onClick={close} autoFocus style={{ marginTop: 16, width: "100%", minHeight: 48, borderRadius: 14, border: 0, background: "linear-gradient(135deg,#C75EDB,#D97DDC)", color: "white", fontWeight: 900, fontSize: 14, cursor: "pointer" }}>Back to my day 💜</button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
