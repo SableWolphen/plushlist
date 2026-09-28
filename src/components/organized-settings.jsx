@@ -234,15 +234,16 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
             </button>;
           })}
         </div>
-                <ToggleRow checked={preferences.nickname_style === "baby"} onChange={(event) => updatePreference({ nickname_style: event.target.checked ? "baby" : "warm", dino_theme: event.target.checked ? false : preferences.dino_theme })} title="🍼 Baby Mode" description="The same PlushLife, made extra soft: gentler wording, bigger cozy controls, bedtime stars, and comfort-first cards. Your tasks and progress never change." />
-        <BabyModeExplainer />
-        {preferences.nickname_style === "baby" && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, padding: "8px 0 2px" }}>
-            <button type="button" onClick={() => updatePreference({ baby_voice: "motherly" })} style={{ ...secondaryButton, border: (preferences.baby_voice || "motherly") === "motherly" ? "2px solid #9660AF" : secondaryButton.border }}>👩 Motherly voice</button>
-            <button type="button" onClick={() => updatePreference({ baby_voice: "fatherly" })} style={{ ...secondaryButton, border: preferences.baby_voice === "fatherly" ? "2px solid #4C8FE8" : secondaryButton.border }}>👨 Fatherly voice</button>
+                {preferences.nickname_style === "baby" && (
+          <div style={{ marginTop: 12, padding: 11, borderRadius: 14, background: "linear-gradient(145deg,#FFF4FA,#F4ECFF)", border: "1px solid #E8D7ED" }}>
+            <BabyModeExplainer />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, marginTop: 8 }}>
+              <button type="button" onClick={() => updatePreference({ baby_voice: "motherly" })} style={{ ...secondaryButton, border: (preferences.baby_voice || "motherly") === "motherly" ? "2px solid #9660AF" : secondaryButton.border }}>👩 Motherly voice</button>
+              <button type="button" onClick={() => updatePreference({ baby_voice: "fatherly" })} style={{ ...secondaryButton, border: preferences.baby_voice === "fatherly" ? "2px solid #9660AF" : secondaryButton.border }}>👨 Fatherly voice</button>
+            </div>
           </div>
         )}
-        <ToggleRow checked={dinoTheme} onChange={(event) => updatePreference({ dino_theme: event.target.checked, nickname_style: event.target.checked ? "warm" : preferences.nickname_style })} title="🦕 Dino Theme" description="The illustrated dinosaur world from the PlushLife reference: garden scenes, soft clouds, stars, plants, and dino companions." />
+        {dinoTheme && <div style={{ marginTop: 10, padding: "9px 11px", borderRadius: 13, background: "#F3F8F3", border: "1px solid #D7E8DD", color: "#5C7565", fontSize: 11.2, lineHeight: 1.4 }}>🦕 Dino is its own theme. Choosing Lavender, Pink, Mint, Peach, Night, Strawberry, Cloud, or Baby automatically turns Dino off.</div>}
       </Card>
     </>
   );
