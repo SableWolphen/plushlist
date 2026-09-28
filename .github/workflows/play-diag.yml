@@ -1,0 +1,71 @@
+name: Play track diagnostic (TEMPORARY)
+
+# Read-only diagnostic: lists releases on each Play track to understand why
+# the closed-testing publish is rejected. Deletes itself after use.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query Play tracks (read-only)
+        env:
+          PLAY_SA_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          node -e "
+          const crypto = require('crypto');
+          const https = require('https');
+          const sa = JSON.parse(process.env.PLAY_SA_JSON);
+          const now = Math.floor(Date.now() / 1000);
+          const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
+          const jwtInput = b64({ alg: 'RS256', typ: 'JWT' }) + '.' + b64({
+            iss: sa.client_email,
+            scope: 'https://www.googleapis.com/auth/androidpublisher',
+            aud: 'https://oauth2.googleapis.com/token',
+            exp: now + 3600, iat: now,
+          });
+          const sig = crypto.sign('RSA-SHA256', Buffer.from(jwtInput), sa.private_key).toString('base64url');
+          function req(opts, body) {
+            return new Promise((resolve, reject) => {
+              const r = https.request(opts, (res) => {
+                let d = ''; res.on('data', (c) => d += c);
+                res.on('end', () => resolve({ status: res.statusCode, body: d }));
+              });
+              r.on('error', reject);
+              if (body) r.write(body);
+              r.end();
+            });
+          }
+          (async () => {
+            const tokRes = await req({
+              hostname: 'oauth2.googleapis.com', path: '/token', method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            }, 'grant_type=' + encodeURIComponent('urn:ietf:params:oauth:grant-type:jwt-bearer') + '&assertion=' + jwtInput);
+            const token = JSON.parse(tokRes.body).access_token;
+            if (!token) { console.log('TOKEN FAILED: ' + tokRes.body.slice(0, 200)); process.exit(1); }
+            const api = (method, path, body) => req({
+              hostname: 'androidpublisher.googleapis.com',
+              path: '/androidpublisher/v3/applications/com.PlushLife' + path,
+              method, headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            }, body ? JSON.stringify(body) : null);
+            const edit = JSON.parse((await api('POST', '/edits', { id: '', expiryTimeSeconds: '600' })).body);
+            const editId = edit.id;
+            console.log('edit id: ' + editId);
+            for (const track of ['internal', 'alpha', 'production']) {
+              const tr = await api('GET', '/edits/' + editId + '/tracks/' + track);
+              if (tr.status !== 200) { console.log(track + ': HTTP ' + tr.status + ' ' + tr.body.slice(0, 160)); continue; }
+              const releases = JSON.parse(tr.body).releases || [];
+              console.log('TRACK ' + track + ': ' + releases.length + ' releases');
+              for (const rel of releases) {
+                const vcs = (rel.versionCodes || []).join(',');
+                console.log('  name=' + rel.name + ' status=' + rel.status + ' versionCodes=[' + vcs + ']');
+              }
+            }
+            await api('DELETE', '/edits/' + editId);
+            console.log('diagnostic edit discarded');
+          })().catch((e) => { console.log('DIAG ERROR: ' + e.message); process.exit(1); });
+          "
