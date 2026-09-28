@@ -57,7 +57,33 @@
 <script src="./assets/app.bundle.js"></script>
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(() => {}));
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").then((registration) => {
+      // Tell the app when a newer build is ready so it can offer a refresh
+      // instead of silently running the old version in a long-lived tab.
+      const notifyUpdateReady = () => {
+        window.__plushlifeSwUpdateReady = true;
+        window.dispatchEvent(new CustomEvent("plushlife:sw-update-ready"));
+      };
+      if (registration.waiting) notifyUpdateReady();
+      registration.addEventListener("updatefound", () => {
+        const incoming = registration.installing;
+        if (!incoming) return;
+        incoming.addEventListener("statechange", () => {
+          if (incoming.state === "installed" && navigator.serviceWorker.controller) notifyUpdateReady();
+        });
+      });
+      // Long-lived tabs never re-check on their own; nudge on visibility.
+      let lastUpdateCheck = 0;
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState !== "visible") return;
+        const now = Date.now();
+        if (now - lastUpdateCheck < 3600000) return;
+        lastUpdateCheck = now;
+        registration.update().catch(() => {});
+      });
+    }).catch(() => {});
+  });
 }
 </script>
 </body>
