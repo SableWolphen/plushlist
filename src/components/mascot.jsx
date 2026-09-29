@@ -13,11 +13,12 @@ const DEFAULT_ACCESSORY_POSITION = { left: "50%", top: "1%", transform: "transla
 const SPARKLE_LEFT = [6, 88, 12, 82];
 const SPARKLE_TOP = [4, 8, 78, 74];
 
-export const PlushMascot = React.memo(function PlushMascot({ outfit = MASCOT_OUTFITS[0], size = 150, celebrating = false, mood = "neutral", activityDays = 0, theme = "soft" }) {
+export const PlushMascot = React.memo(function PlushMascot({ outfit = MASCOT_OUTFITS[0], size = 150, celebrating = false, mood = "neutral", activityDays = 0, theme = "soft", variant = "bear" }) {
   const accessorySize = Math.round(size * 0.23);
   const accessoryPos = ACCESSORY_POSITIONS[outfit.id] || DEFAULT_ACCESSORY_POSITION;
   const growth = mascotGrowthStageForDays(activityDays);
   const dino = theme === "dino";
+  const bunny = variant === "bunny";
   const palette = {
     pink: ["#FFF0F7", "#D755A6", "#F7B7D7"], meadow: ["#F0FFF5", "#4AAE86", "#B6E8D1"],
     peach: ["#FFF3E9", "#E57D72", "#FFD3B8"], twilight: ["#EDE9FF", "#7867CF", "#C5B8F5"],
@@ -33,8 +34,15 @@ export const PlushMascot = React.memo(function PlushMascot({ outfit = MASCOT_OUT
       <svg viewBox="0 0 240 220" role="img" aria-label={`PlushLife mascot wearing ${outfit.name}, looking ${mood}`} style={{ width: "100%", height: "100%", display: "block" }}>
         {dino && <path d="M184 72 C222 43 233 63 222 91 C214 112 202 127 187 139" fill="none" stroke="#FFA510" strokeWidth="17" strokeLinecap="round" />}
         <circle cx="120" cy="117" r="80" fill={fur} stroke={outline} strokeWidth="7" />
-        <circle cx="61" cy="60" r="25" fill={fur} stroke={outline} strokeWidth="7" />
-        <circle cx="179" cy="60" r="25" fill={fur} stroke={outline} strokeWidth="7" />
+        {bunny ? <>
+          <ellipse cx="66" cy="45" rx="20" ry="43" transform="rotate(-17 66 45)" fill={fur} stroke={outline} strokeWidth="7" />
+          <ellipse cx="174" cy="45" rx="20" ry="43" transform="rotate(17 174 45)" fill={fur} stroke={outline} strokeWidth="7" />
+          <ellipse cx="66" cy="45" rx="8" ry="27" transform="rotate(-17 66 45)" fill={blush} opacity=".58" />
+          <ellipse cx="174" cy="45" rx="8" ry="27" transform="rotate(17 174 45)" fill={blush} opacity=".58" />
+        </> : <>
+          <circle cx="61" cy="60" r="25" fill={fur} stroke={outline} strokeWidth="7" />
+          <circle cx="179" cy="60" r="25" fill={fur} stroke={outline} strokeWidth="7" />
+        </>}
         <ellipse cx="77" cy="190" rx="30" ry="20" fill={fur} stroke={outline} strokeWidth="7" />
         <ellipse cx="163" cy="190" rx="30" ry="20" fill={fur} stroke={outline} strokeWidth="7" />
         {dino ? <path d="M91 43 L101 10 L116 45 Z M124 41 L139 16 L151 50 Z" fill="#12C8AA" stroke="#12A88F" strokeWidth="3" /> : <path d="M102 39 Q119 22 138 40" fill="none" stroke={outline} strokeWidth="5" strokeLinecap="round" />}
