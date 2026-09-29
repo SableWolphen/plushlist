@@ -39,6 +39,10 @@ jobs:
       - name: Build site (same esbuild pipeline as Android/Cloudflare)
         run: npm run web:sync
 
+      - name: Verify shared build stamp
+        run: |
+          node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('www/build-info.json','utf8'));if(x.gitSha!==process.env.GITHUB_SHA){console.error(x);process.exit(1)};console.log('Verified shared build',x.gitSha)"
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
