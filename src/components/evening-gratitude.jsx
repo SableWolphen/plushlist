@@ -59,17 +59,17 @@ export function EveningGratitude() {
   };
 
   return (
-    <section aria-label="One good thing from today" style={{ borderRadius: 20, border: "1px solid #E4CFF0", background: "linear-gradient(145deg,#FDFAFF,#F6EEFB)", boxShadow: "0 8px 22px rgba(101,63,115,.05)", padding: "14px 15px", marginBottom: 12 }}>
+    <section aria-label="One good thing from today" style={{ borderRadius: 20, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", boxShadow: "0 8px 22px rgba(101,63,115,.05)", padding: "14px 15px", marginBottom: 12 }}>
       {!saved ? (
         <>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <span aria-hidden="true" style={{ fontSize: 28, lineHeight: 1.1 }}>🌟</span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 950, color: "#B44CC7" }}>EVENING CHECK-IN</div>
-              <div style={{ marginTop: 3, fontSize: 14.5, fontWeight: 950, color: "#3E2458" }}>One good thing from today?</div>
-              <p style={{ margin: "4px 0 0", fontSize: 12.5, lineHeight: 1.5, color: "#6B5A7D" }}>Tiny counts. Kept privately in your journal.</p>
+              <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 950, color: "var(--pl-theme-muted,#B44CC7)" }}>EVENING CHECK-IN</div>
+              <div style={{ marginTop: 3, fontSize: 14.5, fontWeight: 950, color: "var(--pl-theme-ink,#3E2458)" }}>One good thing from today?</div>
+              <p style={{ margin: "4px 0 0", fontSize: 12.5, lineHeight: 1.5, color: "var(--pl-theme-ink,#6B5A7D)" }}>Tiny counts. Kept privately in your journal.</p>
             </div>
-            <button type="button" onClick={dismiss} aria-label="Dismiss evening check-in for today" style={{ border: 0, background: "transparent", color: "#B79DC4", fontSize: 18, cursor: "pointer", padding: 4, lineHeight: 1 }}>×</button>
+            <button type="button" onClick={dismiss} aria-label="Dismiss evening check-in for today" style={{ border: 0, background: "transparent", color: "var(--pl-theme-muted,#B79DC4)", fontSize: 18, cursor: "pointer", padding: 4, lineHeight: 1 }}>×</button>
           </div>
           <div style={{ display: "flex", gap: 7, marginTop: 10 }}>
             <input
@@ -79,7 +79,7 @@ export function EveningGratitude() {
               maxLength={280}
               placeholder="e.g. I drank water before coffee"
               aria-label="One good thing from today"
-              style={{ flex: 1, minWidth: 0, padding: "10px 12px", borderRadius: 12, border: "1px solid #E3C9EC", fontSize: 13.5 }}
+              style={{ flex: 1, minWidth: 0, padding: "10px 12px", borderRadius: 12, border: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 13.5 }}
             />
             <button type="button" onClick={save} disabled={!text.trim()} aria-label={text.trim() ? "Save your good thing" : "Type something first"} style={{ padding: "0 16px", minHeight: 44, borderRadius: 12, border: 0, background: !text.trim() ? "#D9CBE2" : "linear-gradient(135deg,#B95DCA,#DB78BF)", color: "white", fontWeight: 900, fontSize: 13, cursor: !text.trim() ? "not-allowed" : "pointer", whiteSpace: "nowrap" }}>
               Save ✨
@@ -90,14 +90,14 @@ export function EveningGratitude() {
         <div role="status" aria-live="polite">
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span aria-hidden="true" style={{ fontSize: 26 }}>💜</span>
-            <div style={{ fontSize: 13, lineHeight: 1.5, color: "#6B5A7D", flex: 1 }}>
-              <strong style={{ color: "#3E2458" }}>Tucked away.</strong> Your wins jar holds it now — sleep well.
+            <div style={{ fontSize: 13, lineHeight: 1.5, color: "var(--pl-theme-ink,#6B5A7D)", flex: 1 }}>
+              <strong style={{ color: "var(--pl-theme-ink,#3E2458)" }}>Tucked away.</strong> Your wins jar holds it now — sleep well.
             </div>
           </div>
           <button
             type="button"
             onClick={() => setShareOpen(true)}
-            style={{ marginTop: 10, width: "100%", padding: "10px 12px", minHeight: 44, borderRadius: 12, border: "1px solid #D994E7", background: "white", color: "#75428C", fontWeight: 900, fontSize: 13, cursor: "pointer" }}
+            style={{ marginTop: 10, width: "100%", padding: "10px 12px", minHeight: 44, borderRadius: 12, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white", color: "var(--pl-theme-ink,#75428C)", fontWeight: 900, fontSize: 13, cursor: "pointer" }}
           >
             Share your win 🌟
           </button>

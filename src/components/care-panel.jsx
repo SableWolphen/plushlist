@@ -1,3 +1,4 @@
+import { CozyScene } from "./theme-world.jsx";
 /*
  * Product-quality compatibility contract:
  * data-actionable-care-recommendation
@@ -17,7 +18,7 @@ import { beginRecommendation, profileContext, recommendationFit, recordRecommend
 
 const card = {
   borderRadius: 24,
-  border: "1px solid #EBD9F0",
+  border: "1px solid var(--pl-theme-line,#E9DDF6)",
   background: "linear-gradient(145deg,rgba(255,255,255,.95),rgba(255,248,252,.92))",
   boxShadow: "0 10px 28px rgba(101,63,115,.055)",
 };
@@ -26,9 +27,9 @@ const pill = {
   minHeight: 42,
   padding: "8px 12px",
   borderRadius: 999,
-  border: "1px solid #E5CFEA",
-  background: "#FFF9FD",
-  color: "#7B548A",
+  border: "1px solid var(--pl-theme-line,#E9DDF6)",
+  background: "var(--pl-theme-surface,#FFF9FD)",
+  color: "var(--pl-theme-ink,#7B548A)",
   fontWeight: 900,
   cursor: "pointer",
 };
@@ -167,6 +168,7 @@ export function CarePanel(props) {
         }
       `}</style>
 
+      <CozyScene title="What do you need right now?" subtitle="Choose what feels closest." />
       <section className="pl-care-card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
           <div>
@@ -190,7 +192,7 @@ export function CarePanel(props) {
         {selectedSituation && (
           <div className="pl-care-reco" aria-live="polite">
             <div className="pl-care-kicker">✨ A SOFT PLACE TO START</div>
-            <div style={{ marginTop: 5, fontSize: 15, fontWeight: 950, color: "#533960" }}>
+            <div style={{ marginTop: 5, fontSize: 15, fontWeight: 950, color: "var(--pl-theme-ink,#533960)" }}>
               {recommendedTool ? `${recommendedTool.icon} ${recommendedTool.name}` : `${selectedSituation.icon} One gentle step`}
             </div>
             <div className="pl-care-copy">{selectedSituation.next}</div>
@@ -205,16 +207,16 @@ export function CarePanel(props) {
       {goldMemoryUnlocked && memory.tool && (
         <section data-actionable-care-recommendation="true" className="pl-care-memory">
           <div className="pl-care-kicker">💗 SOMETHING THAT HELPED BEFORE</div>
-          <div style={{ marginTop: 5, fontSize: 15, fontWeight: 950, color: "#553B61" }}>{memory.tool.icon} {memory.tool.name}</div>
+          <div style={{ marginTop: 5, fontSize: 15, fontWeight: 950, color: "var(--pl-theme-ink,#553B61)" }}>{memory.tool.icon} {memory.tool.name}</div>
           <div className="pl-care-copy">Want to use this cozy reset again?</div>
           <button type="button" className="pl-care-primary" onClick={() => startCare(memory.tool.id)} style={{ marginTop: 9 }}>Try it again</button>
-          {memory.count >= 2 && <details style={{ marginTop: 6 }}><summary style={{ minHeight: 40, display: "flex", alignItems: "center", cursor: "pointer", color: "#8A6A95", fontSize: 10.5, fontWeight: 850 }}>Why this?</summary><div style={{ fontSize: 10.2, lineHeight: 1.45, color: "#8C7A96" }}>You marked this helpful {memory.count} times{careFit?.confidence === "strong" && careFit.contextual >= 2 ? " in moments like this" : ""}.</div></details>}
+          {memory.count >= 2 && <details style={{ marginTop: 6 }}><summary style={{ minHeight: 40, display: "flex", alignItems: "center", cursor: "pointer", color: "var(--pl-theme-muted,#8A6A95)", fontSize: 10.5, fontWeight: 850 }}>Why this?</summary><div style={{ fontSize: 10.2, lineHeight: 1.45, color: "var(--pl-theme-muted,#8C7A96)" }}>You marked this helpful {memory.count} times{careFit?.confidence === "strong" && careFit.contextual >= 2 ? " in moments like this" : ""}.</div></details>}
         </section>
       )}
 
       {props.isMamaCornerProfile && (
         <details open={props.careExtraSupportOpen} onToggle={(event) => props.setCareExtraSupportOpen(event.currentTarget.open)} className="pl-care-extra">
-          <summary style={{ minHeight: 34, padding: "0 5px", display: "flex", alignItems: "center", color: "#76558A", fontWeight: 900, fontSize: 9.5, cursor: "pointer" }}>🧸 More cozy support</summary>
+          <summary style={{ minHeight: 34, padding: "0 5px", display: "flex", alignItems: "center", color: "var(--pl-theme-ink,#76558A)", fontWeight: 900, fontSize: 9.5, cursor: "pointer" }}>🧸 More cozy support</summary>
           <div style={{ marginTop: 8 }}>
             <MamasCorner userId={props.user.id} caregiverName={props.babyCaregiverName} parentVoice={props.preferences.baby_voice === "fatherly" ? "fatherly" : "motherly"} incompleteTasks={props.rows.filter((row) => !props.viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => props.toggle(taskKey)} supabase={props.supabase} />
           </div>
@@ -228,7 +230,7 @@ export function CarePanel(props) {
         {goldMemoryUnlocked && props.careSection === "paths" && activePath && (
           <div className="pl-care-reco" data-adaptive-plushpath="true">
             <div className="pl-care-kicker">🗺️ YOUR CURRENT PLUSHPATH</div>
-            <div style={{ marginTop: 5, fontWeight: 950, color: "#5D4468" }}>{activePath.icon} {activePath.title}</div>
+            <div style={{ marginTop: 5, fontWeight: 950, color: "var(--pl-theme-ink,#5D4468)" }}>{activePath.icon} {activePath.title}</div>
             <div className="pl-care-copy">{pathCoach?.text}</div>
             <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 8 }}>
               <button type="button" style={pill} onClick={() => savePathFit("helped")}>💜 Helped</button>
@@ -244,7 +246,7 @@ export function CarePanel(props) {
             <div style={{ marginTop: 5, fontSize: 12.5, lineHeight: 1.45 }}>{sleep.text}</div>
             {sleep.tool && <>
               <button type="button" className="pl-care-soft-btn" onClick={() => { props.setCareSection("sleep"); startSleep(sleep.tool.id); }} style={{ marginTop: 9 }}>Try {sleep.tool.title}</button>
-              {sleep.count >= 2 && <details style={{ marginTop: 5 }}><summary style={{ minHeight: 40, display: "flex", alignItems: "center", cursor: "pointer", color: "#8A6A95", fontSize: 10.5, fontWeight: 850 }}>Why this?</summary><div style={{ fontSize: 10.2, lineHeight: 1.45 }}>{sleepFit?.confidence === "strong" && sleepFit.contextual >= 2 ? "This has helped on nights with a similar check-in." : `You marked this helpful ${sleep.count} times.`}</div></details>}
+              {sleep.count >= 2 && <details style={{ marginTop: 5 }}><summary style={{ minHeight: 40, display: "flex", alignItems: "center", cursor: "pointer", color: "var(--pl-theme-muted,#8A6A95)", fontSize: 10.5, fontWeight: 850 }}>Why this?</summary><div style={{ fontSize: 10.2, lineHeight: 1.45 }}>{sleepFit?.confidence === "strong" && sleepFit.contextual >= 2 ? "This has helped on nights with a similar check-in." : `You marked this helpful ${sleep.count} times.`}</div></details>}
             </>}
           </div>
         )}

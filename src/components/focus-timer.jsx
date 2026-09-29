@@ -114,16 +114,16 @@ export function FocusTimer() {
     <>
       {open && (
         <div role="dialog" aria-modal="true" aria-label="Gentle timer" style={{ position: "fixed", inset: 0, zIndex: 200, display: "grid", placeItems: "center", padding: 20, background: "rgba(43,29,52,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
-          <div style={{ width: "min(400px, 100%)", borderRadius: 24, border: "1px solid #E4CFF0", background: "linear-gradient(150deg,#FFFDFF,#F7EFFB)", boxShadow: "0 24px 70px rgba(42,26,52,.35)", padding: 24, textAlign: "center", color: "#5B4B6B" }}>
+          <div style={{ width: "min(400px, 100%)", borderRadius: 24, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", boxShadow: "0 24px 70px rgba(42,26,52,.35)", padding: 24, textAlign: "center", color: "var(--pl-theme-ink,#5B4B6B)" }}>
             <div style={{ fontSize: 40 }} aria-hidden="true">🧸</div>
             {!finished ? (
               <>
-                <div style={{ marginTop: 6, fontSize: 12, letterSpacing: ".13em", fontWeight: 950, color: "#B44CC7" }}>A GENTLE TIMER</div>
-                <div style={{ marginTop: 10, fontSize: 52, fontWeight: 950, color: "#3E2458", letterSpacing: "-1px", fontVariantNumeric: "tabular-nums" }}>{formatClock(remaining)}</div>
-                <div style={{ height: 8, borderRadius: 999, background: "#EFE2F5", marginTop: 10, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${Math.min(100, Math.max(0, progress * 100))}%`, borderRadius: 999, background: "linear-gradient(90deg,#C75EDB,#D97DDC)", transition: "width .5s linear" }} />
+                <div style={{ marginTop: 6, fontSize: 12, letterSpacing: ".13em", fontWeight: 950, color: "var(--pl-theme-muted,#B44CC7)" }}>A GENTLE TIMER</div>
+                <div style={{ marginTop: 10, fontSize: 52, fontWeight: 950, color: "var(--pl-theme-ink,#3E2458)", letterSpacing: "-1px", fontVariantNumeric: "tabular-nums" }}>{formatClock(remaining)}</div>
+                <div style={{ height: 8, borderRadius: 999, background: "var(--pl-theme-surface-2,#EFE2F5)", marginTop: 10, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${Math.min(100, Math.max(0, progress * 100))}%`, borderRadius: 999, background: "var(--pl-theme-accent)", transition: "width .5s linear" }} />
                 </div>
-                <p style={{ margin: "12px 0 0", fontSize: 13, lineHeight: 1.55, color: "#7B6888" }}>
+                <p style={{ margin: "12px 0 0", fontSize: 13, lineHeight: 1.55, color: "var(--pl-theme-muted,#7B6888)" }}>
                   {running
                     ? "No rush — the timer is just keeping you company. Stopping early is always okay."
                     : "Pick a little pocket of time. The timer won\u2019t scold you; it\u2019s just here to sit with you while you start."}
@@ -145,17 +145,17 @@ export function FocusTimer() {
                 )}
                 <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
                   {!running
-                    ? <button type="button" onClick={start} style={{ flex: 1, minHeight: 48, borderRadius: 14, border: 0, background: "linear-gradient(135deg,#C75EDB,#D97DDC)", color: "white", fontWeight: 900, fontSize: 14, cursor: "pointer" }}>Start softly ⏱</button>
-                    : <button type="button" onClick={() => stop(true)} style={{ flex: 1, minHeight: 48, borderRadius: 14, border: 0, background: "linear-gradient(135deg,#C75EDB,#D97DDC)", color: "white", fontWeight: 900, fontSize: 14, cursor: "pointer" }}>I&rsquo;m done ✓</button>}
-                  <button type="button" onClick={close} style={{ minHeight: 48, padding: "0 18px", borderRadius: 14, border: "1px solid #E4CFF0", background: "white", color: "#8B6797", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>{running ? "Stop" : "Close"}</button>
+                    ? <button type="button" onClick={start} style={{ flex: 1, minHeight: 48, borderRadius: 14, border: 0, background: "var(--pl-theme-accent)", color: "white", fontWeight: 900, fontSize: 14, cursor: "pointer" }}>Start softly ⏱</button>
+                    : <button type="button" onClick={() => stop(true)} style={{ flex: 1, minHeight: 48, borderRadius: 14, border: 0, background: "var(--pl-theme-accent)", color: "white", fontWeight: 900, fontSize: 14, cursor: "pointer" }}>I&rsquo;m done ✓</button>}
+                  <button type="button" onClick={close} style={{ minHeight: 48, padding: "0 18px", borderRadius: 14, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white", color: "var(--pl-theme-muted,#8B6797)", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>{running ? "Stop" : "Close"}</button>
                 </div>
               </>
             ) : (
               <>
                 <div style={{ fontSize: 44 }} aria-hidden="true">🌷</div>
-                <div style={{ marginTop: 8, fontSize: 19, fontWeight: 950, color: "#3E2458" }}>Done for now</div>
-                <p style={{ margin: "8px 0 0", fontSize: 13.5, lineHeight: 1.55, color: "#7B6888" }}>You showed up — that&rsquo;s what counts. The rest of the day can wait.</p>
-                <button type="button" onClick={close} autoFocus style={{ marginTop: 16, width: "100%", minHeight: 48, borderRadius: 14, border: 0, background: "linear-gradient(135deg,#C75EDB,#D97DDC)", color: "white", fontWeight: 900, fontSize: 14, cursor: "pointer" }}>Back to my day 💜</button>
+                <div style={{ marginTop: 8, fontSize: 19, fontWeight: 950, color: "var(--pl-theme-ink,#3E2458)" }}>Done for now</div>
+                <p style={{ margin: "8px 0 0", fontSize: 13.5, lineHeight: 1.55, color: "var(--pl-theme-muted,#7B6888)" }}>You showed up — that&rsquo;s what counts. The rest of the day can wait.</p>
+                <button type="button" onClick={close} autoFocus style={{ marginTop: 16, width: "100%", minHeight: 48, borderRadius: 14, border: 0, background: "var(--pl-theme-accent)", color: "white", fontWeight: 900, fontSize: 14, cursor: "pointer" }}>Back to my day 💜</button>
               </>
             )}
           </div>

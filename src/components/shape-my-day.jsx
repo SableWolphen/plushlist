@@ -65,10 +65,10 @@ export function ShapeMyDay({ rows, viewDone, toggle, dailyCheckIn, period }) {
   const timeLabel = plan.minutes > 0 ? `about ${plan.minutes} minutes` : "a few gentle minutes";
 
   return (
-    <section aria-label="A kinder version of today" style={{ borderRadius: 22, border: "1px solid #E4CFF0", background: "linear-gradient(145deg,#FDF7FF,#F6EEFB)", boxShadow: "0 8px 26px rgba(101,63,115,.06)", padding: "15px 17px 14px", marginBottom: 12 }}>
-      <div style={{ fontSize: 12, letterSpacing: ".13em", fontWeight: 950, color: "#B44CC7" }}>✦&nbsp;SHAPED FOR YOUR ENERGY</div>
-      <div style={{ marginTop: 6, fontSize: 17, fontWeight: 950, color: "#3E2458", letterSpacing: "-.25px" }}>A kinder version of today</div>
-      <p style={{ margin: "6px 0 0", fontSize: 13, lineHeight: 1.5, color: "#6B5A7D" }}>
+    <section aria-label="A kinder version of today" style={{ borderRadius: 22, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", boxShadow: "0 8px 26px rgba(101,63,115,.06)", padding: "15px 17px 14px", marginBottom: 12 }}>
+      <div style={{ fontSize: 12, letterSpacing: ".13em", fontWeight: 950, color: "var(--pl-theme-muted,#B44CC7)" }}>✦&nbsp;SHAPED FOR YOUR ENERGY</div>
+      <div style={{ marginTop: 6, fontSize: 17, fontWeight: 950, color: "var(--pl-theme-ink,#3E2458)", letterSpacing: "-.25px" }}>A kinder version of today</div>
+      <p style={{ margin: "6px 0 0", fontSize: 13, lineHeight: 1.5, color: "var(--pl-theme-ink,#6B5A7D)" }}>
         Your energy is low, so here&rsquo;s a {plan.items.length}-item plan — {timeLabel}.
         The other {Math.max(0, plan.total - plan.items.length)} can wait. Nothing is erased.
       </p>
@@ -82,19 +82,19 @@ export function ShapeMyDay({ rows, viewDone, toggle, dailyCheckIn, period }) {
               type="button"
               onClick={() => toggle?.(row.key)}
               aria-pressed={done}
-              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", minHeight: 44, padding: "8px 10px", borderRadius: 14, border: "1px solid #E9D6EE", background: done ? "#F3EAF9" : "rgba(255,255,255,.85)", cursor: "pointer" }}
+              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", minHeight: 44, padding: "8px 10px", borderRadius: 14, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: done ? "#F3EAF9" : "rgba(255,255,255,.85)", cursor: "pointer" }}
             >
-              <span aria-hidden="true" style={{ width: 24, height: 24, borderRadius: 8, border: "2px solid #DEA8D9", background: done ? "#B94DD2" : "white", color: "white", display: "grid", placeItems: "center", fontSize: 14, fontWeight: 900, flex: "0 0 auto" }}>{done ? "✓" : ""}</span>
+              <span aria-hidden="true" style={{ width: 24, height: 24, borderRadius: 8, border: "2px solid var(--pl-theme-line,#E9DDF6)", background: done ? "#B94DD2" : "white", color: "white", display: "grid", placeItems: "center", fontSize: 14, fontWeight: 900, flex: "0 0 auto" }}>{done ? "✓" : ""}</span>
               <span style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 750, color: done ? "#9A86A7" : "#49385A", textDecoration: done ? "line-through" : "none" }}>{row.label}</span>
-              {mins > 0 && <span style={{ fontSize: 11, color: "#9A86A7", fontWeight: 800, whiteSpace: "nowrap" }}>{mins}m</span>}
-              {row.sourceTask?.essential_on_low_capacity && <span style={{ fontSize: 10, fontWeight: 900, color: "#B44CC7", whiteSpace: "nowrap" }}>♥ essential</span>}
+              {mins > 0 && <span style={{ fontSize: 11, color: "var(--pl-theme-muted,#9A86A7)", fontWeight: 800, whiteSpace: "nowrap" }}>{mins}m</span>}
+              {row.sourceTask?.essential_on_low_capacity && <span style={{ fontSize: 10, fontWeight: 900, color: "var(--pl-theme-muted,#B44CC7)", whiteSpace: "nowrap" }}>♥ essential</span>}
             </button>
           );
         })}
       </div>
       <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-        <button type="button" onClick={startFocusTimer} style={{ flex: 1, minWidth: 150, minHeight: 44, padding: "9px 13px", borderRadius: 14, border: 0, background: "linear-gradient(135deg,#C75EDB,#D97DDC)", color: "white", fontWeight: 900, fontSize: 13, cursor: "pointer" }}>⏱&nbsp; Start a gentle timer</button>
-        <button type="button" onClick={dismiss} style={{ minHeight: 44, padding: "9px 13px", borderRadius: 14, border: "1px solid #E4CFF0", background: "white", color: "#8B6797", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>Not today</button>
+        <button type="button" onClick={startFocusTimer} style={{ flex: 1, minWidth: 150, minHeight: 44, padding: "9px 13px", borderRadius: 14, border: 0, background: "var(--pl-theme-accent)", color: "white", fontWeight: 900, fontSize: 13, cursor: "pointer" }}>⏱&nbsp; Start a gentle timer</button>
+        <button type="button" onClick={dismiss} style={{ minHeight: 44, padding: "9px 13px", borderRadius: 14, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white", color: "var(--pl-theme-muted,#8B6797)", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>Not today</button>
       </div>
     </section>
   );

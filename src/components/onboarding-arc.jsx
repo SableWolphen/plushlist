@@ -78,15 +78,15 @@ export function OnboardingArc({ onboardingComplete }) {
   };
 
   return (
-    <section aria-label={`Day ${dayIndex} of your first week`} style={{ borderRadius: 20, border: "1px solid #E4CFF0", background: "linear-gradient(145deg,#FFFDF9,#F9F2FD)", boxShadow: "0 8px 22px rgba(101,63,115,.05)", padding: "13px 15px", marginBottom: 12 }}>
+    <section aria-label={`Day ${dayIndex} of your first week`} style={{ borderRadius: 20, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", boxShadow: "0 8px 22px rgba(101,63,115,.05)", padding: "13px 15px", marginBottom: 12 }}>
       <div style={{ display: "flex", alignItems: "flex-start", gap: 11 }}>
         <span aria-hidden="true" style={{ fontSize: 30, lineHeight: 1.1 }}>{nudge.emoji}</span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 950, color: "#B44CC7" }}>DAY {dayIndex} OF 7 · GETTING COZY</div>
-          <div style={{ marginTop: 3, fontSize: 14.5, fontWeight: 950, color: "#3E2458" }}>{nudge.title}</div>
-          <p style={{ margin: "4px 0 0", fontSize: 12.5, lineHeight: 1.5, color: "#6B5A7D" }}>{nudge.body}</p>
+          <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 950, color: "var(--pl-theme-muted,#B44CC7)" }}>DAY {dayIndex} OF 7 · GETTING COZY</div>
+          <div style={{ marginTop: 3, fontSize: 14.5, fontWeight: 950, color: "var(--pl-theme-ink,#3E2458)" }}>{nudge.title}</div>
+          <p style={{ margin: "4px 0 0", fontSize: 12.5, lineHeight: 1.5, color: "var(--pl-theme-ink,#6B5A7D)" }}>{nudge.body}</p>
         </div>
-        <button type="button" onClick={dismiss} aria-label="Dismiss for today" style={{ border: 0, background: "transparent", color: "#B79DC4", fontSize: 18, cursor: "pointer", padding: 4, lineHeight: 1 }}>×</button>
+        <button type="button" onClick={dismiss} aria-label="Dismiss for today" style={{ border: 0, background: "transparent", color: "var(--pl-theme-muted,#B79DC4)", fontSize: 18, cursor: "pointer", padding: 4, lineHeight: 1 }}>×</button>
       </div>
       <div style={{ display: "flex", gap: 4, marginTop: 11 }} aria-hidden="true">
         {[1, 2, 3, 4, 5, 6, 7].map((d) => (

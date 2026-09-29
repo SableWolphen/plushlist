@@ -130,7 +130,7 @@ export function SafePanelRegion({ label, children }) {
   return <PanelErrorBoundary label={label}>{children}</PanelErrorBoundary>;
 }
 
-export function ToolPanel({ title, onClose, children, inline = false, hideClose = false }) {
+export function ToolPanel({ title, displayTitle, onClose, children, inline = false, hideClose = false }) {
   const onCloseRef = React.useRef(onClose);
   const panelRef = React.useRef(null);
   onCloseRef.current = onClose;
@@ -166,7 +166,7 @@ export function ToolPanel({ title, onClose, children, inline = false, hideClose 
       onMouseDown={(event) => {
         if (!inline && event.target === event.currentTarget) onClose();
       }}
-      className={inline ? undefined : "pl-tool-backdrop"}
+      className={inline ? "pl-inline-tool" : "pl-tool-backdrop"}
       style={inline ? { margin: "0 0 18px" } : {
         position: "fixed", inset: 0, zIndex: 2000,
         padding: "max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom))",
@@ -191,7 +191,7 @@ export function ToolPanel({ title, onClose, children, inline = false, hideClose 
           gap: 12, padding: "13px 15px", background: "rgba(255,249,253,.96)", borderBottom: "1px solid #E8D5EF",
           backdropFilter: "blur(8px)",
         }}>
-          <div className="pl-tool-title" style={{ minWidth: 0, fontSize: 15, fontWeight: 900, color: "#5B4B6B" }}>{title}</div>
+          <div className="pl-tool-title" style={{ minWidth: 0, fontSize: 15, fontWeight: 900, color: "#5B4B6B" }}>{displayTitle || title}</div>
           {!hideClose && <button type="button" className="pl-tool-close" onClick={onClose} aria-label={`Close ${title}`} style={{
             minWidth: 58, minHeight: 44, padding: "7px 11px", borderRadius: 11, border: "1px solid #D9C5E2",
             background: "white", color: "#7A598C", fontWeight: 900, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, overflowWrap: "normal",

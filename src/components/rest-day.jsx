@@ -42,14 +42,14 @@ export function RestDayCard({ careDaysTotal, goToDashboard, period }) {
   };
 
   return (
-    <section aria-label="Rest day" style={{ borderRadius: 22, border: "1px solid #D9E8F5", background: "linear-gradient(145deg,#F7FBFF,#EEF4FB)", boxShadow: "0 8px 26px rgba(70,110,150,.07)", padding: "18px 17px 15px", marginBottom: 12, textAlign: "center" }}>
+    <section aria-label="Rest day" style={{ borderRadius: 22, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", boxShadow: "0 8px 26px rgba(70,110,150,.07)", padding: "18px 17px 15px", marginBottom: 12, textAlign: "center" }}>
       <div style={{ fontSize: 34 }} aria-hidden="true">🌙</div>
-      <div style={{ marginTop: 6, fontSize: 12, letterSpacing: ".13em", fontWeight: 950, color: "#5B87A8" }}>REST DAY</div>
-      <div style={{ marginTop: 6, fontSize: 18, fontWeight: 950, color: "#33475E", letterSpacing: "-.25px" }}>Today is for resting, on purpose.</div>
-      <p style={{ margin: "8px auto 0", maxWidth: 420, fontSize: 13.5, lineHeight: 1.55, color: "#5E7186", fontStyle: "italic" }}>&ldquo;{affirmation}&rdquo;</p>
+      <div style={{ marginTop: 6, fontSize: 12, letterSpacing: ".13em", fontWeight: 950, color: "var(--pl-theme-muted,#5B87A8)" }}>REST DAY</div>
+      <div style={{ marginTop: 6, fontSize: 18, fontWeight: 950, color: "var(--pl-theme-ink,#33475E)", letterSpacing: "-.25px" }}>Today is for resting, on purpose.</div>
+      <p style={{ margin: "8px auto 0", maxWidth: 420, fontSize: 13.5, lineHeight: 1.55, color: "var(--pl-theme-muted,#5E7186)", fontStyle: "italic" }}>&ldquo;{affirmation}&rdquo;</p>
       {suggestions.length > 0 && (
         <div style={{ marginTop: 13, textAlign: "left" }}>
-          <div style={{ fontSize: 11, letterSpacing: ".1em", fontWeight: 900, color: "#7B93AA" }}>IF YOU WANT A LITTLE SOMETHING</div>
+          <div style={{ fontSize: 11, letterSpacing: ".1em", fontWeight: 900, color: "var(--pl-theme-muted,#7B93AA)" }}>IF YOU WANT A LITTLE SOMETHING</div>
           <div style={{ display: "grid", gap: 7, marginTop: 8 }}>
             {suggestions.map((tool) => (
               <button
@@ -57,20 +57,20 @@ export function RestDayCard({ careDaysTotal, goToDashboard, period }) {
                 type="button"
                 onClick={openCare}
                 aria-label={`Open ${tool.name} — a few quiet minutes, no score`}
-                style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", minHeight: 48, padding: "9px 12px", borderRadius: 14, border: "1px solid #D9E8F5", background: "rgba(255,255,255,.85)", cursor: "pointer" }}
+                style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", minHeight: 48, padding: "9px 12px", borderRadius: 14, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "rgba(255,255,255,.85)", cursor: "pointer" }}
               >
                 <span aria-hidden="true" style={{ fontSize: 22 }}>{tool.icon || "💗"}</span>
                 <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ display: "block", fontSize: 13.5, fontWeight: 850, color: "#33475E" }}>{tool.name}</span>
-                  <span style={{ display: "block", fontSize: 11.5, color: "#7B93AA" }}>A few quiet minutes · no score</span>
+                  <span style={{ display: "block", fontSize: 13.5, fontWeight: 850, color: "var(--pl-theme-ink,#33475E)" }}>{tool.name}</span>
+                  <span style={{ display: "block", fontSize: 11.5, color: "var(--pl-theme-muted,#7B93AA)" }}>A few quiet minutes · no score</span>
                 </span>
-                <span aria-hidden="true" style={{ color: "#9AB4CC", fontSize: 20 }}>›</span>
+                <span aria-hidden="true" style={{ color: "var(--pl-theme-muted,#9AB4CC)", fontSize: 20 }}>›</span>
               </button>
             ))}
           </div>
         </div>
       )}
-      <div style={{ marginTop: 13, fontSize: 12, color: "#7B93AA", fontWeight: 700 }}>
+      <div style={{ marginTop: 13, fontSize: 12, color: "var(--pl-theme-muted,#7B93AA)", fontWeight: 700 }}>
         {Number(careDaysTotal) > 0
           ? `💗 ${careDaysTotal} ${Number(careDaysTotal) === 1 ? "day" : "days"} of care so far — this one counts too.`
           : "💗 Rest days count as care days here."}
