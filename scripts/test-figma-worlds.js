@@ -6,7 +6,7 @@ const app = fs.readFileSync('src/app-source.jsx', 'utf8');
 const manager = app.match(/const openTaskManager = \([^]*?\n  };/)[0];
 const changes = {};
 const context = {dayIdForDate,period:{date:'2026-09-29'},taskSectionsForDay: day => {changes.sectionDay=day;return ['Little things'];}};
-for(const key of ['NewTaskDay','NewTaskSection','NewTaskCustomSection','TaskAdvancedOpen','ManageTasks','Dashboard'])context['set'+key]=value=>changes[key]=value;
+for(const key of ['NewTaskDay','NewTaskSection','NewTaskCustomSection','TaskAdvancedOpen','ManageTasks','Dashboard','TaskManagerView','TaskManagerRequest','TaskSearchQuery','SelectedProgressDate','Active'])context['set'+key]=value=>changes[key]=value;
 vm.runInNewContext('{'+manager+'\nopenTaskManager("2026-09-29");}',context);
 assert.equal(changes.NewTaskDay,'tue');
 assert.equal(changes.sectionDay,'tue');
@@ -26,4 +26,7 @@ for(const directory of ['figma','fonts'])for(const name of fs.readdirSync('asset
   else assert.ok(buffer.length>10000,'font should contain real font data');
 }
 for(const theme of ['soft','dino','baby','pink','meadow','peach','twilight','strawberry','soft-light','baby-night'])assert.match(fs.readFileSync('assets/figma/'+theme+'.svg','utf8'),/<svg[^>]*width="211"[^>]*height="100"/);
+vm.runInNewContext('{'+manager+'\nopenTaskManager("2026-09-29", "habits");}',context);
+assert.equal(changes.TaskManagerView,'habits');
+assert.equal(changes.TaskSearchQuery,'');
 console.log('Figma worlds regression checks passed: date routing, exact SVG dimensions, and offline assets.');

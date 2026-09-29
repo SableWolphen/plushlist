@@ -1,3 +1,4 @@
+import { normalizeHomeLayout } from "./home-layout.js";
 import { FIGMA_WORLDS, ThemeWorldContext, CozyScene, DesignIcon } from "./components/theme-world.jsx";
 // Native bridge (Capacitor back-button, splash, push channels, notification
 // scheduler) must execute before the app bundle so its handlers and
@@ -564,17 +565,13 @@ const BILLING_PRODUCT_IDS = { monthly: "plushplus_monthly", yearly: "plushplus_y
 //   manageSubscription(): Promise<void>  // opens the platform's own subscription-management UI
 
 
-const CURRENT_CHANGELOG_VERSION = "2026-09-28-cute";
+const CURRENT_CHANGELOG_VERSION = "2026-09-29-home-worlds";
 const CHANGELOG_ITEMS = [
-  "🧸 Baby-soft makeover — sticker cards, squishy toy buttons, circle checkboxes, floating plush",
-  "🗓️ The weekly popup now takes “not right now” for an answer — no more Monday nagging",
-  "⏱️ Focus timer (2/5/10/25 min) moved to the Home header — no more floating button over your list",
-  "🌿 Shape-my-day — on low-capacity days, one kind ~30-minute plan instead of the whole list",
-  "😴 Rest-day mode — a cozy card with comfort tools, zero guilt",
-  "⚡ Quick capture — jot into Today, Tomorrow, or Someday from the + button",
-  "🌙 Evening “one good thing” — save one small win after 6pm, share it as a card",
-  "🌱 7-day onboarding — tiny guided steps across your first week",
-  "✨ Fresh-version notice — you'll know when a newer app is ready",
+  "🧸 One matching lavender bear in every world, with dinosaur and nursery accessories.",
+  "🏡 Choose the cards and order on your Home in Settings → Personalize.",
+  "🌷 View all and Little Jobs open your task list or Habits directly.",
+  "💜 Nursery wording follows your Motherly · Mommy or Fatherly · Daddy choice.",
+  "📱 Five familiar tabs, with more room above the bottom gesture area.",
 ];
 
 
@@ -866,6 +863,8 @@ function GlowUpTracker() {
     beta_banner_dismissed: false,
     last_seen_changelog: "",
     task_group_order: [],
+    home_layout: normalizeHomeLayout(),
+    appearance_theme: null,
     is_supporter: false,
     onboarding_reason: null,
     colorblind_mode: false,
@@ -1198,7 +1197,10 @@ function GlowUpTracker() {
     let active = true;
     supabase.from("app_preferences").select("*").eq("user_id", user.id).maybeSingle().then(({ data, error }) => {
       if (!active) return;
-      if (data) setPreferences((current) => ({ ...current, ...data, dark_mode: false, reminder_times: Array.isArray(data.reminder_times) ? data.reminder_times : current.reminder_times }));
+      if (data) {
+        setPreferences((current) => ({ ...current, ...data, home_layout: normalizeHomeLayout(data.home_layout), reminder_times: Array.isArray(data.reminder_times) ? data.reminder_times : current.reminder_times }));
+        if (APPEARANCE_THEMES.some(theme => theme.id === data.appearance_theme)) setAppearanceTheme(data.appearance_theme);
+      }
       // A failed fetch also leaves `data` null, same as a genuinely new
       // account with no preferences row yet — those aren't the same thing.
       // Reopening onboarding for an already-onboarded user just because
@@ -2618,8 +2620,15 @@ function GlowUpTracker() {
   const newTaskSectionOptions = taskSectionsForDay(newTaskDay);
   const editTaskSectionOptions = editTaskDraft ? taskSectionsForDay(editTaskDraft.day_id) : [];
 
-  const openTaskManager = (dayId = dayIdForDate(period.date)) => {
+  const [taskManagerView, setTaskManagerView] = useState("today");
+  const [taskManagerRequest, setTaskManagerRequest] = useState(0);
+  const openTaskManager = (dayId = dayIdForDate(period.date), view = "today") => {
     const selectedDay = /^\d{4}-\d{2}-\d{2}$/.test(dayId) ? dayIdForDate(dayId) : dayId;
+    setSelectedProgressDate(/^\d{4}-\d{2}-\d{2}$/.test(dayId) ? dayId : period.date);
+    setActive(selectedDay === "daily" ? dayIdForDate(period.date) : selectedDay);
+    setTaskManagerView(view === "habits" ? "habits" : "today");
+    setTaskManagerRequest(value => value + 1);
+    setTaskSearchQuery("");
     const nextSections = taskSectionsForDay(selectedDay);
     setNewTaskDay(selectedDay);
     setNewTaskSection(nextSections[0] || "My tasks");
@@ -3717,6 +3726,8 @@ function GlowUpTracker() {
       beta_banner_dismissed: !!nextPreferences.beta_banner_dismissed,
       onboarding_reason: nextPreferences.onboarding_reason || null,
       task_group_order: Array.isArray(nextPreferences.task_group_order) ? nextPreferences.task_group_order : [],
+      home_layout: normalizeHomeLayout(nextPreferences.home_layout),
+      appearance_theme: nextPreferences.appearance_theme || appearanceTheme,
       last_seen_changelog: nextPreferences.last_seen_changelog || "",
       updated_at: new Date().toISOString(),
     };
@@ -5873,18 +5884,18 @@ function GlowUpTracker() {
     art: "baby",
   };
   const activeWorld = babyMode ? ((isNightHour || preferences.dark_mode) ? "baby-night" : "baby") : dinoTheme ? "dino" : preferences.dark_mode ? "twilight" : appearanceTheme;
+  useEffect(() => {
+    try { window.localStorage.setItem("plushlife-login-theme", JSON.stringify({ world: activeWorld, voice: preferences.baby_voice })); } catch (_error) {}
+  }, [activeWorld, preferences.baby_voice]);
   const designPalette = FIGMA_WORLDS[activeWorld];
-  const activeThemePalette = designPalette ? { ...selectedAppearanceTheme, ...designPalette, accent2: designPalette.accent, line: designPalette.surface2, nav: designPalette.surface, art: activeWorld, wash: designPalette.background } : selectedAppearanceTheme;
+  const activeThemePalette = designPalette ? { ...selectedAppearanceTheme, ...designPalette, accent2: designPalette.accent, line: designPalette.line, nav: designPalette.surface, art: activeWorld, wash: designPalette.background } : selectedAppearanceTheme;
   /* Theme regression marker retained for validation: !["soft", "soft-light"].includes(appearanceTheme)
  * Ambient themes remain visible through the dedicated theme layer; the old heavy frame stays removed.
  */
   const selectAppearanceTheme = (themeId) => {
     const validTheme = APPEARANCE_THEMES.some((theme) => theme.id === themeId) ? themeId : "soft";
     setAppearanceTheme(validTheme);
-    // Ambient themes, Dino, and Baby are mutually exclusive visual worlds.
-    if (preferences.dino_theme || preferences.nickname_style === "baby") {
-      updatePreference({ dino_theme: false, nickname_style: "warm" });
-    }
+    updatePreference({ appearance_theme: validTheme, dino_theme: false, nickname_style: "warm", dark_mode: false });
     if (user?.id) window.localStorage.setItem(`plushlist-appearance-${user.id}`, validTheme);
   };
 
@@ -6065,7 +6076,7 @@ function GlowUpTracker() {
   })();
 
   return (
-    <ThemeWorldContext.Provider value={activeWorld}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
+    <ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
       background: activeThemePalette.background,
       backgroundImage: preferences.simple_mode ? `
@@ -7368,7 +7379,7 @@ function GlowUpTracker() {
 
         <JournalReflectionViewer reflectionViewerDate={reflectionViewerDate} onClose={() => setReflectionViewerDate(null)} reflectionViewerPrompt={reflectionViewerPrompt} reflectionViewerLoading={reflectionViewerLoading} reflectionViewerNote={reflectionViewerNote} />
 
-        <TasksPanel open={manageTasks || dashboard === "tasks"} inline={dashboard === "tasks"} rows={rows} viewDone={viewDone} toggle={toggle} onClose={() => { setManageTasks(false); if (dashboard === "tasks") goToDashboard("today"); }} newTaskDay={newTaskDay} setNewTaskDay={setNewTaskDay} taskSectionsForDay={taskSectionsForDay} setNewTaskSection={setNewTaskSection} setNewTaskCustomSection={setNewTaskCustomSection} starterPackId={starterPackId} setStarterPackId={setStarterPackId} trackerTasks={trackerTasks} setStarterPackMessage={setStarterPackMessage} addStarterPack={addStarterPack} starterPackMessage={starterPackMessage} importOpen={importOpen} setImportOpen={setImportOpen} newTaskSection={newTaskSection} importText={importText} setImportText={setImportText} importTasksFromText={importTasksFromText} importMessage={importMessage} newTaskNameInputRef={newTaskNameInputRef} newTaskName={newTaskName} setNewTaskName={setNewTaskName} taskMessage={taskMessage} setTaskMessage={setTaskMessage} naturalScheduleText={naturalScheduleText} setNaturalScheduleText={setNaturalScheduleText} naturalSchedulePreview={naturalSchedulePreview} setNaturalSchedulePreview={setNaturalSchedulePreview} applyNaturalSchedule={applyNaturalSchedule} newTaskSectionOptions={newTaskSectionOptions} newTaskCustomSection={newTaskCustomSection} taskAdvancedOpen={taskAdvancedOpen} setTaskAdvancedOpen={setTaskAdvancedOpen} newTaskWhy={newTaskWhy} setNewTaskWhy={setNewTaskWhy} newTaskSoftLabel={newTaskSoftLabel} setNewTaskSoftLabel={setNewTaskSoftLabel} newTaskTinyLabel={newTaskTinyLabel} setNewTaskTinyLabel={setNewTaskTinyLabel} newTaskEstimatedMinutes={newTaskEstimatedMinutes} setNewTaskEstimatedMinutes={setNewTaskEstimatedMinutes} newTaskEssentialOnLow={newTaskEssentialOnLow} setNewTaskEssentialOnLow={setNewTaskEssentialOnLow} newTaskKind={newTaskKind} setNewTaskKind={setNewTaskKind} newTaskScheduleType={newTaskScheduleType} setNewTaskScheduleType={setNewTaskScheduleType} newTaskScheduleDays={newTaskScheduleDays} setNewTaskScheduleDays={setNewTaskScheduleDays} newTaskReminderTime={newTaskReminderTime} setNewTaskReminderTime={setNewTaskReminderTime} newTaskStartDate={newTaskStartDate} setNewTaskStartDate={setNewTaskStartDate} newTaskEndDate={newTaskEndDate} setNewTaskEndDate={setNewTaskEndDate} newTaskOneTimeDate={newTaskOneTimeDate} setNewTaskOneTimeDate={setNewTaskOneTimeDate} selectedProgressDate={selectedProgressDate} addTrackerTask={addTrackerTask} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} isSupporterAccount={isSupporterAccount} FREE_TASK_LIMIT_PER_DAY={FREE_TASK_LIMIT_PER_DAY} taskSearchQuery={taskSearchQuery} setTaskSearchQuery={setTaskSearchQuery} isTaskPausedOnDate={isTaskPausedOnDate} period={period} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToSection={moveTaskToSection} startEditingTask={startEditingTask} resumeTrackerTask={resumeTrackerTask} pauseTrackerTask={pauseTrackerTask} archiveTrackerTask={archiveTrackerTask} setPendingTaskDelete={setPendingTaskDelete} showArchivedTasks={showArchivedTasks} setShowArchivedTasks={setShowArchivedTasks} restoreArchivedTask={restoreArchivedTask} quickAddTrackerTask={quickAddTrackerTask} quickAddMessage={quickAddMessage} />
+        <TasksPanel initialView={taskManagerView} viewRequest={taskManagerRequest} open={manageTasks || dashboard === "tasks"} inline={dashboard === "tasks"} rows={rows} viewDone={viewDone} toggle={toggle} onClose={() => { setManageTasks(false); if (dashboard === "tasks") goToDashboard("today"); }} newTaskDay={newTaskDay} setNewTaskDay={setNewTaskDay} taskSectionsForDay={taskSectionsForDay} setNewTaskSection={setNewTaskSection} setNewTaskCustomSection={setNewTaskCustomSection} starterPackId={starterPackId} setStarterPackId={setStarterPackId} trackerTasks={trackerTasks} setStarterPackMessage={setStarterPackMessage} addStarterPack={addStarterPack} starterPackMessage={starterPackMessage} importOpen={importOpen} setImportOpen={setImportOpen} newTaskSection={newTaskSection} importText={importText} setImportText={setImportText} importTasksFromText={importTasksFromText} importMessage={importMessage} newTaskNameInputRef={newTaskNameInputRef} newTaskName={newTaskName} setNewTaskName={setNewTaskName} taskMessage={taskMessage} setTaskMessage={setTaskMessage} naturalScheduleText={naturalScheduleText} setNaturalScheduleText={setNaturalScheduleText} naturalSchedulePreview={naturalSchedulePreview} setNaturalSchedulePreview={setNaturalSchedulePreview} applyNaturalSchedule={applyNaturalSchedule} newTaskSectionOptions={newTaskSectionOptions} newTaskCustomSection={newTaskCustomSection} taskAdvancedOpen={taskAdvancedOpen} setTaskAdvancedOpen={setTaskAdvancedOpen} newTaskWhy={newTaskWhy} setNewTaskWhy={setNewTaskWhy} newTaskSoftLabel={newTaskSoftLabel} setNewTaskSoftLabel={setNewTaskSoftLabel} newTaskTinyLabel={newTaskTinyLabel} setNewTaskTinyLabel={setNewTaskTinyLabel} newTaskEstimatedMinutes={newTaskEstimatedMinutes} setNewTaskEstimatedMinutes={setNewTaskEstimatedMinutes} newTaskEssentialOnLow={newTaskEssentialOnLow} setNewTaskEssentialOnLow={setNewTaskEssentialOnLow} newTaskKind={newTaskKind} setNewTaskKind={setNewTaskKind} newTaskScheduleType={newTaskScheduleType} setNewTaskScheduleType={setNewTaskScheduleType} newTaskScheduleDays={newTaskScheduleDays} setNewTaskScheduleDays={setNewTaskScheduleDays} newTaskReminderTime={newTaskReminderTime} setNewTaskReminderTime={setNewTaskReminderTime} newTaskStartDate={newTaskStartDate} setNewTaskStartDate={setNewTaskStartDate} newTaskEndDate={newTaskEndDate} setNewTaskEndDate={setNewTaskEndDate} newTaskOneTimeDate={newTaskOneTimeDate} setNewTaskOneTimeDate={setNewTaskOneTimeDate} selectedProgressDate={selectedProgressDate} addTrackerTask={addTrackerTask} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} isSupporterAccount={isSupporterAccount} FREE_TASK_LIMIT_PER_DAY={FREE_TASK_LIMIT_PER_DAY} taskSearchQuery={taskSearchQuery} setTaskSearchQuery={setTaskSearchQuery} isTaskPausedOnDate={isTaskPausedOnDate} period={period} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToSection={moveTaskToSection} startEditingTask={startEditingTask} resumeTrackerTask={resumeTrackerTask} pauseTrackerTask={pauseTrackerTask} archiveTrackerTask={archiveTrackerTask} setPendingTaskDelete={setPendingTaskDelete} showArchivedTasks={showArchivedTasks} setShowArchivedTasks={setShowArchivedTasks} restoreArchivedTask={restoreArchivedTask} quickAddTrackerTask={quickAddTrackerTask} quickAddMessage={quickAddMessage} />
 
         <ScheduleEditorPanel open={manageSchedule} onClose={() => setManageSchedule(false)} scheduleEditingDayId={scheduleEditingDayId} setScheduleEditDayId={setScheduleEditDayId} personalSchedules={personalSchedules} scheduleDraft={scheduleDraft} updateScheduleEntry={updateScheduleEntry} removeScheduleEntry={removeScheduleEntry} addScheduleEntry={addScheduleEntry} savePersonalSchedule={savePersonalSchedule} copyScheduleToAllDays={copyScheduleToAllDays} clearPersonalSchedule={clearPersonalSchedule} copyToDayIds={copyToDayIds} toggleCopyToDay={toggleCopyToDay} copyScheduleToSelectedDays={copyScheduleToSelectedDays} scheduleMessage={scheduleMessage} scheduleExceptionDraft={scheduleExceptionDraft} setScheduleExceptionDraft={setScheduleExceptionDraft} updateScheduleExceptionEntry={updateScheduleExceptionEntry} removeScheduleExceptionEntry={removeScheduleExceptionEntry} addScheduleExceptionEntry={addScheduleExceptionEntry} saveScheduleException={saveScheduleException} scheduleExceptionMessage={scheduleExceptionMessage} scheduleExceptions={scheduleExceptions} deleteScheduleException={deleteScheduleException} />
 
