@@ -52,6 +52,12 @@ jobs:
       - name: Build www/ and sync Android
         run: npm run android:sync
 
+      - name: Verify Android uses the exact shared build
+        run: |
+          node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('www/build-info.json','utf8'));if(x.gitSha!==process.env.GITHUB_SHA){console.error(x);process.exit(1)};console.log('Verified shared build',x.gitSha)"
+          test -f android/app/src/main/assets/public/build-info.json
+          node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('android/app/src/main/assets/public/build-info.json','utf8'));if(x.gitSha!==process.env.GITHUB_SHA){console.error(x);process.exit(1)};console.log('Verified Android packaged build',x.gitSha)"
+
       - name: Set automatic release version
         working-directory: android/app
         run: |
