@@ -69,13 +69,13 @@ function recordNextStepChoice(row, action, date) {
       meta: { ...(state.meta || {}), __background_engine: { ...engine, nextStepFeedback: feedback } }
     }));
     window.dispatchEvent(new CustomEvent("plushlife:habit-coach-updated"));
-  } catch (_error) {}
+  } catch (_error) { /* silent: localStorage quota or parse failure — next-step feedback is best-effort enrichment */ }
 }
 
 export function TodayPanel(props) {
   const [smartNextStepHidden, setSmartNextStepHidden] = React.useState(false);
   const [smartEaseHint, setSmartEaseHint] = React.useState(null);
-  const { unifiedToggle, lingerKeys } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
+  const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
   const recentlyCompletedKeys = Array.from(new Set([...(props.recentlyCompletedKeys || []), ...lingerKeys]));
   const smartNextStep = useSmartNextStep({
     rows: props.rows || [],
@@ -133,6 +133,10 @@ export function TodayPanel(props) {
 
   return (
     <React.Fragment>
+      {/* Screen reader live region for task completion announcements */}
+      <div aria-live="polite" aria-atomic="true" role="status" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap" }}>
+        {announcement}
+      </div>
       {/* Proactive care layer: shaped day plan / rest experience, a gentle
           7-day onboarding arc, and the evening "one good thing" — session-only
           companions that sit above the reference Home layout. */}

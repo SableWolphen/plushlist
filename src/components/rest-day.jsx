@@ -38,7 +38,7 @@ export function RestDayCard({ careDaysTotal, goToDashboard, period }) {
   }, [comfortTools.length, sleepTools.length, date]);
 
   const openCare = () => {
-    try { goToDashboard?.("care"); } catch (_error) {}
+    try { goToDashboard?.("care"); } catch (err) { console.warn("PlushLife: rest-day navigation to care failed", err); }
   };
 
   return (
@@ -56,6 +56,7 @@ export function RestDayCard({ careDaysTotal, goToDashboard, period }) {
                 key={tool.id || tool.name}
                 type="button"
                 onClick={openCare}
+                aria-label={`Open ${tool.name} — a few quiet minutes, no score`}
                 style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", minHeight: 48, padding: "9px 12px", borderRadius: 14, border: "1px solid #D9E8F5", background: "rgba(255,255,255,.85)", cursor: "pointer" }}
               >
                 <span aria-hidden="true" style={{ fontSize: 22 }}>{tool.icon || "💗"}</span>

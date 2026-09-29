@@ -15,12 +15,12 @@ const ShareWinModalLazy = React.lazy(() => import("./share-win-modal.jsx").then(
 
 function readGratitudeState() {
   try { return JSON.parse(window.localStorage.getItem(GRATITUDE_STORAGE_KEY) || "{}") || {}; }
-  catch (_error) { return {}; }
+  catch (_error) { /* silent: corrupt or missing localStorage entry — fall back to empty */ return {}; }
 }
 
 function writeGratitudeState(patch) {
   try { window.localStorage.setItem(GRATITUDE_STORAGE_KEY, JSON.stringify({ ...readGratitudeState(), ...patch })); }
-  catch (_error) {}
+  catch (_error) { /* silent: localStorage quota or access denied — gratitude still shown next session */ }
 }
 
 function localDateKey(date = new Date()) {
@@ -69,7 +69,7 @@ export function EveningGratitude() {
               <div style={{ marginTop: 3, fontSize: 14.5, fontWeight: 950, color: "#3E2458" }}>One good thing from today?</div>
               <p style={{ margin: "4px 0 0", fontSize: 12.5, lineHeight: 1.5, color: "#6B5A7D" }}>Tiny counts. Kept privately in your journal.</p>
             </div>
-            <button type="button" onClick={dismiss} aria-label="Dismiss for today" style={{ border: 0, background: "transparent", color: "#B79DC4", fontSize: 18, cursor: "pointer", padding: 4, lineHeight: 1 }}>×</button>
+            <button type="button" onClick={dismiss} aria-label="Dismiss evening check-in for today" style={{ border: 0, background: "transparent", color: "#B79DC4", fontSize: 18, cursor: "pointer", padding: 4, lineHeight: 1 }}>×</button>
           </div>
           <div style={{ display: "flex", gap: 7, marginTop: 10 }}>
             <input
@@ -81,13 +81,13 @@ export function EveningGratitude() {
               aria-label="One good thing from today"
               style={{ flex: 1, minWidth: 0, padding: "10px 12px", borderRadius: 12, border: "1px solid #E3C9EC", fontSize: 13.5 }}
             />
-            <button type="button" onClick={save} disabled={!text.trim()} style={{ padding: "0 16px", minHeight: 44, borderRadius: 12, border: 0, background: !text.trim() ? "#D9CBE2" : "linear-gradient(135deg,#B95DCA,#DB78BF)", color: "white", fontWeight: 900, fontSize: 13, cursor: !text.trim() ? "not-allowed" : "pointer", whiteSpace: "nowrap" }}>
+            <button type="button" onClick={save} disabled={!text.trim()} aria-label={text.trim() ? "Save your good thing" : "Type something first"} style={{ padding: "0 16px", minHeight: 44, borderRadius: 12, border: 0, background: !text.trim() ? "#D9CBE2" : "linear-gradient(135deg,#B95DCA,#DB78BF)", color: "white", fontWeight: 900, fontSize: 13, cursor: !text.trim() ? "not-allowed" : "pointer", whiteSpace: "nowrap" }}>
               Save ✨
             </button>
           </div>
         </>
       ) : (
-        <div>
+        <div role="status" aria-live="polite">
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span aria-hidden="true" style={{ fontSize: 26 }}>💜</span>
             <div style={{ fontSize: 13, lineHeight: 1.5, color: "#6B5A7D", flex: 1 }}>
