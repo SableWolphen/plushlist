@@ -82,7 +82,7 @@ function Hero({ period, goToDashboard, setSettingsOpen, reducedMotion, selectedO
 
       <div className="pl-home-brand">
         <div className="pl-home-logo">PlushLife <span>♥</span></div>
-        <div className="pl-home-tagline">Small steps. A softer you.</div>
+        <div className="pl-home-tagline">{babyMode ? "Baby Mode · extra gentle" : dinoTheme ? "Small steps · brighter days" : "Small steps · a softer you"}</div>
       </div>
 
       <div className="pl-home-actions">
@@ -292,6 +292,13 @@ export function TodayPanel({
     <>
       <style>{`
         .pl-home-shell{display:grid;gap:12px;max-width:760px;margin:0 auto;padding:0 0 92px;color:${C.body}}
+        .pl-home-date,.pl-home-timer{display:none!important}
+        .pl-home-actions{right:14px!important;top:14px!important}
+        .pl-home-settings{width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;border:1px solid rgba(230,214,236,.94)!important;background:rgba(255,255,255,.90)!important;box-shadow:0 6px 16px rgba(92,58,108,.10)!important}
+        .pl-home-brand{left:18px!important;top:16px!important;transform:none!important;text-align:left!important;max-width:68%!important}
+        .pl-home-logo{font-size:29px!important;line-height:1!important}
+        .pl-home-tagline{margin-top:5px!important;font-size:10.5px!important;line-height:1.2!important;font-weight:850!important}
+        .baby-mode .pl-home-tagline:after{content:none!important}
         .pl-home-hero{position:relative;min-height:276px;margin:-18px -14px 0;overflow:hidden;border-radius:0 0 28px 28px;background:linear-gradient(135deg,rgba(255,246,248,.92) 0%,rgba(248,236,248,.86) 54%,rgba(239,230,246,.84) 100%);box-shadow:inset 0 -10px 28px rgba(118,75,132,.04)}
         .pl-home-hero:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 15% 35%,rgba(255,244,221,.9),transparent 27%),radial-gradient(circle at 78% 20%,rgba(220,193,233,.42),transparent 33%),linear-gradient(90deg,rgba(255,255,255,.42),transparent 44%);pointer-events:none}
         .pl-home-window{position:absolute;left:10%;top:58px;width:39%;height:87px;border-radius:7px;background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,246,210,.78));box-shadow:inset 0 0 0 8px rgba(255,255,255,.22),0 10px 24px rgba(255,223,178,.17);opacity:.75}
