@@ -328,6 +328,19 @@ async function main() {
 
   const bundleStats = await compileAppSource();
 
+  // Stamp the generated artifact so every host / packaged app can be verified
+  // against the exact source commit that produced it.
+  const buildSha = String(process.env.GITHUB_SHA || process.env.PLUSHLIFE_GIT_SHA || "local").trim() || "local";
+  fs.writeFileSync(
+    path.join(WWW, "build-info.json"),
+    JSON.stringify({
+      app: "PlushLife",
+      gitSha: buildSha,
+      generatedAt: new Date().toISOString(),
+      webDir: "www"
+    }, null, 2) + "\n"
+  );
+
   let missingVendorFiles = false;
   for (const { src, dest } of VENDOR_FILES) {
     const from = path.join(ROOT, src);
@@ -359,7 +372,7 @@ async function main() {
     }
   }
 
-  console.log(`www/ synced (${copiedFiles} files, ${copiedDirectories} directories, ${VENDOR_FILES.length} vendored scripts, ${bundleStats.emittedFiles} app outputs, ${bundleStats.chunkCount} lazy chunks, ${bundleStats.prefetchCount} idle-prefetch chunks).`);
+  console.log(`www/ synced (${copiedFiles} files, ${copiedDirectories} directories, ${VENDOR_FILES.length} vendored scripts, ${bundleStats.emittedFiles} app outputs, ${bundleStats.chunkCount} lazy chunks, ${bundleStats.prefetchCount} idle-prefetch chunks). Build: ${buildSha.slice(0, 12)}.`);
   console.log(`Critical app entry: ${formatKb(bundleStats.entryBytes)}; largest lazy chunk: ${formatKb(bundleStats.largestChunkBytes)}.`);
 }
 
