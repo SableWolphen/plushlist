@@ -13,6 +13,17 @@ const DEFAULT_ACCESSORY_POSITION = { left: "50%", top: "1%", transform: "transla
 const SPARKLE_LEFT = [6, 88, 12, 82];
 const SPARKLE_TOP = [4, 8, 78, 74];
 
+// Extracted constant styles to avoid re-creating objects on every render.
+const SVG_STYLE = { width: "100%", height: "100%", display: "block" };
+const LOADING_SCREEN_STYLE = {
+  minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center",
+  justifyContent: "center", gap: 14, background: "#FFF8FC",
+  backgroundImage: "radial-gradient(circle at 6% 8%, #FCE1F3 0%, transparent 38%), radial-gradient(circle at 96% 4%, #D8F3EC 0%, transparent 38%)",
+  fontFamily: "'Nunito','Segoe UI',sans-serif",
+};
+const LOADING_MASCOT_STYLE = { animation: "appLoadingBob 1.6s ease-in-out infinite" };
+const LOADING_LABEL_STYLE = { fontSize: 13.5, fontWeight: 800, color: "#8574A0", letterSpacing: "0.02em", animation: "appLoadingFade 1.6s ease-in-out infinite" };
+
 export const PlushMascot = React.memo(function PlushMascot({ outfit = MASCOT_OUTFITS[0], size = 150, celebrating = false, mood = "neutral", activityDays = 0, theme = "soft", variant = "bear" }) {
   const accessorySize = Math.round(size * 0.23);
   const accessoryPos = ACCESSORY_POSITIONS[outfit.id] || DEFAULT_ACCESSORY_POSITION;
@@ -31,7 +42,7 @@ export const PlushMascot = React.memo(function PlushMascot({ outfit = MASCOT_OUT
       {growth.sparkles.map((sparkle, index) => (
         <span key={index} aria-hidden="true" style={{ position: "absolute", fontSize: Math.round(size * 0.16), left: `${SPARKLE_LEFT[index % 4]}%`, top: `${SPARKLE_TOP[index % 4]}%`, pointerEvents: "none" }}>{sparkle}</span>
       ))}
-      <svg viewBox="0 0 240 220" role="img" aria-label={`PlushLife mascot wearing ${outfit.name}, looking ${mood}`} style={{ width: "100%", height: "100%", display: "block" }}>
+      <svg viewBox="0 0 240 220" role="img" aria-label={`PlushLife mascot wearing ${outfit.name}, looking ${mood}`} style={SVG_STYLE}>
         {dino && <path d="M184 72 C222 43 233 63 222 91 C214 112 202 127 187 139" fill="none" stroke="#FFA510" strokeWidth="17" strokeLinecap="round" />}
         <circle cx="120" cy="117" r="80" fill={fur} stroke={outline} strokeWidth="7" />
         {bunny ? <>
@@ -108,7 +119,7 @@ export function NurseryNook({ outfit, mood, activityDays, onOpenCloset }) {
 
 export function AppLoadingScreen() {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, background: "#FFF8FC", backgroundImage: "radial-gradient(circle at 6% 8%, #FCE1F3 0%, transparent 38%), radial-gradient(circle at 96% 4%, #D8F3EC 0%, transparent 38%)", fontFamily: "'Nunito','Segoe UI',sans-serif" }}>
+    <div style={LOADING_SCREEN_STYLE} role="status" aria-label="Loading PlushLife">
       <style>{`
         @keyframes appLoadingBob { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-8px) } }
         @keyframes appLoadingFade { 0%,100% { opacity:0.55 } 50% { opacity:1 } }
@@ -116,10 +127,10 @@ export function AppLoadingScreen() {
           .app-loading-mascot, .app-loading-label { animation: none !important; }
         }
       `}</style>
-      <div className="app-loading-mascot" style={{ animation: "appLoadingBob 1.6s ease-in-out infinite" }}>
+      <div className="app-loading-mascot" style={LOADING_MASCOT_STYLE} aria-hidden="true">
         <PlushMascot size={84} />
       </div>
-      <div className="app-loading-label" style={{ fontSize: 13.5, fontWeight: 800, color: "#8574A0", letterSpacing: "0.02em", animation: "appLoadingFade 1.6s ease-in-out infinite" }}>Loading your PlushLife…</div>
+      <div className="app-loading-label" style={LOADING_LABEL_STYLE}>Loading your PlushLife…</div>
     </div>
   );
 }
