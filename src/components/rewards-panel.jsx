@@ -15,11 +15,10 @@ export function RewardsPanel({ open, onClose, inline = false, FeatureTip, select
   const { MASCOT_OUTFITS } = window.PlushLifeContent;
   return (
           <ToolPanel title="🧸 Plush & Keepsakes" displayTitle="Plush Corner" inline={inline} hideClose={inline} onClose={onClose}>
-          <CozyScene title="Your plush, growing with you." subtitle="Little wins help you grow together." />
+          <CozyScene title="Your plush, growing with you." subtitle="Little wins help you grow together." accessory={selectedOutfit.accessory} />
           <FeatureTip id="rewards_panel" text="Everything here is earned from all kinds of care, not just streaks — and once unlocked, nothing is ever taken away." />
           <div style={{ marginBottom: 18, padding: 17, borderRadius: 20, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 12px 30px rgba(100,62,118,.08), inset 0 1px 0 rgba(255,255,255,.9)" }}>
             <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
-              <PlushMascot outfit={selectedOutfit} theme={theme} size={132} mood={mascotMood} activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
               <div style={{ flex: "1 1 190px" }}>
                 <div style={{ fontSize: 10.5, fontWeight: 950, letterSpacing: ".15em", color: "var(--pl-theme-muted,#A957B7)" }}>YOUR PLUSH CORNER</div>
                 <div style={{ marginTop: 4, fontSize: 20, fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>{selectedOutfit.name}</div>

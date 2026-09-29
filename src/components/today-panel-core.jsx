@@ -1,4 +1,5 @@
-import { ThemeScene, DesignIcon } from "./theme-world.jsx";
+import { normalizeHomeLayout } from "../home-layout.js";
+import { ThemeScene, DesignIcon, useThemeCopy } from "./theme-world.jsx";
 import { HabitTypeIcon } from "./shared.jsx";
 import { CalmPanel } from "./info-panels.jsx";
 import { PlushMascot } from "./mascot.jsx";
@@ -59,6 +60,7 @@ function greeting() {
 }
 
 function Hero({ period, goToDashboard, setSettingsOpen, reducedMotion, selectedOutfit, activityDaysTotal, darkMode, appearanceTheme, dinoTheme, babyMode }) {
+  const copy = useThemeCopy();
   // The living mascot reacts to task completions: the completed-task flow
   // dispatches plushlife:task-completion-feedback on window, and the mascot
   // celebrates (happy face + bounce) for the same 2.2s as the gentle glow.
@@ -87,19 +89,20 @@ function Hero({ period, goToDashboard, setSettingsOpen, reducedMotion, selectedO
       </header>
       <section className={`pl-home-hero ${mascotCelebrating && !reducedMotion ? "mascot-celebrating" : ""}`} aria-label="PlushLife welcome">
         <ThemeScene decorative />
-        <h2>A little counts.</h2>
-        <p>Your plush is happy you're here.</p>
+        <h2>{copy["A little counts."] || "A little counts."}</h2>
+        <p>{copy["Your plush is happy you\'re here."] || "Your plush is happy you\'re here."}</p>
       </section>
     </>
   );
 }
 
 function OneTinyThing({ nextStepTask, nextStepReason, nextStepHint, toggle, pickEasierSuggestion, nextStepMoreOpen, setNextStepMoreOpen, setNextStepSkipped, setNextStepDismissedToday }) {
+  const copy = useThemeCopy();
   if (!nextStepTask) return null;
   return (
     <section data-plushlife-compact-card="next-step" id="plushlife-smart-next-step" style={{...card, padding: "15px 17px 16px"}} aria-label="Today's gentle pick">
       <div className="pl-section-topline">
-        <div className="pl-kicker">One tiny thing</div>
+        <div className="pl-kicker">{copy["One tiny thing"] || "One tiny thing"}</div>
         <div className="pl-muted-note">{nextStepReason || "Rebuilding gently · Good fit right now"}</div>
       </div>
       <div className="pl-primary-task">{nextStepTask.sourceTask && <HabitTypeIcon task={nextStepTask.sourceTask} />}{nextStepTask.label}</div>
@@ -120,6 +123,7 @@ function OneTinyThing({ nextStepTask, nextStepReason, nextStepHint, toggle, pick
 }
 
 function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = [], manageSchedule, setManageSchedule }) {
+  const copy = useThemeCopy();
   const { legacyScheduleToEntries, formatTime12 } = window.PlushLifeSchedule || {};
   const baseEntries = (selectedSchedule?.entries?.length
     ? selectedSchedule.entries
@@ -141,7 +145,7 @@ function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = []
   return (
     <section data-plushlife-home-schedule-preview="true" style={{...card, padding: "15px 17px 16px"}} aria-label="Today schedule">
       <div className="pl-section-topline">
-        <div className="pl-kicker">🗓️ &nbsp;Today&rsquo;s plan</div>
+        <div className="pl-kicker">{copy["Today\'s plan"] || "Today’s plan"}</div>
         <button type="button" className="pl-link-btn" onClick={() => setManageSchedule?.(!manageSchedule)}>Edit schedule →</button>
       </div>
       <div className="pl-list">
@@ -206,6 +210,7 @@ function isHabitRow(row) {
 }
 
 function TasksToday({ rows = [], viewDone = {}, toggle, openTaskManager, period }) {
+  const copy = useThemeCopy();
   const taskRows = rows.filter((row) => row && !row.isBonus && !isHabitRow(row));
   const completed = taskRows.filter((row) => !!viewDone[row.key]).length;
   const unfinished = taskRows.filter((row) => !viewDone[row.key]);
@@ -214,7 +219,7 @@ function TasksToday({ rows = [], viewDone = {}, toggle, openTaskManager, period 
   return (
     <section style={{...card, padding: "15px 17px 16px"}} aria-label="Tasks today">
       <div className="pl-section-topline">
-        <div className="pl-kicker">Today · {completed}/{taskRows.length}</div>
+        <div className="pl-kicker">{copy.Today || "Today"} · {completed}/{taskRows.length}</div>
         <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)}>View all →</button>
       </div>
       <div className="pl-list">
@@ -235,6 +240,7 @@ function TasksToday({ rows = [], viewDone = {}, toggle, openTaskManager, period 
 }
 
 function Habits({ rows = [], viewDone = {}, toggle, openTaskManager, period }) {
+  const copy = useThemeCopy();
   const habitRows = rows.filter(isHabitRow);
   const completed = habitRows.filter((r) => !!viewDone[r.key]).length;
   const visible = habitRows.filter((r) => !viewDone[r.key]).slice(0, 3);
@@ -242,8 +248,8 @@ function Habits({ rows = [], viewDone = {}, toggle, openTaskManager, period }) {
   return (
     <section style={{...card, padding: "15px 17px 16px"}} aria-label="Habits today">
       <div className="pl-section-topline">
-        <div className="pl-kicker">Habits · {completed}/{habitRows.length}</div>
-        <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)}>View all →</button>
+        <div className="pl-kicker">{copy.Habits || "Habits"} · {completed}/{habitRows.length}</div>
+        <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date, "habits")}>View all →</button>
       </div>
       <div className="pl-list">
         {visible.length ? visible.map((r) => (
@@ -276,6 +282,30 @@ export function TodayPanel({
   // plushlife:task-completion-feedback so the hero mascot celebrates.
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(toggle, viewDone, rows);
   if (!open) return null;
+  const homeLayout = normalizeHomeLayout(preferences?.home_layout);
+  const homeSections = {
+    tiny: (<OneTinyThing nextStepTask={nextStepTask} nextStepReason={nextStepReason} nextStepHint={nextStepHint} toggle={unifiedToggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} />),
+    tasks: (<TasksToday rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />),
+    habits: (<Habits rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />),
+    schedule: (<TodaySchedule selectedSchedule={selectedSchedule} selectedScheduleExceptionEntries={selectedScheduleExceptionEntries} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} />),
+    shortcuts: (<div className="pl-home-shortcuts">
+          <button type="button" className="pl-shortcut" onClick={() => openTaskManager?.(period?.date, "habits")}>
+            <span className="pl-shortcut-icon">🧸</span>
+            <span><div className="pl-shortcut-title">Little Jobs</div><div className="pl-shortcut-sub">Small tasks, big progress</div></span>
+            <span className="pl-shortcut-arrow">›</span>
+          </button>
+          <button type="button" className="pl-shortcut" onClick={() => setCalmQuickOpen?.(true)}>
+            <span className="pl-shortcut-icon">💗</span>
+            <span><div className="pl-shortcut-title">If I feel overwhelmed</div><div className="pl-shortcut-sub">You’re not alone</div></span>
+            <span className="pl-shortcut-arrow">›</span>
+          </button>
+        </div>),
+    noticed: (<button type="button" onClick={() => goToDashboard?.("progress")} data-plushlife-compact-card="plushweek" className="pl-noticed">
+          <span className="pl-noticed-icon">✨</span>
+          <span><div className="pl-noticed-title">PlushLife noticed:</div><div className="pl-noticed-copy">{nextStepReason || "Rebuilding gently · Good fit right now"}</div></span>
+          <span className="pl-noticed-arrow">›</span>
+        </button>),
+  };
 
   return (
     <>
@@ -353,31 +383,11 @@ export function TodayPanel({
 
       <div data-plushlife-home-stack className="pl-home-shell">
         <Hero period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} />
-        <OneTinyThing nextStepTask={nextStepTask} nextStepReason={nextStepReason} nextStepHint={nextStepHint} toggle={unifiedToggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} />
-        <TasksToday rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />
-        <Habits rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />
-        <TodaySchedule selectedSchedule={selectedSchedule} selectedScheduleExceptionEntries={selectedScheduleExceptionEntries} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} />
+        {homeLayout.order.filter(id => !homeLayout.hidden.includes(id)).map(id => <React.Fragment key={id}>{homeSections[id]}</React.Fragment>)}
         <TomorrowNote tomorrowTasksCount={tomorrowTasksCount} />
         <CompletedToday rows={rows} viewDone={viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} expanded={completedTodayExpanded} setExpanded={setCompletedTodayExpanded} />
 
-        <div className="pl-home-shortcuts">
-          <button type="button" className="pl-shortcut" onClick={() => setTodayCardIndex?.(1)}>
-            <span className="pl-shortcut-icon">🧸</span>
-            <span><div className="pl-shortcut-title">Little Jobs</div><div className="pl-shortcut-sub">Small tasks, big progress</div></span>
-            <span className="pl-shortcut-arrow">›</span>
-          </button>
-          <button type="button" className="pl-shortcut" onClick={() => setCalmQuickOpen?.(true)}>
-            <span className="pl-shortcut-icon">💗</span>
-            <span><div className="pl-shortcut-title">If I feel overwhelmed</div><div className="pl-shortcut-sub">You’re not alone</div></span>
-            <span className="pl-shortcut-arrow">›</span>
-          </button>
-        </div>
 
-        <div data-plushlife-compact-card="plushweek" className="pl-noticed">
-          <span className="pl-noticed-icon">✨</span>
-          <span><div className="pl-noticed-title">PlushLife noticed:</div><div className="pl-noticed-copy">{nextStepReason || "Rebuilding gently · Good fit right now"}</div></span>
-          <span className="pl-noticed-arrow">›</span>
-        </div>
       </div>
 
       {announcement && <div role="status" aria-live="polite" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }}>{announcement}</div>}
