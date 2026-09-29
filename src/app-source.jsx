@@ -5853,12 +5853,12 @@ function GlowUpTracker() {
     art: "dino",
   };
   const babyPalette = {
-    background: isNightHour ? "#25285E" : "#FFF5FA",
-    glowA: isNightHour ? "#4C4A9A70" : "#FFD4E770",
-    glowB: isNightHour ? "#6359B270" : "#E4D8FF70",
-    glowC: isNightHour ? "#FFD87850" : "#FFF0BC70",
-    glowD: isNightHour ? "#7359A650" : "#DFF3E670",
-    wash: isNightHour ? "#2B2D66C8" : "#FFF8FBDD",
+    background: "#FFF5FA",
+    glowA: "#FFD4E770",
+    glowB: "#E4D8FF70",
+    glowC: "#FFF0BC70",
+    glowD: "#DFF3E670",
+    wash: "#FFF8FBDD",
     accent: "#E66CB6",
     accent2: "#C978E4",
     surface: "#FFFDFE",
@@ -5867,7 +5867,7 @@ function GlowUpTracker() {
     muted: "#8C7096",
     line: "#EED6E9",
     nav: "#FFFDFEF5",
-    art: isNightHour ? "baby-night" : "baby",
+    art: "baby",
   };
   const activeThemePalette = babyMode ? babyPalette : dinoTheme ? dinoPalette : softLightPalette;
   /* Theme regression marker retained for validation: !["soft", "soft-light"].includes(appearanceTheme)
@@ -6060,16 +6060,10 @@ function GlowUpTracker() {
   })();
 
   return (
-    <div id="main-content" tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""}${babyMode && isNightHour ? " baby-night" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
+    <div id="main-content" tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
       background: activeThemePalette.background,
-      backgroundImage: babyMode && isNightHour ? `
-        linear-gradient(180deg, #F7F1FC 0%, #EFEBF9 55%, #E8E3F7 100%),
-        radial-gradient(circle at 85% 8%, #D9C9F2 0%, transparent 36%),
-        radial-gradient(circle at 12% 10%, #E5D4F5 0%, transparent 36%),
-        radial-gradient(circle at 90% 88%, #CFC2EC 0%, transparent 40%),
-        radial-gradient(circle at 8% 90%, #E0CDEE 0%, transparent 40%)
-      ` : preferences.simple_mode ? `
+      backgroundImage: preferences.simple_mode ? `
         linear-gradient(180deg, #FFFEFD 0%, #FBF9FC 100%),
         radial-gradient(circle at 50% 0%, #F3EAF6 0%, transparent 45%)
       ` : babyMode ? `
@@ -6343,10 +6337,7 @@ function GlowUpTracker() {
         .baby-mode .pl-unified-page-hero:after{content:"🧸✨";position:absolute;right:12px;top:8px;font-size:28px;opacity:.9;pointer-events:none;animation:pl-dino-bob 3.2s ease-in-out infinite}
         .baby-mode .pl-home-hero{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(255,240,250,.62))!important;border:2px solid #F7DFF0!important;border-radius:28px!important;box-shadow:0 14px 34px rgba(220,140,190,.16),inset 0 2px 0 rgba(255,255,255,.95)!important;overflow:hidden}
         .baby-mode .pl-home-hero:before{content:"🌷🌱";position:absolute;left:8px;bottom:6px;font-size:22px;opacity:.85;pointer-events:none}
-        .baby-mode .pl-home-hero:after{content:"🦕";position:absolute;right:10px;top:6px;font-size:34px;opacity:.9;pointer-events:none;animation:pl-dino-bob 3.2s ease-in-out infinite;filter:drop-shadow(0 6px 8px rgba(220,140,190,.25))}
-        .baby-mode.baby-night .pl-unified-page-hero:after{content:"🌙✨"}
-        .baby-mode.baby-night .pl-home-hero:after{content:"🦕💤"}
-        .baby-mode.baby-night .pl-unified-page-hero:before{content:"✨  🌟  ✨"}
+        .baby-mode .pl-home-hero:after{content:"☾";position:absolute;right:10px;top:6px;font-size:34px;opacity:.9;pointer-events:none;animation:pl-dino-bob 3.2s ease-in-out infinite;filter:drop-shadow(0 6px 8px rgba(220,140,190,.25))}
         /* ---- Illustrated storybook scenes (custom dino artwork) ---- */
         .dino-theme .pl-home-hero{background:url(assets/dino-garden.jpg) center 32%/cover no-repeat!important}
         .dino-theme .pl-home-hero:before,.dino-theme .pl-home-hero:after{display:none!important}
@@ -6355,19 +6346,27 @@ function GlowUpTracker() {
         .dino-theme .pl-home-copy h1{text-shadow:0 2px 12px rgba(255,255,255,.95)}
         .dino-theme .pl-home-copy p{text-shadow:0 1px 8px rgba(255,255,255,.95)}
         .dino-theme .pl-unified-page-hero{background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,247,253,.72)),url(assets/dino-garden.jpg) center 35%/cover no-repeat!important}
-        .baby-mode .pl-home-hero{background:url(assets/dino-clouds.jpg) center 32%/cover no-repeat!important}
-        .baby-mode .pl-home-hero:before,.baby-mode .pl-home-hero:after{display:none!important}
-        .baby-mode .pl-home-plush{display:none!important}
-        .baby-mode .pl-home-logo{text-shadow:0 2px 10px rgba(255,255,255,.92)}
-        .baby-mode .pl-home-copy h1{text-shadow:0 2px 12px rgba(255,255,255,.95)}
-        .baby-mode .pl-home-copy p{text-shadow:0 1px 8px rgba(255,255,255,.95)}
-        .baby-mode.baby-night .pl-home-hero{background:url(assets/dino-night.jpg) center 32%/cover no-repeat!important}
-        .baby-mode.baby-night .pl-home-logo{color:#FFF7EA;text-shadow:0 2px 12px rgba(35,28,75,.7)}
-        .baby-mode.baby-night .pl-home-tagline{color:#D9D0EA}
-        .baby-mode.baby-night .pl-home-copy h1{color:#FFF7EA;text-shadow:0 2px 12px rgba(35,28,75,.7)}
-        .baby-mode.baby-night .pl-home-copy p{color:#EDE6F8;text-shadow:0 1px 8px rgba(35,28,75,.7)}
-        .baby-mode .pl-unified-page-hero{background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,240,250,.72)),url(assets/dino-clouds.jpg) center 35%/cover no-repeat!important}
-        .baby-mode.baby-night .pl-unified-page-hero{background:linear-gradient(180deg,rgba(255,255,255,.80),rgba(240,235,250,.66)),url(assets/dino-night.jpg) center 35%/cover no-repeat!important}
+        .baby-mode .pl-home-hero{
+          background:
+            radial-gradient(circle at 82% 18%,rgba(255,239,177,.95) 0 7%,transparent 16%),
+            radial-gradient(circle at 72% 72%,rgba(255,214,232,.85) 0 15%,transparent 34%),
+            radial-gradient(circle at 18% 18%,rgba(255,255,255,.94) 0 16%,transparent 34%),
+            linear-gradient(145deg,#FFF1F8 0%,#F5ECFF 52%,#FFF1E8 100%)!important;
+          border:2px solid #F4DDEC!important;
+        }
+        .baby-mode .pl-home-hero:before{display:block!important;content:"☁️   ✦   ♡"!important;position:absolute!important;left:18px!important;bottom:14px!important;font-size:20px!important;opacity:.42!important;pointer-events:none!important}
+        .baby-mode .pl-home-hero:after{display:block!important;content:"☾  ★"!important;position:absolute!important;right:18px!important;top:72px!important;font-size:21px!important;opacity:.55!important;color:#E59ACA!important;pointer-events:none!important}
+        .baby-mode .pl-home-plush{display:flex!important}
+        .baby-mode .pl-home-logo{color:#6A3382!important;text-shadow:0 2px 10px rgba(255,255,255,.92)}
+        .baby-mode .pl-home-tagline{color:#A05A91!important}
+        .baby-mode .pl-home-copy h1{color:#6A3382!important;text-shadow:none!important}
+        .baby-mode .pl-home-copy p{color:#815F88!important;text-shadow:none!important}
+        .baby-mode .pl-unified-page-hero{
+          background:
+            radial-gradient(circle at 82% 18%,#FFF0BD 0 7%,transparent 16%),
+            radial-gradient(circle at 76% 72%,#FFDCEB 0 15%,transparent 34%),
+            linear-gradient(145deg,#FFF5FA,#F6EEFF 58%,#FFF1E8)!important;
+        }
         .dino-theme .pl-app-bottom-nav,.baby-mode .pl-app-bottom-nav{left:12px!important;right:12px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;border-radius:28px!important;border:2px solid #F3DDF2!important;box-shadow:0 12px 30px rgba(190,120,200,.20)!important}
         .simple-mode .pl-home-hero{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(250,246,252,.9))!important}
         .simple-mode .pl-home-plush{display:block!important}
