@@ -64,6 +64,7 @@
     { id: "twilight", label: "Night", icon: "🌙", background: "#171B4C", glowA: "#483D9E", glowB: "#5D65C7", glowC: "#E2A8E7", glowD: "#314D87", wash: "#24285ABF", accent: "#A787FF", accent2: "#F083CE", surface: "#F9F7FF", surface2: "#EEE9FF", ink: "#392A69", muted: "#756A9E", line: "#D8D0F3", nav: "#FCFAFFF2", art: "night" },
     { id: "strawberry", label: "Strawberry", icon: "🍓", background: "#FFF0F4", glowA: "#FFBDD1", glowB: "#FFDCE8", glowC: "#FFF0BD", glowD: "#DDF2DC", wash: "#FFF7F9DD", accent: "#E44E86", accent2: "#F58AA9", surface: "#FFFDFE", surface2: "#FFF1F5", ink: "#74264B", muted: "#986D81", line: "#F1D2DF", nav: "#FFFDFEF2", art: "strawberry" },
     { id: "soft-light", label: "Cloud / Blue", icon: "☁️", background: "#FFF8FB", glowA: "#D9E9FF70", glowB: "#E8DBFF70", glowC: "#FFF0BD70", glowD: "#E2F5F070", wash: "#F8FBFFDE", accent: "#6E8FE8", accent2: "#C078DD", surface: "#FEFFFF", surface2: "#F1F6FF", ink: "#3C487B", muted: "#7180A0", line: "#D8E3F4", nav: "#FEFFFFF2", art: "cloud" },
+    { id: "garden", label: "Garden", icon: "🌿", background: "#FCFAF6", glowA: "#D5ECE1", glowB: "#E8DFF5", glowC: "#FFE5D9", glowD: "#FFF0C9", wash: "#FDFBF8DD", accent: "#5E8E7A", accent2: "#8ECB8E", surface: "#FFFFFF", surface2: "#F5F1EC", ink: "#4E3E3C", muted: "#8A7977", line: "#E4DDD6", nav: "#FDFBF8F2", art: "garden" },
   ];
 
   const MASCOT_GROWTH_STAGES = [

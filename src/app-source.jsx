@@ -1,4 +1,4 @@
-// Native bridge (Capacitor back-button, splash, push channels, notification
+[Resource from GitHub__3f6f5673 at repo://SableWolphen/plushlist/sha/9fa6aa4cfc44d4474bcb12858a93a0c6edc48df7/contents/src/app-source.jsx] // Native bridge (Capacitor back-button, splash, push channels, notification
 // scheduler) must execute before the app bundle so its handlers and
 // window.PlushLifeNativeNotifications exist before the UI mounts.
 import "./native-bridge.js";
@@ -7341,9 +7341,9 @@ function GlowUpTracker() {
               </div>
             </div>
             <div className="pl-unified-page-title">
-              <div className="pl-unified-kicker">{dashboard === "progress" ? "✨ LITTLE WINS" : dashboard === "care" ? "💗 COZY CARE" : dashboard === "week" ? "🌷 YOUR DAYS" : "💜 PLUSHLIFE"}</div>
-              <h2>{dashboard === "progress" ? "Your little wins" : dashboard === "care" ? "A little care" : dashboard === "week" ? "Your calendar" : "PlushLife"}</h2>
-              <p>{dashboard === "progress" ? "Notice what is growing without turning it into a grade." : dashboard === "care" ? "Pick one soft thing that might feel nice right now." : dashboard === "week" ? "Your days, plans, and gentle reminders in one cozy place." : "Everything you need, in one soft place."}</p>
+              <div className="pl-unified-kicker">{dashboard === "progress" ? "✨ YOUR SOFT JOURNEY" : dashboard === "care" ? "💗 MOOD CHECK-IN" : dashboard === "week" ? "📅 TODAY'S FLOW" : "💜 PLUSHLIFE"}</div>
+              <h2>{dashboard === "progress" ? "Your Soft Journey" : dashboard === "care" ? "Mood Check-in" : dashboard === "week" ? "Today's Flow" : "PlushLife"}</h2>
+              <p>{dashboard === "progress" ? "Progress isn't a straight line, and that's beautiful." : dashboard === "care" ? "How is your heart feeling? There are no wrong answers here." : dashboard === "week" ? "Your energy-adaptive schedule for today." : "Everything you need, in one soft place."}</p>
             </div>
           </section>
         )}
@@ -7384,10 +7384,10 @@ function GlowUpTracker() {
         {dashboard === "progress" && <div className="pl-unified-page-content"><ProgressPanel open={dashboard === "progress"} user={user} progressView={progressView} setProgressView={setProgressView} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} hasWeeklyActivity={hasWeeklyActivity} goToDashboard={goToDashboard} weeklyOverallPct={weeklyOverallPct} weekOverWeekDelta={weekOverWeekDelta} preferences={preferences} weeklyEssentialPct={weeklyEssentialPct} weeklyOverallDone={weeklyOverallDone} weeklyOverallPossible={weeklyOverallPossible} weeklyBonusDone={weeklyBonusDone} caringDays={caringDays} weeklyEssentialDone={weeklyEssentialDone} careStory={careStory} careAreas={careAreas} openTaskManager={openTaskManager} patternInsightCards={patternInsightCards} insightCardIndex={insightCardIndex} setInsightCardIndex={setInsightCardIndex} weeklyHighlights={weeklyHighlights} period={period} goWriteWeeklyIntention={goWriteWeeklyIntention} setShareCardOpen={setShareCardOpen} progressDetailsOpen={progressDetailsOpen} setProgressDetailsOpen={setProgressDetailsOpen} TREND_WEEKS={TREND_WEEKS} TREND_MONTHS={TREND_MONTHS} currentMonthKey={currentMonthKey} monthlyOverallPct={monthlyOverallPct} monthOverMonthDelta={monthOverMonthDelta} monthlyTrendPoints={monthlyTrendPoints} tappedTrendMonth={tappedTrendMonth} setTappedTrendMonth={setTappedTrendMonth} monthlyMostConsistent={monthlyMostConsistent} currentMonthDates={currentMonthDates} weeklyTrendPoints={weeklyTrendPoints} tappedTrendWeek={tappedTrendWeek} setTappedTrendWeek={setTappedTrendWeek} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} /></div>}
         <nav className="pl-app-bottom-nav" aria-label="Main navigation">
           <button type="button" aria-current={dashboard === "today" ? "page" : undefined} className={`pl-app-nav-btn ${dashboard === "today" ? "active" : ""}`} onClick={() => goToDashboard("today")}><span className="ico">🏠</span><span>Home</span></button>
-          <button type="button" aria-current={dashboard === "progress" ? "page" : undefined} className={`pl-app-nav-btn ${dashboard === "progress" ? "active" : ""}`} onClick={() => goToDashboard("progress")}><span className="ico">🌷</span><span>Progress</span></button>
-          <button type="button" className="pl-app-nav-btn" aria-label="Add" onClick={() => openTaskManager(period.date)}><span className="pl-app-nav-add">＋</span><span>Add</span></button>
-          <button type="button" aria-current={dashboard === "care" ? "page" : undefined} className={`pl-app-nav-btn ${dashboard === "care" ? "active" : ""}`} onClick={() => goToDashboard("care")}><span className="ico">💗</span><span>Care</span></button>
+          <button type="button" aria-current={dashboard === "week" ? "page" : undefined} className={`pl-app-nav-btn ${dashboard === "week" ? "active" : ""}`} onClick={() => goToDashboard("week")}><span className="ico">📅</span><span>Schedule</span></button>
+          <button type="button" aria-current={dashboard === "care" ? "page" : undefined} className={`pl-app-nav-btn ${dashboard === "care" ? "active" : ""}`} onClick={() => goToDashboard("care")}><span className="ico">😊</span><span>Mood</span></button>
           <button type="button" className="pl-app-nav-btn" onClick={() => setCollectionOpen(true)} aria-label="Open rewards"><span className="ico">🧸</span><span>Plush</span></button>
+          <button type="button" aria-current={dashboard === "progress" ? "page" : undefined} className={`pl-app-nav-btn ${dashboard === "progress" ? "active" : ""}`} onClick={() => goToDashboard("progress")}><span className="ico">📊</span><span>Progress</span></button>
         </nav>
 
         </>

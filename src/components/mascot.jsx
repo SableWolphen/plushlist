@@ -35,6 +35,7 @@ export const PlushMascot = React.memo(function PlushMascot({ outfit = MASCOT_OUT
     peach: ["#FFF3E9", "#E57D72", "#FFD3B8"], twilight: ["#EDE9FF", "#7867CF", "#C5B8F5"],
     strawberry: ["#FFF0F4", "#E44E86", "#FFBDD1"], "soft-light": ["#F4F9FF", "#7999C9", "#D3E5FA"],
     baby: ["#FFF0FA", "#E66CB6", "#F8C9E4"], dino: ["#FFEAF7", "#B64CCB", "#F5A8DC"],
+    garden: ["#FFF0E5", "#5E8E7A", "#FFD2D2"],
   }[theme] || ["#F7EDFF", "#A85BC5", "#E4BBED"];
   const [fur, outline, blush] = palette;
   return (
