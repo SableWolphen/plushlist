@@ -251,6 +251,7 @@ export function CarePanel(props) {
           </div>
         )}
 
+        <button type="button" className="pl-care-soft-btn" onClick={props.onOpenSupport}>My support circle →</button>
         <div className="plushcare-library pl-care-tabs">
           <ExistingCarePanel {...props} open={true} isMamaCornerProfile={false} openCareSession={startCare} setSleepToolOpen={startSleep} />
         </div>

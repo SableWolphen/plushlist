@@ -126,3 +126,5 @@ body:has(.auth-card) :is(.comfort-note,.legal,.mobile-mini-note){font-size:12px!
 #main-content#main-content[data-pl-world] :is(#plushlife-tomorrow-note,[aria-label="Completed today"]){color:var(--pl-theme-muted)!important}
 #main-content#main-content[data-pl-world] :is(#plushlife-tomorrow-note,[aria-label="Completed today"]) :is(div,span,strong){color:inherit!important}
 @media(min-width:1100px){#main-content#main-content[data-pl-world] .baby-shell{max-width:1000px!important}#main-content#main-content[data-pl-world] .pl-home-shell .pl-muted-note{display:none!important}}
+
+#main-content#main-content[data-pl-world].dashboard-guardian .pl-inline-tool .pl-tool-header{display:none!important}
