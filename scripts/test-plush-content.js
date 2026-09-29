@@ -46,7 +46,7 @@ for (const requiredId of ["today", "week", "care", "progress"]) {
 
 const softLight = content.APPEARANCE_THEMES.find((theme) => theme.id === "soft-light");
 assert.ok(softLight, "Soft Light should be available as an appearance theme");
-assert.equal(softLight.background, "#FFF8FB", "Soft Light should use the warm cream-pink base");
+assert.equal(softLight.background, "#EFF6FC", "Cloud / Soft Light should use its Figma sky-blue base");
 assert.match(softLight.glowA, /[0-9A-F]{8}$/i, "Soft Light decorative washes should remain translucent");
 
 console.log("plush-content tests passed");

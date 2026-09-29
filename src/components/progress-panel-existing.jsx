@@ -1,3 +1,4 @@
+import { CozyScene } from "./theme-world.jsx";
 /*
  * Progress regression markers retained while the visible copy stays friendlier:
  * ✨ What PlushLife noticed
@@ -14,12 +15,12 @@ const LazyWhatWorksForMe = React.lazy(() => import("./habit-retention.jsx").then
 const LazyResilienceProgress = React.lazy(() => import("./habit-resilience.jsx").then((module) => ({ default: module.ResilienceProgress })));
 
 function InsightToolsFallback() {
-  return <div role="status" style={{ padding: 10, color: "#8B7394", fontSize: 11 }}>✨ Getting your little wins ready…</div>;
+  return <div role="status" style={{ padding: 10, color: "var(--pl-theme-muted,#8B7394)", fontSize: 11 }}>✨ Getting your little wins ready…</div>;
 }
 
 const card = {
   borderRadius: 24,
-  border: "1px solid #EBD9F0",
+  border: "1px solid var(--pl-theme-line,#E9DDF6)",
   background: "linear-gradient(145deg,rgba(255,255,255,.96),rgba(255,248,252,.93))",
   boxShadow: "0 10px 28px rgba(101,63,115,.055)",
 };
@@ -132,6 +133,7 @@ function CompactGrowthOverview(props) {
 
       <ProgressTabs progressView={props.progressView} setProgressView={props.setProgressView} />
 
+      <CozyScene title="Every return counts." subtitle="Your story is bigger than a streak." />
       <section className="pl-growth-weekbar" aria-label="Weekly progress">
         <div className="pl-growth-weekbar-head">
           <span>🌷 This week</span>
@@ -163,10 +165,10 @@ function CompactGrowthOverview(props) {
             <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
               <div style={{ fontSize: 25 }}>{detail.icon}</div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 950, color: "#5C4067" }}>{detail.title} · {detail.value}</div>
+                <div style={{ fontWeight: 950, color: "var(--pl-theme-ink,#5C4067)" }}>{detail.title} · {detail.value}</div>
                 <div className="pl-growth-copy">{detail.text}</div>
               </div>
-              <button type="button" aria-label="Close" onClick={() => setSelectedMetric(null)} style={{ border: 0, background: "transparent", color: "#A768B5", fontSize: 20, cursor: "pointer" }}>×</button>
+              <button type="button" aria-label="Close" onClick={() => setSelectedMetric(null)} style={{ border: 0, background: "transparent", color: "var(--pl-theme-muted,#A768B5)", fontSize: 20, cursor: "pointer" }}>×</button>
             </div>
           </section>
         );
@@ -189,14 +191,14 @@ function CompactGrowthOverview(props) {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ fontSize: 26 }}>📝</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 11, fontWeight: 950, color: "#744A80" }}>A gentle direction for the week</div>
+            <div style={{ fontSize: 11, fontWeight: 950, color: "var(--pl-theme-ink,#744A80)" }}>A gentle direction for the week</div>
             <div className="pl-growth-copy" style={{ marginTop: 2 }}>{props.weeklyIntentionText || "Choose one tiny thing you want this week to feel like."}</div>
           </div>
           <button type="button" className="pl-growth-soft-btn" onClick={() => { props.setWeeklyIntentionDraft(props.weeklyIntentionText || ""); props.setWeeklyIntentionEditing(true); }}>{props.weeklyIntentionText ? "Edit" : "Add"}</button>
         </div>
         {props.weeklyIntentionEditing && (
           <div style={{ marginTop: 9 }}>
-            <textarea value={props.weeklyIntentionDraft} onChange={(event) => props.setWeeklyIntentionDraft(event.target.value)} maxLength={2000} style={{ width: "100%", boxSizing: "border-box", minHeight: 68, padding: 10, borderRadius: 14, border: "1px solid #E1CBE7", background: "#FFFDFE", color: "#5F4868", resize: "vertical" }} />
+            <textarea value={props.weeklyIntentionDraft} onChange={(event) => props.setWeeklyIntentionDraft(event.target.value)} maxLength={2000} style={{ width: "100%", boxSizing: "border-box", minHeight: 68, padding: 10, borderRadius: 14, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface,#FFFDFE)", color: "var(--pl-theme-ink,#5F4868)", resize: "vertical" }} />
             <div style={{ display: "flex", gap: 7, marginTop: 7 }}>
               <button type="button" className="pl-growth-primary" onClick={props.saveWeeklyIntentionEdit}>Save</button>
               <button type="button" className="pl-growth-soft-btn" onClick={() => props.setWeeklyIntentionEditing(false)}>Not now</button>
@@ -206,7 +208,7 @@ function CompactGrowthOverview(props) {
       </section>
 
       <details onToggle={(event) => setMonthlyOpen(event.currentTarget.open)} className="pl-growth-card" style={{ padding: 0, overflow: "hidden" }}>
-        <summary style={{ minHeight: 48, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", listStyle: "none", color: "#7E568A", fontSize: 11.2, fontWeight: 900 }}>
+        <summary style={{ minHeight: 48, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", listStyle: "none", color: "var(--pl-theme-ink,#7E568A)", fontSize: 11.2, fontWeight: 900 }}>
           <span>🗓️ A peek at this month</span>
           <span>{monthlyOpen ? "Hide" : "Open"} ▾</span>
         </summary>
@@ -223,8 +225,8 @@ function CompactGrowthOverview(props) {
           {goldInsights && (
             <div style={{ marginTop: 10 }}>
               <React.Suspense fallback={<InsightToolsFallback />}><GrowthNextMove /></React.Suspense>
-              <details onToggle={(event) => setInsightsOpen(event.currentTarget.open)} style={{ marginTop: 8, borderRadius: 16, border: "1px solid #E8D8EC", background: "#FFF9FD", overflow: "hidden" }}>
-                <summary style={{ minHeight: 44, padding: "10px 12px", cursor: "pointer", color: "#7B5684", fontWeight: 900, listStyle: "none", fontSize: 10.7 }}>✨ More things PlushLife noticed</summary>
+              <details onToggle={(event) => setInsightsOpen(event.currentTarget.open)} style={{ marginTop: 8, borderRadius: 16, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface,#FFF9FD)", overflow: "hidden" }}>
+                <summary style={{ minHeight: 44, padding: "10px 12px", cursor: "pointer", color: "var(--pl-theme-ink,#7B5684)", fontWeight: 900, listStyle: "none", fontSize: 10.7 }}>✨ More things PlushLife noticed</summary>
                 <div style={{ padding: "0 10px 10px" }}>
                   <React.Suspense fallback={<InsightToolsFallback />}><HabitHealth weeklyOverallPct={props.weeklyOverallPct} weeklyEssentialPct={props.weeklyEssentialPct} caringDays={props.caringDays} weekOverWeekDelta={props.weekOverWeekDelta} preferences={props.preferences} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} /></React.Suspense>
                   {insightsOpen && <React.Suspense fallback={<InsightToolsFallback />}><LazyWeeklyHabitReview open={props.open} openTaskManager={props.openTaskManager} goToDashboard={props.goToDashboard} /><LazyWhatWorksForMe open={props.open} openTaskManager={props.openTaskManager} /><LazyResilienceProgress open={props.open} /></React.Suspense>}

@@ -1,4 +1,5 @@
-[Resource from GitHub__3f6f5673 at repo://SableWolphen/plushlist/sha/9fa6aa4cfc44d4474bcb12858a93a0c6edc48df7/contents/src/app-source.jsx] // Native bridge (Capacitor back-button, splash, push channels, notification
+import { FIGMA_WORLDS, ThemeWorldContext, CozyScene, DesignIcon } from "./components/theme-world.jsx";
+// Native bridge (Capacitor back-button, splash, push channels, notification
 // scheduler) must execute before the app bundle so its handlers and
 // window.PlushLifeNativeNotifications exist before the UI mounts.
 import "./native-bridge.js";
@@ -2618,12 +2619,14 @@ function GlowUpTracker() {
   const editTaskSectionOptions = editTaskDraft ? taskSectionsForDay(editTaskDraft.day_id) : [];
 
   const openTaskManager = (dayId = dayIdForDate(period.date)) => {
-    const nextSections = taskSectionsForDay(dayId);
-    setNewTaskDay(dayId);
+    const selectedDay = /^\d{4}-\d{2}-\d{2}$/.test(dayId) ? dayIdForDate(dayId) : dayId;
+    const nextSections = taskSectionsForDay(selectedDay);
+    setNewTaskDay(selectedDay);
     setNewTaskSection(nextSections[0] || "My tasks");
     setNewTaskCustomSection("");
     setTaskAdvancedOpen(false);
-    setManageTasks(true);
+    setManageTasks(false);
+    setDashboard("tasks");
   };
 
   useEffect(() => {
@@ -5869,7 +5872,9 @@ function GlowUpTracker() {
     nav: "#FFFDFEF5",
     art: "baby",
   };
-  const activeThemePalette = babyMode ? babyPalette : dinoTheme ? dinoPalette : softLightPalette;
+  const activeWorld = babyMode ? ((isNightHour || preferences.dark_mode) ? "baby-night" : "baby") : dinoTheme ? "dino" : preferences.dark_mode ? "twilight" : appearanceTheme;
+  const designPalette = FIGMA_WORLDS[activeWorld];
+  const activeThemePalette = designPalette ? { ...selectedAppearanceTheme, ...designPalette, accent2: designPalette.accent, line: designPalette.surface2, nav: designPalette.surface, art: activeWorld, wash: designPalette.background } : selectedAppearanceTheme;
   /* Theme regression marker retained for validation: !["soft", "soft-light"].includes(appearanceTheme)
  * Ambient themes remain visible through the dedicated theme layer; the old heavy frame stays removed.
  */
@@ -6060,7 +6065,7 @@ function GlowUpTracker() {
   })();
 
   return (
-    <div id="main-content" tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
+    <ThemeWorldContext.Provider value={activeWorld}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
       background: activeThemePalette.background,
       backgroundImage: preferences.simple_mode ? `
@@ -6092,6 +6097,7 @@ function GlowUpTracker() {
       padding: "max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))",
       position: "relative",
       isolation: "isolate",
+      "--pl-theme-on-accent": ["twilight", "baby-night"].includes(activeWorld) ? "#29223E" : "#FFFFFF",
       "--pl-theme-bg": activeThemePalette.background,
       "--pl-theme-accent": activeThemePalette.accent,
       "--pl-theme-accent-2": activeThemePalette.accent2 || activeThemePalette.accent,
@@ -6110,6 +6116,10 @@ function GlowUpTracker() {
       boxShadow: "none",
     }}>
       <div className="pl-ambient-theme-layer" aria-hidden="true" />
+      <aside className="pl-desktop-navigation" aria-label="Desktop navigation">
+        <h2>PlushLife</h2>
+        {[["today", "Today"], ["tasks", "Tasks"], ["week", "Calendar"], ["care", "Care"], ["progress", "Progress"], ["plush", "Plush Corner"], ["guardian", "Support"], ["settings", "Settings"]].map(([id, label]) => <button type="button" key={id} aria-current={dashboard === id && !collectionOpen ? "page" : undefined} onClick={() => { if (id === "plush") setCollectionOpen(true); else if (id === "settings") setSettingsOpen(true); else { setCollectionOpen(false); if (id === "tasks") openTaskManager(); else goToDashboard(id); } }}>{label}</button>)}
+      </aside>
 
       <style>{`
         #main-content > :not(.pl-ambient-theme-layer):not(style) { position: relative; z-index: 1; }
@@ -6644,7 +6654,7 @@ function GlowUpTracker() {
           <div onClick={(event) => event.stopPropagation()} style={{ width: "min(100%, 380px)" }}>
             <div style={{ padding: "26px 22px", borderRadius: 28, textAlign: "center", background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 55%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
               <div style={{ fontSize: 11, letterSpacing: "0.18em", fontWeight: 900, color: "#A65DC1" }}>PLUSHLIFE · MY WEEK</div>
-              <PlushMascot theme={dinoTheme ? "dino" : babyMode ? "baby" : appearanceTheme} outfit={selectedOutfit} size={110} mood={mascotMood} activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
+              <PlushMascot theme={activeWorld} outfit={selectedOutfit} size={110} mood={mascotMood} activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
               <div id="share-card-title" style={{ marginTop: 4, fontSize: 34, fontWeight: 900, color: "#75428C" }}>{weeklyOverallPct}%</div>
               <div style={{ fontSize: 12.5, color: "#8C6B9E", fontWeight: 700 }}>whole-week progress</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginTop: 18 }}>
@@ -6893,7 +6903,7 @@ function GlowUpTracker() {
             <span key={index} className="celebration-confetti" style={{ left: `${5 + index * 8}%`, animationDelay: `${(index % 5) * 0.12}s`, fontSize: `${18 + index % 3 * 6}px` }}>{piece}</span>
           ))}
           <div onClick={(event) => event.stopPropagation()} style={{ position: "relative", zIndex: 62, width: "min(100%, 390px)", padding: "22px 20px", borderRadius: 26, textAlign: "center", background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
-            <PlushMascot theme={dinoTheme ? "dino" : babyMode ? "baby" : appearanceTheme} outfit={selectedOutfit} size={170} celebrating={!preferences.reduced_motion} mood="excited" activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
+            <PlushMascot theme={activeWorld} outfit={selectedOutfit} size={170} celebrating={!preferences.reduced_motion} mood="excited" activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
             <div id="day-complete-title" style={{ marginTop: -5, fontSize: 24, fontWeight: 900, color: "#75428C" }}>{celebrationTitleText || voice.celebrationTitles[0]}</div>
             <div style={{ marginTop: 7, fontSize: 13.5, lineHeight: 1.55, color: "#6B5A7D" }}>
               You cared for every required task today. Bonus items are still optional—this day already counts.
@@ -7238,7 +7248,7 @@ function GlowUpTracker() {
           </div>
           {user && <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
             <button type="button" onClick={() => setCollectionOpen(true)} aria-label={`Open rewards, ${unlockedOutfits.length} outfits and ${earnedBadgeIdSet.size} badges unlocked`} style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 46, height: 46, padding: 0, borderRadius: "50%", border: "1px solid #E9C96E", background: "#FFFDF4", cursor: "pointer", overflow: "hidden" }}>
-              <PlushMascot theme={dinoTheme ? "dino" : babyMode ? "baby" : appearanceTheme} outfit={selectedOutfit} size={46} mood="happy" activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
+              <PlushMascot theme={activeWorld} outfit={selectedOutfit} size={46} mood="happy" activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
             </button>
             <button type="button" onClick={() => setProfileOpen(true)} aria-label={unreadNoteCount > 0 ? `Open profile, ${unreadNoteCount} unread notes` : "Open profile"} style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 46, height: 46, padding: 0, borderRadius: "50%", border: "1px solid #E6D4F2", background: "#FFFFFFCC", color: "#8D5CA5", fontSize: 19, cursor: "pointer" }}>
               👤
@@ -7331,24 +7341,13 @@ function GlowUpTracker() {
           @media(max-width:520px){.pl-unified-page-shell{padding-bottom:calc(82px + env(safe-area-inset-bottom));gap:5px}.pl-app-bottom-nav{min-height:48px;padding-top:2px}.pl-app-nav-btn{min-height:44px;font-size:9px}.pl-app-nav-btn .ico{font-size:16px}.pl-app-nav-add{width:36px;height:36px;min-height:36px;font-size:19px;margin-top:-9px}.pl-unified-page-hero{min-height:0;padding:4px 2px 5px;border-radius:0}.pl-unified-wordmark{font-size:20px;letter-spacing:-.7px}.pl-unified-date{font-size:9px;padding:5px 7px}.pl-unified-gear{width:44px;height:44px;font-size:16px}.pl-unified-page-title{margin-top:4px;max-width:100%}.pl-unified-kicker{font-size:7.8px}.pl-unified-page-title h2{font-size:15px}.pl-unified-page-title p{display:none}.pl-unified-page-hero:after,.pl-unified-page-hero:before{display:none}}
         `}</style>
 
-        {dashboard !== "today" && (
-          <section className="pl-unified-page-hero" aria-label="PlushLife section">
-            <div className="pl-unified-topline">
-              <div className="pl-unified-wordmark">PlushLife <span>♥</span></div>
-              <div className="pl-unified-actions">
-                <button type="button" className="pl-unified-date" onClick={() => goToDashboard("week")} aria-label="Open calendar">🗓️&nbsp;{new Date(`${period.date}T12:00:00`).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}</button>
-                <button type="button" className="pl-unified-gear" onClick={() => setSettingsOpen(true)} aria-label="Settings">⚙</button>
-              </div>
-            </div>
-            <div className="pl-unified-page-title">
-              <div className="pl-unified-kicker">{dashboard === "progress" ? "✨ YOUR SOFT JOURNEY" : dashboard === "care" ? "💗 MOOD CHECK-IN" : dashboard === "week" ? "📅 TODAY'S FLOW" : "💜 PLUSHLIFE"}</div>
-              <h2>{dashboard === "progress" ? "Your Soft Journey" : dashboard === "care" ? "Mood Check-in" : dashboard === "week" ? "Today's Flow" : "PlushLife"}</h2>
-              <p>{dashboard === "progress" ? "Progress isn't a straight line, and that's beautiful." : dashboard === "care" ? "How is your heart feeling? There are no wrong answers here." : dashboard === "week" ? "Your energy-adaptive schedule for today." : "Everything you need, in one soft place."}</p>
-            </div>
-          </section>
-        )}
+        {dashboard !== "today" && <header className="pl-page-heading">
+          <div><h1>{dashboard === "progress" ? "Progress" : dashboard === "care" ? "Care" : dashboard === "week" ? "Calendar" : dashboard === "tasks" ? "Tasks" : "Support"}</h1>
+          <button type="button" className="pl-heading-date" onClick={() => goToDashboard("week")} aria-label="Open calendar">{new Date(`${period.date}T12:00:00`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</button></div>
+          <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
+        </header>}
 
-                {dashboard === "care" && <div className="pl-unified-page-content"><CarePanel open={dashboard === "care"} babyMode={babyMode} setCheckInPopupOpen={setCheckInPopupOpen} babyCaregiverName={babyCaregiverName} careSituationsExpanded={careSituationsExpanded} setCareSituationsExpanded={setCareSituationsExpanded} setCareMessage={setCareMessage} openCareSession={openCareSession} careMessage={careMessage} isMamaCornerProfile={isMamaCornerProfile} careExtraSupportOpen={careExtraSupportOpen} setCareExtraSupportOpen={setCareExtraSupportOpen} user={user} preferences={preferences} rows={rows} viewDone={viewDone} toggle={toggle} supabase={supabase} careSection={careSection} setCareSection={setCareSection} careSessionHistory={careSessionHistory} HELP_ME_NOW_OPTIONS={HELP_ME_NOW_OPTIONS} pathProgress={pathProgress} setSelectedCarePath={setSelectedCarePath} period={period} setSleepToolOpen={setSleepToolOpen} soundscapePlaying={soundscapePlaying} toggleSoundscape={toggleSoundscape} soundscapeVolume={soundscapeVolume} changeSoundscapeVolume={changeSoundscapeVolume} setSoundscapeSleepTimer={setSoundscapeSleepTimer} soundscapeTimerMinutes={soundscapeTimerMinutes} /></div>}
+                {dashboard === "care" && <div className="pl-unified-page-content"><CarePanel onOpenSupport={() => goToDashboard("guardian")} open={dashboard === "care"} babyMode={babyMode} setCheckInPopupOpen={setCheckInPopupOpen} babyCaregiverName={babyCaregiverName} careSituationsExpanded={careSituationsExpanded} setCareSituationsExpanded={setCareSituationsExpanded} setCareMessage={setCareMessage} openCareSession={openCareSession} careMessage={careMessage} isMamaCornerProfile={isMamaCornerProfile} careExtraSupportOpen={careExtraSupportOpen} setCareExtraSupportOpen={setCareExtraSupportOpen} user={user} preferences={preferences} rows={rows} viewDone={viewDone} toggle={toggle} supabase={supabase} careSection={careSection} setCareSection={setCareSection} careSessionHistory={careSessionHistory} HELP_ME_NOW_OPTIONS={HELP_ME_NOW_OPTIONS} pathProgress={pathProgress} setSelectedCarePath={setSelectedCarePath} period={period} setSleepToolOpen={setSleepToolOpen} soundscapePlaying={soundscapePlaying} toggleSoundscape={toggleSoundscape} soundscapeVolume={soundscapeVolume} changeSoundscapeVolume={changeSoundscapeVolume} setSoundscapeSleepTimer={setSoundscapeSleepTimer} soundscapeTimerMinutes={soundscapeTimerMinutes} /></div>}
         <ProfilePanel open={profileOpen} onClose={() => setProfileOpen(false)} pendingSupportInvites={pendingSupportInvites} hasOwnGuardian={hasOwnGuardian} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} setSafetyOpen={setSafetyOpen} setHelpOpen={setHelpOpen} goToFeedback={goToFeedback} isAdminUser={isAdminUser} setAdminOpen={setAdminOpen} loadAdminData={loadAdminData} nativeBuildInfo={nativeBuildInfo} />
 
         <MoodViewer checkInViewerDate={checkInViewerDate} onClose={() => setCheckInViewerDate(null)} dailyCheckInHistory={dailyCheckInHistory} reflectionDateSet={reflectionDateSet} setReflectionViewerDate={setReflectionViewerDate} deleteDailyCheckIn={deleteDailyCheckIn} CHECKIN_MOODS={CHECKIN_MOODS} ENERGY_LEVELS={ENERGY_LEVELS} DAY_TYPES={DAY_TYPES} SUPPORT_PREFERENCES={SUPPORT_PREFERENCES} />
@@ -7361,7 +7360,7 @@ function GlowUpTracker() {
 
         <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} babyMode={babyMode} goToFeedback={goToFeedback} />
 
-        <RewardsPanel open={collectionOpen} theme={dinoTheme ? "dino" : babyMode ? "baby" : appearanceTheme} onClose={() => setCollectionOpen(false)} FeatureTip={FeatureTip} selectedOutfit={selectedOutfit} mascotMood={mascotMood} activityDaysTotal={activityDaysTotal} preferences={preferences} mascotGrowth={mascotGrowth} careDaysTotal={careDaysTotal} unlockedOutfits={unlockedOutfits} earnedBadgeIdSet={earnedBadgeIdSet} BADGE_DEFS={BADGE_DEFS} unlockedIdSet={unlockedIdSet} mascotRequirementProgress={mascotRequirementProgress} saveMascotCollection={saveMascotCollection} mascotCollection={mascotCollection} savedBestStreak={savedBestStreak} collectionTab={collectionTab} setCollectionTab={setCollectionTab} winsJarEntries={winsJarEntries} />
+        <RewardsPanel inline={collectionOpen} open={collectionOpen} theme={activeWorld} onClose={() => setCollectionOpen(false)} FeatureTip={FeatureTip} selectedOutfit={selectedOutfit} mascotMood={mascotMood} activityDaysTotal={activityDaysTotal} preferences={preferences} mascotGrowth={mascotGrowth} careDaysTotal={careDaysTotal} unlockedOutfits={unlockedOutfits} earnedBadgeIdSet={earnedBadgeIdSet} BADGE_DEFS={BADGE_DEFS} unlockedIdSet={unlockedIdSet} mascotRequirementProgress={mascotRequirementProgress} saveMascotCollection={saveMascotCollection} mascotCollection={mascotCollection} savedBestStreak={savedBestStreak} collectionTab={collectionTab} setCollectionTab={setCollectionTab} winsJarEntries={winsJarEntries} />
 
         <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} openDailyCheckIn={() => { setSettingsOpen(false); setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); }} watchPairingCode={watchPairingCode} setWatchPairingCode={setWatchPairingCode} connectWatch={connectWatch} watchPairingBusy={watchPairingBusy} watchPairingMessage={watchPairingMessage} localWatchSyncBusy={localWatchSyncBusy} startLocalWatchSync={startLocalWatchSync} localWatchSyncMessage={localWatchSyncMessage} dailyCheckIn={dailyCheckIn} pct={pct} rows={rows} viewDone={viewDone} weeklyOverallPct={weeklyOverallPct} widgetSyncMsg={widgetSyncMsg} setWidgetSyncMsg={setWidgetSyncMsg} displayNameDraft={displayNameDraft} setDisplayNameDraft={setDisplayNameDraft} saveDisplayName={saveDisplayName} comfortItemDraft={comfortItemDraft} setComfortItemDraft={setComfortItemDraft} saveComfortItem={saveComfortItem} preferences={preferences} appearanceTheme={appearanceTheme} selectAppearanceTheme={selectAppearanceTheme} dinoTheme={dinoTheme} updatePreference={updatePreference} enableNotifications={enableNotifications} smartReminderSuggestion={smartReminderSuggestion} restDatesSet={restDatesSet} toggleRestToday={toggleRestToday} period={period} restRangeDraft={restRangeDraft} setRestRangeDraft={setRestRangeDraft} saveRestRange={saveRestRange} restDates={restDates} savePreferences={savePreferences} feedbackText={feedbackText} setFeedbackText={setFeedbackText} submitFeedback={submitFeedback} feedbackMessage={feedbackMessage} exportMyData={exportMyData} restoreFileInputRef={restoreFileInputRef} restoreFromBackup={restoreFromBackup} deleteAllCheckIns={deleteAllCheckIns} deleteAllReflections={deleteAllReflections} user={user} online={online} syncStatus={syncStatus} lastSyncedAt={lastSyncedAt} syncNow={syncNow} emailChangeDraft={emailChangeDraft} setEmailChangeDraft={setEmailChangeDraft} requestEmailChange={requestEmailChange} signingOut={signingOut} handleSignOut={handleSignOut} signOutOtherDevices={signOutOtherDevices} deleteMyAccount={deleteMyAccount} deviceBackupStatus={deviceBackupStatus} refreshDeviceBackup={refreshDeviceBackup} deviceBackupBusy={deviceBackupBusy} verifyDeviceBackupNow={verifyDeviceBackupNow} deviceBackupVerifyBusy={deviceBackupVerifyBusy} settingsMessage={settingsMessage} />
 
@@ -7369,7 +7368,7 @@ function GlowUpTracker() {
 
         <JournalReflectionViewer reflectionViewerDate={reflectionViewerDate} onClose={() => setReflectionViewerDate(null)} reflectionViewerPrompt={reflectionViewerPrompt} reflectionViewerLoading={reflectionViewerLoading} reflectionViewerNote={reflectionViewerNote} />
 
-        <TasksPanel open={manageTasks} onClose={() => setManageTasks(false)} newTaskDay={newTaskDay} setNewTaskDay={setNewTaskDay} taskSectionsForDay={taskSectionsForDay} setNewTaskSection={setNewTaskSection} setNewTaskCustomSection={setNewTaskCustomSection} starterPackId={starterPackId} setStarterPackId={setStarterPackId} trackerTasks={trackerTasks} setStarterPackMessage={setStarterPackMessage} addStarterPack={addStarterPack} starterPackMessage={starterPackMessage} importOpen={importOpen} setImportOpen={setImportOpen} newTaskSection={newTaskSection} importText={importText} setImportText={setImportText} importTasksFromText={importTasksFromText} importMessage={importMessage} newTaskNameInputRef={newTaskNameInputRef} newTaskName={newTaskName} setNewTaskName={setNewTaskName} taskMessage={taskMessage} setTaskMessage={setTaskMessage} naturalScheduleText={naturalScheduleText} setNaturalScheduleText={setNaturalScheduleText} naturalSchedulePreview={naturalSchedulePreview} setNaturalSchedulePreview={setNaturalSchedulePreview} applyNaturalSchedule={applyNaturalSchedule} newTaskSectionOptions={newTaskSectionOptions} newTaskCustomSection={newTaskCustomSection} taskAdvancedOpen={taskAdvancedOpen} setTaskAdvancedOpen={setTaskAdvancedOpen} newTaskWhy={newTaskWhy} setNewTaskWhy={setNewTaskWhy} newTaskSoftLabel={newTaskSoftLabel} setNewTaskSoftLabel={setNewTaskSoftLabel} newTaskTinyLabel={newTaskTinyLabel} setNewTaskTinyLabel={setNewTaskTinyLabel} newTaskEstimatedMinutes={newTaskEstimatedMinutes} setNewTaskEstimatedMinutes={setNewTaskEstimatedMinutes} newTaskEssentialOnLow={newTaskEssentialOnLow} setNewTaskEssentialOnLow={setNewTaskEssentialOnLow} newTaskKind={newTaskKind} setNewTaskKind={setNewTaskKind} newTaskScheduleType={newTaskScheduleType} setNewTaskScheduleType={setNewTaskScheduleType} newTaskScheduleDays={newTaskScheduleDays} setNewTaskScheduleDays={setNewTaskScheduleDays} newTaskReminderTime={newTaskReminderTime} setNewTaskReminderTime={setNewTaskReminderTime} newTaskStartDate={newTaskStartDate} setNewTaskStartDate={setNewTaskStartDate} newTaskEndDate={newTaskEndDate} setNewTaskEndDate={setNewTaskEndDate} newTaskOneTimeDate={newTaskOneTimeDate} setNewTaskOneTimeDate={setNewTaskOneTimeDate} selectedProgressDate={selectedProgressDate} addTrackerTask={addTrackerTask} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} isSupporterAccount={isSupporterAccount} FREE_TASK_LIMIT_PER_DAY={FREE_TASK_LIMIT_PER_DAY} taskSearchQuery={taskSearchQuery} setTaskSearchQuery={setTaskSearchQuery} isTaskPausedOnDate={isTaskPausedOnDate} period={period} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToSection={moveTaskToSection} startEditingTask={startEditingTask} resumeTrackerTask={resumeTrackerTask} pauseTrackerTask={pauseTrackerTask} archiveTrackerTask={archiveTrackerTask} setPendingTaskDelete={setPendingTaskDelete} showArchivedTasks={showArchivedTasks} setShowArchivedTasks={setShowArchivedTasks} restoreArchivedTask={restoreArchivedTask} quickAddTrackerTask={quickAddTrackerTask} quickAddMessage={quickAddMessage} />
+        <TasksPanel open={manageTasks || dashboard === "tasks"} inline={dashboard === "tasks"} rows={rows} viewDone={viewDone} toggle={toggle} onClose={() => { setManageTasks(false); if (dashboard === "tasks") goToDashboard("today"); }} newTaskDay={newTaskDay} setNewTaskDay={setNewTaskDay} taskSectionsForDay={taskSectionsForDay} setNewTaskSection={setNewTaskSection} setNewTaskCustomSection={setNewTaskCustomSection} starterPackId={starterPackId} setStarterPackId={setStarterPackId} trackerTasks={trackerTasks} setStarterPackMessage={setStarterPackMessage} addStarterPack={addStarterPack} starterPackMessage={starterPackMessage} importOpen={importOpen} setImportOpen={setImportOpen} newTaskSection={newTaskSection} importText={importText} setImportText={setImportText} importTasksFromText={importTasksFromText} importMessage={importMessage} newTaskNameInputRef={newTaskNameInputRef} newTaskName={newTaskName} setNewTaskName={setNewTaskName} taskMessage={taskMessage} setTaskMessage={setTaskMessage} naturalScheduleText={naturalScheduleText} setNaturalScheduleText={setNaturalScheduleText} naturalSchedulePreview={naturalSchedulePreview} setNaturalSchedulePreview={setNaturalSchedulePreview} applyNaturalSchedule={applyNaturalSchedule} newTaskSectionOptions={newTaskSectionOptions} newTaskCustomSection={newTaskCustomSection} taskAdvancedOpen={taskAdvancedOpen} setTaskAdvancedOpen={setTaskAdvancedOpen} newTaskWhy={newTaskWhy} setNewTaskWhy={setNewTaskWhy} newTaskSoftLabel={newTaskSoftLabel} setNewTaskSoftLabel={setNewTaskSoftLabel} newTaskTinyLabel={newTaskTinyLabel} setNewTaskTinyLabel={setNewTaskTinyLabel} newTaskEstimatedMinutes={newTaskEstimatedMinutes} setNewTaskEstimatedMinutes={setNewTaskEstimatedMinutes} newTaskEssentialOnLow={newTaskEssentialOnLow} setNewTaskEssentialOnLow={setNewTaskEssentialOnLow} newTaskKind={newTaskKind} setNewTaskKind={setNewTaskKind} newTaskScheduleType={newTaskScheduleType} setNewTaskScheduleType={setNewTaskScheduleType} newTaskScheduleDays={newTaskScheduleDays} setNewTaskScheduleDays={setNewTaskScheduleDays} newTaskReminderTime={newTaskReminderTime} setNewTaskReminderTime={setNewTaskReminderTime} newTaskStartDate={newTaskStartDate} setNewTaskStartDate={setNewTaskStartDate} newTaskEndDate={newTaskEndDate} setNewTaskEndDate={setNewTaskEndDate} newTaskOneTimeDate={newTaskOneTimeDate} setNewTaskOneTimeDate={setNewTaskOneTimeDate} selectedProgressDate={selectedProgressDate} addTrackerTask={addTrackerTask} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} isSupporterAccount={isSupporterAccount} FREE_TASK_LIMIT_PER_DAY={FREE_TASK_LIMIT_PER_DAY} taskSearchQuery={taskSearchQuery} setTaskSearchQuery={setTaskSearchQuery} isTaskPausedOnDate={isTaskPausedOnDate} period={period} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToSection={moveTaskToSection} startEditingTask={startEditingTask} resumeTrackerTask={resumeTrackerTask} pauseTrackerTask={pauseTrackerTask} archiveTrackerTask={archiveTrackerTask} setPendingTaskDelete={setPendingTaskDelete} showArchivedTasks={showArchivedTasks} setShowArchivedTasks={setShowArchivedTasks} restoreArchivedTask={restoreArchivedTask} quickAddTrackerTask={quickAddTrackerTask} quickAddMessage={quickAddMessage} />
 
         <ScheduleEditorPanel open={manageSchedule} onClose={() => setManageSchedule(false)} scheduleEditingDayId={scheduleEditingDayId} setScheduleEditDayId={setScheduleEditDayId} personalSchedules={personalSchedules} scheduleDraft={scheduleDraft} updateScheduleEntry={updateScheduleEntry} removeScheduleEntry={removeScheduleEntry} addScheduleEntry={addScheduleEntry} savePersonalSchedule={savePersonalSchedule} copyScheduleToAllDays={copyScheduleToAllDays} clearPersonalSchedule={clearPersonalSchedule} copyToDayIds={copyToDayIds} toggleCopyToDay={toggleCopyToDay} copyScheduleToSelectedDays={copyScheduleToSelectedDays} scheduleMessage={scheduleMessage} scheduleExceptionDraft={scheduleExceptionDraft} setScheduleExceptionDraft={setScheduleExceptionDraft} updateScheduleExceptionEntry={updateScheduleExceptionEntry} removeScheduleExceptionEntry={removeScheduleExceptionEntry} addScheduleExceptionEntry={addScheduleExceptionEntry} saveScheduleException={saveScheduleException} scheduleExceptionMessage={scheduleExceptionMessage} scheduleExceptions={scheduleExceptions} deleteScheduleException={deleteScheduleException} />
 
@@ -7383,11 +7382,11 @@ function GlowUpTracker() {
 
         {dashboard === "progress" && <div className="pl-unified-page-content"><ProgressPanel open={dashboard === "progress"} user={user} progressView={progressView} setProgressView={setProgressView} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} hasWeeklyActivity={hasWeeklyActivity} goToDashboard={goToDashboard} weeklyOverallPct={weeklyOverallPct} weekOverWeekDelta={weekOverWeekDelta} preferences={preferences} weeklyEssentialPct={weeklyEssentialPct} weeklyOverallDone={weeklyOverallDone} weeklyOverallPossible={weeklyOverallPossible} weeklyBonusDone={weeklyBonusDone} caringDays={caringDays} weeklyEssentialDone={weeklyEssentialDone} careStory={careStory} careAreas={careAreas} openTaskManager={openTaskManager} patternInsightCards={patternInsightCards} insightCardIndex={insightCardIndex} setInsightCardIndex={setInsightCardIndex} weeklyHighlights={weeklyHighlights} period={period} goWriteWeeklyIntention={goWriteWeeklyIntention} setShareCardOpen={setShareCardOpen} progressDetailsOpen={progressDetailsOpen} setProgressDetailsOpen={setProgressDetailsOpen} TREND_WEEKS={TREND_WEEKS} TREND_MONTHS={TREND_MONTHS} currentMonthKey={currentMonthKey} monthlyOverallPct={monthlyOverallPct} monthOverMonthDelta={monthOverMonthDelta} monthlyTrendPoints={monthlyTrendPoints} tappedTrendMonth={tappedTrendMonth} setTappedTrendMonth={setTappedTrendMonth} monthlyMostConsistent={monthlyMostConsistent} currentMonthDates={currentMonthDates} weeklyTrendPoints={weeklyTrendPoints} tappedTrendWeek={tappedTrendWeek} setTappedTrendWeek={setTappedTrendWeek} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} /></div>}
         <nav className="pl-app-bottom-nav" aria-label="Main navigation">
-          <button type="button" aria-current={dashboard === "today" ? "page" : undefined} className={`pl-app-nav-btn ${dashboard === "today" ? "active" : ""}`} onClick={() => goToDashboard("today")}><span className="ico">🏠</span><span>Home</span></button>
-          <button type="button" aria-current={dashboard === "week" ? "page" : undefined} className={`pl-app-nav-btn ${dashboard === "week" ? "active" : ""}`} onClick={() => goToDashboard("week")}><span className="ico">📅</span><span>Schedule</span></button>
-          <button type="button" aria-current={dashboard === "care" ? "page" : undefined} className={`pl-app-nav-btn ${dashboard === "care" ? "active" : ""}`} onClick={() => goToDashboard("care")}><span className="ico">😊</span><span>Mood</span></button>
-          <button type="button" className="pl-app-nav-btn" onClick={() => setCollectionOpen(true)} aria-label="Open rewards"><span className="ico">🧸</span><span>Plush</span></button>
-          <button type="button" aria-current={dashboard === "progress" ? "page" : undefined} className={`pl-app-nav-btn ${dashboard === "progress" ? "active" : ""}`} onClick={() => goToDashboard("progress")}><span className="ico">📊</span><span>Progress</span></button>
+          <button type="button" aria-current={dashboard === "today" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("today"); }}><DesignIcon name="home" /><span>Home</span></button>
+          <button type="button" aria-current={dashboard === "tasks" ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); openTaskManager(); }}><DesignIcon name="tasks" /><span>Tasks</span></button>
+          <button type="button" aria-current={dashboard === "care" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("care"); }}><DesignIcon name="care" /><span>Care</span></button>
+          <button type="button" aria-current={dashboard === "progress" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("progress"); }}><DesignIcon name="progress" /><span>Progress</span></button>
+          <button type="button" aria-current={collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => setCollectionOpen(true)} aria-label="Open rewards"><DesignIcon name="plush" /><span>Plush</span></button>
         </nav>
 
         </>
@@ -7423,7 +7422,7 @@ function GlowUpTracker() {
           <button type="button" onClick={() => setBadgeCelebration(null)} aria-label="Dismiss" style={{ padding: "5px 10px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.4)", background: "transparent", color: "#F2D9FF", fontWeight: 900, cursor: "pointer", fontSize: 12.5, whiteSpace: "nowrap" }}>✕</button>
         </div>
       )}
-    </div>
+    </div></ThemeWorldContext.Provider>
   );
 }
 

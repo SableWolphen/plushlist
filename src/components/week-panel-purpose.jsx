@@ -1,6 +1,6 @@
 import { HabitTypeIcon } from "./shared.jsx";
 
-const card = { borderRadius: 14, border: "1px solid #D9C8EA", background: "rgba(255,255,255,.78)", boxShadow: "0 3px 10px rgba(151,112,173,.05)" };
+const card = { borderRadius: 14, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "rgba(255,255,255,.78)", boxShadow: "0 3px 10px rgba(151,112,173,.05)" };
 
 function Tabs({ weekCardIndex, setWeekCardIndex }) {
   const tabs = [[0,"📅 Month"],[1,"🗓️ Week"],[2,"📆 Day"]];

@@ -1,3 +1,4 @@
+import { ThemeScene, DesignIcon } from "./theme-world.jsx";
 import { HabitTypeIcon } from "./shared.jsx";
 import { CalmPanel } from "./info-panels.jsx";
 import { PlushMascot } from "./mascot.jsx";
@@ -25,13 +26,13 @@ import { startFocusTimer } from "./focus-timer.jsx";
  */
 
 const C = {
-  ink: "#3E2458",
-  body: "#62506D",
-  purple: "#B94DD2",
+  ink: "var(--pl-theme-ink)",
+  body: "var(--pl-theme-ink)",
+  purple: "var(--pl-theme-accent)",
   purple2: "#D879DE",
   line: "#E9D6EE",
   line2: "#F0E2F2",
-  card: "rgba(255,255,255,.88)",
+  card: "var(--pl-theme-surface)",
 };
 
 const card = {
@@ -78,30 +79,18 @@ function Hero({ period, goToDashboard, setSettingsOpen, reducedMotion, selectedO
   }, []);
 
   return (
-    <section className="pl-home-hero" aria-label="PlushLife welcome">
-
-      <div className="pl-home-brand">
-        <div className="pl-home-logo">PlushLife <span>♥</span></div>
-        <div className="pl-home-tagline">{babyMode ? "Baby Mode · extra gentle" : dinoTheme ? "Small steps · brighter days" : "Small steps · a softer you"}</div>
-      </div>
-
-      <div className="pl-home-actions">
-        <button type="button" className="pl-home-date" onClick={() => goToDashboard?.("week")} aria-label="Open calendar">▣&nbsp;&nbsp;{formatDate(period?.date)}</button>
-        <button type="button" className="pl-home-timer" onClick={startFocusTimer} aria-label="Start a gentle timer" title="Start a gentle timer">⏱</button>
-        <button type="button" className="pl-home-settings" onClick={() => setSettingsOpen?.(true)} aria-label="Settings">⚙</button>
-      </div>
-
-      <div className="pl-home-copy">
-        <h1>{greeting()} <span className="pl-heart">♥</span></h1>
-        <p>You’re doing great.<br/>Let’s make today a little<br/>kinder for you.</p>
-      </div>
-
-      <div className="pl-home-plush" aria-hidden="true">
-        <PlushMascot outfit={selectedOutfit} theme={dinoTheme ? "dino" : babyMode ? "baby" : appearanceTheme} variant={dinoTheme ? "bear" : "bunny"} size={120} celebrating={mascotCelebrating && !reducedMotion} mood={mascotCelebrating ? "excited" : "neutral"} activityDays={activityDaysTotal} darkMode={darkMode} />
-      </div>
-
-      <div className="pl-home-bubble">🌱 Taking care of yourself matters.</div>
-    </section>
+    <>
+      <header className="pl-page-heading">
+        <div style={{flex:1}}><h1>Today</h1><button type="button" className="pl-heading-date" onClick={() => goToDashboard?.("week")} aria-label="Open calendar">{formatDate(period?.date)}</button></div>
+        <button type="button" className="pl-heading-gear" onClick={startFocusTimer} aria-label="Start a gentle timer" title="Start a gentle timer">⏱</button>
+        <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen?.(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
+      </header>
+      <section className={`pl-home-hero ${mascotCelebrating && !reducedMotion ? "mascot-celebrating" : ""}`} aria-label="PlushLife welcome">
+        <ThemeScene decorative />
+        <h2>A little counts.</h2>
+        <p>Your plush is happy you're here.</p>
+      </section>
+    </>
   );
 }
 
@@ -110,7 +99,7 @@ function OneTinyThing({ nextStepTask, nextStepReason, nextStepHint, toggle, pick
   return (
     <section data-plushlife-compact-card="next-step" id="plushlife-smart-next-step" style={{...card, padding: "15px 17px 16px"}} aria-label="Today's gentle pick">
       <div className="pl-section-topline">
-        <div className="pl-kicker">✦ &nbsp;Today&rsquo;s gentle pick</div>
+        <div className="pl-kicker">One tiny thing</div>
         <div className="pl-muted-note">{nextStepReason || "Rebuilding gently · Good fit right now"}</div>
       </div>
       <div className="pl-primary-task">{nextStepTask.sourceTask && <HabitTypeIcon task={nextStepTask.sourceTask} />}{nextStepTask.label}</div>
@@ -225,7 +214,7 @@ function TasksToday({ rows = [], viewDone = {}, toggle, openTaskManager, period 
   return (
     <section style={{...card, padding: "15px 17px 16px"}} aria-label="Tasks today">
       <div className="pl-section-topline">
-        <div className="pl-kicker">🧸 &nbsp;Today&rsquo;s little tasks · {completed}/{taskRows.length}</div>
+        <div className="pl-kicker">Today · {completed}/{taskRows.length}</div>
         <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)}>View all →</button>
       </div>
       <div className="pl-list">
@@ -253,7 +242,7 @@ function Habits({ rows = [], viewDone = {}, toggle, openTaskManager, period }) {
   return (
     <section style={{...card, padding: "15px 17px 16px"}} aria-label="Habits today">
       <div className="pl-section-topline">
-        <div className="pl-kicker">🌱 &nbsp;Little habits · {completed}/{habitRows.length}</div>
+        <div className="pl-kicker">Habits · {completed}/{habitRows.length}</div>
         <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)}>View all →</button>
       </div>
       <div className="pl-list">
@@ -365,9 +354,9 @@ export function TodayPanel({
       <div data-plushlife-home-stack className="pl-home-shell">
         <Hero period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} />
         <OneTinyThing nextStepTask={nextStepTask} nextStepReason={nextStepReason} nextStepHint={nextStepHint} toggle={unifiedToggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} />
-        <TodaySchedule selectedSchedule={selectedSchedule} selectedScheduleExceptionEntries={selectedScheduleExceptionEntries} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} />
         <TasksToday rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />
         <Habits rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />
+        <TodaySchedule selectedSchedule={selectedSchedule} selectedScheduleExceptionEntries={selectedScheduleExceptionEntries} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} />
         <TomorrowNote tomorrowTasksCount={tomorrowTasksCount} />
         <CompletedToday rows={rows} viewDone={viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} expanded={completedTodayExpanded} setExpanded={setCompletedTodayExpanded} />
 

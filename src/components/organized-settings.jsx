@@ -5,7 +5,7 @@ import { PlushMascot } from "./mascot.jsx";
 
 const cardStyle = {
   background: "linear-gradient(145deg,rgba(255,253,254,.96),rgba(249,243,255,.92))",
-  border: "1px solid #E6D4EB",
+  border: "1px solid var(--pl-theme-line,#E9DDF6)",
   borderRadius: 20,
   overflow: "hidden",
   boxShadow: "0 8px 22px rgba(87,53,104,.06), inset 0 1px 0 rgba(255,255,255,.9)",
@@ -16,9 +16,9 @@ const inputStyle = {
   boxSizing: "border-box",
   padding: "11px 12px",
   borderRadius: 13,
-  border: "1px solid #E0CEE6",
-  background: "linear-gradient(145deg,#FFFDFE,#FFF9FC)",
-  color: "#51425E",
+  border: "1px solid var(--pl-theme-line,#E9DDF6)",
+  background: "var(--pl-theme-surface)",
+  color: "var(--pl-theme-ink,#51425E)",
   fontSize: 14,
 };
 
@@ -26,7 +26,7 @@ const primaryButton = {
   padding: "10px 13px",
   borderRadius: 13,
   border: 0,
-  background: "linear-gradient(135deg,#B85BC9,#DE78BE)",
+  background: "var(--pl-theme-accent)",
   color: "white",
   fontWeight: 900,
   cursor: "pointer",
@@ -35,9 +35,9 @@ const primaryButton = {
 const secondaryButton = {
   padding: "9px 12px",
   borderRadius: 13,
-  border: "1px solid #E1D0E6",
-  background: "linear-gradient(145deg,#FFFDFE,#FAF4FF)",
-  color: "#755D82",
+  border: "1px solid var(--pl-theme-line,#E9DDF6)",
+  background: "var(--pl-theme-surface)",
+  color: "var(--pl-theme-ink,#755D82)",
   fontWeight: 800,
   cursor: "pointer",
 };
@@ -45,10 +45,10 @@ const secondaryButton = {
 function SectionTitle({ icon, title, description }) {
   return (
     <div style={{ marginBottom: 14 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 18, fontWeight: 900, color: "#5B4B6B" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 18, fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>
         <span aria-hidden="true">{icon}</span><span>{title}</span>
       </div>
-      {description && <div style={{ marginTop: 5, color: "#8A7895", fontSize: 12.5, lineHeight: 1.5 }}>{description}</div>}
+      {description && <div style={{ marginTop: 5, color: "var(--pl-theme-muted,#8A7895)", fontSize: 12.5, lineHeight: 1.5 }}>{description}</div>}
     </div>
   );
 }
@@ -60,18 +60,18 @@ function Card({ children, style }) {
 function SettingsHomeRow({ icon, title, description, onClick, badge }) {
   return (
     <button type="button" onClick={onClick} style={{
-      width: "100%", border: 0, borderBottom: "1px solid #F0E8F2", background: "transparent",
+      width: "100%", border: 0, borderBottom: "1px solid var(--pl-theme-line,#E9DDF6)", background: "transparent",
       padding: "13px 14px", display: "grid", gridTemplateColumns: "38px 1fr auto", gap: 10,
       alignItems: "center", textAlign: "left", cursor: "pointer", color: "inherit",
     }}>
-      <span aria-hidden="true" style={{ width: 38, height: 38, borderRadius: 13, display: "grid", placeItems: "center", background: "linear-gradient(145deg,#FFF4FB,#F1EBFF)", border: "1px solid #E9D8ED", boxShadow: "0 4px 10px rgba(102,66,119,.05)", fontSize: 19 }}>{icon}</span>
+      <span aria-hidden="true" style={{ width: 38, height: 38, borderRadius: 13, display: "grid", placeItems: "center", background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 4px 10px rgba(102,66,119,.05)", fontSize: 19 }}>{icon}</span>
       <span style={{ minWidth: 0 }}>
-        <span style={{ display: "block", fontSize: 14.5, fontWeight: 900, color: "#5B4B6B" }}>{title}</span>
-        <span style={{ display: "block", marginTop: 2, fontSize: 11.5, lineHeight: 1.4, color: "#8A7895" }}>{description}</span>
+        <span style={{ display: "block", fontSize: 14.5, fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>{title}</span>
+        <span style={{ display: "block", marginTop: 2, fontSize: 11.5, lineHeight: 1.4, color: "var(--pl-theme-muted,#8A7895)" }}>{description}</span>
       </span>
       <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        {badge && <span style={{ padding: "3px 7px", borderRadius: 999, background: "#EEF8F4", color: "#38816F", fontSize: 10, fontWeight: 900 }}>{badge}</span>}
-        <span aria-hidden="true" style={{ color: "#A997B2", fontSize: 22 }}>›</span>
+        {badge && <span style={{ padding: "3px 7px", borderRadius: 999, background: "var(--pl-theme-surface-2,#EEF8F4)", color: "var(--pl-theme-ink,#38816F)", fontSize: 10, fontWeight: 900 }}>{badge}</span>}
+        <span aria-hidden="true" style={{ color: "var(--pl-theme-muted,#A997B2)", fontSize: 22 }}>›</span>
       </span>
     </button>
   );
@@ -79,10 +79,10 @@ function SettingsHomeRow({ icon, title, description, onClick, badge }) {
 
 function ToggleRow({ checked, onChange, title, description }) {
   return (
-    <label style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "center", padding: "12px 0", borderBottom: "1px solid #F1EAF3", cursor: "pointer" }}>
+    <label style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--pl-theme-line,#E9DDF6)", cursor: "pointer" }}>
       <span>
-        <span style={{ display: "block", fontSize: 13.5, fontWeight: 850, color: "#5B4B6B" }}>{title}</span>
-        {description && <span style={{ display: "block", marginTop: 3, fontSize: 11.5, lineHeight: 1.45, color: "#8A7895" }}>{description}</span>}
+        <span style={{ display: "block", fontSize: 13.5, fontWeight: 850, color: "var(--pl-theme-ink,#5B4B6B)" }}>{title}</span>
+        {description && <span style={{ display: "block", marginTop: 3, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#8A7895)" }}>{description}</span>}
       </span>
       <input type="checkbox" checked={!!checked} onChange={onChange} style={{ width: 22, height: 22, accentColor: "#9660AF" }} />
     </label>
@@ -93,7 +93,7 @@ function DetailHeader({ title, onBack }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
       <button type="button" onClick={onBack} aria-label="Back to settings" style={{ ...secondaryButton, padding: "7px 10px", minWidth: 44 }}>‹ Back</button>
-      <div style={{ fontSize: 16, fontWeight: 900, color: "#5B4B6B" }}>{title}</div>
+      <div style={{ fontSize: 16, fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>{title}</div>
     </div>
   );
 }
@@ -116,9 +116,9 @@ function BabyModeExplainer() {
     setDismissed(true);
   };
   return (
-    <div style={{ marginTop: 8, padding: "10px 12px", borderRadius: 12, background: "#FDF6FF", border: "1px solid #EBD6F2", fontSize: 11.5, lineHeight: 1.5, color: "#6B5A7D" }}>
-      <strong style={{ color: "#5B3D70" }}>What is Baby Mode?</strong> Baby Mode is a simplified comfort view: bigger words, rounder controls, and candy-soft decoration on the Home screen. Your tasks and progress do not change — everything is still there when you switch back.
-      <button type="button" onClick={dismiss} style={{ marginTop: 6, display: "block", minHeight: 32, padding: "4px 10px", borderRadius: 8, border: "1px solid #DCC8E6", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>Got it</button>
+    <div style={{ marginTop: 8, padding: "10px 12px", borderRadius: 12, background: "var(--pl-theme-surface,#FDF6FF)", border: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 11.5, lineHeight: 1.5, color: "var(--pl-theme-ink,#6B5A7D)" }}>
+      <strong style={{ color: "var(--pl-theme-ink,#5B3D70)" }}>What is Baby Mode?</strong> Baby Mode is a simplified comfort view: bigger words, rounder controls, and candy-soft decoration on the Home screen. Your tasks and progress do not change — everything is still there when you switch back.
+      <button type="button" onClick={dismiss} style={{ marginTop: 6, display: "block", minHeight: 32, padding: "4px 10px", borderRadius: 8, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white", color: "var(--pl-theme-muted,#8E4EAA)", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>Got it</button>
     </div>
   );
 }
@@ -177,19 +177,19 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
   const home = (
     <>
       <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 13, color: "#8A7895", lineHeight: 1.45 }}>Everything has a home now. Pick what you want to change.</div>
+        <div style={{ fontSize: 13, color: "var(--pl-theme-muted,#8A7895)", lineHeight: 1.45 }}>Everything has a home now. Pick what you want to change.</div>
         <div style={{ position: "relative", marginTop: 11 }}>
-          <span aria-hidden="true" style={{ position: "absolute", left: 12, top: 11, color: "#A493AD" }}>⌕</span>
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search settings" aria-label="Search settings" style={{ ...inputStyle, paddingLeft: 35, background: "#FFFCFE" }} />
+          <span aria-hidden="true" style={{ position: "absolute", left: 12, top: 11, color: "var(--pl-theme-muted,#A493AD)" }}>⌕</span>
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search settings" aria-label="Search settings" style={{ ...inputStyle, paddingLeft: 35, background: "var(--pl-theme-surface,#FFFCFE)" }} />
         </div>
       </div>
       <div style={cardStyle}>
         {visibleCategories.map(([id, icon, title, description]) => (
           <SettingsHomeRow key={id} icon={icon} title={title} description={description} onClick={() => setSection(id)} badge={id === "account" && (!online || syncStatus === "offline") ? "Offline" : null} />
         ))}
-        {visibleCategories.length === 0 && <div style={{ padding: 22, textAlign: "center", color: "#8A7895", fontSize: 12.5 }}>No settings match “{search}”.</div>}
+        {visibleCategories.length === 0 && <div style={{ padding: 22, textAlign: "center", color: "var(--pl-theme-muted,#8A7895)", fontSize: 12.5 }}>No settings match “{search}”.</div>}
       </div>
-      {settingsMessage && <div role="status" style={{ marginTop: 12, padding: "10px 12px", borderRadius: 11, background: "#F0FAF6", color: "#347865", fontSize: 12, fontWeight: 800 }}>{settingsMessage}</div>}
+      {settingsMessage && <div role="status" style={{ marginTop: 12, padding: "10px 12px", borderRadius: 11, background: "var(--pl-theme-surface-2,#F0FAF6)", color: "var(--pl-theme-ink,#347865)", fontSize: 12, fontWeight: 800 }}>{settingsMessage}</div>}
     </>
   );
 
@@ -198,15 +198,15 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
       <DetailHeader title="Personalize" onBack={() => setSection("home")} />
       <SectionTitle icon="👤" title="Make PlushLife yours" description="Your name, comfort wording, and visual style live here." />
       <Card>
-        <label style={{ display: "grid", gap: 6, fontSize: 11.5, fontWeight: 900, color: "#745D81" }}>
+        <label style={{ display: "grid", gap: 6, fontSize: 11.5, fontWeight: 900, color: "var(--pl-theme-ink,#745D81)" }}>
           YOUR NAME
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 8 }}>
             <input type="text" value={displayNameDraft} onChange={(event) => setDisplayNameDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") saveDisplayName(); }} maxLength={40} placeholder="Your name" style={inputStyle} />
             <button type="button" onClick={saveDisplayName} style={primaryButton}>Save</button>
           </div>
         </label>
-        <div style={{ marginTop: 5, fontSize: 11, color: "#95859E" }}>Your heading will read “{displayNameDraft.trim() || "Name"}'s PlushLife.”</div>
-        <label style={{ display: "grid", gap: 6, marginTop: 15, fontSize: 11.5, fontWeight: 900, color: "#745D81" }}>
+        <div style={{ marginTop: 5, fontSize: 11, color: "var(--pl-theme-muted,#95859E)" }}>Your heading will read “{displayNameDraft.trim() || "Name"}'s PlushLife.”</div>
+        <label style={{ display: "grid", gap: 6, marginTop: 15, fontSize: 11.5, fontWeight: 900, color: "var(--pl-theme-ink,#745D81)" }}>
           COMFORT ITEM · OPTIONAL
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 8 }}>
             <input type="text" value={comfortItemDraft} onChange={(event) => setComfortItemDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") saveComfortItem(); }} maxLength={80} placeholder="Favorite plush, blanket…" style={inputStyle} />
@@ -215,28 +215,28 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
         </label>
       </Card>
       <Card>
-        <div style={{ fontSize: 11.5, fontWeight: 900, color: "#745D81" }}>AMBIENT THEME</div>
-        <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#8A7895" }}>Pick the world that feels like you. Every option keeps the same PlushLife layout and your same data.</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8, marginTop: 10 }}>
-          <button type="button" onClick={() => updatePreference({ dino_theme: true, nickname_style: "warm" })} aria-pressed={!!dinoTheme} style={{ position: "relative", overflow: "hidden", minHeight: 102, padding: 0, borderRadius: 16, border: dinoTheme ? "2px solid #9B67C6" : "1px solid #E4D8E8", background: "linear-gradient(145deg,#F1E8FF,#ECF8EF)", color: "#5D3F73", fontWeight: 900, cursor: "pointer", boxShadow: dinoTheme ? "0 7px 18px rgba(155,103,198,.22)" : "0 4px 12px rgba(96,62,108,.05)" }}>
-            <span aria-hidden="true" style={{ display: "grid", placeItems: "center", minHeight: 69, background: "radial-gradient(circle at 30% 30%,#FFF6D5,transparent 42%),linear-gradient(145deg,#EFE5FF,#E8F6ED)" }}><PlushMascot theme="dino" size={58} /></span>
+        <div style={{ fontSize: 11.5, fontWeight: 900, color: "var(--pl-theme-ink,#745D81)" }}>AMBIENT THEME</div>
+        <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#8A7895)" }}>Pick the world that feels like you. Every option keeps the same PlushLife layout and your same data.</div>
+        <div className="pl-theme-picker" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8, marginTop: 10 }}>
+          <button type="button" onClick={() => updatePreference({ dino_theme: true, nickname_style: "warm" })} aria-pressed={!!dinoTheme} style={{ position: "relative", overflow: "hidden", minHeight: 102, padding: 0, borderRadius: 16, border: dinoTheme ? "2px solid #9B67C6" : "1px solid #E4D8E8", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink,#5D3F73)", fontWeight: 900, cursor: "pointer", boxShadow: dinoTheme ? "0 7px 18px rgba(155,103,198,.22)" : "0 4px 12px rgba(96,62,108,.05)" }}>
+            <span aria-hidden="true" style={{ display: "grid", placeItems: "center", minHeight: 69, background: "radial-gradient(circle at 30% 30%,#FFF6D5,transparent 42%),linear-gradient(145deg,#EFE5FF,#E8F6ED)" }}><PlushMascot theme="dino" size={104} /></span>
             <span style={{ display: "block", padding: "6px 4px 8px", background: "rgba(255,255,255,.72)", borderTop: "1px solid rgba(255,255,255,.65)", fontSize: 10.5 }}>Dino{dinoTheme ? " ✓" : ""}</span>
           </button>
-          <button type="button" onClick={() => updatePreference({ nickname_style: "baby", dino_theme: false })} aria-pressed={preferences.nickname_style === "baby"} style={{ position: "relative", overflow: "hidden", minHeight: 102, padding: 0, borderRadius: 16, border: preferences.nickname_style === "baby" ? "2px solid #E572B7" : "1px solid #E4D8E8", background: "linear-gradient(145deg,#FFF0F7,#F1E9FF)", color: "#743B6D", fontWeight: 900, cursor: "pointer", boxShadow: preferences.nickname_style === "baby" ? "0 7px 18px rgba(229,114,183,.20)" : "0 4px 12px rgba(96,62,108,.05)" }}>
-            <span aria-hidden="true" style={{ display: "grid", placeItems: "center", minHeight: 69, background: "radial-gradient(circle at 72% 26%,#FFF4B8,transparent 34%),linear-gradient(145deg,#FFF0F7,#F1E9FF)" }}><PlushMascot theme="baby" size={58} /></span>
+          <button type="button" onClick={() => updatePreference({ nickname_style: "baby", dino_theme: false })} aria-pressed={preferences.nickname_style === "baby"} style={{ position: "relative", overflow: "hidden", minHeight: 102, padding: 0, borderRadius: 16, border: preferences.nickname_style === "baby" ? "2px solid #E572B7" : "1px solid #E4D8E8", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink,#743B6D)", fontWeight: 900, cursor: "pointer", boxShadow: preferences.nickname_style === "baby" ? "0 7px 18px rgba(229,114,183,.20)" : "0 4px 12px rgba(96,62,108,.05)" }}>
+            <span aria-hidden="true" style={{ display: "grid", placeItems: "center", minHeight: 69, background: "radial-gradient(circle at 72% 26%,#FFF4B8,transparent 34%),linear-gradient(145deg,#FFF0F7,#F1E9FF)" }}><PlushMascot theme="baby" size={104} /></span>
             <span style={{ display: "block", padding: "6px 4px 8px", background: "rgba(255,255,255,.72)", borderTop: "1px solid rgba(255,255,255,.65)", fontSize: 10.5 }}>Baby Mode{preferences.nickname_style === "baby" ? " ✓" : ""}</span>
           </button>
           {APPEARANCE_THEMES.map((theme) => {
             const selected = !dinoTheme && preferences.nickname_style !== "baby" && appearanceTheme === theme.id;
             return <button key={theme.id} type="button" onClick={() => selectAppearanceTheme(theme.id)} aria-pressed={selected} style={{ position: "relative", overflow: "hidden", padding: 0, minHeight: 102, borderRadius: 16, border: selected ? `2px solid ${theme.accent}` : "1px solid #E4D8E8", background: theme.background, color: theme.ink || "#695474", fontWeight: 900, cursor: "pointer", boxShadow: selected ? `0 7px 18px ${theme.accent}33` : "0 4px 12px rgba(96,62,108,.05)" }}>
               <span aria-hidden="true" style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 18% 18%,${theme.glowA} 0%,transparent 48%),radial-gradient(circle at 82% 18%,${theme.glowB} 0%,transparent 48%),radial-gradient(circle at 75% 88%,${theme.glowC} 0%,transparent 52%)` }} />
-              <span aria-hidden="true" style={{ position: "relative", display: "grid", placeItems: "center", minHeight: 69, filter: "drop-shadow(0 4px 8px rgba(73,47,88,.10))" }}><PlushMascot theme={theme.id} size={58} /></span>
+              <span aria-hidden="true" style={{ position: "relative", display: "grid", placeItems: "center", minHeight: 69, filter: "drop-shadow(0 4px 8px rgba(73,47,88,.10))" }}><PlushMascot theme={theme.id} size={104} /></span>
               <span style={{ position: "relative", display: "block", padding: "6px 4px 8px", background: "rgba(255,255,255,.72)", borderTop: "1px solid rgba(255,255,255,.65)", fontSize: 10.5 }}>{theme.label}{selected ? " ✓" : ""}</span>
             </button>;
           })}
         </div>
                 {preferences.nickname_style === "baby" && (
-          <div style={{ marginTop: 12, padding: 11, borderRadius: 14, background: "linear-gradient(145deg,#FFF4FA,#F4ECFF)", border: "1px solid #E8D7ED" }}>
+          <div style={{ marginTop: 12, padding: 11, borderRadius: 14, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
             <BabyModeExplainer />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, marginTop: 8 }}>
               <button type="button" onClick={() => updatePreference({ baby_voice: "motherly" })} style={{ ...secondaryButton, border: (preferences.baby_voice || "motherly") === "motherly" ? "2px solid #9660AF" : secondaryButton.border }}>👩 Motherly voice</button>
@@ -244,7 +244,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
             </div>
           </div>
         )}
-        {dinoTheme && <div style={{ marginTop: 10, padding: "9px 11px", borderRadius: 13, background: "#F3F8F3", border: "1px solid #D7E8DD", color: "#5C7565", fontSize: 11.2, lineHeight: 1.4 }}>🦕 Dino is its own theme. Choosing Lavender, Pink, Mint, Peach, Night, Strawberry, Cloud, or Baby automatically turns Dino off.</div>}
+        {dinoTheme && <div style={{ marginTop: 10, padding: "9px 11px", borderRadius: 13, background: "var(--pl-theme-surface-2,#F3F8F3)", border: "1px solid var(--pl-theme-line,#E9DDF6)", color: "var(--pl-theme-ink,#5C7565)", fontSize: 11.2, lineHeight: 1.4 }}>🦕 Dino is its own theme. Choosing Lavender, Pink, Mint, Peach, Night, Strawberry, Cloud, or Baby automatically turns Dino off.</div>}
       </Card>
     </>
   );
@@ -254,37 +254,37 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
       <DetailHeader title="Notifications & Reminders" onBack={() => setSection("home")} />
       <SectionTitle icon="🔔" title="PlushReminders" description="Choose when PlushLife can gently check in with you." />
       <Card>
-        <button type="button" onClick={enableNotifications} style={{ ...primaryButton, background: "#388C79" }}>🔔 Enable push notifications</button>
-        <div style={{ marginTop: 7, fontSize: 11.5, lineHeight: 1.45, color: "#8A7895" }}>Push notifications can arrive while PlushLife is closed.</div>
+        <button type="button" onClick={enableNotifications} style={{ ...primaryButton, background: "var(--pl-theme-accent,#388C79)" }}>🔔 Enable push notifications</button>
+        <div style={{ marginTop: 7, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#8A7895)" }}>Push notifications can arrive while PlushLife is closed.</div>
       </Card>
       <Card>
-        <div style={{ fontSize: 11.5, fontWeight: 900, color: "#665474" }}>REMINDER TIMES</div>
-        <div style={{ marginTop: 5, fontSize: 11.5, color: "#8A7895" }}>Tap a time to change it. Remove reminders you don't need.</div>
+        <div style={{ fontSize: 11.5, fontWeight: 900, color: "var(--pl-theme-ink,#665474)" }}>REMINDER TIMES</div>
+        <div style={{ marginTop: 5, fontSize: 11.5, color: "var(--pl-theme-muted,#8A7895)" }}>Tap a time to change it. Remove reminders you don't need.</div>
         <div style={{ marginTop: 8 }}>
           {(preferences.reminder_times || []).map((time, index) => (
-            <div key={`${time}-${index}`} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8, alignItems: "center", padding: "8px 0", borderBottom: "1px solid #F1EAF3" }}>
+            <div key={`${time}-${index}`} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8, alignItems: "center", padding: "8px 0", borderBottom: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
               <input aria-label={`Reminder ${index + 1}`} type="time" value={time} onChange={(event) => updatePreference({ reminder_times: preferences.reminder_times.map((item, itemIndex) => itemIndex === index ? event.target.value : item) })} style={{ ...inputStyle, padding: "9px 11px" }} />
-              {preferences.reminder_times.length > 1 && <button type="button" onClick={() => updatePreference({ reminder_times: preferences.reminder_times.filter((_, itemIndex) => itemIndex !== index) })} style={{ ...secondaryButton, color: "#A65F70" }}>Remove</button>}
+              {preferences.reminder_times.length > 1 && <button type="button" onClick={() => updatePreference({ reminder_times: preferences.reminder_times.filter((_, itemIndex) => itemIndex !== index) })} style={{ ...secondaryButton, color: "var(--pl-theme-muted,#A65F70)" }}>Remove</button>}
             </div>
           ))}
         </div>
         {(preferences.reminder_times || []).length < 8 && <button type="button" onClick={() => updatePreference({ reminder_times: [...(preferences.reminder_times || []), "12:00"] })} style={{ ...secondaryButton, marginTop: 10 }}>＋ Add reminder</button>}
-        {(preferences.reminder_times || []).length >= 5 && <div style={{ marginTop: 10, padding: "9px 10px", borderRadius: 10, background: "#FFF9E9", border: "1px solid #F0D99E", color: "#6B5A3D", fontSize: 11.5, lineHeight: 1.45 }}><strong>REMINDER LOAD:</strong> You have {(preferences.reminder_times || []).length} daily reminders. If they start blending into the background, keeping fewer high-value times usually makes each one easier to notice.</div>}
+        {(preferences.reminder_times || []).length >= 5 && <div style={{ marginTop: 10, padding: "9px 10px", borderRadius: 10, background: "var(--pl-theme-surface-2,#FFF9E9)", border: "1px solid var(--pl-theme-line,#E9DDF6)", color: "var(--pl-theme-ink,#6B5A3D)", fontSize: 11.5, lineHeight: 1.45 }}><strong>REMINDER LOAD:</strong> You have {(preferences.reminder_times || []).length} daily reminders. If they start blending into the background, keeping fewer high-value times usually makes each one easier to notice.</div>}
         {smartReminderSuggestion && (preferences.reminder_times || []).length < 8 && (
-          <div style={{ marginTop: 12, padding: 11, borderRadius: 12, background: "#F0FAF6", border: "1px solid #CFE7DC", color: "#347865", fontSize: 11.5, lineHeight: 1.45 }}>
+          <div style={{ marginTop: 12, padding: 11, borderRadius: 12, background: "var(--pl-theme-surface-2,#F0FAF6)", border: "1px solid var(--pl-theme-line,#E9DDF6)", color: "var(--pl-theme-ink,#347865)", fontSize: 11.5, lineHeight: 1.45 }}>
             💡 You tend to check in around <strong>{smartReminderSuggestion.label}</strong>. <span style={{ opacity: .82 }}>This suggestion comes from your own recent check-in timing.</span>
             <div style={{ display: "flex", gap: 7, marginTop: 8 }}>
-              <button type="button" onClick={() => updatePreference({ reminder_times: [...preferences.reminder_times, smartReminderSuggestion.suggestedTime] })} style={{ ...primaryButton, padding: "7px 10px", background: "#388C79" }}>Add it</button>
+              <button type="button" onClick={() => updatePreference({ reminder_times: [...preferences.reminder_times, smartReminderSuggestion.suggestedTime] })} style={{ ...primaryButton, padding: "7px 10px", background: "var(--pl-theme-accent,#388C79)" }}>Add it</button>
               <button type="button" onClick={() => updatePreference({ smart_reminder_hint_dismissed_at: new Date().toISOString() })} style={{ ...secondaryButton, padding: "7px 10px" }}>No thanks</button>
             </div>
           </div>
         )}
       </Card>
       <Card>
-        <div style={{ fontSize: 11.5, fontWeight: 900, color: "#665474" }}>QUIET HOURS</div>
+        <div style={{ fontSize: 11.5, fontWeight: 900, color: "var(--pl-theme-ink,#665474)" }}>QUIET HOURS</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 8 }}>
-          <label style={{ fontSize: 11.5, fontWeight: 800, color: "#745D81" }}>Starts<input type="time" value={preferences.quiet_start || ""} onChange={(event) => updatePreference({ quiet_start: event.target.value })} style={{ ...inputStyle, marginTop: 5, padding: "9px 10px" }} /></label>
-          <label style={{ fontSize: 11.5, fontWeight: 800, color: "#745D81" }}>Ends<input type="time" value={preferences.quiet_end || ""} onChange={(event) => updatePreference({ quiet_end: event.target.value })} style={{ ...inputStyle, marginTop: 5, padding: "9px 10px" }} /></label>
+          <label style={{ fontSize: 11.5, fontWeight: 800, color: "var(--pl-theme-ink,#745D81)" }}>Starts<input type="time" value={preferences.quiet_start || ""} onChange={(event) => updatePreference({ quiet_start: event.target.value })} style={{ ...inputStyle, marginTop: 5, padding: "9px 10px" }} /></label>
+          <label style={{ fontSize: 11.5, fontWeight: 800, color: "var(--pl-theme-ink,#745D81)" }}>Ends<input type="time" value={preferences.quiet_end || ""} onChange={(event) => updatePreference({ quiet_end: event.target.value })} style={{ ...inputStyle, marginTop: 5, padding: "9px 10px" }} /></label>
         </div>
         <ToggleRow checked={preferences.discreet_notifications} onChange={(event) => updatePreference({ discreet_notifications: event.target.checked })} title="Discreet lock-screen wording" description="Also hides Guardian note previews." />
         <ToggleRow checked={preferences.nurturing_checkins} onChange={(event) => updatePreference({ nurturing_checkins: event.target.checked })} title="Nurturing check-ins" description="Allow PlushLife to use the warmer check-in style." />
@@ -298,10 +298,10 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
       <DetailHeader title="Experience" onBack={() => setSection("home")} />
       <SectionTitle icon="✨" title="How PlushLife feels" description="These options save automatically." />
       <Card>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", paddingBottom: 12, marginBottom: 4, borderBottom: "1px solid #EEE3F1" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", paddingBottom: 12, marginBottom: 4, borderBottom: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
           <div>
-            <div style={{ fontSize: 12.5, fontWeight: 900, color: "#6E5480" }}>🎯 Today's check-in</div>
-            <div style={{ marginTop: 3, fontSize: 11, lineHeight: 1.4, color: "#8A7895" }}>Reopen today's check-in.</div>
+            <div style={{ fontSize: 12.5, fontWeight: 900, color: "var(--pl-theme-ink,#6E5480)" }}>🎯 Today's check-in</div>
+            <div style={{ marginTop: 3, fontSize: 11, lineHeight: 1.4, color: "var(--pl-theme-muted,#8A7895)" }}>Reopen today's check-in.</div>
           </div>
           <button type="button" onClick={openDailyCheckIn} style={{ ...secondaryButton, flexShrink: 0 }}>Change</button>
         </div>
@@ -324,27 +324,27 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
       <DetailHeader title="Devices" onBack={() => setSection("home")} />
       <SectionTitle icon="⌚" title="Connected experiences" description="Watch pairing and the home-screen widget are kept together here." />
       <Card>
-        <div style={{ fontSize: 13.5, fontWeight: 900, color: "#4D756B" }}>⌚ Amazfit watch</div>
-        <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#7E8B87" }}>Open PlushLife on your watch, choose <strong>My tasks</strong>, then enter its code below.</div>
+        <div style={{ fontSize: 13.5, fontWeight: 900, color: "var(--pl-theme-ink,#4D756B)" }}>⌚ Amazfit watch</div>
+        <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#7E8B87)" }}>Open PlushLife on your watch, choose <strong>My tasks</strong>, then enter its code below.</div>
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 8, marginTop: 10 }}>
           <input type="text" value={watchPairingCode} onChange={(event) => setWatchPairingCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8))} onKeyDown={(event) => { if (event.key === "Enter") connectWatch(); }} maxLength={8} placeholder="8-character code" style={{ ...inputStyle, letterSpacing: ".12em", textTransform: "uppercase" }} />
           <button type="button" disabled={watchPairingBusy} onClick={connectWatch} style={{ ...primaryButton, background: watchPairingBusy ? "#97B5AD" : "#388C79" }}>{watchPairingBusy ? "Connecting…" : "Connect"}</button>
         </div>
-        {watchPairingMessage && <div role="status" style={{ marginTop: 8, fontSize: 11.5, color: "#47776B", fontWeight: 700 }}>{watchPairingMessage}</div>}
+        {watchPairingMessage && <div role="status" style={{ marginTop: 8, fontSize: 11.5, color: "var(--pl-theme-ink,#47776B)", fontWeight: 700 }}>{watchPairingMessage}</div>}
       </Card>
       {window.Capacitor?.isNativePlatform?.() && window.Capacitor?.Plugins?.WatchSyncBridge && (
         <Card>
-          <div style={{ fontSize: 13.5, fontWeight: 900, color: "#4D756B" }}>⚡ Instant local sync</div>
-          <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#7E8B87" }}>Optional Bluetooth sync while this phone app is running. Normal watch sync still works as a fallback.</div>
-          <button type="button" disabled={localWatchSyncBusy} onClick={startLocalWatchSync} style={{ ...secondaryButton, marginTop: 9, color: "#388C79" }}>{localWatchSyncBusy ? "Waiting for watch…" : "Enable instant sync"}</button>
-          {localWatchSyncMessage && <div role="status" style={{ marginTop: 7, fontSize: 11.5, color: "#6F5C7C" }}>{localWatchSyncMessage}</div>}
+          <div style={{ fontSize: 13.5, fontWeight: 900, color: "var(--pl-theme-ink,#4D756B)" }}>⚡ Instant local sync</div>
+          <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#7E8B87)" }}>Optional Bluetooth sync while this phone app is running. Normal watch sync still works as a fallback.</div>
+          <button type="button" disabled={localWatchSyncBusy} onClick={startLocalWatchSync} style={{ ...secondaryButton, marginTop: 9, color: "var(--pl-theme-ink,#388C79)" }}>{localWatchSyncBusy ? "Waiting for watch…" : "Enable instant sync"}</button>
+          {localWatchSyncMessage && <div role="status" style={{ marginTop: 7, fontSize: 11.5, color: "var(--pl-theme-ink,#6F5C7C)" }}>{localWatchSyncMessage}</div>}
         </Card>
       )}
       <Card>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
           <div>
-            <div style={{ fontSize: 13.5, fontWeight: 900, color: "#6E5480" }}>📱 Home-screen widget</div>
-            <div style={{ marginTop: 3, fontSize: 11.5, color: "#8A7895" }}>Today {pct}% · Week {weeklyOverallPct}%</div>
+            <div style={{ fontSize: 13.5, fontWeight: 900, color: "var(--pl-theme-ink,#6E5480)" }}>📱 Home-screen widget</div>
+            <div style={{ marginTop: 3, fontSize: 11.5, color: "var(--pl-theme-muted,#8A7895)" }}>Today {pct}% · Week {weeklyOverallPct}%</div>
           </div>
           <button type="button" onClick={() => {
             document.dispatchEvent(new CustomEvent("plushlife-widget-sync"));
@@ -357,10 +357,10 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
             setTimeout(() => setWidgetSyncMsg(""), 3000);
           }} style={primaryButton}>Sync now</button>
         </div>
-        {widgetSyncMsg && <div style={{ marginTop: 7, color: "#38816F", fontSize: 11.5, fontWeight: 800 }}>{widgetSyncMsg}</div>}
+        {widgetSyncMsg && <div style={{ marginTop: 7, color: "var(--pl-theme-ink,#38816F)", fontSize: 11.5, fontWeight: 800 }}>{widgetSyncMsg}</div>}
         <details style={{ marginTop: 11 }}>
-          <summary style={{ cursor: "pointer", color: "#755D82", fontSize: 12, fontWeight: 850 }}>How to add the Android widget</summary>
-          <div style={{ marginTop: 8, fontSize: 11.5, lineHeight: 1.55, color: "#8A7895" }}>1. Long-press an empty space on your home screen.<br/>2. Tap <strong>Widgets</strong> and find <strong>PlushLife</strong>.<br/>3. Drag the widget onto your home screen.</div>
+          <summary style={{ cursor: "pointer", color: "var(--pl-theme-ink,#755D82)", fontSize: 12, fontWeight: 850 }}>How to add the Android widget</summary>
+          <div style={{ marginTop: 8, fontSize: 11.5, lineHeight: 1.55, color: "var(--pl-theme-muted,#8A7895)" }}>1. Long-press an empty space on your home screen.<br/>2. Tap <strong>Widgets</strong> and find <strong>PlushLife</strong>.<br/>3. Drag the widget onto your home screen.</div>
         </details>
       </Card>
     </>
@@ -381,20 +381,20 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
       <Card>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
           <div>
-            <div style={{ fontSize: 13.5, fontWeight: 900, color: "#4F756A" }}>Rest today</div>
-            <div style={{ marginTop: 3, fontSize: 11.5, color: "#81928D" }}>Nothing is required today.</div>
+            <div style={{ fontSize: 13.5, fontWeight: 900, color: "var(--pl-theme-ink,#4F756A)" }}>Rest today</div>
+            <div style={{ marginTop: 3, fontSize: 11.5, color: "var(--pl-theme-muted,#81928D)" }}>Nothing is required today.</div>
           </div>
-          <button type="button" onClick={toggleRestToday} style={{ ...secondaryButton, border: restDatesSet.has(period.date) ? "2px solid #388C79" : secondaryButton.border, color: "#388C79" }}>{restDatesSet.has(period.date) ? "✓ Resting" : "Turn on"}</button>
+          <button type="button" onClick={toggleRestToday} style={{ ...secondaryButton, border: restDatesSet.has(period.date) ? "2px solid #388C79" : secondaryButton.border, color: "var(--pl-theme-ink,#388C79)" }}>{restDatesSet.has(period.date) ? "✓ Resting" : "Turn on"}</button>
         </div>
       </Card>
       <Card>
-        <div style={{ fontSize: 13.5, fontWeight: 900, color: "#4F756A" }}>Plan a rest range</div>
+        <div style={{ fontSize: 13.5, fontWeight: 900, color: "var(--pl-theme-ink,#4F756A)" }}>Plan a rest range</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 9 }}>
-          <label style={{ fontSize: 11.5, fontWeight: 800, color: "#6B817B" }}>From<input type="date" value={restRangeDraft.start} onChange={(event) => setRestRangeDraft((current) => ({ ...current, start: event.target.value }))} style={{ ...inputStyle, marginTop: 5 }} /></label>
-          <label style={{ fontSize: 11.5, fontWeight: 800, color: "#6B817B" }}>To<input type="date" value={restRangeDraft.end} onChange={(event) => setRestRangeDraft((current) => ({ ...current, end: event.target.value }))} style={{ ...inputStyle, marginTop: 5 }} /></label>
+          <label style={{ fontSize: 11.5, fontWeight: 800, color: "var(--pl-theme-muted,#6B817B)" }}>From<input type="date" value={restRangeDraft.start} onChange={(event) => setRestRangeDraft((current) => ({ ...current, start: event.target.value }))} style={{ ...inputStyle, marginTop: 5 }} /></label>
+          <label style={{ fontSize: 11.5, fontWeight: 800, color: "var(--pl-theme-muted,#6B817B)" }}>To<input type="date" value={restRangeDraft.end} onChange={(event) => setRestRangeDraft((current) => ({ ...current, end: event.target.value }))} style={{ ...inputStyle, marginTop: 5 }} /></label>
         </div>
-        <button type="button" onClick={saveRestRange} style={{ ...primaryButton, marginTop: 10, background: "#388C79" }}>Mark as resting</button>
-        {restDates.length > 0 && <div style={{ marginTop: 8, color: "#81928D", fontSize: 11.5 }}>{restDates.length} rest {restDates.length === 1 ? "day" : "days"} marked.</div>}
+        <button type="button" onClick={saveRestRange} style={{ ...primaryButton, marginTop: 10, background: "var(--pl-theme-accent,#388C79)" }}>Mark as resting</button>
+        {restDates.length > 0 && <div style={{ marginTop: 8, color: "var(--pl-theme-muted,#81928D)", fontSize: 11.5 }}>{restDates.length} rest {restDates.length === 1 ? "day" : "days"} marked.</div>}
       </Card>
     </>
   );
@@ -403,26 +403,26 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
     <>
       <DetailHeader title="Privacy & Data" onBack={() => setSection("home")} />
       <SectionTitle icon="🔐" title="Your data stays yours" description="Backup, restore, or remove specific categories." />
-      <Card style={{ background: "#F5FBF9", borderColor: "#CFE7DF" }}>
+      <Card style={{ background: "var(--pl-theme-surface,#F5FBF9)", borderColor: "var(--pl-theme-line,#CFE7DF)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 13.5, fontWeight: 900, color: "#347865" }}>📱 On-device backup</div>
-            <div style={{ marginTop: 4, color: "#6E817B", fontSize: 11.5, lineHeight: 1.45 }}>PlushLife keeps a second copy of your independently restorable data on this device. Cloud sync stays on so a new phone can still recover your account.</div>
+            <div style={{ fontSize: 13.5, fontWeight: 900, color: "var(--pl-theme-ink,#347865)" }}>📱 On-device backup</div>
+            <div style={{ marginTop: 4, color: "var(--pl-theme-muted,#6E817B)", fontSize: 11.5, lineHeight: 1.45 }}>PlushLife keeps a second copy of your independently restorable data on this device. Cloud sync stays on so a new phone can still recover your account.</div>
             <div style={{ marginTop: 6, color: deviceBackupStatus?.stale ? "#A56D14" : "#56756C", fontSize: 11, fontWeight: 800 }}>
               {deviceBackupStatus?.savedAt ? (deviceBackupStatus.stale ? "Backup needs refreshing · last saved " : "Last saved ") + new Date(deviceBackupStatus.savedAt).toLocaleString() : deviceBackupStatus?.unavailable ? "On-device backup unavailable on this device" : "Waiting for the first on-device backup"}
             </div>
-            {deviceBackupStatus?.exists && <div style={{ marginTop: 3, color: "#71857F", fontSize: 10.5, lineHeight: 1.4 }}>{deviceBackupStatus.verified ? "✓ Latest backup verified" : "Verification recommended"} · Recovery snapshots: {deviceBackupStatus.snapshotCount || 1}/3</div>}
+            {deviceBackupStatus?.exists && <div style={{ marginTop: 3, color: "var(--pl-theme-muted,#71857F)", fontSize: 10.5, lineHeight: 1.4 }}>{deviceBackupStatus.verified ? "✓ Latest backup verified" : "Verification recommended"} · Recovery snapshots: {deviceBackupStatus.snapshotCount || 1}/3</div>}
           </div>
           <div style={{ display: "grid", gap: 6, flexShrink: 0 }}>
-            <button type="button" disabled={deviceBackupBusy} onClick={refreshDeviceBackup} style={{ ...secondaryButton, color: "#347865", opacity: deviceBackupBusy ? .65 : 1 }}>{deviceBackupBusy ? "Saving…" : "Back up now"}</button>
-            <button type="button" disabled={deviceBackupVerifyBusy || !deviceBackupStatus?.exists} onClick={verifyDeviceBackupNow} style={{ ...secondaryButton, color: "#3F78B8", opacity: (deviceBackupVerifyBusy || !deviceBackupStatus?.exists) ? .55 : 1 }}>{deviceBackupVerifyBusy ? "Verifying…" : "Verify backup"}</button>
+            <button type="button" disabled={deviceBackupBusy} onClick={refreshDeviceBackup} style={{ ...secondaryButton, color: "var(--pl-theme-ink,#347865)", opacity: deviceBackupBusy ? .65 : 1 }}>{deviceBackupBusy ? "Saving…" : "Back up now"}</button>
+            <button type="button" disabled={deviceBackupVerifyBusy || !deviceBackupStatus?.exists} onClick={verifyDeviceBackupNow} style={{ ...secondaryButton, color: "var(--pl-theme-muted,#3F78B8)", opacity: (deviceBackupVerifyBusy || !deviceBackupStatus?.exists) ? .55 : 1 }}>{deviceBackupVerifyBusy ? "Verifying…" : "Verify backup"}</button>
           </div>
         </div>
-        <div style={{ marginTop: 9, padding: "8px 9px", borderRadius: 10, background: "rgba(255,255,255,.7)", color: "#71857F", fontSize: 10.8, lineHeight: 1.45 }}>PlushLife keeps up to 3 recent recovery snapshots on this device. Nothing is deleted from the cloud automatically. Relationship, payment, push-token, and device-pairing records are deliberately not copied into the restorable device backup.</div>
+        <div style={{ marginTop: 9, padding: "8px 9px", borderRadius: 10, background: "rgba(255,255,255,.7)", color: "var(--pl-theme-muted,#71857F)", fontSize: 10.8, lineHeight: 1.45 }}>PlushLife keeps up to 3 recent recovery snapshots on this device. Nothing is deleted from the cloud automatically. Relationship, payment, push-token, and device-pairing records are deliberately not copied into the restorable device backup.</div>
       </Card>
-      <Card style={{ background: "#F8FBFF", borderColor: "#D9E9F6" }}>
-        <div style={{ fontSize: 13.5, fontWeight: 900, color: "#3F78B8" }}>🔒 We will never sell your data. Ever.</div>
-        <div style={{ marginTop: 4, color: "#6985A3", fontSize: 11.5, lineHeight: 1.45 }}>No data brokers and no sale of your habits, moods, or reflections.</div>
+      <Card style={{ background: "var(--pl-theme-surface,#F8FBFF)", borderColor: "var(--pl-theme-line,#D9E9F6)" }}>
+        <div style={{ fontSize: 13.5, fontWeight: 900, color: "var(--pl-theme-muted,#3F78B8)" }}>🔒 We will never sell your data. Ever.</div>
+        <div style={{ marginTop: 4, color: "var(--pl-theme-muted,#6985A3)", fontSize: 11.5, lineHeight: 1.45 }}>No data brokers and no sale of your habits, moods, or reflections.</div>
       </Card>
       <Card>
         <div style={{ display: "grid", gap: 8 }}>
@@ -430,14 +430,14 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
           <button type="button" onClick={() => restoreFileInputRef.current?.click()} style={{ ...secondaryButton, textAlign: "left" }}>⬆️ Restore from backup</button>
           <input ref={restoreFileInputRef} type="file" accept="application/json" style={{ display: "none" }} onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) restoreFromBackup(file); }} />
         </div>
-        <div style={{ marginTop: 8, color: "#8A7895", fontSize: 11.5, lineHeight: 1.45 }}>Backups include your own tasks, schedules, progress, and reflections. Guardian connections are not included.</div>
+        <div style={{ marginTop: 8, color: "var(--pl-theme-muted,#8A7895)", fontSize: 11.5, lineHeight: 1.45 }}>Backups include your own tasks, schedules, progress, and reflections. Guardian connections are not included.</div>
       </Card>
       <Card>
-        <div style={{ fontSize: 12, fontWeight: 900, color: "#A65F70" }}>DELETE SOME OF MY DATA</div>
-        <div style={{ marginTop: 4, fontSize: 11.5, color: "#8A7895" }}>These leave your account, tasks, and routines in place.</div>
+        <div style={{ fontSize: 12, fontWeight: 900, color: "var(--pl-theme-muted,#A65F70)" }}>DELETE SOME OF MY DATA</div>
+        <div style={{ marginTop: 4, fontSize: 11.5, color: "var(--pl-theme-muted,#8A7895)" }}>These leave your account, tasks, and routines in place.</div>
         <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
-          <button type="button" onClick={deleteAllCheckIns} style={{ ...secondaryButton, color: "#A65F70" }}>Delete all check-ins</button>
-          <button type="button" onClick={deleteAllReflections} style={{ ...secondaryButton, color: "#A65F70" }}>Delete all reflections</button>
+          <button type="button" onClick={deleteAllCheckIns} style={{ ...secondaryButton, color: "var(--pl-theme-muted,#A65F70)" }}>Delete all check-ins</button>
+          <button type="button" onClick={deleteAllReflections} style={{ ...secondaryButton, color: "var(--pl-theme-muted,#A65F70)" }}>Delete all reflections</button>
         </div>
       </Card>
     </>
@@ -450,7 +450,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
       <Card>
         <textarea value={feedbackText} onChange={(event) => setFeedbackText(event.target.value)} maxLength={2000} placeholder="What's going on?" style={{ ...inputStyle, minHeight: 120, resize: "vertical", fontFamily: "inherit" }} />
         <button type="button" onClick={submitFeedback} style={{ ...primaryButton, marginTop: 9 }}>💌 Send feedback</button>
-        {feedbackMessage && <div role="status" style={{ marginTop: 7, color: "#755D82", fontSize: 11.5 }}>{feedbackMessage}</div>}
+        {feedbackMessage && <div role="status" style={{ marginTop: 7, color: "var(--pl-theme-ink,#755D82)", fontSize: 11.5 }}>{feedbackMessage}</div>}
       </Card>
     </>
   );
@@ -467,31 +467,31 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
       <DetailHeader title="Account" onBack={() => setSection("home")} />
       <SectionTitle icon="🔑" title="Account & sync" description="Manage your email, sessions, and account controls." />
       <Card>
-        <div style={{ fontSize: 11.5, color: "#8A7895" }}>SIGNED IN AS</div>
-        <div style={{ marginTop: 3, fontSize: 14, fontWeight: 900, color: "#5B4B6B", overflowWrap: "anywhere" }}>{user?.email || "—"}</div>
+        <div style={{ fontSize: 11.5, color: "var(--pl-theme-muted,#8A7895)" }}>SIGNED IN AS</div>
+        <div style={{ marginTop: 3, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)", overflowWrap: "anywhere" }}>{user?.email || "—"}</div>
         <div style={{ marginTop: 10, padding: "10px 11px", borderRadius: 11, background: online && syncStatus !== "offline" ? "#F0FAF6" : "#FFF7F2", color: online && syncStatus !== "offline" ? "#347865" : "#9A6B4F", fontSize: 11.5, fontWeight: 750 }}>{formatSyncStatus(online, syncStatus, lastSyncedAt)}</div>
         <button type="button" onClick={syncNow} style={{ ...secondaryButton, marginTop: 8 }}>{syncStatus === "error" ? "Retry sync" : "Sync now"}</button>
       </Card>
       <Card>
-        <div style={{ fontSize: 12, fontWeight: 900, color: "#665474" }}>CHANGE EMAIL</div>
+        <div style={{ fontSize: 12, fontWeight: 900, color: "var(--pl-theme-ink,#665474)" }}>CHANGE EMAIL</div>
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 8, marginTop: 8 }}>
           <input type="email" value={emailChangeDraft} onChange={(event) => setEmailChangeDraft(event.target.value)} placeholder="New email address" style={inputStyle} />
-          <button type="button" onClick={requestEmailChange} style={{ ...primaryButton, background: "#4C8FE8" }}>Change</button>
+          <button type="button" onClick={requestEmailChange} style={{ ...primaryButton, background: "var(--pl-theme-accent,#4C8FE8)" }}>Change</button>
         </div>
-        <div style={{ marginTop: 6, fontSize: 11, lineHeight: 1.4, color: "#8A7895" }}>For security, confirmation links are sent before the address changes.</div>
+        <div style={{ marginTop: 6, fontSize: 11, lineHeight: 1.4, color: "var(--pl-theme-muted,#8A7895)" }}>For security, confirmation links are sent before the address changes.</div>
       </Card>
       <Card>
         <div style={{ display: "grid", gap: 8 }}>
           <button type="button" disabled={signingOut} onClick={() => { void handleSignOut(); }} style={{ ...secondaryButton, textAlign: "left", opacity: signingOut ? .6 : 1 }}>🚪 {signingOut ? "Signing out…" : "Sign out"}</button>
-          <button type="button" onClick={signOutOtherDevices} style={{ ...secondaryButton, textAlign: "left", color: "#A65F70" }}>Sign out other devices</button>
+          <button type="button" onClick={signOutOtherDevices} style={{ ...secondaryButton, textAlign: "left", color: "var(--pl-theme-muted,#A65F70)" }}>Sign out other devices</button>
         </div>
       </Card>
-      <Card style={{ borderColor: "#EACFD6" }}>
-        <div style={{ fontSize: 12, fontWeight: 900, color: "#A65F70" }}>DANGER ZONE</div>
-        <div style={{ marginTop: 4, fontSize: 11.5, color: "#8A7895" }}>Deleting your account requires confirmation and cannot be undone.</div>
-        <button type="button" onClick={() => { setDeleteConfirmation(""); setDeleteDialogOpen(true); }} style={{ ...secondaryButton, marginTop: 9, color: "#A65F70", borderColor: "#E6C2CB" }}>Delete account</button>
+      <Card style={{ borderColor: "var(--pl-theme-line,#EACFD6)" }}>
+        <div style={{ fontSize: 12, fontWeight: 900, color: "var(--pl-theme-muted,#A65F70)" }}>DANGER ZONE</div>
+        <div style={{ marginTop: 4, fontSize: 11.5, color: "var(--pl-theme-muted,#8A7895)" }}>Deleting your account requires confirmation and cannot be undone.</div>
+        <button type="button" onClick={() => { setDeleteConfirmation(""); setDeleteDialogOpen(true); }} style={{ ...secondaryButton, marginTop: 9, color: "var(--pl-theme-muted,#A65F70)", borderColor: "var(--pl-theme-line,#E6C2CB)" }}>Delete account</button>
       </Card>
-      {settingsMessage && <div role="status" style={{ marginTop: 10, color: "#347865", fontSize: 12, fontWeight: 800 }}>{settingsMessage}</div>}
+      {settingsMessage && <div role="status" style={{ marginTop: 10, color: "var(--pl-theme-ink,#347865)", fontSize: 12, fontWeight: 800 }}>{settingsMessage}</div>}
     </>
   );
 
@@ -502,15 +502,15 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
       <div style={{ maxWidth: 620, margin: "0 auto" }}>{pages[section] || home}</div>
       {deleteDialogOpen && (
         <div role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !deletingAccount) setDeleteDialogOpen(false); }} style={{ position: "fixed", inset: 0, zIndex: 10040, display: "grid", placeItems: "center", padding: 18, background: "rgba(47,32,53,.48)" }}>
-          <div role="dialog" aria-modal="true" aria-labelledby="delete-account-title" aria-describedby="delete-account-description" style={{ width: "min(440px,100%)", padding: 20, borderRadius: 20, background: "white", border: "1px solid #E7C8D1", boxShadow: "0 24px 70px rgba(47,32,53,.24)" }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-account-title" aria-describedby="delete-account-description" style={{ width: "min(440px,100%)", padding: 20, borderRadius: 20, background: "white", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 24px 70px rgba(47,32,53,.24)" }}>
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-              <div><div id="delete-account-title" style={{ fontSize: 18, fontWeight: 900, color: "#8E4057" }}>Permanently delete this account?</div><div id="delete-account-description" style={{ marginTop: 7, fontSize: 12, lineHeight: 1.55, color: "#725F68" }}>This permanently deletes your PlushLife account, tasks, progress, schedules, and private reflections. This cannot be undone.</div></div>
-              <button type="button" aria-label="Close account deletion confirmation" disabled={deletingAccount} onClick={() => setDeleteDialogOpen(false)} style={{ minWidth: 44, minHeight: 44, border: 0, borderRadius: 12, background: "#F8F1F3", color: "#8E4057", fontSize: 20, cursor: deletingAccount ? "default" : "pointer" }}>×</button>
+              <div><div id="delete-account-title" style={{ fontSize: 18, fontWeight: 900, color: "var(--pl-theme-ink,#8E4057)" }}>Permanently delete this account?</div><div id="delete-account-description" style={{ marginTop: 7, fontSize: 12, lineHeight: 1.55, color: "var(--pl-theme-ink,#725F68)" }}>This permanently deletes your PlushLife account, tasks, progress, schedules, and private reflections. This cannot be undone.</div></div>
+              <button type="button" aria-label="Close account deletion confirmation" disabled={deletingAccount} onClick={() => setDeleteDialogOpen(false)} style={{ minWidth: 44, minHeight: 44, border: 0, borderRadius: 12, background: "var(--pl-theme-surface-2,#F8F1F3)", color: "var(--pl-theme-ink,#8E4057)", fontSize: 20, cursor: deletingAccount ? "default" : "pointer" }}>×</button>
             </div>
-            <label htmlFor="delete-account-confirmation" style={{ display: "grid", gap: 6, marginTop: 16, fontSize: 12, fontWeight: 900, color: "#66515A" }}>Type DELETE MY ACCOUNT to continue<input id="delete-account-confirmation" autoFocus autoComplete="off" value={deleteConfirmation} onChange={(event) => setDeleteConfirmation(event.target.value)} disabled={deletingAccount} style={{ ...inputStyle, borderColor: "#D8AEB9" }} /></label>
+            <label htmlFor="delete-account-confirmation" style={{ display: "grid", gap: 6, marginTop: 16, fontSize: 12, fontWeight: 900, color: "var(--pl-theme-ink,#66515A)" }}>Type DELETE MY ACCOUNT to continue<input id="delete-account-confirmation" autoFocus autoComplete="off" value={deleteConfirmation} onChange={(event) => setDeleteConfirmation(event.target.value)} disabled={deletingAccount} style={{ ...inputStyle, borderColor: "var(--pl-theme-line,#D8AEB9)" }} /></label>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
               <button type="button" disabled={deletingAccount} onClick={() => setDeleteDialogOpen(false)} style={secondaryButton}>Cancel</button>
-              <button type="button" disabled={deleteConfirmation !== "DELETE MY ACCOUNT" || deletingAccount} onClick={async () => { setDeletingAccount(true); await deleteMyAccount(); setDeletingAccount(false); }} style={{ ...primaryButton, background: "#A65F70", opacity: deleteConfirmation === "DELETE MY ACCOUNT" && !deletingAccount ? 1 : .5, cursor: deleteConfirmation === "DELETE MY ACCOUNT" && !deletingAccount ? "pointer" : "not-allowed" }}>{deletingAccount ? "Deleting…" : "Delete my account"}</button>
+              <button type="button" disabled={deleteConfirmation !== "DELETE MY ACCOUNT" || deletingAccount} onClick={async () => { setDeletingAccount(true); await deleteMyAccount(); setDeletingAccount(false); }} style={{ ...primaryButton, background: "var(--pl-theme-accent,#A65F70)", opacity: deleteConfirmation === "DELETE MY ACCOUNT" && !deletingAccount ? 1 : .5, cursor: deleteConfirmation === "DELETE MY ACCOUNT" && !deletingAccount ? "pointer" : "not-allowed" }}>{deletingAccount ? "Deleting…" : "Delete my account"}</button>
             </div>
           </div>
         </div>

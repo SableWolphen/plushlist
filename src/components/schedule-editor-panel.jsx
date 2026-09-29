@@ -173,7 +173,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
             <button type="button" onClick={saveScheduleException} className="schedule-btn green">Save extras</button>
           </div>
 
-          {scheduleExceptionMessage && <div role="status" className="schedule-status" style={{ color: "#52746E" }}>{scheduleExceptionMessage}</div>}
+          {scheduleExceptionMessage && <div role="status" className="schedule-status" style={{ color: "var(--pl-theme-ink,#52746E)" }}>{scheduleExceptionMessage}</div>}
 
           {scheduleExceptions.length > 0 && (
             <div className="schedule-saved">

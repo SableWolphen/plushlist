@@ -33,7 +33,7 @@ function LandingDemo({ colors }) {
         <div style={{ marginTop: 3, color: colors.soft, fontSize: 13.5 }}>Tap the sample tasks. This demo doesn’t save anything.</div>
       </div>
       <div style={{ width: "min(100%, 390px)", background: "#FFFFFFEE", borderRadius: 32, padding: 14, boxSizing: "border-box", boxShadow: "0 22px 55px -22px rgba(90,50,110,.3)", border: `1px solid ${colors.line}` }}>
-        <div style={{ position: "relative", overflow: "hidden", background: "linear-gradient(160deg,#FDECFA,#E8F8F2 60%,#FFF6E2)", borderRadius: 22, padding: "18px 16px", minHeight: 340 }}>
+        <div style={{ position: "relative", overflow: "hidden", background: "var(--pl-theme-surface)", borderRadius: 22, padding: "18px 16px", minHeight: 340 }}>
           {demoCelebrating && (
             <div role="status" aria-live="polite" style={{ position: "absolute", inset: 0, zIndex: 3, display: "grid", placeItems: "center", padding: 18, background: "rgba(255,250,253,.93)", textAlign: "center", animation: "demoPop .45s ease-out" }}>
               <div>
@@ -137,7 +137,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
       </nav>
 
       <section className="plushlife-landing-hero" style={{ padding: "40px 28px 20px", textAlign: "center" }}>
-        <span style={{ display: "inline-block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", color: colors.orchid, background: "#F9E4F7", padding: "6px 16px", borderRadius: 999, marginBottom: 22 }}>ROUTINES · SELF-CARE · SUPPORT</span>
+        <span style={{ display: "inline-block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", color: colors.orchid, background: "var(--pl-theme-surface-2,#F9E4F7)", padding: "6px 16px", borderRadius: 999, marginBottom: 22 }}>ROUTINES · SELF-CARE · SUPPORT</span>
         <h1 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: "clamp(38px,6vw,64px)", fontWeight: 800, lineHeight: 1.05, margin: "0 0 18px" }}>Care that fits<br/><span style={{ color: colors.orchid }}>the day you’re having.</span></h1>
         <p style={{ fontSize: 18, color: colors.soft, maxWidth: 650, margin: "0 auto 30px", lineHeight: 1.6 }}>PlushLife brings your schedule, habits, self-care, check-ins, journal, and trusted support into one private daily companion. Unlike a rigid checklist, it adapts to the energy you actually have.</p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
@@ -231,16 +231,16 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
               <div className="landing-phone-screen">
                 <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: ".14em", color: colors.orchid }}>MY PLUSHLIFE · SUNDAY</div>
                 <div style={{ marginTop: 4, fontFamily: "'Baloo 2',sans-serif", fontSize: 20, fontWeight: 900 }}>A gentle little day 💜</div>
-                <div style={{ marginTop: 11, padding: "10px 11px", borderRadius: 13, background: "rgba(255,255,255,.88)", border: "1px solid #E8D2E8", fontSize: 11.5, fontWeight: 900 }}>🎯 Check-in · Soft Day</div>
+                <div style={{ marginTop: 11, padding: "10px 11px", borderRadius: 13, background: "rgba(255,255,255,.88)", border: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 11.5, fontWeight: 900 }}>🎯 Check-in · Soft Day</div>
                 <div style={{ display: "flex", gap: 7, marginTop: 10 }}>
-                  <div style={{ flex: 1, padding: "10px", borderRadius: 13, background: "rgba(255,255,255,.82)", border: "1px solid #E8D2E8" }}><div style={{ fontSize: 8.5, fontWeight: 900, color: colors.orchid }}>PLUSHJOURNAL</div><div style={{ marginTop: 5, fontSize: 10.5, lineHeight: 1.35 }}>What would make today feel kinder?</div></div>
-                  <div style={{ flex: 1, padding: "10px", borderRadius: 13, background: "rgba(255,255,255,.82)", border: "1px solid #E8D2E8" }}><div style={{ fontSize: 8.5, fontWeight: 900, color: colors.mint }}>PROGRESS</div><div style={{ marginTop: 5, fontSize: 19, fontWeight: 900 }}>2 / 4</div><div style={{ fontSize: 8.5, color: colors.soft }}>gentle steps</div></div>
+                  <div style={{ flex: 1, padding: "10px", borderRadius: 13, background: "rgba(255,255,255,.82)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}><div style={{ fontSize: 8.5, fontWeight: 900, color: colors.orchid }}>PLUSHJOURNAL</div><div style={{ marginTop: 5, fontSize: 10.5, lineHeight: 1.35 }}>What would make today feel kinder?</div></div>
+                  <div style={{ flex: 1, padding: "10px", borderRadius: 13, background: "rgba(255,255,255,.82)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}><div style={{ fontSize: 8.5, fontWeight: 900, color: colors.mint }}>PROGRESS</div><div style={{ marginTop: 5, fontSize: 19, fontWeight: 900 }}>2 / 4</div><div style={{ fontSize: 8.5, color: colors.soft }}>gentle steps</div></div>
                 </div>
                 <div style={{ marginTop: 13, fontSize: 9, fontWeight: 900, letterSpacing: ".12em", color: colors.soft }}>TODAY</div>
                 {[["✓","Drink water",true],["✓","Morning medicine",true],["","Ten-minute tidy",false],["","Prepare for tomorrow",false]].map(([mark,label,done]) => (
-                  <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 7, padding: "9px", borderRadius: 11, background: "rgba(255,255,255,.9)", border: "1px solid #E8D2E8", color: done ? colors.soft : colors.plum, fontSize: 10.5, fontWeight: 800, textDecoration: done ? "line-through" : "none" }}><span style={{ width: 17, height: 17, display: "grid", placeItems: "center", borderRadius: 6, background: done ? colors.mint : "transparent", border: `2px solid ${done ? colors.mint : "#D1B8D3"}`, color: "white", fontSize: 9 }}>{mark}</span>{label}</div>
+                  <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 7, padding: "9px", borderRadius: 11, background: "rgba(255,255,255,.9)", border: "1px solid var(--pl-theme-line,#E9DDF6)", color: done ? colors.soft : colors.plum, fontSize: 10.5, fontWeight: 800, textDecoration: done ? "line-through" : "none" }}><span style={{ width: 17, height: 17, display: "grid", placeItems: "center", borderRadius: 6, background: done ? colors.mint : "transparent", border: `2px solid ${done ? colors.mint : "#D1B8D3"}`, color: "white", fontSize: 9 }}>{mark}</span>{label}</div>
                 ))}
-                <div style={{ marginTop: 12, padding: "9px", borderRadius: 999, background: "linear-gradient(90deg,#B95FCE,#8A6DE0)", color: "white", textAlign: "center", fontSize: 10.5, fontWeight: 900 }}>🧸 Open PlushRescue</div>
+                <div style={{ marginTop: 12, padding: "9px", borderRadius: 999, background: "var(--pl-theme-accent)", color: "white", textAlign: "center", fontSize: 10.5, fontWeight: 900 }}>🧸 Open PlushRescue</div>
               </div>
             </div>
             <div style={{ marginTop: 13, textAlign: "center", fontSize: 12, color: colors.soft, fontWeight: 800 }}>Plan · Reflect · See patterns</div>
@@ -253,7 +253,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
                 <div style={{ marginTop: 4, fontFamily: "'Baloo 2',sans-serif", fontSize: 17, fontWeight: 900 }}>How are you?</div>
                 <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 8 }}><span style={{ padding: "7px 9px", borderRadius: 999, background: "white", fontSize: 15 }}>😌</span><span style={{ padding: "7px 9px", borderRadius: 999, background: colors.orchid, boxShadow: "0 5px 12px rgba(185,95,206,.28)", fontSize: 15 }}>🙂</span><span style={{ padding: "7px 9px", borderRadius: 999, background: "white", fontSize: 15 }}>😣</span></div>
                 <div style={{ marginTop: 9, fontSize: 10.5, fontWeight: 900 }}>Okay · Soft</div>
-                <div style={{ marginTop: 8, padding: "7px 10px", borderRadius: 999, background: "#4A3A5C", color: "white", fontSize: 9.5, fontWeight: 900 }}>Tiny Step → water</div>
+                <div style={{ marginTop: 8, padding: "7px 10px", borderRadius: 999, background: "var(--pl-theme-accent,#4A3A5C)", color: "white", fontSize: 9.5, fontWeight: 900 }}>Tiny Step → water</div>
                 <div style={{ marginTop: 6, color: colors.orchid, fontSize: 9, fontWeight: 900 }}>🛟 Rescue</div>
               </div>
             </div>
@@ -311,7 +311,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
       </section>
 
       <section className="landing-detail-section" style={{ padding: "0 28px 70px", maxWidth: 900, margin: "0 auto" }}>
-        <div style={{ background: "linear-gradient(135deg, #EAF4FF, #F7ECFB)", borderRadius: 28, padding: "36px 30px", textAlign: "center" }}>
+        <div style={{ background: "var(--pl-theme-surface)", borderRadius: 28, padding: "36px 30px", textAlign: "center" }}>
           <div style={{ fontSize: 32 }}>🔒</div>
           <h3 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 22, margin: "10px 0 8px", color: colors.plum }}>We will never sell your data. Ever.</h3>
           <p style={{ color: colors.soft, fontSize: 15, lineHeight: 1.6, maxWidth: 560, margin: "0 auto" }}>No ads. No data brokers. No "anonymized insights" quietly sold to anyone. Your habits, moods, and reflections are not a product — they're yours, and you can download or delete them anytime.</p>
