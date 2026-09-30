@@ -43,16 +43,18 @@
     @media(min-width:681px) and (max-height:720px){body{align-items:start;padding-top:16px;padding-bottom:16px}main{padding:22px}.brand{margin-bottom:14px}.auth-card{padding:16px}}
   </style>
   <link rel="stylesheet" href="./assets/figma-design.css">
+  <link rel="stylesheet" href="./assets/login-redesign.css">
   <script defer src="./assets/plush-theme-copy.js"></script>
   <script defer src="./assets/login-theme.js"></script>
 </head>
 <body>
   <main>
-    <div class="brand"><div class="pl-login-scene"><img src="./assets/figma/soft.svg" width="211" height="100" alt="Your lavender plush companion" /></div><h1>Welcome back.</h1><p class="intro">Your little space is ready whenever you are.</p></div>
+    <div class="pl-login-wordmark"><span class="pl-brand-mark" aria-hidden="true"></span>PlushLife</div>
+    <div class="brand"><img class="pl-brand-mascot" src="./assets/plushlife-mascot.svg" width="160" height="160" alt="PlushLife’s friendly plush companion"><h1>A little space,<br>just for you.</h1><p class="intro">Tiny steps. Familiar comforts. Your pace.</p></div>
     <div class="login-layout">
       <section class="auth-card" aria-label="Sign in options">
-        <div class="auth-title">Open your space</div><p class="auth-subtitle">Your day, your pace. Sign in with Google or an email code.</p>
-        <button id="googleSignIn" class="google" type="button"><span class="gmark" aria-hidden="true">G</span><span>Continue with Google</span></button>
+        <div class="auth-title">Open your little space</div><p class="auth-subtitle">New here? Your first sign-in creates your account.</p>
+        <button id="googleSignIn" class="google" type="button"><span>Continue with Google</span></button>
         <button id="mobileEmailToggle" class="mobile-email-toggle" type="button" aria-expanded="false">Use email instead</button>
         <div class="email-shell" id="emailShell">
           <div class="divider">or use email</div>
@@ -62,7 +64,7 @@
           <div id="passwordSection" style="display:none"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Your password"><button id="passwordSignIn" class="secondary" type="button">Sign in with password</button></div>
         </div>
         <div id="message" role="status" aria-live="polite"></div>
-        <div class="comfort-note">🔒 Your routines and reflections stay private.</div>
+        <div class="comfort-note">Your routines and reflections stay private.</div>
         <a class="back back-home" href="./">Back to PlushLife</a>
         <div class="mobile-mini-note">Private account · Free core experience</div>
       </section>
@@ -89,6 +91,7 @@
     togglePassword.addEventListener("click",(event)=>{event.preventDefault();openEmailShell();const showing=passwordSection.style.display!=="none";passwordSection.style.display=showing?"none":"block";togglePassword.textContent=showing?"Have a password instead?":"Use the emailed code instead";if(!showing&&mobileLayout.matches)window.setTimeout(()=>password.focus(),0)});
     passwordSignIn.addEventListener("click",async()=>{const address=email.value.trim();if(!address||!address.includes("@")){message.textContent="Please enter your email address first.";openEmailShell();email.focus();return}if(!password.value){message.textContent="Please enter your password.";password.focus();return}passwordSignIn.disabled=true;message.textContent="Signing you in…";const{error}=await client.auth.signInWithPassword({email:address,password:password.value});passwordSignIn.disabled=false;if(error){message.textContent="That email or password didn't work.";return}message.textContent="Signed in! Opening your tracker…";window.location.replace("./")});
   </script>
+  <script>if(new URLSearchParams(window.location.search).get("provider")==="google")document.getElementById("googleSignIn").click();</script>
   <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}))}</script>
 </body>
 </html>

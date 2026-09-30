@@ -35,7 +35,7 @@
 
   function ensureCompactCard() {
     const card = findEmbeddedAuthCard();
-    if (!card) return;
+    if (!card || card.classList.contains("pl-welcome-auth")) return;
     card.classList.add("plushlife-landing-embedded-auth");
     if (!card.querySelector("[data-plushlife-mobile-auth-cta='true']")) {
       const compact = document.createElement("div");

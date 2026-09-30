@@ -79,6 +79,7 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
   const [codeStep, setCodeStep] = useState(false);
   return (
     <div className="plushlife-landing-root" style={{ minHeight: "100vh", background: colors.bg, backgroundImage: "radial-gradient(circle at 6% 8%, #FCE1F3 0%, transparent 38%), radial-gradient(circle at 96% 4%, #D8F3EC 0%, transparent 38%), radial-gradient(circle at 90% 92%, #FDF0D6 0%, transparent 42%)", color: colors.plum, fontFamily: "'Nunito','Segoe UI',sans-serif" }}>
+      <link rel="stylesheet" href="./assets/login-redesign.css" />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap');
         @keyframes plushBob { 0%,100% { transform:translateY(0) rotate(-1.5deg) } 50% { transform:translateY(-10px) rotate(1.5deg) } }
@@ -132,25 +133,25 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
             <a className="landing-nav-link" href="#landing-difference">Why it’s different</a>
             <a className="landing-nav-link" href="#landing-features">Features</a>
           </div>
-          <button onClick={() => setShowSignIn(true)} style={{ background: colors.plum, color: "white", border: 0, padding: "10px 20px", borderRadius: 999, fontWeight: 800, cursor: "pointer" }}>Start free</button>
+          <button onClick={() => { setShowSignIn(true); document.getElementById("welcome-sign-in")?.scrollIntoView({behavior:"smooth",block:"center"}); }} style={{ background: colors.plum, color: "white", border: 0, padding: "10px 20px", borderRadius: 999, fontWeight: 800, cursor: "pointer" }}>Start free</button>
         </div>
       </nav>
 
-      <section className="plushlife-landing-hero" style={{ padding: "40px 28px 20px", textAlign: "center" }}>
-        <span style={{ display: "inline-block", fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", color: colors.orchid, background: "var(--pl-theme-surface-2,#F9E4F7)", padding: "6px 16px", borderRadius: 999, marginBottom: 22 }}>ROUTINES · SELF-CARE · SUPPORT</span>
-        <h1 style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: "clamp(38px,6vw,64px)", fontWeight: 800, lineHeight: 1.05, margin: "0 0 18px" }}>Care that fits<br/><span style={{ color: colors.orchid }}>the day you’re having.</span></h1>
-        <p style={{ fontSize: 18, color: colors.soft, maxWidth: 650, margin: "0 auto 30px", lineHeight: 1.6 }}>PlushLife brings your schedule, habits, self-care, check-ins, journal, and trusted support into one private daily companion. Unlike a rigid checklist, it adapts to the energy you actually have.</p>
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <button onClick={() => setShowSignIn(true)} style={{ background: colors.orchid, color: "white", border: 0, padding: "15px 30px", borderRadius: 999, fontWeight: 800, fontSize: 16, cursor: "pointer", boxShadow: "0 12px 24px -10px rgba(185,95,206,.6)" }}>Start your list</button>
-          <button onClick={() => document.getElementById("landing-features")?.scrollIntoView({ behavior: "smooth" })} style={{ background: "transparent", color: colors.plum, border: `2px solid ${colors.line}`, padding: "13px 26px", borderRadius: 999, fontWeight: 800, fontSize: 16, cursor: "pointer" }}>See how it works</button>
+      <section className="plushlife-landing-hero pl-welcome-layout">
+        <div className="pl-welcome-copy">
+          <img className="pl-brand-mascot" src="./assets/plushlife-mascot.svg" width="160" height="160" alt="PlushLife’s friendly plush companion" />
+          <h1>A little space,<br/>just for you.</h1>
+          <p>Your routines, comforts, and little wins — all in one place, at your pace.</p>
+          <span className="pl-welcome-note">Soft days welcome. Fresh starts always.</span>
         </div>
 
-        {showSignIn && (
-          <div className="landing-auth-card" role="region" aria-label="PlushLife sign in">
-            <span className="landing-auth-badge" aria-hidden="true">🧸 YOUR LITTLE SPACE</span>
-            <h2>Create or open your private tracker</h2>
-            <p>{showPasswordField ? "Welcome back. Your space is right where you left it." : codeStep ? "Check your inbox for your one-time code." : "One small step, then you're home. We'll email you a secure code."}</p>
-            <div style={{ color: colors.soft, fontSize: 11, fontWeight: 800 }}>Everything is open right now — no tiers, no paywalls.</div>
+        {(
+          <div id="welcome-sign-in" className="landing-auth-card pl-welcome-auth" role="region" aria-label="PlushLife sign in">
+
+            <h2>Open your little space</h2>
+            <p>{showPasswordField ? "Welcome back. Your space is right where you left it." : codeStep ? "Check your inbox for your one-time code." : "New here? Your first sign-in creates your account."}</p>
+            <a className="pl-google-action" href="./login.html?provider=google">Continue with Google</a>
+            <div className="pl-auth-divider">or use your email</div>
             <label htmlFor="landing-email">Email address</label>
             <input id="landing-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" />
             {showPasswordField ? (
@@ -171,22 +172,10 @@ export function LandingPage({ email, setEmail, otpCode, setOtpCode, showSignIn, 
             )}
             {signInMessage && <div className="auth-status" role="status" aria-live="polite">{signInMessage}</div>}
             <div><button className="auth-back" type="button" onClick={() => { setShowPasswordField((shown) => !shown); setCodeStep(false); }}>{showPasswordField ? "Use an email code instead" : "Have a password instead?"}</button></div>
+            <div className="pl-auth-privacy">Your routines and reflections stay private.</div>
           </div>
         )}
 
-        <svg className="plushlife-landing-mascot" aria-hidden="true" viewBox="0 0 200 200" width="200" height="200" style={{ marginTop: 10, animation: "plushBob 3.2s ease-in-out infinite" }}>
-          <path d="M155 130 Q185 120 180 90 Q178 75 160 80" fill="none" stroke={colors.amber} strokeWidth="14" strokeLinecap="round"/>
-          <ellipse cx="100" cy="120" rx="62" ry="54" fill="#FCEFFB" stroke={colors.orchid} strokeWidth="3"/>
-          <path d="M60 78 L68 58 L76 78 M86 72 L94 50 L102 72 M112 78 L120 58 L128 78" fill={colors.mint} stroke="#2FA88C" strokeWidth="2"/>
-          <path d="M55 118 q10 8 0 16 M75 128 q10 8 0 16 M125 128 q-10 8 0 16 M145 118 q-10 8 0 16" stroke={colors.amber} strokeWidth="5" fill="none" strokeLinecap="round"/>
-          <circle cx="65" cy="72" r="13" fill="#FCEFFB" stroke={colors.orchid} strokeWidth="3"/><circle cx="135" cy="72" r="13" fill="#FCEFFB" stroke={colors.orchid} strokeWidth="3"/>
-          <circle cx="100" cy="112" r="40" fill="white" stroke={colors.orchid} strokeWidth="3"/>
-          <circle cx="82" cy="108" r="9" fill={colors.plum}/><circle cx="118" cy="108" r="9" fill={colors.plum}/>
-          <circle cx="82" cy="108" r="3.4" fill="white"/><circle cx="118" cy="108" r="3.4" fill="white"/>
-          <circle cx="70" cy="122" r="7" fill="#F9C9E9"/><circle cx="130" cy="122" r="7" fill="#F9C9E9"/>
-          <path d="M90 128 Q100 136 110 128" stroke={colors.plum} strokeWidth="3" fill="none" strokeLinecap="round"/>
-          <ellipse cx="75" cy="168" rx="16" ry="10" fill="#FCEFFB" stroke={colors.orchid} strokeWidth="3"/><ellipse cx="125" cy="168" rx="16" ry="10" fill="#FCEFFB" stroke={colors.orchid} strokeWidth="3"/>
-        </svg>
       </section>
 
       <LandingDemo colors={colors} />
