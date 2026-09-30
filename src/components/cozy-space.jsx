@@ -1,10 +1,39 @@
-import { COZY_FIELDS, COZY_NEEDS, COZY_STATUSES, normalizeCozyProfile, cozyCardSnapshot, supportPreferenceSummary } from '../cozy-profile.js';
+import { COZY_FIELDS, COZY_NEEDS, COZY_STATUSES, COZY_REMINDER_STYLES, normalizeCozyProfile, cozyCardSnapshot, supportPreferenceSummary, cozyComfortSuggestions } from '../cozy-profile.js';
 
 export const CozyComfortContext = React.createContext(null);
 const box = { padding: 14, borderRadius: 20, border: '1px solid var(--pl-theme-line)', background: 'var(--pl-theme-surface)', color: 'var(--pl-theme-ink)', marginTop: 10 };
 const button = { minHeight: 44, padding: '9px 12px', borderRadius: 14, border: '1px solid var(--pl-theme-line)', background: 'var(--pl-theme-surface-2)', color: 'var(--pl-theme-ink)', font: 'inherit', fontSize: 14, fontWeight: 800, cursor: 'pointer' };
 const input = { width: '100%', boxSizing: 'border-box', minHeight: 44, padding: 10, borderRadius: 12, border: '1px solid var(--pl-theme-line)', background: 'var(--pl-theme-surface)', color: 'var(--pl-theme-ink)', font: 'inherit', fontSize: 14 };
 const flex = { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 };
+
+export function CozySetup({ draft, onChange, section = 'all' }) {
+  const field = (key,value)=>onChange({...draft,fields:{...draft.fields,[key]:value}});
+  const groups = {
+    comforts: [['comfort_item','My comfort item','A blanket, plush, or favorite thing'],['sounds','Sounds that help','Soft music, rain, or quiet'],['snacks','A familiar snack','Whatever feels good to you']],
+    support: [['helps','What helps on a rough day','A quiet spot, water, a tiny step'],['soft_plan','My Soft Plan','The few things I want to keep on hard days'],['please_dont','Please don’t','No repeated reminders, no surprise calls']],
+    anchors: [['little_goal','What I’d like help with','Getting started, routines, bedtime…'],['anchors','My routine anchors','After coffee, before bed…']],
+  };
+  const fields = section === 'all' ? Object.values(groups).flat() : groups[section] || [];
+  return <div style={{display:'grid',gap:12}}>
+    <p style={{fontSize:14,lineHeight:1.5,margin:'6px 0'}}>Optional, private, and yours to change. Nothing here is shared automatically.</p>
+    {fields.map(([key,label,placeholder])=><label key={key} style={{display:'grid',gap:6,fontSize:14,fontWeight:700}}>{label}<input style={input} value={draft.fields[key]} maxLength={500} placeholder={placeholder} onChange={e=>field(key,e.target.value)}/></label>)}
+    {(section==='all'||section==='support')&&<label style={{display:'grid',gap:6,fontSize:14,fontWeight:700}}>How I like encouragement<select style={input} value={draft.reminder_style} onChange={e=>onChange({...draft,reminder_style:e.target.value,fields:{...draft.fields,reminders:e.target.value}})}>{COZY_REMINDER_STYLES.map(s=><option key={s}>{s}</option>)}</select></label>}
+  </div>;
+}
+
+export function CozyComfortKit({ onSound, soundscapes = [] }) {
+  const cozy = React.useContext(CozyComfortContext);
+  const [active,setActive] = React.useState('');
+  if (!cozy || cozy.status!=='ready') return null;
+  const suggestions=cozyComfortSuggestions(cozy.profile);
+  const record=async(key,fit)=>{if(await cozy.save({...cozy.profile,comfort_uses:[{key,fit,date:new Date().toLocaleDateString('en-CA')},...cozy.profile.comfort_uses].slice(0,80)}))setActive('');};
+  return <section style={box} aria-label="My Comfort Kit"><h4 style={{margin:0,fontSize:17}}>My Comfort Kit</h4><p style={{fontSize:14,margin:'6px 0'}}>Something familiar, whenever you need it.</p>
+    {!suggestions.length&&<p style={{fontSize:14}}>Add a comfort below. A blanket, a snack, or quiet all count.</p>}
+    {suggestions.map(s=><div key={s.key} style={{marginTop:8}}><button type="button" style={{...button,width:'100%',textAlign:'left'}} aria-expanded={active===s.key} onClick={()=>setActive(active===s.key?'':s.key)}><span style={{display:'block',fontSize:13,color:'var(--pl-theme-muted)'}}>{s.label}</span>{s.text}</button>{s.helped>0&&<p style={{margin:'4px 0',fontSize:13}}>You marked this helpful {s.helped} {s.helped===1?'time':'times'}.</p>}{active===s.key&&<div style={flex}><button type="button" style={button} disabled={cozy.busy} onClick={()=>record(s.key,'helped')}>That helped</button><button type="button" style={button} disabled={cozy.busy} onClick={()=>record(s.key,'not_today')}>Not today</button></div>}</div>)}
+    {cozy.profile.reset_sound&&soundscapes.some(s=>s.id===cozy.profile.reset_sound)&&<button type="button" style={{...button,marginTop:10}} onClick={()=>onSound?.(cozy.profile.reset_sound)}>Play my reset sound</button>}
+    {cozy.message&&<p role="status" style={{fontSize:14}}>{cozy.message}</p>}
+  </section>;
+}
 
 export function useCozyComfort(user, client) {
   const [profile, setProfile] = React.useState(normalizeCozyProfile());
@@ -13,6 +42,7 @@ export function useCozyComfort(user, client) {
   const [message, setMessage] = React.useState('');
   const [busy, setBusy] = React.useState(false);
   const [version, setVersion] = React.useState(0);
+  const saving = React.useRef(false);
   const account = React.useRef(user?.id);
   account.current = user?.id;
   React.useEffect(() => {
@@ -31,8 +61,8 @@ export function useCozyComfort(user, client) {
     return () => { alive = false; };
   }, [user?.id, version]);
   const save = async (next) => {
-    if (!user?.id || busy || status !== 'ready') return false;
-    const id = user.id; setBusy(true); setMessage('Saving your little guide…');
+    if (!user?.id || saving.current || status !== 'ready') return false;
+    const id = user.id; saving.current=true; setBusy(true); setMessage('Saving your little guide…');
     try {
       const clean = normalizeCozyProfile(next);
       const { error } = await client.from('cozy_profiles').upsert({user_id:id,profile:clean,updated_at:new Date().toISOString()}, {onConflict:'user_id'});
@@ -40,11 +70,11 @@ export function useCozyComfort(user, client) {
       if (error) throw error;
       setProfile(clean); setMessage('Saved privately. Shared cards change only when you publish them.'); return true;
     } catch (_) { if (account.current === id) setMessage('Couldn’t save your comforts. Your edits are still here; try again.'); return false; }
-    finally { if (account.current === id) setBusy(false); }
+    finally { saving.current=false; if (account.current === id) setBusy(false); }
   };
   const publish = async (link, selected, includeMemories, active = true) => {
-    if (!user?.id || link.owner_user_id !== user.id || busy || status !== 'ready') return false;
-    const id = user.id; setBusy(true); setMessage(active ? 'Saving your sharing choices…' : 'Pausing card sharing…');
+    if (!user?.id || link.owner_user_id !== user.id || saving.current || status !== 'ready') return false;
+    const id = user.id; saving.current=true; setBusy(true); setMessage(active ? 'Saving your sharing choices…' : 'Pausing card sharing…');
     const card = active ? cozyCardSnapshot(profile, selected, includeMemories) : {fields:{},memories:[]};
     try {
       const {data, error} = await client.from('cozy_shared_cards').upsert({link_id:link.id,owner_user_id:id,card,active,updated_at:new Date().toISOString()},{onConflict:'link_id'}).select().single();
@@ -53,7 +83,7 @@ export function useCozyComfort(user, client) {
       setCards(items => [...items.filter(item => item.link_id !== link.id), data]);
       setMessage(active ? 'Your Guardian can see exactly this saved card.' : 'Card sharing paused. No comfort fields are shared.'); return true;
     } catch (_) { if (account.current === id) setMessage('Couldn’t update sharing. Please try again.'); return false; }
-    finally { if (account.current === id) setBusy(false); }
+    finally { saving.current=false; if (account.current === id) setBusy(false); }
   };
   return {profile,cards,status,message,busy,save,publish,retry:()=>setVersion(v=>v+1)};
 }
@@ -104,17 +134,20 @@ export function SharedCozyCard({ client, ownerId, userId }) {
   return <section style={box} aria-label="Shared Cozy Card"><h3 style={{margin:0,fontSize:18}}>🌱 Our Cozy Corner</h3>{state.status==='loading'?<p role="status">Opening the shared card…</p>:state.status==='error'?<><p>Couldn’t load the Cozy Card.</p><button type="button" style={button} onClick={()=>setVersion(v=>v+1)}>Try again</button></>:state.cards.length?state.cards.map((row,i)=><div key={i}><CardContents card={row.card}/><p style={{fontSize:12,color:'var(--pl-theme-muted)'}}>Shared by your Cozy · {new Date(row.updated_at).toLocaleDateString()}</p></div>):<p style={{fontSize:14}}>Your Cozy hasn’t shared a comfort card with you, or sharing is paused.</p>}</section>;
 }
 
-export function CozySpace({ comfortItem='', rows=[], viewDone={}, onReset, onSupport, onSettings, soundscapes=[], notes=[] }) {
+export function CozySpace({ comfortItem='', rows=[], viewDone={}, onReset, onSupport, onSettings, onSound, onReminderTime, soundscapes=[], notes=[] }) {
   const cozy=React.useContext(CozyComfortContext);
-  const [open,setOpen]=React.useState(false);
+  const [open,setOpen]=React.useState(()=>{const requested=window.__plushlifeOpenCozySpace===true;window.__plushlifeOpenCozySpace=false;return requested;});
   const [draft,setDraft]=React.useState(normalizeCozyProfile());
   const [memory,setMemory]=React.useState('');
   const [resetMessage,setResetMessage]=React.useState('');
-  React.useEffect(()=>{if(cozy?.status==='ready')setDraft(cozy.profile);},[JSON.stringify(cozy?.profile?.fields),JSON.stringify(cozy?.profile?.essentials),cozy?.profile?.reset_sound,cozy?.status]);
+  const [reflection,setReflection]=React.useState('');
+  const weekDate=new Date(); weekDate.setDate(weekDate.getDate()-((weekDate.getDay()+6)%7));
+  const week=`${weekDate.getFullYear()}-${String(weekDate.getMonth()+1).padStart(2,'0')}-${String(weekDate.getDate()).padStart(2,'0')}`;
+  React.useEffect(()=>{if(cozy?.status==='ready')setDraft(cozy.profile);},[JSON.stringify(cozy?.profile?.fields),JSON.stringify(cozy?.profile?.essentials),cozy?.profile?.reset_sound,cozy?.profile?.reminder_style,cozy?.profile?.reminder_time,cozy?.profile?.return_reminders,cozy?.status]);
   React.useEffect(()=>{const show=()=>{setOpen(true);setTimeout(()=>document.getElementById('pl-cozy-space')?.scrollIntoView({block:'start',behavior:'smooth'}),100);};window.addEventListener('plushlife:open-cozy-space',show);return ()=>window.removeEventListener('plushlife:open-cozy-space',show);},[]);
   if(!cozy)return null;
   const field=(key,value)=>setDraft(p=>({...p,fields:{...p.fields,[key]:value}}));
-  const save=()=>cozy.save({...draft, memories:cozy.profile.memories, feedback:cozy.profile.feedback});
+  const save=()=>cozy.save({...cozy.profile,fields:draft.fields,essentials:draft.essentials,reset_sound:draft.reset_sound,reminder_style:draft.reminder_style,reminder_time:draft.reminder_time,return_reminders:draft.return_reminders});
   const savedFields=cozy.profile.fields;
   const keepWin=async(text)=>{const next={...cozy.profile,memories:[{id:crypto.randomUUID(),text,date:new Date().toISOString()},...cozy.profile.memories].slice(0,60)};if(await cozy.save(next))setMemory('');};
   const feedback=async(noteId,value)=>cozy.save({...cozy.profile,feedback:[{note_id:noteId,value},...cozy.profile.feedback.filter(item=>item.note_id!==noteId)].slice(0,60)});
@@ -122,9 +155,13 @@ export function CozySpace({ comfortItem='', rows=[], viewDone={}, onReset, onSup
     <div style={{display:'flex',justifyContent:'space-between',gap:10,alignItems:'center'}}><div><h3 style={{margin:0,fontSize:18}}>🧸 My Cozy Space</h3><p style={{margin:'4px 0 0',fontSize:14,color:'var(--pl-theme-muted)'}}>Things that make me feel more like me.</p></div><button type="button" style={button} aria-expanded={open} onClick={()=>setOpen(v=>!v)}>{open?'Close':'Open'}</button></div>
     {!open && <p style={{fontSize:14,marginBottom:0}}>{savedFields.comfort_item || comfortItem ? `Keep ${savedFields.comfort_item || comfortItem} close.`:'Your comforts, little wins, and a gentler plan.'} {savedFields.need && `Today I need: ${savedFields.need}.`}</p>}
     {open && (cozy.status==='loading'?<p role="status">Opening your little guide…</p>:cozy.status==='error'?<><p>Your comforts couldn’t be loaded. Try again before editing.</p><button type="button" style={button} onClick={cozy.retry}>Try again</button></>:<>
+      {!cozy.profile.setup&&<details style={box}><summary style={{minHeight:44,display:'flex',alignItems:'center',fontWeight:800}}>Set up my little comfort guide</summary><CozySetup draft={draft} onChange={setDraft}/><div style={flex}><button type="button" style={button} disabled={cozy.busy} onClick={()=>cozy.save({...cozy.profile,fields:draft.fields,reminder_style:draft.reminder_style,setup:'done'})}>Save my little guide</button><button type="button" style={button} disabled={cozy.busy} onClick={()=>cozy.save({...cozy.profile,setup:'skipped'})}>Skip for now</button></div></details>}
+      <CozyComfortKit onSound={onSound} soundscapes={soundscapes}/>
       <div style={{...box,background:'var(--pl-theme-surface-2)'}}><h4 style={{margin:'0 0 8px'}}>My Cozy Card · private preview</h4><label style={{display:'grid',gap:6,fontSize:14}}>How I’m feeling<select style={input} value={draft.fields.status} onChange={e=>field('status',e.target.value)}><option value="">Choose when you want</option>{COZY_STATUSES.map(s=><option key={s}>{s}</option>)}</select></label><label style={{display:'grid',gap:6,fontSize:14,marginTop:10}}>Today I need<select style={input} value={draft.fields.need} onChange={e=>field('need',e.target.value)}><option value="">What would help?</option>{COZY_NEEDS.map(n=><option key={n}>{n}</option>)}</select></label></div>
       {[["identity","A little about me"],["comforts","My Comforts · Comfort Passport"],["signals","My Signals"],["help","How to Help Me"],["space","My Cozy Space"],["routine","My Soft Plan & Routine Anchors"]].map(([group,title])=><details key={group} style={box}><summary style={{minHeight:44,display:'flex',alignItems:'center',fontWeight:800,cursor:'pointer'}}>{title}</summary><div style={{display:'grid',gap:12,marginTop:8}}>{COZY_FIELDS.filter(([key,,section])=>section===group&&!['status','need'].includes(key)).map(([key,label])=><label key={key} style={{display:'grid',gap:5,fontSize:14}}>{label}<textarea style={{...input,resize:'vertical',minHeight:64}} maxLength={500} value={draft.fields[key]} placeholder={key==='comfort_item'?(comfortItem || 'My blanket, plush, or favorite thing'):'Whatever feels right for you'} onChange={e=>field(key,e.target.value)}/></label>)}</div>{group==='space'&&<button type="button" style={{...button,marginTop:10}} onClick={onSettings}>Choose my theme</button>}</details>)}
       <div style={flex}><button type="button" style={button} onClick={save} disabled={cozy.busy}>Save my comforts</button><button type="button" style={button} onClick={()=>setDraft(cozy.profile)} disabled={cozy.busy}>Undo unsaved edits</button></div>
+      <details style={box}><summary style={{minHeight:44,display:'flex',alignItems:'center',fontWeight:800}}>My reminder choices</summary><p style={{fontSize:14}}>These change the voice of device reminders. Turning notifications on stays optional in Settings.</p><label style={{display:'grid',gap:6,fontSize:14}}>My reminder style<select style={input} value={draft.reminder_style} onChange={e=>setDraft(p=>({...p,reminder_style:e.target.value,fields:{...p.fields,reminders:e.target.value}}))}>{COZY_REMINDER_STYLES.map(s=><option key={s}>{s}</option>)}</select></label><label style={{display:'grid',gap:6,marginTop:10,fontSize:14}}>A time that suits me<input type="time" style={input} value={draft.reminder_time} onChange={e=>setDraft(p=>({...p,reminder_time:e.target.value}))}/></label><label style={{minHeight:44,display:'flex',alignItems:'center',gap:8,fontSize:14}}><input type="checkbox" checked={draft.return_reminders} onChange={e=>setDraft(p=>({...p,return_reminders:e.target.checked}))}/>Offer one gentle return reminder when I’m away</label><button type="button" style={button} disabled={cozy.busy} onClick={save}>Save reminder choices</button>{onReminderTime&&draft.reminder_time&&<button type="button" style={{...button,marginTop:8}} disabled={cozy.busy} onClick={async()=>{if(await save()) await onReminderTime(draft.reminder_time);}}>Use this time for daily reminders</button>}<button type="button" style={{...button,marginTop:8}} onClick={onSettings}>Notification times & quiet hours</button></details>
+      <section style={box} aria-label="Weekly cozy reflection"><h4 style={{margin:0,fontSize:17}}>What felt easier this week?</h4>{cozy.profile.reflection_week===week?<p style={{fontSize:14}}>You’ve made room for this week. Your saved reflection is on your memory shelf.</p>:<><p style={{fontSize:14}}>One line is plenty. You can skip this week.</p><textarea aria-label="What felt easier this week?" style={{...input,minHeight:64}} maxLength={500} value={reflection} onChange={e=>setReflection(e.target.value)}/><div style={flex}><button type="button" style={button} disabled={cozy.busy||!reflection.trim()} onClick={async()=>{if(await cozy.save({...cozy.profile,reflection_week:week,memories:[{id:crypto.randomUUID(),text:`This week felt easier: ${reflection.trim()}`,date:new Date().toISOString()},...cozy.profile.memories].slice(0,60)}))setReflection('');}}>Keep this reflection</button><button type="button" style={button} disabled={cozy.busy} onClick={()=>cozy.save({...cozy.profile,reflection_week:week})}>Not this week</button></div></>}</section>
       <details style={box}><summary style={{minHeight:44,display:'flex',alignItems:'center',fontWeight:800,cursor:'pointer'}}>🌷 My Reset · My Safe Routine</summary><p style={{fontSize:14}}>Choose up to three caring steps. Reset uses your saved choices, makes today Tiny, and keeps every task saved.</p>
       {rows.filter(r=>!r.isBonus).map(row=><label key={row.key} style={{minHeight:44,display:'flex',gap:8,alignItems:'center',fontSize:14}}><input type="checkbox" checked={draft.essentials.includes(row.key)} disabled={!draft.essentials.includes(row.key)&&draft.essentials.length>=3} onChange={e=>setDraft(p=>({...p,essentials:e.target.checked?[...p.essentials,row.key]:p.essentials.filter(k=>k!==row.key)}))}/>{row.label}</label>)}
       <label style={{display:'grid',gap:6,marginTop:10,fontSize:14}}>Favorite reset sound<select style={input} value={draft.reset_sound} onChange={e=>setDraft(p=>({...p,reset_sound:e.target.value}))}><option value="">Keep it quiet</option>{soundscapes.map(s=><option key={s.id} value={s.id}>{s.label || s.title || s.name}</option>)}</select></label>

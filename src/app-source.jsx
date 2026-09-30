@@ -1,4 +1,6 @@
-import { CozyComfortContext, useCozyComfort } from "./components/cozy-space.jsx";
+import { CozyGuideSuggestions } from "./components/cozy-daily.jsx";
+import { normalizeCozyProfile, cozyReminderCopy } from "./cozy-profile.js";
+import { CozyComfortContext, useCozyComfort, CozySetup } from "./components/cozy-space.jsx";
 import { widgetSnapshot } from "./widget-model.js";
 import { loadHistoryRows } from "./care-history-data.js";
 import { normalizeHomeLayout } from "./home-layout.js";
@@ -769,7 +771,19 @@ function GlowUpTracker() {
   const [selectedTemplateId, setSelectedTemplateId] = useState("basics");
   const [starterPackId, setStarterPackId] = useState("basics");
   const [starterPackMessage, setStarterPackMessage] = useState("");
+
   const [onboardingReason, setOnboardingReason] = useState(null);
+  const [onboardingCozyDraft, setOnboardingCozyDraft] = useState(normalizeCozyProfile());
+  const [onboardingCozySkipped, setOnboardingCozySkipped] = useState(false);
+  const [onboardingEssentials, setOnboardingEssentials] = useState([]);
+  const onboardingCozyAccount = React.useRef(null);
+  useEffect(() => {
+    if (!user?.id) {onboardingCozyAccount.current=null;setOnboardingCozyDraft(normalizeCozyProfile());setOnboardingEssentials([]);return;}
+    if (cozyComfort.status !== "ready" || onboardingCozyAccount.current === user?.id) return;
+    onboardingCozyAccount.current = user?.id;
+    setOnboardingCozyDraft(cozyComfort.profile);
+    setOnboardingCozySkipped(false);
+  }, [user?.id, cozyComfort.status]);
   const [onboardingIntentionDraft, setOnboardingIntentionDraft] = useState("");
   const [onboardingMode, setOnboardingMode] = useState(null);
   const [onboardingMessage, setOnboardingMessage] = useState("");
@@ -918,6 +932,18 @@ function GlowUpTracker() {
     window.history.replaceState(null, "", window.location.pathname);
   }, []);
   const [onboardingStep, setOnboardingStep] = useState(0);
+  useEffect(() => {
+    const ready = !!user?.id && cozyComfort.status === "ready";
+    const style = ready ? cozyComfort.profile.reminder_style : "Gentle";
+    window.PlushLifeCozyPreferences = {
+      enabled:ready && !!cozyComfort.profile.return_reminders && !!preferences.notifications_enabled,
+      style, reminderTime:ready ? cozyComfort.profile.reminder_time : "",
+      quietStart:preferences.quiet_start, quietEnd:preferences.quiet_end,
+      copy:cozyReminderCopy(style,"",true),
+    };
+    window.dispatchEvent(new CustomEvent("plushlife:cozy-preferences-changed"));
+    return () => {window.PlushLifeCozyPreferences=null;window.dispatchEvent(new CustomEvent("plushlife:cozy-preferences-changed"));};
+  }, [user?.id,cozyComfort.status,cozyComfort.profile.reminder_style,cozyComfort.profile.return_reminders,cozyComfort.profile.reminder_time,preferences.notifications_enabled,preferences.quiet_start,preferences.quiet_end]);
 
   useEffect(() => {
     if (!user || onboardingStep < 1) return;
@@ -2284,15 +2310,19 @@ function GlowUpTracker() {
   };
 
   const selectDayType = async (value) => {
-    await saveDailyCheckIn({ day_type: value, soft_day: value === "soft" || value === "tiny" || value === "recovery" });
+    const okay = await saveDailyCheckIn({ day_type: value, soft_day: value === "soft" || value === "tiny" || value === "recovery", ...(value === "full" ? {custom_essentials:null} : {}) });
+    if (!okay) return false;
     const resting = restDates.includes(period.date);
     if (value === "rest" && !resting) {
       const { error } = await supabase.from("rest_days").insert({ user_id: user.id, rest_date: period.date });
+      if (error) return false;
       if (!error) setRestDates((dates) => [...dates, period.date]);
     } else if (value !== "rest" && resting) {
       const { error } = await supabase.from("rest_days").delete().eq("user_id", user.id).eq("rest_date", period.date);
+      if (error) return false;
       if (!error) setRestDates((dates) => dates.filter((date) => date !== period.date));
     }
+    return true;
   };
 
   const saveRestRange = async () => {
@@ -3759,6 +3789,8 @@ function GlowUpTracker() {
     };
     const { error } = await supabase.from("app_preferences").upsert(row, { onConflict: "user_id" });
     setSettingsMessage(error ? "Those settings couldn't be saved." : "Settings saved privately ✨");
+    if (!error) setPreferences(nextPreferences);
+    return !error;
   };
 
   // Opt-in, Android-only companion to connectWatch() above. Unlike the cloud
@@ -3894,14 +3926,29 @@ function GlowUpTracker() {
     setSettingsMessage(data.comfort_item_name ? "Comfort item saved 💛" : "Comfort item cleared.");
   };
 
+  const onboardingSaving = React.useRef(false);
   const completeOnboarding = async () => {
-    if (!user) return;
+    if (!user || onboardingSaving.current) return;
     const displayName = displayNameDraft.trim().replace(/\s+/g, " ").slice(0, 40);
     if (!displayName) {
       setOnboardingMessage("Add your name first.");
       setOnboardingStep(1);
       return;
     }
+    let nextCozy = null;
+    let onboardingTasks = trackerTasks;
+    if (onboardingMode !== "supporter") {
+      if (cozyComfort.status !== "ready" || cozyComfort.busy) {
+        setOnboardingMessage("Your comforts are still loading. Try again in a moment.");
+        return;
+      }
+      nextCozy = onboardingCozySkipped ? {...cozyComfort.profile,setup:"skipped"} : {
+        ...cozyComfort.profile, fields:{...cozyComfort.profile.fields,...onboardingCozyDraft.fields,nickname:onboardingCozyDraft.fields.nickname || displayName},
+        reminder_style:onboardingCozyDraft.reminder_style,setup:"done",
+      };
+    }
+    onboardingSaving.current = true;
+    try {
     setOnboardingMessage("Saving your space…");
     const { data: profileData, error: profileError } = await supabase.from("tracker_profiles").upsert({
       user_id: user.id,
@@ -3924,7 +3971,16 @@ function GlowUpTracker() {
           task: item.task, detail: "", sort_order: index, is_bonus: false, schedule_type: "weekly",
         }));
         const { error: starterError } = await supabase.from("tracker_tasks").insert(starterTasks);
-        if (!starterError) setTrackerTasks(starterTasks);
+        if (starterError) {setOnboardingMessage("Your starting tasks couldn't be saved. Please try again.");return;}
+        onboardingTasks = starterTasks;
+        setTrackerTasks(starterTasks);
+      }
+    }
+    if (nextCozy) {
+      if (!onboardingCozySkipped && onboardingEssentials.length) nextCozy.essentials = onboardingTasks.filter(t=>onboardingEssentials.includes(t.task)).map(t=>t.task_key).slice(0,3);
+      if (!(await cozyComfort.save(nextCozy))) {
+        setOnboardingMessage("Your comfort guide couldn't be saved. Your choices are still here; try again.");
+        return;
       }
     }
     let softError = null;
@@ -4001,6 +4057,9 @@ function GlowUpTracker() {
       }
       setDashboard("guardian");
     }
+    } catch (_) {
+      setOnboardingMessage("Your space couldn’t be saved yet. Your choices are still here; try again.");
+    } finally { onboardingSaving.current = false; }
   };
 
   const saveNativePushToken = async (token) => {
@@ -4897,8 +4956,9 @@ function GlowUpTracker() {
       quietEnd: preferences.quiet_end || "",
       restDates,
       taskReminders,
+      cozyReminderStyle: cozyComfort.status === "ready" ? cozyComfort.profile.reminder_style : "Gentle",
     }).catch(() => {});
-  }, [user?.id, preferences.notifications_enabled, preferences.discreet_notifications, JSON.stringify(preferences.reminder_times || []), preferences.quiet_start, preferences.quiet_end, JSON.stringify(restDates), JSON.stringify(viewDone), JSON.stringify(trackerTasks.map((task) => [task.task_key, task.archived_at, task.reminder_time, task.schedule_days, task.day_id, task.tiny_label]))]);
+  }, [user?.id, cozyComfort.status, cozyComfort.profile.reminder_style, preferences.notifications_enabled, preferences.discreet_notifications, JSON.stringify(preferences.reminder_times || []), preferences.quiet_start, preferences.quiet_end, JSON.stringify(restDates), JSON.stringify(viewDone), JSON.stringify(trackerTasks.map((task) => [task.task_key, task.archived_at, task.reminder_time, task.schedule_days, task.day_id, task.tiny_label]))]);
   const doneCount = rows.filter((r) => viewDone[r.key]).length;
   const requiredRows = rows.filter((row) => !row.isBonus);
   const optionalRows = rows.filter((row) => row.isBonus);
@@ -5743,6 +5803,7 @@ function GlowUpTracker() {
       }
     }
   };
+  const startCozyReset = async (profile) => { const available = rows.filter(row => !row.isBonus).map(row => row.key); const essentials = profile.essentials.filter(key => available.includes(key)); const okay = await saveDailyCheckIn({day_type:"tiny",soft_day:true,custom_essentials:essentials.length ? essentials : available.slice(0,3)}); if (okay && restDates.includes(period.date)) { const {error} = await supabase.from("rest_days").delete().eq("user_id",user.id).eq("rest_date",period.date); if(error) return false; setRestDates(dates=>dates.filter(date=>date!==period.date)); } if (okay && profile.reset_sound && soundscapePlaying !== profile.reset_sound) toggleSoundscape(profile.reset_sound); return okay; };
   const dashboardIndex = dashboardItems.findIndex((item) => item.id === dashboard);
   const stepDashboard = (direction) => {
     const currentIndex = dashboardIndex === -1 ? 0 : dashboardIndex;
@@ -6102,7 +6163,7 @@ function GlowUpTracker() {
   })();
 
   return (
-    <CozyComfortContext.Provider value={cozyComfort}><ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
+    <CozyComfortContext.Provider value={cozyComfort}><CozyGuideSuggestions rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} onOpen={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard("care");}}/><ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
       background: activeThemePalette.background,
       backgroundImage: preferences.simple_mode ? `
@@ -7120,16 +7181,16 @@ function GlowUpTracker() {
                 : <div style={{ marginTop: 10, padding: 11, borderRadius: 11, background: "#F5FAFF", border: "1px solid #CFE4F5", color: "#4C6E8E", fontSize: 12.5 }}>No invitation is visible yet. Ask your Cozy to invite this exact email, then refresh the Guardian screen.</div>}
             </>}
             {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 2) && <>
-              <h2 style={{ margin: "8px 0 6px" }}>One comforting detail 🧸</h2>
-              <p style={{ color: "#6B5A7D", lineHeight: 1.55 }}>Optional: name a comfort item. You can change this later.</p>
-              <input value={comfortItemDraft} onChange={(event) => setComfortItemDraft(event.target.value)} maxLength={80} placeholder="Example: favorite plush" aria-label="Comfort item name" style={{ width: "100%", boxSizing: "border-box", padding: "10px", borderRadius: 10, border: "1px solid #DCC9E8" }} />
+              <h2 style={{ margin: "8px 0 6px" }}>Things that feel like you 🧸</h2>
+              {cozyComfort.status==='ready'?<CozySetup draft={onboardingCozyDraft} section="comforts" onChange={draft=>{setOnboardingCozySkipped(false);setOnboardingCozyDraft(draft);setComfortItemDraft(draft.fields.comfort_item.slice(0,80));}} />:<p role="status">Opening your little guide…</p>}
+              <button type="button" onClick={()=>{setOnboardingCozySkipped(true);setComfortItemDraft("");setSelectedTemplateId(TEMPLATE_PACKS.find(p=>p.tasks.length===0)?.id || selectedTemplateId);setOnboardingStep(6);}} style={{minHeight:44,marginTop:10,padding:10,borderRadius:16,border:'1px solid var(--pl-theme-line)',background:'var(--pl-theme-surface-2)',color:'var(--pl-theme-ink)',font:'inherit'}}>Skip for now — set up later</button>
             </>}
             {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 3) && <>
               <h2 style={{ margin: "8px 0 6px" }}>Pick a starting point 🌱</h2>
               <p style={{ color: "#6B5A7D", lineHeight: 1.55 }}>Optional — just a head start. You can add, edit, or delete anything afterward.</p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 7, marginTop: 10 }}>
                 {TEMPLATE_PACKS.map((pack) => (
-                  <button key={pack.id} type="button" onClick={() => setSelectedTemplateId(pack.id)} aria-pressed={selectedTemplateId === pack.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "10px 6px", borderRadius: 12, border: selectedTemplateId === pack.id ? "2px solid #A65DC1" : "1px solid #DCC9E8", background: selectedTemplateId === pack.id ? "#F7ECFB" : "white", textAlign: "center", cursor: "pointer" }}>
+                  <button key={pack.id} type="button" onClick={() => {setSelectedTemplateId(pack.id);setOnboardingEssentials([]);}} aria-pressed={selectedTemplateId === pack.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "10px 6px", borderRadius: 12, border: selectedTemplateId === pack.id ? "2px solid #A65DC1" : "1px solid #DCC9E8", background: selectedTemplateId === pack.id ? "#F7ECFB" : "white", textAlign: "center", cursor: "pointer" }}>
                     <span style={{ fontSize: 20 }}>{pack.emoji}</span>
                     <span style={{ fontSize: 11.5, fontWeight: 800, color: "#5B4B6B", lineHeight: 1.25 }}>{pack.label}</span>
                     <span style={{ fontSize: 9.5, color: "#9A86A7", lineHeight: 1.3 }}>{pack.tasks.length > 0 ? pack.tasks.slice(0, 2).map((item) => item.task).join(" · ") + (pack.tasks.length > 2 ? "…" : "") : "Build it yourself"}</span>
@@ -7143,22 +7204,20 @@ function GlowUpTracker() {
                   <div style={{ marginTop: 10, padding: "10px 12px", borderRadius: 12, background: "#F7ECFB", border: "1px solid #E3C9EC" }}>
                     <div style={{ fontSize: 12, fontWeight: 800, color: "#8E4EAA" }}>{selectedPack.emoji} {selectedPack.label}</div>
                     <div style={{ marginTop: 4, fontSize: 11.5, color: "#6B5A7D", lineHeight: 1.5 }}>{selectedPack.tasks.length > 0 ? selectedPack.tasks.map((item) => item.task).join(" · ") : "No starter tasks — build it all yourself."}</div>
+                    {selectedPack.tasks.length>0&&<fieldset style={{border:0,padding:0,margin:'8px 0 0'}}><legend style={{fontSize:14,fontWeight:800}}>My rough-day essentials · choose up to three</legend>{selectedPack.tasks.map(item=><label key={item.task} style={{display:'flex',alignItems:'center',gap:8,minHeight:44,fontSize:14}}><input type="checkbox" checked={onboardingEssentials.includes(item.task)} disabled={!onboardingEssentials.includes(item.task)&&onboardingEssentials.length>=3} onChange={e=>setOnboardingEssentials(items=>e.target.checked?[...items,item.task]:items.filter(t=>t!==item.task))}/>{item.task}</label>)}</fieldset>}
                   </div>
                 );
               })()}
             </>}
             {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 4) && <>
-              <h2 style={{ margin: "8px 0 6px" }}>What you're working toward 🧸</h2>
-              <p style={{ color: "#6B5A7D", lineHeight: 1.55 }}>
-                As you check things off, your plush mascot earns new outfits and badges — for showing up day after day, for building a good habit, or for gently reducing one you're working on.
-              </p>
-              <p style={{ marginTop: 8, color: "#6B5A7D", lineHeight: 1.55 }}>
-                Missing a day never takes anything away. You can see what you've unlocked (and what's next) anytime from 🏅 Rewards.
-              </p>
+              <h2 style={{ margin: "8px 0 6px" }}>How you like to be cared for 🌷</h2>
+              <CozySetup draft={onboardingCozyDraft} section="support" onChange={setOnboardingCozyDraft}/>
+
             </>}
             {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 5) && <>
               <h2 style={{ margin: "8px 0 6px" }}>One intention for this week 📮</h2>
               <p style={{ color: "#6B5A7D", lineHeight: 1.55 }}>Optional — just one small thing you want to carry with you this week. Every Sunday, PlushLife will remind you what you wrote and let you check in on it.</p>
+              <CozySetup draft={onboardingCozyDraft} section="anchors" onChange={setOnboardingCozyDraft}/>
               <textarea value={onboardingIntentionDraft} onChange={(event) => setOnboardingIntentionDraft(event.target.value)} maxLength={2000} placeholder="Example: Be a little gentler with myself this week." style={{ width: "100%", boxSizing: "border-box", minHeight: 80, marginTop: 8, padding: 10, borderRadius: 10, border: "1px solid #DCC9E8", resize: "vertical" }} />
               <div style={{ marginTop: 6, fontSize: 10.5, color: "#8C6B9E" }}>Private — only you can ever read this. You can skip this and write one later too.</div>
             </>}
@@ -7196,6 +7255,7 @@ function GlowUpTracker() {
                 {settingsMessage && <div style={{ marginTop: 6, fontSize: 11, color: "#8C6B9E" }}>{settingsMessage}</div>}
               </div>
             </>}
+            {onboardingMode!=="supporter"&&cozyComfort.status==='error'&&<div role="status"><p>Your comfort guide couldn’t load yet.</p><button type="button" style={{minHeight:44}} onClick={cozyComfort.retry}>Retry loading my comforts</button></div>}
             {onboardingMessage && <div style={{ marginTop: 11, fontSize: 12, color: "#B0576B", lineHeight: 1.45 }}>{onboardingMessage}</div>}
             <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginTop: 18 }}>
               <button disabled={onboardingStep === 1} onClick={() => setOnboardingStep((step) => Math.max(1, step - 1))} style={{ padding: "9px 13px", borderRadius: 10, border: "1px solid #DCC9E8", background: "white", color: "#76558A", fontWeight: 800, opacity: onboardingStep === 1 ? .4 : 1 }}>Back</button>
@@ -7384,7 +7444,7 @@ function GlowUpTracker() {
           <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
         </header>}
 
-                {dashboard === "care" && <div className="pl-unified-page-content"><CarePanel comfortItem={trackerProfile?.comfort_item_name} supportNotes={supportNotes.filter(note => note.owner_user_id === user.id)} onOpenSettings={() => setSettingsOpen(true)} onReset={async (profile) => { const available = rows.filter(row => !row.isBonus).map(row => row.key); const essentials = profile.essentials.filter(key => available.includes(key)); const okay = await saveDailyCheckIn({day_type:"tiny",soft_day:true,custom_essentials:essentials.length ? essentials : available.slice(0,3)}); if (okay && restDates.includes(period.date)) { const {error} = await supabase.from("rest_days").delete().eq("user_id",user.id).eq("rest_date",period.date); if(error) return false; setRestDates(dates=>dates.filter(date=>date!==period.date)); } if (okay && profile.reset_sound && soundscapePlaying !== profile.reset_sound) toggleSoundscape(profile.reset_sound); return okay; }} dailyCheckInHistory={dailyCheckInHistory} reflectionHistory={reflectionHistory} checkInHistoryStatus={checkInHistoryStatus} journalHistoryStatus={journalHistoryStatus} retryCareHistory={retryCareHistory} setCheckInViewerDate={setCheckInViewerDate} setReflectionViewerDate={setReflectionViewerDate} openTodayJournal={openTodayJournal} CHECKIN_MOODS={CHECKIN_MOODS} onOpenSupport={() => goToDashboard("guardian")} open={dashboard === "care"} babyMode={babyMode} setCheckInPopupOpen={setCheckInPopupOpen} babyCaregiverName={babyCaregiverName} careSituationsExpanded={careSituationsExpanded} setCareSituationsExpanded={setCareSituationsExpanded} setCareMessage={setCareMessage} openCareSession={openCareSession} careMessage={careMessage} user={user} preferences={preferences} rows={rows} viewDone={viewDone} toggle={toggle} supabase={supabase} careSection={careSection} setCareSection={setCareSection} careSessionHistory={careSessionHistory} HELP_ME_NOW_OPTIONS={HELP_ME_NOW_OPTIONS} pathProgress={pathProgress} setSelectedCarePath={setSelectedCarePath} period={period} setSleepToolOpen={setSleepToolOpen} soundscapePlaying={soundscapePlaying} toggleSoundscape={toggleSoundscape} soundscapeVolume={soundscapeVolume} changeSoundscapeVolume={changeSoundscapeVolume} setSoundscapeSleepTimer={setSoundscapeSleepTimer} soundscapeTimerMinutes={soundscapeTimerMinutes} /></div>}
+                {dashboard === "care" && <div className="pl-unified-page-content"><CarePanel comfortItem={trackerProfile?.comfort_item_name} supportNotes={supportNotes.filter(note => note.owner_user_id === user.id)} onOpenSettings={() => setSettingsOpen(true)} onReset={startCozyReset} onReminderTime={async time=>{const okay=await savePreferences({...preferences,reminder_times:[time]});return okay;}} dailyCheckInHistory={dailyCheckInHistory} reflectionHistory={reflectionHistory} checkInHistoryStatus={checkInHistoryStatus} journalHistoryStatus={journalHistoryStatus} retryCareHistory={retryCareHistory} setCheckInViewerDate={setCheckInViewerDate} setReflectionViewerDate={setReflectionViewerDate} openTodayJournal={openTodayJournal} CHECKIN_MOODS={CHECKIN_MOODS} onOpenSupport={() => goToDashboard("guardian")} open={dashboard === "care"} babyMode={babyMode} setCheckInPopupOpen={setCheckInPopupOpen} babyCaregiverName={babyCaregiverName} careSituationsExpanded={careSituationsExpanded} setCareSituationsExpanded={setCareSituationsExpanded} setCareMessage={setCareMessage} openCareSession={openCareSession} careMessage={careMessage} user={user} preferences={preferences} rows={rows} viewDone={viewDone} toggle={toggle} supabase={supabase} careSection={careSection} setCareSection={setCareSection} careSessionHistory={careSessionHistory} HELP_ME_NOW_OPTIONS={HELP_ME_NOW_OPTIONS} pathProgress={pathProgress} setSelectedCarePath={setSelectedCarePath} period={period} setSleepToolOpen={setSleepToolOpen} soundscapePlaying={soundscapePlaying} toggleSoundscape={toggleSoundscape} soundscapeVolume={soundscapeVolume} changeSoundscapeVolume={changeSoundscapeVolume} setSoundscapeSleepTimer={setSoundscapeSleepTimer} soundscapeTimerMinutes={soundscapeTimerMinutes} /></div>}
         <ProfilePanel open={profileOpen} onClose={() => setProfileOpen(false)} pendingSupportInvites={pendingSupportInvites} hasOwnGuardian={hasOwnGuardian} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} setSafetyOpen={setSafetyOpen} setHelpOpen={setHelpOpen} goToFeedback={goToFeedback} isAdminUser={isAdminUser} setAdminOpen={setAdminOpen} loadAdminData={loadAdminData} nativeBuildInfo={nativeBuildInfo} />
 
         <MoodViewer checkInViewerDate={checkInViewerDate} onClose={() => setCheckInViewerDate(null)} dailyCheckInHistory={dailyCheckInHistory} reflectionDateSet={reflectionDateSet} setReflectionViewerDate={setReflectionViewerDate} deleteDailyCheckIn={deleteDailyCheckIn} CHECKIN_MOODS={CHECKIN_MOODS} ENERGY_LEVELS={ENERGY_LEVELS} DAY_TYPES={DAY_TYPES} SUPPORT_PREFERENCES={SUPPORT_PREFERENCES} />
@@ -7413,7 +7473,7 @@ function GlowUpTracker() {
 
         <>
         <DailyJournalPanel open={journalQuickOpen && (!dailyJournalPromptOpen || autoPopupToShow === "daily_journal")} onClose={() => { setJournalQuickOpen(false); setDailyJournalPromptOpen(false); setPrivateNoteEditing(false); }} dailyJournalPromptOpen={dailyJournalPromptOpen} journalQuickOpenDate={journalQuickOpenDate} journalDisplayedPrompt={journalDisplayedPrompt} privateNoteEditing={privateNoteEditing} setPrivateNoteEditing={setPrivateNoteEditing} privateNoteDraft={privateNoteDraft} setPrivateNoteDraft={setPrivateNoteDraft} savePrivateNote={savePrivateNote} privateNote={privateNote} privateNoteMessage={privateNoteMessage} />
-        <TodayPanel open={dashboard === "today"} returnGapDays={returnGapDays} returnBannerDismissed={returnBannerDismissed} setReturnBannerDismissed={setReturnBannerDismissed} voice={voice} setEssentialsPickerOpen={setEssentialsPickerOpen} selectDayType={selectDayType} wellbeingPatternInsight={wellbeingPatternInsight} todayDayId={todayDayId} hardDayBannerDismissed={hardDayBannerDismissed} setHardDayBannerDismissed={setHardDayBannerDismissed} dailyCheckIn={dailyCheckIn} restDatesSet={restDatesSet} period={period} toggleRestToday={toggleRestToday} nextStepTask={nextStepTask} FeatureTip={FeatureTip} day={day} babyMode={babyMode} nextStepHint={nextStepHint} toggle={toggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} weeklyIntentionMessage={weeklyIntentionMessage} todayCardIndex={todayCardIndex} setTodayCardIndex={setTodayCardIndex} taskWeekDates={taskWeekDates} selectedProgressDate={selectedProgressDate} selectTaskPreviewDate={selectTaskPreviewDate} isFutureView={isFutureView} selectedTaskDateLabel={selectedTaskDateLabel} todaySwipeStartX={todaySwipeStartX} todaySwipeStartY={todaySwipeStartY} selectedSchedule={homeSelectedSchedule} selectedScheduleExceptionEntries={homeScheduleExceptionEntries} scheduleDayId={scheduleDayId} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} active={active} rows={rows} viewDone={viewDone} openTaskManager={openTaskManager} todayRequiredDone={todayRequiredDone} todayRequiredKeys={todayRequiredKeys} activityDaysTotal={activityDaysTotal} careDaysTotal={careDaysTotal} babyCaregiverName={babyCaregiverName} trackerProfile={trackerProfile} openJournalForSelectedDate={openJournalForSelectedDate} isHistoricalView={isHistoricalView} focusHelperOpen={focusHelperOpen} setFocusHelperOpen={setFocusHelperOpen} pickRandomFocusTask={pickRandomFocusTask} setFocusSuggestionKey={setFocusSuggestionKey} focusedEssential={focusedEssential} focusChoices={focusChoices} selectedTaskViewIsRest={selectedTaskViewIsRest} pct={pct} requiredDoneCount={requiredDoneCount} requiredRows={requiredRows} preferences={preferences} doneCount={doneCount} focusModeShowAll={focusModeShowAll} setFocusModeShowAll={setFocusModeShowAll} isTaskPausedOnDate={isTaskPausedOnDate} openRow={openRow} setOpenRow={setOpenRow} celebrateKey={celebrateKey} pauseTrackerTask={pauseTrackerTask} resumeTrackerTask={resumeTrackerTask} taskListCollapsed={taskListCollapsed} setTaskListCollapsed={setTaskListCollapsed} recentlyCompletedKeys={recentlyCompletedKeys} moveTaskGroup={moveTaskGroup} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToTomorrow={moveTaskToTomorrow} completedTodayExpanded={completedTodayExpanded} setCompletedTodayExpanded={setCompletedTodayExpanded} tomorrowTasksCount={tomorrowTasksCount} selectedOutfit={selectedOutfit} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} calmQuickOpen={calmQuickOpen} setCalmQuickOpen={setCalmQuickOpen} currentCopingOption={currentCopingOption} reshuffle={reshuffle} setCareSection={setCareSection} goToDashboard={goToDashboard} setProfileOpen={setProfileOpen} setSettingsOpen={setSettingsOpen} />
+        <TodayPanel onCozyReset={startCozyReset} open={dashboard === "today"} returnGapDays={returnGapDays} returnBannerDismissed={returnBannerDismissed} setReturnBannerDismissed={setReturnBannerDismissed} voice={voice} setEssentialsPickerOpen={setEssentialsPickerOpen} selectDayType={selectDayType} wellbeingPatternInsight={wellbeingPatternInsight} todayDayId={todayDayId} hardDayBannerDismissed={hardDayBannerDismissed} setHardDayBannerDismissed={setHardDayBannerDismissed} dailyCheckIn={dailyCheckIn} restDatesSet={restDatesSet} period={period} toggleRestToday={toggleRestToday} nextStepTask={nextStepTask} FeatureTip={FeatureTip} day={day} babyMode={babyMode} nextStepHint={nextStepHint} toggle={toggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} weeklyIntentionMessage={weeklyIntentionMessage} todayCardIndex={todayCardIndex} setTodayCardIndex={setTodayCardIndex} taskWeekDates={taskWeekDates} selectedProgressDate={selectedProgressDate} selectTaskPreviewDate={selectTaskPreviewDate} isFutureView={isFutureView} selectedTaskDateLabel={selectedTaskDateLabel} todaySwipeStartX={todaySwipeStartX} todaySwipeStartY={todaySwipeStartY} selectedSchedule={homeSelectedSchedule} selectedScheduleExceptionEntries={homeScheduleExceptionEntries} scheduleDayId={scheduleDayId} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} active={active} rows={rows} viewDone={viewDone} openTaskManager={openTaskManager} todayRequiredDone={todayRequiredDone} todayRequiredKeys={todayRequiredKeys} activityDaysTotal={activityDaysTotal} careDaysTotal={careDaysTotal} babyCaregiverName={babyCaregiverName} trackerProfile={trackerProfile} openJournalForSelectedDate={openJournalForSelectedDate} isHistoricalView={isHistoricalView} focusHelperOpen={focusHelperOpen} setFocusHelperOpen={setFocusHelperOpen} pickRandomFocusTask={pickRandomFocusTask} setFocusSuggestionKey={setFocusSuggestionKey} focusedEssential={focusedEssential} focusChoices={focusChoices} selectedTaskViewIsRest={selectedTaskViewIsRest} pct={pct} requiredDoneCount={requiredDoneCount} requiredRows={requiredRows} preferences={preferences} doneCount={doneCount} focusModeShowAll={focusModeShowAll} setFocusModeShowAll={setFocusModeShowAll} isTaskPausedOnDate={isTaskPausedOnDate} openRow={openRow} setOpenRow={setOpenRow} celebrateKey={celebrateKey} pauseTrackerTask={pauseTrackerTask} resumeTrackerTask={resumeTrackerTask} taskListCollapsed={taskListCollapsed} setTaskListCollapsed={setTaskListCollapsed} recentlyCompletedKeys={recentlyCompletedKeys} moveTaskGroup={moveTaskGroup} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToTomorrow={moveTaskToTomorrow} completedTodayExpanded={completedTodayExpanded} setCompletedTodayExpanded={setCompletedTodayExpanded} tomorrowTasksCount={tomorrowTasksCount} selectedOutfit={selectedOutfit} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} calmQuickOpen={calmQuickOpen} setCalmQuickOpen={setCalmQuickOpen} currentCopingOption={currentCopingOption} reshuffle={reshuffle} setCareSection={setCareSection} goToDashboard={goToDashboard} setProfileOpen={setProfileOpen} setSettingsOpen={setSettingsOpen} />
 
         {dashboard === "week" && <div className="pl-unified-page-content"><WeekPanel open={dashboard === "week"} openTodayJournal={openTodayJournal} weekCardIndex={weekCardIndex} setWeekCardIndex={setWeekCardIndex} weekSwipeStartX={weekSwipeStartX} weekSwipeStartY={weekSwipeStartY} reflectionCalendarMonth={reflectionCalendarMonth} setReflectionCalendarMonth={setReflectionCalendarMonth} reflectionMonthDate={reflectionMonthDate} reflectionMonthStart={reflectionMonthStart} reflectionMonthDays={reflectionMonthDays} reflectionDateSet={reflectionDateSet} dailyCheckInHistory={dailyCheckInHistory} restDatesSet={restDatesSet} selectedProgressDate={selectedProgressDate} setSelectedProgressDate={setSelectedProgressDate} dayCompletionPct={dayCompletionPct} setDayViewDate={setDayViewDate} setActive={setActive} setReflectionViewerDate={setReflectionViewerDate} setCheckInViewerDate={setCheckInViewerDate} reflectionHistory={reflectionHistory} journalHistoryExpanded={journalHistoryExpanded} setJournalHistoryExpanded={setJournalHistoryExpanded} weeklyIntentionHistory={weeklyIntentionHistory} weeklyIntentionHistoryExpanded={weeklyIntentionHistoryExpanded} setWeeklyIntentionHistoryExpanded={setWeeklyIntentionHistoryExpanded} period={period} calendarWeekOffset={calendarWeekOffset} setCalendarWeekOffset={setCalendarWeekOffset} calendarWeekPreviewDate={calendarWeekPreviewDate} setCalendarWeekPreviewDate={setCalendarWeekPreviewDate} trackerTasks={trackerTasks} dayViewDate={dayViewDate} dayViewExpanded={dayViewExpanded} setDayViewExpanded={setDayViewExpanded} longHistoryByDate={longHistoryByDate} isTaskPausedOnDate={isTaskPausedOnDate} markPastTasksDone={markPastTasksDone} done={done} toggle={toggle} isHistoricalView={isHistoricalView} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} CHECKIN_MOODS={CHECKIN_MOODS} /></div>}
 

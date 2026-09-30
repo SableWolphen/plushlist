@@ -1,0 +1,54 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),vm=require('node:vm');
+const React=require('react'),Renderer=require('react-test-renderer'),esbuild=require('esbuild');
+global.React=React;global.window=new EventTarget();global.document=new EventTarget();
+const temp=fs.mkdtempSync(path.join(os.tmpdir(),'cozy-personalization-'));
+esbuild.buildSync({entryPoints:['src/components/cozy-daily.jsx','src/components/cozy-space.jsx','src/cozy-profile.js'],bundle:true,platform:'node',format:'cjs',outdir:temp});
+const model=require(path.join(temp,'cozy-profile.js'));
+const {CozyDaily}=require(path.join(temp,'components/cozy-daily.js'));
+// Bundle together so context identity matches across the components.
+fs.writeFileSync(path.join(temp,'entry.jsx'),`export {CozyDaily} from '${process.cwd()}/src/components/cozy-daily.jsx';export {CozyComfortContext,CozySetup,CozySpace} from '${process.cwd()}/src/components/cozy-space.jsx';`);
+esbuild.buildSync({entryPoints:[path.join(temp,'entry.jsx')],bundle:true,platform:'node',format:'cjs',outfile:path.join(temp,'entry.cjs')});
+const Components=require(path.join(temp,'entry.cjs'));
+const {act}=Renderer;
+const profile=model.normalizeCozyProfile({setup:'done',fields:{comfort_item:'Blanket',sounds:'Rain',please_dont:'No surprise calls'},essentials:['water'],return_reminders:true,reminder_style:'Direct',reminder_time:'23:99',comfort_uses:[{key:'sounds',fit:'helped',date:'2026-09-30'},{key:'sounds',fit:'helped',date:'2026-09-29'},{key:'unknown',fit:'helped'}]});
+assert.equal(profile.reminder_time,'');assert.equal(profile.comfort_uses.length,2);
+assert.equal(model.cozyComfortSuggestions(profile)[0].key,'sounds');
+assert.equal(model.cozyNextStep(profile,[{key:'water',label:'Water'},{key:'shower',label:'Shower'}],{}).key,'water');
+assert.equal(model.cozyNextStep(profile,[{key:'water'}],{water:true}),null);
+assert.equal(model.cozyNextStep(profile,[{key:'water'}],{},'rest'),null);
+const snapshot=model.cozyCardSnapshot(profile,['comfort_item']);
+assert.deepEqual(Object.keys(snapshot),['fields','memories']);
+assert.ok(!JSON.stringify(snapshot).includes('return_reminders'));
+assert.ok(!JSON.stringify(snapshot).includes('No surprise calls'));
+assert.ok(!model.cozyReminderCopy('Quiet','private task').body.includes('private task'));
+assert.equal(model.normalizeCozyProfile({return_reminders:'true'}).return_reminders,false);
+(async()=>{
+ let dismissed=false,resetCalls=0,tree;
+ const context={status:'ready',profile,cards:[],busy:false};
+ await act(async()=>{tree=Renderer.create(React.createElement(Components.CozyComfortContext.Provider,{value:context},React.createElement(Components.CozyDaily,{returnGapDays:4,onReset:async()=>{resetCalls++;return false},onDismissReturn:()=>dismissed=true})));});
+ const reset=tree.root.findAllByType('button').find(b=>b.children.join('')==='Use my Soft Plan');
+ await act(async()=>{await reset.props.onClick();});
+ assert.equal(resetCalls,1);assert.equal(dismissed,false);
+ assert.match(JSON.stringify(tree.toJSON()),/Couldn’t start/);
+ await act(async()=>tree.unmount());
+ // Verify the return reminder is opt-in, quiet-hours aware, cancelled on sign-out,
+ // and cannot finish scheduling after its account/config changes while awaiting permission.
+ const win=new EventTarget(),doc=new EventTarget();doc.visibilityState='visible';doc.querySelector=()=>null;doc.querySelectorAll=()=>[];
+ let scheduled=[],cancelled=0,permissionResolve;
+ const storage=new Map();win.localStorage={getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)};
+ win.Capacitor={Plugins:{LocalNotifications:{checkPermissions:async()=>({display:'granted'}),cancel:async()=>cancelled++,schedule:async v=>scheduled.push(v.notifications[0])}}};
+ const environment={window:win,document:doc,localStorage:win.localStorage,Date,CustomEvent:class extends Event{constructor(type,options){super(type);this.detail=options?.detail}},setTimeout,clearTimeout};
+ vm.runInNewContext(fs.readFileSync('assets/comeback-reminder.js','utf8'),environment);
+ win.dispatchEvent(new Event('pagehide'));await new Promise(r=>setImmediate(r));assert.equal(scheduled.length,0);
+ win.PlushLifeCozyPreferences={enabled:true,reminderTime:'23:00',quietStart:'21:00',quietEnd:'09:00',copy:model.cozyReminderCopy('Direct','',true)};
+ win.dispatchEvent(new Event('pagehide'));await new Promise(r=>setImmediate(r));
+ assert.equal(scheduled.length,1);assert.equal(scheduled[0].schedule.at.getHours(),9);
+ assert.ok(!scheduled[0].body.includes('Blanket'));
+ win.PlushLifeCozyPreferences=null;win.dispatchEvent(new Event('plushlife:cozy-preferences-changed'));await new Promise(r=>setImmediate(r));assert.ok(cancelled>0);
+ win.Capacitor.Plugins.LocalNotifications.checkPermissions=()=>new Promise(r=>permissionResolve=r);
+ win.PlushLifeCozyPreferences={enabled:true,copy:model.cozyReminderCopy('Playful','',true)};
+ win.dispatchEvent(new Event('pagehide'));await new Promise(r=>setImmediate(r));
+ win.PlushLifeCozyPreferences=null;permissionResolve({display:'granted'});await new Promise(r=>setImmediate(r));assert.equal(scheduled.length,1);
+ console.log('Cozy personalization passed: comfort learning, selected essentials, private snapshots, failed Reset, opt-in reminders, quiet hours and stale-account cancellation.');
+})().catch(e=>{console.error(e);process.exitCode=1}).finally(()=>fs.rmSync(temp,{recursive:true,force:true}));

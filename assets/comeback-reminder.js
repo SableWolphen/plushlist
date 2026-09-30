@@ -13,6 +13,7 @@
   const AWAY_MS = 60 * 60 * 1000 * 60; // 60 hours = 2.5 days
 
   function isOptedOut() {
+    if (window.PlushLifeCozyPreferences) return !window.PlushLifeCozyPreferences.enabled;
     try { return window.localStorage.getItem(OPT_OUT_KEY) === "1"; }
     catch (_error) { return false; }
   }
@@ -63,40 +64,54 @@
   }
 
   function reminderTime() {
+    const config = window.PlushLifeCozyPreferences;
     const at = new Date(Date.now() + AWAY_MS);
-    const hour = at.getHours();
-    if (hour < 9) at.setHours(9, 30, 0, 0);
-    else if (hour >= 21) {
-      at.setDate(at.getDate() + 1);
-      at.setHours(9, 30, 0, 0);
+    const clock = /^([01]\d|2[0-3]):[0-5]\d$/.test(config?.reminderTime || "") ? config.reminderTime : "09:30";
+    const parts = clock.split(":").map(Number);
+    const earliest = at.getTime();
+    at.setHours(parts[0],parts[1],0,0);
+    if(at.getTime()<earliest)at.setDate(at.getDate()+1);
+    const minutes = value => {const match=/^([01]\d|2[0-3]):([0-5]\d)$/.exec(value || "");return match?Number(match[1])*60+Number(match[2]):null;};
+    const start=minutes(config?.quietStart) ?? 21*60;
+    const end=minutes(config?.quietEnd) ?? 9*60;
+    for(let i=0;i<97;i++){
+      const m=at.getHours()*60+at.getMinutes();
+      const quiet=start<=end?m>=start&&m<end:m>=start||m<end;
+      if(!quiet)return at;
+      at.setMinutes(at.getMinutes()+15);
     }
-    return at;
+    return null;
   }
 
   async function scheduleReminder() {
-    if (isOptedOut()) {
+    if (isOptedOut() || !window.PlushLifeCozyPreferences?.enabled) {
       // Respect the opt-out: clear any previously scheduled nudge and stop.
       await cancelReminder();
       return;
     }
     if (isSignedOut()) return;
+    const config = window.PlushLifeCozyPreferences;
     const target = plugin();
     if (!target?.schedule) return;
     if (!(await permissionGranted(target))) return;
+    if (config !== window.PlushLifeCozyPreferences || !config?.enabled) return;
 
     const at = reminderTime();
+    if (!at) return;
     try {
       await cancelReminder();
+      if (config !== window.PlushLifeCozyPreferences || !config?.enabled) return;
       await target.schedule({
         notifications: [{
           id: REMINDER_ID,
-          title: "A little PlushLife check-in 💜",
-          body: "Been a couple days? You don't have to catch up. Come back Tiny if you need to — one small step still counts.",
+          title: config.copy.title,
+          body: config.copy.body,
           schedule: { at, allowWhileIdle: true },
           channelId: "plushlife-reminders",
           extra: { source: "comeback-reminder" },
         }],
       });
+      if (config !== window.PlushLifeCozyPreferences || !config?.enabled) { await cancelReminder(); return; }
       saveState({ scheduledFor: at.toISOString(), lastScheduledAt: new Date().toISOString() });
     } catch (_error) {}
   }
@@ -118,6 +133,10 @@
     hiddenTimer = window.setTimeout(scheduleReminder, 500);
   }
 
+  window.addEventListener("plushlife:cozy-preferences-changed", () => {
+    if (!window.PlushLifeCozyPreferences?.enabled) cancelReminder();
+    else if(document.visibilityState !== "visible") scheduleReminder();
+  });
   document.addEventListener("visibilitychange", onVisibilityChange);
   window.addEventListener("pagehide", scheduleReminder);
 

@@ -199,7 +199,7 @@
     const target=await waitForTarget(step.labels,fallback); if(target)await positionSpotlight(tour,target);
   }
 
-  function closeGuide(){document.getElementById(GUIDE_ID)?.remove();}
+  function closeGuide(){window.dispatchEvent(new CustomEvent("plushlife:guide-close"));document.getElementById(GUIDE_ID)?.remove();}
 
   async function route(featureKey) {
     const feature=FEATURES[featureKey]; if(!feature)return; closeGuide(); closeTour();
@@ -216,8 +216,8 @@
 
   function openGuide(){
     if(document.getElementById(GUIDE_ID))return; closeTour(); const guide=document.createElement("div"); guide.id=GUIDE_ID; guide.setAttribute("role","dialog"); guide.setAttribute("aria-modal","true"); guide.setAttribute("aria-label","PlushGuide");
-    guide.innerHTML=`<div class="pg-card"><div class="pg-head"><div><strong>PLUSHGUIDE</strong><h2>Everything you already have, in one place</h2><p>Tap a feature to learn what it does. Nothing opens until you choose <strong>Show me</strong>, and the walkthrough only points things out—it never changes your data.</p></div><button class="pg-close" type="button" aria-label="Close PlushGuide">×</button></div>${SECTIONS.map(([title,keys])=>`<div class="pg-section"><div class="pg-section-title">${title}</div><div class="pg-grid">${keys.map(itemMarkup).join("")}</div></div>`).join("")}<div class="pg-note">PlushGuide does not create new data or change existing data. Guided tours never complete tasks. It only navigates to and points out features already built into PlushLife.</div></div>`;
-    document.body.appendChild(guide); guide.querySelector(".pg-close").addEventListener("click",closeGuide); guide.addEventListener("click",e=>{if(e.target===guide)closeGuide();});
+    guide.innerHTML=`<div class="pg-card"><div class="pg-head"><div><strong>PLUSHGUIDE</strong><h2>Everything you already have, in one place</h2><p>Tap a feature to learn what it does. Nothing opens until you choose <strong>Show me</strong>, and the walkthrough only points things out—it never changes your data.</p></div><button class="pg-close" type="button" aria-label="Close PlushGuide">×</button></div><div id="plushlife-cozy-guide-suggestion"></div>${SECTIONS.map(([title,keys])=>`<div class="pg-section"><div class="pg-section-title">${title}</div><div class="pg-grid">${keys.map(itemMarkup).join("")}</div></div>`).join("")}<div class="pg-note">PlushGuide does not create new data or change existing data. Guided tours never complete tasks. It only navigates to and points out features already built into PlushLife.</div></div>`;
+    document.body.appendChild(guide); window.dispatchEvent(new CustomEvent("plushlife:guide-open")); guide.querySelector(".pg-close").addEventListener("click",closeGuide); guide.addEventListener("click",e=>{if(e.target===guide)closeGuide();});
     guide.querySelectorAll(".pg-item").forEach(item=>{const key=item.dataset.feature,action=item.querySelector(".pg-action"),details=item.querySelector(".pg-details"); action.addEventListener("click",()=>{const opening=action.getAttribute("aria-expanded")!=="true"; guide.querySelectorAll('.pg-action[aria-expanded="true"]').forEach(other=>{other.setAttribute("aria-expanded","false");other.parentElement.querySelector(".pg-details").classList.remove("open");}); action.setAttribute("aria-expanded",opening?"true":"false"); details.classList.toggle("open",opening);}); item.querySelector(".pg-show").addEventListener("click",e=>{e.stopPropagation();route(key);});});
   }
 

@@ -278,7 +278,7 @@ export function TodayPanel({
   rows, viewDone, openTaskManager, setCalmQuickOpen, calmQuickOpen, currentCopingOption,
   reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen, setSettingsOpen,
   completedTodayExpanded, setCompletedTodayExpanded, tomorrowTasksCount, preferences,
-  activityDaysTotal, selectedOutfit, appearanceTheme, dinoTheme, babyMode
+  activityDaysTotal, selectedOutfit, appearanceTheme, dinoTheme, babyMode, cozyDaily
 }) {
   // Wraps the app toggle with the shared completion flow: newly completed
   // tasks linger briefly for undo, and every completion dispatches
@@ -386,6 +386,7 @@ export function TodayPanel({
 
       <div data-plushlife-home-stack className="pl-home-shell">
         <Hero period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} />
+        {cozyDaily}
         {homeLayout.order.filter(id => !homeLayout.hidden.includes(id)).map(id => <React.Fragment key={id}>{homeSections[id]}</React.Fragment>)}
         <TomorrowNote tomorrowTasksCount={tomorrowTasksCount} />
         <CompletedToday rows={rows} viewDone={viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} expanded={completedTodayExpanded} setExpanded={setCompletedTodayExpanded} />
