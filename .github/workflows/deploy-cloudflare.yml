@@ -57,11 +57,12 @@ jobs:
           node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('www/build-info.json','utf8'));if(x.gitSha!==process.env.GITHUB_SHA){console.error(x);process.exit(1)};console.log('Verified shared build',x.gitSha)"
 
       - name: Deploy exact www artifact to Cloudflare
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
+          wranglerVersion: "4.144.0"
+          command: deploy --config wrangler.jsonc
 
       - name: Verify live Cloudflare commit
         env:
