@@ -1,61 +1,13 @@
-import { PLUSH_GOLD_BILLING_ENABLED, PLUSH_GOLD_FEATURES, goldPreviewSummary } from "../plush-gold.js";
-
-const groupStyle = {
-  padding: "12px 13px",
-  borderRadius: 14,
-  border: "1px solid #E6D4F2",
-  background: "rgba(255,255,255,.86)",
-  marginBottom: 10,
-};
-
-export function PlushGoldPreview() {
-  const summary = goldPreviewSummary();
-  const available = summary.features.filter((feature) => feature.status === "available");
-  const reserved = summary.features.filter((feature) => feature.status === "reserved");
-
-  return (
-    <div>
-      <div style={{ padding: "13px 14px", borderRadius: 16, background: "linear-gradient(135deg,#FFF8DE,#FBF3FE)", border: "1px solid #E7D29A", marginBottom: 12 }}>
-        <div style={{ fontSize: 11, letterSpacing: ".12em", fontWeight: 900, color: "#9A6B14" }}>✨ PLUSH GOLD PREVIEW</div>
-        <div style={{ marginTop: 5, fontSize: 16, fontWeight: 900, color: "#5B4B6B" }}>Everything is included free for now.</div>
-        <div style={{ marginTop: 5, fontSize: 12, lineHeight: 1.5, color: "#7B6A83" }}>
-          Plush Gold is being structured now so deeper intelligence can become an optional paid tier later. During preview, every Gold feature stays unlocked and no purchase is required.
-        </div>
-        <div style={{ marginTop: 8, display: "inline-flex", padding: "4px 8px", borderRadius: 999, background: "#EEF8F4", color: "#38816F", fontSize: 10.5, fontWeight: 900 }}>
-          {PLUSH_GOLD_BILLING_ENABLED ? "Billing active" : "Billing off · free preview"}
-        </div>
-      </div>
-
-      <div style={groupStyle}>
-        <div style={{ fontSize: 11, fontWeight: 900, color: "#745D81", marginBottom: 7 }}>INCLUDED IN THE PREVIEW</div>
-        <div style={{ display: "grid", gap: 7 }}>
-          {available.map((feature) => (
-            <div key={feature.id} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12, color: "#5B4B6B" }}>
-              <span aria-hidden="true" style={{ color: "#38816F", fontWeight: 900 }}>✓</span>
-              <span>{feature.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={groupStyle}>
-        <div style={{ fontSize: 11, fontWeight: 900, color: "#745D81", marginBottom: 5 }}>GOLD-READY, NOT YET RELEASED</div>
-        <div style={{ fontSize: 11.5, lineHeight: 1.45, color: "#8A7895", marginBottom: 7 }}>These are reserved in the Gold access model so they can be added later without redesigning the tier system.</div>
-        <div style={{ display: "grid", gap: 7 }}>
-          {reserved.map((feature) => (
-            <div key={feature.id} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12, color: "#6B5A7D" }}>
-              <span aria-hidden="true">○</span>
-              <span>{feature.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ fontSize: 11.5, lineHeight: 1.5, color: "#8A7895" }}>
-        Core PlushLife stays separate from Gold: basic habits/tasks, Focus Habit, check-ins, Today, accessibility, Baby Mode, Low Screen Time, basic reminders, and core support are not part of this premium feature registry.
-      </div>
-    </div>
-  );
+import { PLUSH_GOLD_BILLING_ENABLED, PLUSH_GOLD_FEATURES, goldPreviewSummary } from '../plush-gold.js';
+const card={padding:15,borderRadius:20,border:'1px solid var(--pl-theme-line)',background:'var(--pl-theme-surface)',color:'var(--pl-theme-ink)',marginBottom:12};
+const free=['Tasks, routines, habits, Today and calendar','Care tools, check-ins and your comfort profile','Basic PlushGuide and Guardian support','Sharing boundaries, accessibility and privacy controls','Reminders, backup, sync and basic data export','My Reset and making a rough day smaller'];
+const planned=['PlushGuide+ and Routine Builder+','Opt-in Smart Day Autopilot and deeper personalization','Comfort Kit learning and searchable long-term memory','Scheduled Guardian check-ins and support summaries','Context-aware check-ins and custom automations','Optional sleep/activity integrations','Advanced widgets, watch controls and personal reports'];
+export function PlushGoldPreview(){
+  const available=goldPreviewSummary().features.filter(f=>f.status==='available'&&f.id!=='priority_history_protection');
+  return <div aria-label="PlushLife Plus plan"><section style={card}><h3 style={{margin:0,fontSize:20}}>✨ PlushLife Plus</h3><p style={{fontSize:15,lineHeight:1.5}}>Free PlushLife helps you take care of yourself. PlushLife Plus learns how you live and quietly helps make life easier.</p><b style={{fontSize:14}}>Everything is included free for now.</b><p style={{fontSize:13,color:'var(--pl-theme-muted)'}}>{PLUSH_GOLD_BILLING_ENABLED?'Billing active':'Billing off · free preview'}</p></section>
+  <section style={card}><h4 style={{margin:'0 0 8px',fontSize:17}}>💜 Always in Free</h4><ul style={{fontSize:14,lineHeight:1.7,paddingLeft:20}}>{free.map(text=><li key={text}>{text}</li>)}</ul></section>
+  <section style={card}><h4 style={{margin:'0 0 8px',fontSize:17}}>🌱 Smart help available today</h4><ul style={{fontSize:14,lineHeight:1.7,paddingLeft:20}}>{available.map(f=><li key={f.id}>{f.label.replace(/Gold/g,'Plus')}</li>)}</ul></section>
+  <details style={card}><summary style={{minHeight:44,display:'flex',alignItems:'center',fontSize:17,fontWeight:800,cursor:'pointer'}}>Where Plus is going</summary><p style={{fontSize:14}}>These features are planned; they are not subscriptions or promises of features available today.</p><ul style={{fontSize:14,lineHeight:1.7,paddingLeft:20}}>{planned.map(text=><li key={text}>{text}</li>)}</ul></details>
+  <p style={{fontSize:14,lineHeight:1.5,color:'var(--pl-theme-muted)'}}>One simple optional subscription when purchasing is ready. Your themes, plush accessories, essential support, and privacy stay outside paid upgrades.</p></div>;
 }
-
-export { PLUSH_GOLD_FEATURES };
+export {PLUSH_GOLD_FEATURES};

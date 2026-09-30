@@ -30,7 +30,7 @@ public class WidgetBridgePlugin extends Plugin {
         "var taskLabel=function(r){return clean(r&&r.textContent).replace(/^(✓|○|✔|☐|☑)\\s*/, '').slice(0,90);};" +
         "var coach=function(){try{return JSON.parse(localStorage.getItem('plushlife:habit-coach:v1')||'{}')||{};}catch(e){return {};}};" +
         "var dayMode=function(){var text=clean(document.body&&document.body.innerText);var m=text.match(/(?:☀️|🌤️|🌱|↺|🌴)?\\s*(Full|Soft|Tiny|Recovery|Rest) Day\\b/i);return m?(m[1].charAt(0).toUpperCase()+m[1].slice(1).toLowerCase()+' Day'):'Today';};" +
-        "var sync=function(){try{var plugin=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.WidgetBridge;if(!plugin)return;" +
+        "var sync=function(){if(window.__plushlifeWidgetDataOwnedByApp)return;try{var plugin=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.WidgetBridge;if(!plugin)return;" +
         "if(!document.querySelector('[aria-label=\"PlushLife dashboards\"]'))return;" +
         "var all=rows(),doneCount=0,tasks=[];all.forEach(function(r){var c=controlFor(r);var done=isDone(c);if(done)doneCount++;" +
         "if(tasks.length<8){var label=taskLabel(r);if(label)tasks.push({label:label,done:done,key:taskKey(r,c)});}});" +
@@ -40,7 +40,7 @@ public class WidgetBridgePlugin extends Plugin {
         "plugin.updateWidget({dayType:dayMode(),nextTask:next?next.label:(all.length&&doneCount>=all.length?'You’re good for today 💜':'Open PlushLife for one caring step'),progress:progress,weeklyProgress:progress,tasks:tasks}).catch(function(){});" +
         "}catch(e){}};" +
         "var findTask=function(label,key){var wanted=clean(label).toLowerCase();var wantedKey=clean(key);var list=rows();for(var i=0;i<list.length;i++){var r=list[i],c=controlFor(r);if(!c)continue;var keyMatch=wantedKey&&taskKey(r,c)===wantedKey;var text=taskLabel(r).toLowerCase();var labelMatch=wanted&&(text===wanted||text.indexOf(wanted)>=0||wanted.indexOf(text)>=0);if(keyMatch||labelMatch)return {row:r,control:c};}return null;};" +
-        "var consumeAction=function(){try{var plugin=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.WidgetBridge;if(!plugin||!plugin.consumeWidgetAction)return;plugin.consumeWidgetAction().then(function(action){if(!action||action.action!=='done')return;var found=findTask(action.taskLabel,action.taskKey);if(!found||isDone(found.control))return;found.control.click();setTimeout(sync,350);}).catch(function(){});}catch(e){}};" +
+        "var consumeAction=function(){if(window.__plushlifeWidgetDataOwnedByApp)return;try{var plugin=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.WidgetBridge;if(!plugin||!plugin.consumeWidgetAction)return;plugin.consumeWidgetAction().then(function(action){if(!action||action.action!=='done')return;var found=findTask(action.taskLabel,action.taskKey);if(!found||isDone(found.control))return;found.control.click();setTimeout(sync,350);}).catch(function(){});}catch(e){}};" +
         "var queued=false;var queue=function(){if(queued)return;queued=true;setTimeout(function(){queued=false;sync();},250);};" +
         "document.addEventListener('change',queue,true);document.addEventListener('click',queue,true);document.addEventListener('plushlife-widget-sync',queue);document.addEventListener('plushlife-widget-action',consumeAction);" +
         "window.addEventListener('plushlife:habit-coach-updated',queue);window.addEventListener('plushlife:habit-coach-hydrated',queue);" +
@@ -69,6 +69,7 @@ public class WidgetBridgePlugin extends Plugin {
             .edit()
             .putString("nextTask", nextTask)
             .putString("dayType", dayType)
+            .putString("theme", call.getString("theme", "soft"))
             .putInt("progress", progress)
             .putInt("weeklyProgress", weeklyProgress);
 

@@ -1,3 +1,4 @@
+import { CozySpace } from "./cozy-space.jsx";
 import { CareHistory } from "./care-history.jsx";
 import { CozyScene } from "./theme-world.jsx";
 /*
@@ -170,6 +171,7 @@ export function CarePanel(props) {
       `}</style>
 
       <CozyScene title="What do you need right now?" subtitle="Choose what feels closest." />
+      <CozySpace comfortItem={props.comfortItem} rows={props.rows} viewDone={props.viewDone} onReset={props.onReset} onSupport={props.onOpenSupport} onSettings={props.onOpenSettings} soundscapes={window.PlushLifeContent.SOUNDSCAPES} notes={props.supportNotes} />
       <section className="pl-care-card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
           <div>

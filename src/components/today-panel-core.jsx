@@ -92,6 +92,7 @@ function Hero({ period, goToDashboard, setSettingsOpen, reducedMotion, selectedO
         <div className="pl-companion-copy">
         <h2>{copy["A little counts."] || "A little counts."}</h2>
         <p>{copy["Your plush is happy you\'re here."] || "Your plush is happy you\'re here."}</p>
+        <button type="button" className="pl-link-btn" style={{minHeight:44}} onClick={() => { goToDashboard?.("care"); setTimeout(() => window.dispatchEvent(new Event("plushlife:open-cozy-space")),100); }}>My Cozy Space →</button>
         </div>
       </section>
     </>

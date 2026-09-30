@@ -27,9 +27,10 @@
   const PLUSH_FEATURE_FLAGS = [
     "plushUnlimitedHabits","plushAdvancedRoutines","plushAdvancedInsights","plushFullPathsLibrary","plushAdvancedJournal","plushFocusTools","plushCalmTools","plushSleepTools","plushCloudBackup","plushCrossDeviceSync","plushWidgets","plushSmartProgress","plushSmartFocus","plushSmartReminders","plushAdaptiveRoutines","plushPersonalizedCalm","plushJournalPatterns","plushSmartRecommendations","plushPersonalizedGuide","plushFamilyFeatures",
   ];
+  const CORE_FREE_FEATURES = ["plushUnlimitedHabits", "plushFocusTools", "plushCalmTools", "plushSleepTools", "plushCloudBackup", "plushCrossDeviceSync", "plushWidgets"];
   const PLUSHPLUS_FEATURES = PLUSH_FEATURE_FLAGS.filter((flag) => flag !== "plushFamilyFeatures");
   const PLAN_FEATURES = {
-    [PLUSH_PLANS.FREE]: [],
+    [PLUSH_PLANS.FREE]: CORE_FREE_FEATURES,
     [PLUSH_PLANS.PLUSHPLUS]: PLUSHPLUS_FEATURES,
     [PLUSH_PLANS.PLUSHFAMILY]: [...PLUSHPLUS_FEATURES, "plushFamilyFeatures"],
   };
@@ -39,7 +40,7 @@
     const features = PLAN_FEATURES[devPreviewPlan || plan];
     return Array.isArray(features) && features.includes(featureKey);
   }
-  return { PLUSH_PLANS, PLUSH_FEATURE_FLAGS, PLAN_FEATURES, hasPlushFeature };
+  return { PLUSH_PLANS, PLUSH_FEATURE_FLAGS, CORE_FREE_FEATURES, PLAN_FEATURES, hasPlushFeature };
 });
 
 (function keepFullTodayTaskListStable() {
