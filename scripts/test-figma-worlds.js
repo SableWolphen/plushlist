@@ -29,4 +29,23 @@ for(const theme of ['soft','dino','baby','pink','meadow','peach','twilight','str
 vm.runInNewContext('{'+manager+'\nopenTaskManager("2026-09-29", "habits");}',context);
 assert.equal(changes.TaskManagerView,'habits');
 assert.equal(changes.TaskSearchQuery,'');
-console.log('Figma worlds regression checks passed: date routing, exact SVG dimensions, and offline assets.');
+const { worlds } = require('../assets/plush-theme-copy.js');
+function luminance(hex) {
+  const [r, g, b] = hex.match(/[a-f\d]{2}/gi).map(value => parseInt(value, 16) / 255)
+    .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
+  return r * 0.2126 + g * 0.7152 + b * 0.0722;
+}
+function contrast(a, b) {
+  const values = [luminance(a), luminance(b)];
+  return (Math.max(...values) + 0.05) / (Math.min(...values) + 0.05);
+}
+for (const [world, palette] of Object.entries(worlds)) {
+  for (const background of ['background', 'surface', 'surface2']) {
+    for (const text of ['ink', 'muted']) {
+      assert.ok(contrast(palette[text], palette[background]) >= 4.5, `${world}: ${text} must be readable on ${background}`);
+    }
+  }
+  const buttonText = ['twilight', 'baby-night'].includes(world) ? '#29223E' : '#FFFFFF';
+  assert.ok(contrast(buttonText, palette.accent) >= 4.5, `${world}: primary button text must be readable`);
+}
+console.log('Figma worlds regression checks passed: date routing, offline assets, and readable theme contrast.');

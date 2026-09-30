@@ -1,148 +1,58 @@
-import { CozyScene } from "./theme-world.jsx";
-// The Rewards ToolPanel — module split phase 7, fourth slice (see
-// docs/module-split-plan.md). FeatureTip and BADGE_DEFS are passed as
-// props rather than moved, since both are defined inside GlowUpTracker
-// as closures over other state (BADGE_DEFS's check() functions close
-// over a dozen-plus state variables) — passing the reference through
-// is safe and doesn't require touching either. PlushMascot is imported
-// directly since it's already its own module (phase 6); MASCOT_OUTFITS
-// is read from window.PlushLifeContent, same as app-source.jsx itself.
+import { CozyScene, useThemeCopy } from "./theme-world.jsx";
 import { ToolPanel } from "./shared.jsx";
-import { PlushMascot } from "./mascot.jsx";
 
-export function RewardsPanel({ open, onClose, inline = false, FeatureTip, selectedOutfit, mascotMood, activityDaysTotal, preferences, mascotGrowth, careDaysTotal, unlockedOutfits, earnedBadgeIdSet, BADGE_DEFS, unlockedIdSet, mascotRequirementProgress, saveMascotCollection, mascotCollection, savedBestStreak, collectionTab, setCollectionTab, winsJarEntries, theme }) {
+export function RewardsPanel({ open, onClose, inline = false, selectedOutfit, activityDaysTotal, preferences, mascotGrowth, unlockedOutfits, earnedBadgeIdSet, BADGE_DEFS, unlockedIdSet, mascotRequirementProgress, saveMascotCollection, mascotCollection, savedBestStreak, collectionTab, setCollectionTab, winsJarEntries, theme }) {
+  const [showAllOutfits, setShowAllOutfits] = React.useState(false);
+  const [showAllBadges, setShowAllBadges] = React.useState(false);
+  const [shownWins, setShownWins] = React.useState(6);
+  const copy = useThemeCopy();
   if (!open) return null;
   const { MASCOT_OUTFITS } = window.PlushLifeContent;
-  return (
-          <ToolPanel title="🧸 Plush & Keepsakes" displayTitle="Plush Corner" inline={inline} hideClose={inline} onClose={onClose}>
-          <CozyScene title="Your plush, growing with you." subtitle="Little wins help you grow together." accessory={selectedOutfit.accessory} />
-          <FeatureTip id="rewards_panel" text="Everything here is earned from all kinds of care, not just streaks — and once unlocked, nothing is ever taken away." />
-          <div style={{ marginBottom: 18, padding: 17, borderRadius: 20, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 12px 30px rgba(100,62,118,.08), inset 0 1px 0 rgba(255,255,255,.9)" }}>
-            <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
-              <div style={{ flex: "1 1 190px" }}>
-                <div style={{ fontSize: 10.5, fontWeight: 950, letterSpacing: ".15em", color: "var(--pl-theme-muted,#A957B7)" }}>YOUR PLUSH CORNER</div>
-                <div style={{ marginTop: 4, fontSize: 20, fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>{selectedOutfit.name}</div>
-                {mascotGrowth.label !== "new" && <div style={{ marginTop: 2, fontSize: 12, fontWeight: 800, color: "var(--pl-theme-muted,#A65DC1)" }}>Your companion is {mascotGrowth.label} ✨</div>}
-                <div style={{ marginTop: 7, fontSize: 12.5, lineHeight: 1.5, color: "var(--pl-theme-muted,#7B6888)" }}>
-                  Every little bit of care helps your PlushLife grow. Outfits, badges, and keepsakes celebrate showing up — without taking anything away when life gets messy.
-                </div>
-                <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 9 }}>
-                  <span style={{ padding: "5px 9px", borderRadius: 999, background: "var(--pl-theme-surface-2,#FFF4CF)", color: "var(--pl-theme-ink,#94600D)", fontWeight: 900, fontSize: 11.5 }}>👋 Active days: {activityDaysTotal}</span>
-                  <span style={{ padding: "5px 9px", borderRadius: 999, background: "var(--pl-theme-surface-2,#F3E8FA)", color: "var(--pl-theme-muted,#8E4EAA)", fontWeight: 900, fontSize: 11.5 }}>♥ Essential-care days: {careDaysTotal}</span>
-                  <span style={{ padding: "5px 9px", borderRadius: 999, background: "var(--pl-theme-surface-2,#EAF8F4)", color: "var(--pl-theme-ink,#318C79)", fontWeight: 900, fontSize: 11.5 }}>✨ {unlockedOutfits.length}/{MASCOT_OUTFITS.length} outfits · {earnedBadgeIdSet.size}/{BADGE_DEFS.length} badges</span>
-                </div>
-                <div style={{ marginTop: 7, fontSize: 10.5, color: "var(--pl-theme-muted,#8C6B9E)" }}>These are lifetime totals. Taking time away never lowers them, and every unlocked reward remains yours.</div>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", gap: 6, marginTop: 14 }}>
-              <button type="button" onClick={() => setCollectionTab("mascot")} style={{ flex: 1, padding: "8px 6px", borderRadius: 10, border: collectionTab === "mascot" ? "2px solid #A65DC1" : "1px solid #E4D7B4", background: collectionTab === "mascot" ? "linear-gradient(145deg,#FFF5FC,#F2EBFF)" : "#FFFDFE", color: "var(--pl-theme-ink,#5B4B6B)", fontWeight: 800, cursor: "pointer" }}>🧸 Closet</button>
-              <button type="button" onClick={() => setCollectionTab("badges")} style={{ flex: 1, padding: "8px 10px", borderRadius: 10, border: collectionTab === "badges" ? "2px solid #A65DC1" : "1px solid #E4D7B4", background: collectionTab === "badges" ? "linear-gradient(145deg,#FFF5FC,#F2EBFF)" : "#FFFDFE", color: "var(--pl-theme-ink,#5B4B6B)", fontWeight: 800, cursor: "pointer" }}>🏅 Badges</button>
-              <button type="button" onClick={() => setCollectionTab("wins")} style={{ flex: 1, padding: "8px 6px", borderRadius: 10, border: collectionTab === "wins" ? "2px solid #A65DC1" : "1px solid #E4D7B4", background: collectionTab === "wins" ? "linear-gradient(145deg,#FFF5FC,#F2EBFF)" : "#FFFDFE", color: "var(--pl-theme-ink,#5B4B6B)", fontWeight: 800, cursor: "pointer" }}>🫙 Jar</button>
-            </div>
-
-            {collectionTab === "mascot" && (
-            <div style={{ marginTop: 14 }}>
-              {[
-                { id: "unlocked", title: `✨ UNLOCKED · ${unlockedOutfits.length}`, subtitle: "Tap an outfit to wear it.", items: MASCOT_OUTFITS.filter((outfit) => unlockedIdSet.has(outfit.id)) },
-                { id: "locked", title: `🔒 STILL TO UNLOCK · ${MASCOT_OUTFITS.length - unlockedOutfits.length}`, subtitle: "Your progress is shown on each reward—nothing already earned can disappear.", items: MASCOT_OUTFITS.filter((outfit) => !unlockedIdSet.has(outfit.id)) },
-              ].map((section) => (
-              <div key={section.id} style={{ marginTop: section.id === "unlocked" ? 0 : 18 }}>
-                <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: ".1em", color: section.id === "unlocked" ? "#318C79" : "#8C6B9E" }}>{section.title}</div>
-                <div style={{ marginTop: 3, fontSize: 10.5, color: "var(--pl-theme-muted,#8C6B9E)" }}>{section.subtitle}</div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(132px,1fr))", gap: 8, marginTop: 8 }}>
-              {section.items.map((outfit) => {
-                const unlocked = unlockedIdSet.has(outfit.id);
-                const selected = selectedOutfit.id === outfit.id;
-                const progress = Math.min(outfit.unlock.count, mascotRequirementProgress(outfit));
-                return (
-                  <button key={outfit.id} type="button" disabled={!unlocked} onClick={() => {
-                    if (!unlocked) return;
-                    saveMascotCollection({
-                      ...mascotCollection,
-                      bestStreak: savedBestStreak,
-                      unlockedIds: [...unlockedIdSet],
-                      selectedId: outfit.id,
-                    });
-                  }} style={{ minHeight: 96, padding: "10px 8px", borderRadius: 13, border: selected ? "2px solid #A65DC1" : "1px solid #E4D7B4", background: selected ? "#F8ECFC" : unlocked ? "#FFFFFFC9" : "#F1ECEF", color: unlocked ? "#5B4B6B" : "#9B919F", textAlign: "center", cursor: unlocked ? "pointer" : "not-allowed", opacity: unlocked ? 1 : .68 }}>
-                    <div style={{ fontSize: 27 }}>{unlocked ? outfit.badge : "🔒"}</div>
-                    <div style={{ marginTop: 3, fontSize: 12, fontWeight: 900 }}>{outfit.name}</div>
-                    <div style={{ marginTop: 3, fontSize: 9.5, lineHeight: 1.35 }}>{outfit.hint}</div>
-                    {unlocked && <div style={{ marginTop: 3, fontSize: 9.5, fontWeight: 900, color: selected ? "#A65DC1" : "#318C79" }}>{selected ? "Wearing now" : "✓ Unlocked · tap to wear"}</div>}
-                    {!unlocked && outfit.unlock.count > 0 && (
-                      <div style={{ marginTop: 4, fontSize: 9, fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>{progress}/{outfit.unlock.count}</div>
-                    )}
-                  </button>
-                );
-              })}
-                </div>
-              </div>
-              ))}
-            </div>
-            )}
-
-            {collectionTab === "badges" && (
-            <div style={{ marginTop: 14 }}>
-              <div style={{ fontSize: 11.5, lineHeight: 1.5, color: "var(--pl-theme-muted,#7B6888)" }}>Earned for all kinds of caring, not just streaks — showing up, reflecting, connecting, organizing, and growing habits. Once earned, a badge is yours forever.</div>
-              {[
-                { id: "earned", title: `✨ EARNED · ${earnedBadgeIdSet.size}`, items: BADGE_DEFS.filter((item) => earnedBadgeIdSet.has(item.id)) },
-                { id: "locked", title: `🔒 STILL TO UNLOCK · ${BADGE_DEFS.length - earnedBadgeIdSet.size}`, items: BADGE_DEFS.filter((item) => !earnedBadgeIdSet.has(item.id)) },
-              ].map((section) => (
-              <div key={section.id} style={{ marginTop: section.id === "earned" ? 12 : 18 }}>
-                <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: ".1em", color: section.id === "earned" ? "#318C79" : "#8C6B9E" }}>{section.title}</div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(112px,1fr))", gap: 8, marginTop: 8 }}>
-                {section.items.map((item) => {
-                  const unlocked = earnedBadgeIdSet.has(item.id);
-                  return (
-                    <div key={item.id} style={{ minHeight: 88, padding: "10px 8px", borderRadius: 13, border: unlocked ? "1px solid #E4D7B4" : "1px solid #E9E4E7", background: unlocked ? "#FFFFFFC9" : "#F1ECEF", color: unlocked ? "#5B4B6B" : "#9B919F", textAlign: "center", opacity: unlocked ? 1 : .68 }}>
-                      <div style={{ fontSize: 24 }}>{unlocked ? item.badge : "🔒"}</div>
-                      <div style={{ marginTop: 3, fontSize: 11, fontWeight: 900 }}>{item.name}</div>
-                      <div style={{ marginTop: 3, fontSize: 9, lineHeight: 1.35 }}>{item.hint}</div>
-                      {unlocked && <div style={{ marginTop: 3, fontSize: 9.5, fontWeight: 900, color: "var(--pl-theme-ink,#318C79)" }}>✓ Earned</div>}
-                    </div>
-                  );
-                })}
-                </div>
-              </div>
-              ))}
-            </div>
-            )}
-
-            {collectionTab === "wins" && (
-            <div style={{ marginTop: 14 }}>
-              <div style={{ padding: "12px 13px", borderRadius: 14, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
-                <div style={{ fontSize: 12, fontWeight: 900, color: "var(--pl-theme-ink,#76558A)" }}>🫙 YOUR WINS JAR</div>
-                <div style={{ marginTop: 4, fontSize: 12, lineHeight: 1.5, color: "var(--pl-theme-muted,#7B6888)" }}>Little care is worth keeping. These are gentle notes from days you showed up—no streaks to protect, no points to lose.</div>
-              </div>
-              <div style={{ marginTop: 10, padding: "10px 11px", borderRadius: 13, background: "var(--pl-theme-surface,#FFFDFE)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
-                <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: ".1em", color: "var(--pl-theme-muted,#9A62AB)" }}>🏠 NURSERY KEEPSAKE WALL</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 7 }}>
-                  {winsJarEntries.length ? winsJarEntries.slice(0, 8).map((entry) => <span key={`keepsake-${entry.date}`} title={entry.title} aria-label={entry.title} style={{ display: "grid", placeItems: "center", width: 31, height: 31, borderRadius: 10, background: "var(--pl-theme-surface-2,#F8EEFC)", border: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 17 }}>{entry.emoji}</span>) : <span style={{ color: "var(--pl-theme-muted,#9A86A7)", fontSize: 11.5 }}>Your first little win will become a keepsake here.</span>}
-                </div>
-              </div>
-              {winsJarEntries.length === 0 ? (
-                <div style={{ marginTop: 10, padding: 14, borderRadius: 13, border: "1px dashed var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface,#FFFCFF)", color: "var(--pl-theme-muted,#8C6B9E)", fontSize: 12.5, lineHeight: 1.5, textAlign: "center" }}>Your jar is waiting for its first tiny win. Whenever you finish something that helps, it will have a place here. 🌱</div>
-              ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(145px,1fr))", gap: 8, marginTop: 10 }}>
-                  {winsJarEntries.map((entry) => (
-                    <article key={entry.date} style={{ minHeight: 116, padding: "11px 10px", borderRadius: 14, background: "#FFFFFFD6", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 4px 12px rgba(120,80,145,.08)" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}><span style={{ fontSize: 23 }}>{entry.emoji}</span><span style={{ color: "var(--pl-theme-muted,#9A86A7)", fontSize: 9.5, fontWeight: 800 }}>{new Date(`${entry.date}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span></div>
-                      <div style={{ marginTop: 5, color: "var(--pl-theme-ink,#68446F)", fontSize: 12.5, fontWeight: 900 }}>{entry.title}</div>
-                      <div style={{ marginTop: 4, color: "var(--pl-theme-muted,#7B6888)", fontSize: 10.5, lineHeight: 1.42 }}>{entry.text}</div>
-                      <div style={{ marginTop: 6, color: "var(--pl-theme-ink,#318C79)", fontSize: 9.5, fontWeight: 900 }}>{entry.count} {entry.count === 1 ? "care thing" : "care things"} that day</div>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </div>
-            )}
-
-            <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 13, paddingTop: 12, borderTop: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 12.5, fontWeight: 800 }}>
-              <input type="checkbox" checked={mascotCollection.celebrationSound} onChange={(event) => saveMascotCollection({ ...mascotCollection, bestStreak: savedBestStreak, unlockedIds: [...unlockedIdSet], celebrationSound: event.target.checked })} />
-              Play a soft chime at 100% (automatically silent during quiet hours)
-            </label>
-            <div style={{ marginTop: 6, fontSize: 10.5, color: "var(--pl-theme-muted,#8C6B9E)" }}>Reduce animation in Settings also keeps the 100% celebration still and calm.</div>
-          </div>
-          </ToolPanel>
-  );
+  const available = MASCOT_OUTFITS.filter(item => unlockedIdSet.has(item.id));
+  const locked = MASCOT_OUTFITS.filter(item => !unlockedIdSet.has(item.id));
+  const earned = BADGE_DEFS.filter(item => earnedBadgeIdSet.has(item.id));
+  const next = [...locked].sort((a, b) => (a.unlock.count - mascotRequirementProgress(a)) - (b.unlock.count - mascotRequirementProgress(b)))[0];
+  const wear = (outfit) => {
+    if (!unlockedIdSet.has(outfit.id)) return;
+    saveMascotCollection({ ...mascotCollection, bestStreak: savedBestStreak, unlockedIds: [...unlockedIdSet], selectedId: outfit.id });
+  };
+  const outfitCard = (outfit, unlocked) => {
+    const selected = selectedOutfit.id === outfit.id;
+    const progress = Math.min(outfit.unlock.count, mascotRequirementProgress(outfit));
+    return <button key={outfit.id} type="button" className="pl-collection-item" disabled={!unlocked} aria-pressed={unlocked ? selected : undefined} onClick={() => wear(outfit)}>
+      <span className="pl-collection-icon" aria-hidden="true">{outfit.badge}</span>
+      <strong>{outfit.name}</strong>
+      <span>{unlocked ? selected ? "Wearing now" : "Tap to wear" : `${progress} / ${outfit.unlock.count}`}</span>
+      {!unlocked && <small>{outfit.hint}</small>}
+    </button>;
+  };
+  return <ToolPanel title="🧸 Plush & Keepsakes" displayTitle="Plush Corner" inline={inline} hideClose={inline} onClose={onClose}>
+    <div className="pl-closet-shell">
+      <CozyScene title="Your plush, growing with you." subtitle={copy["Your story is bigger than a streak."] || "Tiny steps. Big hugs."} outfit={selectedOutfit} />
+      <section className="pl-design-card pl-closet-summary">
+        <h2>Wearing · {selectedOutfit.name}</h2>
+        <p>{activityDaysTotal} caring days · {unlockedOutfits.length} outfits · {earnedBadgeIdSet.size} badges</p>
+        <div role="tablist" aria-label="Your collection" className="pl-collection-tabs">
+          {[["mascot", "Closet"], ["badges", "Badges"], ["wins", "Jar"]].map(([id, label]) => <button type="button" key={id} role="tab" aria-selected={collectionTab === id} onClick={() => setCollectionTab(id)}>{label}</button>)}
+        </div>
+      </section>
+      <div role="tabpanel" aria-label={collectionTab === "mascot" ? "Closet" : collectionTab === "badges" ? "Badges" : "Kindness jar"}>
+        {collectionTab === "mascot" && <>
+          <section className="pl-design-card">
+            <h2>Your outfits · {available.length}</h2>
+            <div className="pl-collection-grid">{(showAllOutfits ? available : [selectedOutfit, ...available.filter(item => item.id !== selectedOutfit.id)].slice(0, 6)).map(item => outfitCard(item, true))}</div>
+            {available.length > 6 && <button type="button" className="pl-collection-more" aria-expanded={showAllOutfits} onClick={() => setShowAllOutfits(value => !value)}>{showAllOutfits ? "Show fewer outfits" : `See all ${available.length} outfits`}</button>}
+          </section>
+          {next && <section className="pl-design-card pl-next-unlock"><h2>Next little unlock</h2><p>{next.badge} {next.name} · {Math.min(next.unlock.count, mascotRequirementProgress(next))} / {next.unlock.count}</p><p>{next.hint}</p></section>}
+          {locked.length > 0 && <details className="pl-design-card pl-collection-details"><summary>Still to unlock · {locked.length}</summary><p>Your progress is shown on each reward. Everything you earn stays yours.</p><div className="pl-collection-grid">{locked.map(item => outfitCard(item, false))}</div></details>}
+        </>}
+        {collectionTab === "badges" && <>
+          <section className="pl-design-card"><h2>Little celebrations · {earned.length}</h2><div className="pl-collection-grid">{(showAllBadges ? earned : earned.slice(0, 6)).map(item => <article className="pl-collection-item" key={item.id}><span className="pl-collection-icon" aria-hidden="true">{item.badge}</span><strong>{item.name}</strong><span>Earned</span></article>)}</div>{!earned.length && <p>Your first badge is waiting for a little care.</p>}{earned.length > 6 && <button type="button" className="pl-collection-more" aria-expanded={showAllBadges} onClick={() => setShowAllBadges(value => !value)}>{showAllBadges ? "Show fewer badges" : `See all ${earned.length} badges`}</button>}</section>
+          <details className="pl-design-card pl-collection-details"><summary>Badges to discover · {BADGE_DEFS.length - earned.length}</summary><div className="pl-collection-grid">{BADGE_DEFS.filter(item => !earnedBadgeIdSet.has(item.id)).map(item => <article key={item.id} className="pl-collection-item"><span className="pl-collection-icon" aria-hidden="true">{item.badge}</span><strong>{item.name}</strong><small>{item.hint}</small></article>)}</div></details>
+        </>}
+        {collectionTab === "wins" && <section className="pl-design-card"><h2>{theme?.startsWith("baby") ? "Nursery keepsakes" : theme === "dino" ? "Adventure keepsakes" : "Your kindness jar"}</h2><p>Little moments, kept with love.</p>{!winsJarEntries.length && <p>Your first little win will find a home here.</p>}<div className="pl-wins-list">{winsJarEntries.slice(0, shownWins).map(entry => <article key={entry.date}><span aria-hidden="true">{entry.emoji}</span><div><strong>{entry.title}</strong><time dateTime={entry.date}>{new Date(`${entry.date}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</time><p>{entry.text}</p></div></article>)}</div>{shownWins < winsJarEntries.length && <button type="button" className="pl-collection-more" onClick={() => setShownWins(value => value + 10)}>More little memories</button>}</section>}
+      </div>
+      <details className="pl-design-card pl-collection-details"><summary>Little celebration settings</summary><p>Earned rewards stay yours, even when you take time away.</p><label className="pl-collection-setting"><input type="checkbox" checked={mascotCollection.celebrationSound} onChange={event => saveMascotCollection({ ...mascotCollection, bestStreak: savedBestStreak, unlockedIds: [...unlockedIdSet], celebrationSound: event.target.checked })} />Play a soft chime at 100% (silent during quiet hours)</label><p>Reduce animation in Settings keeps celebrations still and calm.</p></details>
+    </div>
+  </ToolPanel>;
 }

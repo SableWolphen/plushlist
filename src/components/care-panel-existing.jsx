@@ -1,22 +1,12 @@
-// The PlushCare dashboard tab — module split phase 7, ninth slice
-// (see docs/module-split-plan.md). First of the always-in-tree
-// dashboard views (not a ToolPanel — switched via `dashboard === "x"`,
-// no onClose). Quick comfort tools, PlushPaths, PlushSleep +
-// soundscapes, and (for the one profile that has it) Mama's Corner.
-// COMFORT_TOOLS/PLUSH_PATHS/SLEEP_TOOLS/SOUNDSCAPES/GENTLE_AFFIRMATIONS
-// read from window.PlushLifeContent; pathOfTheWeekId from
-// window.PlushLifeSchedule — both inside this file. MamasCorner
-// imported directly from ./baby-mode.jsx (already its own module,
-// phase 6). HELP_ME_NOW_OPTIONS passed as a prop since it's a plain
-// literal in app-source.jsx, not a window global.
-import { MamasCorner } from "./baby-mode.jsx";
-
-export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverName, careSituationsExpanded, setCareSituationsExpanded, setCareMessage, openCareSession, careMessage, isMamaCornerProfile, careExtraSupportOpen, setCareExtraSupportOpen, user, preferences, rows, viewDone, toggle, supabase, careSection, setCareSection, careSessionHistory, HELP_ME_NOW_OPTIONS, pathProgress, setSelectedCarePath, period, setSleepToolOpen, soundscapePlaying, toggleSoundscape, soundscapeVolume, changeSoundscapeVolume, setSoundscapeSleepTimer, soundscapeTimerMinutes }) {
+// Care tool library, with a short default path list and optional full browsing.
+export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverName, careSituationsExpanded, setCareSituationsExpanded, setCareMessage, openCareSession, careMessage, libraryOnly = false, user, preferences, rows, viewDone, toggle, supabase, careSection, setCareSection, careSessionHistory, HELP_ME_NOW_OPTIONS, pathProgress, setSelectedCarePath, period, setSleepToolOpen, soundscapePlaying, toggleSoundscape, soundscapeVolume, changeSoundscapeVolume, setSoundscapeSleepTimer, soundscapeTimerMinutes }) {
+  const [allPaths, setAllPaths] = React.useState(false);
   if (!open) return null;
   const { COMFORT_TOOLS, PLUSH_PATHS, SLEEP_TOOLS, SOUNDSCAPES, GENTLE_AFFIRMATIONS } = window.PlushLifeContent;
   const { pathOfTheWeekId } = window.PlushLifeSchedule;
   return (
           <div style={{ marginBottom: 18, display: "grid", gap: 14 }}>
+            {!libraryOnly && (
             <div style={{ padding: 18, borderRadius: 20, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 8px 24px rgba(49,140,121,.09)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10, flexWrap: "wrap" }}>
                 <div><div style={{ fontSize: 11, letterSpacing: ".15em", color: "var(--pl-theme-ink,#318C79)", fontWeight: 900 }}>{babyMode ? "🧸 LITTLE COMFORT CORNER" : "♥ PLUSHCARE"}</div><div style={{ marginTop: 4, fontSize: 20, color: "var(--pl-theme-ink,#4F405C)", fontWeight: 900 }}>{babyMode ? "What does my little self need?" : "What would help right now?"}</div></div>
@@ -31,14 +21,6 @@ export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverNa
               <button type="button" onClick={() => setCareSituationsExpanded((expanded) => !expanded)} aria-expanded={careSituationsExpanded} style={{ marginTop: 9, padding: "7px 10px", borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white", color: "var(--pl-theme-ink,#318C79)", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>{careSituationsExpanded ? "Show fewer situations" : "Show all situations"}</button>
               {careMessage && <div aria-live="polite" style={{ marginTop: 10, padding: "9px 11px", borderRadius: 10, background: "#FFFFFFB8", color: "var(--pl-theme-ink,#5E766F)", fontSize: 11.5, lineHeight: 1.5 }}>{careMessage}</div>}
             </div>
-
-            {isMamaCornerProfile && (
-            <details open={careExtraSupportOpen} onToggle={(event) => setCareExtraSupportOpen(event.currentTarget.open)} style={{ borderRadius: 14, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "#FFFFFF99", padding: "10px 12px" }}>
-              <summary style={{ color: "var(--pl-theme-ink,#76558A)", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>More cozy support</summary>
-              <div style={{ marginTop: 10, display: "grid", gap: 12 }}>
-                <MamasCorner userId={user.id} caregiverName={babyCaregiverName} parentVoice={preferences.baby_voice === "fatherly" ? "fatherly" : "motherly"} incompleteTasks={rows.filter((row) => !viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => toggle(taskKey)} supabase={supabase} />
-              </div>
-            </details>
             )}
 
             <div role="tablist" aria-label="Care library" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 5, padding: 4, borderRadius: 13, background: "#FFFFFFB8", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
@@ -49,11 +31,11 @@ export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverNa
 
             {careSection === "quick" && <div className="pl-care-library-panel" style={{ padding: 11, borderRadius: 16, background: "#FFFFFFC7", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
               <div style={{ fontSize: 9.8, letterSpacing: ".12em", fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>🌿 QUICK CARE SESSIONS</div>
-              <div style={{ marginTop: 3, fontSize: 10.5, lineHeight: 1.35, color: "var(--pl-theme-muted,#7B6888)" }}>Short, private, and always free. Tell PlushLife afterward whether it helped.</div>
+              <div style={{ marginTop: 3, fontSize: 10.5, lineHeight: 1.35, color: "var(--pl-theme-muted,#7B6888)" }}>A little calm, whenever you need it.</div>
               {(() => {
                 const helpful = careSessionHistory.find((entry) => ["helped", "a_little"].includes(entry.outcome));
                 const tool = helpful && COMFORT_TOOLS.find((entry) => entry.id === helpful.session_id);
-                return tool ? <div style={{ marginTop: 7, padding: "7px 9px", borderRadius: 10, background: "var(--pl-theme-surface,#F7FFFC)", color: "var(--pl-theme-ink,#5B746D)", fontSize: 10.2, lineHeight: 1.35 }}>You previously said <strong>{tool.name}</strong> helped. Want to use it again?</div> : null;
+                return !libraryOnly && tool ? <div style={{ marginTop: 7, padding: "7px 9px", borderRadius: 10, background: "var(--pl-theme-surface,#F7FFFC)", color: "var(--pl-theme-ink,#5B746D)", fontSize: 10.2, lineHeight: 1.35 }}>You previously said <strong>{tool.name}</strong> helped. Want to use it again?</div> : null;
               })()}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 6, marginTop: 8 }}>
                 {COMFORT_TOOLS.map((tool) => <button key={tool.id} className="pl-care-tool" type="button" onClick={() => openCareSession(tool.id)} style={{ minHeight: 64, padding: "8px 6px", borderRadius: 12, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface,#FFF9FD)", color: "var(--pl-theme-ink,#6B5A7D)", fontWeight: 900, fontSize: 10.2, cursor: "pointer" }}><div style={{ fontSize: 19 }}>{tool.icon}</div><div style={{ marginTop: 3, lineHeight: 1.2 }}>{tool.name}</div></button>)}
@@ -62,12 +44,12 @@ export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverNa
 
             {careSection === "paths" && <div className="pl-care-library-panel" style={{ padding: 11, borderRadius: 16, background: "#FFFDF4D9", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
               <div style={{ fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "var(--pl-theme-ink,#A56D14)" }}>🗺️ PLUSHPATHS</div>
-              <div style={{ marginTop: 5, fontSize: 12, color: "var(--pl-theme-muted,#7B6888)" }}>Guided programs that move at your pace. Pause, repeat, or leave any time. One is featured each week — try it, or pick any other.</div>
+              <div style={{ marginTop: 5, fontSize: 12, color: "var(--pl-theme-muted,#7B6888)" }}>One small step at a time. Pause whenever you need.</div>
               <div style={{ display: "grid", gap: 9, marginTop: 11 }}>
                 {(() => {
                   const featuredId = pathOfTheWeekId(period.weekStart);
                   const ordered = [...PLUSH_PATHS].sort((a, b) => (a.id === featuredId ? -1 : b.id === featuredId ? 1 : 0));
-                  return ordered.map((path) => {
+                  return (allPaths ? ordered : ordered.slice(0, 3)).map((path) => {
                   const progress = pathProgress.find((item) => item.path_id === path.id);
                   const completedCount = progress?.completed_days?.length || 0;
                   const featured = path.id === featuredId;
@@ -80,6 +62,7 @@ export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverNa
                   });
                 })()}
               </div>
+              {PLUSH_PATHS.length > 3 && <button type="button" className="pl-collection-more" aria-expanded={allPaths} onClick={() => setAllPaths(value => !value)}>{allPaths ? "Show fewer paths" : `Browse all ${PLUSH_PATHS.length} paths`}</button>}
             </div>}
 
             {careSection === "sleep" && (() => {
@@ -91,7 +74,7 @@ export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverNa
                   return <span key={index} aria-hidden="true" style={{ position: "absolute", left, top, fontSize: 10, color: "var(--pl-theme-muted,#C596D5)", opacity: 0.8 }}>✦</span>;
                 })}
                 <div style={{ position: "relative", fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "var(--pl-theme-muted,#A15CB7)" }}>{babyMode ? "🌙 BEDTIME NEST" : "🌙 PLUSHSLEEP"}</div>
-                <div style={{ position: "relative", marginTop: 5, fontSize: 12, color: "var(--pl-theme-muted,#796386)" }}>{babyMode ? "A soft little landing for when it is time to get cozy and rest." : "Practical support for difficult nights—not a score and not a medical sleep assessment."}</div>
+                <div style={{ position: "relative", marginTop: 5, fontSize: 12, color: "var(--pl-theme-muted,#796386)" }}>{babyMode ? "A soft little landing for when it is time to get cozy and rest." : "A softer landing for tonight."}</div>
                 {helpfulSleepTool && <div style={{ position: "relative", marginTop: 9, padding: "8px 10px", borderRadius: 10, background: "var(--pl-theme-surface-2,#F5ECFA)", color: "var(--pl-theme-ink,#654D73)", fontSize: 11.5 }}>You previously said <strong>{helpfulSleepTool.title}</strong> helped. Want to use it again?</div>}
                 <div style={{ position: "relative", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(145px,1fr))", gap: 8, marginTop: 11 }}>
                   {SLEEP_TOOLS.map((tool) => <button key={tool.id} className="pl-care-tool" type="button" onClick={() => setSleepToolOpen(tool.id)} style={{ padding: "11px 10px", borderRadius: 13, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface-2,#F5ECFA)", color: "var(--pl-theme-ink,#654D73)", textAlign: "left", fontWeight: 800, fontSize: 12, cursor: "pointer" }}><span style={{ fontSize: 19, marginRight: 6 }}>{tool.icon}</span>{tool.title}</button>)}

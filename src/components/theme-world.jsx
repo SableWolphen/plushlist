@@ -2,13 +2,22 @@
 export const ThemeWorldContext = React.createContext({ world: "soft", voice: "motherly" });
 export const FIGMA_WORLDS = window.PlushLifeThemeCopy.worlds;
 
-export function ThemeScene({ world, className = "", decorative = false }) {
+import { wardrobeGeometry, REAR_OUTFITS, FRONT_OUTFITS } from "../mascot-wardrobe.js";
+
+export function ThemeScene({ world, className = "", decorative = false, outfit }) {
   const context = React.useContext(ThemeWorldContext);
   const inherited = typeof context === "string" ? context : context.world;
   const requested = world === "warm" || String(world).startsWith("baby_") ? inherited : world || inherited;
   const selected = FIGMA_WORLDS[requested] ? requested : "soft";
+  outfit = outfit || context.outfit;
+  const geometry = wardrobeGeometry(selected);
+  const layer = (position) => <svg className={`pl-outfit-layer pl-outfit-${position}`} width={geometry.width} height="100" viewBox={`0 0 ${geometry.width} 100`} aria-hidden="true"><g transform={`translate(${geometry.x} ${geometry.y}) scale(${geometry.scale})`}><use href={`./assets/plush-outfits.svg#${outfit.id}-${position}`} width="100" height="100" /></g></svg>;
   return <span className={`pl-theme-scene ${className}`} data-world={selected} aria-hidden={decorative || undefined}>
-    <img src={`./assets/figma/${FIGMA_WORLDS[selected].asset}.svg`} alt={decorative ? "" : `Your ${FIGMA_WORLDS[selected].companion}`} width={selected === "dino" || selected.startsWith("baby") ? 294 : 211} height="100" decoding="async" />
+    <span className="pl-scene-art" style={{ width: geometry.width, aspectRatio: `${geometry.width} / 100` }}>
+      {outfit && REAR_OUTFITS.has(outfit.id) && layer("back")}
+      <img src={`./assets/figma/${FIGMA_WORLDS[selected].asset}.svg`} alt={decorative ? "" : `Your ${FIGMA_WORLDS[selected].companion}${outfit ? ` wearing ${outfit.name}` : ""}`} width={geometry.width} height="100" decoding="async" />
+      {outfit && FRONT_OUTFITS.has(outfit.id) && layer("front")}
+    </span>
   </span>;
 }
 
@@ -16,11 +25,11 @@ export function DesignIcon({ name, className = "" }) {
   return <span className={`pl-design-icon ${className}`} aria-hidden="true" style={{ maskImage: `url(./assets/figma/icon-${name}.svg)`, WebkitMaskImage: `url(./assets/figma/icon-${name}.svg)` }} />;
 }
 
-export function CozyScene({ title, subtitle, world, accessory }) {
+export function CozyScene({ title, subtitle, world, outfit }) {
   const copy = useThemeCopy();
   title = copy[title] || title;
   subtitle = copy[subtitle] || subtitle;
-  return <section className="pl-cozy-scene"><span className="pl-scene-owner"><ThemeScene world={world} decorative />{accessory && <span className="pl-scene-accessory" aria-hidden="true">{accessory}</span>}</span><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</section>;
+  return <section className="pl-cozy-scene"><span className="pl-scene-owner"><ThemeScene world={world} outfit={outfit} decorative /></span><div className="pl-companion-copy"><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div></section>;
 }
 
 export function useThemeCopy() {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "plushlife-v76";
+const CACHE_NAME = "plushlife-v78";
 const APP_SHELL = [
   "./assets/figma-design.css",
   "./assets/figma/icon-progress.svg",
@@ -16,6 +16,7 @@ const APP_SHELL = [
   "./assets/figma/baby-night.svg",
   "./assets/figma/soft-light.svg",
   "./assets/figma/soft.svg",
+  "./assets/plush-outfits.svg",
   "./assets/figma/signature-dino.svg",
   "./assets/figma/signature-nursery.svg",
   "./assets/plush-theme-copy.js",

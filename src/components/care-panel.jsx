@@ -10,7 +10,6 @@ import { CozyScene } from "./theme-world.jsx";
  * 🌙 TONIGHT
  * minHeight: 44
  */
-import { MamasCorner } from "./baby-mode.jsx";
 import { CarePanel as ExistingCarePanel } from "./care-panel-existing.jsx";
 import { EXTRA_PLUSH_PATHS } from "../plush-paths-extra.js";
 import { hasGoldFeature } from "../plush-gold.js";
@@ -61,6 +60,7 @@ export function CarePanel(props) {
   }
 
   const [selectedSituationId, setSelectedSituationId] = React.useState(null);
+  const [libraryOpen, setLibraryOpen] = React.useState(false);
   const [pathFeedbackVersion, setPathFeedbackVersion] = React.useState(0);
   const [profileVersion, setProfileVersion] = React.useState(0);
 
@@ -173,14 +173,14 @@ export function CarePanel(props) {
       <section className="pl-care-card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
           <div>
-            <div className="pl-care-kicker">🧸 A LITTLE SUPPORT</div>
+
             <div className="pl-care-title">What would feel nicest right now?</div>
           </div>
           <button type="button" className="pl-care-checkin" onClick={() => props.setCheckInPopupOpen(true)}>
             {props.babyMode ? `${props.babyCaregiverName} check-in` : "Check in"}
           </button>
         </div>
-        <div className="pl-care-copy">Pick what feels closest. PlushLife will help you choose one gentle thing — no big checklist.</div>
+        <div className="pl-care-copy">Pick one feeling. We’ll find one small step.</div>
 
         <div className="pl-care-feelings">
           {visibleOptions.map((option) => <SituationButton key={option.id} option={option} selected={selectedSituationId === option.id} onClick={() => chooseSituation(option)} />)}
@@ -199,13 +199,16 @@ export function CarePanel(props) {
             <div className="pl-care-copy">{selectedSituation.next}</div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
               <button type="button" className="pl-care-primary" onClick={() => startCare(selectedSituation.tool)}>Start now</button>
-              <button type="button" className="pl-care-soft-btn" onClick={() => props.setCareSection("quick")}>🌿 Open PlushCalm</button>
+              <button type="button" className="pl-care-soft-btn" onClick={() => { props.setCareSection("quick"); setLibraryOpen(true); }}>🌿 Open PlushCalm</button>
             </div>
           </div>
         )}
       </section>
 
-      <CareHistory {...props} />
+      <details className="pl-care-history-door pl-design-card">
+        <summary>Your history <span>Check-ins & journals →</span></summary>
+        <CareHistory {...props} />
+      </details>
 
       {goldMemoryUnlocked && memory.tool && (
         <section data-actionable-care-recommendation="true" className="pl-care-memory">
@@ -217,18 +220,9 @@ export function CarePanel(props) {
         </section>
       )}
 
-      {props.isMamaCornerProfile && (
-        <details open={props.careExtraSupportOpen} onToggle={(event) => props.setCareExtraSupportOpen(event.currentTarget.open)} className="pl-care-extra">
-          <summary style={{ minHeight: 34, padding: "0 5px", display: "flex", alignItems: "center", color: "var(--pl-theme-ink,#76558A)", fontWeight: 900, fontSize: 9.5, cursor: "pointer" }}>🧸 More cozy support</summary>
-          <div style={{ marginTop: 8 }}>
-            <MamasCorner userId={props.user.id} caregiverName={props.babyCaregiverName} parentVoice={props.preferences.baby_voice === "fatherly" ? "fatherly" : "motherly"} incompleteTasks={props.rows.filter((row) => !props.viewDone[row.key] && !row.isBonus)} onConfirmTask={(taskKey) => props.toggle(taskKey)} supabase={props.supabase} />
-          </div>
-        </details>
-      )}
 
       <section aria-label="PlushCare main spaces" className="pl-care-spaces">
-        <div className="pl-care-kicker">✨ YOUR COZY SPACES</div>
-        <div className="pl-care-copy">Pick the kind of support you want: calm down, follow a gentle path, or wind down for sleep.</div>
+
 
         {goldMemoryUnlocked && props.careSection === "paths" && activePath && (
           <div className="pl-care-reco" data-adaptive-plushpath="true">
@@ -243,7 +237,7 @@ export function CarePanel(props) {
           </div>
         )}
 
-        {goldMemoryUnlocked && (
+        {goldMemoryUnlocked && props.careSection === "sleep" && (
           <div className="pl-care-tonight">
             <div className="moon">🌙 TONIGHT</div>
             <div style={{ marginTop: 5, fontSize: 12.5, lineHeight: 1.45 }}>{sleep.text}</div>
@@ -255,9 +249,12 @@ export function CarePanel(props) {
         )}
 
         <button type="button" className="pl-care-soft-btn" onClick={props.onOpenSupport}>My support circle →</button>
+        <details className="pl-care-library-door pl-design-card" open={libraryOpen} onToggle={event => setLibraryOpen(event.currentTarget.open)}>
+          <summary>Calm, paths & sleep <span>Browse care tools →</span></summary>
         <div className="plushcare-library pl-care-tabs">
-          <ExistingCarePanel {...props} open={true} isMamaCornerProfile={false} openCareSession={startCare} setSleepToolOpen={startSleep} />
+          <ExistingCarePanel {...props} open={true} libraryOnly={true} openCareSession={startCare} setSleepToolOpen={startSleep} />
         </div>
+        </details>
       </section>
     </div>
   );
