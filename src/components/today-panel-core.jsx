@@ -88,7 +88,7 @@ function Hero({ period, goToDashboard, setSettingsOpen, reducedMotion, selectedO
         <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen?.(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
       </header>
       <section className={`pl-home-hero ${mascotCelebrating && !reducedMotion ? "mascot-celebrating" : ""}`} aria-label="PlushLife welcome">
-        <ThemeScene outfit={selectedOutfit} decorative />
+        <ThemeScene outfit={selectedOutfit} focus />
         <div className="pl-companion-copy">
         <h2>{copy["A little counts."] || "A little counts."}</h2>
         <p>{copy["Your plush is happy you\'re here."] || "Your plush is happy you\'re here."}</p>
