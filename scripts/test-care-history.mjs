@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { transform } from 'esbuild';
+const { loadHistoryRows } = await import('data:text/javascript;base64,' + Buffer.from(fs.readFileSync('src/care-history-data.js','utf8')).toString('base64'));
+const calls = [];
+const fake = { from(table) { const query = { select(columns) { calls.push(['select', table, columns]); return this; }, eq(key, id) { calls.push(['eq',key,id]); return this; }, lte(key, date) { calls.push(['lte',key,date]); return this; }, order(key, options) { calls.push(['order',key,options]); return this; }, async range(start,end) { calls.push(['range',start,end]); return { data: Array.from({length: start === 0 ? 500 : 2},(_,i)=>({id:start+i})), error:null }; } }; return query; } };
+assert.equal((await loadHistoryRows(fake,'daily_check_ins','*','owner','check_date',{through:'2026-09-29'})).length,502);
+assert.deepEqual(calls.filter(c=>c[0]==='range'),[['range',0,499],['range',500,999]]);
+assert.equal(calls.filter(c=>c[0]==='eq'&&c[1]==='user_id'&&c[2]==='owner').length,2);
+const broken = { from() { const q = {select(){return q},eq(){return q},order(){return q},range:async()=>({data:null,error:new Error('offline')})};return q; } };
+await assert.rejects(loadHistoryRows(broken,'private_notes','*','owner','note_date'),/offline/);
+const React = (await import('react')).default;
+let selected = 'checkins';
+globalThis.React = { ...React, useState: (initial) => [typeof initial === 'string' ? selected : initial, ()=>{}] };
+const compiled = await transform(fs.readFileSync('src/components/care-history.jsx','utf8'), {loader:'jsx',format:'esm'});
+const { CareHistory } = await import('data:text/javascript;base64,'+Buffer.from(compiled.code).toString('base64'));
+function flatten(node) { if (!node || typeof node !== 'object') return []; return [node,...[node.props?.children].flat(Infinity).flatMap(flatten)]; }
+const opened = [];
+const props = {dailyCheckInHistory:[{check_date:'2026-07-01',mood:'good'},{check_date:'2026-09-29',mood:'good'}],reflectionHistory:[{note_date:'2026-07-02',body:'Private saved journal'}],checkInHistoryStatus:'ready',journalHistoryStatus:'ready',setCheckInViewerDate:d=>opened.push(d),setReflectionViewerDate:d=>opened.push(d),retryCareHistory:()=>opened.push('retry'),CHECKIN_MOODS:[['good','💛','Good']]};
+let nodes=flatten(CareHistory(props));
+let entries=nodes.filter(n=>n.type==='li');
+assert.equal(entries[0].props.children.props.children[0].props.children,'Sep 29, 2026');
+entries[1].props.children.props.onClick();assert.equal(opened.pop(),'2026-07-01');
+selected='journals';nodes=flatten(CareHistory(props));nodes.find(n=>n.type==='li').props.children.props.onClick();assert.equal(opened.pop(),'2026-07-02');
+nodes=flatten(CareHistory({...props,journalHistoryStatus:'error'}));nodes.find(n=>n.type==='button'&&n.props.children==='Retry history').props.onClick();assert.equal(opened.pop(),'retry');
+assert.equal(nodes.filter(n=>n.type==='li').length,1,'Failed refresh retains loaded entries');
+console.log('Care history checks passed: pagination, ownership, load errors, entry navigation, and retained history.');

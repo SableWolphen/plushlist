@@ -1,3 +1,4 @@
+import { CareHistory } from "./care-history.jsx";
 import { CozyScene } from "./theme-world.jsx";
 /*
  * Product-quality compatibility contract:
@@ -203,6 +204,8 @@ export function CarePanel(props) {
           </div>
         )}
       </section>
+
+      <CareHistory {...props} />
 
       {goldMemoryUnlocked && memory.tool && (
         <section data-actionable-care-recommendation="true" className="pl-care-memory">

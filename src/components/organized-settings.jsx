@@ -99,7 +99,7 @@ function DetailHeader({ title, onBack }) {
   );
 }
 
-// One-time explainer next to the ABDL Nursery opt-in: surfaces once per device
+// One-time explainer next to the Nursery opt-in: surfaces once per device
 // (localStorage flag) so users understand the mode before enabling it.
 function BabyModeExplainer() {
   const [dismissed, setDismissed] = React.useState(() => {
@@ -118,7 +118,7 @@ function BabyModeExplainer() {
   };
   return (
     <div style={{ marginTop: 8, padding: "10px 12px", borderRadius: 12, background: "var(--pl-theme-surface,#FDF6FF)", border: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 11.5, lineHeight: 1.5, color: "var(--pl-theme-ink,#6B5A7D)" }}>
-      <strong style={{ color: "var(--pl-theme-ink,#5B3D70)" }}>What is ABDL Nursery?</strong> ABDL Nursery is a simplified comfort view: bigger words, rounder controls, and candy-soft decoration on the Home screen. Your tasks and progress do not change — everything is still there when you switch back.
+      <strong style={{ color: "var(--pl-theme-ink,#5B3D70)" }}>What is Nursery?</strong> Nursery is a simplified comfort view: bigger words, rounder controls, and candy-soft decoration on the Home screen. Your tasks and progress do not change — everything is still there when you switch back.
       <button type="button" onClick={dismiss} style={{ marginTop: 6, display: "block", minHeight: 32, padding: "4px 10px", borderRadius: 8, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white", color: "var(--pl-theme-muted,#8E4EAA)", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>Got it</button>
     </div>
   );
@@ -160,7 +160,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
   if (!open) return null;
 
   const categories = [
-    ["personalize", "👤", "Personalize", "Name, comfort item, themes, ABDL Nursery, Dino Theme", "name profile theme baby dino appearance comfort"],
+    ["personalize", "👤", "Personalize", "Name, comfort item, themes, Nursery, Dino Theme", "name profile theme baby dino appearance comfort"],
     ["notifications", "🔔", "Notifications & Reminders", "Reminder times, quiet hours, push notifications", "notifications reminders quiet push nurturing discreet"],
     ["experience", "✨", "Experience", "Focus, accessibility, motion, contrast, PlushInsights", "focus accessibility text motion contrast simple insights colorblind consistency"],
     ["recommendations", "🧠", "Recommendations", "Suggestion boundaries and learned-pattern corrections", "recommendations learning profile boundaries forget correction"],
@@ -226,7 +226,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
           </button>
           <button type="button" onClick={() => updatePreference({ nickname_style: "baby", dino_theme: false })} aria-pressed={preferences.nickname_style === "baby"} style={{ position: "relative", overflow: "hidden", minHeight: 102, padding: 0, borderRadius: 16, border: preferences.nickname_style === "baby" ? "2px solid #E572B7" : "1px solid #E4D8E8", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink,#743B6D)", fontWeight: 900, cursor: "pointer", boxShadow: preferences.nickname_style === "baby" ? "0 7px 18px rgba(229,114,183,.20)" : "0 4px 12px rgba(96,62,108,.05)" }}>
             <span aria-hidden="true" style={{ display: "grid", placeItems: "center", minHeight: 69, background: "radial-gradient(circle at 72% 26%,#FFF4B8,transparent 34%),linear-gradient(145deg,#FFF0F7,#F1E9FF)" }}><PlushMascot theme="baby" size={104} /></span>
-            <span style={{ display: "block", padding: "6px 4px 8px", background: "rgba(255,255,255,.72)", borderTop: "1px solid rgba(255,255,255,.65)", fontSize: 10.5 }}>ABDL Nursery{preferences.nickname_style === "baby" ? " ✓" : ""}</span>
+            <span style={{ display: "block", padding: "6px 4px 8px", background: "rgba(255,255,255,.72)", borderTop: "1px solid rgba(255,255,255,.65)", fontSize: 10.5 }}>Nursery{preferences.nickname_style === "baby" ? " ✓" : ""}</span>
           </button>
           {APPEARANCE_THEMES.map((theme) => {
             const selected = !dinoTheme && preferences.nickname_style !== "baby" && appearanceTheme === theme.id;
