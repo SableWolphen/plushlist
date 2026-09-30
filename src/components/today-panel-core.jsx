@@ -306,7 +306,7 @@ function Habits({ rows = [], viewDone = {}, toggle, openTaskManager, period }) {
 export function TodayPanel({
   open, period, nextStepTask, nextStepReason, nextStepHint, toggle, pickEasierSuggestion,
   nextStepMoreOpen, setNextStepMoreOpen, setNextStepSkipped, setNextStepDismissedToday,
-  selectedSchedule, selectedScheduleExceptionEntries, manageSchedule, setManageSchedule,
+  selectedSchedule, selectedScheduleExceptionEntries, selectedProgressDate, manageSchedule, setManageSchedule,
   rows, viewDone, openTaskManager, setCalmQuickOpen, calmQuickOpen, currentCopingOption,
   reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen, setSettingsOpen,
   completedTodayExpanded, setCompletedTodayExpanded, tomorrowTasksCount, preferences,
@@ -320,7 +320,7 @@ export function TodayPanel({
   const homeLayout = normalizeHomeLayout(preferences?.home_layout);
   const homeSections = {
     tiny: (<OneTinyThing nextStepTask={nextStepTask} nextStepReason={nextStepReason} nextStepHint={nextStepHint} toggle={unifiedToggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} />),
-    tasks: (<TasksToday rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />),
+    tasks: (<TasksToday rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={selectedProgressDate ? {...period,date:selectedProgressDate} : period} />),
     habits: (<Habits rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />),
     schedule: (<TodaySchedule selectedSchedule={selectedSchedule} selectedScheduleExceptionEntries={selectedScheduleExceptionEntries} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} />),
     shortcuts: (<div className="pl-home-shortcuts">
@@ -419,7 +419,7 @@ export function TodayPanel({
       <div data-plushlife-home-stack className="pl-home-shell">
         <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} />
         {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }
-        {homeDisplayGroups(homeLayout).map(group => group.length===2 ? <DayAgenda key="schedule-tasks" tasks={homeSections.tasks} schedule={homeSections.schedule} selectedSchedule={selectedSchedule} exceptions={selectedScheduleExceptionEntries} date={period?.date} timezone={preferences?.timezone}/> : <React.Fragment key={group[0]}>{homeSections[group[0]]}</React.Fragment>)}
+        {homeDisplayGroups(homeLayout).map(group => group.length===2 ? <DayAgenda key="schedule-tasks" tasks={homeSections.tasks} schedule={homeSections.schedule} selectedSchedule={selectedSchedule} exceptions={selectedScheduleExceptionEntries} date={selectedProgressDate || period?.date} timezone={preferences?.timezone}/> : <React.Fragment key={group[0]}>{homeSections[group[0]]}</React.Fragment>)}
         <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
           <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>A little more, when you want it</summary>
           <div style={{display:'grid',gap:12,paddingTop:8}}>

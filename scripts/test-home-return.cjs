@@ -38,7 +38,7 @@ act(()=>tabs()[1].props.onKeyDown({key:'Home',preventDefault(){}}));
 assert.equal(tabs()[0].props['aria-selected'],true);
 act(()=>pair.findByProps({'aria-label':'View all today’s tasks'}).props.onClick());assert.equal(opened,'2026-09-30');
 act(()=>pair.findAllByProps({className:'pl-list-row pl-habit-row'})[0].props.onClick());assert.equal(marked,'task-0');
-act(()=>tree.update(React.createElement(TodayPanel,{...props,period:{date:'2099-01-01'},preferences:{},selectedSchedule:{entries},rows})));
+act(()=>tree.update(React.createElement(TodayPanel,{...props,selectedProgressDate:'2099-01-01',preferences:{},selectedSchedule:{entries},rows})));
 const futureCard=tree.root.findByProps({className:'pl-home-day-card'});
 assert.equal(futureCard.findAllByProps({role:'tab'})[0].props['aria-selected'],true,'Changing dates starts with Tasks');
 act(()=>futureCard.findAllByType('button').find(n=>n.props.className==='pl-agenda-next').props.onClick());
