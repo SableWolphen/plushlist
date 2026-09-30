@@ -6,6 +6,7 @@ import { OnboardingArc } from "./onboarding-arc.jsx";
 import { EveningGratitude } from "./evening-gratitude.jsx";
 import { useCompletedTaskFlow } from "./completed-task-flow.jsx";
 import { useSmartNextStep } from "./smart-next-step.jsx";
+import { CozyDaily, useCozyNextStep } from "./cozy-daily.jsx";
 
 /*
  * These lazy handles are intentionally retained for release compatibility.
@@ -73,6 +74,7 @@ function recordNextStepChoice(row, action, date) {
 }
 
 export function TodayPanel(props) {
+  const cozyStep=useCozyNextStep(props.rows,props.viewDone,props.dailyCheckIn?.day_type || 'full');
   const [smartNextStepHidden, setSmartNextStepHidden] = React.useState(false);
   const [smartEaseHint, setSmartEaseHint] = React.useState(null);
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
@@ -94,7 +96,7 @@ export function TodayPanel(props) {
   if (!props.open) return null;
 
   const dayType = props.dailyCheckIn?.day_type || "full";
-  const activeNextStep = dayType === "rest" ? null : (smartNextStep.task || props.nextStepTask);
+  const activeNextStep = dayType === "rest" ? null : (cozyStep || smartNextStep.task || props.nextStepTask);
 
   const setNextStepDismissedToday = (hidden) => {
     if (hidden && activeNextStep) recordNextStepChoice(activeNextStep, "hide", props.period?.date);
@@ -151,10 +153,11 @@ export function TodayPanel(props) {
       </div>
       <TodayPanelCore
       {...props}
+      cozyDaily={!props.isHistoricalView&&!props.isFutureView&&<CozyDaily rows={props.rows} viewDone={props.viewDone} dailyCheckIn={props.dailyCheckIn} returnGapDays={props.returnGapDays} returnBannerDismissed={props.returnBannerDismissed} onDismissReturn={props.setReturnBannerDismissed} onReset={props.onCozyReset} onUsual={()=>props.selectDayType?.('full')} onOpen={()=>{window.__plushlifeOpenCozySpace=true;props.goToDashboard?.('care');}}/>}
       toggle={smartToggle}
       recentlyCompletedKeys={recentlyCompletedKeys}
       nextStepTask={smartNextStepHidden ? null : activeNextStep}
-      nextStepReason={smartNextStepHidden ? "" : smartNextStep.reason}
+      nextStepReason={smartNextStepHidden ? "" : cozyStep ? "One of your chosen caring steps." : smartNextStep.reason}
       nextStepHint={smartEaseHint || props.nextStepHint}
       pickEasierSuggestion={pickEasierSuggestion}
       setNextStepSkipped={setNextStepSkipped}

@@ -1,3 +1,4 @@
+import { CozyComfortContext } from "./cozy-space.jsx";
 import { WidgetSettings } from "./widget-settings.jsx";
 import { HomeLayoutEditor } from "./home-layout-editor.jsx";
 import { ToolPanel } from "./shared.jsx";
@@ -136,6 +137,7 @@ function formatSyncStatus(online, syncStatus, lastSyncedAt) {
 export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCode, setWatchPairingCode, connectWatch, watchPairingBusy, watchPairingMessage, localWatchSyncBusy, startLocalWatchSync, localWatchSyncMessage, dailyCheckIn, pct, rows, viewDone, weeklyOverallPct, widgetSyncMsg, setWidgetSyncMsg, displayNameDraft, setDisplayNameDraft, saveDisplayName, comfortItemDraft, setComfortItemDraft, saveComfortItem, preferences, appearanceTheme, selectAppearanceTheme, dinoTheme, updatePreference, enableNotifications, smartReminderSuggestion, restDatesSet, toggleRestToday, period, restRangeDraft, setRestRangeDraft, saveRestRange, restDates, feedbackText, setFeedbackText, submitFeedback, feedbackMessage, exportMyData, restoreFileInputRef, restoreFromBackup, deleteAllCheckIns, deleteAllReflections, user, online, syncStatus, lastSyncedAt, syncNow, emailChangeDraft, setEmailChangeDraft, requestEmailChange, signingOut, handleSignOut, signOutOtherDevices, deleteMyAccount, deviceBackupStatus, refreshDeviceBackup, deviceBackupBusy, verifyDeviceBackupNow, deviceBackupVerifyBusy, settingsMessage }) {
   const [section, setSection] = React.useState("home");
   const [search, setSearch] = React.useState("");
+  const cozy = React.useContext(CozyComfortContext);
   const [comebackOptOut, setComebackOptOut] = React.useState(() => {
     try { return !!window.PlushLifeComebackReminder?.isOptedOut?.(); } catch (_error) { return false; }
   });
@@ -291,7 +293,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
         </div>
         <ToggleRow checked={preferences.discreet_notifications} onChange={(event) => updatePreference({ discreet_notifications: event.target.checked })} title="Discreet lock-screen wording" description="Also hides Guardian note previews." />
         <ToggleRow checked={preferences.nurturing_checkins} onChange={(event) => updatePreference({ nurturing_checkins: event.target.checked })} title="Nurturing check-ins" description="Allow PlushLife to use the warmer check-in style." />
-        <ToggleRow checked={!comebackOptOut} onChange={(event) => { try { window.PlushLifeComebackReminder?.setOptOut?.(!event.target.checked); } catch (_error) {} setComebackOptOut(!event.target.checked); }} title="Gentle comeback nudges" description="One kind note if you've been away a couple of days. Turn off anytime — no guilt either way." />
+        <ToggleRow checked={!!cozy?.profile.return_reminders && !comebackOptOut} onChange={async (event) => { const enabled=event.target.checked; if (await cozy?.save({...cozy.profile,return_reminders:enabled})) { try { window.PlushLifeComebackReminder?.setOptOut?.(!enabled); } catch (_error) {} setComebackOptOut(!enabled); } }} title="Gentle comeback nudges" description="One kind note if you've been away a couple of days. Turn off anytime — no guilt either way." />
       </Card>
     </>
   );

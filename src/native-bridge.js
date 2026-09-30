@@ -15,6 +15,7 @@
  * Everything below is a no-op on the web: the whole bridge returns
  * immediately when the Capacitor runtime is not present.
  */
+import { cozyReminderCopy } from './cozy-profile.js';
 (function () {
   if (!window.Capacitor || !window.Capacitor.Plugins) return;
   var Plugins = window.Capacitor.Plugins;
@@ -299,12 +300,13 @@
                 coveredTasks.add(dateKey + "::" + suggestedTask.taskKey);
               }
             }
+            var cozyCopy = cozyReminderCopy(options.cozyReminderStyle, suggestedTask ? suggestedTask.label : "");
             notifications.push({
               id: window.PlushLifeCare.notificationId("daily-" + dateKey + "-" + timeIndex),
-              title: options.discreet ? "A gentle PlushLife reminder" : (suggestedTask ? titleForTime(at) : "A gentle PlushLife reminder"),
+              title: options.discreet ? "A gentle PlushLife reminder" : cozyCopy.title,
               body: options.discreet
                 ? "You have something waiting in PlushLife."
-                : (suggestedTask ? "Your next gentle step: " + suggestedTask.label : "One caring step is enough. Open your PlushList when you're ready."),
+                : cozyCopy.body,
               schedule: { at: at, allowWhileIdle: true },
               channelId: reminderChannelId,
               actionTypeId: "PLUSHLIFE_REMINDER",
@@ -329,8 +331,8 @@
             if (isQuietAt(date)) return;
             notifications.push({
               id: window.PlushLifeCare.notificationId("task-" + task.taskKey + "-" + dateKey),
-              title: "Ready for one caring step?",
-              body: options.discreet ? "You have something waiting in PlushLife." : task.label,
+              title: options.discreet ? "A gentle PlushLife reminder" : cozyReminderCopy(options.cozyReminderStyle, task.label).title,
+              body: options.discreet ? "You have something waiting in PlushLife." : cozyReminderCopy(options.cozyReminderStyle, task.label).body,
               schedule: { at: date, allowWhileIdle: true },
               channelId: reminderChannelId,
               actionTypeId: "PLUSHLIFE_REMINDER",
