@@ -139,20 +139,9 @@ export function TodayPanel(props) {
       <div aria-live="polite" aria-atomic="true" role="status" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap" }}>
         {announcement}
       </div>
-      {/* Proactive care layer: shaped day plan / rest experience, a gentle
-          7-day onboarding arc, and the evening "one good thing" — session-only
-          companions that sit above the reference Home layout. */}
-      <div style={{ maxWidth: 760, margin: "0 auto 18px" }}>
-        {props.selectedTaskViewIsRest ? (
-          <RestDayCard careDaysTotal={props.careDaysTotal} goToDashboard={props.goToDashboard} period={props.period} />
-        ) : (
-          <ShapeMyDay rows={props.rows} viewDone={props.viewDone} toggle={smartToggle} dailyCheckIn={props.dailyCheckIn} period={props.period} />
-        )}
-        <OnboardingArc onboardingComplete={!!props.preferences?.onboarding_complete} />
-        <EveningGratitude />
-      </div>
       <TodayPanelCore
       {...props}
+      optionalTools={<><OnboardingArc onboardingComplete={!!props.preferences?.onboarding_complete} goToDashboard={props.goToDashboard}/>{props.selectedTaskViewIsRest ? <RestDayCard careDaysTotal={props.careDaysTotal} goToDashboard={props.goToDashboard} period={props.period}/> : <ShapeMyDay rows={props.rows} viewDone={props.viewDone} toggle={smartToggle} dailyCheckIn={props.dailyCheckIn} period={props.period}/>}<EveningGratitude/></>}
       cozyDaily={!props.isHistoricalView&&!props.isFutureView&&<CozyDaily rows={props.rows} viewDone={props.viewDone} dailyCheckIn={props.dailyCheckIn} returnGapDays={props.returnGapDays} returnBannerDismissed={props.returnBannerDismissed} onDismissReturn={props.setReturnBannerDismissed} onReset={props.onCozyReset} onUsual={()=>props.selectDayType?.('full')} onOpen={()=>{window.__plushlifeOpenCozySpace=true;props.goToDashboard?.('care');}}/>}
       toggle={smartToggle}
       recentlyCompletedKeys={recentlyCompletedKeys}
