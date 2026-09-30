@@ -330,7 +330,7 @@ async function main() {
 
   // Stamp the generated artifact so every host / packaged app can be verified
   // against the exact source commit that produced it.
-  const buildSha = String(process.env.GITHUB_SHA || process.env.PLUSHLIFE_GIT_SHA || "local").trim() || "local";
+  const buildSha = String(process.env.GITHUB_SHA || process.env.PLUSHLIFE_GIT_SHA || process.env.WORKERS_CI_COMMIT_SHA || process.env.CF_PAGES_COMMIT_SHA || "local").trim() || "local";
   fs.writeFileSync(
     path.join(WWW, "build-info.json"),
     JSON.stringify({
