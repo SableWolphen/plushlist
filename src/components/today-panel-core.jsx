@@ -1,3 +1,4 @@
+import { upcomingSchedule } from "../home-agenda.js";
 import { RewardMoment } from "./reward-moment.jsx";
 import { normalizeHomeLayout, homeDisplayGroups } from "../home-layout.js";
 import { ThemeScene, DesignIcon, useThemeCopy } from "./theme-world.jsx";
@@ -126,9 +127,8 @@ function OneTinyThing({ nextStepTask, nextStepReason, nextStepHint, toggle, pick
   );
 }
 
-function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = [], manageSchedule, setManageSchedule }) {
-  const copy = useThemeCopy();
-  const { legacyScheduleToEntries, formatTime12 } = window.PlushLifeSchedule || {};
+function scheduleEntries(selectedSchedule, selectedScheduleExceptionEntries = []) {
+  const { legacyScheduleToEntries } = window.PlushLifeSchedule || {};
   const baseEntries = (selectedSchedule?.entries?.length
     ? selectedSchedule.entries
     : legacyScheduleToEntries?.(selectedSchedule)) || [];
@@ -143,6 +143,14 @@ function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = []
       text: entry.text || entry.label || entry.title || "",
     }))
     .sort((a,b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")));
+
+  return entries;
+}
+
+function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = [], manageSchedule, setManageSchedule }) {
+  const copy = useThemeCopy();
+  const { formatTime12 } = window.PlushLifeSchedule || {};
+  const entries = scheduleEntries(selectedSchedule, selectedScheduleExceptionEntries);
 
   const visibleEntries = entries;
 
@@ -178,6 +186,29 @@ function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = []
       </div>
     </section>
   );
+}
+
+function DayAgenda({ tasks, schedule, selectedSchedule, exceptions, date, timezone }) {
+  const [tab,setTab]=React.useState('tasks');
+  const [wide,setWide]=React.useState(()=>window.matchMedia?.('(min-width:720px)').matches || false);
+  const [now,setNow]=React.useState(()=>new Date());
+  const id=React.useId();
+  React.useEffect(()=>{
+    const media=window.matchMedia?.('(min-width:720px)');
+    const change=()=>setWide(Boolean(media?.matches));
+    change();media?.addEventListener?.('change',change);
+    const timer=setInterval(()=>setNow(new Date()),60000);
+    return ()=>{media?.removeEventListener?.('change',change);clearInterval(timer);};
+  },[]);
+  React.useEffect(()=>setTab('tasks'),[date]);
+  const next=upcomingSchedule(scheduleEntries(selectedSchedule,exceptions),date,now,timezone);
+  const select=(value,focus=false)=>{setTab(value);if(focus)document.getElementById(`${id}-${value}-tab`)?.focus?.();};
+  const key=(event)=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();select(event.key==='Home'?'tasks':event.key==='End'?'schedule':tab==='tasks'?'schedule':'tasks',true);};
+  return <section className="pl-home-day-card" aria-label="Today’s tasks and schedule">
+    {next && <button type="button" className="pl-agenda-next" onClick={()=>select('schedule')} aria-label={`Open schedule. Next up: ${next.text}`}><span>Next up · {window.PlushLifeSchedule?.formatTime12?.(next.time) || next.time}</span><strong>{next.text}</strong></button>}
+    {!wide && <div className="pl-agenda-tabs" role="tablist" aria-label="Today view">{['tasks','schedule'].map(value=><button type="button" key={value} role="tab" id={`${id}-${value}-tab`} aria-controls={`${id}-${value}-panel`} aria-selected={tab===value} tabIndex={tab===value?0:-1} onKeyDown={key} onClick={()=>select(value)}>{value==='tasks'?'Tasks':'Schedule'}</button>)}</div>}
+    <div className="pl-agenda-panels">{[['tasks',tasks],['schedule',schedule]].map(([value,content])=><div key={value} id={`${id}-${value}-panel`} role={wide?undefined:'tabpanel'} aria-labelledby={wide?undefined:`${id}-${value}-tab`} hidden={!wide && tab!==value}>{content}</div>)}</div>
+  </section>;
 }
 
 function TomorrowNote({ tomorrowTasksCount }) {
@@ -388,7 +419,7 @@ export function TodayPanel({
       <div data-plushlife-home-stack className="pl-home-shell">
         <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} />
         {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }
-        {homeDisplayGroups(homeLayout).map(group => group.length===2 ? <div className="pl-home-day-pair" key="schedule-tasks" aria-label="Today’s plan and tasks">{group.map(id=><React.Fragment key={id}>{homeSections[id]}</React.Fragment>)}</div> : <React.Fragment key={group[0]}>{homeSections[group[0]]}</React.Fragment>)}
+        {homeDisplayGroups(homeLayout).map(group => group.length===2 ? <DayAgenda key="schedule-tasks" tasks={homeSections.tasks} schedule={homeSections.schedule} selectedSchedule={selectedSchedule} exceptions={selectedScheduleExceptionEntries} date={period?.date} timezone={preferences?.timezone}/> : <React.Fragment key={group[0]}>{homeSections[group[0]]}</React.Fragment>)}
         <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
           <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>A little more, when you want it</summary>
           <div style={{display:'grid',gap:12,paddingTop:8}}>
