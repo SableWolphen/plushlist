@@ -270,3 +270,13 @@ body[data-login-world] button:not(.mobile-email-toggle){border-radius:18px!impor
 #main-content#main-content[data-pl-world] .pl-care-library-door>summary{min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:8px;font:700 15px/1.4 Quicksand,Nunito,sans-serif;color:var(--pl-theme-ink);cursor:pointer;list-style:none}
 #main-content#main-content[data-pl-world] .pl-care-library-door>summary span{font:400 12px/1.4 Nunito,sans-serif;color:var(--pl-theme-muted);text-align:right}
 #main-content#main-content[data-pl-world] .pl-care-library-door .pl-care-tabs{padding-top:12px!important}
+
+/* Close-up companions keep earned accessories readable in every world. */
+#main-content#main-content[data-pl-world] :is(.pl-home-hero,.pl-cozy-scene) .pl-theme-scene.pl-mascot-focus{position:relative!important;display:block!important;width:150px!important;height:138px!important;flex:none;overflow:hidden}
+#main-content#main-content[data-pl-world] .pl-mascot-focus .pl-scene-art{position:absolute;max-width:none!important}
+#main-content#main-content[data-pl-world] .pl-mascot-focus .pl-scene-art>img{width:100%;max-width:none!important}
+#main-content#main-content[data-pl-world] .pl-closet-shell .pl-cozy-scene{flex-direction:column!important;padding:18px!important;gap:8px!important}
+#main-content#main-content[data-pl-world] .pl-closet-shell .pl-scene-owner{width:240px!important;max-width:100%;height:auto!important}
+#main-content#main-content[data-pl-world] .pl-closet-shell .pl-theme-scene.pl-mascot-focus{width:240px!important;height:220px!important;max-width:100%}
+#main-content#main-content[data-pl-world] .pl-closet-shell .pl-cozy-scene :is(h2,p){text-align:center!important}
+@media(max-width:360px){#main-content#main-content[data-pl-world] .pl-home-hero .pl-theme-scene.pl-mascot-focus{width:128px!important;height:118px!important}}

@@ -25,6 +25,16 @@ const {ThemeScene}=await moduleAt('src/components/theme-world.jsx');
 for (const world of Object.keys(themeCopy.worlds)) {
   for (const outfit of content.MASCOT_OUTFITS) {
     const nodes=flatten(ThemeScene({world,outfit}));
+    const closeup=flatten(ThemeScene({world,outfit,focus:true}));
+    const art=closeup.find(n=>n.props?.className==='pl-scene-art');
+    const geometry=wardrobe.wardrobeGeometry(world);
+    const width=parseFloat(art.props.style.width)/100*120;
+    const left=parseFloat(art.props.style.left)/100*120;
+    const top=parseFloat(art.props.style.top)/100*110;
+    assert.ok(Math.abs(left+geometry.x/geometry.width*width-10)<1e-8,'Every theme centers the equipped bear in the close-up');
+    assert.ok(Math.abs(top+geometry.y/geometry.width*width-5)<1e-8,'Reward and bear share the same vertical offset');
+    assert.ok(closeup[0].props.className.includes('pl-mascot-focus'));
+    assert.equal(closeup.filter(n=>n.type==='svg').length,nodes.filter(n=>n.type==='svg').length,'Close-up preserves every outfit layer');
     const image=nodes.find(n=>n.type==='img');
     assert.ok(image.props.alt.includes(outfit.name));
     for(const layer of nodes.filter(n=>n.type==='svg')){

@@ -28,7 +28,7 @@ export function RewardsPanel({ open, onClose, inline = false, selectedOutfit, ac
   };
   return <ToolPanel title="🧸 Plush & Keepsakes" displayTitle="Plush Corner" inline={inline} hideClose={inline} onClose={onClose}>
     <div className="pl-closet-shell">
-      <CozyScene title="Your plush, growing with you." subtitle={copy["Your story is bigger than a streak."] || "Tiny steps. Big hugs."} outfit={selectedOutfit} />
+      <CozyScene title="Your plush, growing with you." subtitle={copy["Your story is bigger than a streak."] || "Tiny steps. Big hugs."} outfit={selectedOutfit} focus />
       <section className="pl-design-card pl-closet-summary">
         <h2>Wearing · {selectedOutfit.name}</h2>
         <p>{activityDaysTotal} caring days · {unlockedOutfits.length} outfits · {earnedBadgeIdSet.size} badges</p>
