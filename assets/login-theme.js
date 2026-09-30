@@ -12,5 +12,5 @@
   const image = document.querySelector(".pl-login-scene img");
   if (image) { image.src = `./assets/figma/${theme.asset}.svg`; image.width = world === "dino" || world.startsWith("baby") ? 294 : 211; image.height = 100; image.alt = "Your lavender plush companion"; }
   const copy = window.PlushLifeThemeCopy.forWorld(world, hint.voice);
-  for (const selector of [".brand h1", ".auth-subtitle"]) { const node = document.querySelector(selector); if (node) node.textContent = copy[node.textContent] || node.textContent; }
+  for (const selector of [".brand h1", ".auth-subtitle"]) { const node = document.querySelector(selector); if (node && copy[node.textContent]) node.textContent = copy[node.textContent]; }
 })();
