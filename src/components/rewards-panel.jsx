@@ -1,7 +1,7 @@
 import { CozyScene, useThemeCopy } from "./theme-world.jsx";
 import { ToolPanel } from "./shared.jsx";
 
-export function RewardsPanel({ open, onClose, inline = false, selectedOutfit, activityDaysTotal, preferences, mascotGrowth, unlockedOutfits, earnedBadgeIdSet, BADGE_DEFS, unlockedIdSet, mascotRequirementProgress, saveMascotCollection, mascotCollection, savedBestStreak, collectionTab, setCollectionTab, winsJarEntries, theme }) {
+export function RewardsPanel({ saveMessage, open, onClose, inline = false, selectedOutfit, activityDaysTotal, preferences, mascotGrowth, unlockedOutfits, earnedBadgeIdSet, BADGE_DEFS, unlockedIdSet, mascotRequirementProgress, saveMascotCollection, mascotCollection, savedBestStreak, collectionTab, setCollectionTab, winsJarEntries, theme }) {
   const [showAllOutfits, setShowAllOutfits] = React.useState(false);
   const [showAllBadges, setShowAllBadges] = React.useState(false);
   const [shownWins, setShownWins] = React.useState(6);
@@ -31,6 +31,7 @@ export function RewardsPanel({ open, onClose, inline = false, selectedOutfit, ac
       <CozyScene title="Your plush, growing with you." subtitle={copy["Your story is bigger than a streak."] || "Tiny steps. Big hugs."} outfit={selectedOutfit} focus />
       <section className="pl-design-card pl-closet-summary">
         <h2>Wearing · {selectedOutfit.name}</h2>
+        {saveMessage && <p role="status">{saveMessage}</p>}
         <p>{activityDaysTotal} caring days · {unlockedOutfits.length} outfits · {earnedBadgeIdSet.size} badges</p>
         <div role="tablist" aria-label="Your collection" className="pl-collection-tabs">
           {[["mascot", "Closet"], ["badges", "Badges"], ["wins", "Jar"]].map(([id, label]) => <button type="button" key={id} role="tab" aria-selected={collectionTab === id} onClick={() => setCollectionTab(id)}>{label}</button>)}

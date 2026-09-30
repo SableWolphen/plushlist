@@ -1,3 +1,4 @@
+import { RewardMoment } from "./reward-moment.jsx";
 import { normalizeHomeLayout } from "../home-layout.js";
 import { ThemeScene, DesignIcon, useThemeCopy } from "./theme-world.jsx";
 import { HabitTypeIcon } from "./shared.jsx";
@@ -59,7 +60,7 @@ function greeting() {
   return "Good evening";
 }
 
-function Hero({ period, goToDashboard, setSettingsOpen, reducedMotion, selectedOutfit, activityDaysTotal, darkMode, appearanceTheme, dinoTheme, babyMode }) {
+function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, reducedMotion, selectedOutfit, activityDaysTotal, darkMode, appearanceTheme, dinoTheme, babyMode }) {
   const copy = useThemeCopy();
   // The living mascot reacts to task completions: the completed-task flow
   // dispatches plushlife:task-completion-feedback on window, and the mascot
@@ -90,9 +91,9 @@ function Hero({ period, goToDashboard, setSettingsOpen, reducedMotion, selectedO
       <section className={`pl-home-hero ${mascotCelebrating && !reducedMotion ? "mascot-celebrating" : ""}`} aria-label="PlushLife welcome">
         <ThemeScene outfit={selectedOutfit} focus />
         <div className="pl-companion-copy">
-        <h2>{copy["A little counts."] || "A little counts."}</h2>
-        <p>{copy["Your plush is happy you\'re here."] || "Your plush is happy you\'re here."}</p>
-        <button type="button" className="pl-link-btn" style={{minHeight:44}} onClick={() => { goToDashboard?.("care"); setTimeout(() => window.dispatchEvent(new Event("plushlife:open-cozy-space")),100); }}>My Cozy Space →</button>
+        <h2>{returning ? "Welcome back, Cozy." : copy["A little counts."] || "A little counts."}</h2>
+        <p>{returning ? "Good to see you. One tiny thing is plenty." : copy["Your plush is happy you\'re here."] || "Your plush is happy you\'re here."}</p>
+        <button type="button" className="pl-link-btn" style={{minHeight:44}} onClick={() => { if(returning){onSofterDay?.();return;} goToDashboard?.("care"); setTimeout(() => window.dispatchEvent(new Event("plushlife:open-cozy-space")),100); }}>{returning ? "Make today softer →" : "My Cozy Space →"}</button>
         </div>
       </section>
     </>
@@ -278,7 +279,7 @@ export function TodayPanel({
   rows, viewDone, openTaskManager, setCalmQuickOpen, calmQuickOpen, currentCopingOption,
   reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen, setSettingsOpen,
   completedTodayExpanded, setCompletedTodayExpanded, tomorrowTasksCount, preferences,
-  activityDaysTotal, selectedOutfit, appearanceTheme, dinoTheme, babyMode, cozyDaily, optionalTools
+  activityDaysTotal, selectedOutfit, appearanceTheme, dinoTheme, babyMode, cozyDaily, optionalTools, rewardMoment, onWearReward, onDismissReward, returnGapDays, returnBannerDismissed, setReturnBannerDismissed, selectDayType, isHistoricalView, isFutureView
 }) {
   // Wraps the app toggle with the shared completion flow: newly completed
   // tasks linger briefly for undo, and every completion dispatches
@@ -385,7 +386,8 @@ export function TodayPanel({
       `}</style>
 
       <div data-plushlife-home-stack className="pl-home-shell">
-        <Hero period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} />
+        <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} />
+        {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }
         {homeLayout.order.filter(id => !homeLayout.hidden.includes(id) && !['shortcuts','noticed'].includes(id)).map(id => <React.Fragment key={id}>{homeSections[id]}</React.Fragment>)}
         <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
           <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>A little more, when you want it</summary>

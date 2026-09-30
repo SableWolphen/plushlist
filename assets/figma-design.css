@@ -280,3 +280,11 @@ body[data-login-world] button:not(.mobile-email-toggle){border-radius:18px!impor
 #main-content#main-content[data-pl-world] .pl-closet-shell .pl-theme-scene.pl-mascot-focus{width:240px!important;height:220px!important;max-width:100%}
 #main-content#main-content[data-pl-world] .pl-closet-shell .pl-cozy-scene :is(h2,p){text-align:center!important}
 @media(max-width:360px){#main-content#main-content[data-pl-world] .pl-home-hero .pl-theme-scene.pl-mascot-focus{width:128px!important;height:118px!important}}
+
+.pl-reward-moment{padding:14px;border:1px solid var(--pl-theme-line);border-radius:20px;background:var(--pl-theme-surface);color:var(--pl-theme-ink)}
+.pl-reward-moment p{margin:5px 0;font-size:14px;line-height:1.5;color:var(--pl-theme-muted)}
+.pl-reward-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.pl-reward-actions button{min-height:44px;padding:8px 16px;border:1px solid var(--pl-theme-line);border-radius:16px;background:var(--pl-theme-surface-2);color:var(--pl-theme-ink);font:700 14px Nunito,sans-serif;cursor:pointer}
+.pl-reward-actions button:first-child{background:var(--pl-theme-accent);color:var(--pl-theme-on-accent)}
+#main-content :is(button,a,input,select,textarea,summary):focus-visible{outline:3px solid var(--pl-theme-accent);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.pl-reward-moment,.pl-reward-moment *{animation:none!important;transition:none!important}}
