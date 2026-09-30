@@ -1,6 +1,7 @@
 name: Build signed Android App Bundle
 
-# Manual dispatch or an explicitly tagged release commit. It builds app-release.aab and
+# Manual dispatch. The existing production workflow owns automatic main releases.
+# This builds app-release.aab and
 # always uploads it as a workflow artifact for you to download yourself.
 #
 # It will ALSO publish straight to Google Play if (and only if) the
@@ -8,8 +9,6 @@ name: Build signed Android App Bundle
 # for how to create that service account. Without the secret, this workflow
 # behaves exactly as before: a downloadable .aab and nothing else.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       versionCode:
@@ -40,7 +39,6 @@ permissions:
 
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[play-release]')
     runs-on: ubuntu-latest
     env:
       HAS_PLAY_SECRET: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
