@@ -5,6 +5,11 @@ require('esbuild').buildSync({entryPoints:['src/components/reward-moment.jsx'],b
 const {RewardMoment}=require(path.join(dir,'reward.cjs'));
 const outfit=require('../assets/plush-content.js').MASCOT_OUTFITS.find(o=>o.id==='bow');
 assert.deepEqual(outfit.unlock,{type:'first_step',count:1});
+const vm=require('vm'),source=fs.readFileSync('src/app-source.jsx','utf8');
+const requirement=source.match(/const mascotRequirementProgress = \(outfit\) => \{[\s\S]*?\n  \};/)[0];
+for(const [habitHistory,done,expected] of [[[],{},0],[[],{water:true},1],[[{completed_keys:['water']}],{},1],[[{completed_keys:[]}],{},0]]){
+  const context={habitHistory,done};vm.runInNewContext(requirement+';result=mascotRequirementProgress({unlock:{type:"first_step"}})',context);assert.equal(context.result,expected);
+}
 let equipped=null,later=0;
 const tree=Renderer.create(React.createElement(RewardMoment,{outfit,onWear:o=>equipped=o,onDismiss:()=>later++}));
 assert.match(JSON.stringify(tree.toJSON()),/first completed step/);

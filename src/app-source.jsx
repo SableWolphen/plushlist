@@ -5568,7 +5568,7 @@ function GlowUpTracker() {
   const mascotGrowth = mascotGrowthStageForDays(activityDaysTotal);
   const mascotRequirementProgress = (outfit) => {
     switch (outfit.unlock.type) {
-      case "first_step": return activityDaysTotal > 0 || Object.values(done).some(Boolean) ? 1 : 0;
+      case "first_step": return habitHistory.some(entry=>(entry.completed_keys || []).length > 0) || Object.values(done).some(Boolean) ? 1 : 0;
       case "daily_core": return careDaysTotal >= 1 || todayDailyCoreIsComplete ? 1 : 0;
       case "care_days": return careDaysTotal;
       case "activity_days": return activityDaysTotal;
