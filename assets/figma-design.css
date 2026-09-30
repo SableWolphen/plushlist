@@ -288,3 +288,22 @@ body[data-login-world] button:not(.mobile-email-toggle){border-radius:18px!impor
 .pl-reward-actions button:first-child{background:var(--pl-theme-accent);color:var(--pl-theme-on-accent)}
 #main-content :is(button,a,input,select,textarea,summary):focus-visible{outline:3px solid var(--pl-theme-accent);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.pl-reward-moment,.pl-reward-moment *{animation:none!important;transition:none!important}}
+
+/* One calm Today card: tabs on phones, both views on wider screens. */
+.pl-home-day-card{grid-column:1/-1;min-width:0}
+#main-content#main-content[data-pl-world] .pl-home-day-card{padding:12px!important;background:var(--pl-theme-surface)!important;border:1px solid var(--pl-theme-line)!important;border-radius:22px!important;box-shadow:var(--pl-plush-shadow)!important}
+.pl-agenda-tabs{display:flex;gap:6px;margin:0 0 6px}
+.pl-agenda-tabs button{flex:1;min-height:44px;border:0;border-radius:14px;background:var(--pl-theme-surface-2);color:var(--pl-theme-ink);font:700 14px Nunito,sans-serif;cursor:pointer}
+.pl-agenda-tabs button[aria-selected=true]{background:var(--pl-theme-accent);color:var(--pl-theme-on-accent)}
+.pl-agenda-next{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;width:100%;min-height:44px;text-align:left;padding:6px 0 10px;margin-bottom:6px;border:0;background:transparent;color:var(--pl-theme-ink);font:400 13px/1.45 Nunito,sans-serif;cursor:pointer}
+.pl-agenda-next span{color:var(--pl-theme-muted);white-space:nowrap}.pl-agenda-next strong{font-weight:700;overflow-wrap:anywhere}
+.pl-agenda-panels>div{min-width:0}.pl-agenda-panels>div[hidden]{display:none!important}
+#main-content#main-content[data-pl-world] .pl-agenda-panels>div>section{border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;min-width:0}
+#main-content#main-content[data-pl-world] .pl-agenda-panels .pl-kicker{font-size:15px!important;line-height:1.4!important}
+#main-content#main-content[data-pl-world] .pl-agenda-panels .pl-list{gap:3px!important;margin-top:4px!important}
+#main-content#main-content[data-pl-world] .pl-agenda-panels .pl-list-row{min-height:48px!important;padding:6px 0!important}
+#main-content#main-content[data-pl-world] .pl-agenda-panels .pl-row-text{font-size:14px!important;line-height:1.4!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere;min-width:0}
+#main-content#main-content[data-pl-world] .pl-agenda-panels .pl-schedule-row{display:grid!important;grid-template-columns:64px minmax(0,1fr)!important;gap:8px!important}
+#main-content#main-content[data-pl-world] .pl-agenda-panels .pl-schedule-row :is(.pl-row-icon,.pl-chevron){display:none}
+#main-content#main-content[data-pl-world] .pl-agenda-panels .pl-time{font-size:12px!important;min-width:0!important;font-weight:700}
+@media(min-width:720px){.pl-agenda-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}}

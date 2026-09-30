@@ -1,5 +1,6 @@
+import { upcomingSchedule } from "../home-agenda.js";
 import { RewardMoment } from "./reward-moment.jsx";
-import { normalizeHomeLayout } from "../home-layout.js";
+import { normalizeHomeLayout, homeDisplayGroups } from "../home-layout.js";
 import { ThemeScene, DesignIcon, useThemeCopy } from "./theme-world.jsx";
 import { HabitTypeIcon } from "./shared.jsx";
 import { CalmPanel } from "./info-panels.jsx";
@@ -126,9 +127,8 @@ function OneTinyThing({ nextStepTask, nextStepReason, nextStepHint, toggle, pick
   );
 }
 
-function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = [], manageSchedule, setManageSchedule }) {
-  const copy = useThemeCopy();
-  const { legacyScheduleToEntries, formatTime12 } = window.PlushLifeSchedule || {};
+function scheduleEntries(selectedSchedule, selectedScheduleExceptionEntries = []) {
+  const { legacyScheduleToEntries } = window.PlushLifeSchedule || {};
   const baseEntries = (selectedSchedule?.entries?.length
     ? selectedSchedule.entries
     : legacyScheduleToEntries?.(selectedSchedule)) || [];
@@ -144,13 +144,21 @@ function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = []
     }))
     .sort((a,b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")));
 
+  return entries;
+}
+
+function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = [], manageSchedule, setManageSchedule }) {
+  const copy = useThemeCopy();
+  const { formatTime12 } = window.PlushLifeSchedule || {};
+  const entries = scheduleEntries(selectedSchedule, selectedScheduleExceptionEntries);
+
   const visibleEntries = entries;
 
   return (
     <section data-plushlife-home-schedule-preview="true" style={{...card, padding: "15px 17px 16px"}} aria-label="Today schedule">
       <div className="pl-section-topline">
         <div className="pl-kicker">{copy["Today\'s plan"] || "Today’s plan"}</div>
-        <button type="button" className="pl-link-btn" onClick={() => setManageSchedule?.(!manageSchedule)}>Edit schedule →</button>
+        <button type="button" className="pl-link-btn" onClick={() => setManageSchedule?.(!manageSchedule)} aria-label="Edit today’s schedule">Edit →</button>
       </div>
       <div className="pl-list">
         {visibleEntries.length ? visibleEntries.map((entry, index) => (
@@ -178,6 +186,29 @@ function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = []
       </div>
     </section>
   );
+}
+
+function DayAgenda({ tasks, schedule, selectedSchedule, exceptions, date, timezone }) {
+  const [tab,setTab]=React.useState('tasks');
+  const [wide,setWide]=React.useState(()=>window.matchMedia?.('(min-width:720px)').matches || false);
+  const [now,setNow]=React.useState(()=>new Date());
+  const id=React.useId();
+  React.useEffect(()=>{
+    const media=window.matchMedia?.('(min-width:720px)');
+    const change=()=>setWide(Boolean(media?.matches));
+    change();media?.addEventListener?.('change',change);
+    const timer=setInterval(()=>setNow(new Date()),60000);
+    return ()=>{media?.removeEventListener?.('change',change);clearInterval(timer);};
+  },[]);
+  React.useEffect(()=>setTab('tasks'),[date]);
+  const next=upcomingSchedule(scheduleEntries(selectedSchedule,exceptions),date,now,timezone);
+  const select=(value,focus=false)=>{setTab(value);if(focus)document.getElementById(`${id}-${value}-tab`)?.focus?.();};
+  const key=(event)=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();select(event.key==='Home'?'tasks':event.key==='End'?'schedule':tab==='tasks'?'schedule':'tasks',true);};
+  return <section className="pl-home-day-card" aria-label="Today’s tasks and schedule">
+    {next && <button type="button" className="pl-agenda-next" onClick={()=>select('schedule')} aria-label={`Open schedule. Next up: ${next.text}`}><span>Next up · {window.PlushLifeSchedule?.formatTime12?.(next.time) || next.time}</span><strong>{next.text}</strong></button>}
+    {!wide && <div className="pl-agenda-tabs" role="tablist" aria-label="Today view">{['tasks','schedule'].map(value=><button type="button" key={value} role="tab" id={`${id}-${value}-tab`} aria-controls={`${id}-${value}-panel`} aria-selected={tab===value} tabIndex={tab===value?0:-1} onKeyDown={key} onClick={()=>select(value)}>{value==='tasks'?'Tasks':'Schedule'}</button>)}</div>}
+    <div className="pl-agenda-panels">{[['tasks',tasks],['schedule',schedule]].map(([value,content])=><div key={value} id={`${id}-${value}-panel`} role={wide?undefined:'tabpanel'} aria-labelledby={wide?undefined:`${id}-${value}-tab`} hidden={!wide && tab!==value}>{content}</div>)}</div>
+  </section>;
 }
 
 function TomorrowNote({ tomorrowTasksCount }) {
@@ -224,7 +255,7 @@ function TasksToday({ rows = [], viewDone = {}, toggle, openTaskManager, period 
     <section style={{...card, padding: "15px 17px 16px"}} aria-label="Tasks today">
       <div className="pl-section-topline">
         <div className="pl-kicker">{copy.Today || "Today"} · {completed}/{taskRows.length}</div>
-        <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)}>View all →</button>
+        <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)} aria-label="View all today’s tasks">All →</button>
       </div>
       <div className="pl-list">
         {shown.length ? shown.map((row) => (
@@ -275,7 +306,7 @@ function Habits({ rows = [], viewDone = {}, toggle, openTaskManager, period }) {
 export function TodayPanel({
   open, period, nextStepTask, nextStepReason, nextStepHint, toggle, pickEasierSuggestion,
   nextStepMoreOpen, setNextStepMoreOpen, setNextStepSkipped, setNextStepDismissedToday,
-  selectedSchedule, selectedScheduleExceptionEntries, manageSchedule, setManageSchedule,
+  selectedSchedule, selectedScheduleExceptionEntries, selectedProgressDate, manageSchedule, setManageSchedule,
   rows, viewDone, openTaskManager, setCalmQuickOpen, calmQuickOpen, currentCopingOption,
   reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen, setSettingsOpen,
   completedTodayExpanded, setCompletedTodayExpanded, tomorrowTasksCount, preferences,
@@ -289,7 +320,7 @@ export function TodayPanel({
   const homeLayout = normalizeHomeLayout(preferences?.home_layout);
   const homeSections = {
     tiny: (<OneTinyThing nextStepTask={nextStepTask} nextStepReason={nextStepReason} nextStepHint={nextStepHint} toggle={unifiedToggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} />),
-    tasks: (<TasksToday rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />),
+    tasks: (<TasksToday rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={selectedProgressDate ? {...period,date:selectedProgressDate} : period} />),
     habits: (<Habits rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />),
     schedule: (<TodaySchedule selectedSchedule={selectedSchedule} selectedScheduleExceptionEntries={selectedScheduleExceptionEntries} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} />),
     shortcuts: (<div className="pl-home-shortcuts">
@@ -388,7 +419,7 @@ export function TodayPanel({
       <div data-plushlife-home-stack className="pl-home-shell">
         <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} />
         {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }
-        {homeLayout.order.filter(id => !homeLayout.hidden.includes(id) && !['shortcuts','noticed'].includes(id)).map(id => <React.Fragment key={id}>{homeSections[id]}</React.Fragment>)}
+        {homeDisplayGroups(homeLayout).map(group => group.length===2 ? <DayAgenda key="schedule-tasks" tasks={homeSections.tasks} schedule={homeSections.schedule} selectedSchedule={selectedSchedule} exceptions={selectedScheduleExceptionEntries} date={selectedProgressDate || period?.date} timezone={preferences?.timezone}/> : <React.Fragment key={group[0]}>{homeSections[group[0]]}</React.Fragment>)}
         <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
           <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>A little more, when you want it</summary>
           <div style={{display:'grid',gap:12,paddingTop:8}}>
