@@ -1,6 +1,7 @@
+import { GentleOnboarding } from "./components/gentle-onboarding.jsx";
 import { CozyGuideSuggestions } from "./components/cozy-daily.jsx";
 import { normalizeCozyProfile, cozyReminderCopy } from "./cozy-profile.js";
-import { CozyComfortContext, useCozyComfort, CozySetup } from "./components/cozy-space.jsx";
+import { CozyComfortContext, useCozyComfort } from "./components/cozy-space.jsx";
 import { widgetSnapshot } from "./widget-model.js";
 import { loadHistoryRows } from "./care-history-data.js";
 import { normalizeHomeLayout } from "./home-layout.js";
@@ -768,25 +769,14 @@ function GlowUpTracker() {
   const [trackerProfile, setTrackerProfile] = useState(null);
   const [displayNameDraft, setDisplayNameDraft] = useState("");
   const [comfortItemDraft, setComfortItemDraft] = useState("");
-  const [selectedTemplateId, setSelectedTemplateId] = useState("basics");
   const [starterPackId, setStarterPackId] = useState("basics");
   const [starterPackMessage, setStarterPackMessage] = useState("");
 
   const [onboardingReason, setOnboardingReason] = useState(null);
-  const [onboardingCozyDraft, setOnboardingCozyDraft] = useState(normalizeCozyProfile());
-  const [onboardingCozySkipped, setOnboardingCozySkipped] = useState(false);
-  const [onboardingEssentials, setOnboardingEssentials] = useState([]);
-  const onboardingCozyAccount = React.useRef(null);
-  useEffect(() => {
-    if (!user?.id) {onboardingCozyAccount.current=null;setOnboardingCozyDraft(normalizeCozyProfile());setOnboardingEssentials([]);return;}
-    if (cozyComfort.status !== "ready" || onboardingCozyAccount.current === user?.id) return;
-    onboardingCozyAccount.current = user?.id;
-    setOnboardingCozyDraft(cozyComfort.profile);
-    setOnboardingCozySkipped(false);
-  }, [user?.id, cozyComfort.status]);
-  const [onboardingIntentionDraft, setOnboardingIntentionDraft] = useState("");
-  const [onboardingMode, setOnboardingMode] = useState(null);
+  const [onboardingMode, setOnboardingMode] = useState("cozy");
+  const [onboardingBusy, setOnboardingBusy] = useState(false);
   const [onboardingMessage, setOnboardingMessage] = useState("");
+  useEffect(() => { setOnboardingMode("cozy"); setOnboardingReason(null); setOnboardingMessage(""); }, [user?.id]);
   const [privateNote, setPrivateNote] = useState("");
   const [privateNotePrompt, setPrivateNotePrompt] = useState("");
   const [privateNoteLoaded, setPrivateNoteLoaded] = useState(false);
@@ -2026,47 +2016,8 @@ function GlowUpTracker() {
   };
 
 
-  useEffect(() => {
-    // Only ever shows for a signed-in user, and only on Monday — the actual
-    // first day of a Mon-Sun week — not Sunday (the last day of the week
-    // that's ending), which is when this used to fire despite talking about
-    // "the week ahead." Since today is now the day AFTER the week closed,
-    // "last week" means yesterday's Sunday and the week before this one.
-    // Stays quiet when the user already engaged this Monday (flag), already
-    // reflected on the closing week (check-in row), or already wrote this
-    // week's intention — any of those means the popup did its job.
-    if (!user || dayIdForDate(period.date) !== "mon") { setWeeklyKickoffOpen(false); return; }
-    if (isWeeklyKickoffDone(period.weekStart)) { setWeeklyKickoffOpen(false); return; }
-    let alive = true;
-    const closingWeekStart = offsetDate(period.weekStart, -7);
-    (async () => {
-      const [{ data: noteRow }, { data: checkinRow }, { data: thisWeekRow }] = await Promise.all([
-        supabase.from("weekly_intentions").select("body").eq("user_id", user.id).eq("week_start", closingWeekStart).maybeSingle(),
-        supabase.from("weekly_intention_checkins").select("id").eq("user_id", user.id).eq("week_start", closingWeekStart).maybeSingle(),
-        supabase.from("weekly_intentions").select("id").eq("user_id", user.id).eq("week_start", period.weekStart).maybeSingle(),
-      ]);
-      if (!alive) return;
-      if (!checkinRow && !thisWeekRow && !isWeeklyKickoffDone(period.weekStart)) {
-        setWeeklyKickoffNote(noteRow?.body || "");
-        setWeeklyKickoffOpen(true);
-      } else {
-        setWeeklyKickoffOpen(false);
-      }
-    })();
-    return () => { alive = false; };
-  }, [user, period.date]);
-
-  useEffect(() => {
-    if (!user || !preferences.onboarding_complete || preferences.weekly_intention_intro_seen || dayIdForDate(period.date) === "sun") {
-      return;
-    }
-    let alive = true;
-    supabase.from("weekly_intentions").select("body").eq("user_id", user.id).eq("week_start", period.weekStart).maybeSingle().then(({ data }) => {
-      if (!alive) return;
-      if (!data?.body) setIntroIntentionOpen(true);
-    });
-    return () => { alive = false; };
-  }, [user, preferences.onboarding_complete, preferences.weekly_intention_intro_seen, period.weekStart]);
+  // Intentions and weekly reflections are available from Calendar and Progress.
+  // Opening the app does not start an extra setup dialog.
 
   const dismissIntroIntention = async (writtenSomething) => {
     setIntroIntentionOpen(false);
@@ -2147,12 +2098,6 @@ function GlowUpTracker() {
     });
     return () => { alive = false; };
   }, [user?.id, period.date, historyReload]);
-
-  useEffect(() => {
-    if (preferences.onboarding_complete && dailyCheckInLoaded && !dailyCheckIn.capacity && !checkInPopupDismissedToday) {
-      setCheckInPopupOpen(true);
-    }
-  }, [preferences.onboarding_complete, dailyCheckInLoaded, dailyCheckIn.capacity, checkInPopupDismissedToday]);
 
   const saveDailyCheckIn = async (patch) => {
     const previous = dailyCheckIn;
@@ -3935,19 +3880,8 @@ function GlowUpTracker() {
       setOnboardingStep(1);
       return;
     }
-    let nextCozy = null;
-    let onboardingTasks = trackerTasks;
-    if (onboardingMode !== "supporter") {
-      if (cozyComfort.status !== "ready" || cozyComfort.busy) {
-        setOnboardingMessage("Your comforts are still loading. Try again in a moment.");
-        return;
-      }
-      nextCozy = onboardingCozySkipped ? {...cozyComfort.profile,setup:"skipped"} : {
-        ...cozyComfort.profile, fields:{...cozyComfort.profile.fields,...onboardingCozyDraft.fields,nickname:onboardingCozyDraft.fields.nickname || displayName},
-        reminder_style:onboardingCozyDraft.reminder_style,setup:"done",
-      };
-    }
     onboardingSaving.current = true;
+    setOnboardingBusy(true);
     try {
     setOnboardingMessage("Saving your space…");
     const { data: profileData, error: profileError } = await supabase.from("tracker_profiles").upsert({
@@ -3964,7 +3898,7 @@ function GlowUpTracker() {
       return;
     }
     if (onboardingMode !== "supporter" && trackerTasks.length === 0) {
-      const pack = TEMPLATE_PACKS.find((item) => item.id === selectedTemplateId) || TEMPLATE_PACKS[0];
+      const pack = {tasks:[{task:"Drink water",section:"Every day"}]};
       if (pack.tasks.length > 0) {
         const starterTasks = pack.tasks.map((item, index) => ({
           user_id: user.id, task_key: `starter-${Date.now()}-${index}`, day_id: "daily", section: item.section,
@@ -3972,39 +3906,17 @@ function GlowUpTracker() {
         }));
         const { error: starterError } = await supabase.from("tracker_tasks").insert(starterTasks);
         if (starterError) {setOnboardingMessage("Your starting tasks couldn't be saved. Please try again.");return;}
-        onboardingTasks = starterTasks;
         setTrackerTasks(starterTasks);
       }
     }
-    if (nextCozy) {
-      if (!onboardingCozySkipped && onboardingEssentials.length) nextCozy.essentials = onboardingTasks.filter(t=>onboardingEssentials.includes(t.task)).map(t=>t.task_key).slice(0,3);
-      if (!(await cozyComfort.save(nextCozy))) {
-        setOnboardingMessage("Your comfort guide couldn't be saved. Your choices are still here; try again.");
-        return;
-      }
-    }
     let softError = null;
-    const weeklyIntention = onboardingIntentionDraft.trim();
-    if (onboardingMode !== "supporter" && weeklyIntention) {
-      const { error: noteError } = await supabase.from("weekly_intentions").upsert({
-        user_id: user.id,
-        week_start: period.weekStart,
-        body: weeklyIntention,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "user_id,week_start" });
-      if (noteError) {
-        softError = "Your space is saved, but your weekly intention couldn't be saved yet — you can add it again from PlushCalendar.";
-      } else {
-        setWeeklyIntentionText(weeklyIntention);
-        setWeeklyIntentionHistory((entries) => [{ week_start: period.weekStart, body: weeklyIntention, updated_at: new Date().toISOString() }, ...entries.filter((entry) => entry.week_start !== period.weekStart)].sort((a, b) => b.week_start.localeCompare(a.week_start)));
-      }
-    }
     const reasonProfile = onboardingReason ? ONBOARDING_REASON_PROFILES[onboardingReason] : null;
     const previousPreferences = preferences;
     const next = {
       ...preferences,
       onboarding_complete: true,
       weekly_intention_intro_seen: true,
+      last_seen_changelog: CURRENT_CHANGELOG_VERSION,
       onboarding_reason: onboardingReason,
       ...(reasonProfile?.preferences || {}),
     };
@@ -4059,7 +3971,7 @@ function GlowUpTracker() {
     }
     } catch (_) {
       setOnboardingMessage("Your space couldn’t be saved yet. Your choices are still here; try again.");
-    } finally { onboardingSaving.current = false; }
+    } finally { onboardingSaving.current = false; setOnboardingBusy(false); }
   };
 
   const saveNativePushToken = async (token) => {
@@ -4210,22 +4122,7 @@ function GlowUpTracker() {
     setSettingsMessage(error ? "Other devices couldn't be signed out." : "Other sessions have been signed out. This device stays connected.");
   };
 
-  const tryOpenNotificationNudge = (chance) => {
-    if (!preferences.onboarding_complete || preferences.notifications_enabled || notificationNudgeOpen) return;
-    const lastDismissed = preferences.notification_nudge_dismissed_at;
-    const cooldownOk = !lastDismissed || (Date.now() - new Date(lastDismissed).getTime()) > 14 * 24 * 60 * 60 * 1000;
-    if (!cooldownOk) return;
-    if (Math.random() >= chance) return;
-    const personalized = careDaysTotal >= 3
-      ? `You've logged ${careDaysTotal} essential-care days. A quiet reminder can help on the days when remembering is hard.`
-      : NOTIFICATION_NUDGE_REASONS[Math.floor(Math.random() * NOTIFICATION_NUDGE_REASONS.length)];
-    setNotificationNudgeReason(personalized);
-    setNotificationNudgeOpen(true);
-  };
-
-  useEffect(() => {
-    tryOpenNotificationNudge(0.15);
-  }, [preferences.onboarding_complete, preferences.notifications_enabled, preferences.notification_nudge_dismissed_at]);
+  // Notification permission is requested only from the user's reminder settings.
 
   const dismissNotificationNudge = () => {
     setNotificationNudgeOpen(false);
@@ -5745,7 +5642,6 @@ function GlowUpTracker() {
     setCelebrationOpen(true);
     setCelebrationTitleText(voice.celebrationTitles[Math.floor(Math.random() * voice.celebrationTitles.length)]);
     if (mascotCollection.celebrationSound && !isQuietTime(preferences)) playCelebrationChime();
-    window.setTimeout(() => tryOpenNotificationNudge(0.3), 6000);
   }, [
     user?.id,
     collectionLoadedFor,
@@ -5903,22 +5799,6 @@ function GlowUpTracker() {
   }, [user?.id, dashboard, supportViewMode]);
 
   const babyMode = preferences.nickname_style === "baby";
-  useEffect(() => {
-    if (!user?.id || !preferences.onboarding_complete || !privateNoteLoaded || privateNote) return;
-    if (!dailyCheckIn.capacity && !checkInPopupDismissedToday) return;
-    const promptKey = `plushlife-journal-prompt-${user.id}-${period.date}`;
-    if (window.localStorage.getItem(promptKey) === "seen") return;
-    const timer = window.setTimeout(() => {
-      window.localStorage.setItem(promptKey, "seen");
-      setJournalQuickOpenDate(period.date);
-      setPrivateNoteDraft("");
-      setPrivateNoteMessage("");
-      setPrivateNoteEditing(true);
-      setDailyJournalPromptOpen(true);
-      setJournalQuickOpen(true);
-    }, 700);
-    return () => window.clearTimeout(timer);
-  }, [user?.id, preferences.onboarding_complete, privateNoteLoaded, privateNote, dailyCheckIn.capacity, checkInPopupDismissedToday, period.date]);
   const dinoTheme = !!preferences.dino_theme;
   const nightHour = new Date().getHours();
   const isNightHour = nightHour >= 19 || nightHour < 6;
@@ -6150,7 +6030,6 @@ function GlowUpTracker() {
   } : baseVoice;
   const comfortItemName = trackerProfile?.comfort_item_name?.trim() || "a comfort item";
   const currentCopingOption = COPING_OPTIONS[copingPick].replace(/Tigger/gi, comfortItemName);
-  const onboardingTotalSteps = onboardingMode === "supporter" ? 2 : 6;
   const autoPopupToShow = (() => {
     if (weeklyKickoffOpen) return "weekly_kickoff";
     if (user && preferences.onboarding_complete && preferences.last_seen_changelog !== CURRENT_CHANGELOG_VERSION) return "changelog";
@@ -7157,124 +7036,7 @@ function GlowUpTracker() {
           </div>
         </div>
       )}
-      {onboardingStep > 0 && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "grid", placeItems: "center", padding: 18, background: "rgba(45,32,56,0.42)", backdropFilter: "blur(5px)" }}>
-          <div style={{ width: "min(100%, 480px)", maxHeight: "calc(100dvh - 36px)", overflowY: "auto", overscrollBehavior: "contain", padding: 22, borderRadius: 24, background: "#FFFDFE", border: "1px solid #E9D7F0", boxShadow: "0 24px 70px rgba(45,32,56,.25)" }}>
-            <div style={{ fontSize: 11, color: "#A65DC1", fontWeight: 900, letterSpacing: ".14em" }}>WELCOME TO PLUSHLIFE · {onboardingStep}/{onboardingTotalSteps}</div>
-            {onboardingStep === 1 && <>
-              <h2 style={{ margin: "8px 0 6px" }}>How will you use PlushLife? 💛</h2>
-              <p style={{ marginTop: 0, fontSize: 12.5, color: "#76558A", lineHeight: 1.5 }}>Set up your own cozy space, connect with a Guardian, or accept an invitation to support someone else.</p>
-              <label style={{ display: "grid", gap: 5, marginTop: 12, color: "#6B5A7D", fontWeight: 800 }}>YOUR NAME
-                <input value={displayNameDraft} onChange={(event) => setDisplayNameDraft(event.target.value)} maxLength={40} placeholder="What should PlushLife call you?" style={{ padding: "10px", borderRadius: 10, border: "1px solid #DCC9E8" }} />
-              </label>
-              <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
-                <button type="button" aria-pressed={onboardingMode === "cozy"} onClick={() => { setOnboardingMode("cozy"); setOnboardingMessage(""); }} style={{ padding: "10px", borderRadius: 10, border: onboardingMode === "cozy" ? "2px solid #A65DC1" : "1px solid #DCC9E8", background: onboardingMode === "cozy" ? "#F7ECFB" : "white", fontWeight: 800 }}>My own cozy space</button>
-                <button type="button" aria-pressed={onboardingMode === "guardian"} onClick={() => { setOnboardingMode("guardian"); setOnboardingMessage(""); }} style={{ padding: "10px", borderRadius: 10, border: onboardingMode === "guardian" ? "2px solid #4C8FE8" : "1px solid #DCC9E8", background: onboardingMode === "guardian" ? "#EAF4FF" : "white", fontWeight: 800 }}>My cozy space + optional Guardian support</button>
-                <button type="button" aria-pressed={onboardingMode === "supporter"} onClick={() => { setOnboardingMode("supporter"); setOnboardingMessage(""); }} style={{ padding: "10px", borderRadius: 10, border: onboardingMode === "supporter" ? "2px solid #318C79" : "1px solid #DCC9E8", background: onboardingMode === "supporter" ? "#EAF6F1" : "white", fontWeight: 800 }}>I'm here as a Guardian</button>
-              </div>
-            </>}
-            {onboardingStep === 2 && onboardingMode === "supporter" && <>
-              <h2 style={{ margin: "8px 0 6px" }}>You're here to support someone 💛</h2>
-              <p style={{ fontSize: 13, lineHeight: 1.55, color: "#6B5A7D" }}>PlushLife will show invitations sent to your signed-in email. Nothing is shared until you accept, and you only see or do what the Cozy explicitly allows.</p>
-              {pendingSupportInvites.length > 0
-                ? <div style={{ marginTop: 10, padding: 11, borderRadius: 11, background: "#FFF9E9", border: "1px solid #F0D99E", color: "#7A5A18", fontSize: 12.5, fontWeight: 800 }}>You have {pendingSupportInvites.length} Guardian invitation{pendingSupportInvites.length === 1 ? "" : "s"} waiting.</div>
-                : <div style={{ marginTop: 10, padding: 11, borderRadius: 11, background: "#F5FAFF", border: "1px solid #CFE4F5", color: "#4C6E8E", fontSize: 12.5 }}>No invitation is visible yet. Ask your Cozy to invite this exact email, then refresh the Guardian screen.</div>}
-            </>}
-            {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 2) && <>
-              <h2 style={{ margin: "8px 0 6px" }}>Things that feel like you 🧸</h2>
-              {cozyComfort.status==='ready'?<CozySetup draft={onboardingCozyDraft} section="comforts" onChange={draft=>{setOnboardingCozySkipped(false);setOnboardingCozyDraft(draft);setComfortItemDraft(draft.fields.comfort_item.slice(0,80));}} />:<p role="status">Opening your little guide…</p>}
-              <button type="button" onClick={()=>{setOnboardingCozySkipped(true);setComfortItemDraft("");setSelectedTemplateId(TEMPLATE_PACKS.find(p=>p.tasks.length===0)?.id || selectedTemplateId);setOnboardingStep(6);}} style={{minHeight:44,marginTop:10,padding:10,borderRadius:16,border:'1px solid var(--pl-theme-line)',background:'var(--pl-theme-surface-2)',color:'var(--pl-theme-ink)',font:'inherit'}}>Skip for now — set up later</button>
-            </>}
-            {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 3) && <>
-              <h2 style={{ margin: "8px 0 6px" }}>Pick a starting point 🌱</h2>
-              <p style={{ color: "#6B5A7D", lineHeight: 1.55 }}>Optional — just a head start. You can add, edit, or delete anything afterward.</p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 7, marginTop: 10 }}>
-                {TEMPLATE_PACKS.map((pack) => (
-                  <button key={pack.id} type="button" onClick={() => {setSelectedTemplateId(pack.id);setOnboardingEssentials([]);}} aria-pressed={selectedTemplateId === pack.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "10px 6px", borderRadius: 12, border: selectedTemplateId === pack.id ? "2px solid #A65DC1" : "1px solid #DCC9E8", background: selectedTemplateId === pack.id ? "#F7ECFB" : "white", textAlign: "center", cursor: "pointer" }}>
-                    <span style={{ fontSize: 20 }}>{pack.emoji}</span>
-                    <span style={{ fontSize: 11.5, fontWeight: 800, color: "#5B4B6B", lineHeight: 1.25 }}>{pack.label}</span>
-                    <span style={{ fontSize: 9.5, color: "#9A86A7", lineHeight: 1.3 }}>{pack.tasks.length > 0 ? pack.tasks.slice(0, 2).map((item) => item.task).join(" · ") + (pack.tasks.length > 2 ? "…" : "") : "Build it yourself"}</span>
-                  </button>
-                ))}
-              </div>
-              {(() => {
-                const selectedPack = TEMPLATE_PACKS.find((pack) => pack.id === selectedTemplateId);
-                if (!selectedPack) return null;
-                return (
-                  <div style={{ marginTop: 10, padding: "10px 12px", borderRadius: 12, background: "#F7ECFB", border: "1px solid #E3C9EC" }}>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: "#8E4EAA" }}>{selectedPack.emoji} {selectedPack.label}</div>
-                    <div style={{ marginTop: 4, fontSize: 11.5, color: "#6B5A7D", lineHeight: 1.5 }}>{selectedPack.tasks.length > 0 ? selectedPack.tasks.map((item) => item.task).join(" · ") : "No starter tasks — build it all yourself."}</div>
-                    {selectedPack.tasks.length>0&&<fieldset style={{border:0,padding:0,margin:'8px 0 0'}}><legend style={{fontSize:14,fontWeight:800}}>My rough-day essentials · choose up to three</legend>{selectedPack.tasks.map(item=><label key={item.task} style={{display:'flex',alignItems:'center',gap:8,minHeight:44,fontSize:14}}><input type="checkbox" checked={onboardingEssentials.includes(item.task)} disabled={!onboardingEssentials.includes(item.task)&&onboardingEssentials.length>=3} onChange={e=>setOnboardingEssentials(items=>e.target.checked?[...items,item.task]:items.filter(t=>t!==item.task))}/>{item.task}</label>)}</fieldset>}
-                  </div>
-                );
-              })()}
-            </>}
-            {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 4) && <>
-              <h2 style={{ margin: "8px 0 6px" }}>How you like to be cared for 🌷</h2>
-              <CozySetup draft={onboardingCozyDraft} section="support" onChange={setOnboardingCozyDraft}/>
-
-            </>}
-            {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 5) && <>
-              <h2 style={{ margin: "8px 0 6px" }}>One intention for this week 📮</h2>
-              <p style={{ color: "#6B5A7D", lineHeight: 1.55 }}>Optional — just one small thing you want to carry with you this week. Every Sunday, PlushLife will remind you what you wrote and let you check in on it.</p>
-              <CozySetup draft={onboardingCozyDraft} section="anchors" onChange={setOnboardingCozyDraft}/>
-              <textarea value={onboardingIntentionDraft} onChange={(event) => setOnboardingIntentionDraft(event.target.value)} maxLength={2000} placeholder="Example: Be a little gentler with myself this week." style={{ width: "100%", boxSizing: "border-box", minHeight: 80, marginTop: 8, padding: 10, borderRadius: 10, border: "1px solid #DCC9E8", resize: "vertical" }} />
-              <div style={{ marginTop: 6, fontSize: 10.5, color: "#8C6B9E" }}>Private — only you can ever read this. You can skip this and write one later too.</div>
-            </>}
-            {((onboardingMode === "cozy" || onboardingMode === "guardian") && onboardingStep === 6) && <>
-              <h2 style={{ margin: "8px 0 6px" }}>You're ready ✨</h2>
-              {onboardingMode === "guardian" && <div data-plushlife-onboarding-guardian-deferred="true" style={{ margin: "8px 0 12px", padding: 11, borderRadius: 11, background: "#F5FAFF", border: "1px solid #CFE4F5", color: "#4C6E8E", fontSize: 12, lineHeight: 1.5 }}><strong>Guardian setup is optional.</strong> Finish your cozy space first. You can connect a Guardian later from the Guardian area, then choose exactly what they can see. Nothing is shared automatically.</div>}
-              <p style={{ color: "#6B5A7D", lineHeight: 1.55 }}>{(TEMPLATE_PACKS.find((pack) => pack.id === selectedTemplateId)?.tasks.length ?? 0) > 0 ? `PlushLife will begin with your ${TEMPLATE_PACKS.find((pack) => pack.id === selectedTemplateId)?.label.toLowerCase()} tasks.` : "You chose to start from scratch — add your first task once you're in."} Soft Plush is your default theme.</p>
-              <div style={{ marginTop: 14, paddingTop: 13, borderTop: "1px solid #E9DAF2" }}>
-                <div style={{ fontSize: 12.5, fontWeight: 800, color: "#6B5A7D" }}>One last thing, totally optional 💛</div>
-                <div style={{ marginTop: 3, fontSize: 12, color: "#8C6B9E" }}>What brings you here? Your choice changes a few starting settings, and you can change them later.</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-                  {[
-                    ["general", "🌿 General self-care"],
-                    ["focus", "🎯 ADHD / focus support"],
-                    ["burnout", "🕊️ Recovering from burnout"],
-                    ["plain", "≡ Just a normal tracker"],
-                  ].map(([value, label]) => (
-                    <button key={value} type="button" onClick={() => setOnboardingReason((current) => current === value ? null : value)} aria-pressed={onboardingReason === value} style={{ padding: "7px 11px", borderRadius: 999, border: onboardingReason === value ? "2px solid #A65DC1" : "1px solid #DCC9E8", background: onboardingReason === value ? "#F7ECFB" : "white", color: "#5B4B6B", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>{label}</button>
-                  ))}
-                </div>
-                {onboardingReason && (
-                  <div aria-live="polite" style={{ marginTop: 8, padding: "8px 10px", borderRadius: 10, background: "#F7ECFB", border: "1px solid #E3C9EC", color: "#6B5A7D", fontSize: 11.5, lineHeight: 1.45 }}>
-                    {ONBOARDING_REASON_PROFILES[onboardingReason]?.description}
-                  </div>
-                )}
-              </div>
-              <div style={{ marginTop: 14, paddingTop: 13, borderTop: "1px solid #E9DAF2" }}>
-                <div style={{ fontSize: 12.5, fontWeight: 800, color: "#6B5A7D" }}>🔔 Want gentle reminders?</div>
-                <div style={{ marginTop: 3, fontSize: 12, color: "#8C6B9E" }}>Also optional. PlushLife can send a check-in nudge at times you choose — nothing pushy, and you can turn it off anytime.</div>
-                {preferences.notifications_enabled ? (
-                  <div style={{ marginTop: 8, fontSize: 12.5, fontWeight: 800, color: "#318C79" }}>🔔 Notifications are on</div>
-                ) : (
-                  <button type="button" onClick={enableNotifications} style={{ marginTop: 8, padding: "8px 12px", borderRadius: 10, border: 0, background: "#318C79", color: "white", fontWeight: 900, fontSize: 12.5, cursor: "pointer" }}>Turn on notifications</button>
-                )}
-                {settingsMessage && <div style={{ marginTop: 6, fontSize: 11, color: "#8C6B9E" }}>{settingsMessage}</div>}
-              </div>
-            </>}
-            {onboardingMode!=="supporter"&&cozyComfort.status==='error'&&<div role="status"><p>Your comfort guide couldn’t load yet.</p><button type="button" style={{minHeight:44}} onClick={cozyComfort.retry}>Retry loading my comforts</button></div>}
-            {onboardingMessage && <div style={{ marginTop: 11, fontSize: 12, color: "#B0576B", lineHeight: 1.45 }}>{onboardingMessage}</div>}
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginTop: 18 }}>
-              <button disabled={onboardingStep === 1} onClick={() => setOnboardingStep((step) => Math.max(1, step - 1))} style={{ padding: "9px 13px", borderRadius: 10, border: "1px solid #DCC9E8", background: "white", color: "#76558A", fontWeight: 800, opacity: onboardingStep === 1 ? .4 : 1 }}>Back</button>
-              {onboardingStep < onboardingTotalSteps ? <button onClick={() => {
-                if (onboardingStep === 1 && !displayNameDraft.trim()) {
-                  setOnboardingMessage("Add your name to continue.");
-                  return;
-                }
-                if (onboardingStep === 1 && !onboardingMode) {
-                  setOnboardingMessage("Choose how you'll use PlushLife to continue.");
-                  return;
-                }
-                setOnboardingMessage("");
-                setOnboardingStep((step) => step + 1);
-              }} style={{ padding: "9px 15px", borderRadius: 10, border: 0, background: "#A65DC1", color: "white", fontWeight: 900 }}>Next</button> : <button onClick={completeOnboarding} style={{ padding: "9px 15px", borderRadius: 10, border: 0, background: "#318C79", color: "white", fontWeight: 900 }}>{onboardingMode === "supporter" ? "Open Guardian invitations 💛" : "Open my tracker ✨"}</button>}
-            </div>
-          </div>
-        </div>
-      )}
+      {onboardingStep > 0 && <GentleOnboarding name={displayNameDraft} onName={setDisplayNameDraft} reason={onboardingReason} onReason={setOnboardingReason} mode={onboardingMode} onMode={setOnboardingMode} onFinish={completeOnboarding} busy={onboardingBusy} message={onboardingMessage} invitationCount={pendingSupportInvites.length}/>}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 0, overflow: "visible" }}>
         {(preferences.simple_mode ? [] : (dinoTheme ? [
           { e: "🦕", top: "2%", left: "4%", size: 54 }, { e: "🦖", top: "4%", left: "82%", size: 58 },

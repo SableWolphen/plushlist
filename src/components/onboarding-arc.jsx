@@ -9,8 +9,8 @@ const ARC_STORAGE_KEY = "plushlife:onboarding-arc:v1";
 const ARC_NUDGES = [
   null, // day 1 is covered by onboarding itself
   {
-    day: 2, emoji: "🎯", title: "Meet your gentle pick",
-    body: "Every morning PlushLife chooses one doable step for you. You never have to decide where to start.",
+    day: 2, emoji: "🧸", title: "Make room for one comfort",
+    body: "My Cozy Space is there when you want it. Add a favorite blanket, sound, or snack — there’s no setup checklist.", destination: "care",
   },
   {
     day: 3, emoji: "🌱", title: "Too much? Make it smaller",
@@ -53,7 +53,7 @@ function daysBetween(a, b) {
   return Math.round(ms / 86400000);
 }
 
-export function OnboardingArc({ onboardingComplete }) {
+export function OnboardingArc({ onboardingComplete, goToDashboard }) {
   const [dayIndex, setDayIndex] = React.useState(0);
   const [dismissed, setDismissed] = React.useState(false);
   const today = localDateKey();
@@ -68,7 +68,7 @@ export function OnboardingArc({ onboardingComplete }) {
   }, [onboardingComplete, today]);
 
   if (!onboardingComplete || dayIndex < 2 || dayIndex > 7 || dismissed) return null;
-  const nudge = ARC_NUDGES[dayIndex];
+  const nudge = ARC_NUDGES.find(item => item?.day === dayIndex);
   if (!nudge) return null;
 
   const dismiss = () => {
@@ -82,17 +82,13 @@ export function OnboardingArc({ onboardingComplete }) {
       <div style={{ display: "flex", alignItems: "flex-start", gap: 11 }}>
         <span aria-hidden="true" style={{ fontSize: 30, lineHeight: 1.1 }}>{nudge.emoji}</span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 950, color: "var(--pl-theme-muted,#B44CC7)" }}>DAY {dayIndex} OF 7 · GETTING COZY</div>
+          <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 950, color: "var(--pl-theme-muted,#B44CC7)" }}>WHEN YOU FEEL READY</div>
           <div style={{ marginTop: 3, fontSize: 14.5, fontWeight: 950, color: "var(--pl-theme-ink,#3E2458)" }}>{nudge.title}</div>
           <p style={{ margin: "4px 0 0", fontSize: 12.5, lineHeight: 1.5, color: "var(--pl-theme-ink,#6B5A7D)" }}>{nudge.body}</p>
         </div>
         <button type="button" onClick={dismiss} aria-label="Dismiss for today" style={{ border: 0, background: "transparent", color: "var(--pl-theme-muted,#B79DC4)", fontSize: 18, cursor: "pointer", padding: 4, lineHeight: 1 }}>×</button>
       </div>
-      <div style={{ display: "flex", gap: 4, marginTop: 11 }} aria-hidden="true">
-        {[1, 2, 3, 4, 5, 6, 7].map((d) => (
-          <span key={d} style={{ flex: 1, height: 5, borderRadius: 999, background: d < dayIndex ? "#C75EDB" : d === dayIndex ? "#E9B8F2" : "#F0E4F5" }} />
-        ))}
-      </div>
+      <button type="button" onClick={()=>{if(nudge.destination==='care')window.__plushlifeOpenCozySpace=true;goToDashboard?.(nudge.destination || (dayIndex===7?'progress':'care'));dismiss();}} style={{minHeight:44,marginTop:8,padding:'8px 12px',borderRadius:14,border:'1px solid var(--pl-theme-line)',background:'var(--pl-theme-surface-2)',color:'var(--pl-theme-ink)',font:'inherit'}}>Explore when I’m ready</button>
     </section>
   );
 }

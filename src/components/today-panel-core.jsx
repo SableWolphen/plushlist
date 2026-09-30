@@ -278,7 +278,7 @@ export function TodayPanel({
   rows, viewDone, openTaskManager, setCalmQuickOpen, calmQuickOpen, currentCopingOption,
   reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen, setSettingsOpen,
   completedTodayExpanded, setCompletedTodayExpanded, tomorrowTasksCount, preferences,
-  activityDaysTotal, selectedOutfit, appearanceTheme, dinoTheme, babyMode, cozyDaily
+  activityDaysTotal, selectedOutfit, appearanceTheme, dinoTheme, babyMode, cozyDaily, optionalTools
 }) {
   // Wraps the app toggle with the shared completion flow: newly completed
   // tasks linger briefly for undo, and every completion dispatches
@@ -386,9 +386,19 @@ export function TodayPanel({
 
       <div data-plushlife-home-stack className="pl-home-shell">
         <Hero period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} />
-        {cozyDaily}
-        {homeLayout.order.filter(id => !homeLayout.hidden.includes(id)).map(id => <React.Fragment key={id}>{homeSections[id]}</React.Fragment>)}
-        <TomorrowNote tomorrowTasksCount={tomorrowTasksCount} />
+        {homeLayout.order.filter(id => !homeLayout.hidden.includes(id) && !['shortcuts','noticed'].includes(id)).map(id => <React.Fragment key={id}>{homeSections[id]}</React.Fragment>)}
+        <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
+          <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>A little more, when you want it</summary>
+          <div style={{display:'grid',gap:12,paddingTop:8}}>
+            <button type="button" onClick={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard?.('care');}} style={{minHeight:44,border:'1px solid var(--pl-theme-line)',borderRadius:14,padding:10,background:'var(--pl-theme-surface-2)',color:'var(--pl-theme-ink)',font:'inherit'}}>My Cozy Space · add a comfort when you like</button>
+            {cozyDaily}
+            {homeLayout.order.filter(id => !homeLayout.hidden.includes(id) && ['shortcuts','noticed'].includes(id)).map(id => <React.Fragment key={id}>{homeSections[id]}</React.Fragment>)}
+            {optionalTools}
+            <button type="button" onClick={()=>window.dispatchEvent(new Event('plushlife:weekly-reflection-request'))} style={{minHeight:44,border:'1px solid var(--pl-theme-line)',borderRadius:14,padding:10,background:'var(--pl-theme-surface-2)',color:'var(--pl-theme-ink)',font:'inherit'}}>Reflect on my week · optional</button>
+            <button type="button" onClick={()=>goToDashboard?.('settings')} style={{minHeight:44,border:'1px solid var(--pl-theme-line)',borderRadius:14,padding:10,background:'var(--pl-theme-surface-2)',color:'var(--pl-theme-ink)',font:'inherit'}}>Reminder choices · optional</button>
+            <TomorrowNote tomorrowTasksCount={tomorrowTasksCount} />
+          </div>
+        </details>
         <CompletedToday rows={rows} viewDone={viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} expanded={completedTodayExpanded} setExpanded={setCompletedTodayExpanded} />
 
 

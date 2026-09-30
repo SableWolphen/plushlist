@@ -216,8 +216,7 @@
   `;
   document.head.appendChild(style);
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", maybeShow, { once:true }); else maybeShow();
-  const observer = new MutationObserver(() => { if (checkTimer) window.clearTimeout(checkTimer); checkTimer = window.setTimeout(maybeShow, 160); });
-  observer.observe(document.documentElement, { childList:true, subtree:true });
-  window.PlushLifeWeeklyReflection = { check: maybeShow, inWindow: inReflectionWindow, weekKey: reflectionWeekKey, lines: reflectionLines };
+  // Reflection opens only after an explicit choice, never over the first home visit.
+  window.addEventListener("plushlife:weekly-reflection-request", () => showWeeklyReflection(new Date()));
+  window.PlushLifeWeeklyReflection = { open: () => showWeeklyReflection(new Date()), inWindow: inReflectionWindow, weekKey: reflectionWeekKey, lines: reflectionLines };
 })();

@@ -128,7 +128,7 @@ const checks = [
   [focusTimer.includes("AudioContext") && focusTimer.includes("Stopping early is always okay"), "gentle timer chimes softly and never scolds for stopping"],
   [tasksPanel.includes("<QuickCapture") && quickCapture.includes("someday") && appSource.includes("quickAddTrackerTask"), "quick capture sits atop Add & organize with Today/Tomorrow/Someday routing"],
   [appSource.includes('paused_until: someday ? "2099-12-31"') , "Someday quick-adds park as paused-indefinite tasks (resumable, no schema change)"],
-  [onboardingArc.includes("plushlife:onboarding-arc:v1") && onboardingArc.includes("DAY {dayIndex} OF 7"), "the 7-day onboarding arc tracks one dismissible nudge per day locally"],
+  [onboardingArc.includes("plushlife:onboarding-arc:v1") && onboardingArc.includes("WHEN YOU FEEL READY"), "the 7-day onboarding arc tracks one dismissible nudge per day locally"],
   [eveningGratitude.includes("plushlife:gratitude") && appSource.includes('addEventListener("plushlife:gratitude"') && appSource.includes("One good thing:"), "evening gratitude flows into today's private note via the existing upsert"],
   // Share-a-win growth loop: real shareable cards, no screenshot instructions
   [shareCard.includes("drawWinCard") && shareCard.includes("drawWeeklyCard") && shareCard.includes("sharePngFile") && shareCard.includes("PLUSH_APP_URL"), "share-card lib renders win + weekly cards and shares via Web Share API with fallbacks"],

@@ -79,9 +79,12 @@ for (const file of files) {
 
 const mustContain = {
   'src/app-source.jsx': [
-    ['const onboardingTotalSteps = onboardingMode === "supporter" ? 2 : 6;', 'Guardian onboarding no longer adds a required setup step'],
-    ['data-plushlife-onboarding-guardian-deferred="true"', 'Guardian setup is explicitly deferred and optional'],
-    ['My cozy space + optional Guardian support', 'Guardian onboarding choice explains optional support'],
+    ['<GentleOnboarding', 'One welcome panel replaces required Guardian setup steps'],
+    ['onMode={setOnboardingMode}', 'Guardian invitations remain reachable from the welcome panel'],
+  ],
+  'src/components/gentle-onboarding.jsx': [
+    ['Comforts, reminders, and Guardian connections can wait.', 'Guardian connection is optional and deferred'],
+    ['Here to support someone? Guardian invitations', 'Guardian supporters have an explicit entry point'],
   ],
   'src/components/baby-mode.jsx': [
     ['onClick={onShowTinyThing}', 'Baby Mode Tiny thing action'],
