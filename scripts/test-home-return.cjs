@@ -16,5 +16,15 @@ for(const view of [{returnBannerDismissed:true},{isHistoricalView:true},{isFutur
   act(()=>tree.update(React.createElement(TodayPanel,{...props,...view})));
   assert.ok(!JSON.stringify(tree.toJSON()).includes('Welcome back, Cozy.'));
 }
+let marked=null,editing=null,opened=null;
+const entries=Array.from({length:6},(_,i)=>({id:String(i),time:`0${i+4}:00`,text:`A complete schedule event ${i}`}));
+const rows=Array.from({length:4},(_,i)=>({key:`task-${i}`,label:`A caring task ${i}`}));
+act(()=>tree.update(React.createElement(TodayPanel,{...props,preferences:{},selectedSchedule:{entries},rows,toggle:key=>marked=key,setManageSchedule:value=>editing=value,openTaskManager:date=>opened=date})));
+const pair=tree.root.findByProps({className:'pl-home-day-pair'});
+assert.equal(pair.findAllByType('section').length,2);
+assert.equal(pair.findAllByProps({className:'pl-list-row pl-schedule-row'}).length,6,'Full schedule remains visible');
+act(()=>pair.findByProps({'aria-label':'Edit today’s schedule'}).props.onClick());assert.equal(editing,true);
+act(()=>pair.findByProps({'aria-label':'View all today’s tasks'}).props.onClick());assert.equal(opened,'2026-09-30');
+act(()=>pair.findAllByProps({className:'pl-list-row pl-habit-row'})[0].props.onClick());assert.equal(marked,'task-0');
 act(()=>tree.unmount());fs.rmSync(dir,{recursive:true,force:true});
 console.log('Home return passed: gentle greeting, user-chosen Tiny day, dismissal, and current-day-only display.');

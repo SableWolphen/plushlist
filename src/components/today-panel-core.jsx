@@ -1,5 +1,5 @@
 import { RewardMoment } from "./reward-moment.jsx";
-import { normalizeHomeLayout } from "../home-layout.js";
+import { normalizeHomeLayout, homeDisplayGroups } from "../home-layout.js";
 import { ThemeScene, DesignIcon, useThemeCopy } from "./theme-world.jsx";
 import { HabitTypeIcon } from "./shared.jsx";
 import { CalmPanel } from "./info-panels.jsx";
@@ -150,7 +150,7 @@ function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = []
     <section data-plushlife-home-schedule-preview="true" style={{...card, padding: "15px 17px 16px"}} aria-label="Today schedule">
       <div className="pl-section-topline">
         <div className="pl-kicker">{copy["Today\'s plan"] || "Today’s plan"}</div>
-        <button type="button" className="pl-link-btn" onClick={() => setManageSchedule?.(!manageSchedule)}>Edit schedule →</button>
+        <button type="button" className="pl-link-btn" onClick={() => setManageSchedule?.(!manageSchedule)} aria-label="Edit today’s schedule">Edit →</button>
       </div>
       <div className="pl-list">
         {visibleEntries.length ? visibleEntries.map((entry, index) => (
@@ -224,7 +224,7 @@ function TasksToday({ rows = [], viewDone = {}, toggle, openTaskManager, period 
     <section style={{...card, padding: "15px 17px 16px"}} aria-label="Tasks today">
       <div className="pl-section-topline">
         <div className="pl-kicker">{copy.Today || "Today"} · {completed}/{taskRows.length}</div>
-        <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)}>View all →</button>
+        <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)} aria-label="View all today’s tasks">All →</button>
       </div>
       <div className="pl-list">
         {shown.length ? shown.map((row) => (
@@ -388,7 +388,7 @@ export function TodayPanel({
       <div data-plushlife-home-stack className="pl-home-shell">
         <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} />
         {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }
-        {homeLayout.order.filter(id => !homeLayout.hidden.includes(id) && !['shortcuts','noticed'].includes(id)).map(id => <React.Fragment key={id}>{homeSections[id]}</React.Fragment>)}
+        {homeDisplayGroups(homeLayout).map(group => group.length===2 ? <div className="pl-home-day-pair" key="schedule-tasks" aria-label="Today’s plan and tasks">{group.map(id=><React.Fragment key={id}>{homeSections[id]}</React.Fragment>)}</div> : <React.Fragment key={group[0]}>{homeSections[group[0]]}</React.Fragment>)}
         <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
           <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>A little more, when you want it</summary>
           <div style={{display:'grid',gap:12,paddingTop:8}}>

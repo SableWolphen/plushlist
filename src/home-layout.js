@@ -25,3 +25,16 @@ export function moveHomeSection(layout, id, offset) {
   next.order.splice(target, 0, id);
   return next;
 }
+
+export function homeDisplayGroups(layout) {
+  const normalized = normalizeHomeLayout(layout);
+  const visible = normalized.order.filter(id => !normalized.hidden.includes(id) && !['shortcuts','noticed'].includes(id));
+  const paired = visible.includes('schedule') && visible.includes('tasks');
+  let placed = false;
+  return visible.flatMap(id => {
+    if (!paired || !['schedule','tasks'].includes(id)) return [[id]];
+    if (placed) return [];
+    placed = true;
+    return [['schedule','tasks']];
+  });
+}

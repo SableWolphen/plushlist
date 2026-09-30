@@ -288,3 +288,18 @@ body[data-login-world] button:not(.mobile-email-toggle){border-radius:18px!impor
 .pl-reward-actions button:first-child{background:var(--pl-theme-accent);color:var(--pl-theme-on-accent)}
 #main-content :is(button,a,input,select,textarea,summary):focus-visible{outline:3px solid var(--pl-theme-accent);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.pl-reward-moment,.pl-reward-moment *{animation:none!important;transition:none!important}}
+
+/* The plan and tasks share one row instead of two tall stacked cards. */
+.pl-home-day-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:10px;grid-column:1/-1;min-width:0}
+#main-content#main-content[data-pl-world] .pl-home-day-pair>section{min-width:0;padding:10px!important;border:1px solid var(--pl-theme-line)!important;border-radius:20px!important;background:var(--pl-theme-surface)!important;box-shadow:var(--pl-plush-shadow)!important}
+#main-content#main-content[data-pl-world] .pl-home-day-pair .pl-section-topline{display:flex;flex-wrap:wrap;gap:2px!important;align-items:center}
+#main-content#main-content[data-pl-world] .pl-home-day-pair .pl-kicker{font-size:14px!important;line-height:1.4!important;overflow-wrap:anywhere}
+#main-content#main-content[data-pl-world] .pl-home-day-pair .pl-link-btn{min-height:44px!important;padding:4px 0!important;font-size:12px!important}
+#main-content#main-content[data-pl-world] .pl-home-day-pair .pl-list{gap:4px!important;margin-top:4px!important}
+#main-content#main-content[data-pl-world] .pl-home-day-pair .pl-schedule-row{display:flex!important;flex-direction:column;align-items:flex-start;gap:3px!important;min-height:0!important;padding:6px 0!important}
+#main-content#main-content[data-pl-world] .pl-home-day-pair .pl-time{min-width:0!important;font-size:11px!important;font-weight:800}
+#main-content#main-content[data-pl-world] .pl-home-day-pair .pl-schedule-row :is(.pl-row-icon,.pl-chevron){display:none}
+#main-content#main-content[data-pl-world] .pl-home-day-pair .pl-row-text{font-size:13px!important;line-height:1.4!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere;min-width:0}
+#main-content#main-content[data-pl-world] .pl-home-day-pair .pl-habit-row{display:grid!important;grid-template-columns:18px minmax(0,1fr)!important;gap:6px!important;min-height:48px!important;text-align:left}
+#main-content#main-content[data-pl-world] .pl-home-day-pair .pl-note-row{display:grid!important;grid-template-columns:18px minmax(0,1fr)!important;gap:6px!important}
+@media(max-width:359px){.pl-home-day-pair{grid-template-columns:minmax(0,1fr)}}
