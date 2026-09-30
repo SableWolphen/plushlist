@@ -119,7 +119,7 @@ function BabyModeExplainer() {
   return (
     <div style={{ marginTop: 8, padding: "10px 12px", borderRadius: 12, background: "var(--pl-theme-surface,#FDF6FF)", border: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 11.5, lineHeight: 1.5, color: "var(--pl-theme-ink,#6B5A7D)" }}>
       <strong style={{ color: "var(--pl-theme-ink,#5B3D70)" }}>What is Nursery?</strong> Nursery is a simplified comfort view: bigger words, rounder controls, and candy-soft decoration on the Home screen. Your tasks and progress do not change — everything is still there when you switch back.
-      <button type="button" onClick={dismiss} style={{ marginTop: 6, display: "block", minHeight: 32, padding: "4px 10px", borderRadius: 8, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white", color: "var(--pl-theme-muted,#8E4EAA)", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>Got it</button>
+      <button type="button" onClick={dismiss} style={{ marginTop: 6, display: "block", minHeight: 32, padding: "4px 10px", borderRadius: 8, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink)", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>Got it</button>
     </div>
   );
 }
@@ -222,18 +222,18 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
         <div className="pl-theme-picker" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8, marginTop: 10 }}>
           <button type="button" onClick={() => updatePreference({ dino_theme: true, nickname_style: "warm" })} aria-pressed={!!dinoTheme} style={{ position: "relative", overflow: "hidden", minHeight: 102, padding: 0, borderRadius: 16, border: dinoTheme ? "2px solid #9B67C6" : "1px solid #E4D8E8", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink,#5D3F73)", fontWeight: 900, cursor: "pointer", boxShadow: dinoTheme ? "0 7px 18px rgba(155,103,198,.22)" : "0 4px 12px rgba(96,62,108,.05)" }}>
             <span aria-hidden="true" style={{ display: "grid", placeItems: "center", minHeight: 69, background: "radial-gradient(circle at 30% 30%,#FFF6D5,transparent 42%),linear-gradient(145deg,#EFE5FF,#E8F6ED)" }}><PlushMascot theme="dino" size={104} /></span>
-            <span style={{ display: "block", padding: "6px 4px 8px", background: "rgba(255,255,255,.72)", borderTop: "1px solid rgba(255,255,255,.65)", fontSize: 10.5 }}>Dino{dinoTheme ? " ✓" : ""}</span>
+            <span style={{ display: "block", padding: "6px 4px 8px", background: "var(--pl-theme-surface-2)", color: "var(--pl-theme-ink)", borderTop: "1px solid var(--pl-theme-line)", fontSize: 10.5 }}>Dino{dinoTheme ? " ✓" : ""}</span>
           </button>
           <button type="button" onClick={() => updatePreference({ nickname_style: "baby", dino_theme: false })} aria-pressed={preferences.nickname_style === "baby"} style={{ position: "relative", overflow: "hidden", minHeight: 102, padding: 0, borderRadius: 16, border: preferences.nickname_style === "baby" ? "2px solid #E572B7" : "1px solid #E4D8E8", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink,#743B6D)", fontWeight: 900, cursor: "pointer", boxShadow: preferences.nickname_style === "baby" ? "0 7px 18px rgba(229,114,183,.20)" : "0 4px 12px rgba(96,62,108,.05)" }}>
             <span aria-hidden="true" style={{ display: "grid", placeItems: "center", minHeight: 69, background: "radial-gradient(circle at 72% 26%,#FFF4B8,transparent 34%),linear-gradient(145deg,#FFF0F7,#F1E9FF)" }}><PlushMascot theme="baby" size={104} /></span>
-            <span style={{ display: "block", padding: "6px 4px 8px", background: "rgba(255,255,255,.72)", borderTop: "1px solid rgba(255,255,255,.65)", fontSize: 10.5 }}>Nursery{preferences.nickname_style === "baby" ? " ✓" : ""}</span>
+            <span style={{ display: "block", padding: "6px 4px 8px", background: "var(--pl-theme-surface-2)", color: "var(--pl-theme-ink)", borderTop: "1px solid var(--pl-theme-line)", fontSize: 10.5 }}>Nursery{preferences.nickname_style === "baby" ? " ✓" : ""}</span>
           </button>
           {APPEARANCE_THEMES.map((theme) => {
             const selected = !dinoTheme && preferences.nickname_style !== "baby" && appearanceTheme === theme.id;
             return <button key={theme.id} type="button" onClick={() => selectAppearanceTheme(theme.id)} aria-pressed={selected} style={{ position: "relative", overflow: "hidden", padding: 0, minHeight: 102, borderRadius: 16, border: selected ? `2px solid ${theme.accent}` : "1px solid #E4D8E8", background: theme.background, color: theme.ink || "#695474", fontWeight: 900, cursor: "pointer", boxShadow: selected ? `0 7px 18px ${theme.accent}33` : "0 4px 12px rgba(96,62,108,.05)" }}>
               <span aria-hidden="true" style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 18% 18%,${theme.glowA} 0%,transparent 48%),radial-gradient(circle at 82% 18%,${theme.glowB} 0%,transparent 48%),radial-gradient(circle at 75% 88%,${theme.glowC} 0%,transparent 52%)` }} />
               <span aria-hidden="true" style={{ position: "relative", display: "grid", placeItems: "center", minHeight: 69, filter: "drop-shadow(0 4px 8px rgba(73,47,88,.10))" }}><PlushMascot theme={theme.id} size={104} /></span>
-              <span style={{ position: "relative", display: "block", padding: "6px 4px 8px", background: "rgba(255,255,255,.72)", borderTop: "1px solid rgba(255,255,255,.65)", fontSize: 10.5 }}>{theme.label}{selected ? " ✓" : ""}</span>
+              <span style={{ position: "relative", display: "block", padding: "6px 4px 8px", background: "var(--pl-theme-surface-2)", color: "var(--pl-theme-ink)", borderTop: "1px solid var(--pl-theme-line)", fontSize: 10.5 }}>{theme.label}{selected ? " ✓" : ""}</span>
             </button>;
           })}
         </div>
