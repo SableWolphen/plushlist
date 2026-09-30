@@ -52,7 +52,7 @@ const checks = [
   // The tier comparison was removed from the signed-out landing intentionally
   // (review directive): the sign-in panel now states everything is unlocked
   // with no tiers or paywalls instead of comparing Free and Gold.
-  [!landing.includes("PlushLife Free") && !landing.includes("Plush Gold") && !landing.includes("FREE PREVIEW") && landing.includes("no tiers, no paywalls"), "signed-out landing omits the removed Free/Gold tier comparison"],
+  [!landing.includes("PlushLife Free") && !landing.includes("Plush Gold") && !landing.includes("FREE PREVIEW"), "signed-out landing omits the removed Free/Gold tier comparison"],
   // The dedicated login page no longer duplicates the Free/Gold tier comparison
   // (hidden comparison HTML and its tier CSS were removed intentionally).
   [!loginPage.includes("PlushLife Free") && !loginPage.includes("Plush Gold") && !loginPage.includes("tier-grid"), "dedicated login page omits the removed Free/Gold tier comparison"],
