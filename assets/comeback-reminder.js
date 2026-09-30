@@ -100,6 +100,7 @@
     if (!at) return;
     try {
       await cancelReminder();
+      if (config !== window.PlushLifeCozyPreferences || !config?.enabled) return;
       await target.schedule({
         notifications: [{
           id: REMINDER_ID,
@@ -110,6 +111,7 @@
           extra: { source: "comeback-reminder" },
         }],
       });
+      if (config !== window.PlushLifeCozyPreferences || !config?.enabled) { await cancelReminder(); return; }
       saveState({ scheduledFor: at.toISOString(), lastScheduledAt: new Date().toISOString() });
     } catch (_error) {}
   }
