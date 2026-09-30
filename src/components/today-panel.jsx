@@ -142,7 +142,7 @@ export function TodayPanel(props) {
       <TodayPanelCore
       {...props}
       optionalTools={<><OnboardingArc onboardingComplete={!!props.preferences?.onboarding_complete} goToDashboard={props.goToDashboard}/>{props.selectedTaskViewIsRest ? <RestDayCard careDaysTotal={props.careDaysTotal} goToDashboard={props.goToDashboard} period={props.period}/> : <ShapeMyDay rows={props.rows} viewDone={props.viewDone} toggle={smartToggle} dailyCheckIn={props.dailyCheckIn} period={props.period}/>}<EveningGratitude/></>}
-      cozyDaily={!props.isHistoricalView&&!props.isFutureView&&<CozyDaily rows={props.rows} viewDone={props.viewDone} dailyCheckIn={props.dailyCheckIn} returnGapDays={props.returnGapDays} returnBannerDismissed={props.returnBannerDismissed} onDismissReturn={props.setReturnBannerDismissed} onReset={props.onCozyReset} onUsual={()=>props.selectDayType?.('full')} onOpen={()=>{window.__plushlifeOpenCozySpace=true;props.goToDashboard?.('care');}}/>}
+      cozyDaily={!props.isHistoricalView&&!props.isFutureView&&<CozyDaily rows={props.rows} viewDone={props.viewDone} dailyCheckIn={props.dailyCheckIn} returnGapDays={0} returnBannerDismissed={props.returnBannerDismissed} onDismissReturn={props.setReturnBannerDismissed} onReset={props.onCozyReset} onUsual={()=>props.selectDayType?.('full')} onOpen={()=>{window.__plushlifeOpenCozySpace=true;props.goToDashboard?.('care');}}/>}
       toggle={smartToggle}
       recentlyCompletedKeys={recentlyCompletedKeys}
       nextStepTask={smartNextStepHidden ? null : activeNextStep}

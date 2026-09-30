@@ -1,3 +1,4 @@
+import { privateSave, deviceStorage } from "../private-save.js";
 import { COZY_FIELDS, COZY_NEEDS, COZY_STATUSES, COZY_REMINDER_STYLES, normalizeCozyProfile, cozyCardSnapshot, supportPreferenceSummary, cozyComfortSuggestions } from '../cozy-profile.js';
 
 export const CozyComfortContext = React.createContext(null);
@@ -45,19 +46,31 @@ export function useCozyComfort(user, client) {
   const saving = React.useRef(false);
   const account = React.useRef(user?.id);
   account.current = user?.id;
+  const writer=React.useMemo(()=>privateSave({storage:deviceStorage(),key:`plushlife-cozy-${user?.id}`,client,table:'cozy_profiles',userId:user?.id}),[user?.id,client]);
+  React.useEffect(()=>{
+    const retry=()=>{if(writer.hasPending())writer.flush().then(ok=>{if(ok && writer.isActive())setMessage('Your comforts are synced privately.');});};
+    window.addEventListener('online',retry);
+    const timer=setInterval(retry,30000);
+    return ()=>{window.removeEventListener('online',retry);clearInterval(timer);writer.dispose();};
+  },[writer]);
   React.useEffect(() => {
     let alive = true;
     setProfile(normalizeCozyProfile()); setCards([]); setMessage(''); setBusy(false);
     if (!user?.id || !client) { setStatus('idle'); return; }
     setStatus('loading');
+    const pendingAtLoad=writer.hasPending();
     Promise.all([
       client.from('cozy_profiles').select('profile').eq('user_id', user.id).maybeSingle(),
       client.from('cozy_shared_cards').select('*').eq('owner_user_id', user.id),
     ]).then(([own, shared]) => {
       if (!alive) return;
-      if (own.error || shared.error) { setStatus('error'); return; }
-      setProfile(normalizeCozyProfile(own.data?.profile)); setCards(shared.data || []); setStatus('ready');
-    }).catch(() => { if (alive) setStatus('error'); });
+      const cached=writer.read();
+      if (own.error && !cached) { setStatus('error'); return; }
+      const value=pendingAtLoad || writer.hasPending() || own.error ? cached : own.data?.profile || cached;
+      setProfile(normalizeCozyProfile(value)); setCards(shared.data || []); setStatus('ready');
+      if(own.error || writer.hasPending())setMessage('Your device comforts are here. Cloud sync will retry.');
+      else try{deviceStorage()?.setItem(`plushlife-cozy-${user.id}`,JSON.stringify(normalizeCozyProfile(value)));}catch(_){}
+    }).catch(() => { if (alive) {const cached=writer.read();if(cached){setProfile(normalizeCozyProfile(cached));setStatus('ready');setMessage('Your device comforts are here. Cloud sync will retry.');}else setStatus('error');} });
     return () => { alive = false; };
   }, [user?.id, version]);
   const save = async (next) => {
@@ -65,10 +78,10 @@ export function useCozyComfort(user, client) {
     const id = user.id; saving.current=true; setBusy(true); setMessage('Saving your little guide…');
     try {
       const clean = normalizeCozyProfile(next);
-      const { error } = await client.from('cozy_profiles').upsert({user_id:id,profile:clean,updated_at:new Date().toISOString()}, {onConflict:'user_id'});
+      const result=await writer.write(clean,{profile:clean,updated_at:new Date().toISOString()});
       if (account.current !== id) return false;
-      if (error) throw error;
-      setProfile(clean); setMessage('Saved privately. Shared cards change only when you publish them.'); return true;
+      if (!result.saved) throw new Error('save failed');
+      setProfile(clean); setMessage(result.synced ? 'Saved privately. Shared cards change only when you publish them.' : 'Saved on this device. Cloud sync will retry.'); return true;
     } catch (_) { if (account.current === id) setMessage('Couldn’t save your comforts. Your edits are still here; try again.'); return false; }
     finally { saving.current=false; if (account.current === id) setBusy(false); }
   };

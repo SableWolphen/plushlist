@@ -48,15 +48,17 @@ export function normalizeCozyProfile(value = {}) {
   };
 }
 
-export function cozyComfortSuggestions(profile) {
+export function cozyComfortSuggestions(profile, today = new Date().toLocaleDateString('en-CA')) {
   const clean = normalizeCozyProfile(profile);
   const available = COZY_FIELDS.filter(([key,,group]) => (group === 'comforts' || key === 'helps') && clean.fields[key]);
   return available.map(([key,label], index) => {
     const uses = clean.comfort_uses.filter(u=>u.key===key);
     const helped = uses.filter(u=>u.fit==='helped').length;
-    const score = helped - uses.filter(u=>u.fit==='not_today').length;
-    return {key,label,text:clean.fields[key],helped,score,index};
-  }).sort((a,b)=>b.score-a.score || a.index-b.index).slice(0,3);
+    const recent = uses.slice(0,10);
+    const score = recent.reduce((total,u,index)=>total+(u.fit==='helped'?1:-1)*(10-index),0);
+    const skippedToday = uses.some(u=>u.fit==='not_today' && u.date===today);
+    return {key,label,text:clean.fields[key],helped,score,index,skippedToday};
+  }).filter(s=>!s.skippedToday).sort((a,b)=>b.score-a.score || a.index-b.index).slice(0,3);
 }
 
 export function cozyNextStep(profile, rows = [], done = {}, dayType = 'full') {

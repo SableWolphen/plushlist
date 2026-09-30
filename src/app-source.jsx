@@ -1,3 +1,4 @@
+import { privateSave, deviceStorage } from "./private-save.js";
 import { GentleOnboarding } from "./components/gentle-onboarding.jsx";
 import { CozyGuideSuggestions } from "./components/cozy-daily.jsx";
 import { normalizeCozyProfile, cozyReminderCopy } from "./cozy-profile.js";
@@ -1102,6 +1103,16 @@ function GlowUpTracker() {
     celebrationSound: true,
     lastCelebratedDate: "",
   });
+  const [rewardMoment,setRewardMoment] = useState(null);
+  const [mascotSaveMessage,setMascotSaveMessage] = useState('');
+  useEffect(()=>{setRewardMoment(null);setMascotSaveMessage('');},[user?.id]);
+  const mascotWriter = React.useMemo(()=>privateSave({storage:deviceStorage(),key:`plushlist-mascot-${user?.id}`,client:supabase,table:'user_achievements',userId:user?.id}),[user?.id]);
+  useEffect(()=>{
+    const retry=()=>mascotWriter.flush().then(ok=>{if(ok && mascotWriter.isActive())setMascotSaveMessage('');});
+    window.addEventListener('online',retry);
+    const timer=setInterval(retry,30000);
+    return ()=>{window.removeEventListener('online',retry);clearInterval(timer);mascotWriter.dispose();};
+  },[mascotWriter]);
   const [celebrationOpen, setCelebrationOpen] = useState(false);
   const [celebrationTitleText, setCelebrationTitleText] = useState("");
   const [badgeCelebration, setBadgeCelebration] = useState(null);
@@ -1159,6 +1170,7 @@ function GlowUpTracker() {
   };
   const [returnGapDays, setReturnGapDays] = useState(0);
   const [returnBannerDismissed, setReturnBannerDismissed] = useState(false);
+  useEffect(()=>{setReturnBannerDismissed(false);setReturnGapDays(0);},[user?.id,period.date]);
   const [hardDayBannerDismissed, setHardDayBannerDismissed] = useState(false);
 
   useEffect(() => {
@@ -1265,13 +1277,14 @@ function GlowUpTracker() {
     let active = true;
     let saved = null;
     try {
-      saved = JSON.parse(window.localStorage.getItem(`plushlist-mascot-${user.id}`) || "null");
+      saved = mascotWriter.read();
     } catch (_error) {
       saved = null;
     }
     const loadCollection = async () => {
+      const pendingAtLoad = mascotWriter.hasPending();
       const { data: priorRow } = await supabase.from("user_achievements").select("last_visit_date").eq("user_id", user.id).maybeSingle();
-      const priorLastVisitDate = priorRow?.last_visit_date || "";
+      const priorLastVisitDate = priorRow?.last_visit_date || saved?.lastVisitDate || "";
       const { data, error } = await supabase.rpc("record_plushlist_visit", {
         p_visit_date: period.date,
       });
@@ -1287,16 +1300,17 @@ function GlowUpTracker() {
       const savedBadgeIds = Array.isArray(saved?.earnedBadgeIds) ? saved.earnedBadgeIds : [];
       const serverBadgeIds = Array.isArray(row?.earned_badge_ids) ? row.earned_badge_ids : [];
       const earnedBadgeIds = [...new Set([...serverBadgeIds, ...savedBadgeIds])];
-      const selectedId = MASCOT_OUTFITS.some((outfit) => outfit.id === row?.selected_mascot)
+      saved = mascotWriter.read() || saved;
+      const selectedId = (pendingAtLoad || mascotWriter.hasPending()) && MASCOT_OUTFITS.some(o=>o.id===saved?.selectedId) ? saved.selectedId : MASCOT_OUTFITS.some((outfit) => outfit.id === row?.selected_mascot)
         ? row.selected_mascot
         : MASCOT_OUTFITS.some((outfit) => outfit.id === saved?.selectedId)
           ? saved.selectedId
           : "classic";
       const next = {
         bestStreak: Math.max(0, Number(row?.best_care_streak) || 0, Number(saved?.bestStreak) || 0),
-        visitStreak: Math.max(0, Number(row?.visit_streak) || 0),
-        bestVisitStreak: Math.max(0, Number(row?.best_visit_streak) || 0),
-        lastVisitDate: row?.last_visit_date || "",
+        visitStreak: Math.max(0, Number(row?.visit_streak) || Number(saved?.visitStreak) || 0),
+        bestVisitStreak: Math.max(0, Number(row?.best_visit_streak) || 0, Number(saved?.bestVisitStreak) || 0),
+        lastVisitDate: row?.last_visit_date || saved?.lastVisitDate || "",
         unlockedIds,
         earnedBadgeIds,
         selectedId,
@@ -1304,9 +1318,9 @@ function GlowUpTracker() {
         lastCelebratedDate: row?.last_celebrated_date || saved?.lastCelebratedDate || "",
       };
       setMascotCollection(next);
-      window.localStorage.setItem(`plushlist-mascot-${user.id}`, JSON.stringify(next));
+      try { deviceStorage()?.setItem(`plushlist-mascot-${user.id}`, JSON.stringify(next)); } catch (_) {}
       setCollectionLoadedFor(user.id);
-      if (!error && row) {
+      if (!error && row && !mascotWriter.hasPending()) {
         await supabase.from("user_achievements").update({
           best_care_streak: next.bestStreak,
           unlocked_ids: next.unlockedIds,
@@ -1318,7 +1332,7 @@ function GlowUpTracker() {
         }).eq("user_id", user.id);
       }
     };
-    loadCollection();
+    loadCollection().catch(()=>{if(active){const cached=mascotWriter.read();if(cached)setMascotCollection(cached);setCollectionLoadedFor(user.id);}});
     return () => { active = false; };
   }, [user?.id, period.date]);
 
@@ -5554,6 +5568,7 @@ function GlowUpTracker() {
   const mascotGrowth = mascotGrowthStageForDays(activityDaysTotal);
   const mascotRequirementProgress = (outfit) => {
     switch (outfit.unlock.type) {
+      case "first_step": return habitHistory.some(entry=>(entry.completed_keys || []).length > 0) || Object.values(done).some(Boolean) ? 1 : 0;
       case "daily_core": return careDaysTotal >= 1 || todayDailyCoreIsComplete ? 1 : 0;
       case "care_days": return careDaysTotal;
       case "activity_days": return activityDaysTotal;
@@ -5579,8 +5594,7 @@ function GlowUpTracker() {
     };
     setMascotCollection(normalized);
     if (user) {
-      window.localStorage.setItem(`plushlist-mascot-${user.id}`, JSON.stringify(normalized));
-      supabase.from("user_achievements").upsert({
+      mascotWriter.write(normalized, {
         user_id: user.id,
         visit_streak: normalized.visitStreak,
         best_visit_streak: normalized.bestVisitStreak,
@@ -5592,8 +5606,9 @@ function GlowUpTracker() {
         celebration_sound: normalized.celebrationSound,
         last_celebrated_date: normalized.lastCelebratedDate || null,
         updated_at: new Date().toISOString(),
-      }, { onConflict: "user_id" }).then(({ error }) => {
-        if (error) console.warn("Mascot collection sync is waiting to retry.", error.message);
+      }).then(({ saved, synced }) => {
+        if(!mascotWriter.isActive())return;
+        setMascotSaveMessage(synced ? "Saved." : saved ? "Saved on this device. Cloud sync will retry." : "Couldn’t save on this device. Keep the app open and try again.");
       });
     }
   };
@@ -5604,6 +5619,8 @@ function GlowUpTracker() {
     const currentIds = mascotCollection.unlockedIds || [];
     const unlocksChanged = nextIds.some((id) => !currentIds.includes(id));
     if (currentUnlockProgress <= mascotCollection.bestStreak && !unlocksChanged) return;
+    const reward = MASCOT_OUTFITS.find(o=>o.id!=="classic" && nextIds.includes(o.id) && !currentIds.includes(o.id));
+    if(reward && ["ready","offline"].includes(syncStatus) && preferences.onboarding_complete) setRewardMoment(reward);
     saveMascotCollection({
       ...mascotCollection,
       bestStreak: Math.max(mascotCollection.bestStreak, currentUnlockProgress),
@@ -5616,6 +5633,8 @@ function GlowUpTracker() {
     mascotCollection.bestStreak,
     (mascotCollection.unlockedIds || []).join("|"),
     newlyEarnedIds.join("|"),
+    syncStatus,
+    preferences.onboarding_complete,
   ]);
 
   useEffect(() => {
@@ -7219,7 +7238,7 @@ function GlowUpTracker() {
 
         <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} babyMode={babyMode} goToFeedback={goToFeedback} />
 
-        <RewardsPanel inline={collectionOpen} open={collectionOpen} theme={activeWorld} onClose={() => setCollectionOpen(false)} FeatureTip={FeatureTip} selectedOutfit={selectedOutfit} mascotMood={mascotMood} activityDaysTotal={activityDaysTotal} preferences={preferences} mascotGrowth={mascotGrowth} careDaysTotal={careDaysTotal} unlockedOutfits={unlockedOutfits} earnedBadgeIdSet={earnedBadgeIdSet} BADGE_DEFS={BADGE_DEFS} unlockedIdSet={unlockedIdSet} mascotRequirementProgress={mascotRequirementProgress} saveMascotCollection={saveMascotCollection} mascotCollection={mascotCollection} savedBestStreak={savedBestStreak} collectionTab={collectionTab} setCollectionTab={setCollectionTab} winsJarEntries={winsJarEntries} />
+        <RewardsPanel inline={collectionOpen} open={collectionOpen} theme={activeWorld} onClose={() => setCollectionOpen(false)} FeatureTip={FeatureTip} selectedOutfit={selectedOutfit} mascotMood={mascotMood} activityDaysTotal={activityDaysTotal} preferences={preferences} mascotGrowth={mascotGrowth} careDaysTotal={careDaysTotal} unlockedOutfits={unlockedOutfits} earnedBadgeIdSet={earnedBadgeIdSet} BADGE_DEFS={BADGE_DEFS} unlockedIdSet={unlockedIdSet} mascotRequirementProgress={mascotRequirementProgress} saveMascotCollection={saveMascotCollection} mascotCollection={mascotCollection} savedBestStreak={savedBestStreak} collectionTab={collectionTab} setCollectionTab={setCollectionTab} winsJarEntries={winsJarEntries} saveMessage={mascotSaveMessage} />
 
         <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} openDailyCheckIn={() => { setSettingsOpen(false); setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); }} watchPairingCode={watchPairingCode} setWatchPairingCode={setWatchPairingCode} connectWatch={connectWatch} watchPairingBusy={watchPairingBusy} watchPairingMessage={watchPairingMessage} localWatchSyncBusy={localWatchSyncBusy} startLocalWatchSync={startLocalWatchSync} localWatchSyncMessage={localWatchSyncMessage} dailyCheckIn={dailyCheckIn} pct={pct} rows={rows} viewDone={viewDone} weeklyOverallPct={weeklyOverallPct} widgetSyncMsg={widgetSyncMsg} setWidgetSyncMsg={setWidgetSyncMsg} displayNameDraft={displayNameDraft} setDisplayNameDraft={setDisplayNameDraft} saveDisplayName={saveDisplayName} comfortItemDraft={comfortItemDraft} setComfortItemDraft={setComfortItemDraft} saveComfortItem={saveComfortItem} preferences={preferences} appearanceTheme={appearanceTheme} selectAppearanceTheme={selectAppearanceTheme} dinoTheme={dinoTheme} updatePreference={updatePreference} enableNotifications={enableNotifications} smartReminderSuggestion={smartReminderSuggestion} restDatesSet={restDatesSet} toggleRestToday={toggleRestToday} period={period} restRangeDraft={restRangeDraft} setRestRangeDraft={setRestRangeDraft} saveRestRange={saveRestRange} restDates={restDates} savePreferences={savePreferences} feedbackText={feedbackText} setFeedbackText={setFeedbackText} submitFeedback={submitFeedback} feedbackMessage={feedbackMessage} exportMyData={exportMyData} restoreFileInputRef={restoreFileInputRef} restoreFromBackup={restoreFromBackup} deleteAllCheckIns={deleteAllCheckIns} deleteAllReflections={deleteAllReflections} user={user} online={online} syncStatus={syncStatus} lastSyncedAt={lastSyncedAt} syncNow={syncNow} emailChangeDraft={emailChangeDraft} setEmailChangeDraft={setEmailChangeDraft} requestEmailChange={requestEmailChange} signingOut={signingOut} handleSignOut={handleSignOut} signOutOtherDevices={signOutOtherDevices} deleteMyAccount={deleteMyAccount} deviceBackupStatus={deviceBackupStatus} refreshDeviceBackup={refreshDeviceBackup} deviceBackupBusy={deviceBackupBusy} verifyDeviceBackupNow={verifyDeviceBackupNow} deviceBackupVerifyBusy={deviceBackupVerifyBusy} settingsMessage={settingsMessage} />
 
@@ -7235,7 +7254,7 @@ function GlowUpTracker() {
 
         <>
         <DailyJournalPanel open={journalQuickOpen && (!dailyJournalPromptOpen || autoPopupToShow === "daily_journal")} onClose={() => { setJournalQuickOpen(false); setDailyJournalPromptOpen(false); setPrivateNoteEditing(false); }} dailyJournalPromptOpen={dailyJournalPromptOpen} journalQuickOpenDate={journalQuickOpenDate} journalDisplayedPrompt={journalDisplayedPrompt} privateNoteEditing={privateNoteEditing} setPrivateNoteEditing={setPrivateNoteEditing} privateNoteDraft={privateNoteDraft} setPrivateNoteDraft={setPrivateNoteDraft} savePrivateNote={savePrivateNote} privateNote={privateNote} privateNoteMessage={privateNoteMessage} />
-        <TodayPanel onCozyReset={startCozyReset} open={dashboard === "today"} returnGapDays={returnGapDays} returnBannerDismissed={returnBannerDismissed} setReturnBannerDismissed={setReturnBannerDismissed} voice={voice} setEssentialsPickerOpen={setEssentialsPickerOpen} selectDayType={selectDayType} wellbeingPatternInsight={wellbeingPatternInsight} todayDayId={todayDayId} hardDayBannerDismissed={hardDayBannerDismissed} setHardDayBannerDismissed={setHardDayBannerDismissed} dailyCheckIn={dailyCheckIn} restDatesSet={restDatesSet} period={period} toggleRestToday={toggleRestToday} nextStepTask={nextStepTask} FeatureTip={FeatureTip} day={day} babyMode={babyMode} nextStepHint={nextStepHint} toggle={toggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} weeklyIntentionMessage={weeklyIntentionMessage} todayCardIndex={todayCardIndex} setTodayCardIndex={setTodayCardIndex} taskWeekDates={taskWeekDates} selectedProgressDate={selectedProgressDate} selectTaskPreviewDate={selectTaskPreviewDate} isFutureView={isFutureView} selectedTaskDateLabel={selectedTaskDateLabel} todaySwipeStartX={todaySwipeStartX} todaySwipeStartY={todaySwipeStartY} selectedSchedule={homeSelectedSchedule} selectedScheduleExceptionEntries={homeScheduleExceptionEntries} scheduleDayId={scheduleDayId} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} active={active} rows={rows} viewDone={viewDone} openTaskManager={openTaskManager} todayRequiredDone={todayRequiredDone} todayRequiredKeys={todayRequiredKeys} activityDaysTotal={activityDaysTotal} careDaysTotal={careDaysTotal} babyCaregiverName={babyCaregiverName} trackerProfile={trackerProfile} openJournalForSelectedDate={openJournalForSelectedDate} isHistoricalView={isHistoricalView} focusHelperOpen={focusHelperOpen} setFocusHelperOpen={setFocusHelperOpen} pickRandomFocusTask={pickRandomFocusTask} setFocusSuggestionKey={setFocusSuggestionKey} focusedEssential={focusedEssential} focusChoices={focusChoices} selectedTaskViewIsRest={selectedTaskViewIsRest} pct={pct} requiredDoneCount={requiredDoneCount} requiredRows={requiredRows} preferences={preferences} doneCount={doneCount} focusModeShowAll={focusModeShowAll} setFocusModeShowAll={setFocusModeShowAll} isTaskPausedOnDate={isTaskPausedOnDate} openRow={openRow} setOpenRow={setOpenRow} celebrateKey={celebrateKey} pauseTrackerTask={pauseTrackerTask} resumeTrackerTask={resumeTrackerTask} taskListCollapsed={taskListCollapsed} setTaskListCollapsed={setTaskListCollapsed} recentlyCompletedKeys={recentlyCompletedKeys} moveTaskGroup={moveTaskGroup} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToTomorrow={moveTaskToTomorrow} completedTodayExpanded={completedTodayExpanded} setCompletedTodayExpanded={setCompletedTodayExpanded} tomorrowTasksCount={tomorrowTasksCount} selectedOutfit={selectedOutfit} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} calmQuickOpen={calmQuickOpen} setCalmQuickOpen={setCalmQuickOpen} currentCopingOption={currentCopingOption} reshuffle={reshuffle} setCareSection={setCareSection} goToDashboard={goToDashboard} setProfileOpen={setProfileOpen} setSettingsOpen={setSettingsOpen} />
+        <TodayPanel rewardMoment={rewardMoment} onDismissReward={()=>setRewardMoment(null)} onWearReward={outfit=>{if(!unlockedIdSet.has(outfit.id))return;saveMascotCollection({...mascotCollection,unlockedIds:[...unlockedIdSet],selectedId:outfit.id});setRewardMoment(null);}} onCozyReset={startCozyReset} open={dashboard === "today"} returnGapDays={returnGapDays} returnBannerDismissed={returnBannerDismissed} setReturnBannerDismissed={setReturnBannerDismissed} voice={voice} setEssentialsPickerOpen={setEssentialsPickerOpen} selectDayType={selectDayType} wellbeingPatternInsight={wellbeingPatternInsight} todayDayId={todayDayId} hardDayBannerDismissed={hardDayBannerDismissed} setHardDayBannerDismissed={setHardDayBannerDismissed} dailyCheckIn={dailyCheckIn} restDatesSet={restDatesSet} period={period} toggleRestToday={toggleRestToday} nextStepTask={nextStepTask} FeatureTip={FeatureTip} day={day} babyMode={babyMode} nextStepHint={nextStepHint} toggle={toggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} weeklyIntentionMessage={weeklyIntentionMessage} todayCardIndex={todayCardIndex} setTodayCardIndex={setTodayCardIndex} taskWeekDates={taskWeekDates} selectedProgressDate={selectedProgressDate} selectTaskPreviewDate={selectTaskPreviewDate} isFutureView={isFutureView} selectedTaskDateLabel={selectedTaskDateLabel} todaySwipeStartX={todaySwipeStartX} todaySwipeStartY={todaySwipeStartY} selectedSchedule={homeSelectedSchedule} selectedScheduleExceptionEntries={homeScheduleExceptionEntries} scheduleDayId={scheduleDayId} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} active={active} rows={rows} viewDone={viewDone} openTaskManager={openTaskManager} todayRequiredDone={todayRequiredDone} todayRequiredKeys={todayRequiredKeys} activityDaysTotal={activityDaysTotal} careDaysTotal={careDaysTotal} babyCaregiverName={babyCaregiverName} trackerProfile={trackerProfile} openJournalForSelectedDate={openJournalForSelectedDate} isHistoricalView={isHistoricalView} focusHelperOpen={focusHelperOpen} setFocusHelperOpen={setFocusHelperOpen} pickRandomFocusTask={pickRandomFocusTask} setFocusSuggestionKey={setFocusSuggestionKey} focusedEssential={focusedEssential} focusChoices={focusChoices} selectedTaskViewIsRest={selectedTaskViewIsRest} pct={pct} requiredDoneCount={requiredDoneCount} requiredRows={requiredRows} preferences={preferences} doneCount={doneCount} focusModeShowAll={focusModeShowAll} setFocusModeShowAll={setFocusModeShowAll} isTaskPausedOnDate={isTaskPausedOnDate} openRow={openRow} setOpenRow={setOpenRow} celebrateKey={celebrateKey} pauseTrackerTask={pauseTrackerTask} resumeTrackerTask={resumeTrackerTask} taskListCollapsed={taskListCollapsed} setTaskListCollapsed={setTaskListCollapsed} recentlyCompletedKeys={recentlyCompletedKeys} moveTaskGroup={moveTaskGroup} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToTomorrow={moveTaskToTomorrow} completedTodayExpanded={completedTodayExpanded} setCompletedTodayExpanded={setCompletedTodayExpanded} tomorrowTasksCount={tomorrowTasksCount} selectedOutfit={selectedOutfit} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} calmQuickOpen={calmQuickOpen} setCalmQuickOpen={setCalmQuickOpen} currentCopingOption={currentCopingOption} reshuffle={reshuffle} setCareSection={setCareSection} goToDashboard={goToDashboard} setProfileOpen={setProfileOpen} setSettingsOpen={setSettingsOpen} />
 
         {dashboard === "week" && <div className="pl-unified-page-content"><WeekPanel open={dashboard === "week"} openTodayJournal={openTodayJournal} weekCardIndex={weekCardIndex} setWeekCardIndex={setWeekCardIndex} weekSwipeStartX={weekSwipeStartX} weekSwipeStartY={weekSwipeStartY} reflectionCalendarMonth={reflectionCalendarMonth} setReflectionCalendarMonth={setReflectionCalendarMonth} reflectionMonthDate={reflectionMonthDate} reflectionMonthStart={reflectionMonthStart} reflectionMonthDays={reflectionMonthDays} reflectionDateSet={reflectionDateSet} dailyCheckInHistory={dailyCheckInHistory} restDatesSet={restDatesSet} selectedProgressDate={selectedProgressDate} setSelectedProgressDate={setSelectedProgressDate} dayCompletionPct={dayCompletionPct} setDayViewDate={setDayViewDate} setActive={setActive} setReflectionViewerDate={setReflectionViewerDate} setCheckInViewerDate={setCheckInViewerDate} reflectionHistory={reflectionHistory} journalHistoryExpanded={journalHistoryExpanded} setJournalHistoryExpanded={setJournalHistoryExpanded} weeklyIntentionHistory={weeklyIntentionHistory} weeklyIntentionHistoryExpanded={weeklyIntentionHistoryExpanded} setWeeklyIntentionHistoryExpanded={setWeeklyIntentionHistoryExpanded} period={period} calendarWeekOffset={calendarWeekOffset} setCalendarWeekOffset={setCalendarWeekOffset} calendarWeekPreviewDate={calendarWeekPreviewDate} setCalendarWeekPreviewDate={setCalendarWeekPreviewDate} trackerTasks={trackerTasks} dayViewDate={dayViewDate} dayViewExpanded={dayViewExpanded} setDayViewExpanded={setDayViewExpanded} longHistoryByDate={longHistoryByDate} isTaskPausedOnDate={isTaskPausedOnDate} markPastTasksDone={markPastTasksDone} done={done} toggle={toggle} isHistoricalView={isHistoricalView} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} CHECKIN_MOODS={CHECKIN_MOODS} /></div>}
 

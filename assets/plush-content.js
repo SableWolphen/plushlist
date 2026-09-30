@@ -12,7 +12,7 @@
 
   const MASCOT_OUTFITS = [
     { id: "classic", name: "Classic Plush", badge: "💛", accessory: "", unlock: { type: "always", count: 0 }, hint: "Always available" },
-    { id: "bow", name: "Cozy Bow", badge: "🎀", accessory: "🎀", unlock: { type: "daily_core", count: 1 }, hint: "Complete your Every Day Core once" },
+    { id: "bow", name: "Cozy Bow", badge: "🎀", accessory: "🎀", unlock: { type: "first_step", count: 1 }, hint: "Complete your first tiny step" },
     { id: "glasses", name: "Star Glasses", badge: "🌟", accessory: "🕶️", unlock: { type: "care_days", count: 2 }, hint: "Complete your essential care on any 2 days" },
     { id: "crown", name: "Dino Crown", badge: "🦖", accessory: "👑", unlock: { type: "care_days", count: 3 }, hint: "Complete your essential care on any 3 days" },
     { id: "cape", name: "Care Hero Cape", badge: "🦸", accessory: "🦸", unlock: { type: "care_days", count: 5 }, hint: "Complete your essential care on any 5 days" },
