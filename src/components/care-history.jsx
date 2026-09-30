@@ -1,6 +1,6 @@
 export function CareHistory({ dailyCheckInHistory = [], reflectionHistory = [], checkInHistoryStatus, journalHistoryStatus, retryCareHistory, setCheckInViewerDate, setReflectionViewerDate, openTodayJournal, CHECKIN_MOODS = [] }) {
   const [tab, setTab] = React.useState("checkins");
-  const [shown, setShown] = React.useState(10);
+  const [shown, setShown] = React.useState(3);
   const checkins = tab === "checkins";
   const rows = checkins ? [...dailyCheckInHistory].sort((a, b) => b.check_date.localeCompare(a.check_date)) : reflectionHistory;
   const status = checkins ? checkInHistoryStatus : journalHistoryStatus;
@@ -8,7 +8,7 @@ export function CareHistory({ dailyCheckInHistory = [], reflectionHistory = [], 
     <h3>Your history</h3>
     <p>Check-ins and journals, saved for you.</p>
     <div role="tablist" aria-label="History type">
-      {[['checkins', 'Check-ins', dailyCheckInHistory.length], ['journals', 'Journals', reflectionHistory.length]].map(([id, label, count]) => <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => { setTab(id); setShown(10); }}>{label} ({count})</button>)}
+      {[['checkins', 'Check-ins', dailyCheckInHistory.length], ['journals', 'Journals', reflectionHistory.length]].map(([id, label, count]) => <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => { setTab(id); setShown(3); }}>{label} ({count})</button>)}
     </div>
     <div role="tabpanel" aria-label={checkins ? "Check-in history" : "Journal history"}>
       {status === "loading" && <p role="status">Loading your saved entries…</p>}

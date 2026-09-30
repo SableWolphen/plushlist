@@ -4,13 +4,6 @@ import { ThemeScene } from "./theme-world.jsx";
 const { MASCOT_OUTFITS } = window.PlushLifeContent;
 const { mascotGrowthStageForDays } = window.PlushLifeHelpers;
 
-const ACCESSORY_POSITIONS = {
-  bow: { left: "24%", top: "9%" },
-  glasses: { left: "50%", top: "38%", transform: "translateX(-50%)" },
-  cape: { left: "80%", top: "54%" },
-  party: { left: "68%", top: "1%" },
-};
-const DEFAULT_ACCESSORY_POSITION = { left: "50%", top: "1%", transform: "translateX(-50%)" };
 const SPARKLE_LEFT = [6, 88, 12, 82];
 const SPARKLE_TOP = [4, 8, 78, 74];
 
@@ -26,18 +19,13 @@ const LOADING_MASCOT_STYLE = { animation: "appLoadingBob 1.6s ease-in-out infini
 const LOADING_LABEL_STYLE = { fontSize: 13.5, fontWeight: 800, color: "#8574A0", letterSpacing: "0.02em", animation: "appLoadingFade 1.6s ease-in-out infinite" };
 
 export const PlushMascot = React.memo(function PlushMascot({ outfit = MASCOT_OUTFITS[0], size = 150, celebrating = false, mood = "neutral", activityDays = 0, theme, variant = "bear" }) {
-  const accessorySize = Math.round(size * 0.23);
-  const accessoryPos = ACCESSORY_POSITIONS[outfit.id] || DEFAULT_ACCESSORY_POSITION;
   const growth = mascotGrowthStageForDays(activityDays);
   return (
-    <div className={celebrating ? "plush-mascot mascot-celebrating" : "plush-mascot"} style={{ width: size, height: Math.round(size * 100 / 211), position: "relative", borderRadius: "50%", boxShadow: growth.glow }}>
+    <div className={celebrating ? "plush-mascot mascot-celebrating" : "plush-mascot"} style={{ width: size, aspectRatio: "211 / 100", position: "relative", borderRadius: "50%", boxShadow: growth.glow }}>
       {growth.sparkles.map((sparkle, index) => (
         <span key={index} aria-hidden="true" style={{ position: "absolute", fontSize: Math.round(size * 0.16), left: `${SPARKLE_LEFT[index % 4]}%`, top: `${SPARKLE_TOP[index % 4]}%`, pointerEvents: "none" }}>{sparkle}</span>
       ))}
-      <ThemeScene world={theme} />
-      {outfit.accessory && (
-        <span className="mascot-accessory" aria-hidden="true" style={{ position: "absolute", zIndex: 2, fontSize: accessorySize, lineHeight: 1, filter: "drop-shadow(0 3px 3px rgba(70,38,88,.22))", ...accessoryPos }}>{outfit.accessory}</span>
-      )}
+      <ThemeScene world={theme} outfit={outfit} />
     </div>
   );
 });

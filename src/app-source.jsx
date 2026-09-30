@@ -7,7 +7,6 @@ import { FIGMA_WORLDS, ThemeWorldContext, CozyScene, DesignIcon } from "./compon
 import "./native-bridge.js";
 import { ToolPanel, HabitTypeIcon, useConfirmation } from "./components/shared.jsx";
 import { PlushMascot, AppLoadingScreen } from "./components/mascot.jsx";
-import { MamasCorner } from "./components/baby-mode.jsx";
 import { LandingPage } from "./components/landing.jsx";
 import { ProfilePanel, SafetyPanel, HelpPanel, CalmPanel } from "./components/info-panels.jsx";
 import { MoodViewer, CarePathViewer, SleepToolViewer, JournalReflectionViewer, DailyJournalPanel } from "./components/viewer-panels.jsx";
@@ -840,7 +839,6 @@ function GlowUpTracker() {
   const [scheduleExceptionMessage, setScheduleExceptionMessage] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [arrivalRitualVisible, setArrivalRitualVisible] = useState(true);
-  const [careExtraSupportOpen, setCareExtraSupportOpen] = useState(false);
   const [habitGardenOpen, setHabitGardenOpen] = useState(false);
   const [progressDetailsOpen, setProgressDetailsOpen] = useState(false);
   const [preferences, setPreferences] = useState({
@@ -5748,7 +5746,6 @@ function GlowUpTracker() {
     }
   };
   const isAdminUser = ["johnston.alexander.k@gmail.com", "johnston.alexander.k+plushlisttest@gmail.com"].includes((user?.email || "").toLowerCase());
-  const isMamaCornerProfile = (user?.email || "").trim().toLowerCase() === "johnston.alexander.k@gmail.com";
   const isSupporterAccount = !!preferences.is_supporter || isAdminUser;
   const personalPlushlistTitle = trackerProfile?.display_name
     ? `${trackerProfile.display_name}’s PlushLife`
@@ -5907,7 +5904,7 @@ function GlowUpTracker() {
   };
   const activeWorld = babyMode ? ((isNightHour || preferences.dark_mode) ? "baby-night" : "baby") : dinoTheme ? "dino" : preferences.dark_mode ? "twilight" : appearanceTheme;
   useEffect(() => {
-    try { window.localStorage.setItem("plushlife-login-theme", JSON.stringify({ world: activeWorld, voice: preferences.baby_voice })); } catch (_error) {}
+    try { window.localStorage.setItem("plushlife-login-theme", JSON.stringify({ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit })); } catch (_error) {}
   }, [activeWorld, preferences.baby_voice]);
   const designPalette = FIGMA_WORLDS[activeWorld];
   const activeThemePalette = designPalette ? { ...selectedAppearanceTheme, ...designPalette, accent2: designPalette.accent, line: designPalette.line, nav: designPalette.surface, art: activeWorld, wash: designPalette.background } : selectedAppearanceTheme;
@@ -6098,7 +6095,7 @@ function GlowUpTracker() {
   })();
 
   return (
-    <ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
+    <ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
       background: activeThemePalette.background,
       backgroundImage: preferences.simple_mode ? `
@@ -7380,7 +7377,7 @@ function GlowUpTracker() {
           <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
         </header>}
 
-                {dashboard === "care" && <div className="pl-unified-page-content"><CarePanel dailyCheckInHistory={dailyCheckInHistory} reflectionHistory={reflectionHistory} checkInHistoryStatus={checkInHistoryStatus} journalHistoryStatus={journalHistoryStatus} retryCareHistory={retryCareHistory} setCheckInViewerDate={setCheckInViewerDate} setReflectionViewerDate={setReflectionViewerDate} openTodayJournal={openTodayJournal} CHECKIN_MOODS={CHECKIN_MOODS} onOpenSupport={() => goToDashboard("guardian")} open={dashboard === "care"} babyMode={babyMode} setCheckInPopupOpen={setCheckInPopupOpen} babyCaregiverName={babyCaregiverName} careSituationsExpanded={careSituationsExpanded} setCareSituationsExpanded={setCareSituationsExpanded} setCareMessage={setCareMessage} openCareSession={openCareSession} careMessage={careMessage} isMamaCornerProfile={isMamaCornerProfile} careExtraSupportOpen={careExtraSupportOpen} setCareExtraSupportOpen={setCareExtraSupportOpen} user={user} preferences={preferences} rows={rows} viewDone={viewDone} toggle={toggle} supabase={supabase} careSection={careSection} setCareSection={setCareSection} careSessionHistory={careSessionHistory} HELP_ME_NOW_OPTIONS={HELP_ME_NOW_OPTIONS} pathProgress={pathProgress} setSelectedCarePath={setSelectedCarePath} period={period} setSleepToolOpen={setSleepToolOpen} soundscapePlaying={soundscapePlaying} toggleSoundscape={toggleSoundscape} soundscapeVolume={soundscapeVolume} changeSoundscapeVolume={changeSoundscapeVolume} setSoundscapeSleepTimer={setSoundscapeSleepTimer} soundscapeTimerMinutes={soundscapeTimerMinutes} /></div>}
+                {dashboard === "care" && <div className="pl-unified-page-content"><CarePanel dailyCheckInHistory={dailyCheckInHistory} reflectionHistory={reflectionHistory} checkInHistoryStatus={checkInHistoryStatus} journalHistoryStatus={journalHistoryStatus} retryCareHistory={retryCareHistory} setCheckInViewerDate={setCheckInViewerDate} setReflectionViewerDate={setReflectionViewerDate} openTodayJournal={openTodayJournal} CHECKIN_MOODS={CHECKIN_MOODS} onOpenSupport={() => goToDashboard("guardian")} open={dashboard === "care"} babyMode={babyMode} setCheckInPopupOpen={setCheckInPopupOpen} babyCaregiverName={babyCaregiverName} careSituationsExpanded={careSituationsExpanded} setCareSituationsExpanded={setCareSituationsExpanded} setCareMessage={setCareMessage} openCareSession={openCareSession} careMessage={careMessage} user={user} preferences={preferences} rows={rows} viewDone={viewDone} toggle={toggle} supabase={supabase} careSection={careSection} setCareSection={setCareSection} careSessionHistory={careSessionHistory} HELP_ME_NOW_OPTIONS={HELP_ME_NOW_OPTIONS} pathProgress={pathProgress} setSelectedCarePath={setSelectedCarePath} period={period} setSleepToolOpen={setSleepToolOpen} soundscapePlaying={soundscapePlaying} toggleSoundscape={toggleSoundscape} soundscapeVolume={soundscapeVolume} changeSoundscapeVolume={changeSoundscapeVolume} setSoundscapeSleepTimer={setSoundscapeSleepTimer} soundscapeTimerMinutes={soundscapeTimerMinutes} /></div>}
         <ProfilePanel open={profileOpen} onClose={() => setProfileOpen(false)} pendingSupportInvites={pendingSupportInvites} hasOwnGuardian={hasOwnGuardian} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} setSafetyOpen={setSafetyOpen} setHelpOpen={setHelpOpen} goToFeedback={goToFeedback} isAdminUser={isAdminUser} setAdminOpen={setAdminOpen} loadAdminData={loadAdminData} nativeBuildInfo={nativeBuildInfo} />
 
         <MoodViewer checkInViewerDate={checkInViewerDate} onClose={() => setCheckInViewerDate(null)} dailyCheckInHistory={dailyCheckInHistory} reflectionDateSet={reflectionDateSet} setReflectionViewerDate={setReflectionViewerDate} deleteDailyCheckIn={deleteDailyCheckIn} CHECKIN_MOODS={CHECKIN_MOODS} ENERGY_LEVELS={ENERGY_LEVELS} DAY_TYPES={DAY_TYPES} SUPPORT_PREFERENCES={SUPPORT_PREFERENCES} />

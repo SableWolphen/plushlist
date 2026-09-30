@@ -75,6 +75,7 @@ function CompactGrowthOverview(props) {
   const [monthlyOpen, setMonthlyOpen] = React.useState(false);
   const [insightsOpen, setInsightsOpen] = React.useState(false);
   const [selectedMetric, setSelectedMetric] = React.useState(null);
+  const [morePatterns, setMorePatterns] = React.useState(false);
   const goldInsights = hasGoldFeature("advanced_growth_insights");
   const highlights = props.weeklyHighlights || {};
   const takeaways = buildTakeaways(props);
@@ -178,13 +179,14 @@ function CompactGrowthOverview(props) {
         <div className="pl-growth-kicker">🧸 WHAT PLUSHLIFE NOTICED</div>
         <div className="pl-growth-copy">Little patterns, not grades.</div>
         <div className="pl-growth-notice">
-          {takeaways.map((item) => (
+          {(morePatterns ? takeaways : takeaways.slice(0, 1)).map((item) => (
             <div className="pl-growth-note" key={`${item.label}-${item.text}`}>
               <div className="icon">{item.icon}</div>
               <div><strong>{item.label}</strong><span>{item.text}</span></div>
             </div>
           ))}
         </div>
+        {takeaways.length > 1 && <button type="button" className="pl-collection-more" aria-expanded={morePatterns} onClick={() => setMorePatterns(value => !value)}>{morePatterns ? "Show less" : "More little patterns"}</button>}
       </section>
 
       <section className="pl-growth-card">
