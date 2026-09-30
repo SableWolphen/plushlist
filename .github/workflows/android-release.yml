@@ -1,6 +1,6 @@
 name: Build signed Android App Bundle
 
-# Manual only — this never runs on a push. It builds app-release.aab and
+# Manual dispatch or an explicitly tagged release commit. It builds app-release.aab and
 # always uploads it as a workflow artifact for you to download yourself.
 #
 # It will ALSO publish straight to Google Play if (and only if) the
@@ -8,6 +8,8 @@ name: Build signed Android App Bundle
 # for how to create that service account. Without the secret, this workflow
 # behaves exactly as before: a downloadable .aab and nothing else.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       versionCode:
@@ -29,11 +31,16 @@ on:
           - beta
           - production
 
+concurrency:
+  group: plushlife-play-publish
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
 jobs:
   build:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[play-release]')
     runs-on: ubuntu-latest
     env:
       HAS_PLAY_SECRET: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
@@ -69,11 +76,28 @@ jobs:
       - name: Build www/ and sync Android
         run: npm run android:sync
 
-      - name: Set release version
-        working-directory: android/app
+      - name: Resolve release version
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          REQUESTED_VERSION_CODE: ${{ inputs.versionCode }}
+          REQUESTED_VERSION_NAME: ${{ inputs.versionName }}
         run: |
-          sed -i "s/versionCode 1/versionCode ${{ inputs.versionCode }}/" build.gradle
-          sed -i 's/versionName "1.0"/versionName "${{ inputs.versionName }}"/' build.gradle
+          python -m pip install 'google-auth==2.40.3' 'requests==2.32.4'
+          python scripts/resolve-play-version.py
+
+      - name: Set release version
+        run: |
+          python - <<'PYVERSION'
+          import os, re
+          from pathlib import Path
+          file = Path('android/app/build.gradle')
+          source = file.read_text()
+          source, codes = re.subn(r'versionCode \d+', 'versionCode ' + os.environ['RELEASE_VERSION_CODE'], source)
+          source, names = re.subn(r'versionName "[^"]+"', 'versionName "' + os.environ['RELEASE_VERSION_NAME'] + '"', source)
+          if codes != 1 or names != 1:
+              raise RuntimeError('Expected one Android versionCode and versionName')
+          file.write_text(source)
+          PYVERSION
 
       - name: Decode signing keystore
         run: |
@@ -121,7 +145,7 @@ jobs:
             --ks-pass=pass:"${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
             --key-pass=pass:"${{ secrets.ANDROID_KEY_PASSWORD }}"
           unzip -o app-release.apks -d app-release-apks
-          mv app-release-apks/universal.apk app-release-${{ inputs.versionCode }}.apk
+          mv app-release-apks/universal.apk app-release-${{ env.RELEASE_VERSION_CODE }}.apk
 
       - name: Remove decoded keystore
         if: always()
@@ -130,20 +154,20 @@ jobs:
       - name: SHA-256 of the AAB and APK
         run: |
           sha256sum android/app/build/outputs/bundle/release/app-release.aab
-          sha256sum app-release-${{ inputs.versionCode }}.apk
+          sha256sum app-release-${{ env.RELEASE_VERSION_CODE }}.apk
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-${{ inputs.versionCode }}
+          name: app-release-${{ env.RELEASE_VERSION_CODE }}
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
       - name: Upload universal APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-${{ inputs.versionCode }}-apk
-          path: app-release-${{ inputs.versionCode }}.apk
+          name: app-release-${{ env.RELEASE_VERSION_CODE }}-apk
+          path: app-release-${{ env.RELEASE_VERSION_CODE }}.apk
           retention-days: 30
 
       - name: Publish to Google Play
@@ -153,5 +177,5 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.PlushLife
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
-          track: ${{ inputs.track }}
+          track: ${{ inputs.track || 'production' }}
           status: completed

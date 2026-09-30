@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.graphics.Color;
 import android.widget.RemoteViews;
 
 public class PlushLifeWidgetProvider extends AppWidgetProvider {
@@ -57,7 +58,22 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
     static void updateWidget(Context context, AppWidgetManager manager, int widgetId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.plushlife_widget);
-        views.setTextViewText(R.id.widget_day_type, prefs.getString("dayType", "Today"));
+        String theme = prefs.getString("theme", "soft");
+        boolean night = "twilight".equals(theme) || "baby-night".equals(theme);
+        int background = night ? R.drawable.plushlife_widget_night : "dino".equals(theme) ? R.drawable.plushlife_widget_dino : "baby".equals(theme) ? R.drawable.plushlife_widget_nursery : "pink".equals(theme) || "strawberry".equals(theme) ? R.drawable.plushlife_widget_pink : R.drawable.plushlife_widget_background;
+        int ink = Color.parseColor(night ? "#F6EEFF" : "#51405E");
+        int muted = Color.parseColor(night ? "#D5C5EA" : "#725981");
+        views.setInt(R.id.widget_root, "setBackgroundResource", background);
+        views.setTextColor(R.id.widget_day_type, muted);
+        views.setTextColor(R.id.widget_next_task, ink);
+        views.setTextColor(R.id.widget_today_label, muted);
+        views.setTextColor(R.id.widget_week_label, muted);
+        views.setTextViewText(R.id.widget_day_type, "PlushLife · " + prefs.getString("dayType", "Today"));
+        views.setTextViewText(R.id.widget_today_label, "Today " + prefs.getInt("progress", 0) + "%");
+        views.setTextViewText(R.id.widget_week_label, "Week " + prefs.getInt("weeklyProgress", 0) + "%");
+        Bundle options = manager.getAppWidgetOptions(widgetId);
+        int height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 140);
+        int rowCount = height >= 240 ? 3 : height >= 185 ? 2 : 1;
         views.setProgressBar(R.id.widget_progress, 100, prefs.getInt("progress", 0), false);
         views.setProgressBar(R.id.widget_weekly_progress, 100, prefs.getInt("weeklyProgress", 0), false);
 
@@ -65,13 +81,14 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
         boolean anyOpenTask = false;
         for (int i = 0; i < TASK_ROW_IDS.length; i++) {
             String label = prefs.getString("task" + i + "Label", "");
-            if (label == null || label.isEmpty()) {
+            if (i >= rowCount || label == null || label.isEmpty()) {
                 views.setViewVisibility(TASK_ROW_IDS[i], View.GONE);
                 continue;
             }
             boolean done = prefs.getBoolean("task" + i + "Done", false);
             views.setTextViewText(TASK_ROW_IDS[i], (done ? "✓ " : "○ ") + label);
             views.setViewVisibility(TASK_ROW_IDS[i], View.VISIBLE);
+            views.setTextColor(TASK_ROW_IDS[i], ink);
             String taskKey = prefs.getString("task" + i + "Key", "");
             if (!done) {
                 anyOpenTask = true;
@@ -88,6 +105,12 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
                 );
                 views.setOnClickPendingIntent(TASK_ROW_IDS[i], completePending);
+            }
+            if (done) {
+                Intent open = new Intent(context, MainActivity.class).setAction(Intent.ACTION_VIEW)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                views.setOnClickPendingIntent(TASK_ROW_IDS[i], PendingIntent.getActivity(context, widgetId,
+                    open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
             }
             anyTaskShown = true;
         }

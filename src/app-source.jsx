@@ -1,3 +1,5 @@
+import { CozyComfortContext, useCozyComfort } from "./components/cozy-space.jsx";
+import { widgetSnapshot } from "./widget-model.js";
 import { loadHistoryRows } from "./care-history-data.js";
 import { normalizeHomeLayout } from "./home-layout.js";
 import { FIGMA_WORLDS, ThemeWorldContext, CozyScene, DesignIcon } from "./components/theme-world.jsx";
@@ -23,6 +25,7 @@ import { TodayPanel } from "./components/today-panel.jsx";
 import { createDeviceBackup, getDeviceBackupStatus, scheduleAutomaticDeviceBackup, verifyDeviceBackup } from "./device-backup.js";
 
 const { useState, useEffect } = React;
+window.__plushlifeWidgetDataOwnedByApp = true;
 // The SDK script tag can fail (offline, blocked CDN, SRI mismatch). Never let
 // that turn into a blank white page: degrade to a friendly retry screen.
 const supabase = window.supabase ? window.supabase.createClient(
@@ -616,6 +619,7 @@ const RESTORABLE_DATA_TABLES = [
   { payloadKey: "task_completion_history", table: "tracker_progress", onConflict: "user_id,task_key" },
   { payloadKey: "care_session_history", table: "care_session_logs", stripId: true, dedupeBy: ["session_id", "completed_at"] },
   { payloadKey: "private_mommy_chats", table: "mommy_chat_threads", onConflict: "id" },
+  { payloadKey: "cozy_profile", table: "cozy_profiles", onConflict: "user_id", single: true },
   { payloadKey: "profile", table: "tracker_profiles", onConflict: "user_id", single: true },
   { payloadKey: "preferences", table: "app_preferences", onConflict: "user_id", single: true },
   { payloadKey: "achievements", table: "user_achievements", onConflict: "user_id", single: true },
@@ -680,6 +684,7 @@ function GlowUpTracker() {
   const [openRow, setOpenRow] = useState(null);
   const [focusModeShowAll, setFocusModeShowAll] = useState(false);
   const [user, setUser] = useState(null);
+  const cozyComfort = useCozyComfort(user, supabase);
   const [syncStatus, setSyncStatus] = useState("loading");
   const pendingQueueRef = React.useRef([]);
   const latestSupportOwnerRequestRef = React.useRef(null);
@@ -1630,7 +1635,7 @@ function GlowUpTracker() {
     await loadSupportData(user);
   };
 
-  const sendGuardianSupportRequest = async () => {
+  const sendGuardianSupportRequest = async (options = {}) => {
     const activeGuardians = supportLinks.filter((link) => link.owner_user_id === user?.id && link.active && link.accepted_at);
     const address = supportRequestGuardian || activeGuardians[0]?.caregiver_email || "";
     if (!address) { setSupportMessage("Connect with an active Guardian before sending a support request."); return; }
@@ -1639,11 +1644,11 @@ function GlowUpTracker() {
       owner_user_id: user.id,
       caregiver_email: address,
       request_type: supportRequestType,
-      message: supportRequestText.trim() || null,
+      message: [supportRequestText.trim(), [30,60].includes(options.delayMinutes) ? `Please check on me in ${options.delayMinutes} minutes (around ${new Date(Date.now()+options.delayMinutes*60000).toLocaleTimeString([], {hour:"numeric",minute:"2-digit",timeZone:preferences.timezone || "America/Chicago"})}, ${preferences.timezone || "America/Chicago"}).` : ""].filter(Boolean).join("\n").slice(0,500) || null,
     });
     if (error) { setSupportMessage("That request could not be sent yet."); return; }
     setSupportRequestText("");
-    setSupportMessage("Your Guardian received a clear request. You stay in control of what happens next.");
+    setSupportMessage("Your request is saved for your Guardian. They’ll see it when they open Support. You stay in control.");
   };
 
   const updateGuardianSupportRequest = async (requestId, status) => {
@@ -2127,7 +2132,7 @@ function GlowUpTracker() {
     const previous = dailyCheckIn;
     const next = { ...dailyCheckIn, ...patch };
     setDailyCheckIn(next);
-    if (!user) return;
+    if (!user) return false;
     const { error } = await supabase.from("daily_check_ins").upsert({
       user_id: user.id,
       check_date: period.date,
@@ -2144,12 +2149,13 @@ function GlowUpTracker() {
       // Roll back the optimistic update — otherwise the UI keeps showing
       // this check-in as saved even though it never reached the database.
       setDailyCheckIn(previous);
-      return;
+      return false;
     }
     setDailyCheckInHistory((rows) => [
       ...rows.filter((row) => row.check_date !== period.date),
       { ...next, check_date: period.date },
     ].sort((a, b) => a.check_date.localeCompare(b.check_date)));
+    return true;
   };
 
   const deleteDailyCheckIn = async (date) => {
@@ -4287,6 +4293,7 @@ function GlowUpTracker() {
     if (!user) return;
     setSettingsMessage("Preparing your data for download…");
     try {
+      if (cozyComfort.status !== "ready") throw new Error("Your comfort profile is still loading. Please retry once it is ready.");
       const [
         profileRes, prefsRes, tasksRes, schedulesRes, notesRes, dailyRes, checkInsRes, careRes, pathsRes,
         supportRequestsRes, achievementsRes, restDaysRes, weeklyIntentionRes, weeklyIntentionsRes, taskCompletionRes,
@@ -4336,6 +4343,8 @@ function GlowUpTracker() {
         guardian_rewards: supportRewardsRes.data || [],
         guardian_task_suggestions: taskSuggestionsRes.data || [],
         private_mommy_chats: mommyChatsRes.data || [],
+        cozy_profile: { user_id: user.id, profile: cozyComfort.profile },
+        cozy_shared_cards: cozyComfort.cards,
       };
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -5058,26 +5067,24 @@ function GlowUpTracker() {
   useEffect(() => {
     const WidgetBridge = window.Capacitor?.Plugins?.WidgetBridge;
     if (!WidgetBridge || !user || selectedProgressDate !== period.date) return;
-    const nextTask = rows.find((row) => !row.isBonus && !viewDone[row.key]) || rows.find((row) => !viewDone[row.key]);
-    WidgetBridge.updateWidget({
-      nextTask: dailyCheckIn.day_type === "rest" ? "Resting counts today" : (nextTask?.label || "Today's caring steps are complete"),
-      dayType: `${(dailyCheckIn.day_type || "full").replace(/^./, (letter) => letter.toUpperCase())} Day · ${pct}%`,
-      progress: pct,
-      weeklyProgress: weeklyOverallPct,
-      tasks: rows.slice(0, 4).map((row) => ({ key: row.key, label: row.label, done: !!viewDone[row.key] })),
-    }).catch((error) => console.error("[widget] updateWidget failed:", error));
-  }, [user?.id, selectedProgressDate, period.date, dailyCheckIn.day_type, pct, weeklyOverallPct, JSON.stringify(rows.slice(0, 4).map((row) => [row.key, row.label, !!viewDone[row.key]]))]);
+    window.__plushlifeWidgetDataOwnedByApp = true;
+    const snapshot = widgetSnapshot({rows,viewDone,dayType:dailyCheckIn.day_type,progress:pct,weeklyProgress:weeklyOverallPct,theme:preferences.nickname_style === "baby" ? (preferences.dark_mode ? "baby-night" : "baby") : preferences.dino_theme ? "dino" : preferences.dark_mode ? "twilight" : appearanceTheme});
+    const syncWidget = () => WidgetBridge.updateWidget(snapshot).catch((error) => console.error("[widget] updateWidget failed:", error));
+    syncWidget();
+    document.addEventListener("plushlife-widget-sync", syncWidget);
+    return () => document.removeEventListener("plushlife-widget-sync", syncWidget);
+  }, [user?.id, selectedProgressDate, period.date, dailyCheckIn.day_type, pct, weeklyOverallPct, appearanceTheme, preferences.nickname_style, preferences.dark_mode, preferences.dino_theme, JSON.stringify(rows.map((row) => [row.key,row.label,!!viewDone[row.key]]))]);
 
   useEffect(() => {
     const WidgetBridge = window.Capacitor?.Plugins?.WidgetBridge;
-    if (!WidgetBridge?.consumeWidgetAction || !user) return;
+    if (!WidgetBridge?.consumeWidgetAction || !user || selectedProgressDate !== period.date) return;
     const consume = () => WidgetBridge.consumeWidgetAction().then((result) => {
-        if (result?.action === "done" && result.taskKey && !viewDone[result.taskKey]) toggle(result.taskKey);
-      }).catch(() => {});
+      if (result?.action === "done" && result.taskKey && rows.some(row => row.key === result.taskKey) && !viewDone[result.taskKey]) toggle(result.taskKey);
+    }).catch(() => {});
     consume();
     document.addEventListener("plushlife-widget-action", consume);
     return () => document.removeEventListener("plushlife-widget-action", consume);
-  }, [user?.id, JSON.stringify(viewDone)]);
+  }, [user?.id, selectedProgressDate, period.date, JSON.stringify(viewDone), JSON.stringify(rows.map(row=>row.key))]);
 
   // Applies one watch-originated task change to Supabase. Mirrors the exact
   // upsert shape the existing cloud watch-sync Edge Function already uses
@@ -6095,7 +6102,7 @@ function GlowUpTracker() {
   })();
 
   return (
-    <ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
+    <CozyComfortContext.Provider value={cozyComfort}><ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
       background: activeThemePalette.background,
       backgroundImage: preferences.simple_mode ? `
@@ -7377,7 +7384,7 @@ function GlowUpTracker() {
           <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
         </header>}
 
-                {dashboard === "care" && <div className="pl-unified-page-content"><CarePanel dailyCheckInHistory={dailyCheckInHistory} reflectionHistory={reflectionHistory} checkInHistoryStatus={checkInHistoryStatus} journalHistoryStatus={journalHistoryStatus} retryCareHistory={retryCareHistory} setCheckInViewerDate={setCheckInViewerDate} setReflectionViewerDate={setReflectionViewerDate} openTodayJournal={openTodayJournal} CHECKIN_MOODS={CHECKIN_MOODS} onOpenSupport={() => goToDashboard("guardian")} open={dashboard === "care"} babyMode={babyMode} setCheckInPopupOpen={setCheckInPopupOpen} babyCaregiverName={babyCaregiverName} careSituationsExpanded={careSituationsExpanded} setCareSituationsExpanded={setCareSituationsExpanded} setCareMessage={setCareMessage} openCareSession={openCareSession} careMessage={careMessage} user={user} preferences={preferences} rows={rows} viewDone={viewDone} toggle={toggle} supabase={supabase} careSection={careSection} setCareSection={setCareSection} careSessionHistory={careSessionHistory} HELP_ME_NOW_OPTIONS={HELP_ME_NOW_OPTIONS} pathProgress={pathProgress} setSelectedCarePath={setSelectedCarePath} period={period} setSleepToolOpen={setSleepToolOpen} soundscapePlaying={soundscapePlaying} toggleSoundscape={toggleSoundscape} soundscapeVolume={soundscapeVolume} changeSoundscapeVolume={changeSoundscapeVolume} setSoundscapeSleepTimer={setSoundscapeSleepTimer} soundscapeTimerMinutes={soundscapeTimerMinutes} /></div>}
+                {dashboard === "care" && <div className="pl-unified-page-content"><CarePanel comfortItem={trackerProfile?.comfort_item_name} supportNotes={supportNotes.filter(note => note.owner_user_id === user.id)} onOpenSettings={() => setSettingsOpen(true)} onReset={async (profile) => { const available = rows.filter(row => !row.isBonus).map(row => row.key); const essentials = profile.essentials.filter(key => available.includes(key)); const okay = await saveDailyCheckIn({day_type:"tiny",soft_day:true,custom_essentials:essentials.length ? essentials : available.slice(0,3)}); if (okay && restDates.includes(period.date)) { const {error} = await supabase.from("rest_days").delete().eq("user_id",user.id).eq("rest_date",period.date); if(error) return false; setRestDates(dates=>dates.filter(date=>date!==period.date)); } if (okay && profile.reset_sound && soundscapePlaying !== profile.reset_sound) toggleSoundscape(profile.reset_sound); return okay; }} dailyCheckInHistory={dailyCheckInHistory} reflectionHistory={reflectionHistory} checkInHistoryStatus={checkInHistoryStatus} journalHistoryStatus={journalHistoryStatus} retryCareHistory={retryCareHistory} setCheckInViewerDate={setCheckInViewerDate} setReflectionViewerDate={setReflectionViewerDate} openTodayJournal={openTodayJournal} CHECKIN_MOODS={CHECKIN_MOODS} onOpenSupport={() => goToDashboard("guardian")} open={dashboard === "care"} babyMode={babyMode} setCheckInPopupOpen={setCheckInPopupOpen} babyCaregiverName={babyCaregiverName} careSituationsExpanded={careSituationsExpanded} setCareSituationsExpanded={setCareSituationsExpanded} setCareMessage={setCareMessage} openCareSession={openCareSession} careMessage={careMessage} user={user} preferences={preferences} rows={rows} viewDone={viewDone} toggle={toggle} supabase={supabase} careSection={careSection} setCareSection={setCareSection} careSessionHistory={careSessionHistory} HELP_ME_NOW_OPTIONS={HELP_ME_NOW_OPTIONS} pathProgress={pathProgress} setSelectedCarePath={setSelectedCarePath} period={period} setSleepToolOpen={setSleepToolOpen} soundscapePlaying={soundscapePlaying} toggleSoundscape={toggleSoundscape} soundscapeVolume={soundscapeVolume} changeSoundscapeVolume={changeSoundscapeVolume} setSoundscapeSleepTimer={setSoundscapeSleepTimer} soundscapeTimerMinutes={soundscapeTimerMinutes} /></div>}
         <ProfilePanel open={profileOpen} onClose={() => setProfileOpen(false)} pendingSupportInvites={pendingSupportInvites} hasOwnGuardian={hasOwnGuardian} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} setSafetyOpen={setSafetyOpen} setHelpOpen={setHelpOpen} goToFeedback={goToFeedback} isAdminUser={isAdminUser} setAdminOpen={setAdminOpen} loadAdminData={loadAdminData} nativeBuildInfo={nativeBuildInfo} />
 
         <MoodViewer checkInViewerDate={checkInViewerDate} onClose={() => setCheckInViewerDate(null)} dailyCheckInHistory={dailyCheckInHistory} reflectionDateSet={reflectionDateSet} setReflectionViewerDate={setReflectionViewerDate} deleteDailyCheckIn={deleteDailyCheckIn} CHECKIN_MOODS={CHECKIN_MOODS} ENERGY_LEVELS={ENERGY_LEVELS} DAY_TYPES={DAY_TYPES} SUPPORT_PREFERENCES={SUPPORT_PREFERENCES} />
@@ -7402,7 +7409,7 @@ function GlowUpTracker() {
 
         <ScheduleEditorPanel open={manageSchedule} onClose={() => setManageSchedule(false)} scheduleEditingDayId={scheduleEditingDayId} setScheduleEditDayId={setScheduleEditDayId} personalSchedules={personalSchedules} scheduleDraft={scheduleDraft} updateScheduleEntry={updateScheduleEntry} removeScheduleEntry={removeScheduleEntry} addScheduleEntry={addScheduleEntry} savePersonalSchedule={savePersonalSchedule} copyScheduleToAllDays={copyScheduleToAllDays} clearPersonalSchedule={clearPersonalSchedule} copyToDayIds={copyToDayIds} toggleCopyToDay={toggleCopyToDay} copyScheduleToSelectedDays={copyScheduleToSelectedDays} scheduleMessage={scheduleMessage} scheduleExceptionDraft={scheduleExceptionDraft} setScheduleExceptionDraft={setScheduleExceptionDraft} updateScheduleExceptionEntry={updateScheduleExceptionEntry} removeScheduleExceptionEntry={removeScheduleExceptionEntry} addScheduleExceptionEntry={addScheduleExceptionEntry} saveScheduleException={saveScheduleException} scheduleExceptionMessage={scheduleExceptionMessage} scheduleExceptions={scheduleExceptions} deleteScheduleException={deleteScheduleException} />
 
-        <GuardianPanel open={user && dashboard === "guardian"} onClose={() => setDashboard("today")} isGuardianAccount={isGuardianAccount} hasOwnGuardian={hasOwnGuardian} supportViewMode={supportViewMode} setSupportViewMode={setSupportViewMode} isSupportAdult={isSupportAdult} selectedSupportName={selectedSupportName} guardianSupportRequests={guardianSupportRequests} supportOwnerId={supportOwnerId} updateGuardianSupportRequest={updateGuardianSupportRequest} pendingSupportInvites={pendingSupportInvites} supportPeople={supportPeople} acceptSupportInvitation={acceptSupportInvitation} declineSupportInvitation={declineSupportInvitation} canUseCaretakerDashboard={canUseCaretakerDashboard} invitedSupportLinks={invitedSupportLinks} loadSupportOwner={loadSupportOwner} loadSupportData={loadSupportData} user={user} supportAchievements={supportAchievements} period={period} ownerIsRestingToday={ownerIsRestingToday} restDatesSet={restDatesSet} todayRequiredDone={todayRequiredDone} supportProgress={supportProgress} activeSupportLink={activeSupportLink} canViewSupportProgress={canViewSupportProgress} canViewSupportTasks={canViewSupportTasks} canViewSupportSchedule={canViewSupportSchedule} canViewSupportMood={canViewSupportMood} supportTrackerTasks={supportTrackerTasks} supportSchedules={supportSchedules} supportScheduleExceptions={supportScheduleExceptions} supportMoodSummary={supportMoodSummary} supportProgressView={supportProgressView} setSupportProgressView={setSupportProgressView} supportTodayDayLabel={supportTodayDayLabel} displayedSupportPercent={displayedSupportPercent} displayedSupportCompleted={displayedSupportCompleted} displayedSupportPossible={displayedSupportPossible} supportDailyEssentialCompleted={supportDailyEssentialCompleted} supportDailyEssentialKeys={supportDailyEssentialKeys} supportScheduledTodayCompleted={supportScheduledTodayCompleted} supportScheduledTodayKeys={supportScheduledTodayKeys} canSendSupportNotes={canSendSupportNotes} newNote={newNote} setNewNote={setNewNote} addSupportNote={addSupportNote} suggestComfortTool={suggestComfortTool} canAddSupportRewards={canAddSupportRewards} rewardTitle={rewardTitle} setRewardTitle={setRewardTitle} rewardDetails={rewardDetails} setRewardDetails={setRewardDetails} rewardTarget={rewardTarget} setRewardTarget={setRewardTarget} rewardTargetPeriod={rewardTargetPeriod} setRewardTargetPeriod={setRewardTargetPeriod} rewardApprovalRequired={rewardApprovalRequired} setRewardApprovalRequired={setRewardApprovalRequired} addSupportReward={addSupportReward} suggestedTask={suggestedTask} setSuggestedTask={setSuggestedTask} suggestedTaskDay={suggestedTaskDay} setSuggestedTaskDay={setSuggestedTaskDay} submitTaskSuggestion={submitTaskSuggestion} inviteEmail={inviteEmail} setInviteEmail={setInviteEmail} inviteSupportAdult={inviteSupportAdult} GUARDIAN_ROLE_PRESETS={GUARDIAN_ROLE_PRESETS} guardianRolePreset={guardianRolePreset} setGuardianRolePreset={setGuardianRolePreset} ownedSupportLinks={ownedSupportLinks} supportRelationships={supportRelationships} setSupportAdultActive={setSupportAdultActive} removeSupportAdult={removeSupportAdult} updateCaretakerPermission={updateCaretakerPermission} updateCareAgreement={updateCareAgreement} supportRequestGuardian={supportRequestGuardian} setSupportRequestGuardian={setSupportRequestGuardian} supportRequestType={supportRequestType} setSupportRequestType={setSupportRequestType} supportRequestText={supportRequestText} setSupportRequestText={setSupportRequestText} sendGuardianSupportRequest={sendGuardianSupportRequest} taskSuggestions={taskSuggestions} suggestionSectionsById={suggestionSectionsById} setSuggestionSectionsById={setSuggestionSectionsById} taskSectionsForDay={taskSectionsForDay} decideTaskSuggestion={decideTaskSuggestion} supportMessage={supportMessage} supportRewards={supportRewards} supportWeeklyPercent={supportWeeklyPercent} supportPercent={supportPercent} updateRewardStatus={updateRewardStatus} supportNotes={supportNotes} setComfortToolOpen={setComfortToolOpen} deleteSupportNote={deleteSupportNote} onOpenSettings={() => setSettingsOpen(true)} />
+        <GuardianPanel client={supabase} open={user && dashboard === "guardian"} onClose={() => setDashboard("today")} isGuardianAccount={isGuardianAccount} hasOwnGuardian={hasOwnGuardian} supportViewMode={supportViewMode} setSupportViewMode={setSupportViewMode} isSupportAdult={isSupportAdult} selectedSupportName={selectedSupportName} guardianSupportRequests={guardianSupportRequests} supportOwnerId={supportOwnerId} updateGuardianSupportRequest={updateGuardianSupportRequest} pendingSupportInvites={pendingSupportInvites} supportPeople={supportPeople} acceptSupportInvitation={acceptSupportInvitation} declineSupportInvitation={declineSupportInvitation} canUseCaretakerDashboard={canUseCaretakerDashboard} invitedSupportLinks={invitedSupportLinks} loadSupportOwner={loadSupportOwner} loadSupportData={loadSupportData} user={user} supportAchievements={supportAchievements} period={period} ownerIsRestingToday={ownerIsRestingToday} restDatesSet={restDatesSet} todayRequiredDone={todayRequiredDone} supportProgress={supportProgress} activeSupportLink={activeSupportLink} canViewSupportProgress={canViewSupportProgress} canViewSupportTasks={canViewSupportTasks} canViewSupportSchedule={canViewSupportSchedule} canViewSupportMood={canViewSupportMood} supportTrackerTasks={supportTrackerTasks} supportSchedules={supportSchedules} supportScheduleExceptions={supportScheduleExceptions} supportMoodSummary={supportMoodSummary} supportProgressView={supportProgressView} setSupportProgressView={setSupportProgressView} supportTodayDayLabel={supportTodayDayLabel} displayedSupportPercent={displayedSupportPercent} displayedSupportCompleted={displayedSupportCompleted} displayedSupportPossible={displayedSupportPossible} supportDailyEssentialCompleted={supportDailyEssentialCompleted} supportDailyEssentialKeys={supportDailyEssentialKeys} supportScheduledTodayCompleted={supportScheduledTodayCompleted} supportScheduledTodayKeys={supportScheduledTodayKeys} canSendSupportNotes={canSendSupportNotes} newNote={newNote} setNewNote={setNewNote} addSupportNote={addSupportNote} suggestComfortTool={suggestComfortTool} canAddSupportRewards={canAddSupportRewards} rewardTitle={rewardTitle} setRewardTitle={setRewardTitle} rewardDetails={rewardDetails} setRewardDetails={setRewardDetails} rewardTarget={rewardTarget} setRewardTarget={setRewardTarget} rewardTargetPeriod={rewardTargetPeriod} setRewardTargetPeriod={setRewardTargetPeriod} rewardApprovalRequired={rewardApprovalRequired} setRewardApprovalRequired={setRewardApprovalRequired} addSupportReward={addSupportReward} suggestedTask={suggestedTask} setSuggestedTask={setSuggestedTask} suggestedTaskDay={suggestedTaskDay} setSuggestedTaskDay={setSuggestedTaskDay} submitTaskSuggestion={submitTaskSuggestion} inviteEmail={inviteEmail} setInviteEmail={setInviteEmail} inviteSupportAdult={inviteSupportAdult} GUARDIAN_ROLE_PRESETS={GUARDIAN_ROLE_PRESETS} guardianRolePreset={guardianRolePreset} setGuardianRolePreset={setGuardianRolePreset} ownedSupportLinks={ownedSupportLinks} supportRelationships={supportRelationships} setSupportAdultActive={setSupportAdultActive} removeSupportAdult={removeSupportAdult} updateCaretakerPermission={updateCaretakerPermission} updateCareAgreement={updateCareAgreement} supportRequestGuardian={supportRequestGuardian} setSupportRequestGuardian={setSupportRequestGuardian} supportRequestType={supportRequestType} setSupportRequestType={setSupportRequestType} supportRequestText={supportRequestText} setSupportRequestText={setSupportRequestText} sendGuardianSupportRequest={sendGuardianSupportRequest} taskSuggestions={taskSuggestions} suggestionSectionsById={suggestionSectionsById} setSuggestionSectionsById={setSuggestionSectionsById} taskSectionsForDay={taskSectionsForDay} decideTaskSuggestion={decideTaskSuggestion} supportMessage={supportMessage} supportRewards={supportRewards} supportWeeklyPercent={supportWeeklyPercent} supportPercent={supportPercent} updateRewardStatus={updateRewardStatus} supportNotes={supportNotes} setComfortToolOpen={setComfortToolOpen} deleteSupportNote={deleteSupportNote} onOpenSettings={() => setSettingsOpen(true)} />
 
         <>
         <DailyJournalPanel open={journalQuickOpen && (!dailyJournalPromptOpen || autoPopupToShow === "daily_journal")} onClose={() => { setJournalQuickOpen(false); setDailyJournalPromptOpen(false); setPrivateNoteEditing(false); }} dailyJournalPromptOpen={dailyJournalPromptOpen} journalQuickOpenDate={journalQuickOpenDate} journalDisplayedPrompt={journalDisplayedPrompt} privateNoteEditing={privateNoteEditing} setPrivateNoteEditing={setPrivateNoteEditing} privateNoteDraft={privateNoteDraft} setPrivateNoteDraft={setPrivateNoteDraft} savePrivateNote={savePrivateNote} privateNote={privateNote} privateNoteMessage={privateNoteMessage} />
@@ -7452,7 +7459,7 @@ function GlowUpTracker() {
           <button type="button" onClick={() => setBadgeCelebration(null)} aria-label="Dismiss" style={{ padding: "5px 10px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.4)", background: "transparent", color: "#F2D9FF", fontWeight: 900, cursor: "pointer", fontSize: 12.5, whiteSpace: "nowrap" }}>✕</button>
         </div>
       )}
-    </div></ThemeWorldContext.Provider>
+    </div></ThemeWorldContext.Provider></CozyComfortContext.Provider>
   );
 }
 

@@ -4,17 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="12dp"
+    android:padding="14dp"
     android:background="@drawable/plushlife_widget_background">
 
     <TextView
         android:id="@+id/widget_day_type"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Today"
-        android:textAllCaps="true"
-        android:textColor="#A65DC1"
-        android:textSize="11sp"
+        android:text="PlushLife · Today"
+                android:textColor="#79508E"
+        android:textSize="13sp"
         android:textStyle="bold" />
 
     <TextView
@@ -22,6 +21,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
+        android:minHeight="44dp"
+        android:gravity="center_vertical"
         android:maxLines="2"
         android:ellipsize="end"
         android:text="Open PlushLife for one caring step"
@@ -38,29 +39,35 @@
         android:maxLines="1"
         android:ellipsize="end"
         android:textColor="#5B4B6B"
-        android:textSize="13sp"
+        android:textSize="15sp"
+        android:minHeight="44dp"
+        android:gravity="center_vertical"
         android:visibility="gone" />
 
     <TextView
         android:id="@+id/widget_task_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
+        android:layout_marginTop="0dp"
         android:maxLines="1"
         android:ellipsize="end"
         android:textColor="#5B4B6B"
-        android:textSize="13sp"
+        android:textSize="15sp"
+        android:minHeight="44dp"
+        android:gravity="center_vertical"
         android:visibility="gone" />
 
     <TextView
         android:id="@+id/widget_task_2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
+        android:layout_marginTop="0dp"
         android:maxLines="1"
         android:ellipsize="end"
         android:textColor="#5B4B6B"
-        android:textSize="13sp"
+        android:textSize="15sp"
+        android:minHeight="44dp"
+        android:gravity="center_vertical"
         android:visibility="gone" />
 
     <!-- RemoteViews only supports a restricted set of widget classes.
@@ -82,10 +89,11 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TODAY"
-                android:textAllCaps="true"
-                android:textColor="#8C6B9E"
-                android:textSize="9sp"
+                android:id="@+id/widget_today_label"
+                android:text="Today"
+                android:textAllCaps="false"
+                android:textColor="#725981"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <ProgressBar
@@ -108,10 +116,11 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="WEEK"
-                android:textAllCaps="true"
-                android:textColor="#8C6B9E"
-                android:textSize="9sp"
+                android:id="@+id/widget_week_label"
+                android:text="Week"
+                android:textAllCaps="false"
+                android:textColor="#725981"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <ProgressBar

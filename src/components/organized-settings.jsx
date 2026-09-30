@@ -1,3 +1,4 @@
+import { WidgetSettings } from "./widget-settings.jsx";
 import { HomeLayoutEditor } from "./home-layout-editor.jsx";
 import { ToolPanel } from "./shared.jsx";
 import { PlushGoldPreview } from "./plush-gold-preview.jsx";
@@ -168,7 +169,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
     ["rest", "🌴", "Rest & Vacation", "Pause tasks and reminders without losing progress", "rest vacation illness pause"],
     ["privacy", "🔐", "Privacy & Data", "Backup, restore, and delete selected data", "privacy data backup restore export delete reflections check-ins"],
     ["support", "💬", "Help & Feedback", "Send feedback or report something that feels off", "feedback help support bug"],
-    ["gold", "✨", "Plush Gold Preview", "Future premium intelligence · everything included free for now", "gold premium plus preview subscription intelligence"],
+    ["gold", "✨", "PlushLife Plus Preview", "Future premium intelligence · everything included free for now", "gold premium plus preview subscription intelligence"],
     ["account", "🔑", "Account", "Email, sync status, sessions, and account controls", "account email sync sign out delete account"],
   ];
 
@@ -342,29 +343,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
           {localWatchSyncMessage && <div role="status" style={{ marginTop: 7, fontSize: 11.5, color: "var(--pl-theme-ink,#6F5C7C)" }}>{localWatchSyncMessage}</div>}
         </Card>
       )}
-      <Card>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
-          <div>
-            <div style={{ fontSize: 13.5, fontWeight: 900, color: "var(--pl-theme-ink,#6E5480)" }}>📱 Home-screen widget</div>
-            <div style={{ marginTop: 3, fontSize: 11.5, color: "var(--pl-theme-muted,#8A7895)" }}>Today {pct}% · Week {weeklyOverallPct}%</div>
-          </div>
-          <button type="button" onClick={() => {
-            document.dispatchEvent(new CustomEvent("plushlife-widget-sync"));
-            const WidgetBridge = window.Capacitor?.Plugins?.WidgetBridge;
-            if (WidgetBridge) {
-              const nextTask = rows.find((row) => !row.isBonus && !viewDone[row.key]) || rows.find((row) => !row.isBonus);
-              WidgetBridge.updateWidget({ nextTask: dailyCheckIn.day_type === "rest" ? "Resting counts today" : (nextTask?.label || "Today's caring steps are complete"), dayType: `${(dailyCheckIn.day_type || "full").replace(/^./, (letter) => letter.toUpperCase())} Day · ${pct}%`, progress: pct, weeklyProgress: weeklyOverallPct, tasks: rows.slice(0, 4).map((row) => ({ label: row.label, done: !!viewDone[row.key] })) }).catch(() => {});
-            }
-            setWidgetSyncMsg("Widget synced! 💕");
-            setTimeout(() => setWidgetSyncMsg(""), 3000);
-          }} style={primaryButton}>Sync now</button>
-        </div>
-        {widgetSyncMsg && <div style={{ marginTop: 7, color: "var(--pl-theme-ink,#38816F)", fontSize: 11.5, fontWeight: 800 }}>{widgetSyncMsg}</div>}
-        <details style={{ marginTop: 11 }}>
-          <summary style={{ cursor: "pointer", color: "var(--pl-theme-ink,#755D82)", fontSize: 12, fontWeight: 850 }}>How to add the Android widget</summary>
-          <div style={{ marginTop: 8, fontSize: 11.5, lineHeight: 1.55, color: "var(--pl-theme-muted,#8A7895)" }}>1. Long-press an empty space on your home screen.<br/>2. Tap <strong>Widgets</strong> and find <strong>PlushLife</strong>.<br/>3. Drag the widget onto your home screen.</div>
-        </details>
-      </Card>
+      <WidgetSettings rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} pct={pct} weeklyOverallPct={weeklyOverallPct} />
     </>
   );
 
@@ -459,7 +438,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
 
   const gold = (
     <>
-      <DetailHeader title="Plush Gold Preview" onBack={() => setSection("home")} />
+      <DetailHeader title="PlushLife Plus Preview" onBack={() => setSection("home")} />
       <PlushGoldPreview />
     </>
   );

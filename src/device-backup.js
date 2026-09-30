@@ -27,6 +27,7 @@ const BACKUP_QUERY_BATCH_SIZE = 4;
 // because replaying those rows on another device could be unsafe or invalid.
 const DEVICE_BACKUP_TABLES = [
   ["profile", "tracker_profiles", "user_id"],
+  ["cozy_profile", "cozy_profiles", "user_id"],
   ["preferences", "app_preferences", "user_id"],
   ["tasks", "tracker_tasks", "user_id"],
   ["schedules", "tracker_schedules", "user_id"],
