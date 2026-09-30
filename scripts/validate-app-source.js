@@ -54,7 +54,7 @@ const requiredRegressionMarkers = [
   'pendingInviteAutoOpenedFor',
   'const invitation = supportLinks.find((link) => link.id === linkId);',
   'const isGuardianAccount = !!user && trackerProfile?.account_type === "caretaker";',
-  'GUARDIAN SUPPORT DASHBOARD',
+  'Sharing & care agreement',
   '{ id: "guardian", label: "Guardian", icon: "💛", accent: "#318C79" }',
   '🧸 My Guardians',
   '💛 People I Support',

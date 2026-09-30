@@ -1,3 +1,4 @@
+import { loadHistoryRows } from "./care-history-data.js";
 import { normalizeHomeLayout } from "./home-layout.js";
 import { FIGMA_WORLDS, ThemeWorldContext, CozyScene, DesignIcon } from "./components/theme-world.jsx";
 // Native bridge (Capacitor back-button, splash, push channels, notification
@@ -975,6 +976,10 @@ function GlowUpTracker() {
   };
   const [dailyCheckIn, setDailyCheckIn] = useState({ capacity: null, mood: null, energy: null, day_type: "full", support_preference: null, soft_day: false, custom_essentials: null });
   const [dailyCheckInHistory, setDailyCheckInHistory] = useState([]);
+  const [checkInHistoryStatus, setCheckInHistoryStatus] = useState("loading");
+  const [journalHistoryStatus, setJournalHistoryStatus] = useState("loading");
+  const [historyReload, setHistoryReload] = useState(0);
+  const retryCareHistory = () => setHistoryReload((value) => value + 1);
   const [careSessionHistory, setCareSessionHistory] = useState([]);
   const [careOutcomeTool, setCareOutcomeTool] = useState(null);
   const [careOutcomeKind, setCareOutcomeKind] = useState("care");
@@ -2084,12 +2089,27 @@ function GlowUpTracker() {
   }, [user, period.date]);
 
   useEffect(() => {
+    setDailyCheckInHistory([]);
+    setReflectionHistory([]);
+    setReflectionDates([]);
+    setCheckInHistoryStatus("loading");
+    setJournalHistoryStatus("loading");
+  }, [user?.id]);
+
+  useEffect(() => {
     if (!user) { setCareSessionHistory([]); setPathProgress([]); return; }
     let alive = true;
-    const historyStart = offsetDate(period.date, -120);
-    supabase.from("daily_check_ins").select("*").eq("user_id", user.id).gte("check_date", historyStart).lte("check_date", period.date).order("check_date").then(({ data }) => {
-      if (alive) setDailyCheckInHistory(data || []);
-    });
+    setCheckInHistoryStatus("loading");
+    (async () => {
+      try {
+        const entries = await loadHistoryRows(supabase, "daily_check_ins", "*", user.id, "check_date", { through: period.date });
+        if (!alive) return;
+        setDailyCheckInHistory(entries);
+        setCheckInHistoryStatus("ready");
+      } catch {
+        if (alive) setCheckInHistoryStatus("error");
+      }
+    })();
     supabase.from("plush_path_progress").select("path_id, current_day, completed_days, status, updated_at").eq("user_id", user.id).then(({ data }) => {
       if (alive) setPathProgress(data || []);
     });
@@ -2097,7 +2117,7 @@ function GlowUpTracker() {
       if (alive) setCareSessionHistory(data || []);
     });
     return () => { alive = false; };
-  }, [user?.id, period.date]);
+  }, [user?.id, period.date, historyReload]);
 
   useEffect(() => {
     if (preferences.onboarding_complete && dailyCheckInLoaded && !dailyCheckIn.capacity && !checkInPopupDismissedToday) {
@@ -2477,18 +2497,20 @@ function GlowUpTracker() {
       return;
     }
     let alive = true;
-    supabase
-      .from("private_notes")
-      .select("note_date, body, prompt, updated_at")
-      .eq("user_id", user.id)
-      .order("note_date", { ascending: false })
-      .then(({ data, error }) => {
-        if (!alive || error) return;
-        setReflectionDates((data || []).map((note) => note.note_date));
-        setReflectionHistory(data || []);
-      });
+    setJournalHistoryStatus("loading");
+    (async () => {
+      try {
+        const entries = await loadHistoryRows(supabase, "private_notes", "note_date, body, prompt, updated_at", user.id, "note_date", { ascending: false });
+        if (!alive) return;
+        setReflectionDates(entries.map((note) => note.note_date));
+        setReflectionHistory(entries);
+        setJournalHistoryStatus("ready");
+      } catch {
+        if (alive) setJournalHistoryStatus("error");
+      }
+    })();
     return () => { alive = false; };
-  }, [user]);
+  }, [user?.id, historyReload]);
 
   useEffect(() => {
     if (!user || !reflectionViewerDate) return;
@@ -7358,7 +7380,7 @@ function GlowUpTracker() {
           <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
         </header>}
 
-                {dashboard === "care" && <div className="pl-unified-page-content"><CarePanel onOpenSupport={() => goToDashboard("guardian")} open={dashboard === "care"} babyMode={babyMode} setCheckInPopupOpen={setCheckInPopupOpen} babyCaregiverName={babyCaregiverName} careSituationsExpanded={careSituationsExpanded} setCareSituationsExpanded={setCareSituationsExpanded} setCareMessage={setCareMessage} openCareSession={openCareSession} careMessage={careMessage} isMamaCornerProfile={isMamaCornerProfile} careExtraSupportOpen={careExtraSupportOpen} setCareExtraSupportOpen={setCareExtraSupportOpen} user={user} preferences={preferences} rows={rows} viewDone={viewDone} toggle={toggle} supabase={supabase} careSection={careSection} setCareSection={setCareSection} careSessionHistory={careSessionHistory} HELP_ME_NOW_OPTIONS={HELP_ME_NOW_OPTIONS} pathProgress={pathProgress} setSelectedCarePath={setSelectedCarePath} period={period} setSleepToolOpen={setSleepToolOpen} soundscapePlaying={soundscapePlaying} toggleSoundscape={toggleSoundscape} soundscapeVolume={soundscapeVolume} changeSoundscapeVolume={changeSoundscapeVolume} setSoundscapeSleepTimer={setSoundscapeSleepTimer} soundscapeTimerMinutes={soundscapeTimerMinutes} /></div>}
+                {dashboard === "care" && <div className="pl-unified-page-content"><CarePanel dailyCheckInHistory={dailyCheckInHistory} reflectionHistory={reflectionHistory} checkInHistoryStatus={checkInHistoryStatus} journalHistoryStatus={journalHistoryStatus} retryCareHistory={retryCareHistory} setCheckInViewerDate={setCheckInViewerDate} setReflectionViewerDate={setReflectionViewerDate} openTodayJournal={openTodayJournal} CHECKIN_MOODS={CHECKIN_MOODS} onOpenSupport={() => goToDashboard("guardian")} open={dashboard === "care"} babyMode={babyMode} setCheckInPopupOpen={setCheckInPopupOpen} babyCaregiverName={babyCaregiverName} careSituationsExpanded={careSituationsExpanded} setCareSituationsExpanded={setCareSituationsExpanded} setCareMessage={setCareMessage} openCareSession={openCareSession} careMessage={careMessage} isMamaCornerProfile={isMamaCornerProfile} careExtraSupportOpen={careExtraSupportOpen} setCareExtraSupportOpen={setCareExtraSupportOpen} user={user} preferences={preferences} rows={rows} viewDone={viewDone} toggle={toggle} supabase={supabase} careSection={careSection} setCareSection={setCareSection} careSessionHistory={careSessionHistory} HELP_ME_NOW_OPTIONS={HELP_ME_NOW_OPTIONS} pathProgress={pathProgress} setSelectedCarePath={setSelectedCarePath} period={period} setSleepToolOpen={setSleepToolOpen} soundscapePlaying={soundscapePlaying} toggleSoundscape={toggleSoundscape} soundscapeVolume={soundscapeVolume} changeSoundscapeVolume={changeSoundscapeVolume} setSoundscapeSleepTimer={setSoundscapeSleepTimer} soundscapeTimerMinutes={soundscapeTimerMinutes} /></div>}
         <ProfilePanel open={profileOpen} onClose={() => setProfileOpen(false)} pendingSupportInvites={pendingSupportInvites} hasOwnGuardian={hasOwnGuardian} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} setSafetyOpen={setSafetyOpen} setHelpOpen={setHelpOpen} goToFeedback={goToFeedback} isAdminUser={isAdminUser} setAdminOpen={setAdminOpen} loadAdminData={loadAdminData} nativeBuildInfo={nativeBuildInfo} />
 
         <MoodViewer checkInViewerDate={checkInViewerDate} onClose={() => setCheckInViewerDate(null)} dailyCheckInHistory={dailyCheckInHistory} reflectionDateSet={reflectionDateSet} setReflectionViewerDate={setReflectionViewerDate} deleteDailyCheckIn={deleteDailyCheckIn} CHECKIN_MOODS={CHECKIN_MOODS} ENERGY_LEVELS={ENERGY_LEVELS} DAY_TYPES={DAY_TYPES} SUPPORT_PREFERENCES={SUPPORT_PREFERENCES} />
