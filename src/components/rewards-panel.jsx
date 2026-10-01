@@ -1,5 +1,5 @@
 import { nextCompanionReward } from "../companion-experience.js";
-import { CozyScene, useThemeCopy } from "./theme-world.jsx";
+import { CozyScene, ThemeScene, useThemeCopy } from "./theme-world.jsx";
 import { ToolPanel } from "./shared.jsx";
 
 export function RewardsPanel({ saveMessage, open, onClose, inline = false, selectedOutfit, activityDaysTotal, preferences, mascotGrowth, unlockedOutfits, earnedBadgeIdSet, BADGE_DEFS, unlockedIdSet, mascotRequirementProgress, saveMascotCollection, mascotCollection, savedBestStreak, collectionTab, setCollectionTab, winsJarEntries, theme }) {
@@ -22,9 +22,9 @@ export function RewardsPanel({ saveMessage, open, onClose, inline = false, selec
     const selected = selectedOutfit.id === outfit.id;
     const progress = Math.min(outfit.unlock.count, mascotRequirementProgress(outfit));
     return <button key={outfit.id} type="button" className="pl-collection-item" disabled={!unlocked} aria-pressed={unlocked ? selected : undefined} onClick={() => wear(outfit)}>
-      <span className="pl-collection-icon" aria-hidden="true">{outfit.badge}</span>
+      <span className="pl-outfit-preview"><ThemeScene outfit={outfit} focus decorative/></span>
       <strong>{outfit.name}</strong>
-      <span>{unlocked ? selected ? "Wearing now" : "Tap to wear" : `${progress} / ${outfit.unlock.count}`}</span>
+      <span>{unlocked ? selected ? "✓ Wearing now" : "Wear this look" : `${progress} / ${outfit.unlock.count}`}</span>
       {!unlocked && <small>{outfit.hint}</small>}
     </button>;
   };
@@ -42,7 +42,7 @@ export function RewardsPanel({ saveMessage, open, onClose, inline = false, selec
       <div role="tabpanel" aria-label={collectionTab === "mascot" ? "Closet" : collectionTab === "badges" ? "Badges" : "Kindness jar"}>
         {collectionTab === "mascot" && <>
           <section className="pl-design-card">
-            <h2>Your outfits · {available.length}</h2>
+            <h2>Choose a look · {available.length}</h2><p className="pl-closet-help">Tap a plush to wear that look. One look at a time; every earned reward stays yours.</p>
             <div className="pl-collection-grid">{(showAllOutfits ? available : [selectedOutfit, ...available.filter(item => item.id !== selectedOutfit.id)].slice(0, 6)).map(item => outfitCard(item, true))}</div>
             {available.length > 6 && <button type="button" className="pl-collection-more" aria-expanded={showAllOutfits} onClick={() => setShowAllOutfits(value => !value)}>{showAllOutfits ? "Show fewer outfits" : `See all ${available.length} outfits`}</button>}
           </section>
