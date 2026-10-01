@@ -41,6 +41,12 @@ export const OUTFIT_KINDS = {
   "cozy-cardigan": "cardigan"
 };
 export const REAR_OUTFITS = new Set(["cape", "habit-tree", "sunrise-cape", "backpack", "wings"]);
+// The round companion's face reaches lower than the previous bear's face.
+// Keep clothing on its lower body; head accessories retain their anchors.
+export function frontOutfitTransform(id) {
+  return ["scarf", "overalls", "sweater", "coat", "cardigan"].includes(OUTFIT_KINDS[id])
+    ? "translate(0 44) scale(1 .58)" : undefined;
+}
 export const FRONT_OUTFITS = new Set(["bow", "comet-bow", "glasses", "crown", "gold-crown", "aurora-crown", "yearlight-crown", "cape", "habit-tree", "sunrise-cape", "party", "scarf", "backpack", "cozy-cap", "moon-cap", "compass", "century-gem", "change-champion", "journal-charm", "keepsake-gem", "moon-halo", "rainbow-aura", "garden-glow", "evergreen-halo", "sprout", "garden", "sunflower", "shield", "diamond-shield", "boots", "founders-ribbon", "memory-ribbon", "knit-sweater", "book-buddy", "storybook-star", "raincoat", "starlight-pins", "cozy-cardigan"]);
 
 // Match the bear coordinates in the original Figma assets, not the scene bounds.

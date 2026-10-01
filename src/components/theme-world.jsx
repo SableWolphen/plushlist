@@ -2,7 +2,7 @@
 export const ThemeWorldContext = React.createContext({ world: "soft", voice: "motherly" });
 export const FIGMA_WORLDS = window.PlushLifeThemeCopy.worlds;
 
-import { wardrobeGeometry, REAR_OUTFITS, FRONT_OUTFITS } from "../mascot-wardrobe.js";
+import { wardrobeGeometry, frontOutfitTransform, REAR_OUTFITS, FRONT_OUTFITS } from "../mascot-wardrobe.js";
 
 export function ThemeScene({ world, className = "", decorative = false, outfit, focus = false, mood = "neutral" }) {
   const context = React.useContext(ThemeWorldContext);
@@ -11,7 +11,7 @@ export function ThemeScene({ world, className = "", decorative = false, outfit, 
   const selected = FIGMA_WORLDS[requested] ? requested : "soft";
   outfit = outfit || context.outfit;
   const geometry = wardrobeGeometry(selected);
-  const layer = (position) => <svg className={`pl-outfit-layer pl-outfit-${position}`} width={geometry.width} height="100" viewBox={`0 0 ${geometry.width} 100`} aria-hidden="true"><g transform={`translate(${geometry.x} ${geometry.y}) scale(${geometry.scale})`}><use href={`./assets/plush-outfits.svg#${outfit.id}-${position}`} width="100" height="100" /></g></svg>;
+  const layer = (position) => <svg className={`pl-outfit-layer pl-outfit-${position}`} width={geometry.width} height="100" viewBox={`0 0 ${geometry.width} 100`} aria-hidden="true"><g transform={`translate(${geometry.x} ${geometry.y}) scale(${geometry.scale})`}><g transform={position === "front" ? frontOutfitTransform(outfit.id) : undefined}><use href={`./assets/plush-outfits.svg#${outfit.id}-${position}`} width="100" height="100" /></g></g></svg>;
   return <span className={`pl-theme-scene ${className} ${focus ? "pl-mascot-focus" : ""}`} data-world={selected} aria-hidden={decorative || undefined}>
     <span className="pl-scene-art" style={focus ? { width: `${geometry.width / geometry.scale / 120 * 100}%`, left: `${(10 - geometry.x / geometry.scale) / 120 * 100}%`, top: `${(5 - geometry.y / geometry.scale) / 110 * 100}%`, aspectRatio: `${geometry.width} / 100` } : { width: geometry.width, aspectRatio: `${geometry.width} / 100` }}>
       {outfit && REAR_OUTFITS.has(outfit.id) && layer("back")}
