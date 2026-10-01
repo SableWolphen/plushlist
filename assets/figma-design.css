@@ -387,3 +387,4 @@ body[data-login-world] button:not(.mobile-email-toggle){border-radius:18px!impor
 .pl-weekly-keepsake select{width:100%;min-height:44px;box-sizing:border-box;font:inherit;padding:8px;border-radius:12px;border:1px solid var(--pl-theme-line);background:var(--pl-theme-surface);color:var(--pl-theme-ink)}
 .pl-weekly-keepsake>small{font-size:12px;line-height:1.5;color:var(--pl-theme-muted)}
 @media(prefers-reduced-motion:reduce){.pl-companion-idle{animation:none!important;transform:none!important}}
+#main-content#main-content[data-pl-world] :is(.pl-cozy-room,.pl-keepsake-preview) .pl-theme-scene.pl-mascot-focus{position:relative;display:block;width:150px;height:138px;flex:none;overflow:hidden}

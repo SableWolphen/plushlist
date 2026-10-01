@@ -35,4 +35,5 @@ act(()=>tree.update(React.createElement(api.ThemeWorldContext.Provider,{value:{w
 assert.equal(tree.root.findByType('select').props.value,'','Removed memories leave the preview');act(()=>tree.unmount());
 const art=api.composeKeepsakeMascot(fs.readFileSync('assets/plushlife-mascot.svg','utf8'),fs.readFileSync('assets/plush-outfits.svg','utf8'),'knit-sweater');
 assert.match(art,/data-cozy-mascot/);assert.match(art,/href="#knit-sweater-front"/);assert.match(art,/translate\(0 44\) scale\(1 .58\)/);assert.doesNotMatch(art,/href="\.\//);
+assert.match(fs.readFileSync('assets/figma-design.css','utf8'),/:is\(\.pl-cozy-room,\.pl-keepsake-preview\).*width:150px;height:138px/,'New containers reserve a visible mascot viewport');
 console.log('Companion checks passed: accurate units, permanent earned decor, private naming, optional weekly win, removed-memory handling, and portable outfit artwork.');
