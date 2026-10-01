@@ -1,3 +1,4 @@
+import { HabitStudio, HabitGoalCaption } from "./habit-studio.jsx";
 // The "Change my tasks" ToolPanel — module split phase 7, seventh
 // slice, third of the "big four" (see docs/module-split-plan.md).
 // Task creation (with natural-language schedule parsing, starter
@@ -51,12 +52,13 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
                 return matching.length ? matching.map(row => <div className="pl-design-task" key={row.key}>
                   <button type="button" className="pl-task-toggle" aria-label={row.later ? `Edit ${row.label}` : `${viewDone[row.key] ? "Undo" : "Complete"} ${row.label}`} aria-pressed={row.later ? undefined : !!viewDone[row.key]} onClick={() => { if (row.later) { startEditingTask(row.sourceTask); return; } if (!viewDone[row.key]) cheer(); unifiedToggle(row.key); }}>
                     <span className={`pl-task-box ${!row.later && viewDone[row.key] ? "is-done" : ""}`} aria-hidden="true">{!row.later && viewDone[row.key] ? "✓" : ""}</span>
-                    <span><strong>{row.label}</strong><small>{row.later ? scheduleLabelForTask(row.sourceTask) : row.sourceTask?.estimated_minutes ? `${row.sourceTask.estimated_minutes} minutes · At your pace` : "One little step"}</small></span>
+                    <span><strong>{row.label}</strong><HabitGoalCaption taskKey={row.key}/><small>{row.later ? scheduleLabelForTask(row.sourceTask) : row.sourceTask?.estimated_minutes ? `${row.sourceTask.estimated_minutes} minutes · At your pace` : "One little step"}</small></span>
                   </button>
                   {row.sourceTask && <button type="button" className="pl-task-edit" onClick={() => startEditingTask(row.sourceTask)} aria-label={`Edit ${row.label}`}>•••</button>}
                 </div>) : <p className="pl-design-empty">{query ? "No tasks match that search." : taskView === "today" ? "Your list has room to breathe. Add your first little task below." : "Nothing here yet. A small start is enough."}</p>;
               })()}
             </section>
+            {taskView === "habits" && <HabitStudio/>}
             <button type="button" className="pl-design-primary" aria-expanded={composerOpen} onClick={() => setComposerOpen(value => !value)}>Add a task</button>
             <details className="pl-task-composer" open={composerOpen} onToggle={event => setComposerOpen(event.currentTarget.open)}>
               <summary>Add & shape a little task</summary>

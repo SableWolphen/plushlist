@@ -129,6 +129,7 @@ import { cozyReminderCopy } from './cozy-profile.js';
         id: "PLUSHLIFE_REMINDER",
         actions: [
           { id: "DONE", title: "Done" },
+          { id: "START", title: "Start · 2 minutes", foreground: true },
           { id: "TINY", title: "Tiny version" },
           { id: "SKIP", title: "Skip today" },
           { id: "SNOOZE_10", title: "10 min" },
@@ -360,7 +361,7 @@ import { cozyReminderCopy } from './cozy-profile.js';
       var minutesByAction = { SNOOZE_10: 10, SNOOZE_30: 30, SNOOZE_60: 60 };
       var minutes = minutesByAction[event && event.actionId];
       var notification = event && event.notification;
-      var taskAction = event && ["DONE", "TINY", "SKIP"].includes(event.actionId) ? event.actionId.toLowerCase() : "";
+      var taskAction = event && ["DONE", "TINY", "SKIP", "START"].includes(event.actionId) ? event.actionId.toLowerCase() : "";
       if (notification) {
         try {
           var storedEvents = JSON.parse(localStorage.getItem("plushlife:notification-events:v1") || "[]");

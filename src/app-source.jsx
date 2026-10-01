@@ -1,3 +1,5 @@
+import { HabitStudioProvider } from "./components/habit-studio.jsx";
+import { FocusTimer, startFocusTimer } from "./components/focus-timer.jsx";
 import { privateSave, deviceStorage } from "./private-save.js";
 import { GentleOnboarding } from "./components/gentle-onboarding.jsx";
 import { CozyGuideSuggestions } from "./components/cozy-daily.jsx";
@@ -4819,10 +4821,11 @@ function GlowUpTracker() {
     const consumeTaskAction = () => {
       let pending = null;
       try { pending = JSON.parse(localStorage.getItem("plushlife:pending-notification-action:v1") || "null"); } catch (_error) {}
-      if (!pending?.taskKey || !["done", "tiny", "skip"].includes(pending.action)) return;
+      if (!pending?.taskKey || !["done", "tiny", "skip", "start"].includes(pending.action)) return;
       try { localStorage.removeItem("plushlife:pending-notification-action:v1"); } catch (_error) {}
       const row = rows.find((item) => item.key === pending.taskKey);
       if (!row) return;
+      if (pending.action === "start") {goToDashboard("today");startFocusTimer({minutes:2,taskLabel:row.label,step:row.sourceTask?.tiny_label || "Get one thing ready. Starting is enough."});}
       if (pending.action === "done" && !viewDone[row.key]) toggle(row.key);
       if (pending.action === "tiny") {
         const stateKey = "plushlife:habit-coach:v1";
@@ -6061,7 +6064,7 @@ function GlowUpTracker() {
   })();
 
   return (
-    <CozyComfortContext.Provider value={cozyComfort}><CozyGuideSuggestions rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} onOpen={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard("care");}}/><ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit, unlockedIds: unlockedIdSet, rewardProgress: mascotRequirementProgress }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
+    <HabitStudioProvider key={user.id} userId={user.id} tasks={trackerTasks} rows={rows} done={done} history={habitHistory} date={period.date} editableDay={selectedProgressDate===period.date} onToggle={toggle}><CozyComfortContext.Provider value={cozyComfort}><CozyGuideSuggestions rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} onOpen={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard("care");}}/><ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit, unlockedIds: unlockedIdSet, rewardProgress: mascotRequirementProgress }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
       background: activeThemePalette.background,
       backgroundImage: preferences.simple_mode ? `
@@ -7300,7 +7303,7 @@ function GlowUpTracker() {
           <button type="button" onClick={() => setBadgeCelebration(null)} aria-label="Dismiss" style={{ padding: "5px 10px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.4)", background: "transparent", color: "#F2D9FF", fontWeight: 900, cursor: "pointer", fontSize: 12.5, whiteSpace: "nowrap" }}>✕</button>
         </div>
       )}
-    </div></ThemeWorldContext.Provider></CozyComfortContext.Provider>
+    <FocusTimer/></div></ThemeWorldContext.Provider></CozyComfortContext.Provider></HabitStudioProvider>
   );
 }
 

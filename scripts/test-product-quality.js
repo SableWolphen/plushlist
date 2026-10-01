@@ -59,7 +59,7 @@ const checks = [
   [!loginPage.includes("FREE PREVIEW"), "login page omits the removed tier preview banner"],
   [goldAccess.includes('PLUSH_GOLD_ACCESS_MODE = "free_preview"') && goldAccess.includes("PLUSH_GOLD_BILLING_ENABLED = false"), "Plush Gold stays fully unlocked with billing disabled during preview"],
   [goldAccess.includes("advanced_growth_insights") && goldAccess.includes("smart_next_step") && goldAccess.includes("adaptive_habit_coaching") && goldAccess.includes("advanced_reminders") && goldAccess.includes("habit_experiments") && goldAccess.includes("recovery_intelligence") && goldAccess.includes("expanded_growth_history") && goldAccess.includes("multiple_focus_habits") && goldAccess.includes("advanced_planning") && goldAccess.includes("advanced_personalization") && goldAccess.includes("priority_history_protection") && goldAccess.includes("gold_reports"), "Plush Gold has one central registry for current and reserved premium capabilities"],
-  [goldPreview.includes("Everything is included free for now") && goldPreview.includes("Billing off · free preview"), "Plush Gold preview stays discoverable during the free preview"],
+  [goldPreview.includes("Everything remains unlocked") && goldPreview.includes("Purchases aren’t open yet"), "Plush Gold preview stays discoverable during the free preview"],
   [settings.includes("PlushLife Plus Preview") && settings.includes("<PlushGoldPreview />"), "Plush Gold preview is discoverable from Settings"],
   [progress.includes('hasGoldFeature("advanced_growth_insights")') && smartNextStep.includes('hasGoldFeature("smart_next_step")') && background.includes('hasGoldFeature("adaptive_habit_coaching")'), "advanced intelligence routes through the Gold entitlement model"],
   [completed.includes("COMPLETED_LINGER_MS = 4200"), "completed tasks stay visible long enough for an easy undo"],
@@ -120,7 +120,7 @@ const checks = [
   [shared.includes("minHeight: 44"), "shared dialog action meets minimum touch target"],
   [settings.includes("Reduce visual decisions, ambient theme effects, and extra decoration."), "Simple Layout/theme interaction is explained"],
   // Compassionate proactive triage + rest as a feature (2026-09-28 pass)
-  [today.includes("<ShapeMyDay") && today.includes("<RestDayCard") && today.includes("<FocusTimer") && today.includes("<OnboardingArc") && today.includes("<EveningGratitude"), "Home renders the proactive care layer above the reference layout"],
+  [today.includes("<ShapeMyDay") && today.includes("<RestDayCard") && appSource.includes("<FocusTimer") && today.includes("<OnboardingArc") && today.includes("<EveningGratitude"), "Home retains proactive care and the shared timer is available across screens"],
   [shapeMyDay.includes("essential_on_low_capacity") && shapeMyDay.includes("estimated_minutes") && shapeMyDay.includes("plushlife:shape-my-day:v1"), "Shape-my-day builds its plan from low-capacity metadata and remembers dismissal per date"],
   [shapeMyDay.includes("plushlife:start-focus-timer") && focusTimer.includes("plushlife:start-focus-timer"), "the gentle timer opens from Shape-my-day via a decoupled event"],
   [shapeMyDay.includes("Nothing is erased"), "Shape-my-day promises it never rewrites the task list"],
