@@ -24,8 +24,11 @@ function flatten(node){if(!node||typeof node!=='object')return [];return [node,.
 for (const [world, palette] of Object.entries(themeCopy.worlds)) {
   for (const happy of ['', '-happy']) {
     const art=fs.readFileSync(`assets/figma/${palette.asset}${happy}.svg`,'utf8');
-    assert.ok(art.includes('data-companion-world='),`${world} must have a themed companion`);
-    assert.equal(art.includes('data-dino-spikes="true"'),world==='dino','Dinosaur spikes belong only to Dino');
+    const mascot=art.match(/<g data-cozy-mascot="true"[^>]*>.*?<\/g>/s)?.[0];
+    const canonical=fs.readFileSync(`assets/figma/soft${happy}.svg`,'utf8').match(/<g data-cozy-mascot="true"[^>]*>.*?<\/g>/s)?.[0];
+    assert.ok(mascot,'Every scene has the original plush');
+    assert.equal(mascot,canonical,`${world} must preserve the original mascot in every expression`);
+    assert.ok(mascot.includes('#FFB724') && mascot.includes('#24BFA5') && mascot.includes('#AE49C7'),'Keep the original tail, spikes, and purple outline');
     assert.ok(fs.readFileSync('service-worker.js','utf8').includes(`./assets/figma/${palette.asset}${happy}.svg`),'Every expression must work offline');
   }
 }
