@@ -1,3 +1,4 @@
+import { HabitGoalCaption } from "./habit-studio.jsx";
 import { nextCompanionReward } from "../companion-experience.js";
 import { CozyComfortContext } from "./cozy-space.jsx";
 import { upcomingSchedule } from "../home-agenda.js";
@@ -315,7 +316,7 @@ function Habits({ rows = [], viewDone = {}, toggle, openTaskManager, period }) {
         {visible.length ? visible.map((r) => (
           <button type="button" className="pl-list-row pl-habit-row" key={r.key} onClick={() => toggle?.(r.key)}>
             <span className="pl-check" aria-hidden="true" />
-            <span className="pl-row-text">{r.sourceTask && <HabitTypeIcon task={r.sourceTask} />}{r.label}</span>
+            <span className="pl-row-text">{r.sourceTask && <HabitTypeIcon task={r.sourceTask} />}{r.label}<HabitGoalCaption taskKey={r.key}/></span>
           </button>
         )) : (
           <div className="pl-list-row pl-note-row">

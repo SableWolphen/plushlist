@@ -1,3 +1,4 @@
+import { HabitStudio } from "./habit-studio.jsx";
 import { hasGoldFeature } from "../plush-gold.js";
 
 const LazyExistingProgressPanel = React.lazy(() => import("./progress-panel-existing.jsx").then((module) => ({ default: module.ProgressPanel })));
@@ -16,5 +17,5 @@ export function ProgressPanel(props) {
   const goldInsights = hasGoldFeature("advanced_growth_insights");
   if (goldInsights && props.progressView === "story") return <React.Suspense fallback={<GrowthFallback />}><LazyGoldStoryView {...props} /></React.Suspense>;
   if (goldInsights && props.progressView === "areas") return <React.Suspense fallback={<GrowthFallback />}><LazyGoldSpacesView {...props} /></React.Suspense>;
-  return <div className="pl-progress-page"><React.Suspense fallback={null}>{props.progressView === "overview" && <LazyGrowthMoments user={props.user} />}</React.Suspense><React.Suspense fallback={<GrowthFallback />}><LazyExistingProgressPanel {...props} /></React.Suspense></div>;
+  return <div className="pl-progress-page"><HabitStudio compact initialTab="week"/><React.Suspense fallback={null}>{props.progressView === "overview" && <LazyGrowthMoments user={props.user} />}</React.Suspense><React.Suspense fallback={<GrowthFallback />}><LazyExistingProgressPanel {...props} /></React.Suspense></div>;
 }
