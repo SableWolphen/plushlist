@@ -20,12 +20,13 @@ const LOADING_LABEL_STYLE = { fontSize: 13.5, fontWeight: 800, color: "#8574A0",
 
 export const PlushMascot = React.memo(function PlushMascot({ outfit = MASCOT_OUTFITS[0], size = 150, celebrating = false, mood = "neutral", activityDays = 0, theme, variant = "bear" }) {
   const growth = mascotGrowthStageForDays(activityDays);
+  const displaySize = size <= 48 ? 46 : 128;
   return (
-    <div className={celebrating ? "plush-mascot mascot-celebrating" : "plush-mascot"} style={{ width: size, aspectRatio: "211 / 100", position: "relative", borderRadius: "50%", boxShadow: growth.glow }}>
+    <div className={celebrating ? "plush-mascot mascot-celebrating" : "plush-mascot"} style={{ width: displaySize, height: displaySize === 128 ? 118 : 42, flexShrink: 0, position: "relative", borderRadius: "50%", boxShadow: growth.glow }}>
       {growth.sparkles.map((sparkle, index) => (
-        <span key={index} aria-hidden="true" style={{ position: "absolute", fontSize: Math.round(size * 0.16), left: `${SPARKLE_LEFT[index % 4]}%`, top: `${SPARKLE_TOP[index % 4]}%`, pointerEvents: "none" }}>{sparkle}</span>
+        <span key={index} aria-hidden="true" style={{ position: "absolute", fontSize: Math.round(displaySize * 0.16), left: `${SPARKLE_LEFT[index % 4]}%`, top: `${SPARKLE_TOP[index % 4]}%`, pointerEvents: "none" }}>{sparkle}</span>
       ))}
-      <ThemeScene world={theme} outfit={outfit} mood={celebrating ? "happy" : mood} />
+      <ThemeScene focus world={theme} outfit={outfit} mood={celebrating ? "happy" : mood} />
     </div>
   );
 });

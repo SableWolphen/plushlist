@@ -388,3 +388,22 @@ body[data-login-world] button:not(.mobile-email-toggle){border-radius:18px!impor
 .pl-weekly-keepsake>small{font-size:12px;line-height:1.5;color:var(--pl-theme-muted)}
 @media(prefers-reduced-motion:reduce){.pl-companion-idle{animation:none!important;transform:none!important}}
 #main-content#main-content[data-pl-world] :is(.pl-cozy-room,.pl-keepsake-preview) .pl-theme-scene.pl-mascot-focus{position:relative;display:block;width:150px;height:138px;flex:none;overflow:hidden}
+
+/* One companion footprint across worlds, screens, and viewport sizes. */
+:root{--pl-companion-width:128px;--pl-companion-height:118px}
+.pl-theme-scene.pl-mascot-focus{position:relative;display:block;width:var(--pl-companion-width);height:var(--pl-companion-height);flex:none;overflow:hidden}
+.pl-mascot-focus .pl-scene-art{position:absolute;max-width:none}
+.pl-mascot-focus .pl-scene-art>img{width:100%;max-width:none}
+#main-content#main-content[data-pl-world] :is(.pl-home-hero,.pl-cozy-scene,.pl-cozy-room,.pl-keepsake-preview,.pl-closet-shell .pl-cozy-scene) .pl-theme-scene.pl-mascot-focus{width:var(--pl-companion-width)!important;height:var(--pl-companion-height)!important}
+#main-content#main-content[data-pl-world] .pl-scene-owner{width:var(--pl-companion-width)!important;height:var(--pl-companion-height)!important}
+.plush-mascot .pl-theme-scene.pl-mascot-focus{width:100%;height:100%}
+#main-content#main-content[data-pl-world] .pl-home-plush .plush-mascot{width:var(--pl-companion-width)!important;height:var(--pl-companion-height)!important}
+.pl-gentle-tools{padding:12px;border:1px solid var(--pl-theme-line);border-radius:20px;background:var(--pl-theme-surface);color:var(--pl-theme-ink);min-width:0}
+.pl-gentle-tools>summary{min-height:44px;align-content:center;cursor:pointer;font-weight:800;font-size:15px}
+.pl-gentle-tools>summary>span{display:block;font-size:12px;font-weight:400;color:var(--pl-theme-muted);margin-top:3px}
+.pl-gentle-tools section{padding:12px 0;border-top:1px solid var(--pl-theme-line);margin-top:10px}
+.pl-gentle-tools h3{font:700 16px/1.4 Quicksand,Nunito,sans-serif;margin:0 0 8px}
+.pl-gentle-tools p,.pl-gentle-tools label,.pl-gentle-tools li{font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.pl-gentle-tools button[aria-pressed=true]{outline:2px solid var(--pl-theme-accent);outline-offset:1px}
+.pl-gentle-tools :is(button,input,select,textarea):focus-visible{outline:3px solid var(--pl-theme-accent);outline-offset:3px}
+.pl-gentle-tools button:disabled{opacity:.6;cursor:default}

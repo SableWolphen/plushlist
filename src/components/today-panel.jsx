@@ -55,6 +55,9 @@ const LazySmartAdaptationPanel = React.lazy(() => import("./plush-knows-me-smart
  * background-intelligence-start
  */
 
+import { GentleDayTools } from './gentle-day-tools.jsx';
+import { smallerStep } from '../gentle-day.js';
+
 const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 
 function recordNextStepChoice(row, action, date) {
@@ -113,8 +116,7 @@ export function TodayPanel(props) {
       setSmartEaseHint({ key: taskKey, text: gentler });
       return;
     }
-    setSmartEaseHint(null);
-    props.pickEasierSuggestion?.(taskKey);
+    setSmartEaseHint({key:taskKey,text:smallerStep(task)});
   };
 
   const setNextStepSkipped = (updater) => {
@@ -141,8 +143,8 @@ export function TodayPanel(props) {
       </div>
       <TodayPanelCore
       {...props}
-      optionalTools={<><OnboardingArc onboardingComplete={!!props.preferences?.onboarding_complete} goToDashboard={props.goToDashboard}/>{props.selectedTaskViewIsRest ? <RestDayCard careDaysTotal={props.careDaysTotal} goToDashboard={props.goToDashboard} period={props.period}/> : <ShapeMyDay rows={props.rows} viewDone={props.viewDone} toggle={smartToggle} dailyCheckIn={props.dailyCheckIn} period={props.period}/>}<EveningGratitude/></>}
-      cozyDaily={!props.isHistoricalView&&!props.isFutureView&&<CozyDaily rows={props.rows} viewDone={props.viewDone} dailyCheckIn={props.dailyCheckIn} returnGapDays={0} returnBannerDismissed={props.returnBannerDismissed} onDismissReturn={props.setReturnBannerDismissed} onReset={props.onCozyReset} onUsual={()=>props.selectDayType?.('full')} onOpen={()=>{window.__plushlifeOpenCozySpace=true;props.goToDashboard?.('care');}}/>}
+      optionalTools={<>{!props.isHistoricalView&&!props.isFutureView&&<GentleDayTools key={`${props.userId}:${props.period?.date}`} userId={props.userId} date={props.period?.date} rows={props.rows} viewDone={props.viewDone} dailyCheckIn={props.dailyCheckIn} onDayType={props.selectDayType} onReset={props.onCozyReset} onOpenComfort={()=>{window.__plushlifeOpenCozySpace=true;props.goToDashboard?.("care");}} onSupport={()=>props.goToDashboard?.("guardian")}/>}<OnboardingArc onboardingComplete={!!props.preferences?.onboarding_complete} goToDashboard={props.goToDashboard}/>{props.selectedTaskViewIsRest ? <RestDayCard careDaysTotal={props.careDaysTotal} goToDashboard={props.goToDashboard} period={props.period}/> : <ShapeMyDay rows={props.rows} viewDone={props.viewDone} toggle={smartToggle} dailyCheckIn={props.dailyCheckIn} period={props.period}/>}<EveningGratitude/></>}
+      cozyDaily={!props.isHistoricalView&&!props.isFutureView&&<CozyDaily rows={props.rows} viewDone={props.viewDone} dailyCheckIn={props.dailyCheckIn} returnGapDays={props.returnGapDays} returnBannerDismissed={props.returnBannerDismissed} onDismissReturn={props.setReturnBannerDismissed} onReset={props.onCozyReset} onUsual={()=>props.selectDayType?.('full')} onOpen={()=>{window.__plushlifeOpenCozySpace=true;props.goToDashboard?.('care');}}/>}
       toggle={smartToggle}
       recentlyCompletedKeys={recentlyCompletedKeys}
       nextStepTask={smartNextStepHidden ? null : activeNextStep}
