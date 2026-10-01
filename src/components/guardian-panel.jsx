@@ -53,6 +53,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             supportOwnerId={supportOwnerId}
             isSupportAdult={isSupportAdult}
             canSendSupportNotes={canSendSupportNotes}
+            activeSupportLink={activeSupportLink}
             ownedSupportLinks={ownedSupportLinks}
             selectedSupportName={selectedSupportName}
             supportNotes={supportNotes}
@@ -295,8 +296,8 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                       <div style={{ marginTop: 8, padding: "8px 9px", borderRadius: 9, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
                         <div style={{ fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#4C8FE8)", letterSpacing: ".08em" }}>SHARED ACCESS</div>
                         <div style={{ marginTop: 5, display: "flex", gap: 5, flexWrap: "wrap" }}>
-                          {[["can_view_progress","Progress"],["can_view_tasks","Today's tasks"],["can_view_schedule","Schedule"],["can_view_mood","Mood summary"],["can_send_notes","Notes"],["can_add_rewards","Rewards"],["can_suggest_tasks","Task suggestions"]].filter(([key]) => link[key]).map(([key,label]) => <span key={key} style={{ padding: "3px 7px", borderRadius: 999, background: "var(--pl-theme-surface-2,#EEF7FF)", color: "var(--pl-theme-ink,#416D98)", fontSize: 14, fontWeight: 800 }}>{label}</span>)}
-                          {![["can_view_progress"],["can_view_tasks"],["can_view_schedule"],["can_view_mood"],["can_send_notes"],["can_add_rewards"],["can_suggest_tasks"]].some(([key]) => link[key]) && <span style={{ fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>Nothing shared right now.</span>}
+                          {[["can_view_progress","Progress"],["can_view_tasks","Today's tasks"],["can_view_schedule","Schedule"],["can_view_mood","Mood summary"],["can_send_notes","Notes"],["can_add_rewards","Rewards"],["can_suggest_tasks","Task suggestions"],["can_use_together","Together space"]].filter(([key]) => link[key]).map(([key,label]) => <span key={key} style={{ padding: "3px 7px", borderRadius: 999, background: "var(--pl-theme-surface-2,#EEF7FF)", color: "var(--pl-theme-ink,#416D98)", fontSize: 14, fontWeight: 800 }}>{label}</span>)}
+                          {![["can_view_progress"],["can_view_tasks"],["can_view_schedule"],["can_view_mood"],["can_send_notes"],["can_add_rewards"],["can_suggest_tasks"],["can_use_together"]].some(([key]) => link[key]) && <span style={{ fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>Nothing shared right now.</span>}
                         </div>
                         {!pending && <div style={{ marginTop: 5, fontSize: 14, fontWeight: 800, color: "var(--pl-theme-ink,#5B3D70)" }}>Last Guardian view: {formatRelativeTime(link.last_viewed_at)} · Pause access anytime.</div>}
                       </div>
@@ -311,6 +312,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                           ["can_send_notes", "Send notes"],
                           ["can_add_rewards", "Add rewards"],
                           ["can_suggest_tasks", "Suggest tasks"],
+                          ["can_use_together", "Together space"],
                         ].map(([permission, label]) => (
                           <label key={permission} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 700 }}>
                             <input type="checkbox" checked={!!link[permission]} disabled={!link.active} onChange={(event) => updateCaretakerPermission(link, permission, event.target.checked)} />
