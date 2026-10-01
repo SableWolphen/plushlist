@@ -5,7 +5,6 @@ import { CozyScene } from "./theme-world.jsx";
  * 🗓️ Month so far
  */
 import { ProgressPanel as ProgressPanelCore } from "./progress-panel-core.jsx";
-import { HabitTypeIcon } from "./shared.jsx";
 import { hasGoldFeature } from "../plush-gold.js";
 
 const GrowthNextMove = React.lazy(() => import("./growth-next-move.jsx").then((module) => ({ default: module.GrowthNextMove })));
@@ -125,14 +124,16 @@ function CompactGrowthOverview(props) {
         }
       `}</style>
 
+      <header className="pl-progress-controls" aria-label="Progress highlights and views">
       {(highlights.mostConsistent || highlights.topMood) && (
         <div className="pl-growth-highlight-row" aria-label="Weekly highlights">
-          {highlights.mostConsistent && <span>🌱 <HabitTypeIcon task={highlights.mostConsistent.task} />{highlights.mostConsistent.task.task}</span>}
-          {highlights.topMood && <span>🙂 {highlights.topMood}</span>}
+          {highlights.mostConsistent && <div className="pl-growth-badge"><span className="pl-badge-icon" aria-hidden="true">🌱</span><strong>{highlights.mostConsistent.task.task}</strong></div>}
+          {highlights.topMood && <div className="pl-growth-badge"><span className="pl-badge-icon" aria-hidden="true">🙂</span><strong>{highlights.topMood}</strong></div>}
         </div>
       )}
 
       <ProgressTabs progressView={props.progressView} setProgressView={props.setProgressView} />
+      </header>
 
       <CozyScene title="Every return counts." subtitle="Your story is bigger than a streak." />
       <section className="pl-growth-weekbar" aria-label="Weekly progress">

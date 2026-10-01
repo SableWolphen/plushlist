@@ -323,3 +323,28 @@ body[data-login-world] button:not(.mobile-email-toggle){border-radius:18px!impor
 #main-content#main-content[data-pl-world] .pl-growth-weekbar-track{background:var(--pl-theme-surface-2)!important}
 #main-content#main-content[data-pl-world] details.pl-growth-card{padding:0!important}
 #main-content#main-content[data-pl-world] details.pl-growth-card>summary{min-height:52px!important;padding:12px 14px!important;box-sizing:border-box}
+
+/* Keep banners, context badges, and view navigation in separate layout groups. */
+#main-content#main-content[data-pl-world] .pl-progress-page{display:grid;gap:14px;min-width:0}
+#main-content#main-content[data-pl-world] .pl-progress-controls{display:grid;gap:14px;min-width:0}
+#main-content#main-content[data-pl-world] .pl-moments-banner{margin:0!important;padding:0!important;border:1px solid var(--pl-theme-line)!important;border-radius:18px!important;background:var(--pl-theme-surface)!important;color:var(--pl-theme-ink)!important;overflow:hidden}
+#main-content#main-content[data-pl-world] .pl-moments-banner>summary{display:flex;align-items:center;gap:10px;min-height:60px;padding:10px 14px;box-sizing:border-box;cursor:pointer;list-style:none}
+#main-content#main-content[data-pl-world] .pl-moments-banner>summary::-webkit-details-marker{display:none}
+#main-content#main-content[data-pl-world] .pl-moments-banner>summary::after{content:'⌄';margin-left:auto;color:var(--pl-theme-muted);font-size:18px;flex:none}
+#main-content#main-content[data-pl-world] .pl-moments-banner[open]>summary::after{content:'⌃'}
+#main-content#main-content[data-pl-world] .pl-moments-icon{font-size:22px;flex:none}
+#main-content#main-content[data-pl-world] .pl-moments-heading{min-width:0}
+#main-content#main-content[data-pl-world] .pl-moments-heading strong{display:block;font-size:14px;line-height:1.4}
+#main-content#main-content[data-pl-world] .pl-moments-heading small{display:block;font-size:12px;line-height:1.4;color:var(--pl-theme-muted)}
+#main-content#main-content[data-pl-world] .pl-moments-list{display:grid;gap:8px;padding:0 14px 14px}
+#main-content#main-content[data-pl-world] .pl-moments-list>div{padding:10px;border-radius:12px;background:var(--pl-theme-surface-2);color:var(--pl-theme-ink);font-size:13px;line-height:1.45}
+#main-content#main-content[data-pl-world] .pl-moments-empty{padding:8px 4px;font-size:13px;line-height:1.45;color:var(--pl-theme-muted)}
+#main-content#main-content[data-pl-world] .pl-growth-highlight-row{display:flex!important;align-items:stretch;gap:8px!important;flex-wrap:wrap;margin:0!important;min-width:0}
+#main-content#main-content[data-pl-world] .pl-growth-badge{display:flex;align-items:center;gap:8px;min-height:40px;min-width:0;box-sizing:border-box;padding:8px 12px;border-radius:14px;background:var(--pl-theme-surface-2);color:var(--pl-theme-ink);border:1px solid var(--pl-theme-line);font-size:13px;line-height:1.4}
+#main-content#main-content[data-pl-world] .pl-growth-badge:first-child{flex:1 1 180px}
+#main-content#main-content[data-pl-world] .pl-growth-badge strong{min-width:0;overflow-wrap:anywhere;font-weight:700}
+#main-content#main-content[data-pl-world] .pl-growth-badge .pl-badge-icon{padding:0!important;min-height:0!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important;font-size:18px;line-height:1;flex:none}
+#main-content#main-content[data-pl-world] :is(.pl-growth-tabs,.pl-care-tabs,.pl-design-tabs){display:grid!important;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px!important;margin:0!important;min-width:0;box-shadow:none!important}
+#main-content#main-content[data-pl-world] :is(.pl-growth-tabs,.pl-care-tabs,.pl-design-tabs) button{min-width:0;box-sizing:border-box;overflow-wrap:anywhere}
+#main-content#main-content[data-pl-world] .pl-growth-tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:60px!important;padding:8px 4px!important;font-size:13px!important;line-height:1.35;white-space:normal!important}
+#main-content#main-content[data-pl-world] .pl-growth-tabs button>span:first-child{font-size:18px;line-height:1}
