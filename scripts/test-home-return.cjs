@@ -48,5 +48,26 @@ window.matchMedia=()=>({matches:true,addEventListener(){},removeEventListener(){
 act(()=>{tree=Renderer.create(React.createElement(TodayPanel,{...props,preferences:{},selectedSchedule:{entries},rows}));});
 assert.equal(tree.root.findAllByProps({role:'tab'}).length,0,'Wide screens show both panes');
 assert.ok(tree.root.findAll(n=>String(n.props.id || '').endsWith('-panel')).every(n=>!n.props.hidden));
-act(()=>tree.unmount());fs.rmSync(dir,{recursive:true,force:true});
+act(()=>tree.unmount());
 console.log('Home return passed: gentle greeting, user-chosen Tiny day, dismissal, and current-day-only display.');
+
+// The companion responds to tap/completion events, without moving the welcome card.
+const reactionTimers=[];window.setTimeout=(fn,delay)=>{if(delay===2200){reactionTimers.push(fn);return 99999;}return setTimeout(fn,delay);};
+act(()=>{tree=Renderer.create(React.createElement(TodayPanel,{...props,preferences:{},returnGapDays:0}));});
+const pat=()=>tree.root.findByProps({'aria-label':'Say hi to your plush'});
+act(()=>window.dispatchEvent(Object.assign(new Event('plushlife:task-completion-feedback'),{detail:{completed:false}})));
+assert.ok(!JSON.stringify(tree.toJSON()).includes('soft-happy.svg'),'Undo does not trigger a celebration');
+act(()=>pat().props.onClick());
+assert.ok(JSON.stringify(tree.toJSON()).includes('soft-happy.svg'));
+assert.ok(pat().props.className.includes('pl-mascot-happy-hop'));
+assert.ok(!tree.root.findByProps({'aria-label':'PlushLife welcome'}).props.className.includes('mascot-celebrating'));
+act(()=>window.dispatchEvent(Object.assign(new Event('plushlife:task-completion-feedback'),{detail:{completed:true,label:'Water'}})));
+assert.ok(JSON.stringify(tree.toJSON()).includes('Tiny win. Big happy dance!'));
+act(()=>tree.update(React.createElement(TodayPanel,{...props,preferences:{reduced_motion:true},returnGapDays:0})));
+assert.ok(!pat().props.className.includes('pl-mascot-happy-hop'));
+assert.ok(JSON.stringify(tree.toJSON()).includes('soft-happy.svg'),'Reduced motion retains the happy expression');
+act(()=>reactionTimers.at(-1)());
+assert.ok(!JSON.stringify(tree.toJSON()).includes('soft-happy.svg'),'Expression returns to neutral after the brief reaction');
+act(()=>tree.unmount());
+window.setTimeout=setTimeout;
+fs.rmSync(dir,{recursive:true,force:true});

@@ -67,13 +67,23 @@ function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, 
   // dispatches plushlife:task-completion-feedback on window, and the mascot
   // celebrates (happy face + bounce) for the same 2.2s as the gentle glow.
   const [mascotCelebrating, setMascotCelebrating] = React.useState(false);
+  const [mascotMessage, setMascotMessage] = React.useState("");
   const celebrateTimer = React.useRef(null);
+  const lastOutfit = React.useRef(selectedOutfit?.id);
+  const reactToCozy = (message) => {
+    setMascotCelebrating(true);
+    setMascotMessage(message);
+    if (celebrateTimer.current) window.clearTimeout(celebrateTimer.current);
+    celebrateTimer.current = window.setTimeout(() => { setMascotCelebrating(false); setMascotMessage(""); }, 2200);
+  };
+  React.useEffect(() => {
+    if (selectedOutfit?.id && selectedOutfit.id !== lastOutfit.current) reactToCozy("Fresh fit. Looking cozy! ✨");
+    lastOutfit.current = selectedOutfit?.id;
+  }, [selectedOutfit?.id]);
   React.useEffect(() => {
     const onCompletion = (event) => {
       if (event.detail?.completed === false) return;
-      setMascotCelebrating(true);
-      if (celebrateTimer.current) window.clearTimeout(celebrateTimer.current);
-      celebrateTimer.current = window.setTimeout(() => setMascotCelebrating(false), 2200);
+      reactToCozy("Tiny win. Big happy dance! ✨");
     };
     window.addEventListener("plushlife:task-completion-feedback", onCompletion);
     return () => {
@@ -89,10 +99,13 @@ function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, 
         <button type="button" className="pl-heading-gear" onClick={startFocusTimer} aria-label="Start a gentle timer" title="Start a gentle timer">⏱</button>
         <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen?.(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
       </header>
-      <section className={`pl-home-hero ${mascotCelebrating && !reducedMotion ? "mascot-celebrating" : ""}`} aria-label="PlushLife welcome">
-        <ThemeScene outfit={selectedOutfit} focus />
+      <section className="pl-home-hero" aria-label="PlushLife welcome">
+        <button type="button" className={`pl-mascot-pat ${mascotCelebrating && !reducedMotion ? "pl-mascot-happy-hop" : ""}`} onClick={() => reactToCozy("Happy you're here, Cozy! 💜")} aria-label="Say hi to your plush" title="Tap to say hi">
+          <ThemeScene outfit={selectedOutfit} focus mood={mascotCelebrating ? "happy" : "neutral"} decorative />
+          {mascotCelebrating && <span className="pl-mascot-heart" aria-hidden="true">💜</span>}
+        </button>
         <div className="pl-companion-copy">
-        <h2>{returning ? "Welcome back, Cozy." : copy["A little counts."] || "A little counts."}</h2>
+        <h2>{mascotMessage || (returning ? "Welcome back, Cozy." : copy["A little counts."] || "A little counts.")}</h2>
         <p>{returning ? "Good to see you. One tiny thing is plenty." : copy["Your plush is happy you\'re here."] || "Your plush is happy you\'re here."}</p>
         <button type="button" className="pl-link-btn" style={{minHeight:44}} onClick={() => { if(returning){onSofterDay?.();return;} goToDashboard?.("care"); setTimeout(() => window.dispatchEvent(new Event("plushlife:open-cozy-space")),100); }}>{returning ? "Make today softer →" : "My Cozy Space →"}</button>
         </div>

@@ -25,7 +25,7 @@ export const PlushMascot = React.memo(function PlushMascot({ outfit = MASCOT_OUT
       {growth.sparkles.map((sparkle, index) => (
         <span key={index} aria-hidden="true" style={{ position: "absolute", fontSize: Math.round(size * 0.16), left: `${SPARKLE_LEFT[index % 4]}%`, top: `${SPARKLE_TOP[index % 4]}%`, pointerEvents: "none" }}>{sparkle}</span>
       ))}
-      <ThemeScene world={theme} outfit={outfit} />
+      <ThemeScene world={theme} outfit={outfit} mood={celebrating ? "happy" : mood} />
     </div>
   );
 });
