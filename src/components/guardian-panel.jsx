@@ -183,6 +183,10 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                   {supportProgressView === "daily" && <div style={{ marginTop: 5, fontSize: 14, lineHeight: 1.45, color: "var(--pl-theme-muted,#8C6B9E)" }}>Daily essentials: {supportDailyEssentialCompleted}/{supportDailyEssentialKeys.length} · {supportTodayDayLabel} schedule: {supportScheduledTodayCompleted}/{supportScheduledTodayKeys.length} · Bonus groups do not lower this score.</div>}
                 </div> : <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: "var(--pl-theme-surface-2,#F6F3F8)", color: "var(--pl-theme-muted,#75677D)", fontSize: 14 }}>Progress sharing is turned off by {selectedSupportName}.</div>}
 
+                {(canSendSupportNotes || canAddSupportRewards || !!activeSupportLink?.can_suggest_tasks) && (
+                  <details style={{ marginTop: 14, borderTop: "1px solid var(--pl-theme-line,#E9DDF6)", paddingTop: 10 }}>
+                    <summary style={{ cursor: "pointer", fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#7B6888)" }}>More ways to support</summary>
+                    <div style={{ paddingTop: 4 }}>
                 {canSendSupportNotes && <>
                 <div style={{ marginTop: 14, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#4C8FE8)" }}>SEND AN ENCOURAGING NOTE</div>
                 <textarea value={newNote} onChange={(event) => setNewNote(event.target.value)} maxLength={1000} placeholder="How are you doing? I'm proud of your progress…" style={{ width: "100%", boxSizing: "border-box", minHeight: 74, marginTop: 7, padding: 10, borderRadius: 11, border: "1px solid var(--pl-theme-line,#E9DDF6)", color: "var(--pl-theme-ink,#5B4B6B)", resize: "vertical" }} />
@@ -225,6 +229,10 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                   </div>
                   <button onClick={submitTaskSuggestion} style={{ marginTop: 7, padding: "8px 12px", borderRadius: 10, border: 0, background: "var(--pl-theme-accent,#318C79)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800 }}>Send suggestion</button>
                 </>}
+
+                    </div>
+                  </details>
+                )}
               </div>
             ) : (
               <div>
