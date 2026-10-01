@@ -1,4 +1,5 @@
 import { CozySharing, SharedCozyCard } from "./cozy-space.jsx";
+import { TogetherCorner } from "./together-corner.jsx";
 // The inline Guardian/support ToolPanel — module split phase 7,
 // eighth slice, last of the "big four" (see docs/module-split-plan.md).
 // Covers both roles of the Guardian relationship: managing Guardians
@@ -46,6 +47,18 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
           <div className="pl-guardian-content">
           <CozyScene title="You choose who walks with you." subtitle="Support at your pace. You stay in control." />
           {supportViewMode === "mine" ? <CozySharing links={ownedSupportLinks} /> : <SharedCozyCard client={client} ownerId={supportOwnerId} userId={user?.id} />}
+          <TogetherCorner
+            client={client}
+            user={user}
+            supportOwnerId={supportOwnerId}
+            isSupportAdult={isSupportAdult}
+            canSendSupportNotes={canSendSupportNotes}
+            ownedSupportLinks={ownedSupportLinks}
+            selectedSupportName={selectedSupportName}
+            supportNotes={supportNotes}
+            loadSupportData={loadSupportData}
+            loadSupportOwner={loadSupportOwner}
+          />
           <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 8px 24px rgba(92,57,108,0.07)" }}>
             {supportViewMode === "caretaker" && guardianSupportRequests.filter((request) => request.owner_user_id === supportOwnerId && request.status !== "resolved" && request.status !== "cancelled").length > 0 && (
               <div style={{ marginBottom: 14, padding: 13, borderRadius: 13, background: "var(--pl-theme-surface,#FFF9FD)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
@@ -368,8 +381,8 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             }
 
             <div style={{ marginTop: 16, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#4C8FE8)" }}>💌 NOTES</div>
-            {supportNotes.length === 0 ? <div style={{ marginTop: 7, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>No notes yet.</div> :
-              supportNotes.map((note) => (
+            {supportNotes.filter((note) => !String(note.body || "").startsWith("[Together:")).length === 0 ? <div style={{ marginTop: 7, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>No notes yet.</div> :
+              supportNotes.filter((note) => !String(note.body || "").startsWith("[Together:")).map((note) => (
                 <div key={note.id} style={{ marginTop: 7, padding: 11, borderRadius: 11, background: note.suggested_tool_id ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface-2)", border: note.suggested_tool_id ? "1px solid #F0D5E8" : "1px solid #D9ECFA" }}>
                   <div style={{ fontSize: 14, lineHeight: 1.45 }}>{note.body}</div>
                   {note.suggested_tool_id && (
