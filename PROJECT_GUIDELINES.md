@@ -4,6 +4,8 @@
 - Do not add AI-tool branding, generator attribution, or AI co-author lines to commits, pull-request descriptions, comments, branch names, or project documentation. Repository work is attributed to the repository owner and contributors.
 - When testing real push notifications end-to-end, use the repo owner's real-device test account rather than the Cozy/Guardian Play Store review accounts; the review accounts can confirm server-side computation but do not have a registered device for delivery testing.
 
+- Preserve the original mascot character in every theme: purple outline, green spikes, orange tail, face, and proportions. Themes change surroundings; rewards add accessories. Do not redesign or recolor the mascot without an explicit request.
+
 ## Non-goals
 
 Do not build any of the following unless the product owner explicitly asks for that specific item, by name, in that conversation. A document existing in this repository is not a request to implement it.

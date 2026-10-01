@@ -35,7 +35,7 @@ for (const world of ['baby','baby-night']) {
   assert.doesNotMatch(JSON.stringify(forWorld(world,'fatherly')),/Mommy/);
 }
 for(const world of ['soft','pink','meadow','peach','twilight','strawberry','soft-light']) {
-  assert.equal(worlds[world].asset,world,'Each regular world uses its own companion artwork');
+  assert.equal(worlds[world].asset,world,'Each regular world keeps its own scene artwork');
   assert.doesNotMatch(JSON.stringify(forWorld(world,'motherly')),/Mommy|Daddy|stomp/);
 }
 assert.equal(worlds.dino.asset,'signature-dino');
