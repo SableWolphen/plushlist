@@ -348,3 +348,13 @@ body[data-login-world] button:not(.mobile-email-toggle){border-radius:18px!impor
 #main-content#main-content[data-pl-world] :is(.pl-growth-tabs,.pl-care-tabs,.pl-design-tabs) button{min-width:0;box-sizing:border-box;overflow-wrap:anywhere}
 #main-content#main-content[data-pl-world] .pl-growth-tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:60px!important;padding:8px 4px!important;font-size:13px!important;line-height:1.35;white-space:normal!important}
 #main-content#main-content[data-pl-world] .pl-growth-tabs button>span:first-child{font-size:18px;line-height:1}
+
+#main-content#main-content[data-pl-world] .pl-mascot-pat{position:relative;display:block;flex:none;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;border-radius:22px;cursor:pointer;touch-action:manipulation}
+#main-content#main-content[data-pl-world] .pl-mascot-pat .pl-theme-scene{pointer-events:none}
+.pl-mascot-happy-hop{animation:plCozyHop 700ms ease-in-out 2;transform-origin:50% 90%}
+.pl-mascot-heart{position:absolute;right:2px;top:8px;font-size:22px;pointer-events:none}
+@keyframes plCozyHop{0%,100%{transform:translateY(0) rotate(0)}20%{transform:translateY(2px) scale(1.03,.97)}45%{transform:translateY(-9px) rotate(-4deg)}65%{transform:translateY(-4px) rotate(4deg)}85%{transform:translateY(0) scale(.98,1.02)}}
+@media(prefers-reduced-motion:reduce){.pl-mascot-happy-hop{animation:none!important;transform:none!important}}
+#main-content#main-content[data-pl-world] .pl-task-title{display:flex;align-items:center;gap:10px;min-height:44px}
+#main-content#main-content[data-pl-world] .pl-task-title h2::before{display:none}
+#main-content#main-content[data-pl-world] .pl-task-title .pl-theme-scene.pl-mascot-focus{position:relative;display:block;width:48px;height:44px;overflow:hidden}
