@@ -207,7 +207,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 <div style={{ display: "grid", gap: 7, marginTop: 7 }}>
                   <input value={rewardTitle} onChange={(event) => setRewardTitle(event.target.value)} maxLength={120} placeholder="Reward, e.g. Favorite dinner" aria-label="Reward title" style={{ padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
                   <input value={rewardDetails} onChange={(event) => setRewardDetails(event.target.value)} maxLength={500} placeholder="Optional details" aria-label="Reward details" style={{ padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
-                  <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>
                     Unlock at
                     <input type="number" min="1" max="100" value={rewardTarget} onChange={(event) => setRewardTarget(event.target.value)} style={{ width: 68, padding: 7, borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
                     %
@@ -223,7 +223,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 </>}
                 {!!activeSupportLink?.can_suggest_tasks && <>
                   <div style={{ marginTop: 16, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-ink,#318C79)" }}>SUGGEST A TASK</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", gap: 7, marginTop: 7 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 7, marginTop: 7 }}>
                     <input value={suggestedTask} onChange={(event) => setSuggestedTask(event.target.value)} maxLength={240} placeholder="A gentle task suggestion" aria-label="Task suggestion" style={{ minWidth: 0, padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
                     <select value={suggestedTaskDay} onChange={(event) => setSuggestedTaskDay(event.target.value)} style={{ padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)" }}><option value="daily">Daily</option>{DAYS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select>
                   </div>
@@ -243,7 +243,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 </div>
                 <div style={{ marginTop: 9 }}>
                   <div style={{ fontSize: 14, fontWeight: 800, color: "var(--pl-theme-muted,#4C8FE8)" }}>WHAT'S THEIR ROLE?</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6, marginTop: 6 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(112px, 1fr))", gap: 6, marginTop: 6 }}>
                     {GUARDIAN_ROLE_PRESETS.map((role) => (
                       <button key={role.id} type="button" onClick={() => setGuardianRolePreset(role.id)} aria-pressed={guardianRolePreset === role.id} style={{ padding: "7px 4px", borderRadius: 10, border: guardianRolePreset === role.id ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: guardianRolePreset === role.id ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface)", textAlign: "center", cursor: "pointer" }}>
                         <div style={{ fontSize: 14 }}>{role.icon}</div>
