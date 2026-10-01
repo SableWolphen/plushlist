@@ -53,7 +53,7 @@ const checks = [
   [today.includes("function isHabitRow") && today.includes("!isHabitRow(row)") && today.includes("rows.filter(isHabitRow)"), "Home separates regular tasks from habits instead of mixing them"],
   [app.includes(".pl-unified-page-hero{position:relative;overflow:visible") && app.includes("min-height:0;border-radius:0;background:transparent;border:0;box-shadow:none"), "non-Home page headers stay compact and do not become giant title cards"],
   [progress.includes('className="pl-growth-highlight-row"') && !progress.includes('✨ THIS WEEK’S LITTLE WINS</div>\n        <div className="pl-growth-heading">PlushGrowth'), "Progress avoids duplicating the page title in another card"],
-  [growthMoments.includes("Nothing to review yet") && !growthMoments.includes("borderRadius: 15, background: \"linear-gradient(145deg,#FFF9FD,#F7FCFA)\""), "empty PlushMoments guidance does not consume a full card"],
+  [growthMoments.includes("<details data-growth-plush-moments") && growthMoments.includes("<summary>") && !growthMoments.includes("borderRadius: 15, background: \"linear-gradient(145deg,#FFF9FD,#F7FCFA)\""), "empty PlushMoments guidance does not consume a full card"],
   [!care.includes("MamasCorner") && care.includes('className="pl-care-history-door pl-design-card"'), "Care removes the private corner and keeps history directly reachable"],
   [settings.includes('placeholder="Search settings"') && settings.includes("Privacy & Data") && settings.includes("Experience") && settings.includes("Notifications & Reminders"), "Settings keeps high-complexity options organized and discoverable"],
 ];

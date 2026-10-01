@@ -134,31 +134,33 @@ export function makeShareCanvas(doc) {
 }
 
 // The "one good thing" win card. Text auto-shrinks to fit.
-export function drawWinCard(canvas, { winText, dateLabel } = {}) {
+export function drawWinCard(canvas, { winText, dateLabel, mascotImage, keepsake = false, petName = "" } = {}) {
   const w = SHARE_CARD_WIDTH;
   const h = SHARE_CARD_HEIGHT;
   const ctx = canvas.getContext("2d");
   const clean = String(winText || "").trim().slice(0, 280) || "Today counted.";
 
   drawCardBase(ctx, w, h);
-  drawKicker(ctx, w, "PLUSHLIFE · ONE GOOD THING", 150);
+  drawKicker(ctx, w, keepsake ? "PLUSHLIFE · MY LITTLE WEEK" : "PLUSHLIFE · ONE GOOD THING", 150);
 
   ctx.textAlign = "center";
   ctx.font = "120px serif";
-  ctx.fillText("🌟", w / 2, 250);
+  if(mascotImage) ctx.drawImage(mascotImage, w/2-150, 190, 300, 275);
+  else ctx.fillText("🌟", w / 2, 250);
 
+  if(mascotImage && petName){ctx.font=`800 34px ${FONT_STACK}`;ctx.fillStyle="#6B5A7D";ctx.fillText(String(petName).slice(0,40),w/2,505);}
   const maxWidth = w - 220;
   let fontSize = 72;
   let lines = [];
   while (fontSize >= 40) {
     ctx.font = `900 ${fontSize}px ${FONT_STACK}`;
     lines = wrapLines(ctx, clean, maxWidth);
-    if (lines.length <= 7) break;
+    if (lines.length <= (mascotImage ? 5 : 7)) break;
     fontSize -= 6;
   }
   const lineHeight = fontSize * 1.32;
   const blockHeight = lines.length * lineHeight;
-  let y = 560 - blockHeight / 2 + lineHeight * 0.82;
+  let y = (mascotImage ? 720 : 560) - blockHeight / 2 + lineHeight * 0.82;
   ctx.fillStyle = "#3E2458";
   for (const line of lines) {
     ctx.fillText(line, w / 2, y);

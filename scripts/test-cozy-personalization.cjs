@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),vm=require('node:vm');
 const React=require('react'),Renderer=require('react-test-renderer'),esbuild=require('esbuild');
-global.React=React;global.window=new EventTarget();global.document=new EventTarget();
+global.React=React;global.window=new EventTarget();window.PlushLifeThemeCopy=require("../assets/plush-theme-copy.js");global.document=new EventTarget();
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'cozy-personalization-'));
 esbuild.buildSync({entryPoints:['src/components/cozy-daily.jsx','src/components/cozy-space.jsx','src/cozy-profile.js'],bundle:true,platform:'node',format:'cjs',outdir:temp});
 const model=require(path.join(temp,'cozy-profile.js'));

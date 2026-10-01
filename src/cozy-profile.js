@@ -35,6 +35,8 @@ export function normalizeCozyProfile(value = {}) {
   const fields = Object.fromEntries(COZY_FIELDS.map(([key]) => [key, typeof value?.fields?.[key] === "string" ? value.fields[key].slice(0, 500) : ""]));
   return {
     fields,
+    pet_name: typeof value?.pet_name === "string" ? value.pet_name.trim().slice(0,40) : "",
+    room_hidden: [...new Set(Array.isArray(value?.room_hidden) ? value.room_hidden.filter(id=>["plant","cushion","keepsake"].includes(id)) : [])],
     setup: ['done', 'skipped'].includes(value?.setup) ? value.setup : '',
     reminder_style: COZY_REMINDER_STYLES.includes(value?.reminder_style) ? value.reminder_style : 'Gentle',
     reminder_time: /^([01]\d|2[0-3]):[0-5]\d$/.test(value?.reminder_time || '') ? value.reminder_time : '',
