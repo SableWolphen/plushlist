@@ -56,6 +56,8 @@ const PURGE_TARGETS: Array<{ table: string; column: string; note?: string }> = [
   // stated retention policy before relying on it (see verification doc).
   { table: "supporter_payments", column: "user_id" },
   { table: "guardian_support_requests", column: "owner_user_id" },
+  { table: "together_item_participation", column: "user_id" },
+  { table: "together_items", column: "created_by_user_id" },
 ];
 
 async function purgeTable(table: string, column: string, userId: string) {
@@ -66,6 +68,8 @@ async function purgeTable(table: string, column: string, userId: string) {
     query.or(`owner_user_id.eq.${userId},caregiver_user_id.eq.${userId}`);
   } else if (table === "caregiver_links") {
     query.or(`owner_user_id.eq.${userId},caregiver_user_id.eq.${userId}`);
+  } else if (table === "together_items") {
+    query.or(`owner_user_id.eq.${userId},created_by_user_id.eq.${userId}`);
   } else {
     query.eq(column, userId);
   }
