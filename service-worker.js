@@ -1,5 +1,16 @@
-const CACHE_NAME = "plushlife-v80";
+const CACHE_NAME = "plushlife-v81";
 const APP_SHELL = [
+  "./assets/figma/baby-happy.svg",
+  "./assets/figma/baby-night-happy.svg",
+  "./assets/figma/dino-happy.svg",
+  "./assets/figma/garden-happy.svg",
+  "./assets/figma/garden.svg",
+  "./assets/figma/meadow-happy.svg",
+  "./assets/figma/peach-happy.svg",
+  "./assets/figma/pink-happy.svg",
+  "./assets/figma/soft-light-happy.svg",
+  "./assets/figma/strawberry-happy.svg",
+  "./assets/figma/twilight-happy.svg",
   "./assets/figma/soft-happy.svg",
   "./assets/figma/signature-dino-happy.svg",
   "./assets/figma/signature-nursery-happy.svg",

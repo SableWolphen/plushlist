@@ -21,6 +21,18 @@ assert.ok(fs.readFileSync('service-worker.js','utf8').includes('./assets/plush-o
 const globals={React:{...React,useState:initial=>[initial,()=>{}],useContext:()=>({world:'baby-night',voice:'fatherly'})},window:{PlushLifeContent:content,PlushLifeThemeCopy:themeCopy},console};
 async function moduleAt(entry){const bundle=await build({entryPoints:[entry],bundle:true,write:false,format:'cjs',loader:{'.jsx':'jsx'}});const context={...globals,module:{exports:{}},exports:{}};vm.runInNewContext(bundle.outputFiles[0].text,context);return context.module.exports;}
 function flatten(node){if(!node||typeof node!=='object')return [];return [node,...[node.props?.children].flat(Infinity).flatMap(flatten)];}
+for (const [world, palette] of Object.entries(themeCopy.worlds)) {
+  for (const happy of ['', '-happy']) {
+    const art=fs.readFileSync(`assets/figma/${palette.asset}${happy}.svg`,'utf8');
+    assert.ok(art.includes('data-companion-world='),`${world} must have a themed companion`);
+    assert.equal(art.includes('data-dino-spikes="true"'),world==='dino','Dinosaur spikes belong only to Dino');
+    assert.ok(fs.readFileSync('service-worker.js','utf8').includes(`./assets/figma/${palette.asset}${happy}.svg`),'Every expression must work offline');
+  }
+}
+assert.equal(new Set(Object.values(themeCopy.worlds).map(world=>world.asset)).size,10,'Only the nursery night shares its daytime companion');
+assert.match(wardrobe.frontOutfitTransform('cape'),/17/,'Cape clasp stays below the face');
+assert.match(wardrobe.frontOutfitTransform('book-buddy'),/22/,'Books sit on the body');
+assert.ok(sprite.includes('x="84" y="63" width="21" height="30"'),'Backpack has a visible front-side bag, not just hidden rear artwork');
 const {ThemeScene}=await moduleAt('src/components/theme-world.jsx');
 for (const world of Object.keys(themeCopy.worlds)) {
   for (const outfit of content.MASCOT_OUTFITS) {
@@ -43,6 +55,7 @@ for (const world of Object.keys(themeCopy.worlds)) {
       assert.equal(layer.props.viewBox,`0 0 ${image.props.width} 100`);
     }
     assert.equal(nodes.filter(n=>n.type==='img').length,1,'One mascot per scene');
+    assert.equal(nodes[0].props['data-world'],world,'Explicit theme previews never inherit the selected world');
   }
 }
 const {RewardsPanel}=await moduleAt('src/components/rewards-panel.jsx');
@@ -53,6 +66,7 @@ const props={open:true,inline:true,selectedOutfit:selected,activityDaysTotal:53,
 let nodes=flatten(RewardsPanel(props));
 const cards=nodes.filter(n=>n.type==='button'&&n.props.className==='pl-collection-item'&&!n.props.disabled);
 assert.equal(cards.length,6,'Default closet shows six outfits');
+assert.ok(cards.every(card=>flatten(card).some(n=>n.type===ThemeScene||n.type?.name==='ThemeScene')),'Every outfit card shows the equipped plush');
 assert.equal(cards[0].props['aria-pressed'],true,'Wearing outfit stays visible in the short list');
 const other=cards.find(n=>n.props['aria-pressed']===false);other.props.onClick();
 assert.ok(props.unlockedIdSet.has(saved.selectedId));assert.equal(saved.celebrationSound,true);assert.equal(saved.unlockedIds.length,17);assert.equal(saved.bestStreak,9);

@@ -44,6 +44,8 @@ export const REAR_OUTFITS = new Set(["cape", "habit-tree", "sunrise-cape", "back
 // The round companion's face reaches lower than the previous bear's face.
 // Keep clothing on its lower body; head accessories retain their anchors.
 export function frontOutfitTransform(id) {
+  if (OUTFIT_KINDS[id] === "cape") return "translate(0 17)";
+  if (["charm", "book"].includes(OUTFIT_KINDS[id])) return "translate(0 22) scale(1 .82)";
   return ["scarf", "overalls", "sweater", "coat", "cardigan"].includes(OUTFIT_KINDS[id])
     ? "translate(0 44) scale(1 .58)" : undefined;
 }

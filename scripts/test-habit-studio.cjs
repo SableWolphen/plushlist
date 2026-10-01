@@ -70,6 +70,16 @@ await act(async()=>tree.unmount());
 await act(async()=>{tree=create(React.createElement(m.PlushGoldPreview));});
 const purchases=tree.root.findAllByType('button').find(b=>b.children.join('')==='Purchases aren’t open yet');
 assert.equal(purchases.props.disabled,true,'Paid preview cannot start a purchase');
+assert.equal(tree.root.findAllByType('details').length,2,'Secondary plan information is folded away');
+assert.ok(tree.root.findAllByType('details').every(node=>!node.props.open));
+assert.equal(tree.root.findAllByType('button').filter(node=>node.props.className==='pl-plus-tool-row').length,3,'Plus starts with three clear benefits');
+for (const name of ['Try build a routine','Try find what works','Try understand your week']) {
+  await act(async()=>tree.root.findByProps({'aria-label':name}).props.onClick());
+  assert.equal(tree.root.findAllByProps({className:'pl-plus-tool-row'}).length,0,'A tool replaces the overview instead of extending an endless page');
+  const back=tree.root.findAllByType('button').find(node=>node.children.join('')==='← Back to Plus');
+  assert.ok(back,'Tool preview has a clear way back');
+  await act(async()=>back.props.onClick());
+}
 await act(async()=>tree.unmount());
 fs.rmSync(temp,{recursive:true,force:true});
 console.log('Habit Studio checks passed: goals, cut-back limits, anchor cycles, honest reviews, trials, account isolation, save failures, guided completion and inactive billing.');
