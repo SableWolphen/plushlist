@@ -45,10 +45,10 @@ export function ProgressPanel({ open, user, progressView, setProgressView, weekl
   const { datesThroughToday } = window.PlushLifeSchedule;
   return (
   <>
-        <div role="tablist" aria-label="Progress views" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 6, marginBottom: 12, padding: 5, borderRadius: 14, background: "var(--pl-theme-surface-2,#F3E8FA)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
+        <div role="tablist" aria-label="Progress views" className="pl-growth-tabs" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 6, marginBottom: 12, padding: 5, borderRadius: 14, background: "var(--pl-theme-surface-2,#F3E8FA)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
           {[{ id: "overview", label: "PlushView", icon: "📊" }, { id: "story", label: "PlushStory", icon: "📖" }, { id: "areas", label: "PlushSpaces", icon: "🪴" }].map((item) => {
             const selected = progressView === item.id;
-            return <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} style={{ minWidth: 0, padding: "8px 4px", borderRadius: 10, border: selected ? "2px solid #A65DC1" : "1px solid transparent", background: selected ? "white" : "transparent", color: selected ? "#7A3D93" : "#8C6B9E", fontSize: 10.5, fontWeight: 900, cursor: "pointer" }}>{item.icon} {item.label}</button>;
+            return <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} style={{ minWidth: 0, padding: "8px 4px", borderRadius: 10, border: selected ? "2px solid #A65DC1" : "1px solid transparent", background: selected ? "white" : "transparent", color: selected ? "#7A3D93" : "#8C6B9E", fontSize: 10.5, fontWeight: 900, cursor: "pointer" }}><span aria-hidden="true">{item.icon}</span><span>{item.label}</span></button>;
           })}
         </div>
         {progressView === "overview" && <>
