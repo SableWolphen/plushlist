@@ -1,3 +1,4 @@
+import { ThemeScene } from "./theme-world.jsx";
 // A gentle "do it with me" timer.
 //
 // Focus mode isolates one task but there was no time container for starting.
@@ -39,17 +40,22 @@ function formatClock(totalSeconds) {
 // The timer dialog is opened by dispatching this event (home header button,
 // Shape-my-day card, …). Keeping the trigger as an event means the floating
 // button never has to overlap page content.
-export function startFocusTimer() {
-  window.dispatchEvent(new CustomEvent("plushlife:start-focus-timer"));
+export function startFocusTimer(detail = {}) {
+  window.dispatchEvent(new CustomEvent("plushlife:start-focus-timer", {detail}));
 }
 
 export function FocusTimer() {
+  const [task, setTask] = React.useState({});
+  const [sound, setSound] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [durationMin, setDurationMin] = React.useState(5);
   const [remaining, setRemaining] = React.useState(5 * 60);
   const [running, setRunning] = React.useState(false);
   const [finished, setFinished] = React.useState(false);
   const timerRef = React.useRef(null);
+  const dialogRef = React.useRef(null);
+  const soundRef = React.useRef(false);
+  soundRef.current = sound;
 
   const clearTimer = () => {
     if (timerRef.current) window.clearInterval(timerRef.current);
@@ -57,10 +63,14 @@ export function FocusTimer() {
   };
 
   React.useEffect(() => {
-    const onStart = () => {
+    const onStart = event => {
+      clearTimer();
+      const minutes = TIMER_DURATIONS.includes(event.detail?.minutes) ? event.detail.minutes : durationMin;
+      setDurationMin(minutes);
+      setTask({label:event.detail?.taskLabel || "",step:event.detail?.step || ""});
       setFinished(false);
       setRunning(false);
-      setRemaining(durationMin * 60);
+      setRemaining(minutes * 60);
       setOpen(true);
     };
     window.addEventListener("plushlife:start-focus-timer", onStart);
@@ -85,7 +95,7 @@ export function FocusTimer() {
         clearTimer();
         setRunning(false);
         setFinished(true);
-        playGentleChime();
+        if(soundRef.current) playGentleChime();
       }
     }, 500);
   };
@@ -95,7 +105,7 @@ export function FocusTimer() {
     setRunning(false);
     if (done) {
       setFinished(true);
-      playGentleChime();
+      if(soundRef.current) playGentleChime();
     } else {
       setOpen(false);
     }
@@ -108,14 +118,35 @@ export function FocusTimer() {
     setFinished(false);
   };
 
+  React.useEffect(() => {
+    if (!open) return;
+    const previous = document.activeElement;
+    const panel = dialogRef.current;
+    panel?.focus();
+    const handleKey = event => {
+      if (event.key === 'Escape') { event.preventDefault(); clearTimer(); setRunning(false); setOpen(false); setFinished(false); }
+      if (event.key === 'Tab') {
+        const controls = Array.from(panel?.querySelectorAll('button:not(:disabled),input:not(:disabled)') || []);
+        const first = controls[0], last = controls[controls.length - 1];
+        if (event.shiftKey && (document.activeElement === first || document.activeElement === panel)) {event.preventDefault();last?.focus();}
+        else if (!event.shiftKey && (document.activeElement === last || document.activeElement === panel)) {event.preventDefault();first?.focus();}
+      }
+    };
+    document.addEventListener('keydown',handleKey);
+    return () => {document.removeEventListener('keydown',handleKey);previous?.focus?.();};
+  }, [open]);
+
   const progress = durationMin > 0 ? 1 - remaining / (durationMin * 60) : 0;
 
   return (
     <>
       {open && (
-        <div role="dialog" aria-modal="true" aria-label="Gentle timer" style={{ position: "fixed", inset: 0, zIndex: 200, display: "grid", placeItems: "center", padding: 20, background: "rgba(43,29,52,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
-          <div style={{ width: "min(400px, 100%)", borderRadius: 24, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", boxShadow: "0 24px 70px rgba(42,26,52,.35)", padding: 24, textAlign: "center", color: "var(--pl-theme-ink,#5B4B6B)" }}>
-            <div style={{ fontSize: 40 }} aria-hidden="true">🧸</div>
+        <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Gentle timer" style={{ position: "fixed", inset: 0, zIndex: 200, display: "grid", placeItems: "center", padding: 20, boxSizing: "border-box", background: "rgba(43,29,52,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
+          <div style={{ width: "min(400px, 100%)", boxSizing: "border-box", maxHeight: "calc(100dvh - 40px)", overflowY: "auto", borderRadius: 24, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", boxShadow: "0 24px 70px rgba(42,26,52,.35)", padding: 24, textAlign: "center", color: "var(--pl-theme-ink,#5B4B6B)" }}>
+            <div style={{display:"flex",justifyContent:"center"}}><ThemeScene focus decorative /></div>
+            {task.label&&<p style={{fontWeight:800,overflowWrap:"anywhere"}}>{task.label}</p>}
+            {task.step&&<p>{task.step}</p>}
+            <label style={{display:"flex",justifyContent:"center",alignItems:"center",gap:8,minHeight:44}}><input type="checkbox" checked={sound} onChange={event=>setSound(event.target.checked)}/>A soft chime when I finish</label>
             {!finished ? (
               <>
                 <div style={{ marginTop: 6, fontSize: 12, letterSpacing: ".13em", fontWeight: 950, color: "var(--pl-theme-muted,#B44CC7)" }}>A GENTLE TIMER</div>

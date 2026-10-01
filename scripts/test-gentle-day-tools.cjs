@@ -1,0 +1,67 @@
+const assert = require('node:assert/strict');
+const React = require('react');
+const {act,create} = require('react-test-renderer');
+const esbuild = require('esbuild');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+global.React = React;
+global.window = new EventTarget();
+window.PlushLifeThemeCopy = require('../assets/plush-theme-copy.js');
+window.PlushLifeContent = require('../assets/plush-content.js');
+window.PlushLifeHelpers = require('../assets/plush-helpers.js');
+const entries = new Map();
+let fail = false;
+window.localStorage = {getItem:key=>entries.get(key),setItem:(key,value)=>{if(fail)throw Error('full');entries.set(key,value);}};
+const temp = fs.mkdtempSync(path.join(os.tmpdir(),'gentle-day-'));
+esbuild.buildSync({entryPoints:['src/components/gentle-day-tools.jsx','src/gentle-day.js','src/components/focus-timer.jsx','src/components/mascot.jsx'],outdir:temp,bundle:true,platform:'node',format:'cjs',outExtension:{'.js':'.cjs'}});
+const {GentleDayTools} = require(path.join(temp,'components/gentle-day-tools.cjs'));
+const {smallerStep,nextLocalDate} = require(path.join(temp,'gentle-day.cjs'));
+const {PlushMascot} = require(path.join(temp,'components/mascot.cjs'));
+const {startFocusTimer} = require(path.join(temp,'components/focus-timer.cjs'));
+const date = '2026-10-01';
+const rows = [{key:'clean',label:'Clean my room'},{key:'email',label:'Write an email'}];
+let type,tree;
+const props = {userId:'cozy-a',date,rows,onDayType:async value=>{type=value;return true;}};
+const button = label=>tree.root.findAllByType('button').find(node=>node.children.join('')===label);
+(async()=>{
+  assert.match(smallerStep(rows[0]),/three things/);
+  assert.equal(smallerStep({sourceTask:{tiny_label:'One sock'}}),'One sock');
+  assert.equal(nextLocalDate('2026-12-31'),'2027-01-01');
+  assert.equal(nextLocalDate('2026-03-08'),'2026-03-09');
+  await act(async()=>{tree=create(React.createElement(GentleDayTools,props));});
+  await act(async()=>{await button('A little energy').props.onClick();});
+  assert.equal(type,'tiny');
+  await act(async()=>{button('I did some').props.onClick();});
+  assert.equal(JSON.parse(entries.get(`plushlife:gentle-tools:cozy-a:${date}`)).progress.clean,'partial');
+  assert.equal(button('I did some').props['aria-pressed'],true);
+  fail=true;
+  await act(async()=>{button('I started').props.onClick();});
+  assert.equal(button('I did some').props['aria-pressed'],true,'Failed save keeps the previous state');
+  fail=false;
+  const checkbox=tree.root.findAllByType('input').find(node=>node.props.type==='checkbox');
+  await act(async()=>{checkbox.props.onChange({target:{checked:true}});});
+  await act(async()=>{button('Keep for tomorrow').props.onClick();});
+  assert.deepEqual(JSON.parse(entries.get('plushlife:gentle-tools:cozy-a:2026-10-02')).intentions,['Clean my room']);
+  await act(async()=>{tree.update(React.createElement(GentleDayTools,{...props,date:'2026-10-02'}));});
+  assert.ok(button('Let these go'),'Tomorrow restores intentions');
+  await act(async()=>{tree.update(React.createElement(GentleDayTools,{...props,userId:'cozy-b'}));});
+  assert.equal(button('I did some').props['aria-pressed'],false,'Another account cannot inherit partial progress');
+  assert.equal(button('Let these go'),undefined,'Another account cannot inherit intentions');
+  let request;
+  window.addEventListener('plushlife:start-focus-timer',event=>{request=event.detail;});
+  startFocusTimer({minutes:2,taskLabel:'Clean my room'});
+  assert.equal(request.minutes,2);assert.equal(request.taskLabel,'Clean my room');
+  tree.unmount();
+  for(const theme of Object.keys(window.PlushLifeThemeCopy.worlds)) {
+    for(const size of [84,104,150,170,240]) {
+      const mascot=create(React.createElement(PlushMascot,{size,theme}));
+      const frame=mascot.root.findByProps({className:'plush-mascot'});
+      assert.equal(frame.props.style.width,128);
+      assert.equal(frame.props.style.height,118);
+      assert.ok(mascot.root.findAll(node=>node.props?.className?.includes?.('pl-mascot-focus')).length);
+      mascot.unmount();
+    }
+  }
+  console.log('Gentle day tools passed: smaller steps, day selection, partial progress, failed storage, tomorrow intentions, account isolation, and task timer.');
+})().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>fs.rmSync(temp,{recursive:true,force:true}));

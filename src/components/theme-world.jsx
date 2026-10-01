@@ -25,7 +25,7 @@ export function DesignIcon({ name, className = "" }) {
   return <span className={`pl-design-icon ${className}`} aria-hidden="true" style={{ maskImage: `url(./assets/figma/icon-${name}.svg)`, WebkitMaskImage: `url(./assets/figma/icon-${name}.svg)` }} />;
 }
 
-export function CozyScene({ title, subtitle, world, outfit, focus = false }) {
+export function CozyScene({ title, subtitle, world, outfit, focus = true }) {
   const copy = useThemeCopy();
   title = copy[title] || title;
   subtitle = copy[subtitle] || subtitle;

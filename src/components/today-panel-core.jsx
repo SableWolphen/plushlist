@@ -104,7 +104,7 @@ function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, 
     <>
       <header className="pl-page-heading">
         <div style={{flex:1}}><h1>Today</h1><button type="button" className="pl-heading-date" onClick={() => goToDashboard?.("week")} aria-label="Open calendar">{formatDate(period?.date)}</button></div>
-        <button type="button" className="pl-heading-gear" onClick={startFocusTimer} aria-label="Start a gentle timer" title="Start a gentle timer">⏱</button>
+        <button type="button" className="pl-heading-gear" onClick={()=>startFocusTimer()} aria-label="Start a gentle timer" title="Start a gentle timer">⏱</button>
         <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen?.(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
       </header>
       <section className="pl-home-hero" aria-label="PlushLife welcome">
@@ -143,6 +143,7 @@ function OneTinyThing({ nextStepTask, nextStepReason, nextStepHint, toggle, pick
       </div>
       {nextStepMoreOpen && (
         <div className="pl-more-row">
+          <button type="button" onClick={()=>startFocusTimer({minutes:2,taskLabel:nextStepTask.label,step:nextStepHint?.key===nextStepTask.key?nextStepHint.text:undefined})}>Help me start · 2 minutes</button>
           <button type="button" onClick={() => { setNextStepSkipped?.((keys) => [...(keys || []), nextStepTask.key]); setNextStepMoreOpen?.(false); }}>Pick another</button>
           <button type="button" onClick={() => { setNextStepDismissedToday?.(true); setNextStepMoreOpen?.(false); }}>Hide for today</button>
         </div>
