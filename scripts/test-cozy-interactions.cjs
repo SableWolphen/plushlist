@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict');
 const React=require(process.cwd()+'/node_modules/react');
 const TestRenderer=require(process.cwd()+'/node_modules/react-test-renderer');
-global.React=React;global.window=new EventTarget();global.document=new EventTarget();
+global.React=React;global.window=new EventTarget();window.PlushLifeThemeCopy=require("../assets/plush-theme-copy.js");global.document=new EventTarget();
 const esbuild=require(process.cwd()+'/node_modules/esbuild');
 const os=require('node:os');
 const path=require('node:path');

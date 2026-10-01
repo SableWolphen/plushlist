@@ -1,4 +1,4 @@
-const CACHE_NAME = "plushlife-v79";
+const CACHE_NAME = "plushlife-v80";
 const APP_SHELL = [
   "./assets/figma/soft-happy.svg",
   "./assets/figma/signature-dino-happy.svg",

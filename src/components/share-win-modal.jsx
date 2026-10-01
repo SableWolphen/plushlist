@@ -1,8 +1,9 @@
+import { loadKeepsakeMascot } from "../keepsake-art.js";
 // Share-your-win modal: previews the generated win card and shares it
 // through the native share sheet, with save-image / copy-text fallbacks.
 import { drawWinCard, buildWinShareText, winCardFilename, sharePngFile, downloadPng, copyText, canShareFiles } from "./share-card.js";
 
-export function ShareWinModal({ winText, onClose }) {
+export function ShareWinModal({ winText, onClose, keepsake }) {
   const clean = String(winText || "").trim().slice(0, 280);
   const canvasRef = React.useRef(null);
   const dialogRef = React.useRef(null);
@@ -10,12 +11,20 @@ export function ShareWinModal({ winText, onClose }) {
   const [busy, setBusy] = React.useState(false);
   const [notice, setNotice] = React.useState("");
   const nativeShare = canShareFiles();
+  const [mascotImage,setMascotImage]=React.useState(null);
+  const [artReady,setArtReady]=React.useState(!keepsake);
+  React.useEffect(()=>{
+    if(!keepsake)return;
+    let active=true; setArtReady(false);
+    loadKeepsakeMascot(keepsake.outfit?.id).then(image=>{if(active){setMascotImage(image);setArtReady(true);}}).catch(()=>{if(active){setNotice("Couldn’t load your plush. This preview includes your chosen text only.");setArtReady(true);}});
+    return ()=>{active=false;};
+  },[keepsake?.outfit?.id]);
 
   React.useEffect(() => {
     try {
-      if (canvasRef.current) drawWinCard(canvasRef.current, { winText: clean });
+      if (canvasRef.current) drawWinCard(canvasRef.current, { winText: clean, mascotImage, keepsake: !!keepsake, petName: keepsake?.petName });
     } catch (err) { console.warn("PlushLife: win card render failed", err); }
-  }, [clean]);
+  }, [clean,mascotImage,!!keepsake,keepsake?.petName]);
 
   React.useEffect(() => {
     if (phase !== "shared") return;
@@ -49,11 +58,12 @@ export function ShareWinModal({ winText, onClose }) {
   const getCanvas = () => {
     if (canvasRef.current) return canvasRef.current;
     const fallback = document.createElement("canvas");
-    drawWinCard(fallback, { winText: clean });
+    drawWinCard(fallback, { winText: clean, mascotImage, keepsake: !!keepsake, petName: keepsake?.petName });
     return fallback;
   };
 
   const doShare = async () => {
+    if(!artReady)return;
     setBusy(true);
     setNotice("");
     try {
@@ -79,6 +89,7 @@ export function ShareWinModal({ winText, onClose }) {
   };
 
   const doSave = async () => {
+    if(!artReady)return;
     setBusy(true);
     try {
       await downloadPng(getCanvas(), winCardFilename());
@@ -97,7 +108,7 @@ export function ShareWinModal({ winText, onClose }) {
   };
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Share your win" onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 80, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.5)", backdropFilter: "blur(5px)" }}>
+    <div role="dialog" aria-modal="true" aria-label={keepsake ? "Share your weekly keepsake" : "Share your win"} onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 80, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.5)", backdropFilter: "blur(5px)" }}>
       <div ref={dialogRef} onClick={(event) => event.stopPropagation()} style={{ width: "min(100%, 380px)", maxHeight: "min(92vh, 780px)", overflowY: "auto", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)", padding: "20px 18px" }}>
         {phase === "shared" ? (
           <div style={{ textAlign: "center", padding: "34px 10px" }} role="status">
@@ -107,7 +118,7 @@ export function ShareWinModal({ winText, onClose }) {
           </div>
         ) : (
           <>
-            <div style={{ fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#A65DC1" }}>SHARE YOUR WIN</div>
+            <div style={{ fontSize: 11, letterSpacing: ".14em", fontWeight: 900, color: "#A65DC1" }}>{keepsake ? "MY WEEKLY KEEPSAKE" : "SHARE YOUR WIN"}</div>
             <div style={{ marginTop: 4, fontSize: 17, fontWeight: 900, color: "#3E2458" }}>This one's worth celebrating 🌟</div>
             <p style={{ margin: "6px 0 0", fontSize: 12, lineHeight: 1.55, color: "#8C6B9E" }}>
               Heads up: sharing posts this outside your private journal. Only share what you're happy posting publicly.
@@ -119,12 +130,12 @@ export function ShareWinModal({ winText, onClose }) {
             {phase === "error" && <div role="alert" style={{ marginTop: 10, fontSize: 12.5, color: "#A4446B" }}>Something went wrong making the image — you can still copy the text below.</div>}
             <div style={{ display: "grid", gap: 8, marginTop: 14 }}>
               {nativeShare && (
-                <button type="button" onClick={doShare} disabled={busy} aria-busy={busy} style={{ padding: "13px 16px", minHeight: 48, borderRadius: 14, border: 0, background: "linear-gradient(135deg,#B95DCA,#DB78BF)", color: "white", fontWeight: 900, fontSize: 14, cursor: "pointer", opacity: busy ? 0.7 : 1 }}>
+                <button type="button" onClick={doShare} disabled={busy || !artReady} aria-busy={busy} style={{ padding: "13px 16px", minHeight: 48, borderRadius: 14, border: 0, background: "linear-gradient(135deg,#B95DCA,#DB78BF)", color: "white", fontWeight: 900, fontSize: 14, cursor: "pointer", opacity: busy ? 0.7 : 1 }}>
                   {busy ? "Working…" : "Share 💜"}
                 </button>
               )}
               <div style={{ display: "flex", gap: 8 }}>
-                <button type="button" onClick={doSave} disabled={busy} aria-busy={busy} style={{ flex: 1, padding: "11px 10px", minHeight: 46, borderRadius: 14, border: "1px solid #D994E7", background: "white", color: "#75428C", fontWeight: 900, fontSize: 13, cursor: "pointer" }}>
+                <button type="button" onClick={doSave} disabled={busy || !artReady} aria-busy={busy} style={{ flex: 1, padding: "11px 10px", minHeight: 46, borderRadius: 14, border: "1px solid #D994E7", background: "white", color: "#75428C", fontWeight: 900, fontSize: 13, cursor: "pointer" }}>
                   Save image
                 </button>
                 <button type="button" onClick={doCopy} style={{ flex: 1, padding: "11px 10px", minHeight: 46, borderRadius: 14, border: "1px solid #D994E7", background: "white", color: "#75428C", fontWeight: 900, fontSize: 13, cursor: "pointer" }}>

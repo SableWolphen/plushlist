@@ -6061,7 +6061,7 @@ function GlowUpTracker() {
   })();
 
   return (
-    <CozyComfortContext.Provider value={cozyComfort}><CozyGuideSuggestions rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} onOpen={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard("care");}}/><ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
+    <CozyComfortContext.Provider value={cozyComfort}><CozyGuideSuggestions rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} onOpen={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard("care");}}/><ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit, unlockedIds: unlockedIdSet, rewardProgress: mascotRequirementProgress }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
       background: activeThemePalette.background,
       backgroundImage: preferences.simple_mode ? `

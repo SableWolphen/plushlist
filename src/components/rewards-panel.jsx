@@ -1,3 +1,4 @@
+import { nextCompanionReward } from "../companion-experience.js";
 import { CozyScene, useThemeCopy } from "./theme-world.jsx";
 import { ToolPanel } from "./shared.jsx";
 
@@ -11,7 +12,8 @@ export function RewardsPanel({ saveMessage, open, onClose, inline = false, selec
   const available = MASCOT_OUTFITS.filter(item => unlockedIdSet.has(item.id));
   const locked = MASCOT_OUTFITS.filter(item => !unlockedIdSet.has(item.id));
   const earned = BADGE_DEFS.filter(item => earnedBadgeIdSet.has(item.id));
-  const next = [...locked].sort((a, b) => (a.unlock.count - mascotRequirementProgress(a)) - (b.unlock.count - mascotRequirementProgress(b)))[0];
+  const nextReward = nextCompanionReward(MASCOT_OUTFITS, unlockedIdSet, mascotRequirementProgress);
+  const next = nextReward?.outfit;
   const wear = (outfit) => {
     if (!unlockedIdSet.has(outfit.id)) return;
     saveMascotCollection({ ...mascotCollection, bestStreak: savedBestStreak, unlockedIds: [...unlockedIdSet], selectedId: outfit.id });
@@ -44,7 +46,7 @@ export function RewardsPanel({ saveMessage, open, onClose, inline = false, selec
             <div className="pl-collection-grid">{(showAllOutfits ? available : [selectedOutfit, ...available.filter(item => item.id !== selectedOutfit.id)].slice(0, 6)).map(item => outfitCard(item, true))}</div>
             {available.length > 6 && <button type="button" className="pl-collection-more" aria-expanded={showAllOutfits} onClick={() => setShowAllOutfits(value => !value)}>{showAllOutfits ? "Show fewer outfits" : `See all ${available.length} outfits`}</button>}
           </section>
-          {next && <section className="pl-design-card pl-next-unlock"><h2>Next little unlock</h2><p>{next.badge} {next.name} · {Math.min(next.unlock.count, mascotRequirementProgress(next))} / {next.unlock.count}</p><p>{next.hint}</p></section>}
+          {next && <section className="pl-design-card pl-next-unlock"><h2>Next little unlock</h2><p>{next.badge} {next.name} · {nextReward.count} / {nextReward.total}</p><p>{nextReward.copy}. {next.hint}</p><progress value={nextReward.count} max={nextReward.total} aria-label={`Progress toward ${next.name}`} /></section>}
           {locked.length > 0 && <details className="pl-design-card pl-collection-details"><summary>Still to unlock · {locked.length}</summary><p>Your progress is shown on each reward. Everything you earn stays yours.</p><div className="pl-collection-grid">{locked.map(item => outfitCard(item, false))}</div></details>}
         </>}
         {collectionTab === "badges" && <>

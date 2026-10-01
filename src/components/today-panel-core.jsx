@@ -1,7 +1,9 @@
+import { nextCompanionReward } from "../companion-experience.js";
+import { CozyComfortContext } from "./cozy-space.jsx";
 import { upcomingSchedule } from "../home-agenda.js";
 import { RewardMoment } from "./reward-moment.jsx";
 import { normalizeHomeLayout, homeDisplayGroups } from "../home-layout.js";
-import { ThemeScene, DesignIcon, useThemeCopy } from "./theme-world.jsx";
+import { ThemeScene, DesignIcon, useThemeCopy, ThemeWorldContext } from "./theme-world.jsx";
 import { HabitTypeIcon } from "./shared.jsx";
 import { CalmPanel } from "./info-panels.jsx";
 import { PlushMascot } from "./mascot.jsx";
@@ -63,6 +65,12 @@ function greeting() {
 
 function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, reducedMotion, selectedOutfit, activityDaysTotal, darkMode, appearanceTheme, dinoTheme, babyMode }) {
   const copy = useThemeCopy();
+  const companion = React.useContext(ThemeWorldContext);
+  const cozy = React.useContext(CozyComfortContext);
+  const petName = cozy?.profile?.pet_name || "Your plush";
+  const comfort = cozy?.profile?.fields?.comfort_item;
+  const evening = new Date().getHours() >= 20 || new Date().getHours() < 5;
+  const nextReward = companion.rewardProgress ? nextCompanionReward(window.PlushLifeContent.MASCOT_OUTFITS, companion.unlockedIds, companion.rewardProgress) : null;
   // The living mascot reacts to task completions: the completed-task flow
   // dispatches plushlife:task-completion-feedback on window, and the mascot
   // celebrates (happy face + bounce) for the same 2.2s as the gentle glow.
@@ -100,13 +108,16 @@ function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, 
         <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen?.(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
       </header>
       <section className="pl-home-hero" aria-label="PlushLife welcome">
-        <button type="button" className={`pl-mascot-pat ${mascotCelebrating && !reducedMotion ? "pl-mascot-happy-hop" : ""}`} onClick={() => reactToCozy("Happy you're here, Cozy! 💜")} aria-label="Say hi to your plush" title="Tap to say hi">
-          <ThemeScene outfit={selectedOutfit} focus mood={mascotCelebrating ? "happy" : "neutral"} decorative />
+        <button type="button" className={`pl-mascot-pat ${mascotCelebrating && !reducedMotion ? "pl-mascot-happy-hop" : ""}`} onClick={() => reactToCozy(cozy?.profile?.pet_name ? `${petName} is happy you’re here! 💜` : "Happy you're here, Cozy! 💜")} aria-label="Say hi to your plush" title="Tap to say hi">
+          <span className={!mascotCelebrating && !reducedMotion ? "pl-companion-idle" : ""}><ThemeScene outfit={selectedOutfit} focus mood={mascotCelebrating ? "happy" : "neutral"} decorative /></span>
+          {evening && !mascotCelebrating && <span className="pl-companion-sleep" aria-hidden="true">z z</span>}
           {mascotCelebrating && <span className="pl-mascot-heart" aria-hidden="true">💜</span>}
         </button>
         <div className="pl-companion-copy">
         <h2>{mascotMessage || (returning ? "Welcome back, Cozy." : copy["A little counts."] || "A little counts.")}</h2>
-        <p>{returning ? "Good to see you. One tiny thing is plenty." : copy["Your plush is happy you\'re here."] || "Your plush is happy you\'re here."}</p>
+        <p>{returning ? "Good to see you. One tiny thing is plenty." : evening ? `${petName} is winding down with you.` : cozy?.profile?.pet_name ? `${petName} is happy you’re here.` : copy["Your plush is happy you\'re here."] || "Your plush is happy you\'re here."}</p>
+        {comfort && <small className="pl-companion-comfort" title={comfort}>Keep {comfort.slice(0,80)} close.</small>}
+        {nextReward && <span className="pl-companion-reward"><small>{nextReward.copy}</small><progress value={nextReward.count} max={nextReward.total} aria-label={`Progress toward ${nextReward.outfit.name}`} /></span>}
         <button type="button" className="pl-link-btn" style={{minHeight:44}} onClick={() => { if(returning){onSofterDay?.();return;} goToDashboard?.("care"); setTimeout(() => window.dispatchEvent(new Event("plushlife:open-cozy-space")),100); }}>{returning ? "Make today softer →" : "My Cozy Space →"}</button>
         </div>
       </section>
