@@ -54,7 +54,7 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
                   : rows.filter(row => row && (taskView !== "habits" || (row.habitType || row.sourceTask?.habit_type || "regular") !== "regular"));
                 const matching = visible.filter(row => String(row.label || "").toLowerCase().includes(query));
                 const incompleteToday = taskView === "today" && !query ? matching.filter(row => !viewDone[row.key]) : matching;
-                const displayRows = taskView === "today" && !query && !showAllToday ? incompleteToday.slice(0, 3) : matching;
+                const displayRows = taskView === "today" && !query && !showAllToday ? incompleteToday.slice(0, 5) : matching;
                 const hiddenCount = taskView === "today" && !query ? Math.max(0, matching.length - displayRows.length) : 0;
                 if (!displayRows.length) return <p className="pl-design-empty">{query ? "No tasks match that search." : taskView === "today" && matching.length ? "You’re caught up for now ✨" : taskView === "today" ? "Your list has room to breathe. Add your first little task below." : "Nothing here yet. A small start is enough."}</p>;
                 return <>
@@ -65,9 +65,9 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
                     </button>
                     {row.sourceTask && <button type="button" className="pl-task-edit" onClick={() => startEditingTask(row.sourceTask)} aria-label={`Edit ${row.label}`}>•••</button>}
                   </div>)}
-                  {taskView === "today" && !query && matching.length > 3 && (
+                  {taskView === "today" && !query && matching.length > 5 && (
                     <button type="button" onClick={() => setShowAllToday(value => !value)} style={{ width: "100%", marginTop: 8, minHeight: 40, borderRadius: 12, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface-2,#F8F3FA)", color: "var(--pl-theme-ink,#5B4B6B)", fontWeight: 850, cursor: "pointer" }}>
-                      {showAllToday ? "Show just 3" : `See the rest (${hiddenCount})`}
+                      {showAllToday ? "Show just 5" : `See the rest (${hiddenCount})`}
                     </button>
                   )}
                 </>;
