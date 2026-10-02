@@ -16,6 +16,7 @@ import { useCompletedTaskFlow } from "./completed-task-flow.jsx";
 export function TasksPanel({ open, onClose, inline = false, initialView = "today", viewRequest = 0, rows = [], viewDone = {}, toggle, newTaskDay, setNewTaskDay, taskSectionsForDay, setNewTaskSection, setNewTaskCustomSection, starterPackId, setStarterPackId, trackerTasks, setStarterPackMessage, addStarterPack, starterPackMessage, importOpen, setImportOpen, newTaskSection, importText, setImportText, importTasksFromText, importMessage, newTaskNameInputRef, newTaskName, setNewTaskName, taskMessage, setTaskMessage, naturalScheduleText, setNaturalScheduleText, naturalSchedulePreview, setNaturalSchedulePreview, applyNaturalSchedule, newTaskSectionOptions, newTaskCustomSection, taskAdvancedOpen, setTaskAdvancedOpen, newTaskWhy, setNewTaskWhy, newTaskSoftLabel, setNewTaskSoftLabel, newTaskTinyLabel, setNewTaskTinyLabel, newTaskEstimatedMinutes, setNewTaskEstimatedMinutes, newTaskEssentialOnLow, setNewTaskEssentialOnLow, newTaskKind, setNewTaskKind, newTaskScheduleType, setNewTaskScheduleType, newTaskScheduleDays, setNewTaskScheduleDays, newTaskReminderTime, setNewTaskReminderTime, newTaskStartDate, setNewTaskStartDate, newTaskEndDate, setNewTaskEndDate, newTaskOneTimeDate, setNewTaskOneTimeDate, selectedProgressDate, addTrackerTask, SUPPORTER_FEATURES_ENABLED, isSupporterAccount, FREE_TASK_LIMIT_PER_DAY, taskSearchQuery, setTaskSearchQuery, isTaskPausedOnDate, period, startPointerTaskDrag, movePointerTaskDrag, endPointerTaskDrag, cancelPointerTaskDrag, moveTaskToSection, startEditingTask, resumeTrackerTask, pauseTrackerTask, archiveTrackerTask, setPendingTaskDelete, showArchivedTasks, setShowArchivedTasks, restoreArchivedTask, quickAddTrackerTask, quickAddMessage }) {
   const [taskView, setTaskView] = React.useState("today");
   const [composerOpen, setComposerOpen] = React.useState(false);
+  const [showAllToday, setShowAllToday] = React.useState(false);
   const [plushHappy, setPlushHappy] = React.useState(false);
   const plushTimer = React.useRef(null);
   const { unifiedToggle } = useCompletedTaskFlow(toggle, viewDone, rows);
@@ -25,7 +26,7 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
     plushTimer.current = window.setTimeout(() => setPlushHappy(false), 2200);
   };
   React.useEffect(() => () => { if (plushTimer.current) window.clearTimeout(plushTimer.current); }, []);
-  React.useEffect(() => { if (open) { setTaskView(initialView); setComposerOpen(!inline); } }, [open, inline, initialView, viewRequest]);
+  React.useEffect(() => { if (open) { setTaskView(initialView); setComposerOpen(!inline); setShowAllToday(false); } }, [open, inline, initialView, viewRequest]);
   if (!open) return null;
   const { DAYS, TEMPLATE_PACKS } = window.PlushLifeContent;
   const { WEEKDAY_PRESET_IDS, WEEKEND_PRESET_IDS, scheduleLabelForTask, taskIsScheduledForDate, offsetDate } = window.PlushLifeSchedule;
@@ -41,21 +42,35 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
             </div>
             <section className="pl-design-card" aria-label="Your task list">
               <div className="pl-task-title"><button type="button" className={`pl-mascot-pat ${plushHappy ? "pl-mascot-happy-hop" : ""}`} onClick={cheer} aria-label="Say hi to your plush"><ThemeScene focus decorative mood={plushHappy ? "happy" : "neutral"} /></button><h2>{taskView === "habits" ? "Your gentle routines" : taskView === "later" ? "Another day is okay" : "Your little list"}</h2></div>
-              <p className="pl-design-caption">No need to do everything. Moving a task is allowed.</p>
-              <input value={taskSearchQuery} onChange={(event) => setTaskSearchQuery(event.target.value)} placeholder="Search your little list" aria-label="Search today's tasks" />
+              <p className="pl-design-caption">{taskView === "today" ? "Just a few at a time. The rest are still here when you want them." : "No need to do everything. Moving a task is allowed."}</p>
+              <details style={{ marginTop: 8 }}>
+                <summary style={{ cursor: "pointer", fontSize: 12, fontWeight: 800, color: "var(--pl-theme-muted,#806B8D)" }}>Find a task</summary>
+                <input style={{ marginTop: 7 }} value={taskSearchQuery} onChange={(event) => setTaskSearchQuery(event.target.value)} placeholder="Search your little list" aria-label="Search today's tasks" />
+              </details>
               {(() => {
                 const query = taskSearchQuery.trim().toLowerCase();
                 const visible = taskView === "later"
                   ? trackerTasks.filter(task => !task.archived_at && !taskIsScheduledForDate(task, selectedProgressDate || period.date) && (task.one_time_date > (selectedProgressDate || period.date) || Array.from({length:7}, (_, index) => offsetDate(selectedProgressDate || period.date, index + 1)).some(date => taskIsScheduledForDate(task, date)))).map(task => ({ key: task.task_key, label: task.task, sourceTask: task, later: true }))
                   : rows.filter(row => row && (taskView !== "habits" || (row.habitType || row.sourceTask?.habit_type || "regular") !== "regular"));
                 const matching = visible.filter(row => String(row.label || "").toLowerCase().includes(query));
-                return matching.length ? matching.map(row => <div className="pl-design-task" key={row.key}>
-                  <button type="button" className="pl-task-toggle" aria-label={row.later ? `Edit ${row.label}` : `${viewDone[row.key] ? "Undo" : "Complete"} ${row.label}`} aria-pressed={row.later ? undefined : !!viewDone[row.key]} onClick={() => { if (row.later) { startEditingTask(row.sourceTask); return; } if (!viewDone[row.key]) cheer(); unifiedToggle(row.key); }}>
-                    <span className={`pl-task-box ${!row.later && viewDone[row.key] ? "is-done" : ""}`} aria-hidden="true">{!row.later && viewDone[row.key] ? "✓" : ""}</span>
-                    <span><strong>{row.label}</strong><HabitGoalCaption taskKey={row.key}/><small>{row.later ? scheduleLabelForTask(row.sourceTask) : row.sourceTask?.estimated_minutes ? `${row.sourceTask.estimated_minutes} minutes · At your pace` : "One little step"}</small></span>
-                  </button>
-                  {row.sourceTask && <button type="button" className="pl-task-edit" onClick={() => startEditingTask(row.sourceTask)} aria-label={`Edit ${row.label}`}>•••</button>}
-                </div>) : <p className="pl-design-empty">{query ? "No tasks match that search." : taskView === "today" ? "Your list has room to breathe. Add your first little task below." : "Nothing here yet. A small start is enough."}</p>;
+                const incompleteToday = taskView === "today" && !query ? matching.filter(row => !viewDone[row.key]) : matching;
+                const displayRows = taskView === "today" && !query && !showAllToday ? incompleteToday.slice(0, 3) : matching;
+                const hiddenCount = taskView === "today" && !query ? Math.max(0, matching.length - displayRows.length) : 0;
+                if (!displayRows.length) return <p className="pl-design-empty">{query ? "No tasks match that search." : taskView === "today" && matching.length ? "You’re caught up for now ✨" : taskView === "today" ? "Your list has room to breathe. Add your first little task below." : "Nothing here yet. A small start is enough."}</p>;
+                return <>
+                  {displayRows.map(row => <div className="pl-design-task" key={row.key}>
+                    <button type="button" className="pl-task-toggle" aria-label={row.later ? `Edit ${row.label}` : `${viewDone[row.key] ? "Undo" : "Complete"} ${row.label}`} aria-pressed={row.later ? undefined : !!viewDone[row.key]} onClick={() => { if (row.later) { startEditingTask(row.sourceTask); return; } if (!viewDone[row.key]) cheer(); unifiedToggle(row.key); }}>
+                      <span className={`pl-task-box ${!row.later && viewDone[row.key] ? "is-done" : ""}`} aria-hidden="true">{!row.later && viewDone[row.key] ? "✓" : ""}</span>
+                      <span><strong>{row.label}</strong><HabitGoalCaption taskKey={row.key}/><small>{row.later ? scheduleLabelForTask(row.sourceTask) : row.sourceTask?.estimated_minutes ? `${row.sourceTask.estimated_minutes} minutes · At your pace` : "One little step"}</small></span>
+                    </button>
+                    {row.sourceTask && <button type="button" className="pl-task-edit" onClick={() => startEditingTask(row.sourceTask)} aria-label={`Edit ${row.label}`}>•••</button>}
+                  </div>)}
+                  {taskView === "today" && !query && matching.length > 3 && (
+                    <button type="button" onClick={() => setShowAllToday(value => !value)} style={{ width: "100%", marginTop: 8, minHeight: 40, borderRadius: 12, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface-2,#F8F3FA)", color: "var(--pl-theme-ink,#5B4B6B)", fontWeight: 850, cursor: "pointer" }}>
+                      {showAllToday ? "Show just 3" : `See the rest (${hiddenCount})`}
+                    </button>
+                  )}
+                </>;
               })()}
             </section>
             {taskView === "habits" && <HabitStudio/>}
