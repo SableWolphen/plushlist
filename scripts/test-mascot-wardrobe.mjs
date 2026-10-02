@@ -68,7 +68,7 @@ let saved;
 const props={open:true,inline:true,selectedOutfit:selected,activityDaysTotal:53,unlockedOutfits:earned,earnedBadgeIdSet:new Set(),BADGE_DEFS:[],unlockedIdSet:new Set(earned.map(x=>x.id)),mascotRequirementProgress:()=>5,saveMascotCollection:value=>saved=value,mascotCollection:{selectedId:'backpack',celebrationSound:true,unlockedIds:earned.map(x=>x.id)},savedBestStreak:9,collectionTab:'mascot',setCollectionTab:()=>{},winsJarEntries:[],theme:'baby-night'};
 let nodes=flatten(RewardsPanel(props));
 const cards=nodes.filter(n=>n.type==='button'&&n.props.className==='pl-collection-item'&&!n.props.disabled);
-assert.equal(cards.length,6,'Default closet shows six outfits');
+assert.equal(cards.length,4,'Default closet shows four outfits');
 assert.ok(cards.every(card=>flatten(card).some(n=>n.type===ThemeScene||n.type?.name==='ThemeScene')),'Every outfit card shows the equipped plush');
 assert.equal(cards[0].props['aria-pressed'],true,'Wearing outfit stays visible in the short list');
 const other=cards.find(n=>n.props['aria-pressed']===false);other.props.onClick();
