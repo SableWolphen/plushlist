@@ -7354,12 +7354,10 @@ function GlowUpTracker() {
           <button type="button" aria-current={dashboard === "today" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("today"); }}><DesignIcon name="home" /><span>Home</span></button>
           <button type="button" aria-current={dashboard === "progress" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("progress"); }}><DesignIcon name="progress" /><span>Progress</span></button>
           <button type="button" aria-current={dashboard === "guardian" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("guardian"); }}><span className="ico" aria-hidden="true">💛</span><span>Guardian</span></button>
+          <button type="button" className="pl-app-nav-btn pl-app-nav-add-inline" aria-label="Add a task" onClick={() => { setCollectionOpen(false); openTaskManager(); }}><span className="ico" aria-hidden="true">＋</span><span>Add</span></button>
           <button type="button" aria-current={dashboard === "care" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("care"); }}><DesignIcon name="care" /><span>Care</span></button>
           <button type="button" aria-current={collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => setCollectionOpen(true)} aria-label="Open rewards"><DesignIcon name="plush" /><span>Plush</span></button>
         </nav>
-        {dashboard === "today" && !collectionOpen && <button type="button" className="pl-app-add-float" aria-label="Add a task" onClick={() => { setCollectionOpen(false); openTaskManager(); }}>
-          <span aria-hidden="true">＋</span><small>Add</small>
-        </button>}
 
         </>
           </>
