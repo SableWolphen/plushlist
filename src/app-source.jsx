@@ -6939,7 +6939,7 @@ function GlowUpTracker() {
       )}
       {confirmationDialog}
       {pendingTaskDelete && (
-        <div role="dialog" aria-modal="true" aria-labelledby="delete-task-title" style={{ position: "fixed", inset: 0, zIndex: 65, display: "grid", placeItems: "center", padding: 18, background: "rgba(45,32,56,.45)", backdropFilter: "blur(4px)" }}>
+        <div role="dialog" aria-modal="true" aria-labelledby="delete-task-title" style={{ position: "fixed", inset: 0, zIndex: 120, display: "grid", placeItems: "center", padding: 18, background: "rgba(45,32,56,.45)", backdropFilter: "blur(4px)" }}>
           <div style={{ width: "min(100%, 390px)", padding: 20, borderRadius: 22, background: "#FFFDFE", border: "1px solid #F0B8C4", boxShadow: "0 24px 70px rgba(45,32,56,.25)" }}>
             <div id="delete-task-title" style={{ fontSize: 19, fontWeight: 900, color: "#7A4051" }}>Delete this task?</div>
             <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.5, color: "#6B5A7D" }}>
@@ -6953,7 +6953,7 @@ function GlowUpTracker() {
         </div>
       )}
       {editingTaskKey && editTaskDraft && (
-        <div role="dialog" aria-modal="true" aria-labelledby="edit-task-title" style={{ position: "fixed", inset: 0, zIndex: 65, display: "grid", placeItems: "center", padding: 18, background: "rgba(45,32,56,.45)", backdropFilter: "blur(4px)" }}>
+        <div role="dialog" aria-modal="true" aria-labelledby="edit-task-title" style={{ position: "fixed", inset: 0, zIndex: 120, display: "grid", placeItems: "center", padding: 18, background: "rgba(45,32,56,.45)", backdropFilter: "blur(4px)" }}>
           <div style={{ width: "min(100%, 460px)", maxHeight: "calc(100dvh - 36px)", overflowY: "auto", padding: 20, borderRadius: 22, background: "#FFFDFE", border: "1px solid #E3C9EC", boxShadow: "0 24px 70px rgba(45,32,56,.25)" }}>
             <div id="edit-task-title" style={{ fontSize: 19, fontWeight: 900, color: "#5B4B6B" }}>Edit task</div>
 
@@ -7290,13 +7290,13 @@ function GlowUpTracker() {
       </div>
       </div>
       {recentlyDeletedTask && (
-        <div style={{ position: "fixed", left: "50%", bottom: 20, transform: "translateX(-50%)", zIndex: 60, display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "#3B2E46", color: "white", boxShadow: "0 10px 30px rgba(0,0,0,0.25)", maxWidth: "92vw" }}>
+        <div style={{ position: "fixed", left: "50%", bottom: "calc(68px + env(safe-area-inset-bottom))", transform: "translateX(-50%)", zIndex: 100, display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "#3B2E46", color: "white", boxShadow: "0 10px 30px rgba(0,0,0,0.25)", maxWidth: "92vw" }}>
           <span style={{ fontSize: 12.5 }}>🗑️ "{recentlyDeletedTask.label}" removed</span>
           <button type="button" onClick={undoDeleteTask} style={{ padding: "5px 10px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.4)", background: "transparent", color: "#F2D9FF", fontWeight: 900, cursor: "pointer", fontSize: 12.5, whiteSpace: "nowrap" }}>Undo</button>
         </div>
       )}
       {badgeCelebration && (
-        <div role="status" style={{ position: "fixed", left: "50%", bottom: 20, transform: "translateX(-50%)", zIndex: 61, display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "#3B2E46", color: "white", boxShadow: "0 10px 30px rgba(0,0,0,0.25)", maxWidth: "92vw" }}>
+        <div role="status" style={{ position: "fixed", left: "50%", bottom: "calc(68px + env(safe-area-inset-bottom))", transform: "translateX(-50%)", zIndex: 101, display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "#3B2E46", color: "white", boxShadow: "0 10px 30px rgba(0,0,0,0.25)", maxWidth: "92vw" }}>
           <span style={{ fontSize: 12.5 }}>
             {badgeCelebration.intro} {badgeCelebration.badges.map((item) => `${item.badge} ${item.name}`).join(", ")}
           </span>
