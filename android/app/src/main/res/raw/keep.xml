@@ -9,4 +9,4 @@
      all on the launcher side ("Couldn't add widget"), not just render with
      missing data. -->
 <resources xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@layout/plushlife_widget,@drawable/plushlife_widget_background,@drawable/plushlife_widget_pink,@drawable/plushlife_widget_nursery,@drawable/plushlife_widget_night,@drawable/plushlife_widget_dino,@drawable/plushlife_widget_task_row,@drawable/plushlife_widget_task_row_done,@drawable/plushlife_widget_mini_card,@xml/plushlife_widget_info,@string/widget_description" />
+    tools:keep="@layout/plushlife_widget,@drawable/plushlife_widget_background,@drawable/plushlife_widget_pink,@drawable/plushlife_widget_nursery,@drawable/plushlife_widget_night,@drawable/plushlife_widget_dino,@drawable/plushlife_widget_task_row,@drawable/plushlife_widget_task_row_done,@drawable/plushlife_widget_task_row_night,@drawable/plushlife_widget_task_row_done_night,@drawable/plushlife_widget_mini_card,@drawable/plushlife_widget_mini_card_night,@xml/plushlife_widget_info,@string/widget_description" />
