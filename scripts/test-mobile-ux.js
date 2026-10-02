@@ -67,6 +67,7 @@ const checks = [
   [read("src/components/guardian-panel.jsx").includes("shared with you</summary>") && read("src/components/guardian-panel.jsx").includes("More ways to support"), "Guardian keeps shared detail and secondary support tools collapsible"],
   [app.includes("function PopupCloseButton") && app.includes('label="Close delete task"') && app.includes('label="Close task editor"') && app.includes('label="Close weekly check-in"'), "app popups expose visible close buttons"],
   [app.includes("dailyCheckInLoaded") && app.includes("setCheckInPopupOpen(true)") && app.includes("plushlife:daily-journal-prompt"), "daily check-in and evening journal prompts can surface automatically"],
+  [app.includes("weeklyIntentionsLoaded") && app.includes("setWeeklyKickoffNote(entries.find") && app.includes("setWeeklyKickoffOpen(true)"), "weekly intention kickoff remains reachable and loads the previous week"],
   [read("src/components/shared.jsx").includes('aria-label="Close"') && read("src/components/focus-timer.jsx").includes('aria-label="Close timer"') && read("src/components/share-win-modal.jsx").includes('aria-label="Close share popup"') && read("src/components/gentle-onboarding.jsx").includes('aria-label="Close welcome"'), "shared modal components expose close buttons"],
   [read("src/components/rewards-panel.jsx").includes("React.useState(4)") && read("src/components/rewards-panel.jsx").includes(".slice(0, 4)"), "Rewards previews a smaller collection instead of a wall of items"],
 ];
