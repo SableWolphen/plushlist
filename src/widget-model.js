@@ -9,6 +9,8 @@ export function widgetSnapshot({ rows = [], viewDone = {}, dayType = 'full', pro
     nextTask: resting ? 'Resting counts today' : pending[0]?.label || extras[0]?.label || (tasks.length ? 'Your caring steps are complete 💜' : 'Open PlushLife for one caring step'),
     dayType: `${String(dayType).replace(/^./,letter=>letter.toUpperCase())} Day`,
     progress:clamp(progress),weeklyProgress:clamp(weeklyProgress),theme,
+    totalCount: tasks.filter(task=>!task.isBonus).length,
+    completeCount: tasks.filter(task=>task.done && !task.isBonus).length,
     tasks:resting ? [] : [...pending,...extras,...complete].slice(0,3).map(({isBonus,...task})=>task),
   };
 }
