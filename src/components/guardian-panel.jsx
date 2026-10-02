@@ -17,6 +17,7 @@ import { CozyScene } from "./theme-world.jsx";
 export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwnGuardian, supportViewMode, setSupportViewMode, isSupportAdult, selectedSupportName, guardianSupportRequests, supportOwnerId, updateGuardianSupportRequest, pendingSupportInvites, supportPeople, acceptSupportInvitation, declineSupportInvitation, canUseCaretakerDashboard, invitedSupportLinks, loadSupportOwner, loadSupportData, user, supportAchievements, period, ownerIsRestingToday, restDatesSet, todayRequiredDone, supportProgress, activeSupportLink, canViewSupportProgress, canViewSupportTasks, canViewSupportSchedule, canViewSupportMood, supportTrackerTasks = [], supportSchedules = [], supportScheduleExceptions = [], supportMoodSummary, supportProgressView, setSupportProgressView, supportTodayDayLabel, displayedSupportPercent, displayedSupportCompleted, displayedSupportPossible, supportDailyEssentialCompleted, supportDailyEssentialKeys, supportScheduledTodayCompleted, supportScheduledTodayKeys, canSendSupportNotes, newNote, setNewNote, addSupportNote, suggestComfortTool, canAddSupportRewards, rewardTitle, setRewardTitle, rewardDetails, setRewardDetails, rewardTarget, setRewardTarget, rewardTargetPeriod, setRewardTargetPeriod, rewardApprovalRequired, setRewardApprovalRequired, addSupportReward, suggestedTask, setSuggestedTask, suggestedTaskDay, setSuggestedTaskDay, submitTaskSuggestion, inviteEmail, setInviteEmail, inviteSupportAdult, GUARDIAN_ROLE_PRESETS, guardianRolePreset, setGuardianRolePreset, ownedSupportLinks, supportRelationships, setSupportAdultActive, removeSupportAdult, updateCaretakerPermission, updateCareAgreement, supportRequestGuardian, setSupportRequestGuardian, supportRequestType, setSupportRequestType, supportRequestText, setSupportRequestText, sendGuardianSupportRequest, taskSuggestions, suggestionSectionsById, setSuggestionSectionsById, taskSectionsForDay, decideTaskSuggestion, supportMessage, supportRewards, supportWeeklyPercent, supportPercent, updateRewardStatus, supportNotes, setComfortToolOpen, deleteSupportNote, onOpenSettings }) {
   const [checkInDelay, setCheckInDelay] = React.useState("0");
   const [guardianArea, setGuardianArea] = React.useState("overview");
+  const [supportAction, setSupportAction] = React.useState("note");
   if (!open) return null;
   const { DAYS, COMFORT_TOOLS } = window.PlushLifeContent;
   const { formatRelativeTime } = window.PlushLifeHelpers;
@@ -195,8 +196,19 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 {(canSendSupportNotes || canAddSupportRewards || !!activeSupportLink?.can_suggest_tasks) && (
                   <details style={{ marginTop: 14, borderTop: "1px solid var(--pl-theme-line,#E9DDF6)", paddingTop: 10 }}>
                     <summary style={{ cursor: "pointer", fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#7B6888)" }}>More ways to support</summary>
-                    <div style={{ paddingTop: 4 }}>
-                {canSendSupportNotes && <>
+                    <div style={{ paddingTop: 8 }}>
+                      <div className="pl-guardian-action-switcher" role="tablist" aria-label="Support actions">
+                        {[
+                          ["note","💌","Note",canSendSupportNotes],
+                          ["reward","🎁","Reward",canAddSupportRewards],
+                          ["task","🌱","Task",!!activeSupportLink?.can_suggest_tasks],
+                        ].filter(([, , , enabled]) => enabled).map(([id, icon, label]) => (
+                          <button key={id} type="button" role="tab" aria-selected={supportAction === id} onClick={() => setSupportAction(id)}>
+                            <span aria-hidden="true">{icon}</span><span>{label}</span>
+                          </button>
+                        ))}
+                      </div>
+                {supportAction === "note" && canSendSupportNotes && <>
                 <div style={{ marginTop: 14, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#4C8FE8)" }}>SEND AN ENCOURAGING NOTE</div>
                 <textarea value={newNote} onChange={(event) => setNewNote(event.target.value)} maxLength={1000} placeholder="How are you doing? I'm proud of your progress…" style={{ width: "100%", boxSizing: "border-box", minHeight: 74, marginTop: 7, padding: 10, borderRadius: 11, border: "1px solid var(--pl-theme-line,#E9DDF6)", color: "var(--pl-theme-ink,#5B4B6B)", resize: "vertical" }} />
                 <button onClick={addSupportNote} style={{ marginTop: 7, padding: "8px 12px", borderRadius: 10, border: 0, background: "var(--pl-theme-accent,#4C8FE8)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800, cursor: "pointer" }}>Send note 💛</button>
@@ -211,7 +223,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 </div>
                 </>}
 
-                {canAddSupportRewards && <>
+                {supportAction === "reward" && canAddSupportRewards && <>
                 <div style={{ marginTop: 16, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>ADD A REWARD</div>
                 <div style={{ display: "grid", gap: 7, marginTop: 7 }}>
                   <input value={rewardTitle} onChange={(event) => setRewardTitle(event.target.value)} maxLength={120} placeholder="Reward, e.g. Favorite dinner" aria-label="Reward title" style={{ padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
@@ -230,7 +242,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 </div>
                 <button onClick={addSupportReward} style={{ marginTop: 7, padding: "8px 12px", borderRadius: 10, border: 0, background: "var(--pl-theme-accent,#A65DC1)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800, cursor: "pointer" }}>Add reward 🎁</button>
                 </>}
-                {!!activeSupportLink?.can_suggest_tasks && <>
+                {supportAction === "task" && !!activeSupportLink?.can_suggest_tasks && <>
                   <div style={{ marginTop: 16, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-ink,#318C79)" }}>SUGGEST A TASK</div>
                   <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 7, marginTop: 7 }}>
                     <input value={suggestedTask} onChange={(event) => setSuggestedTask(event.target.value)} maxLength={240} placeholder="A gentle task suggestion" aria-label="Task suggestion" style={{ minWidth: 0, padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
