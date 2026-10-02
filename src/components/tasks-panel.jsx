@@ -16,6 +16,7 @@ import { useCompletedTaskFlow } from "./completed-task-flow.jsx";
 export function TasksPanel({ open, onClose, inline = false, initialView = "today", viewRequest = 0, rows = [], viewDone = {}, toggle, newTaskDay, setNewTaskDay, taskSectionsForDay, setNewTaskSection, setNewTaskCustomSection, starterPackId, setStarterPackId, trackerTasks, setStarterPackMessage, addStarterPack, starterPackMessage, importOpen, setImportOpen, newTaskSection, importText, setImportText, importTasksFromText, importMessage, newTaskNameInputRef, newTaskName, setNewTaskName, taskMessage, setTaskMessage, naturalScheduleText, setNaturalScheduleText, naturalSchedulePreview, setNaturalSchedulePreview, applyNaturalSchedule, newTaskSectionOptions, newTaskCustomSection, taskAdvancedOpen, setTaskAdvancedOpen, newTaskWhy, setNewTaskWhy, newTaskSoftLabel, setNewTaskSoftLabel, newTaskTinyLabel, setNewTaskTinyLabel, newTaskEstimatedMinutes, setNewTaskEstimatedMinutes, newTaskEssentialOnLow, setNewTaskEssentialOnLow, newTaskKind, setNewTaskKind, newTaskScheduleType, setNewTaskScheduleType, newTaskScheduleDays, setNewTaskScheduleDays, newTaskReminderTime, setNewTaskReminderTime, newTaskStartDate, setNewTaskStartDate, newTaskEndDate, setNewTaskEndDate, newTaskOneTimeDate, setNewTaskOneTimeDate, selectedProgressDate, addTrackerTask, SUPPORTER_FEATURES_ENABLED, isSupporterAccount, FREE_TASK_LIMIT_PER_DAY, taskSearchQuery, setTaskSearchQuery, isTaskPausedOnDate, period, startPointerTaskDrag, movePointerTaskDrag, endPointerTaskDrag, cancelPointerTaskDrag, moveTaskToSection, startEditingTask, resumeTrackerTask, pauseTrackerTask, archiveTrackerTask, setPendingTaskDelete, showArchivedTasks, setShowArchivedTasks, restoreArchivedTask, quickAddTrackerTask, quickAddMessage }) {
   const [taskView, setTaskView] = React.useState("today");
   const [composerOpen, setComposerOpen] = React.useState(false);
+  const [taskAddMoreOpen, setTaskAddMoreOpen] = React.useState(false);
   const [showAllToday, setShowAllToday] = React.useState(false);
   const [plushHappy, setPlushHappy] = React.useState(false);
   const plushTimer = React.useRef(null);
@@ -26,12 +27,13 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
     plushTimer.current = window.setTimeout(() => setPlushHappy(false), 2200);
   };
   React.useEffect(() => () => { if (plushTimer.current) window.clearTimeout(plushTimer.current); }, []);
-  React.useEffect(() => { if (open) { setTaskView(initialView); setComposerOpen(!inline); setShowAllToday(false); } }, [open, inline, initialView, viewRequest]);
+  React.useEffect(() => { if (open) { setTaskView(initialView); setComposerOpen(!inline); setTaskAddMoreOpen(false); setShowAllToday(false); } }, [open, inline, initialView, viewRequest]);
   if (!open) return null;
   const { DAYS, TEMPLATE_PACKS } = window.PlushLifeContent;
   const { WEEKDAY_PRESET_IDS, WEEKEND_PRESET_IDS, scheduleLabelForTask, taskIsScheduledForDate, offsetDate } = window.PlushLifeSchedule;
   const scrollToFullForm = () => {
     setComposerOpen(true);
+    setTaskAddMoreOpen(true);
     window.requestAnimationFrame(() => document.getElementById("plushlife-full-task-form")?.scrollIntoView?.({ behavior: "auto", block: "start" }));
   };
   return (
@@ -78,6 +80,9 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
             <details className="pl-task-composer" open={composerOpen} onToggle={event => setComposerOpen(event.currentTarget.open)}>
               <summary>Add & shape a little task</summary>
           <QuickCapture onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage} onMoreOptions={scrollToFullForm} />
+          <details open={taskAddMoreOpen} onToggle={(event) => setTaskAddMoreOpen(event.currentTarget.open)} style={{ marginTop: 10 }}>
+            <summary style={{ minHeight: 44, display: "list-item", alignContent: "center", cursor: "pointer", fontSize: 13, fontWeight: 900, color: "var(--pl-theme-muted,#7B6888)" }}>More ways to add & organize</summary>
+            <div style={{ paddingTop: 8 }}>
           <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 8px 22px rgba(103,65,122,.06), inset 0 1px 0 rgba(255,255,255,.9)" }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: "var(--pl-theme-ink,#76558A)" }}>PICK A COZY SPOT</div>
             <div style={{ marginTop: 5, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#7B6888)" }}>Choose where this belongs. PlushLife will keep the rest tidy for you.</div>
@@ -251,6 +256,8 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
             )}
             {taskMessage && <div id="task-form-message" role={taskMessage.includes("first") || taskMessage.includes("Couldn't") ? "alert" : "status"} aria-live="polite" style={{ marginTop: 8, fontSize: 12, color: taskMessage.includes("first") || taskMessage.includes("Couldn't") ? "#B24D65" : "#8C6B9E", fontWeight: taskMessage.includes("first") ? 800 : 600 }}>{taskMessage}</div>}
           </div>
+            </div>
+          </details>
             </details>
             <details className="pl-task-management"><summary>Manage routines, lists & archived tasks</summary>
           <div style={{ marginBottom: 18, padding: 16, borderRadius: 16, background: "rgba(255,255,255,0.82)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
