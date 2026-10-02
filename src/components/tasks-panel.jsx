@@ -65,7 +65,15 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
                       <span className={`pl-task-box ${!row.later && viewDone[row.key] ? "is-done" : ""}`} aria-hidden="true">{!row.later && viewDone[row.key] ? "✓" : ""}</span>
                       <span><strong>{row.label}</strong><HabitGoalCaption taskKey={row.key}/><small>{row.later ? scheduleLabelForTask(row.sourceTask) : row.sourceTask?.estimated_minutes ? `${row.sourceTask.estimated_minutes} minutes · At your pace` : "One little step"}</small></span>
                     </button>
-                    {row.sourceTask && <button type="button" className="pl-task-edit" onClick={() => startEditingTask(row.sourceTask)} aria-label={`Edit ${row.label}`}>•••</button>}
+                    {row.sourceTask && (
+                      <details style={{ position: "relative", flex: "0 0 auto" }}>
+                        <summary className="pl-task-edit" aria-label={`More options for ${row.label}`} style={{ listStyle: "none", cursor: "pointer", display: "grid", placeItems: "center" }}>•••</summary>
+                        <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 20, minWidth: 132, padding: 6, borderRadius: 11, background: "var(--pl-theme-surface,#FFF)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 10px 26px rgba(74,45,94,.16)" }}>
+                          <button type="button" onClick={() => startEditingTask(row.sourceTask)} style={{ width: "100%", minHeight: 38, border: 0, borderRadius: 8, background: "transparent", textAlign: "left", color: "var(--pl-theme-ink,#5B4B6B)", fontWeight: 850, cursor: "pointer" }}>✏️ Edit</button>
+                          <button type="button" onClick={() => setPendingTaskDelete({ key: row.sourceTask.task_key, label: row.sourceTask.task, section: row.sourceTask.section })} style={{ width: "100%", minHeight: 38, border: 0, borderRadius: 8, background: "transparent", textAlign: "left", color: "var(--pl-theme-muted,#C45D74)", fontWeight: 850, cursor: "pointer" }}>🗑️ Delete</button>
+                        </div>
+                      </details>
+                    )}
                   </div>)}
                   {taskView === "today" && !query && matching.length > 5 && (
                     <button type="button" onClick={() => setShowAllToday(value => !value)} style={{ width: "100%", marginTop: 8, minHeight: 40, borderRadius: 12, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface-2,#F8F3FA)", color: "var(--pl-theme-ink,#5B4B6B)", fontWeight: 850, cursor: "pointer" }}>
