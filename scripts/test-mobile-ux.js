@@ -31,6 +31,7 @@ const checks = [
   [today.includes('textOverflow: "ellipsis"') && today.includes('whiteSpace: "nowrap"'), "long Today labels are constrained instead of widening the page"],
   [careSources.includes('gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))"') && careSources.includes('gridTemplateColumns: "repeat(auto-fit,minmax(145px,1fr))"'), "Care tools reflow to available phone width"],
   [tasks.includes('minWidth: 0') && tasks.includes('width: "100%"') && tasks.includes('flexWrap: "wrap"'), "task editing fields and schedule controls can shrink/wrap on narrow phones"],
+  [tasks.includes("showAllToday") && tasks.includes("Just a few at a time") && tasks.includes("See the rest"), "Tasks defaults to a small calm slice instead of showing the whole day at once"],
   [app.includes("/* compact-phone-shell */") && app.includes("padding-bottom:calc(104px + env(safe-area-inset-bottom))"), "main mobile shell keeps fixed navigation from covering content"],
   [app.includes(".pl-app-bottom-nav") && app.includes("min-height:50px") && app.includes(".pl-app-nav-add{width:38px"), "bottom navigation stays compact instead of becoming oversized"],
   [today.includes(".pl-home-hero{min-height:136px") && today.includes(".pl-home-copy h1{font-size:18px") && today.includes(".pl-home-bubble{right:6px"), "Home hero stays compact and avoids greeting/mascot overlap"],
