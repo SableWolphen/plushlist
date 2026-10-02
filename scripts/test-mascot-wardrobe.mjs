@@ -42,7 +42,7 @@ for (const world of Object.keys(themeCopy.worlds)) {
     const nodes=flatten(ThemeScene({world,outfit}));
     const closeup=flatten(ThemeScene({world,outfit,focus:true}));
     const art=closeup.find(n=>n.props?.className==='pl-scene-art');
-    const geometry=wardrobe.wardrobeGeometry(world);
+    const geometry=wardrobe.wardrobeGeometry('soft');
     const width=parseFloat(art.props.style.width)/100*120;
     const left=parseFloat(art.props.style.left)/100*120;
     const top=parseFloat(art.props.style.top)/100*110;
@@ -51,6 +51,7 @@ for (const world of Object.keys(themeCopy.worlds)) {
     assert.ok(closeup[0].props.className.includes('pl-mascot-focus'));
     assert.equal(closeup.filter(n=>n.type==='svg').length,nodes.filter(n=>n.type==='svg').length,'Close-up preserves every outfit layer');
     const image=nodes.find(n=>n.type==='img');
+    assert.ok(String(image.props.src).includes('assets/figma/soft'),'Every theme renders the exact original mascot artwork');
     assert.ok(image.props.alt.includes(outfit.name));
     for(const layer of nodes.filter(n=>n.type==='svg')){
       assert.equal(layer.props.width,image.props.width,'Outfit and bear share one artwork coordinate system');
@@ -77,4 +78,4 @@ for(const card of nodes.filter(n=>n.type==='button'&&n.props.disabled)){saved=un
 assert.ok(nodes.filter(n=>n.type==='details').every(n=>!n.props.open),'Long reward lists start collapsed');
 for(const path of ['src/app-source.jsx','src/components/care-panel.jsx','src/components/care-panel-existing.jsx','src/components/baby-mode.jsx'])assert.ok(!fs.readFileSync(path,'utf8').includes('MamasCorner'),`Private corner removed from ${path}`);
 assert.ok(fs.readFileSync('src/app-source.jsx','utf8').includes('const babyCaregiverName = preferences.baby_voice === "fatherly" ? "Daddy" : "Mommy";'),'Nursery voices remain selectable');
-console.log('Wardrobe checks passed: every earned outfit, shared bear coordinates in every theme, offline artwork, safe equip, compact collections, and removed private corner.');
+console.log('Wardrobe checks passed: original mascot locked across themes, every earned outfit aligned, offline artwork, safe equip, compact collections, and removed private corner.');
