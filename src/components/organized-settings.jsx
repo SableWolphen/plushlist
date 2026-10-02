@@ -177,20 +177,33 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
 
   const query = search.trim().toLowerCase();
   const visibleCategories = query ? categories.filter((item) => `${item[2]} ${item[3]} ${item[4]}`.toLowerCase().includes(query)) : categories;
+  const primaryCategoryIds = new Set(["personalize", "notifications", "experience", "privacy"]);
+  const primaryCategories = visibleCategories.filter((item) => primaryCategoryIds.has(item[0]));
+  const moreCategories = visibleCategories.filter((item) => !primaryCategoryIds.has(item[0]));
 
   const home = (
     <>
       <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 13, color: "var(--pl-theme-muted,#8A7895)", lineHeight: 1.45 }}>Everything has a home now. Pick what you want to change.</div>
+        <div style={{ fontSize: 13, color: "var(--pl-theme-muted,#8A7895)", lineHeight: 1.45 }}>Start with the common stuff. Everything else is still here when you need it.</div>
         <div style={{ position: "relative", marginTop: 11 }}>
           <span aria-hidden="true" style={{ position: "absolute", left: 12, top: 11, color: "var(--pl-theme-muted,#A493AD)" }}>⌕</span>
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search settings" aria-label="Search settings" style={{ ...inputStyle, paddingLeft: 35, background: "var(--pl-theme-surface,#FFFCFE)" }} />
         </div>
       </div>
       <div style={cardStyle}>
-        {visibleCategories.map(([id, icon, title, description]) => (
+        {(query ? visibleCategories : primaryCategories).map(([id, icon, title, description]) => (
           <SettingsHomeRow key={id} icon={icon} title={title} description={description} onClick={() => setSection(id)} badge={id === "account" && (!online || syncStatus === "offline") ? "Offline" : null} />
         ))}
+        {!query && moreCategories.length > 0 && (
+          <details>
+            <summary style={{ minHeight: 48, padding: "0 14px", display: "list-item", alignContent: "center", cursor: "pointer", fontSize: 13, fontWeight: 900, color: "var(--pl-theme-muted,#7B6888)" }}>More settings · {moreCategories.length}</summary>
+            <div style={{ borderTop: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
+              {moreCategories.map(([id, icon, title, description]) => (
+                <SettingsHomeRow key={id} icon={icon} title={title} description={description} onClick={() => setSection(id)} badge={id === "account" && (!online || syncStatus === "offline") ? "Offline" : null} />
+              ))}
+            </div>
+          </details>
+        )}
         {visibleCategories.length === 0 && <div style={{ padding: 22, textAlign: "center", color: "var(--pl-theme-muted,#8A7895)", fontSize: 12.5 }}>No settings match “{search}”.</div>}
       </div>
       {settingsMessage && <div role="status" style={{ marginTop: 12, padding: "10px 12px", borderRadius: 11, background: "var(--pl-theme-surface-2,#F0FAF6)", color: "var(--pl-theme-ink,#347865)", fontSize: 12, fontWeight: 800 }}>{settingsMessage}</div>}
