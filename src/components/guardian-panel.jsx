@@ -48,6 +48,12 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
           <ToolPanel inline title="💛 PlushSupport" displayTitle="Support" onClose={onClose}>
           <div className="pl-guardian-content">
           <CozyScene title="You choose who walks with you." subtitle="Support at your pace. You stay in control." />
+          {canUseCaretakerDashboard && (
+            <div className="pl-guardian-person-switcher" role="tablist" aria-label="Guardian views">
+              <button type="button" role="tab" aria-selected={supportViewMode === "mine"} onClick={() => setSupportViewMode("mine")}>🧸 My Support</button>
+              <button type="button" role="tab" aria-selected={supportViewMode === "caretaker"} onClick={() => { setSupportViewMode("caretaker"); if (invitedSupportLinks[0]) loadSupportOwner(invitedSupportLinks[0].owner_user_id); }}>💛 People I Support</button>
+            </div>
+          )}
           <div className="pl-guardian-switcher" role="tablist" aria-label="Guardian sections">
             {[["overview","💛","Overview"],["together","🤝","Together"],["support","💌","Support"]].map(([id,icon,label]) => (
               <button key={id} type="button" role="tab" aria-selected={guardianArea === id} onClick={() => setGuardianArea(id)}>
@@ -102,12 +108,6 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                     </div>
                   );
                 })}
-              </div>
-            )}
-            {canUseCaretakerDashboard && (
-              <div role="tablist" aria-label="Guardian views" style={{ display: "flex", gap: 6, marginBottom: 14 }}>
-                <button type="button" role="tab" aria-selected={supportViewMode === "mine"} onClick={() => setSupportViewMode("mine")} style={{ flex: 1, padding: "8px 6px", borderRadius: 10, border: supportViewMode === "mine" ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: supportViewMode === "mine" ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface)", color: "var(--pl-theme-muted,#2D6BB5)", fontWeight: 900, fontSize: 14, cursor: "pointer" }}>🧸 My Guardians</button>
-                <button type="button" role="tab" aria-selected={supportViewMode === "caretaker"} onClick={() => { setSupportViewMode("caretaker"); if (invitedSupportLinks[0]) loadSupportOwner(invitedSupportLinks[0].owner_user_id); }} style={{ flex: 1, padding: "8px 6px", borderRadius: 10, border: supportViewMode === "caretaker" ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: supportViewMode === "caretaker" ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface)", color: "var(--pl-theme-muted,#2D6BB5)", fontWeight: 900, fontSize: 14, cursor: "pointer" }}>💛 People I Support</button>
               </div>
             )}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
