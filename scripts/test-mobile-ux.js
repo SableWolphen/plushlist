@@ -7,6 +7,7 @@ function read(relativePath) {
 
 const index = read("index.html");
 const app = read("src/app-source.jsx");
+const ui = read("assets/plushlife-ui.css");
 const shared = read("src/components/shared.jsx");
 const today = read("src/components/today-panel-core.jsx");
 const care = read("src/components/care-panel.jsx");
