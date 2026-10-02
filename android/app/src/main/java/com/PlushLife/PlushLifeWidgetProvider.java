@@ -130,6 +130,9 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
         int muted = Color.parseColor(night ? "#D5C5EA" : "#7D6588");
         int accent = Color.parseColor(night ? "#DCA8F2" : "#B34BC7");
         int doneInk = Color.parseColor(night ? "#C7E8D7" : "#4B7F68");
+        int rowBackground = night ? R.drawable.plushlife_widget_task_row_night : R.drawable.plushlife_widget_task_row;
+        int rowDoneBackground = night ? R.drawable.plushlife_widget_task_row_done_night : R.drawable.plushlife_widget_task_row_done;
+        int miniCardBackground = night ? R.drawable.plushlife_widget_mini_card_night : R.drawable.plushlife_widget_mini_card;
 
         views.setInt(R.id.widget_root, "setBackgroundResource", background);
         views.setTextColor(R.id.widget_day_type, muted);
@@ -148,6 +151,9 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
         Bundle options = manager.getAppWidgetOptions(widgetId);
         int height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 140);
         int rowCount = height >= 255 ? 3 : height >= 200 ? 2 : 1;
+        views.setViewVisibility(R.id.widget_hint, height >= 220 ? View.VISIBLE : View.GONE);
+        views.setViewVisibility(R.id.widget_progress_footer, height >= 175 ? View.VISIBLE : View.GONE);
+        views.setInt(R.id.widget_progress_footer, "setBackgroundColor", Color.TRANSPARENT);
         views.setProgressBar(R.id.widget_progress, 100, prefs.getInt("progress", 0), false);
         views.setProgressBar(R.id.widget_weekly_progress, 100, prefs.getInt("weeklyProgress", 0), false);
 
@@ -180,7 +186,7 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
             views.setTextColor(TASK_CHECK_IDS[i], done ? doneInk : accent);
             views.setTextColor(TASK_LABEL_IDS[i], done ? doneInk : ink);
             views.setInt(TASK_ROW_IDS[i], "setBackgroundResource",
-                done ? R.drawable.plushlife_widget_task_row_done : R.drawable.plushlife_widget_task_row);
+                done ? rowDoneBackground : rowBackground);
 
             Intent toggle = new Intent(context, PlushLifeWidgetProvider.class)
                 .setAction(ACTION_TOGGLE_TASK)
@@ -215,7 +221,7 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
         views.setTextViewText(R.id.widget_next_task, prefs.getString("nextTask", "Open PlushLife for one caring step"));
         views.setTextColor(R.id.widget_next_task, ink);
         views.setViewVisibility(R.id.widget_next_task, (!anyTaskShown || !anyOpenTask) ? View.VISIBLE : View.GONE);
-        views.setViewVisibility(R.id.widget_hint, anyTaskShown ? View.VISIBLE : View.GONE);
+        if (!anyTaskShown || height < 220) views.setViewVisibility(R.id.widget_hint, View.GONE);
 
         Intent launch = new Intent(context, MainActivity.class)
             .setAction(Intent.ACTION_VIEW)
