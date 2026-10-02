@@ -6663,6 +6663,7 @@ function GlowUpTracker() {
         <div role="dialog" aria-modal="true" aria-labelledby="share-card-title" onClick={() => setShareCardOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
           <div onClick={(event) => event.stopPropagation()} style={{ width: "min(100%, 380px)" }}>
             <div style={{ padding: "26px 22px", borderRadius: 28, textAlign: "center", background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 55%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
+              <PopupCloseButton label="Close weekly share card" onClick={() => setShareCardOpen(false)} />
               <div style={{ fontSize: 11, letterSpacing: "0.18em", fontWeight: 900, color: "#A65DC1" }}>PLUSHLIFE · MY WEEK</div>
               <PlushMascot theme={activeWorld} outfit={selectedOutfit} size={110} mood={mascotMood} activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
               <div id="share-card-title" style={{ marginTop: 4, fontSize: 34, fontWeight: 900, color: "#75428C" }}>{weeklyOverallPct}%</div>
@@ -6841,6 +6842,7 @@ function GlowUpTracker() {
       {careOutcomeTool && (
         <div role="dialog" aria-modal="true" aria-labelledby="care-outcome-title" onClick={() => setCareOutcomeTool(null)} style={{ position: "fixed", inset: 0, zIndex: 61, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
           <div onClick={(event) => event.stopPropagation()} style={{ width: "min(100%,390px)", padding: 20, borderRadius: 24, background: "linear-gradient(145deg,#F2FFFB,#FFF7FC)", border: "2px solid #73B7A8", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
+            <PopupCloseButton label="Close care feedback" onClick={() => setCareOutcomeTool(null)} />
             <div id="care-outcome-title" style={{ fontSize: 18, fontWeight: 900, color: "#4F625D" }}>Did that help?</div>
             <div style={{ marginTop: 5, color: "#6B7F78", fontSize: 12, lineHeight: 1.5 }}>Your answer stays private and helps PlushLife learn which tools are useful for you. It never becomes a diagnosis.</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 8, marginTop: 13 }}>
