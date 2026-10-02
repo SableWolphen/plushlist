@@ -40,7 +40,7 @@ public class WidgetBridgePlugin extends Plugin {
         "plugin.updateWidget({dayType:dayMode(),nextTask:next?next.label:(all.length&&doneCount>=all.length?'You’re good for today 💜':'Open PlushLife for one caring step'),progress:progress,weeklyProgress:progress,tasks:tasks}).catch(function(){});" +
         "}catch(e){}};" +
         "var findTask=function(label,key){var wanted=clean(label).toLowerCase();var wantedKey=clean(key);var list=rows();for(var i=0;i<list.length;i++){var r=list[i],c=controlFor(r);if(!c)continue;var keyMatch=wantedKey&&taskKey(r,c)===wantedKey;var text=taskLabel(r).toLowerCase();var labelMatch=wanted&&(text===wanted||text.indexOf(wanted)>=0||wanted.indexOf(text)>=0);if(keyMatch||labelMatch)return {row:r,control:c};}return null;};" +
-        "var consumeAction=function(){if(window.__plushlifeWidgetDataOwnedByApp)return;try{var plugin=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.WidgetBridge;if(!plugin||!plugin.consumeWidgetAction)return;plugin.consumeWidgetAction().then(function(action){if(!action||action.action!=='done')return;var found=findTask(action.taskLabel,action.taskKey);if(!found||isDone(found.control))return;found.control.click();setTimeout(sync,350);}).catch(function(){});}catch(e){}};" +
+        "var consumeAction=function(){if(window.__plushlifeWidgetDataOwnedByApp)return;try{var plugin=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.WidgetBridge;if(!plugin||!plugin.consumeWidgetAction)return;plugin.consumeWidgetAction().then(function(action){if(!action||!action.action)return;var found=findTask(action.taskLabel,action.taskKey);if(found){var done=isDone(found.control);var shouldClick=(action.action==='done'&&!done)||(action.action==='undo'&&done);if(shouldClick)found.control.click();}setTimeout(sync,350);setTimeout(consumeAction,520);}).catch(function(){});}catch(e){}};" +
         "var queued=false;var queue=function(){if(queued)return;queued=true;setTimeout(function(){queued=false;sync();},250);};" +
         "document.addEventListener('change',queue,true);document.addEventListener('click',queue,true);document.addEventListener('plushlife-widget-sync',queue);document.addEventListener('plushlife-widget-action',consumeAction);" +
         "window.addEventListener('plushlife:habit-coach-updated',queue);window.addEventListener('plushlife:habit-coach-hydrated',queue);" +
@@ -71,7 +71,9 @@ public class WidgetBridgePlugin extends Plugin {
             .putString("dayType", dayType)
             .putString("theme", call.getString("theme", "soft"))
             .putInt("progress", progress)
-            .putInt("weeklyProgress", weeklyProgress);
+            .putInt("weeklyProgress", weeklyProgress)
+            .putInt("totalCount", Math.max(0, call.getInt("totalCount", 0)))
+            .putInt("completeCount", Math.max(0, call.getInt("completeCount", 0)));
 
         for (int i = 0; i < 3; i++) {
             String label = "";
@@ -104,13 +106,36 @@ public class WidgetBridgePlugin extends Plugin {
         String taskKey = getActivity().getIntent().getStringExtra("plushlifeTaskKey");
         String taskLabel = getActivity().getIntent().getStringExtra("plushlifeTaskLabel");
         String action = getActivity().getIntent().getStringExtra("plushlifeTaskAction");
+
+        getActivity().getIntent().removeExtra("plushlifeTaskKey");
+        getActivity().getIntent().removeExtra("plushlifeTaskLabel");
+        getActivity().getIntent().removeExtra("plushlifeTaskAction");
+
+        if (action == null || action.isEmpty()) {
+            SharedPreferences prefs = getContext().getSharedPreferences(PlushLifeWidgetProvider.PREFS, Context.MODE_PRIVATE);
+            try {
+                org.json.JSONArray queue = new org.json.JSONArray(
+                    prefs.getString(PlushLifeWidgetProvider.PENDING_ACTIONS_KEY, "[]")
+                );
+                if (queue.length() > 0) {
+                    JSONObject item = queue.optJSONObject(0);
+                    org.json.JSONArray rest = new org.json.JSONArray();
+                    for (int i = 1; i < queue.length(); i++) rest.put(queue.get(i));
+                    prefs.edit().putString(PlushLifeWidgetProvider.PENDING_ACTIONS_KEY, rest.toString()).apply();
+                    if (item != null) {
+                        taskKey = item.optString("taskKey", "");
+                        taskLabel = item.optString("taskLabel", "");
+                        action = item.optString("action", "");
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
         JSObject result = new JSObject();
         result.put("taskKey", taskKey == null ? "" : taskKey);
         result.put("taskLabel", taskLabel == null ? "" : taskLabel);
         result.put("action", action == null ? "" : action);
-        getActivity().getIntent().removeExtra("plushlifeTaskKey");
-        getActivity().getIntent().removeExtra("plushlifeTaskLabel");
-        getActivity().getIntent().removeExtra("plushlifeTaskAction");
         call.resolve(result);
     }
 
