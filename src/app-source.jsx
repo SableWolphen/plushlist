@@ -185,6 +185,15 @@ function markWeeklyKickoffDone(weekStart) {
 
 
 
+function PopupCloseButton({ onClick, label = "Close popup" }) {
+  return <button type="button" aria-label={label} onClick={onClick} style={{
+    float: "right", width: 44, height: 44, margin: "-8px -6px 6px 10px",
+    borderRadius: 999, border: "1px solid var(--pl-theme-line,#E3C9EC)",
+    background: "var(--pl-theme-surface,#FFF)", color: "var(--pl-theme-muted,#76558A)",
+    fontSize: 20, fontWeight: 900, cursor: "pointer", flexShrink: 0,
+  }}>×</button>;
+}
+
 function playCelebrationChime() {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -6594,6 +6603,7 @@ function GlowUpTracker() {
       {autoPopupToShow === "weekly_kickoff" && (
         <div role="dialog" aria-modal="true" aria-labelledby="weekly-kickoff-title" style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
           <div style={{ width: "min(100%, 420px)", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
+            <PopupCloseButton label="Close weekly check-in" onClick={() => { markWeeklyKickoffDone(period.weekStart); setWeeklyKickoffOpen(false); }} />
             <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>📮 A NEW WEEK BEGINS</div>
             <div id="weekly-kickoff-title" style={{ marginTop: 5, fontSize: 20, fontWeight: 900, color: "#75428C" }}>What you wrote last week</div>
             <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: 14, background: "rgba(255,255,255,0.7)", border: "1px solid #E6D0F0" }}>
@@ -6637,6 +6647,7 @@ function GlowUpTracker() {
       {autoPopupToShow === "changelog" && (
         <div role="dialog" aria-modal="true" aria-labelledby="changelog-title" style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
           <div style={{ width: "min(100%, 420px)", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
+            <PopupCloseButton label="Close what's new" onClick={() => updatePreference({ last_seen_changelog: CURRENT_CHANGELOG_VERSION })} />
             <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>✨ WHAT'S NEW</div>
             <div id="changelog-title" style={{ marginTop: 5, fontSize: 20, fontWeight: 900, color: "#75428C" }}>Here's what's changed</div>
             <div style={{ marginTop: 12, display: "grid", gap: 9 }}>
@@ -6842,6 +6853,7 @@ function GlowUpTracker() {
       {autoPopupToShow === "notification_nudge" && (
         <div role="dialog" aria-modal="true" aria-labelledby="notif-nudge-title" onClick={dismissNotificationNudge} style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
           <div onClick={(event) => event.stopPropagation()} style={{ width: "min(100%, 380px)", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#F1FFF9 58%,#EBFBFF)", border: "2px solid #A9DFC4", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
+            <PopupCloseButton label="Close notification suggestion" onClick={dismissNotificationNudge} />
             <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#268A50", fontWeight: 900 }}>🔔 JUST A THOUGHT</div>
             <div id="notif-nudge-title" style={{ marginTop: 5, fontSize: 19, fontWeight: 900, color: "#1F5C3B" }}>Want a gentle reminder?</div>
             <p style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: "#2F6E48" }}>{notificationNudgeReason}</p>
@@ -6855,6 +6867,7 @@ function GlowUpTracker() {
       {essentialsPickerOpen && (
         <div role="dialog" aria-modal="true" aria-labelledby="essentials-picker-title" onClick={() => setEssentialsPickerOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
           <div onClick={(event) => event.stopPropagation()} style={{ width: "min(100%, 420px)", maxHeight: "82vh", overflowY: "auto", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
+            <PopupCloseButton label="Close essentials picker" onClick={() => setEssentialsPickerOpen(false)} />
             <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>WHAT COUNTS TODAY</div>
             <div id="essentials-picker-title" style={{ marginTop: 5, fontSize: 19, fontWeight: 900, color: "#75428C" }}>Today, enough is...</div>
             <p style={{ marginTop: 6, fontSize: 12.5, color: "#8C6B9E", lineHeight: 1.5 }}>Pick just a few things from today's list. When these are done, today counts as a good day — the rest can wait.</p>
@@ -6883,6 +6896,7 @@ function GlowUpTracker() {
       {autoPopupToShow === "intro_intention" && (
         <div role="dialog" aria-modal="true" aria-labelledby="intro-intention-title" style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
           <div style={{ width: "min(100%, 420px)", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
+            <PopupCloseButton label="Close weekly intention" onClick={() => dismissIntroIntention(false)} />
             <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>✨ NEW</div>
             <div id="intro-intention-title" style={{ marginTop: 5, fontSize: 20, fontWeight: 900, color: "#75428C" }}>Set one intention for this week</div>
             <p style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: "#6B5A7D" }}>
@@ -6902,6 +6916,7 @@ function GlowUpTracker() {
             <span key={index} className="celebration-confetti" style={{ left: `${5 + index * 8}%`, animationDelay: `${(index % 5) * 0.12}s`, fontSize: `${18 + index % 3 * 6}px` }}>{piece}</span>
           ))}
           <div onClick={(event) => event.stopPropagation()} style={{ position: "relative", zIndex: 62, width: "min(100%, 390px)", padding: "22px 20px", borderRadius: 26, textAlign: "center", background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
+            <PopupCloseButton label="Close celebration" onClick={() => setCelebrationOpen(false)} />
             <PlushMascot theme={activeWorld} outfit={selectedOutfit} size={170} celebrating={!preferences.reduced_motion} mood="excited" activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
             <div id="day-complete-title" style={{ marginTop: -5, fontSize: 24, fontWeight: 900, color: "#75428C" }}>{celebrationTitleText || voice.celebrationTitles[0]}</div>
             <div style={{ marginTop: 7, fontSize: 13.5, lineHeight: 1.55, color: "#6B5A7D" }}>
@@ -6918,6 +6933,7 @@ function GlowUpTracker() {
       {taskHelpDraft && (
         <div role="dialog" aria-modal="true" aria-labelledby="task-help-title" style={{ position: "fixed", inset: 0, zIndex: 66, display: "grid", placeItems: "center", padding: 18, background: "rgba(45,32,56,.45)", backdropFilter: "blur(4px)" }}>
           <div style={{ width: "min(100%, 410px)", padding: 20, borderRadius: 22, background: "#FFFDFE", border: "1px solid #F0C5D8", boxShadow: "0 24px 70px rgba(45,32,56,.25)" }}>
+            <PopupCloseButton label="Close help request" onClick={() => setTaskHelpDraft(null)} />
             <div id="task-help-title" style={{ fontSize: 19, fontWeight: 900, color: "#8E4E75" }}>Ask for help with this task</div>
             <div style={{ marginTop: 6, padding: "8px 10px", borderRadius: 10, background: "#FFF8FC", color: "#5B4B6B", fontWeight: 900 }}>{taskHelpDraft.task.task}</div>
             <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>GUARDIAN
@@ -6941,6 +6957,7 @@ function GlowUpTracker() {
       {pendingTaskDelete && (
         <div role="dialog" aria-modal="true" aria-labelledby="delete-task-title" style={{ position: "fixed", inset: 0, zIndex: 120, display: "grid", placeItems: "center", padding: 18, background: "rgba(45,32,56,.45)", backdropFilter: "blur(4px)" }}>
           <div style={{ width: "min(100%, 390px)", padding: 20, borderRadius: 22, background: "#FFFDFE", border: "1px solid #F0B8C4", boxShadow: "0 24px 70px rgba(45,32,56,.25)" }}>
+            <PopupCloseButton label="Close delete task" onClick={() => setPendingTaskDelete(null)} />
             <div id="delete-task-title" style={{ fontSize: 19, fontWeight: 900, color: "#7A4051" }}>Delete this task?</div>
             <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.5, color: "#6B5A7D" }}>
               <strong>{pendingTaskDelete.label}</strong> will be removed from <strong>{pendingTaskDelete.section}</strong>. Other tasks in that group will stay.
@@ -6955,6 +6972,7 @@ function GlowUpTracker() {
       {editingTaskKey && editTaskDraft && (
         <div role="dialog" aria-modal="true" aria-labelledby="edit-task-title" style={{ position: "fixed", inset: 0, zIndex: 120, display: "grid", placeItems: "center", padding: 18, background: "rgba(45,32,56,.45)", backdropFilter: "blur(4px)" }}>
           <div style={{ width: "min(100%, 460px)", maxHeight: "calc(100dvh - 36px)", overflowY: "auto", padding: 20, borderRadius: 22, background: "#FFFDFE", border: "1px solid #E3C9EC", boxShadow: "0 24px 70px rgba(45,32,56,.25)" }}>
+            <PopupCloseButton label="Close task editor" onClick={() => { setEditingTaskKey(null); setEditTaskDraft(null); }} />
             <div id="edit-task-title" style={{ fontSize: 19, fontWeight: 900, color: "#5B4B6B" }}>Edit task</div>
 
             <label style={{ display: "grid", gap: 4, marginTop: 12, fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>
@@ -7058,7 +7076,7 @@ function GlowUpTracker() {
           </div>
         </div>
       )}
-      {onboardingStep > 0 && <GentleOnboarding name={displayNameDraft} onName={setDisplayNameDraft} reason={onboardingReason} onReason={setOnboardingReason} mode={onboardingMode} onMode={setOnboardingMode} onFinish={completeOnboarding} busy={onboardingBusy} message={onboardingMessage} invitationCount={pendingSupportInvites.length}/>}
+      {onboardingStep > 0 && <GentleOnboarding name={displayNameDraft} onName={setDisplayNameDraft} reason={onboardingReason} onReason={setOnboardingReason} mode={onboardingMode} onMode={setOnboardingMode} onFinish={completeOnboarding} onClose={() => setOnboardingStep(0)} busy={onboardingBusy} message={onboardingMessage} invitationCount={pendingSupportInvites.length}/>}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 0, overflow: "visible" }}>
         {(preferences.simple_mode ? [] : (dinoTheme ? [
           { e: "🦕", top: "2%", left: "4%", size: 54 }, { e: "🦖", top: "4%", left: "82%", size: 58 },
