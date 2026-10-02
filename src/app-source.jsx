@@ -7245,13 +7245,14 @@ function GlowUpTracker() {
               { id: "guardian", label: "Guardian", icon: "💛", accent: "#D7A81B" },
               { id: "more", label: "More", icon: "•••", accent: "#9B7BAC" },
             ].map((item) => {
+              const displayLabel = item.label;
               const on = item.id === "more" ? classicMoreOpen : item.id === dashboard;
               return <button className="plushlife-dashboard-tab" key={item.id} id={`dashboard-tab-${item.id}`} role="tab" aria-selected={on} onClick={() => {
                 if (item.id === "more") { setClassicMoreOpen((open) => !open); return; }
                 setClassicMoreOpen(false);
                 goToDashboard(item.id);
               }} style={{ position: "relative", minHeight: 58, padding: "7px 3px", borderRadius: 14, border: on ? `2px solid ${item.accent}` : "2px solid rgba(243,217,236,.95)", background: on ? `${item.accent}20` : "rgba(255,255,255,.93)", color: on ? item.accent : "#735E80", fontWeight: 900, fontSize: 10.5, lineHeight: 1.15, cursor: "pointer", boxShadow: on ? `0 5px 14px ${item.accent}22` : "0 3px 10px rgba(90,55,105,.05)" }}>
-                <span style={{ display: "block", fontSize: item.id === "more" ? 15 : 17, marginBottom: 3 }} aria-hidden="true">{item.icon}</span>{item.label}
+                <span style={{ display: "block", fontSize: item.id === "more" ? 15 : 17, marginBottom: 3 }} aria-hidden="true">{item.icon}</span>{displayLabel}
               </button>;
             })}
           </div>
