@@ -2094,6 +2094,34 @@ function GlowUpTracker() {
   }, [user, period.date]);
 
   useEffect(() => {
+    if (!user || !preferences.onboarding_complete || !dailyCheckInLoaded) return;
+    if (dailyCheckIn.mood || dailyCheckIn.capacity || checkInPopupDismissedToday) return;
+    const timer = window.setTimeout(() => setCheckInPopupOpen(true), 450);
+    return () => window.clearTimeout(timer);
+  }, [user?.id, preferences.onboarding_complete, dailyCheckInLoaded, dailyCheckIn.mood, dailyCheckIn.capacity, checkInPopupDismissedToday, period.date]);
+
+  useEffect(() => {
+    if (!user || !preferences.onboarding_complete || journalHistoryStatus !== "ready") return;
+    const hour = new Date().getHours();
+    if (hour < 18 || reflectionHistory.some((entry) => entry.note_date === period.date)) return;
+    const storageKey = `plushlife:daily-journal-prompt:${user.id}:${period.date}`;
+    try {
+      if (window.localStorage.getItem(storageKey) === "shown") return;
+      window.localStorage.setItem(storageKey, "shown");
+    } catch (_error) {}
+    const timer = window.setTimeout(() => {
+      setJournalQuickOpenDate(period.date);
+      setPrivateNote("");
+      setPrivateNotePrompt("");
+      setPrivateNoteDraft("");
+      setPrivateNoteEditing(true);
+      setDailyJournalPromptOpen(true);
+      setJournalQuickOpen(true);
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, [user?.id, preferences.onboarding_complete, journalHistoryStatus, reflectionHistory, period.date]);
+
+  useEffect(() => {
     setDailyCheckInHistory([]);
     setReflectionHistory([]);
     setReflectionDates([]);
