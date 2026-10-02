@@ -171,7 +171,12 @@ export function CarePanel(props) {
       `}</style>
 
       <CozyScene title="What do you need right now?" subtitle="Choose what feels closest." />
-      <CozySpace comfortItem={props.comfortItem} rows={props.rows} viewDone={props.viewDone} onReset={props.onReset} onSupport={props.onOpenSupport} onSettings={props.onOpenSettings} onSound={props.toggleSoundscape} onReminderTime={props.onReminderTime} soundscapes={window.PlushLifeContent.SOUNDSCAPES} notes={props.supportNotes} />
+      <details className="pl-design-card" style={{ marginBottom: 0 }}>
+        <summary style={{ minHeight: 44, display: "list-item", alignContent: "center", cursor: "pointer", fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>🧸 My Cozy Space</summary>
+        <div style={{ paddingTop: 8 }}>
+          <CozySpace comfortItem={props.comfortItem} rows={props.rows} viewDone={props.viewDone} onReset={props.onReset} onSupport={props.onOpenSupport} onSettings={props.onOpenSettings} onSound={props.toggleSoundscape} onReminderTime={props.onReminderTime} soundscapes={window.PlushLifeContent.SOUNDSCAPES} notes={props.supportNotes} />
+        </div>
+      </details>
       <section className="pl-care-card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
           <div>
