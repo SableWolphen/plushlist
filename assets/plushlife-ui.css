@@ -1518,3 +1518,79 @@
     font-size:10px;
   }
 }
+
+
+/* 2026-10 final simplification: five calm destinations, Add lives in the header. */
+#main-content .pl-app-bottom-nav,
+#main-content.dino-theme .pl-app-bottom-nav,
+#main-content.baby-mode .pl-app-bottom-nav,
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-app-bottom-nav{
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+}
+#main-content .pl-app-nav-add-inline{display:none!important;}
+#main-content .pl-header-add-button{
+  width:38px;
+  min-width:38px;
+  height:38px;
+  min-height:38px;
+  padding:0;
+  border-radius:12px;
+  border:1px solid color-mix(in srgb,var(--pl-theme-accent,#A65DC1) 28%,var(--pl-theme-line,#E9DDF6));
+  background:color-mix(in srgb,var(--pl-theme-accent,#A65DC1) 9%,white);
+  color:var(--pl-theme-accent,#A65DC1);
+  font-size:24px;
+  font-weight:700;
+  line-height:1;
+  cursor:pointer;
+  box-shadow:0 3px 10px rgba(84,52,99,.06);
+}
+#main-content .pl-header-add-button:active{transform:scale(.96)}
+#main-content .pl-app-add-float{display:none!important;}
+
+#main-content .pl-guardian-person-switcher{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;
+  margin:0 0 8px;
+  padding:4px;
+  border-radius:14px;
+  background:var(--pl-theme-surface-2,#F8F3FA);
+  border:1px solid var(--pl-theme-line,#E9DDF6);
+}
+#main-content .pl-guardian-person-switcher button{
+  min-height:42px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:var(--pl-theme-muted,#806B91);
+  font-size:11px;
+  font-weight:900;
+  cursor:pointer;
+}
+#main-content .pl-guardian-person-switcher button[aria-selected="true"]{
+  background:var(--pl-theme-surface,#FFF);
+  color:var(--pl-theme-accent,#A65DC1);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pl-theme-accent,#A65DC1) 24%,transparent),0 3px 10px rgba(80,50,96,.05);
+}
+#main-content .pl-guardian-content>.pl-cozy-scene{
+  margin-bottom:0!important;
+}
+#main-content .pl-guardian-support-card>details,
+#main-content .pl-guardian-support-card .pl-guardian-permissions{
+  margin-top:8px!important;
+}
+@media(max-width:520px){
+  #main-content .pl-header-add-button{
+    width:36px;
+    min-width:36px;
+    height:36px;
+    min-height:36px;
+    font-size:22px;
+  }
+  #main-content .pl-app-bottom-nav{
+    gap:3px!important;
+  }
+  #main-content .pl-app-nav-btn{
+    font-size:8.8px!important;
+  }
+}
