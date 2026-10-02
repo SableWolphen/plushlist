@@ -801,6 +801,7 @@ function GlowUpTracker() {
   const [lastWeekReflection, setLastWeekReflection] = useState("");
   const [weeklyIntentionText, setWeeklyIntentionText] = useState("");
   const [weeklyIntentionHistory, setWeeklyIntentionHistory] = useState([]);
+  const [weeklyIntentionsLoaded, setWeeklyIntentionsLoaded] = useState(false);
   const [weeklyIntentionHistoryExpanded, setWeeklyIntentionHistoryExpanded] = useState(false);
   const [weeklyIntentionEditing, setWeeklyIntentionEditing] = useState(false);
   const [weeklyIntentionDraft, setWeeklyIntentionDraft] = useState("");
@@ -2000,8 +2001,9 @@ function GlowUpTracker() {
   }, [user, selectedProgressDate]);
 
   useEffect(() => {
-    if (!user) { setWeeklyIntentionText(""); setWeeklyIntentionHistory([]); return; }
+    if (!user) { setWeeklyIntentionText(""); setWeeklyIntentionHistory([]); setWeeklyKickoffNote(""); setWeeklyIntentionsLoaded(false); return; }
     let alive = true;
+    setWeeklyIntentionsLoaded(false);
     supabase
       .from("weekly_intentions")
       .select("week_start, body, updated_at")
@@ -2012,9 +2014,18 @@ function GlowUpTracker() {
         const entries = (data || []).filter((entry) => entry.body?.trim());
         setWeeklyIntentionHistory(entries);
         setWeeklyIntentionText(entries.find((entry) => entry.week_start === period.weekStart)?.body || "");
+        setWeeklyKickoffNote(entries.find((entry) => entry.week_start === offsetDate(period.weekStart, -7))?.body || "");
+        setWeeklyIntentionsLoaded(true);
       });
     return () => { alive = false; };
   }, [user, period.weekStart]);
+
+  useEffect(() => {
+    if (!user || !preferences.onboarding_complete || !weeklyIntentionsLoaded) return;
+    const today = new Date(`${period.date}T12:00:00`);
+    if (today.getDay() !== 1 || isWeeklyKickoffDone(period.weekStart)) return;
+    setWeeklyKickoffOpen(true);
+  }, [user?.id, preferences.onboarding_complete, weeklyIntentionsLoaded, period.date, period.weekStart]);
 
   const saveWeeklyIntentionEdit = async () => {
     if (!user) return;
