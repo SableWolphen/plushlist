@@ -861,6 +861,7 @@ function GlowUpTracker() {
   const [scheduleExceptionMessage, setScheduleExceptionMessage] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [classicMoreOpen, setClassicMoreOpen] = useState(false);
+  const [headerMascotDancing, setHeaderMascotDancing] = useState(false);
   const [arrivalRitualVisible, setArrivalRitualVisible] = useState(true);
   const [habitGardenOpen, setHabitGardenOpen] = useState(false);
   const [progressDetailsOpen, setProgressDetailsOpen] = useState(false);
@@ -7197,7 +7198,13 @@ function GlowUpTracker() {
             </h1>
           </div>
           {user && <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-            <button type="button" onClick={() => setCollectionOpen(true)} aria-label={`Open rewards, ${unlockedOutfits.length} outfits and ${earnedBadgeIdSet.size} badges unlocked`} style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 46, height: 46, padding: 0, borderRadius: "50%", border: "1px solid #E9C96E", background: "#FFFDF4", cursor: "pointer", overflow: "hidden" }}>
+            <button type="button" className={`pl-header-mascot-button ${headerMascotDancing ? "is-dancing" : ""}`} onClick={() => {
+              setHeaderMascotDancing(false);
+              window.requestAnimationFrame(() => {
+                setHeaderMascotDancing(true);
+                window.setTimeout(() => setHeaderMascotDancing(false), 900);
+              });
+            }} aria-label="Tap your plush to make it dance" title="Tap me!" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 46, height: 46, padding: 0, borderRadius: "50%", border: "1px solid #E9C96E", background: "#FFFDF4", cursor: "pointer", overflow: "hidden" }}>
               <PlushMascot theme={activeWorld} outfit={selectedOutfit} size={46} mood="happy" activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
             </button>
 
@@ -7350,9 +7357,9 @@ function GlowUpTracker() {
           <button type="button" aria-current={dashboard === "care" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("care"); }}><DesignIcon name="care" /><span>Care</span></button>
           <button type="button" aria-current={collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => setCollectionOpen(true)} aria-label="Open rewards"><DesignIcon name="plush" /><span>Plush</span></button>
         </nav>
-        <button type="button" className="pl-app-add-float" aria-label="Add a task" onClick={() => { setCollectionOpen(false); openTaskManager(); }}>
+        {dashboard === "today" && !collectionOpen && <button type="button" className="pl-app-add-float" aria-label="Add a task" onClick={() => { setCollectionOpen(false); openTaskManager(); }}>
           <span aria-hidden="true">＋</span><small>Add</small>
-        </button>
+        </button>}
 
         </>
           </>
