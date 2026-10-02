@@ -56,7 +56,7 @@ const requiredRegressionMarkers = [
   'const isGuardianAccount = !!user && trackerProfile?.account_type === "caretaker";',
   'Sharing & care agreement',
   '{ id: "guardian", label: "Guardian", icon: "💛", accent: "#318C79" }',
-  '🧸 My Guardians',
+  '🧸 My Support',
   '💛 People I Support',
   'Nothing is shared until they accept, and you choose every permission.',
   // The starter-pack section heading moved to src/components/tasks-panel.jsx
