@@ -57,6 +57,11 @@ const checks = [
   [growthMoments.includes("<details data-growth-plush-moments") && growthMoments.includes("<summary>") && !growthMoments.includes("borderRadius: 15, background: \"linear-gradient(145deg,#FFF9FD,#F7FCFA)\""), "empty PlushMoments guidance does not consume a full card"],
   [!care.includes("MamasCorner") && care.includes('className="pl-care-history-door pl-design-card"'), "Care removes the private corner and keeps history directly reachable"],
   [settings.includes('placeholder="Search settings"') && settings.includes("Privacy & Data") && settings.includes("Experience") && settings.includes("Notifications & Reminders"), "Settings keeps high-complexity options organized and discoverable"],
+  [care.includes('summary style={{ minHeight: 44') && care.includes('>🧸 My Cozy Space</summary>'), "Care keeps the secondary Cozy Space collapsed until requested"],
+  [read("src/components/progress-panel-core.jsx").includes('display: progressDetailsOpen ? undefined : "none"') && read("src/components/progress-panel-core.jsx").includes("Show insights & monthly trends"), "Progress keeps charts and deeper insights behind one reveal"],
+  [settings.includes("primaryCategoryIds") && settings.includes("More settings ·"), "Settings shows common choices before advanced categories"],
+  [read("src/components/guardian-panel.jsx").includes("shared with you</summary>") && read("src/components/guardian-panel.jsx").includes("More ways to support"), "Guardian keeps shared detail and secondary support tools collapsible"],
+  [read("src/components/rewards-panel.jsx").includes("React.useState(4)") && read("src/components/rewards-panel.jsx").includes(".slice(0, 4)"), "Rewards previews a smaller collection instead of a wall of items"],
 ];
 
 const failures = checks.filter(([ok]) => !ok).map(([, label]) => label);
