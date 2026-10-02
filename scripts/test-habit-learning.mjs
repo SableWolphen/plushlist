@@ -53,5 +53,6 @@ const app = fs.readFileSync(new URL("../src/app-source.jsx", import.meta.url), "
 assert.match(app, /measurableMatch = task\.match/);
 assert.match(app, /consumeWidgetAction/);
 const widget = fs.readFileSync(new URL("../android/app/src/main/java/com/PlushLife/PlushLifeWidgetProvider.java", import.meta.url), "utf8");
-assert.match(widget, /ACTION_TOGGLE_TASK/);\nassert.match(widget, /queuePendingAction/);
+assert.match(widget, /ACTION_TOGGLE_TASK/);
+assert.match(widget, /queuePendingAction/);
 console.log("Habit background learning checks passed.");
