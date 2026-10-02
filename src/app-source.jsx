@@ -7197,7 +7197,8 @@ function GlowUpTracker() {
               {user ? personalPlushlistTitle : "PlushLife"} 💜
             </h1>
           </div>
-          {user && <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+          {user && <div style={{ display: "flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
+            <button type="button" className="pl-header-add-button" aria-label="Add a task" onClick={() => { setCollectionOpen(false); openTaskManager(); }}>＋</button>
             <button type="button" className={`pl-header-mascot-button ${headerMascotDancing ? "is-dancing" : ""}`} onClick={() => {
               setHeaderMascotDancing(false);
               window.requestAnimationFrame(() => {
@@ -7207,7 +7208,6 @@ function GlowUpTracker() {
             }} aria-label="Tap your plush to make it dance" title="Tap me!" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 46, height: 46, padding: 0, borderRadius: "50%", border: "1px solid #E9C96E", background: "#FFFDF4", cursor: "pointer", overflow: "hidden" }}>
               <PlushMascot theme={activeWorld} outfit={selectedOutfit} size={46} mood="happy" activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
             </button>
-
           </div>}
         </div>}
 
@@ -7354,7 +7354,6 @@ function GlowUpTracker() {
           <button type="button" aria-current={dashboard === "today" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("today"); }}><DesignIcon name="home" /><span>Home</span></button>
           <button type="button" aria-current={dashboard === "progress" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("progress"); }}><DesignIcon name="progress" /><span>Progress</span></button>
           <button type="button" aria-current={dashboard === "guardian" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("guardian"); }}><span className="ico" aria-hidden="true">💛</span><span>Guardian</span></button>
-          <button type="button" className="pl-app-nav-btn pl-app-nav-add-inline" aria-label="Add a task" onClick={() => { setCollectionOpen(false); openTaskManager(); }}><span className="ico" aria-hidden="true">＋</span><span>Add</span></button>
           <button type="button" aria-current={dashboard === "care" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("care"); }}><DesignIcon name="care" /><span>Care</span></button>
           <button type="button" aria-current={collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => setCollectionOpen(true)} aria-label="Open rewards"><DesignIcon name="plush" /><span>Plush</span></button>
         </nav>
