@@ -142,7 +142,8 @@ export function FocusTimer() {
     <>
       {open && (
         <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Gentle timer" style={{ position: "fixed", inset: 0, zIndex: 200, display: "grid", placeItems: "center", padding: 20, boxSizing: "border-box", background: "rgba(43,29,52,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
-          <div style={{ width: "min(400px, 100%)", boxSizing: "border-box", maxHeight: "calc(100dvh - 40px)", overflowY: "auto", borderRadius: 24, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", boxShadow: "0 24px 70px rgba(42,26,52,.35)", padding: 24, textAlign: "center", color: "var(--pl-theme-ink,#5B4B6B)" }}>
+          <div style={{ position: "relative", width: "min(400px, 100%)", boxSizing: "border-box", maxHeight: "calc(100dvh - 40px)", overflowY: "auto", borderRadius: 24, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", boxShadow: "0 24px 70px rgba(42,26,52,.35)", padding: 24, textAlign: "center", color: "var(--pl-theme-ink,#5B4B6B)" }}>
+            <button type="button" aria-label="Close timer" onClick={close} style={{ position: "absolute", top: 10, right: 10, width: 44, height: 44, borderRadius: 999, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white", color: "var(--pl-theme-muted,#8B6797)", fontSize: 20, fontWeight: 900, cursor: "pointer" }}>×</button>
             <div style={{display:"flex",justifyContent:"center"}}><ThemeScene focus decorative /></div>
             {task.label&&<p style={{fontWeight:800,overflowWrap:"anywhere"}}>{task.label}</p>}
             {task.step&&<p>{task.step}</p>}
