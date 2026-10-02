@@ -1378,7 +1378,7 @@ function GlowUpTracker() {
         .select("task_key, completed, updated_at")
         .eq("user_id", user.id),
       supabase.from("tracker_profiles").select("display_name, show_personal_schedule, account_type, comfort_item_name, guardian_read_only").eq("user_id", user.id).maybeSingle(),
-      supabase.from("tracker_tasks").select("task_key, day_id, section, task, detail, sort_order, is_bonus, schedule_type, start_date, end_date, one_time_date, why_note, soft_label, tiny_label, estimated_minutes, essential_on_low_capacity, archived_at, archive_reason, schedule_days, reminder_time, paused_since, paused_until, pause_reason").eq("user_id", user.id).order("sort_order"),
+      supabase.from("tracker_tasks").select("user_id, task_key, day_id, section, task, detail, sort_order, is_bonus, schedule_type, start_date, end_date, one_time_date, why_note, soft_label, tiny_label, estimated_minutes, essential_on_low_capacity, archived_at, archive_reason, schedule_days, reminder_time, paused_since, paused_until, pause_reason").eq("user_id", user.id).order("sort_order"),
       supabase.from("tracker_schedules").select("day_id, label, wake, morning, work, workout, home, entries").eq("user_id", user.id).order("day_id"),
       supabase.from("schedule_exceptions").select("id, start_date, end_date, entries").eq("user_id", user.id).order("start_date"),
       supabase.from("task_snoozes").select("task_key, snoozed_until").eq("user_id", user.id).gt("snoozed_until", new Date().toISOString()),
@@ -1394,7 +1394,7 @@ function GlowUpTracker() {
         setTrackerProfile(profileResult.data || null);
         setDisplayNameDraft(profileResult.data?.display_name || "");
         setComfortItemDraft(profileResult.data?.comfort_item_name || "");
-        setTrackerTasks(tasksResult.data || []);
+        setTrackerTasks((tasksResult.data || []).filter((task) => task.user_id === user.id));
         setTaskSnoozes(snoozesResult.data || []);
         setPersonalSchedules(schedulesResult.data || []);
         setScheduleExceptions(exceptionsResult.data || []);
@@ -1425,7 +1425,7 @@ function GlowUpTracker() {
         writeWarmStartCache(user.id, period.date, {
           done: serverDone,
           profile: profileResult.data || null,
-          tasks: tasksResult.data || [],
+          tasks: (tasksResult.data || []).filter((task) => task.user_id === user.id),
           snoozes: snoozesResult.data || [],
           schedules: schedulesResult.data || [],
           exceptions: exceptionsResult.data || [],
@@ -6128,7 +6128,7 @@ function GlowUpTracker() {
             padding-top:max(12px,env(safe-area-inset-top))!important;
             padding-left:env(safe-area-inset-left)!important;
             padding-right:env(safe-area-inset-right)!important;
-            padding-bottom:calc(72px + env(safe-area-inset-bottom))!important;
+            padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;
           }
           .pl-unified-page-hero,.pl-unified-page-content{margin-left:8px!important;margin-right:8px!important}
           .pl-unified-page-content{--pl-card-radius:16px!important}
@@ -6524,7 +6524,7 @@ function GlowUpTracker() {
         /* Plush should read as an app screen, not a desktop modal dropped over the tracker. */
         @media(max-width:520px){
           #main-content.rewards-open [data-plush-panel="🧸 Plush & Keepsakes"].pl-tool-backdrop{
-            inset:0 0 82px 0!important;
+            inset:0 0 calc(64px + env(safe-area-inset-bottom)) 0!important;
             padding:max(8px,env(safe-area-inset-top)) 8px 0!important;
             background:linear-gradient(180deg,#F9F4FC,#FFF9FC)!important;
             backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
@@ -7219,7 +7219,7 @@ function GlowUpTracker() {
           .pl-app-nav-btn{appearance:none;border:0;background:transparent;min-height:36px;padding:0 2px;color:#907895;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:7.8px;font-weight:900;cursor:pointer}.pl-app-nav-btn.active{color:#9C3EAC;background:linear-gradient(145deg,rgba(251,239,255,.82),rgba(255,246,251,.68))}.pl-app-nav-btn.active .ico{background:#F7E8FA;box-shadow:0 0 0 5px #F7E8FA;border-radius:10px;transform:translateY(-1px)}.pl-app-nav-btn .ico{font-size:16px;line-height:1;filter:saturate(.88);transition:transform .16s ease}
           .pl-app-nav-add{width:38px;height:38px;min-height:38px;margin-top:-10px;border-radius:50%;background:linear-gradient(145deg,#C85DDD,#E57BC8);color:white;box-shadow:0 7px 16px rgba(178,71,199,.2),0 0 0 3px rgba(255,250,253,.92);font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center}
           @media(min-width:760px){.pl-app-bottom-nav{left:50%;right:auto;width:760px;transform:translateX(-50%);border-left:1px solid #F0E1F1;border-right:1px solid #F0E1F1;border-radius:24px 24px 0 0}}
-          @media(max-width:520px){.pl-unified-page-shell{padding-bottom:calc(82px + env(safe-area-inset-bottom));gap:5px}.pl-app-bottom-nav{min-height:48px;padding-top:2px}.pl-app-nav-btn{min-height:44px;font-size:9px}.pl-app-nav-btn .ico{font-size:16px}.pl-app-nav-add{width:36px;height:36px;min-height:36px;font-size:19px;margin-top:-9px}.pl-unified-page-hero{min-height:0;padding:4px 2px 5px;border-radius:0}.pl-unified-wordmark{font-size:20px;letter-spacing:-.7px}.pl-unified-date{font-size:9px;padding:5px 7px}.pl-unified-gear{width:44px;height:44px;font-size:16px}.pl-unified-page-title{margin-top:4px;max-width:100%}.pl-unified-kicker{font-size:7.8px}.pl-unified-page-title h2{font-size:15px}.pl-unified-page-title p{display:none}.pl-unified-page-hero:after,.pl-unified-page-hero:before{display:none}}
+          @media(max-width:520px){.pl-unified-page-shell{padding-bottom:calc(104px + env(safe-area-inset-bottom));gap:5px}.pl-app-bottom-nav{min-height:48px;padding-top:2px}.pl-app-nav-btn{min-height:44px;font-size:9px}.pl-app-nav-btn .ico{font-size:16px}.pl-app-nav-add{width:36px;height:36px;min-height:36px;font-size:19px;margin-top:-9px}.pl-unified-page-hero{min-height:0;padding:4px 2px 5px;border-radius:0}.pl-unified-wordmark{font-size:20px;letter-spacing:-.7px}.pl-unified-date{font-size:9px;padding:5px 7px}.pl-unified-gear{width:44px;height:44px;font-size:16px}.pl-unified-page-title{margin-top:4px;max-width:100%}.pl-unified-kicker{font-size:7.8px}.pl-unified-page-title h2{font-size:15px}.pl-unified-page-title p{display:none}.pl-unified-page-hero:after,.pl-unified-page-hero:before{display:none}}
         `}</style>
 
         {dashboard !== "today" && <header className="pl-page-heading">
