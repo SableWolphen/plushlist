@@ -5100,12 +5100,18 @@ function GlowUpTracker() {
   useEffect(() => {
     const WidgetBridge = window.Capacitor?.Plugins?.WidgetBridge;
     if (!WidgetBridge?.consumeWidgetAction || !user || selectedProgressDate !== period.date) return;
+    let cancelled = false;
     const consume = () => WidgetBridge.consumeWidgetAction().then((result) => {
-      if (result?.action === "done" && result.taskKey && rows.some(row => row.key === result.taskKey) && !viewDone[result.taskKey]) toggle(result.taskKey);
+      if (cancelled || !result?.action || !result.taskKey) return;
+      const exists = rows.some(row => row.key === result.taskKey);
+      if (!exists) return window.setTimeout(consume, 80);
+      const done = !!viewDone[result.taskKey];
+      if ((result.action === "done" && !done) || (result.action === "undo" && done)) toggle(result.taskKey);
+      window.setTimeout(consume, 180);
     }).catch(() => {});
     consume();
     document.addEventListener("plushlife-widget-action", consume);
-    return () => document.removeEventListener("plushlife-widget-action", consume);
+    return () => { cancelled = true; document.removeEventListener("plushlife-widget-action", consume); };
   }, [user?.id, selectedProgressDate, period.date, JSON.stringify(viewDone), JSON.stringify(rows.map(row=>row.key))]);
 
   // Applies one watch-originated task change to Supabase. Mirrors the exact
