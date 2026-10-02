@@ -16,6 +16,7 @@ import { CozyScene } from "./theme-world.jsx";
 
 export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwnGuardian, supportViewMode, setSupportViewMode, isSupportAdult, selectedSupportName, guardianSupportRequests, supportOwnerId, updateGuardianSupportRequest, pendingSupportInvites, supportPeople, acceptSupportInvitation, declineSupportInvitation, canUseCaretakerDashboard, invitedSupportLinks, loadSupportOwner, loadSupportData, user, supportAchievements, period, ownerIsRestingToday, restDatesSet, todayRequiredDone, supportProgress, activeSupportLink, canViewSupportProgress, canViewSupportTasks, canViewSupportSchedule, canViewSupportMood, supportTrackerTasks = [], supportSchedules = [], supportScheduleExceptions = [], supportMoodSummary, supportProgressView, setSupportProgressView, supportTodayDayLabel, displayedSupportPercent, displayedSupportCompleted, displayedSupportPossible, supportDailyEssentialCompleted, supportDailyEssentialKeys, supportScheduledTodayCompleted, supportScheduledTodayKeys, canSendSupportNotes, newNote, setNewNote, addSupportNote, suggestComfortTool, canAddSupportRewards, rewardTitle, setRewardTitle, rewardDetails, setRewardDetails, rewardTarget, setRewardTarget, rewardTargetPeriod, setRewardTargetPeriod, rewardApprovalRequired, setRewardApprovalRequired, addSupportReward, suggestedTask, setSuggestedTask, suggestedTaskDay, setSuggestedTaskDay, submitTaskSuggestion, inviteEmail, setInviteEmail, inviteSupportAdult, GUARDIAN_ROLE_PRESETS, guardianRolePreset, setGuardianRolePreset, ownedSupportLinks, supportRelationships, setSupportAdultActive, removeSupportAdult, updateCaretakerPermission, updateCareAgreement, supportRequestGuardian, setSupportRequestGuardian, supportRequestType, setSupportRequestType, supportRequestText, setSupportRequestText, sendGuardianSupportRequest, taskSuggestions, suggestionSectionsById, setSuggestionSectionsById, taskSectionsForDay, decideTaskSuggestion, supportMessage, supportRewards, supportWeeklyPercent, supportPercent, updateRewardStatus, supportNotes, setComfortToolOpen, deleteSupportNote, onOpenSettings }) {
   const [checkInDelay, setCheckInDelay] = React.useState("0");
+  const [guardianArea, setGuardianArea] = React.useState("overview");
   if (!open) return null;
   const { DAYS, COMFORT_TOOLS } = window.PlushLifeContent;
   const { formatRelativeTime } = window.PlushLifeHelpers;
@@ -46,8 +47,15 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
           <ToolPanel inline title="💛 PlushSupport" displayTitle="Support" onClose={onClose}>
           <div className="pl-guardian-content">
           <CozyScene title="You choose who walks with you." subtitle="Support at your pace. You stay in control." />
-          {supportViewMode === "mine" ? <CozySharing links={ownedSupportLinks} /> : <SharedCozyCard client={client} ownerId={supportOwnerId} userId={user?.id} />}
-          <TogetherCorner
+          <div className="pl-guardian-switcher" role="tablist" aria-label="Guardian sections">
+            {[["overview","💛","Overview"],["together","🤝","Together"],["support","💌","Support"]].map(([id,icon,label]) => (
+              <button key={id} type="button" role="tab" aria-selected={guardianArea === id} onClick={() => setGuardianArea(id)}>
+                <span aria-hidden="true">{icon}</span><span>{label}</span>
+              </button>
+            ))}
+          </div>
+          {guardianArea === "overview" && (supportViewMode === "mine" ? <CozySharing links={ownedSupportLinks} /> : <SharedCozyCard client={client} ownerId={supportOwnerId} userId={user?.id} />)}
+          {guardianArea === "together" && <TogetherCorner
             client={client}
             user={user}
             supportOwnerId={supportOwnerId}
@@ -59,8 +67,8 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             supportNotes={supportNotes}
             loadSupportData={loadSupportData}
             loadSupportOwner={loadSupportOwner}
-          />
-          <div style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 8px 24px rgba(92,57,108,0.07)" }}>
+          />}
+          {guardianArea === "support" && <div className="pl-guardian-support-card" style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 8px 24px rgba(92,57,108,0.07)" }}>
             {supportViewMode === "caretaker" && guardianSupportRequests.filter((request) => request.owner_user_id === supportOwnerId && request.status !== "resolved" && request.status !== "cancelled").length > 0 && (
               <div style={{ marginBottom: 14, padding: 13, borderRadius: 13, background: "var(--pl-theme-surface,#FFF9FD)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
                 <div style={{ fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>♥ SUPPORT REQUESTS</div>
@@ -407,7 +415,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 </div>
               ))
             }
-          </div>
+          </div>}
           </div>
           </ToolPanel>
   );
