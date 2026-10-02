@@ -76,8 +76,11 @@ if (fs.existsSync(providerPath)) {
     if (!provider.includes(`${lifecycle}(`)) failures.push(`Widget provider is missing ${lifecycle}.`);
   }
   if (!provider.includes("refreshAll(context)")) failures.push("Widget provider does not refresh all widget instances.");
-  if (!provider.includes("plushlifeTaskAction") || !provider.includes("plushlifeTaskLabel")) failures.push("Widget task rows no longer expose the quick Done action.");
+  if (!provider.includes("ACTION_TOGGLE_TASK") || !provider.includes("getBroadcast") || !provider.includes("queuePendingAction")) failures.push("Widget task rows no longer support in-place check/uncheck actions.");
   if (!provider.includes("anyOpenTask")) failures.push("Widget all-done state is no longer guarded by open-task detection.");
+  for (const requiredId of ["widget_task_row_0", "widget_task_check_0", "widget_task_label_0", "widget_refresh", "widget_hint"]) {
+    if (!layout.includes(`android:id="@+id/${requiredId}"`)) failures.push(`Interactive widget layout is missing ${requiredId}.`);
+  }
 }
 
 if (fs.existsSync(bridgePath)) {
@@ -90,6 +93,8 @@ if (fs.existsSync(bridgePath)) {
     "plugin.updateWidget",
     "consumeWidgetAction",
     "plushlifeTaskLabel",
+    "PENDING_ACTIONS_KEY",
+    "action==='undo'",
     "dayMode=function()",
     "getBridge().getWebView().evaluateJavascript",
   ]) {
