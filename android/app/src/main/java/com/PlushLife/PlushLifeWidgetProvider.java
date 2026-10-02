@@ -141,6 +141,8 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
         views.setTextColor(R.id.widget_week_label, muted);
         views.setTextColor(R.id.widget_refresh, accent);
         views.setTextColor(R.id.widget_hint, muted);
+        views.setInt(R.id.widget_today_card, "setBackgroundResource", miniCardBackground);
+        views.setInt(R.id.widget_week_card, "setBackgroundResource", miniCardBackground);
 
         String dayType = prefs.getString("dayType", "Today");
         views.setTextViewText(R.id.widget_day_type, "PLUSH LIFE · " + dayType.toUpperCase());
