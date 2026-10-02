@@ -1,3 +1,5 @@
+import { hasGoldFeature } from "../plush-gold.js";
+
 const TOGETHER_PREFIX = "[Together:";
 
 const TYPES = [
@@ -90,7 +92,8 @@ export function TogetherCorner({
     ? activeSupportLink
     : activeOwned.find((link) => link.id === selectedLinkId) || activeOwned[0] || null;
   const ownerId = isSupportAdult ? supportOwnerId : user?.id;
-  const togetherEnabled = !!selectedLink?.can_use_together;
+  const plusEnabled = hasGoldFeature("guardian_together");
+  const togetherEnabled = plusEnabled && !!selectedLink?.can_use_together;
   const showCorner = isSupportAdult ? !!activeSupportLink : activeOwned.length > 0;
   const canWrite = !!user?.id && !!ownerId && !!selectedLink?.id && togetherEnabled;
 
@@ -214,7 +217,7 @@ export function TogetherCorner({
 
   return (
     <section
-      aria-label="Our Cozy Corner"
+      aria-label="Do It Together"
       style={{
         marginBottom: 14,
         padding: 14,
@@ -225,9 +228,9 @@ export function TogetherCorner({
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>🤝 Our Cozy Corner</div>
+          <div style={{ fontSize: 14, fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>🤝 Do It Together <span style={{ fontSize: 10.5, fontWeight: 900, padding: "2px 6px", borderRadius: 999, background: "var(--pl-theme-surface-2,#F7F1FF)", color: "var(--pl-theme-muted,#8D5CA5)" }}>PLUS</span></div>
           <div style={{ marginTop: 2, fontSize: 13, lineHeight: 1.35, color: "var(--pl-theme-muted,#806B8D)" }}>
-            {isSupportAdult ? `A shared little space with ${selectedSupportName || "your Cozy"}.` : "A shared little space for you and your Guardian."}
+            {isSupportAdult ? `Do little things side by side with ${selectedSupportName || "your Cozy"}.` : "Plan little things with your Guardian and do them side by side."}
           </div>
         </div>
         {canWrite && (
