@@ -7164,21 +7164,16 @@ function GlowUpTracker() {
         }}
         className="plushlife-app-column"
         style={{ maxWidth: 640, margin: "0 auto", touchAction: "pan-y" }}>
-        {/* The routine "signed in and synced" state moved into Settings — it
-            doesn't need to occupy the top of every screen. A real problem
-            (offline or a failed sync) still surfaces here since that's worth
-            noticing right away, not only after opening Settings. */}
+        {{/* Classic top sync strip from the original PlushList shell. */}
         {user ? (
-          (!online || syncStatus === "offline" || syncStatus === "error") && (
-            <div style={{ marginBottom: 14, padding: "9px 12px", borderRadius: 12, background: "rgba(255,255,255,0.55)", border: "1px solid #F3D9EC", fontSize: 12.5, color: "#8C6B9E" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-                <span>{!online || syncStatus === "offline" ? "📡 Offline — changes will wait for a connection" : "⚠️ Sync failed"}</span>
-                <button type="button" disabled={syncStatus === "syncing"} onClick={syncNow} style={{ padding: "5px 8px", borderRadius: 8, border: "1px solid #D7B8E2", background: "white", color: "#8D5CA5", fontWeight: 800, fontSize: 11, cursor: syncStatus === "syncing" ? "wait" : "pointer" }}>
-                  {syncStatus === "error" ? "Retry" : "Sync now"}
-                </button>
-              </div>
+          <div className="classic-sync-strip" style={{ marginBottom: 14, padding: "9px 12px", borderRadius: 13, background: "rgba(255,255,255,.72)", border: "1px solid rgba(233,211,239,.95)", fontSize: 12.5, color: "#7E678D", boxShadow: "0 4px 14px rgba(88,55,105,.04)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+              <span style={{ fontWeight: 800 }}>{!online || syncStatus === "offline" ? "📡 Offline" : syncStatus === "error" ? "⚠️ Sync failed" : syncStatus === "syncing" ? "☁️ Syncing…" : "☁️ Synced"}</span>
+              <button type="button" disabled={syncStatus === "syncing"} onClick={syncNow} style={{ minHeight: 36, padding: "5px 11px", borderRadius: 9, border: "1px solid #D7B8E2", background: "rgba(255,255,255,.94)", color: "#8D5CA5", fontWeight: 900, fontSize: 11, cursor: syncStatus === "syncing" ? "wait" : "pointer", boxShadow: "0 2px 7px rgba(91,56,109,.06)" }}>
+                {syncStatus === "error" ? "Retry" : "Sync now"}
+              </button>
             </div>
-          )
+          </div>
         ) : (
           <div style={{ marginBottom: 14, padding: "9px 12px", borderRadius: 12, background: "rgba(255,255,255,0.55)", border: "1px solid #F3D9EC", fontSize: 12.5, color: "#8C6B9E" }}>
             ☁️ Sign in to keep checkmarks on every device
@@ -7205,10 +7200,7 @@ function GlowUpTracker() {
             <button type="button" onClick={() => setCollectionOpen(true)} aria-label={`Open rewards, ${unlockedOutfits.length} outfits and ${earnedBadgeIdSet.size} badges unlocked`} style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 46, height: 46, padding: 0, borderRadius: "50%", border: "1px solid #E9C96E", background: "#FFFDF4", cursor: "pointer", overflow: "hidden" }}>
               <PlushMascot theme={activeWorld} outfit={selectedOutfit} size={46} mood="happy" activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
             </button>
-            <button type="button" onClick={() => setProfileOpen(true)} aria-label={unreadNoteCount > 0 ? `Open profile, ${unreadNoteCount} unread notes` : "Open profile"} style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 46, height: 46, padding: 0, borderRadius: "50%", border: "1px solid #E6D4F2", background: "#FFFFFFCC", color: "#8D5CA5", fontSize: 19, cursor: "pointer" }}>
-              👤
-              {unreadNoteCount > 0 && <span aria-hidden="true" style={{ position: "absolute", top: -3, right: -3, minWidth: 18, height: 18, padding: "0 4px", borderRadius: 9, background: "#C45D74", color: "white", fontSize: 10.5, fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center" }}>{unreadNoteCount}</span>}
-            </button>
+
           </div>}
         </div>}
 
@@ -7269,6 +7261,7 @@ function GlowUpTracker() {
             <button type="button" onClick={() => { setClassicMoreOpen(false); openTaskManager(); }} style={{ minHeight: 44, borderRadius: 12, border: "1px solid #E6D4F2", background: "#FFF7FC", color: "#674D76", fontWeight: 900 }}>✅ Tasks</button>
             <button type="button" onClick={() => { setClassicMoreOpen(false); setCollectionOpen(true); }} style={{ minHeight: 44, borderRadius: 12, border: "1px solid #E6D4F2", background: "#FFFBEF", color: "#674D76", fontWeight: 900 }}>🧸 Plush</button>
             <button type="button" onClick={() => { setClassicMoreOpen(false); setSettingsOpen(true); }} style={{ minHeight: 44, borderRadius: 12, border: "1px solid #E6D4F2", background: "#F2FAFF", color: "#674D76", fontWeight: 900 }}>⚙️ Settings</button>
+            <button type="button" onClick={() => { setClassicMoreOpen(false); setProfileOpen(true); }} style={{ minHeight: 44, borderRadius: 12, border: "1px solid #E6D4F2", background: "#FFF7FC", color: "#674D76", fontWeight: 900, gridColumn: "1 / -1" }}>👤 Profile{unreadNoteCount > 0 ? ` · ${unreadNoteCount} new` : ""}</button>
           </div>}
         </div>
 
