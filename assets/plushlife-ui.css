@@ -1448,3 +1448,73 @@
     bottom:calc(78px + env(safe-area-inset-bottom))!important;
   }
 }
+
+
+/* 2026-10 simplification pass: keep the original mascot and theme, reduce navigation/Guardian clutter. */
+#main-content .pl-app-bottom-nav,
+#main-content.dino-theme .pl-app-bottom-nav,
+#main-content.baby-mode .pl-app-bottom-nav,
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-app-bottom-nav{
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+}
+#main-content .pl-app-nav-add-inline{
+  color:white!important;
+  background:linear-gradient(145deg,var(--pl-theme-accent,#C555D4),var(--pl-theme-accent-2,#E36EBB))!important;
+  box-shadow:0 5px 14px color-mix(in srgb,var(--pl-theme-accent,#A65DC1) 28%,transparent)!important;
+}
+#main-content .pl-app-nav-add-inline .ico{
+  font-size:24px!important;
+  font-weight:700!important;
+}
+#main-content .pl-app-nav-add-inline span:last-child{
+  color:white!important;
+}
+#main-content .pl-app-add-float{display:none!important;}
+
+#main-content .pl-guardian-action-switcher{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px;
+  padding:4px;
+  margin-bottom:8px;
+  border-radius:14px;
+  background:var(--pl-theme-surface-2,#F8F3FA);
+  border:1px solid var(--pl-theme-line,#E9DDF6);
+}
+#main-content .pl-guardian-action-switcher button{
+  min-height:44px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:var(--pl-theme-muted,#806B91);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  font-size:11px;
+  font-weight:900;
+  cursor:pointer;
+}
+#main-content .pl-guardian-action-switcher button[aria-selected="true"]{
+  background:var(--pl-theme-surface,#FFF);
+  color:var(--pl-theme-accent,#A65DC1);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pl-theme-accent,#A65DC1) 24%,transparent),0 3px 10px rgba(80,50,96,.06);
+}
+@media(max-width:520px){
+  #main-content .pl-app-bottom-nav{
+    padding-left:4px!important;
+    padding-right:4px!important;
+    gap:2px!important;
+  }
+  #main-content .pl-app-nav-btn{
+    font-size:8.2px!important;
+    padding-left:1px!important;
+    padding-right:1px!important;
+  }
+  #main-content .pl-app-nav-btn .ico{
+    font-size:18px!important;
+  }
+  #main-content .pl-guardian-action-switcher button{
+    font-size:10px;
+  }
+}
