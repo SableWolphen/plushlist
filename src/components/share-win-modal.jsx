@@ -109,7 +109,8 @@ export function ShareWinModal({ winText, onClose, keepsake }) {
 
   return (
     <div role="dialog" aria-modal="true" aria-label={keepsake ? "Share your weekly keepsake" : "Share your win"} onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 80, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.5)", backdropFilter: "blur(5px)" }}>
-      <div ref={dialogRef} onClick={(event) => event.stopPropagation()} style={{ width: "min(100%, 380px)", maxHeight: "min(92vh, 780px)", overflowY: "auto", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)", padding: "20px 18px" }}>
+      <div ref={dialogRef} onClick={(event) => event.stopPropagation()} style={{ position: "relative", width: "min(100%, 380px)", maxHeight: "min(92vh, 780px)", overflowY: "auto", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)", padding: "20px 18px" }}>
+        <button type="button" aria-label="Close share popup" onClick={onClose} style={{ position: "absolute", top: 10, right: 10, width: 44, height: 44, borderRadius: 999, border: "1px solid #D994E7", background: "white", color: "#75428C", fontSize: 20, fontWeight: 900, cursor: "pointer", zIndex: 2 }}>×</button>
         {phase === "shared" ? (
           <div style={{ textAlign: "center", padding: "34px 10px" }} role="status">
             <div style={{ fontSize: 44 }} aria-hidden="true">💜</div>
