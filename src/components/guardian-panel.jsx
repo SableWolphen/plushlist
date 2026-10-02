@@ -109,11 +109,10 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
               <button onClick={() => loadSupportData(user)} style={{ padding: "7px 9px", borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface,#F5FAFF)", color: "var(--pl-theme-muted,#4C8FE8)", fontWeight: 800, cursor: "pointer" }}>↻ Refresh</button>
             </div>
 
-            {isSupportAdult && <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
-              <div style={{ padding: 11, borderRadius: 12, background: "var(--pl-theme-surface,#FFF9FD)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
-                <div style={{ fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#8D5CA5)", letterSpacing: ".08em" }}>WHAT {selectedSupportName.toUpperCase()} SHARED WITH YOU</div>
-                <div style={{ marginTop: 5, fontSize: 14, lineHeight: 1.45, color: "var(--pl-theme-muted,#806B8D)" }}>Connection alone does not unlock private data. Each category below is controlled by the Cozy.</div>
-              </div>
+            {isSupportAdult && <details style={{ marginTop: 12, border: "1px solid var(--pl-theme-line,#E9DDF6)", borderRadius: 12, background: "var(--pl-theme-surface,#FFF9FD)", overflow: "hidden" }}>
+              <summary style={{ minHeight: 44, padding: "0 11px", display: "list-item", alignContent: "center", cursor: "pointer", fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#8D5CA5)" }}>What {selectedSupportName} shared with you</summary>
+              <div style={{ padding: "0 11px 11px", display: "grid", gap: 8 }}>
+                <div style={{ fontSize: 13, lineHeight: 1.45, color: "var(--pl-theme-muted,#806B8D)" }}>Only categories the Cozy chose to share appear here.</div>
               {canViewSupportTasks ? <div style={{ padding: 11, borderRadius: 12, background: "var(--pl-theme-surface,#F7FBFF)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
                 <div style={{ fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#4C8FE8)" }}>✓ TODAY'S SHARED TASKS</div>
                 {sharedTodayTasks.length ? <div style={{ display: "grid", gap: 5, marginTop: 7 }}>{sharedTodayTasks.slice(0, 8).map((task) => <div key={task.task_key} style={{ padding: "7px 8px", borderRadius: 8, background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink,#5B4B6B)", fontSize: 14, fontWeight: 750 }}>{task.task}</div>)}</div> : <div style={{ marginTop: 6, fontSize: 14, color: "var(--pl-theme-muted,#71839A)" }}>No shared tasks are scheduled for today.</div>}
@@ -128,7 +127,8 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 <div style={{ fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#4C8FE8)" }}>♥ SHARED MOOD SUMMARY</div>
                 {supportMoodSummary ? <div style={{ marginTop: 6, fontSize: 14, lineHeight: 1.5, color: "var(--pl-theme-ink,#5B4B6B)" }}>{[supportMoodSummary.mood && "Mood: " + supportMoodSummary.mood, supportMoodSummary.energy && "Energy: " + supportMoodSummary.energy, supportMoodSummary.capacity && "Capacity: " + supportMoodSummary.capacity, supportMoodSummary.day_type && "Day: " + supportMoodSummary.day_type, supportMoodSummary.support_preference && "Support: " + supportMoodSummary.support_preference].filter(Boolean).join(" · ")}</div> : <div style={{ marginTop: 6, fontSize: 14, color: "var(--pl-theme-muted,#71839A)" }}>No mood summary shared for today. Private notes are never included.</div>}
               </div> : null}
-            </div>}
+              </div>
+            </details>}
 
             {isSupportAdult && canViewSupportProgress && supportAchievements?.last_celebrated_date && daysBetweenDates(supportAchievements.last_celebrated_date, period.date) !== null && daysBetweenDates(supportAchievements.last_celebrated_date, period.date) <= 2 && (
               <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: 13, background: "var(--pl-theme-surface-2,#FFF9E9)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
