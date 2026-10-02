@@ -109,7 +109,7 @@ const mustContain = {
     ['can_view_tasks', 'Guardian task sharing permission'],
     ['can_view_schedule', 'Guardian schedule sharing permission'],
     ['can_view_mood', 'Guardian mood-summary permission'],
-    ['WHAT {selectedSupportName.toUpperCase()} SHARED WITH YOU', 'Guardian shared-access view'],
+    ['What {selectedSupportName} shared with you', 'Guardian shared-access view'],
   ],
   'src/components/today-panel-core.jsx': [
     ['data-plushlife-home-schedule-preview="true"', 'three-item Home schedule preview'],
