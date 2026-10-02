@@ -5109,9 +5109,17 @@ function GlowUpTracker() {
       if ((result.action === "done" && !done) || (result.action === "undo" && done)) toggle(result.taskKey);
       window.setTimeout(consume, 180);
     }).catch(() => {});
+    const onVisible = () => { if (!document.hidden) consume(); };
     consume();
     document.addEventListener("plushlife-widget-action", consume);
-    return () => { cancelled = true; document.removeEventListener("plushlife-widget-action", consume); };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("pageshow", consume);
+    return () => {
+      cancelled = true;
+      document.removeEventListener("plushlife-widget-action", consume);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("pageshow", consume);
+    };
   }, [user?.id, selectedProgressDate, period.date, JSON.stringify(viewDone), JSON.stringify(rows.map(row=>row.key))]);
 
   // Applies one watch-originated task change to Supabase. Mirrors the exact
