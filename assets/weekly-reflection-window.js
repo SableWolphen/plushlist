@@ -216,7 +216,26 @@
   `;
   document.head.appendChild(style);
 
-  // Reflection opens only after an explicit choice, never over the first home visit.
+  // Surface the weekly journal automatically in its reflection window, but
+  // never stack it on top of another PlushLife dialog. Retry quietly until
+  // the current popup is gone.
+  function scheduleMaybeShow(delay = 1400) {
+    if (checkTimer) window.clearTimeout(checkTimer);
+    checkTimer = window.setTimeout(() => {
+      checkTimer = null;
+      if (document.querySelector('[role="dialog"][aria-modal="true"]')) {
+        scheduleMaybeShow(1800);
+        return;
+      }
+      maybeShow();
+    }, delay);
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => scheduleMaybeShow(), { once: true });
+  } else {
+    scheduleMaybeShow();
+  }
   window.addEventListener("plushlife:weekly-reflection-request", () => showWeeklyReflection(new Date()));
-  window.PlushLifeWeeklyReflection = { open: () => showWeeklyReflection(new Date()), inWindow: inReflectionWindow, weekKey: reflectionWeekKey, lines: reflectionLines };
+  window.addEventListener("plushlife:weekly-reflection-recheck", () => scheduleMaybeShow(250));
+  window.PlushLifeWeeklyReflection = { open: () => showWeeklyReflection(new Date()), inWindow: inReflectionWindow, weekKey: reflectionWeekKey, lines: reflectionLines, maybeShow: scheduleMaybeShow };
 })();
