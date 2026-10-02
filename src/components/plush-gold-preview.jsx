@@ -2,7 +2,7 @@ import { PLUSH_GOLD_BILLING_ENABLED, PLUSH_GOLD_FEATURES } from '../plush-gold.j
 import { ThemeScene } from './theme-world.jsx';
 
 const tools=[
-  {id:'together',icon:'🧸',title:'Build a routine',text:'Put your steps in order. Do them together.',steps:['Pick up to 5 steps','Choose the order','Start when you’re ready']},
+  {id:'together',icon:'🤝',title:'Do It Together',text:'Plan little things with your Guardian and do them side by side.',steps:['Create a shared activity or task','Join it from either side','Track your own completion together']},
   {id:'try',icon:'🌱',title:'Find what works',text:'Try one change for seven days.',steps:['Choose one small change','Try it for 7 days','Keep it, change it, or drop it']},
   {id:'week',icon:'🌷',title:'Understand your week',text:'See your progress. Pick one adjustment.',steps:['See one simple weekly summary','Notice what helped','Choose one adjustment']},
 ];
@@ -35,7 +35,7 @@ export function PlushGoldPreview(){
     ) : (
       <>
         <section className="pl-plus-benefits" aria-label="What you get">
-          <h3>Three ways to make habits easier</h3>
+          <h3>Three ways Plus can help</h3>
           <div className="pl-plus-tool-list">
             {tools.map(item=><button type="button" className="pl-plus-tool-row" key={item.id} onClick={()=>setPreview(item.id)} aria-label={"Try " + item.title.toLowerCase()}><span className="pl-plus-tool-icon" aria-hidden="true">{item.icon}</span><span><strong>{item.title}</strong><small>{item.text}</small></span><span aria-hidden="true">›</span></button>)}
           </div>
