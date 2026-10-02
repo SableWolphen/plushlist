@@ -1109,3 +1109,117 @@
 #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-tool-panel{
   background:linear-gradient(155deg,#FFFDFE,#FAF2FF 55%,#F2F9FF)!important;
 }
+
+
+/* Classic PlushList shell — matches the original pink/lilac/sky reference
+   while preserving the newer functionality underneath. */
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .plushlife-app-column{
+  position:relative;
+  padding:14px 14px 24px;
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 8% 8%,rgba(255,190,222,.48) 0,transparent 27%),
+    radial-gradient(circle at 92% 6%,rgba(185,224,255,.52) 0,transparent 29%),
+    radial-gradient(circle at 12% 92%,rgba(199,242,218,.38) 0,transparent 30%),
+    radial-gradient(circle at 88% 88%,rgba(255,236,174,.30) 0,transparent 30%),
+    linear-gradient(155deg,rgba(255,248,252,.96),rgba(248,240,255,.96) 48%,rgba(241,249,255,.96));
+  border:1px solid rgba(231,211,238,.92);
+  box-shadow:0 16px 38px rgba(91,55,109,.10);
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .plushlife-app-header{
+  margin:2px 0 14px!important;
+  padding:4px 2px 2px;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .plushlife-app-header .app-title{
+  color:#4A2D61!important;
+  text-shadow:none!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .classic-sync-strip{
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .classic-plush-nav{
+  padding-bottom:2px;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .classic-plush-nav .plushlife-dashboard-tabs{
+  padding:0;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .classic-plush-nav .plushlife-dashboard-tab{
+  box-shadow:0 4px 12px rgba(92,56,110,.055)!important;
+  background:rgba(255,255,255,.90)!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .classic-plush-nav .plushlife-dashboard-tab[aria-selected="true"]{
+  background:linear-gradient(145deg,rgba(255,238,250,.96),rgba(239,235,255,.96))!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .classic-nav-hint{
+  margin-top:-1px;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .classic-more-menu button{
+  box-shadow:none!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-home-hero{
+  display:none!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-home-shell{
+  padding-bottom:18px!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-unified-page-shell{
+  padding-bottom:20px!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-unified-page-content{
+  gap:11px!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-unified-page-content :is(
+  .pl-care-card,.pl-care-memory,.pl-growth-card,.pl-growth-weekbar,.pl-calendar-cozy>section,.pl-calendar-cozy>div
+){
+  background:linear-gradient(145deg,rgba(255,253,255,.95),rgba(249,243,255,.91))!important;
+  border:1px solid #E4D1EB!important;
+  border-radius:20px!important;
+  box-shadow:0 8px 22px rgba(101,64,118,.07)!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-growth-stat:nth-child(1){
+  background:#FFF2FB!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-growth-stat:nth-child(2){
+  background:#EDF8FF!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-growth-stat:nth-child(3){
+  background:#FFF9DE!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-growth-stat:nth-child(4){
+  background:#ECFFF5!important;
+}
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-app-bottom-nav{
+  display:none!important;
+}
+@media(max-width:520px){
+  #main-content.appearance-soft:not(.dino-theme):not(.baby-mode){
+    padding-bottom:calc(18px + env(safe-area-inset-bottom))!important;
+  }
+  #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .baby-shell{
+    max-width:none!important;
+  }
+  #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .plushlife-app-column{
+    margin:0 7px!important;
+    padding:12px 10px 20px!important;
+    border-radius:22px!important;
+  }
+  #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .plushlife-app-header{
+    margin-bottom:11px!important;
+  }
+  #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .plushlife-app-header .app-title{
+    font-size:24px!important;
+  }
+  #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .classic-plush-nav .plushlife-dashboard-tabs{
+    gap:6px!important;
+  }
+  #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .classic-plush-nav .plushlife-dashboard-tab{
+    min-height:58px!important;
+    padding:6px 2px!important;
+    border-radius:13px!important;
+    font-size:9.5px!important;
+  }
+  #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .classic-nav-hint{
+    font-size:9.5px!important;
+  }
+}
