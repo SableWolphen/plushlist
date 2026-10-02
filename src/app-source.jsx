@@ -7164,7 +7164,7 @@ function GlowUpTracker() {
         }}
         className="plushlife-app-column"
         style={{ maxWidth: 640, margin: "0 auto", touchAction: "pan-y" }}>
-        {{/* Classic top sync strip from the original PlushList shell. */}
+        {/* Classic top sync strip from the original PlushList shell. */}
         {user ? (
           <div className="classic-sync-strip" style={{ marginBottom: 14, padding: "9px 12px", borderRadius: 13, background: "rgba(255,255,255,.72)", border: "1px solid rgba(233,211,239,.95)", fontSize: 12.5, color: "#7E678D", boxShadow: "0 4px 14px rgba(88,55,105,.04)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
