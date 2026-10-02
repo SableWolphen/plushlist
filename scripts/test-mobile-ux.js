@@ -16,6 +16,7 @@ const growthMoments = read("src/components/growth-moments.jsx");
 const careSources = `${care}\n${careExisting}`;
 const tasks = read("src/components/tasks-panel.jsx");
 const settings = read("src/components/organized-settings.jsx");
+const taskPrivacy = read("supabase/migrations/20261002001500_tighten_task_privacy.sql");
 
 const checks = [
   [care.includes('.pl-care-tabs.plushcare-library>div> :first-child') && !care.includes('.pl-care-tabs .plushcare-library'), "Care hides its legacy duplicate intro with a selector matching the library wrapper"],
@@ -32,6 +33,9 @@ const checks = [
   [careSources.includes('gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))"') && careSources.includes('gridTemplateColumns: "repeat(auto-fit,minmax(145px,1fr))"'), "Care tools reflow to available phone width"],
   [tasks.includes('minWidth: 0') && tasks.includes('width: "100%"') && tasks.includes('flexWrap: "wrap"'), "task editing fields and schedule controls can shrink/wrap on narrow phones"],
   [tasks.includes("showAllToday") && tasks.includes("Just a few at a time") && tasks.includes("See the rest"), "Tasks defaults to a small calm slice instead of showing the whole day at once"],
+  [tasks.includes("More options for") && tasks.includes("🗑️ Delete") && tasks.includes("setPendingTaskDelete"), "visible task rows expose a direct delete action with confirmation"],
+  [taskPrivacy.includes("can_view_tasks") && taskPrivacy.includes("accepted_at is not null") && taskPrivacy.includes("auth.uid()) = user_id"), "task RLS keeps lists private except explicitly permitted Guardian sharing"],
+  [app.includes("padding-bottom:calc(104px + env(safe-area-inset-bottom))") && app.includes('bottom: "calc(68px + env(safe-area-inset-bottom))"'), "content and transient notices stay above the fixed bottom navigation"],
   [app.includes("/* compact-phone-shell */") && app.includes("padding-bottom:calc(104px + env(safe-area-inset-bottom))"), "main mobile shell keeps fixed navigation from covering content"],
   [app.includes(".pl-app-bottom-nav") && app.includes("min-height:50px") && app.includes(".pl-app-nav-add{width:38px"), "bottom navigation stays compact instead of becoming oversized"],
   [today.includes(".pl-home-hero{min-height:136px") && today.includes(".pl-home-copy h1{font-size:18px") && today.includes(".pl-home-bubble{right:6px"), "Home hero stays compact and avoids greeting/mascot overlap"],
