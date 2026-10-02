@@ -860,6 +860,7 @@ function GlowUpTracker() {
   const [scheduleMessage, setScheduleMessage] = useState("");
   const [scheduleExceptionMessage, setScheduleExceptionMessage] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [classicMoreOpen, setClassicMoreOpen] = useState(false);
   const [arrivalRitualVisible, setArrivalRitualVisible] = useState(true);
   const [habitGardenOpen, setHabitGardenOpen] = useState(false);
   const [progressDetailsOpen, setProgressDetailsOpen] = useState(false);
@@ -5796,8 +5797,8 @@ function GlowUpTracker() {
   const isAdminUser = ["johnston.alexander.k@gmail.com", "johnston.alexander.k+plushlisttest@gmail.com"].includes((user?.email || "").toLowerCase());
   const isSupporterAccount = !!preferences.is_supporter || isAdminUser;
   const personalPlushlistTitle = trackerProfile?.display_name
-    ? `${trackerProfile.display_name}’s PlushLife`
-    : "My PlushLife";
+    ? `${trackerProfile.display_name}’s PlushList`
+    : "My PlushList";
   const isSupportAdult = !!user && supportViewMode === "caretaker" && canUseCaretakerDashboard;
   const activeSupportLink = invitedSupportLinks.find((link) => link.owner_user_id === supportOwnerId) || null;
   const canViewSupportProgress = !isSupportAdult || !!activeSupportLink?.can_view_progress;
@@ -7193,7 +7194,7 @@ function GlowUpTracker() {
             {signInMessage && <div style={{ marginTop: 8, fontSize: 12, color: "#8C6B9E" }}>{signInMessage}</div>}
           </div>
         )}
-        {false && <div className="plushlife-app-header" style={{ marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+        {<div className="plushlife-app-header" style={{ marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "#B08AC7", fontWeight: 700 }}>{dinoTheme ? "ONE LITTLE STEP AT A TIME 🦕✨" : "ONE LITTLE STEP AT A TIME ✨"}</div>
             <h1 className="app-title" style={{ fontSize: 28, margin: "6px 0 0", fontWeight: 800, letterSpacing: "-0.02em" }}>
@@ -7242,23 +7243,36 @@ function GlowUpTracker() {
         ) : (
           <>
 
-        {/* Dashboards: Home uses the approved bottom navigation instead. */}
-        {false && <div className="plushlife-dashboard-nav" style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 14 }}>
-          <div className="plushlife-dashboard-tabs" role="tablist" aria-label="PlushLife dashboards" onKeyDown={(event) => {
-            if (event.key === "ArrowRight") { event.preventDefault(); stepDashboard(1); }
-            else if (event.key === "ArrowLeft") { event.preventDefault(); stepDashboard(-1); }
-          }} style={{ flex: 1, display: "grid", gridTemplateColumns: `repeat(${dashboardItems.length}, minmax(0, 1fr))`, gap: 6, minWidth: 0 }}>
-            {dashboardItems.map((item) => {
-              const on = item.id === dashboard;
-              const displayLabel = item.label;
-              return <button className="plushlife-dashboard-tab" key={item.id} id={`dashboard-tab-${item.id}`} role="tab" aria-selected={on} onClick={() => goToDashboard(item.id)} style={{ position: "relative", minHeight: 52, padding: "7px 3px", borderRadius: 13, border: on ? `2px solid ${item.accent}` : "2px solid #F3D9EC", background: on ? `${item.accent}22` : "#FFFFFF", color: on ? item.accent : "#8C6B9E", fontWeight: 900, fontSize: displayLabel.length > 10 ? 9.5 : 11, lineHeight: 1.15, overflowWrap: "break-word", wordBreak: "break-word", cursor: "pointer" }}>
-                <span style={{ display: "block", fontSize: 16, marginBottom: 2 }} aria-hidden="true">{item.icon}</span>{displayLabel}
+        {/* Classic PlushList navigation — restored from the original app shell. */}
+        <div className="plushlife-dashboard-nav classic-plush-nav" style={{ display: "grid", gap: 6, marginBottom: 14 }}>
+          <div className="plushlife-dashboard-tabs" role="tablist" aria-label="PlushLife dashboards" style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: 7, minWidth: 0 }}>
+            {[
+              { id: "today", label: "Today", icon: "☀️", accent: "#C77DD6" },
+              { id: "progress", label: "Progress", icon: "📊", accent: "#4C8FE8" },
+              { id: "care", label: "Care", icon: "♥", accent: "#318C79" },
+              { id: "guardian", label: "Guardian", icon: "💛", accent: "#D7A81B" },
+              { id: "more", label: "More", icon: "•••", accent: "#9B7BAC" },
+            ].map((item) => {
+              const on = item.id === "more" ? classicMoreOpen : item.id === dashboard;
+              return <button className="plushlife-dashboard-tab" key={item.id} id={`dashboard-tab-${item.id}`} role="tab" aria-selected={on} onClick={() => {
+                if (item.id === "more") { setClassicMoreOpen((open) => !open); return; }
+                setClassicMoreOpen(false);
+                goToDashboard(item.id);
+              }} style={{ position: "relative", minHeight: 58, padding: "7px 3px", borderRadius: 14, border: on ? `2px solid ${item.accent}` : "2px solid rgba(243,217,236,.95)", background: on ? `${item.accent}20` : "rgba(255,255,255,.93)", color: on ? item.accent : "#735E80", fontWeight: 900, fontSize: 10.5, lineHeight: 1.15, cursor: "pointer", boxShadow: on ? `0 5px 14px ${item.accent}22` : "0 3px 10px rgba(90,55,105,.05)" }}>
+                <span style={{ display: "block", fontSize: item.id === "more" ? 15 : 17, marginBottom: 3 }} aria-hidden="true">{item.icon}</span>{item.label}
               </button>;
             })}
           </div>
-        </div>}
+          <div className="classic-nav-hint" style={{ textAlign: "center", fontSize: 10.5, color: "#8C6B9E" }}>Swipe or tap to change sections</div>
+          {classicMoreOpen && <div className="classic-more-menu" style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 7, padding: 9, borderRadius: 16, background: "rgba(255,255,255,.92)", border: "1px solid #E6D4F2", boxShadow: "0 10px 28px rgba(80,50,96,.10)" }}>
+            <button type="button" onClick={() => { setClassicMoreOpen(false); goToDashboard("week"); }} style={{ minHeight: 44, borderRadius: 12, border: "1px solid #E6D4F2", background: "#F7F2FF", color: "#674D76", fontWeight: 900 }}>📅 Calendar</button>
+            <button type="button" onClick={() => { setClassicMoreOpen(false); openTaskManager(); }} style={{ minHeight: 44, borderRadius: 12, border: "1px solid #E6D4F2", background: "#FFF7FC", color: "#674D76", fontWeight: 900 }}>✅ Tasks</button>
+            <button type="button" onClick={() => { setClassicMoreOpen(false); setCollectionOpen(true); }} style={{ minHeight: 44, borderRadius: 12, border: "1px solid #E6D4F2", background: "#FFFBEF", color: "#674D76", fontWeight: 900 }}>🧸 Plush</button>
+            <button type="button" onClick={() => { setClassicMoreOpen(false); setSettingsOpen(true); }} style={{ minHeight: 44, borderRadius: 12, border: "1px solid #E6D4F2", background: "#F2FAFF", color: "#674D76", fontWeight: 900 }}>⚙️ Settings</button>
+          </div>}
+        </div>
 
-        {false && dashboard === "today" && (
+        {dashboard === "today" && (
           <div style={{ display: "flex", alignItems: "center", gap: 7, margin: "-2px 0 14px", flexWrap: "wrap" }}>
             <button id="plushlife-checkin-trigger" type="button" onClick={() => { setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); }} style={{ flex: "1 1 220px", display: "flex", alignItems: "center", gap: 7, padding: "9px 11px", borderRadius: 11, border: "1px solid #E6D4F2", background: "#FFFFFFC7", color: "#76558A", fontWeight: 800, fontSize: 12, cursor: "pointer", textAlign: "left" }}>
               {babyMode ? "🍼 How does my little self feel?" : "🎯"} {dailyCheckIn.mood ? `${CHECKIN_MOODS.find(([value]) => value === dailyCheckIn.mood)?.[1] || ""} ${CHECKIN_MOODS.find(([value]) => value === dailyCheckIn.mood)?.[2] || ""}` : dailyCheckIn.capacity ? { very_low: "😞 Very low", low: "😕 Low", usual: "🙂 Usual", high: "💪 High" }[dailyCheckIn.capacity] : babyMode ? "Tell me when you are ready" : "Check in"}
@@ -7295,7 +7309,7 @@ function GlowUpTracker() {
           @media(max-width:520px){.pl-unified-page-shell{padding-bottom:calc(104px + env(safe-area-inset-bottom));gap:5px}.pl-app-bottom-nav{min-height:48px;padding-top:2px}.pl-app-nav-btn{min-height:44px;font-size:9px}.pl-app-nav-btn .ico{font-size:16px}.pl-app-nav-add{width:36px;height:36px;min-height:36px;font-size:19px;margin-top:-9px}.pl-unified-page-hero{min-height:0;padding:4px 2px 5px;border-radius:0}.pl-unified-wordmark{font-size:20px;letter-spacing:-.7px}.pl-unified-date{font-size:9px;padding:5px 7px}.pl-unified-gear{width:44px;height:44px;font-size:16px}.pl-unified-page-title{margin-top:4px;max-width:100%}.pl-unified-kicker{font-size:7.8px}.pl-unified-page-title h2{font-size:15px}.pl-unified-page-title p{display:none}.pl-unified-page-hero:after,.pl-unified-page-hero:before{display:none}}
         `}</style>
 
-        {dashboard !== "today" && <header className="pl-page-heading">
+        {false && dashboard !== "today" && <header className="pl-page-heading">
           <div><h1>{dashboard === "progress" ? "Progress" : dashboard === "care" ? "Care" : dashboard === "week" ? "Calendar" : dashboard === "tasks" ? "Tasks" : "Support"}</h1>
           <button type="button" className="pl-heading-date" onClick={() => goToDashboard("week")} aria-label="Open calendar">{new Date(`${period.date}T12:00:00`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</button></div>
           <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
@@ -7335,7 +7349,7 @@ function GlowUpTracker() {
         {dashboard === "week" && <div className="pl-unified-page-content"><WeekPanel open={dashboard === "week"} openTodayJournal={openTodayJournal} weekCardIndex={weekCardIndex} setWeekCardIndex={setWeekCardIndex} weekSwipeStartX={weekSwipeStartX} weekSwipeStartY={weekSwipeStartY} reflectionCalendarMonth={reflectionCalendarMonth} setReflectionCalendarMonth={setReflectionCalendarMonth} reflectionMonthDate={reflectionMonthDate} reflectionMonthStart={reflectionMonthStart} reflectionMonthDays={reflectionMonthDays} reflectionDateSet={reflectionDateSet} dailyCheckInHistory={dailyCheckInHistory} restDatesSet={restDatesSet} selectedProgressDate={selectedProgressDate} setSelectedProgressDate={setSelectedProgressDate} dayCompletionPct={dayCompletionPct} setDayViewDate={setDayViewDate} setActive={setActive} setReflectionViewerDate={setReflectionViewerDate} setCheckInViewerDate={setCheckInViewerDate} reflectionHistory={reflectionHistory} journalHistoryExpanded={journalHistoryExpanded} setJournalHistoryExpanded={setJournalHistoryExpanded} weeklyIntentionHistory={weeklyIntentionHistory} weeklyIntentionHistoryExpanded={weeklyIntentionHistoryExpanded} setWeeklyIntentionHistoryExpanded={setWeeklyIntentionHistoryExpanded} period={period} calendarWeekOffset={calendarWeekOffset} setCalendarWeekOffset={setCalendarWeekOffset} calendarWeekPreviewDate={calendarWeekPreviewDate} setCalendarWeekPreviewDate={setCalendarWeekPreviewDate} trackerTasks={trackerTasks} dayViewDate={dayViewDate} dayViewExpanded={dayViewExpanded} setDayViewExpanded={setDayViewExpanded} longHistoryByDate={longHistoryByDate} isTaskPausedOnDate={isTaskPausedOnDate} markPastTasksDone={markPastTasksDone} done={done} toggle={toggle} isHistoricalView={isHistoricalView} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} CHECKIN_MOODS={CHECKIN_MOODS} /></div>}
 
         {dashboard === "progress" && <div className="pl-unified-page-content"><ProgressPanel open={dashboard === "progress"} user={user} progressView={progressView} setProgressView={setProgressView} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} hasWeeklyActivity={hasWeeklyActivity} goToDashboard={goToDashboard} weeklyOverallPct={weeklyOverallPct} weekOverWeekDelta={weekOverWeekDelta} preferences={preferences} weeklyEssentialPct={weeklyEssentialPct} weeklyOverallDone={weeklyOverallDone} weeklyOverallPossible={weeklyOverallPossible} weeklyBonusDone={weeklyBonusDone} caringDays={caringDays} weeklyEssentialDone={weeklyEssentialDone} careStory={careStory} careAreas={careAreas} openTaskManager={openTaskManager} patternInsightCards={patternInsightCards} insightCardIndex={insightCardIndex} setInsightCardIndex={setInsightCardIndex} weeklyHighlights={weeklyHighlights} period={period} goWriteWeeklyIntention={goWriteWeeklyIntention} setShareCardOpen={setShareCardOpen} progressDetailsOpen={progressDetailsOpen} setProgressDetailsOpen={setProgressDetailsOpen} TREND_WEEKS={TREND_WEEKS} TREND_MONTHS={TREND_MONTHS} currentMonthKey={currentMonthKey} monthlyOverallPct={monthlyOverallPct} monthOverMonthDelta={monthOverMonthDelta} monthlyTrendPoints={monthlyTrendPoints} tappedTrendMonth={tappedTrendMonth} setTappedTrendMonth={setTappedTrendMonth} monthlyMostConsistent={monthlyMostConsistent} currentMonthDates={currentMonthDates} weeklyTrendPoints={weeklyTrendPoints} tappedTrendWeek={tappedTrendWeek} setTappedTrendWeek={setTappedTrendWeek} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} /></div>}
-        <nav className="pl-app-bottom-nav" aria-label="Main navigation">
+        <nav className="pl-app-bottom-nav" aria-label="Main navigation" style={{ display: "none" }}>
           <button type="button" aria-current={dashboard === "today" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("today"); }}><DesignIcon name="home" /><span>Home</span></button>
           <button type="button" aria-current={dashboard === "tasks" ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); openTaskManager(); }}><DesignIcon name="tasks" /><span>Tasks</span></button>
           <button type="button" aria-current={dashboard === "care" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("care"); }}><DesignIcon name="care" /><span>Care</span></button>
