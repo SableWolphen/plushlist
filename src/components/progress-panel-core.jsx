@@ -85,7 +85,7 @@ export function ProgressPanel({ open, user, progressView, setProgressView, weekl
               {weekOverWeekDelta > 0 ? `📈 ${weekOverWeekDelta}% more than last week` : weekOverWeekDelta < 0 ? `${Math.abs(weekOverWeekDelta)}% less than last week — that's okay 💛` : "Same as last week"}
             </div>
           )}
-          <div style={{ marginTop: 16 }}>
+          <div style={{ marginTop: 16, display: progressDetailsOpen ? undefined : "none" }}>
             <div style={{ fontSize: 10.5, letterSpacing: "0.14em", color: "var(--pl-theme-muted,#8C6B9E)", fontWeight: 800 }}>LAST {TREND_WEEKS + 1} WEEKS</div>
             <div style={{ position: "relative", marginTop: 10, height: 64 }}>
               <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: 1, background: "var(--pl-theme-surface-2,#EDE0F5)" }} />
@@ -164,7 +164,7 @@ export function ProgressPanel({ open, user, progressView, setProgressView, weekl
               </div>
             );
           })()}
-          {hasWeeklyActivity && weeklyHighlights && (
+          {hasWeeklyActivity && progressDetailsOpen && weeklyHighlights && (
             <div style={{ marginTop: 9, padding: "11px 12px", borderRadius: 12, background: "var(--pl-theme-surface,#FFF9FD)", border: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 11.5, lineHeight: 1.6, color: "var(--pl-theme-ink,#6B5A7D)" }}>
               <strong>🌟 Plush highlights:</strong>
               {weeklyHighlights.mostConsistent && (
@@ -179,7 +179,7 @@ export function ProgressPanel({ open, user, progressView, setProgressView, weekl
             </div>
           )}
           <button type="button" onClick={goWriteWeeklyIntention} style={{ display: progressDetailsOpen ? undefined : "none", marginTop: 9, width: "100%", padding: "9px 12px", borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white", color: "var(--pl-theme-muted,#A65DC1)", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>📝 Set next week's intention</button>
-          <button type="button" onClick={() => setShareCardOpen(true)} style={{ marginTop: 8, width: "100%", padding: "9px 12px", borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white", color: "var(--pl-theme-muted,#A65DC1)", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>📸 Share my week</button>
+          <button type="button" onClick={() => setShareCardOpen(true)} style={{ display: progressDetailsOpen ? undefined : "none", marginTop: 8, width: "100%", padding: "9px 12px", borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white", color: "var(--pl-theme-muted,#A65DC1)", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>📸 Share my week</button>
         </div>
 
         <button type="button" onClick={() => setProgressDetailsOpen((open) => !open)} aria-expanded={progressDetailsOpen} style={{ width: "100%", margin: "-6px 0 14px", padding: "9px 12px", borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white", color: "var(--pl-theme-muted,#8E4EAA)", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>{progressDetailsOpen ? "Hide insights & monthly trends" : "Show insights & monthly trends"}</button>
