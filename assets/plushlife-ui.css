@@ -1223,3 +1223,145 @@
     font-size:9.5px!important;
   }
 }
+
+
+/* Shared navigation layout lock — every PlushLife theme uses the same phone
+   structure. Themes may recolor it, but they do not move, resize, or replace it. */
+#main-content .pl-app-bottom-nav,
+#main-content.dino-theme .pl-app-bottom-nav,
+#main-content.baby-mode .pl-app-bottom-nav,
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-app-bottom-nav{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  position:fixed!important;
+  left:12px!important;
+  right:12px!important;
+  bottom:max(8px,env(safe-area-inset-bottom))!important;
+  width:auto!important;
+  height:72px!important;
+  min-height:72px!important;
+  max-height:72px!important;
+  padding:7px 8px!important;
+  box-sizing:border-box!important;
+  align-items:center!important;
+  border-radius:26px!important;
+  border:1px solid color-mix(in srgb,var(--pl-theme-line,#E5D5EB) 88%,white)!important;
+  background:color-mix(in srgb,var(--pl-theme-nav,#FFFDFE) 94%,transparent)!important;
+  box-shadow:0 12px 30px rgba(72,43,88,.16)!important;
+  backdrop-filter:blur(18px)!important;
+  -webkit-backdrop-filter:blur(18px)!important;
+  z-index:90!important;
+}
+#main-content .pl-app-nav-btn,
+#main-content.dino-theme .pl-app-nav-btn,
+#main-content.baby-mode .pl-app-nav-btn{
+  min-width:0!important;
+  height:56px!important;
+  min-height:56px!important;
+  max-height:56px!important;
+  padding:4px 2px!important;
+  border:0!important;
+  border-radius:16px!important;
+  background:transparent!important;
+  color:var(--pl-theme-muted,#806B91)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:2px!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  line-height:1!important;
+}
+#main-content .pl-app-nav-btn .ico,
+#main-content.dino-theme .pl-app-nav-btn .ico,
+#main-content.baby-mode .pl-app-nav-btn .ico{
+  font-size:20px!important;
+  line-height:1!important;
+}
+#main-content .pl-app-nav-btn[aria-current="page"],
+#main-content.dino-theme .pl-app-nav-btn[aria-current="page"],
+#main-content.baby-mode .pl-app-nav-btn[aria-current="page"]{
+  color:var(--pl-theme-accent,#A65DC1)!important;
+  background:color-mix(in srgb,var(--pl-theme-accent,#A65DC1) 11%,white)!important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pl-theme-accent,#A65DC1) 28%,transparent)!important;
+}
+#main-content .pl-app-add-float{
+  position:fixed!important;
+  left:50%!important;
+  bottom:calc(86px + env(safe-area-inset-bottom))!important;
+  transform:translateX(-50%)!important;
+  z-index:92!important;
+  width:60px!important;
+  min-width:60px!important;
+  height:60px!important;
+  min-height:60px!important;
+  padding:0!important;
+  border-radius:50%!important;
+  border:4px solid color-mix(in srgb,var(--pl-theme-surface,#FFF) 94%,transparent)!important;
+  background:linear-gradient(145deg,var(--pl-theme-accent,#C555D4),var(--pl-theme-accent-2,#E36EBB))!important;
+  color:white!important;
+  box-shadow:0 12px 28px color-mix(in srgb,var(--pl-theme-accent,#A65DC1) 34%,transparent)!important;
+  display:grid!important;
+  place-items:center!important;
+  cursor:pointer!important;
+}
+#main-content .pl-app-add-float>span{
+  font-size:34px!important;
+  line-height:.8!important;
+  font-weight:400!important;
+  transform:translateY(-1px);
+}
+#main-content .pl-app-add-float>small{
+  position:absolute;
+  top:62px;
+  left:50%;
+  transform:translateX(-50%);
+  color:var(--pl-theme-muted,#806B91);
+  font-size:9px;
+  font-weight:900;
+  white-space:nowrap;
+}
+#main-content,
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode){
+  padding-bottom:calc(150px + env(safe-area-inset-bottom))!important;
+}
+#main-content .pl-unified-page-shell,
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-unified-page-shell{
+  padding-bottom:calc(150px + env(safe-area-inset-bottom))!important;
+}
+#main-content .pl-home-shell,
+#main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-home-shell{
+  padding-bottom:calc(150px + env(safe-area-inset-bottom))!important;
+}
+@media(min-width:760px){
+  #main-content .pl-app-bottom-nav,
+  #main-content.dino-theme .pl-app-bottom-nav,
+  #main-content.baby-mode .pl-app-bottom-nav,
+  #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-app-bottom-nav{
+    left:50%!important;
+    right:auto!important;
+    width:min(660px,calc(100% - 24px))!important;
+    transform:translateX(-50%)!important;
+  }
+}
+@media(max-width:520px){
+  #main-content .pl-app-bottom-nav,
+  #main-content.dino-theme .pl-app-bottom-nav,
+  #main-content.baby-mode .pl-app-bottom-nav,
+  #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-app-bottom-nav{
+    left:8px!important;
+    right:8px!important;
+    height:70px!important;
+    min-height:70px!important;
+    max-height:70px!important;
+    padding:6px!important;
+  }
+  #main-content .pl-app-add-float{
+    bottom:calc(82px + env(safe-area-inset-bottom))!important;
+    width:58px!important;
+    min-width:58px!important;
+    height:58px!important;
+    min-height:58px!important;
+  }
+}
