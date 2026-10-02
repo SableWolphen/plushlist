@@ -51,6 +51,9 @@ if (fs.existsSync(layoutPath)) {
   const unsupported = [...new Set(tags.filter((tag) => !allowed.has(tag) && !tag.startsWith("android.widget.")))];
   if (unsupported.length) failures.push(`Unsupported RemoteViews widget tags: ${unsupported.join(", ")}`);
   if (!layout.includes('android:id="@+id/widget_root"')) failures.push("Widget root id is missing.");
+  for (const requiredId of ["widget_task_row_0", "widget_task_check_0", "widget_task_label_0", "widget_refresh", "widget_hint", "widget_progress_footer", "widget_today_card", "widget_week_card"]) {
+    if (!layout.includes(`android:id="@+id/${requiredId}"`)) failures.push(`Interactive widget layout is missing ${requiredId}.`);
+  }
 }
 
 if (fs.existsSync(infoPath)) {
@@ -78,9 +81,6 @@ if (fs.existsSync(providerPath)) {
   if (!provider.includes("refreshAll(context)")) failures.push("Widget provider does not refresh all widget instances.");
   if (!provider.includes("ACTION_TOGGLE_TASK") || !provider.includes("getBroadcast") || !provider.includes("queuePendingAction")) failures.push("Widget task rows no longer support in-place check/uncheck actions.");
   if (!provider.includes("anyOpenTask")) failures.push("Widget all-done state is no longer guarded by open-task detection.");
-  for (const requiredId of ["widget_task_row_0", "widget_task_check_0", "widget_task_label_0", "widget_refresh", "widget_hint"]) {
-    if (!layout.includes(`android:id="@+id/${requiredId}"`)) failures.push(`Interactive widget layout is missing ${requiredId}.`);
-  }
 }
 
 if (fs.existsSync(bridgePath)) {
