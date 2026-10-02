@@ -248,8 +248,9 @@ export function useConfirmation() {
 
   const dialog = request ? (
     <div role="dialog" aria-modal="true" aria-labelledby="plushlife-confirm-title" aria-describedby="plushlife-confirm-message" onMouseDown={(event) => { if (event.target === event.currentTarget) answer(false); }} style={{ position: "fixed", inset: 0, zIndex: 70, display: "grid", placeItems: "center", padding: 18, background: "rgba(45,32,56,.45)", backdropFilter: "blur(4px)" }}>
-      <div style={{ width: "min(100%, 390px)", padding: 20, borderRadius: 22, background: "#FFFDFE", border: "1px solid #E3C9EC", boxShadow: "0 24px 70px rgba(45,32,56,.25)" }}>
-        <div id="plushlife-confirm-title" style={{ fontSize: 19, fontWeight: 900, color: "#5B3D70" }}>{request.title}</div>
+      <div style={{ position: "relative", width: "min(100%, 390px)", padding: 20, borderRadius: 22, background: "#FFFDFE", border: "1px solid #E3C9EC", boxShadow: "0 24px 70px rgba(45,32,56,.25)" }}>
+        <button type="button" aria-label="Close" onClick={() => answer(false)} style={{ position: "absolute", top: 10, right: 10, width: 44, height: 44, borderRadius: 999, border: "1px solid #E3C9EC", background: "white", color: "#76558A", fontSize: 20, fontWeight: 900, cursor: "pointer" }}>×</button>
+        <div id="plushlife-confirm-title" style={{ paddingRight: 48, fontSize: 19, fontWeight: 900, color: "#5B3D70" }}>{request.title}</div>
         <div id="plushlife-confirm-message" style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: "#6B5A7D", whiteSpace: "pre-wrap" }}>{request.message}</div>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
           <button ref={cancelButtonRef} type="button" onClick={() => answer(false)} style={{ minHeight: 44, padding: "8px 14px", borderRadius: 10, border: "1px solid #D8C8E2", background: "white", color: "#76558A", fontWeight: 900, cursor: "pointer" }}>{request.cancelLabel}</button>
