@@ -22,8 +22,9 @@ check(auto.includes("PLAY_TRACK: ${{ vars.PLAY_AUTO_TRACK || 'alpha' }}"), "auto
 check(auto.includes("group: google-play-publish") && manual.includes("group: google-play-publish") && historical44.includes("group: google-play-publish"), "all Play publishers must share one concurrency lock");
 check(!historical44.includes("push:\n") && historical44.includes("workflow_dispatch:"), "historical v44 release must stay manual-only");
 check(!historical45.includes("push:\n") && historical45.includes("workflow_dispatch:"), "historical v45 release must stay manual-only");
-check(pages.includes("branches: [main]") && cloudflare.includes("branches: [main]") && codeql.includes("branches: [main]"), "current deploy/security workflows must stay scoped to main");
-check(cloudflare.includes("Require Cloudflare deployment credentials"), "Cloudflare deployment must fail early with an explicit credential reason");
+check(pages.includes("branches: [main]") && codeql.includes("branches: [main]"), "Pages and CodeQL must stay scoped to main");
+check(!cloudflare.includes("push:\n") && cloudflare.includes("workflow_dispatch:"), "redundant GitHub Cloudflare deployment must stay manual-only");
+check(codeql.includes("Run complete app tests") && codeql.includes("run: npm test"), "CodeQL must run the full app test gate before Android analysis");
 check(auto.includes("ready=false") && auto.includes("needs.gate.outputs.ready == 'true'"), "missing Play credentials must skip publishing instead of failing the release job");
 
 if (failures.length) {
