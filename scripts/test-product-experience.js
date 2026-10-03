@@ -10,6 +10,8 @@ const weekly = read("assets/weekly-reflection-window.js");
 const reward = read("assets/gentle-reward.js");
 const states = read("assets/state-polish.js");
 const entitlements = read("assets/entitlements.js");
+const app = read("src/app-source.jsx");
+const today = read("src/components/today-panel-core.jsx");
 const failures = [];
 const expect = (value, message) => { if (!value) failures.push(message); };
 
@@ -33,9 +35,13 @@ expect(!states.includes("MutationObserver"), "state polish stays CSS-only instea
 expect(entitlements.includes("./assets/state-polish.js") && entitlements.includes("./assets/gentle-reward.js") && !entitlements.includes("./assets/resume-context.js"), "experience layers must load without the removed resume prompt");
 expect(!entitlements.includes("enforced: true"), "experience work must not activate billing entitlements");
 expect(!entitlements.includes("keepFullTodayTaskListStable") && !entitlements.includes("plushlife-full-task-list-override"), "Today layout stability is declarative, not injected after render");
+expect(app.includes('className="classic-sync-strip"') && app.includes('borderRadius: 999') && !app.includes('{syncStatus === "error" ? "Retry" : "Sync now"}'), "Home sync status stays a compact single control");
+expect(app.includes('className="pl-home-checkin-row"') && app.includes('flex: "0 1 auto"'), "Home check-in stays a compact status pill instead of a full-width card");
+expect(today.includes("pl-home-today-row") && !today.includes("Start a gentle timer"), "Today header stays compact and does not duplicate the large timer control");
+expect(today.includes("min-height:128px!important") && today.includes("pl-home-cozy-link"), "mobile Home hero stays compact while Cozy Space remains reachable");
 
 if (failures.length) {
   console.error("Product experience checks failed:\n- " + failures.join("\n- "));
   process.exit(1);
 }
-console.log(`Product experience checks passed (${21} checks).`);
+console.log(`Product experience checks passed (${25} checks).`);
