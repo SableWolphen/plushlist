@@ -36,16 +36,16 @@ const C = {
   body: "var(--pl-theme-ink)",
   purple: "var(--pl-theme-accent)",
   purple2: "#D879DE",
-  line: "#E9D6EE",
-  line2: "#F0E2F2",
+  line: "var(--pl-theme-line)",
+  line2: "var(--pl-theme-line)",
   card: "var(--pl-theme-surface)",
 };
 
 const card = {
   borderRadius: 26,
-  border: "2px solid #F3DDF2",
+  border: "1px solid var(--pl-theme-line)",
   background: C.card,
-  boxShadow: "0 10px 24px rgba(190,120,200,.10)",
+  boxShadow: "0 10px 24px rgba(20,14,26,.10)",
   backdropFilter: "blur(14px)",
 };
 
@@ -244,8 +244,8 @@ function TomorrowNote({ tomorrowTasksCount }) {
   return (
     <div id="plushlife-tomorrow-note" style={{...card, padding: "12px 15px", display: "flex", alignItems: "center", gap: 10}} aria-label="Tomorrow is ready">
       <span aria-hidden="true" style={{ fontSize: 20 }}>🌙</span>
-      <div style={{ fontSize: 12.5, lineHeight: 1.45, color: "#6B5A7D" }}>
-        <strong style={{ color: "#5B3D70" }}>Tomorrow is ready.</strong>{" "}
+      <div style={{ fontSize: 12.5, lineHeight: 1.45, color: "var(--pl-theme-muted)" }}>
+        <strong style={{ color: "var(--pl-theme-ink)" }}>Tomorrow is ready.</strong>{" "}
         {tomorrowTasksCount === 0
           ? "Nothing scheduled yet — rest easy."
           : `${tomorrowTasksCount} gentle ${tomorrowTasksCount === 1 ? "task is" : "tasks are"} waiting for you.`}
@@ -260,8 +260,8 @@ function CompletedToday({ rows = [], viewDone = {}, lingerKeys = [], toggle, exp
   return (
     <section style={{...card, padding: "8px 12px 10px"}} aria-label="Completed today">
       <button type="button" onClick={() => setExpanded?.((value) => !value)} aria-expanded={!!expanded} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, minHeight: 44, border: 0, background: "transparent", cursor: "pointer", padding: "4px 2px" }}>
-        <span style={{ fontSize: 11, letterSpacing: ".11em", fontWeight: 900, color: "#8D7898" }}>✓ COMPLETED TODAY · {count}</span>
-        <span aria-hidden="true" style={{ color: "#A660B9", fontWeight: 900 }}>{expanded ? "▾" : "›"}</span>
+        <span style={{ fontSize: 11, letterSpacing: ".11em", fontWeight: 900, color: "var(--pl-theme-muted)" }}>✓ COMPLETED TODAY · {count}</span>
+        <span aria-hidden="true" style={{ color: "var(--pl-theme-accent)", fontWeight: 900 }}>{expanded ? "▾" : "›"}</span>
       </button>
       {expanded && <CompletedTaskArea rows={rows} viewDone={viewDone} lingerKeys={lingerKeys} toggle={toggle} title="Completed today" compact />}
     </section>
