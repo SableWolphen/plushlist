@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: plushlife-auto-play-publish
+  group: google-play-publish
   cancel-in-progress: false
 
 jobs:
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
-      PLAY_TRACK: ${{ vars.PLAY_AUTO_TRACK || 'alpha' }}
+      PLAY_TRACK: ${{ vars.PLAY_AUTO_TRACK || 'production' }}
     steps:
       - name: Checkout the exact green commit
         uses: actions/checkout@v6

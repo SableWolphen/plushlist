@@ -1,6 +1,6 @@
 name: Manual Android bundle and optional Play publish
 
-# Manual dispatch. The existing production workflow owns automatic main releases.
+# Manual dispatch. auto-play-release.yml owns automatic production releases after green CodeQL.
 # This builds app-release.aab and
 # always uploads it as a workflow artifact for you to download yourself.
 #
@@ -31,7 +31,7 @@ on:
           - production
 
 concurrency:
-  group: plushlife-play-publish
+  group: google-play-publish
   cancel-in-progress: false
 
 permissions:
