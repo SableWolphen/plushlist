@@ -23,15 +23,18 @@
     return LEGACY_AUTH_STORAGE_KEY;
   }
 
-  // PlushLife now uses light theme palettes only. Apply light before React
-  // mounts so there is never a system-dark flash during startup.
+  // Apply the last in-app appearance before React mounts so Android/web
+  // never flash the opposite color scheme. Dark is the cozy fallback when a
+  // device has not saved a preference yet; the signed-in preference reconciles
+  // this value after app state loads.
   try {
-    window.localStorage.removeItem(APPEARANCE_STORAGE_KEY);
-    document.documentElement.dataset.plushlifeColorMode = "light";
-    document.documentElement.dataset.plushlifeColorModePreference = "light";
-    document.documentElement.style.colorScheme = "light";
+    var savedAppearance = window.localStorage.getItem(APPEARANCE_STORAGE_KEY);
+    var startupMode = savedAppearance === "light" || savedAppearance === "dark" ? savedAppearance : "dark";
+    document.documentElement.dataset.plushlifeColorMode = startupMode;
+    document.documentElement.dataset.plushlifeColorModePreference = startupMode;
+    document.documentElement.style.colorScheme = startupMode;
     var themeMeta = document.querySelector('meta[name="theme-color"]');
-    if (themeMeta) themeMeta.setAttribute("content", "#b75acb");
+    if (themeMeta) themeMeta.setAttribute("content", startupMode === "dark" ? "#21182c" : "#b75acb");
   } catch (_error) {}
 
   var originalCreateClient = window.supabase && window.supabase.createClient;
