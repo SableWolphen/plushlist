@@ -1,6 +1,5 @@
 import { CozySpace } from "./cozy-space.jsx";
 import { CareHistory } from "./care-history.jsx";
-import { CozyScene } from "./theme-world.jsx";
 /*
  * Product-quality compatibility contract:
  * data-actionable-care-recommendation
@@ -170,7 +169,6 @@ export function CarePanel(props) {
         }
       `}</style>
 
-      <CozyScene title="What do you need right now?" subtitle="Choose what feels closest." />
       <details className="pl-design-card" style={{ marginBottom: 0 }}>
         <summary style={{ minHeight: 44, display: "list-item", alignContent: "center", cursor: "pointer", fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>🧸 My Cozy Space</summary>
         <div style={{ paddingTop: 8 }}>

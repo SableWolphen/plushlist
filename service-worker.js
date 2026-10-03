@@ -15,6 +15,7 @@ const APP_SHELL = [
   "./assets/figma/signature-dino-happy.svg",
   "./assets/figma/signature-nursery-happy.svg",
   "./assets/figma-design.css",
+  "./assets/final-mobile-ui.css",
   "./assets/figma/icon-progress.svg",
   "./assets/figma/icon-plush.svg",
   "./assets/figma/pink.svg",
