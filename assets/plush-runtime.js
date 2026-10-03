@@ -167,10 +167,10 @@
     var style = document.createElement("style");
     style.id = "plush-runtime-polish";
     style.textContent = "@keyframes plushSkeletonPulse{0%,100%{opacity:.52}50%{opacity:1}}" +
-      ".plush-lazy-skeleton{position:relative;margin:10px 0 16px;padding:18px;border-radius:16px;border:1px solid #eadcf2;background:rgba(255,255,255,.72);overflow:hidden}" +
-      ".plush-lazy-skeleton__title,.plush-lazy-skeleton__line{height:12px;border-radius:999px;background:linear-gradient(90deg,#eadcf2,#f7effb,#eadcf2);animation:plushSkeletonPulse 1.15s ease-in-out infinite}" +
+      ".plush-lazy-skeleton{position:relative;margin:10px 0 16px;padding:18px;border-radius:16px;border:1px solid var(--pl-theme-line,#eadcf2);background:var(--pl-theme-surface,#fff);overflow:hidden}" +
+      ".plush-lazy-skeleton__title,.plush-lazy-skeleton__line{height:12px;border-radius:999px;background:linear-gradient(90deg,var(--pl-theme-line,#eadcf2),var(--pl-theme-surface-2,#f7effb),var(--pl-theme-line,#eadcf2));animation:plushSkeletonPulse 1.15s ease-in-out infinite}" +
       ".plush-lazy-skeleton__title{width:42%;height:16px}.plush-lazy-skeleton__line{margin-top:11px;width:88%}.plush-lazy-skeleton__line--short{width:64%}" +
-      ".plush-lazy-skeleton__label{display:block;margin-top:12px;font-size:11px;font-weight:800;color:#8c6b9e}" +
+      ".plush-lazy-skeleton__label{display:block;margin-top:12px;font-size:12px;font-weight:800;color:var(--pl-theme-muted,#8c6b9e)}" +
       "@media(prefers-reduced-motion:reduce){.plush-lazy-skeleton__title,.plush-lazy-skeleton__line{animation:none}}";
     document.head.appendChild(style);
   }
