@@ -11,10 +11,8 @@ const CHUNKS = path.join(ASSETS, "chunks");
 // product limit: 640KB still catches meaningful startup regressions while
 // avoiding false alarms from small feature/theme changes.
 const MAX_ENTRY_BYTES = 640 * 1024;
-// Raised deliberately from 45KB: the settings-panel lazy chunk sits at 43.9KB,
-// leaving only 1.1KB of headroom — any small addition to settings would fail
-// the build for no real performance reason. 60KB is still a tight budget for a
-// lazily-loaded panel.
+// Lazy panels keep a strict 60KB ceiling. When a panel approaches this limit,
+// split secondary UI into nested lazy chunks instead of raising the budget.
 const MAX_LAZY_CHUNK_BYTES = 60 * 1024;
 
 function size(file) {
