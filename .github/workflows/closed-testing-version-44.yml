@@ -1,18 +1,18 @@
-name: Automatic Google Play production release
+name: Historical production release (manual only)
 
-# Publish the latest main branch build to Google Play automatically.
-# Manual dispatch remains available for an intentional retry.
+# Historical release workflow retained for audit/recovery only.
+# Automatic production publishing is owned by auto-play-release.yml after a
+# green CodeQL run. Keeping this manual prevents duplicate Play uploads and
+# repeated failure emails from two release pipelines racing the same commit.
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch: {}
 
 permissions:
   contents: read
 
 concurrency:
-  group: google-play-production
+  group: google-play-publish
   cancel-in-progress: true
 
 jobs:
