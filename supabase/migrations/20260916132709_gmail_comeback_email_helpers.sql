@@ -1,0 +1,4 @@
+-- Historical migration marker.
+-- This migration version is already applied to the live PlushList Supabase project.
+-- The original SQL was created in Supabase and is not reconstructed here. This no-op
+-- marker preserves the authoritative production migration version for branch previews.
