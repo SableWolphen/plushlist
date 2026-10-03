@@ -22,9 +22,9 @@ const checks = [
   [settings.includes('title="🌙 Dark appearance"') && settings.includes('updatePreference({ dark_mode: event.target.checked })') && settings.includes("LazyAppearanceThemePicker"), "Personalize exposes dark appearance and lazy-loads theme selection"],
   [app.includes("const updatePreference = (patch) => {") && app.includes("savePreferences(next);"), "preference toggles persist through savePreferences"],
 
-  [settings.includes('onClick={() => updatePreference({ nickname_style: "baby", dino_theme: false })}'), "Baby Mode toggle updates nickname style"],
-  [settings.includes('nickname_style: "baby", dino_theme: false'), "enabling Baby Mode disables Dino Theme"],
-  [settings.includes('onClick={() => updatePreference({ dino_theme: true, nickname_style: "warm" })}'), "Dino Theme selection leaves the shared layout and exits Baby wording mode"],
+  [appearancePicker.includes('onClick={() => updatePreference({ nickname_style: "baby", dino_theme: false })}'), "Baby Mode toggle updates nickname style"],
+  [appearancePicker.includes('nickname_style: "baby", dino_theme: false'), "enabling Baby Mode disables Dino Theme"],
+  [appearancePicker.includes('onClick={() => updatePreference({ dino_theme: true, nickname_style: "warm" })}'), "Dino Theme selection leaves the shared layout and exits Baby wording mode"],
 
   [settings.includes("onClick={openDailyCheckIn}") && settings.includes("openDailyCheckIn, watchPairingCode"), "Settings can reopen the unified daily check-in directly"],
   [growth.includes('document.getElementById("plushlife-checkin-trigger")') && growth.includes("openCapacityPicker: openDailyCheckIn"), "legacy capacity API routes into the unified daily check-in"],
