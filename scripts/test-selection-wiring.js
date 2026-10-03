@@ -6,6 +6,7 @@ function read(file) {
 }
 
 const settings = read("src/components/organized-settings.jsx");
+const appearancePicker = read("src/components/appearance-theme-picker.jsx");
 const app = read("src/app-source.jsx");
 const growth = read("assets/growth-loop.js");
 const entitlements = read("assets/entitlements.js");
@@ -15,10 +16,10 @@ const checkinTheme = read("assets/checkin-theme.js");
 const dailyCopy = read("assets/daily-checkin-copy.js");
 
 const checks = [
-  [settings.includes("APPEARANCE_THEMES.map((theme)") && settings.includes("onClick={() => selectAppearanceTheme(theme.id)}"), "every ambient theme button calls selectAppearanceTheme"],
+  [appearancePicker.includes("APPEARANCE_THEMES.map((theme)") && appearancePicker.includes("onClick={() => selectAppearanceTheme(theme.id)}"), "every ambient theme button calls selectAppearanceTheme"],
   [app.includes("const selectAppearanceTheme = (themeId) => {") && app.includes("setAppearanceTheme(validTheme);") && app.includes("plushlist-appearance-"), "theme selection updates state and persists per user"],
   [app.includes('window.localStorage.setItem("plushlife:appearance-mode:v1", mode)') && app.includes('paletteWorld = preferences.dark_mode && !babyMode ? "twilight" : activeWorld'), "dark appearance persists without replacing the chosen theme world"],
-  [settings.includes('title="🌙 Dark appearance"') && settings.includes('updatePreference({ dark_mode: event.target.checked })'), "Personalize exposes a dark appearance toggle"],
+  [settings.includes('title="🌙 Dark appearance"') && settings.includes('updatePreference({ dark_mode: event.target.checked })') && settings.includes("LazyAppearanceThemePicker"), "Personalize exposes dark appearance and lazy-loads theme selection"],
   [app.includes("const updatePreference = (patch) => {") && app.includes("savePreferences(next);"), "preference toggles persist through savePreferences"],
 
   [settings.includes('onClick={() => updatePreference({ nickname_style: "baby", dino_theme: false })}'), "Baby Mode toggle updates nickname style"],
