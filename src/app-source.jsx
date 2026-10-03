@@ -896,6 +896,18 @@ function GlowUpTracker() {
     seen_features: [],
     smart_reminder_hint_dismissed_at: null,
   });
+  useEffect(() => {
+    const mode = preferences.dark_mode ? "dark" : "light";
+    try {
+      window.localStorage.setItem("plushlife:appearance-mode:v1", mode);
+    } catch (_error) {}
+    document.documentElement.dataset.plushlifeColorMode = mode;
+    document.documentElement.dataset.plushlifeColorModePreference = mode;
+    document.documentElement.style.colorScheme = mode;
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.setAttribute("content", mode === "dark" ? "#21182c" : "#b75acb");
+  }, [preferences.dark_mode]);
+
   const [settingsMessage, setSettingsMessage] = useState("");
   const [watchPairingCode, setWatchPairingCode] = useState("");
   const [watchPairingMessage, setWatchPairingMessage] = useState("");
@@ -5938,11 +5950,12 @@ function GlowUpTracker() {
     nav: "#FFFDFEF5",
     art: "baby",
   };
-  const activeWorld = babyMode ? ((isNightHour || preferences.dark_mode) ? "baby-night" : "baby") : dinoTheme ? "dino" : preferences.dark_mode ? "twilight" : appearanceTheme;
+  const activeWorld = babyMode ? ((isNightHour || preferences.dark_mode) ? "baby-night" : "baby") : dinoTheme ? "dino" : appearanceTheme;
+  const paletteWorld = preferences.dark_mode && !babyMode ? "twilight" : activeWorld;
   useEffect(() => {
     try { window.localStorage.setItem("plushlife-login-theme", JSON.stringify({ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit })); } catch (_error) {}
   }, [activeWorld, preferences.baby_voice]);
-  const designPalette = FIGMA_WORLDS[activeWorld];
+  const designPalette = FIGMA_WORLDS[paletteWorld] || FIGMA_WORLDS[activeWorld];
   const activeThemePalette = designPalette ? { ...selectedAppearanceTheme, ...designPalette, accent2: designPalette.accent, line: designPalette.line, nav: designPalette.surface, art: activeWorld, wash: designPalette.background } : selectedAppearanceTheme;
   /* Theme regression marker retained for validation: !["soft", "soft-light"].includes(appearanceTheme)
  * Ambient themes remain visible through the dedicated theme layer; the old heavy frame stays removed.
@@ -5950,7 +5963,7 @@ function GlowUpTracker() {
   const selectAppearanceTheme = (themeId) => {
     const validTheme = APPEARANCE_THEMES.some((theme) => theme.id === themeId) ? themeId : "soft";
     setAppearanceTheme(validTheme);
-    updatePreference({ appearance_theme: validTheme, dino_theme: false, nickname_style: "warm", dark_mode: false });
+    updatePreference({ appearance_theme: validTheme, dino_theme: false, nickname_style: "warm" });
     if (user?.id) window.localStorage.setItem(`plushlist-appearance-${user.id}`, validTheme);
   };
 
@@ -6136,15 +6149,15 @@ function GlowUpTracker() {
     <HabitStudioProvider key={user.id} userId={user.id} tasks={trackerTasks} rows={rows} done={done} history={habitHistory} date={period.date} editableDay={selectedProgressDate===period.date} onToggle={toggle}><CozyComfortContext.Provider value={cozyComfort}><CozyGuideSuggestions rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} onOpen={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard("care");}}/><ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit, unlockedIds: unlockedIdSet, rewardProgress: mascotRequirementProgress }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
       background: activeThemePalette.background,
-      backgroundImage: preferences.simple_mode ? `
+      backgroundImage: preferences.simple_mode && !preferences.dark_mode ? `
         linear-gradient(180deg, #FFFEFD 0%, #FBF9FC 100%),
         radial-gradient(circle at 50% 0%, #F3EAF6 0%, transparent 45%)
-      ` : babyMode ? `
+      ` : babyMode && !preferences.dark_mode ? `
         radial-gradient(circle at 8% 9%, #FFBFE4 0%, transparent 34%),
         radial-gradient(circle at 93% 8%, #BDEBFF 0%, transparent 35%),
         radial-gradient(circle at 88% 91%, #FFF0A8 0%, transparent 38%),
         radial-gradient(circle at 9% 88%, #C8F4DE 0%, transparent 38%)
-      ` : dinoTheme ? `
+      ` : dinoTheme && !preferences.dark_mode ? `
         linear-gradient(180deg, #FFF6FB 0%, #FDF1FF 46%, #F4EDFF 100%),
         radial-gradient(circle at 10% 6%, #FFD3E8 0%, transparent 40%),
         radial-gradient(circle at 90% 4%, #D9C9F7 0%, transparent 42%),
@@ -6160,7 +6173,7 @@ function GlowUpTracker() {
         radial-gradient(circle at 10% 85%, ${activeThemePalette.glowD} 0%, transparent 48%)
       `,
       fontFamily: babyMode ? "'Comic Sans MS','Nunito','Segoe UI',sans-serif" : dinoTheme ? "'Baloo 2','Nunito','Avenir Next','Segoe UI',system-ui,sans-serif" : "'Avenir Next','Segoe UI',system-ui,sans-serif",
-      color: preferences.high_contrast ? "#2D2038" : "#5B4B6B",
+      color: preferences.high_contrast ? (preferences.dark_mode ? "#FFF8FF" : "#2D2038") : (activeThemePalette.ink || "#5B4B6B"),
       fontSize: babyMode ? "104%" : "100%",
       padding: "max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))",
       position: "relative",
