@@ -1,9 +1,8 @@
-name: Auto publish Android after green CodeQL
+name: Auto publish Android
 
 on:
-  workflow_run:
-    workflows: ["CodeQL"]
-    types: [completed]
+  workflow_call:
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -14,7 +13,6 @@ concurrency:
 
 jobs:
   gate:
-    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
     outputs:
       ready: ${{ steps.check.outputs.ready }}
@@ -48,13 +46,11 @@ jobs:
     if: needs.gate.outputs.ready == 'true'
     runs-on: ubuntu-latest
     env:
-      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+      RELEASE_SHA: ${{ github.sha }}
       PLAY_TRACK: ${{ vars.PLAY_AUTO_TRACK || 'alpha' }}
     steps:
-      - name: Checkout the exact green commit
+      - name: Checkout trusted repository revision
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -84,7 +80,7 @@ jobs:
 
       - name: Build web and sync Android
         env:
-          GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
+          GITHUB_SHA: ${{ github.sha }}
         run: npm run android:sync
 
       - name: Resolve the next unused Play version
@@ -121,7 +117,7 @@ jobs:
           PLUSHLIFE_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           PLUSHLIFE_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           PLUSHLIFE_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          PLUSHLIFE_GIT_SHA: ${{ github.event.workflow_run.head_sha }}
+          PLUSHLIFE_GIT_SHA: ${{ github.sha }}
         run: ./gradlew --no-daemon bundleRelease
 
       - name: Validate bundle

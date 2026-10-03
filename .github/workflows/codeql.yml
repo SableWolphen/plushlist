@@ -88,3 +88,12 @@ jobs:
         uses: github/codeql-action/analyze@v4
         with:
           category: "/language:java-kotlin"
+
+  release-android:
+    name: Publish Android after green CodeQL
+    needs:
+      - analyze-source
+      - analyze-android
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/auto-play-release.yml
+    secrets: inherit
