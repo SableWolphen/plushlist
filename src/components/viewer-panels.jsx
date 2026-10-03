@@ -148,7 +148,10 @@ export function JournalReflectionViewer({ reflectionViewerDate, onClose, reflect
   );
 }
 
-export function DailyJournalPanel({ open, onClose, dailyJournalPromptOpen, journalQuickOpenDate, journalDisplayedPrompt, privateNoteEditing, setPrivateNoteEditing, privateNoteDraft, setPrivateNoteDraft, savePrivateNote, privateNote, privateNoteMessage }) {
+export function DailyJournalPanel({ open, onVisible, onClose, dailyJournalPromptOpen, journalQuickOpenDate, journalDisplayedPrompt, privateNoteEditing, setPrivateNoteEditing, privateNoteDraft, setPrivateNoteDraft, savePrivateNote, privateNote, privateNoteMessage }) {
+  React.useEffect(() => {
+    if (open) onVisible?.();
+  }, [open, onVisible]);
   if (!open) return null;
   return (
           <ToolPanel title={dailyJournalPromptOpen ? "Your daily PlushJournal prompt" : "PlushJournal"} onClose={onClose}>
