@@ -163,7 +163,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
   if (!open) return null;
 
   const categories = [
-    ["personalize", "👤", "Personalize", "Name, comfort item, themes, Nursery, Dino Theme", "name profile theme baby dino appearance comfort"],
+    ["personalize", "👤", "Personalize", "Name, comfort item, dark appearance, themes, Nursery, Dino Theme", "name profile theme dark baby dino appearance comfort"],
     ["notifications", "🔔", "Notifications & Reminders", "Reminder times, quiet hours, push notifications", "notifications reminders quiet push nurturing discreet"],
     ["experience", "✨", "Experience", "Focus, accessibility, motion, contrast, PlushInsights", "focus accessibility text motion contrast simple insights colorblind consistency"],
     ["recommendations", "🧠", "Recommendations", "Suggestion boundaries and learned-pattern corrections", "recommendations learning profile boundaries forget correction"],
@@ -232,6 +232,14 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
         </label>
       </Card>
       <Card><HomeLayoutEditor value={preferences.home_layout} onSave={home_layout => updatePreference({ home_layout })} /></Card>
+      <Card>
+        <ToggleRow
+          checked={!!preferences.dark_mode}
+          onChange={(event) => updatePreference({ dark_mode: event.target.checked })}
+          title="🌙 Dark appearance"
+          description="Keep the app cozy and low-glare without changing your chosen world, mascot, tasks, or progress."
+        />
+      </Card>
       <Card>
         <div style={{ fontSize: 11.5, fontWeight: 900, color: "var(--pl-theme-ink,#745D81)" }}>AMBIENT THEME</div>
         <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#8A7895)" }}>Swipe to choose your world. Your routines and progress stay with you.</div>
