@@ -16,9 +16,9 @@ const codeql = read(".github/workflows/codeql.yml");
 const failures = [];
 function check(ok, label) { if (!ok) failures.push(label); }
 
-check(auto.includes("workflow_run:") && auto.includes('workflows: ["CodeQL"]'), "automatic Play release must wait for CodeQL");
-check(auto.includes("github.event.workflow_run.conclusion == 'success'") && auto.includes("github.event.workflow_run.head_branch == 'main'"), "automatic Play release must require green main");
-check(auto.includes("PLAY_TRACK: ${{ vars.PLAY_AUTO_TRACK || 'alpha' }}"), "automatic Play release must default to closed testing");
+check(auto.includes("workflow_call:") && !auto.includes("workflow_run:"), "automatic Play release must be reusable and must not run from workflow_run");
+check(codeql.includes("release-android:") && codeql.includes("analyze-source") && codeql.includes("analyze-android"), "CodeQL must call Android publishing only after all analysis jobs succeed");
+check(codeql.includes("github.event_name == 'push'") && codeql.includes("refs/heads/main") && codeql.includes("secrets: inherit"), "Android publishing must only receive secrets from trusted main pushes");\ncheck(!auto.includes("github.event.workflow_run.head_sha"), "automatic Play release must never use a workflow_run supplied SHA");\ncheck(auto.includes("PLAY_TRACK: ${{ vars.PLAY_AUTO_TRACK || 'alpha' }}"), "automatic Play release must default to closed testing");
 check(auto.includes("group: google-play-publish") && manual.includes("group: google-play-publish") && historical44.includes("group: google-play-publish"), "all Play publishers must share one concurrency lock");
 check(!historical44.includes("push:\n") && historical44.includes("workflow_dispatch:"), "historical v44 release must stay manual-only");
 check(!historical45.includes("push:\n") && historical45.includes("workflow_dispatch:"), "historical v45 release must stay manual-only");
