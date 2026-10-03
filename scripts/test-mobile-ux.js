@@ -7,7 +7,7 @@ function read(relativePath) {
 
 const index = read("index.html");
 const app = read("src/app-source.jsx");
-const ui = read("assets/plushlife-ui.css");
+const ui = read("assets/plushlife-ui.css");\nconst finalMobile = read("assets/final-mobile-ui.css");
 const shared = read("src/components/shared.jsx");
 const today = read("src/components/today-panel-core.jsx");
 const care = read("src/components/care-panel.jsx");
@@ -71,7 +71,7 @@ const checks = [
   [ui.includes("Shared navigation layout lock") && ui.includes("grid-template-columns:repeat(5,minmax(0,1fr))") && ui.includes(".pl-header-add-button"), "every theme shares the same five-destination bottom navigation geometry"],
   [read("src/components/guardian-panel.jsx").includes("pl-guardian-action-switcher") && read("src/components/guardian-panel.jsx").includes("supportAction"), "Guardian support tools switch in place instead of stacking every form"],
   [read("src/components/guardian-panel.jsx").includes("pl-guardian-person-switcher") && read("src/components/guardian-panel.jsx").indexOf("pl-guardian-person-switcher") < read("src/components/guardian-panel.jsx").indexOf("pl-guardian-switcher"), "Guardian role switching stays at the top instead of buried down the page"],
-  [app.includes("compactAppShell") && app.includes('window.matchMedia?.("(max-width: 520px)")') && app.includes('!compactAppShell && <div className="plushlife-app-header"'), "mobile structurally omits the duplicate global app header instead of relying only on CSS"],
+  [finalMobile.includes("padding-bottom:148px!important") && finalMobile.includes("grid-template-columns:repeat(5,minmax(0,1fr))!important"), "final mobile layer reserves bottom-nav clearance and keeps five equal nav lanes"],\n  [finalMobile.includes(".pl-home-hero>.pl-mascot-pat{") && finalMobile.includes("position:relative!important") && finalMobile.includes(".pl-home-hero>.pl-companion-copy{"), "final mobile override cannot reintroduce absolute Home mascot/text overlap"],\n  [finalMobile.includes(".classic-sync-strip") && finalMobile.includes(".plushlife-app-header") && finalMobile.includes("display:none!important"), "final mobile override keeps duplicate global chrome suppressed"],\n  [app.includes("compactAppShell") && app.includes('window.matchMedia?.("(max-width: 520px)")') && app.includes('!compactAppShell && <div className="plushlife-app-header"'), "mobile structurally omits the duplicate global app header instead of relying only on CSS"],
   [app.includes("pl-header-mascot-button") && app.includes("headerMascotDancing") && app.includes("<PlushMascot theme={activeWorld} outfit={selectedOutfit}"), "desktop header keeps the real PlushMascot and tap-to-dance behavior"],
   [read("src/components/theme-world.jsx").includes('const mascotWorld = "soft"') && read("src/components/theme-world.jsx").includes("Themes can change the world around it"), "every theme keeps the original PlushLife mascot art"],
   [app.includes("dailyCheckInLoaded") && app.includes("setCheckInPopupOpen(true)") && app.includes("plushlife:daily-journal-prompt"), "daily check-in and evening journal prompts can surface automatically"],
