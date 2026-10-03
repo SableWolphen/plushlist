@@ -7,7 +7,7 @@ const LazyGoldSpacesView = React.lazy(() => import("./progress-gold-experience.j
 const LazyGrowthMoments = React.lazy(() => import("./growth-moments.jsx").then((module) => ({ default: module.GrowthMoments })));
 
 function GrowthFallback() {
-  return <div role="status" style={{ minHeight: 88, display: "grid", placeItems: "center", color: "#806B8D", fontSize: 11.5 }}>✨ Loading PlushGrowth…</div>;
+  return <div role="status" style={{ minHeight: 88, display: "grid", placeItems: "center", color: "var(--pl-theme-ink)", fontSize: 11.5 }}>✨ Loading PlushGrowth…</div>;
 }
 
 // Product-quality contract lives in progress-panel-existing.jsx and remains active:

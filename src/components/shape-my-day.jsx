@@ -82,10 +82,10 @@ export function ShapeMyDay({ rows, viewDone, toggle, dailyCheckIn, period }) {
               type="button"
               onClick={() => toggle?.(row.key)}
               aria-pressed={done}
-              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", minHeight: 44, padding: "8px 10px", borderRadius: 14, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: done ? "#F3EAF9" : "rgba(255,255,255,.85)", cursor: "pointer" }}
+              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", minHeight: 44, padding: "8px 10px", borderRadius: 14, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: done ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface)", cursor: "pointer" }}
             >
-              <span aria-hidden="true" style={{ width: 24, height: 24, borderRadius: 8, border: "2px solid var(--pl-theme-line,#E9DDF6)", background: done ? "#B94DD2" : "white", color: "white", display: "grid", placeItems: "center", fontSize: 14, fontWeight: 900, flex: "0 0 auto" }}>{done ? "✓" : ""}</span>
-              <span style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 750, color: done ? "#9A86A7" : "#49385A", textDecoration: done ? "line-through" : "none" }}>{row.label}</span>
+              <span aria-hidden="true" style={{ width: 24, height: 24, borderRadius: 8, border: "2px solid var(--pl-theme-line,#E9DDF6)", background: done ? "var(--pl-theme-accent)" : "var(--pl-theme-surface)", color: "var(--pl-theme-on-accent)", display: "grid", placeItems: "center", fontSize: 14, fontWeight: 900, flex: "0 0 auto" }}>{done ? "✓" : ""}</span>
+              <span style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 750, color: done ? "var(--pl-theme-ink)" : "var(--pl-theme-ink)", textDecoration: done ? "line-through" : "none" }}>{row.label}</span>
               {mins > 0 && <span style={{ fontSize: 11, color: "var(--pl-theme-muted,#9A86A7)", fontWeight: 800, whiteSpace: "nowrap" }}>{mins}m</span>}
               {row.sourceTask?.essential_on_low_capacity && <span style={{ fontSize: 10, fontWeight: 900, color: "var(--pl-theme-muted,#B44CC7)", whiteSpace: "nowrap" }}>♥ essential</span>}
             </button>
@@ -93,7 +93,7 @@ export function ShapeMyDay({ rows, viewDone, toggle, dailyCheckIn, period }) {
         })}
       </div>
       <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-        <button type="button" onClick={startFocusTimer} style={{ flex: 1, minWidth: 150, minHeight: 44, padding: "9px 13px", borderRadius: 14, border: 0, background: "var(--pl-theme-accent)", color: "white", fontWeight: 900, fontSize: 13, cursor: "pointer" }}>⏱&nbsp; Start a gentle timer</button>
+        <button type="button" onClick={startFocusTimer} style={{ flex: 1, minWidth: 150, minHeight: 44, padding: "9px 13px", borderRadius: 14, border: 0, background: "var(--pl-theme-accent)", color: "var(--pl-theme-on-accent)", fontWeight: 900, fontSize: 13, cursor: "pointer" }}>⏱&nbsp; Start a gentle timer</button>
         <button type="button" onClick={dismiss} style={{ minHeight: 44, padding: "9px 13px", borderRadius: 14, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-muted,#8B6797)", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>Not today</button>
       </div>
     </section>

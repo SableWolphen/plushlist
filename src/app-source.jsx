@@ -1,3 +1,5 @@
+import { useAppearanceMode } from "./hooks/use-appearance-mode.js";
+import { useJournalPresentation } from "./hooks/use-journal-presentation.js";
 import { useCalendarNavigation } from "./hooks/use-calendar-navigation.js";
 import { HabitStudioProvider } from "./components/habit-studio.jsx";
 import { FocusTimer, startFocusTimer } from "./components/focus-timer.jsx";
@@ -718,13 +720,7 @@ function GlowUpTracker() {
   const [selectedProgressDate, setSelectedProgressDate] = useState(() => trackerPeriod().date);
   const [reflectionDates, setReflectionDates] = useState([]);
   const [reflectionHistory, setReflectionHistory] = useState([]);
-  const [journalHistoryExpanded, setJournalHistoryExpanded] = useState(false);
-  const [reflectionCalendarMonth, setReflectionCalendarMonth] = useState(() => trackerPeriod().date.slice(0, 7));
-  const [reflectionViewerDate, setReflectionViewerDate] = useState(null);
-  const [checkInViewerDate, setCheckInViewerDate] = useState(null);
-  const [reflectionViewerNote, setReflectionViewerNote] = useState("");
-  const [reflectionViewerPrompt, setReflectionViewerPrompt] = useState("");
-  const [reflectionViewerLoading, setReflectionViewerLoading] = useState(false);
+  const { journalHistoryExpanded, setJournalHistoryExpanded, reflectionCalendarMonth, setReflectionCalendarMonth, reflectionViewerDate, setReflectionViewerDate, checkInViewerDate, setCheckInViewerDate, reflectionViewerNote, setReflectionViewerNote, reflectionViewerPrompt, setReflectionViewerPrompt, reflectionViewerLoading, setReflectionViewerLoading } = useJournalPresentation(trackerPeriod);
   const [supportViewMode, setSupportViewMode] = useState("mine");
   const [supportLinks, setSupportLinks] = useState([]);
   const [supportNotes, setSupportNotes] = useState([]);
@@ -884,17 +880,7 @@ function GlowUpTracker() {
     seen_features: [],
     smart_reminder_hint_dismissed_at: null,
   });
-  useEffect(() => {
-    const mode = preferences.dark_mode ? "dark" : "light";
-    try {
-      window.localStorage.setItem("plushlife:appearance-mode:v1", mode);
-    } catch (_error) {}
-    document.documentElement.dataset.plushlifeColorMode = mode;
-    document.documentElement.dataset.plushlifeColorModePreference = mode;
-    document.documentElement.style.colorScheme = mode;
-    const themeMeta = document.querySelector('meta[name="theme-color"]');
-    if (themeMeta) themeMeta.setAttribute("content", mode === "dark" ? "#21182c" : "#b75acb");
-  }, [preferences.dark_mode]);
+  useAppearanceMode(preferences.dark_mode);
 
   const [settingsMessage, setSettingsMessage] = useState("");
   const [watchPairingCode, setWatchPairingCode] = useState("");
@@ -5094,7 +5080,7 @@ function GlowUpTracker() {
     const WidgetBridge = window.Capacitor?.Plugins?.WidgetBridge;
     if (!WidgetBridge || !user || selectedProgressDate !== period.date) return;
     window.__plushlifeWidgetDataOwnedByApp = true;
-    const snapshot = widgetSnapshot({rows,viewDone,dayType:dailyCheckIn.day_type,progress:pct,weeklyProgress:weeklyOverallPct,theme:preferences.nickname_style === "baby" ? (preferences.dark_mode ? "baby-night" : "baby") : preferences.dino_theme ? "dino" : preferences.dark_mode ? "twilight" : appearanceTheme});
+    const snapshot = widgetSnapshot({rows,viewDone,dayType:dailyCheckIn.day_type,progress:pct,weeklyProgress:weeklyOverallPct,theme:preferences.nickname_style === "baby" ? (preferences.dark_mode ? "baby-night" : "baby") : preferences.dark_mode ? "twilight" : preferences.dino_theme ? "dino" : appearanceTheme});
     const syncWidget = () => WidgetBridge.updateWidget(snapshot).catch((error) => console.error("[widget] updateWidget failed:", error));
     syncWidget();
     document.addEventListener("plushlife-widget-sync", syncWidget);
@@ -6166,7 +6152,7 @@ function GlowUpTracker() {
       padding: "max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))",
       position: "relative",
       isolation: "isolate",
-      "--pl-theme-on-accent": ["twilight", "baby-night"].includes(activeWorld) ? "#29223E" : "#FFFFFF",
+      "--pl-theme-on-accent": ["twilight", "baby-night"].includes(paletteWorld) ? "#29223E" : "#FFFFFF",
       "--pl-theme-bg": activeThemePalette.background,
       "--pl-theme-accent": activeThemePalette.accent,
       "--pl-theme-accent-2": activeThemePalette.accent2 || activeThemePalette.accent,

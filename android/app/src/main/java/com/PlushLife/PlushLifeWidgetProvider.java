@@ -152,9 +152,10 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
 
         Bundle options = manager.getAppWidgetOptions(widgetId);
         int height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 140);
-        int rowCount = height >= 255 ? 3 : height >= 200 ? 2 : 1;
-        views.setViewVisibility(R.id.widget_hint, height >= 220 ? View.VISIBLE : View.GONE);
-        views.setViewVisibility(R.id.widget_progress_footer, height >= 175 ? View.VISIBLE : View.GONE);
+        // Leave room for 48dp controls, readable labels and the progress footer.
+        int rowCount = height >= 295 ? 3 : height >= 235 ? 2 : 1;
+        views.setViewVisibility(R.id.widget_hint, height >= 280 ? View.VISIBLE : View.GONE);
+        views.setViewVisibility(R.id.widget_progress_footer, height >= 205 ? View.VISIBLE : View.GONE);
         views.setInt(R.id.widget_progress_footer, "setBackgroundColor", Color.TRANSPARENT);
         views.setProgressBar(R.id.widget_progress, 100, prefs.getInt("progress", 0), false);
         views.setProgressBar(R.id.widget_weekly_progress, 100, prefs.getInt("weeklyProgress", 0), false);
@@ -185,6 +186,8 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
             views.setViewVisibility(TASK_ROW_IDS[i], View.VISIBLE);
             views.setTextViewText(TASK_CHECK_IDS[i], done ? "✓" : "○");
             views.setTextViewText(TASK_LABEL_IDS[i], label);
+            views.setContentDescription(TASK_CHECK_IDS[i], (done ? "Mark incomplete: " : "Complete task: ") + label);
+            views.setContentDescription(TASK_LABEL_IDS[i], "Open PlushLife for " + label);
             views.setTextColor(TASK_CHECK_IDS[i], done ? doneInk : accent);
             views.setTextColor(TASK_LABEL_IDS[i], done ? doneInk : ink);
             views.setInt(TASK_ROW_IDS[i], "setBackgroundResource",
@@ -223,7 +226,7 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
         views.setTextViewText(R.id.widget_next_task, prefs.getString("nextTask", "Open PlushLife for one caring step"));
         views.setTextColor(R.id.widget_next_task, ink);
         views.setViewVisibility(R.id.widget_next_task, (!anyTaskShown || !anyOpenTask) ? View.VISIBLE : View.GONE);
-        if (!anyTaskShown || height < 220) views.setViewVisibility(R.id.widget_hint, View.GONE);
+        if (!anyTaskShown || height < 280) views.setViewVisibility(R.id.widget_hint, View.GONE);
 
         Intent launch = new Intent(context, MainActivity.class)
             .setAction(Intent.ACTION_VIEW)

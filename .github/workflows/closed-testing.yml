@@ -1,4 +1,6 @@
-name: Closed testing (version 45)
+name: Historical closed testing (version 45)
+
+# Retained for intentional retries; only dispatch or [release-45] runs this job.
 
 on:
   workflow_dispatch: {}

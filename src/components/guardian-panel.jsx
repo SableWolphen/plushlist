@@ -63,6 +63,11 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
           </div>
           <p className="pl-guardian-intro" aria-live="polite">{guardianArea === "together" ? "Spend a little time together, at your pace." : guardianArea === "support" ? (supportViewMode === "mine" ? "Manage invitations, sharing permissions, and requests for support." : "Offer encouragement and practical help within the sharing they chose.") : (supportViewMode === "mine" ? "Your Cozy card and the people you choose to share it with." : "The Cozy card they have chosen to share with you.")}</p>
           {guardianArea === "overview" && (supportViewMode === "mine" ? <CozySharing links={ownedSupportLinks} /> : <SharedCozyCard client={client} ownerId={supportOwnerId} userId={user?.id} />)}
+          {guardianArea === "overview" && supportViewMode === "mine" && <section style={{padding:16,borderRadius:16,background:"var(--pl-theme-surface)",border:"1px solid var(--pl-theme-line)"}}>
+            <h2 style={{margin:0,fontSize:16,color:"var(--pl-theme-ink)"}}>Your Guardians</h2>
+            {ownedSupportLinks.length ? <ul style={{paddingLeft:20,color:"var(--pl-theme-ink)",overflowWrap:"anywhere"}}>{ownedSupportLinks.map(link=><li key={link.id}>{link.caregiver_email} · {!link.accepted_at ? "Invitation pending" : link.active ? "Active" : "Paused"}</li>)}</ul> : <p style={{color:"var(--pl-theme-muted)"}}>Choose someone you trust when you’re ready.</p>}
+            <button type="button" onClick={()=>setGuardianArea("support")} style={{minHeight:44,padding:"8px 12px",borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)",color:"var(--pl-theme-ink)",fontWeight:800}}>Manage sharing & invitations</button>
+          </section>}
           {guardianArea === "together" && <TogetherCorner
             client={client}
             user={user}
@@ -259,6 +264,8 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             ) : (
               <div>
                 <p className="pl-guardian-intro">Invite someone you trust. You choose what they see, and can pause access anytime.</p>
+                <details open={ownedSupportLinks.length === 0} style={{padding:12,borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)"}}>
+                  <summary style={{minHeight:44,cursor:"pointer",fontWeight:800,color:"var(--pl-theme-ink)"}}>Invite a Guardian</summary>
                 <div className="pl-guardian-invite" style={{ display: "flex", gap: 7, marginTop: 10 }}>
                   <input type="email" aria-label="Guardian email address" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="guardian@example.com" style={{ flex: 1, minWidth: 0, padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
                   <button onClick={inviteSupportAdult} style={{ padding: "8px 11px", borderRadius: 10, border: 0, background: "var(--pl-theme-accent,#4C8FE8)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800, cursor: "pointer" }}>Invite guardian</button>
@@ -279,6 +286,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                   })()}
                   <div style={{ marginTop: 4, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>You can fine-tune each permission afterward too.</div>
                 </div>
+                </details>
                 <div style={{ marginTop: 12 }}>
                   {ownedSupportLinks.length === 0 ? (
                     <div style={{ padding: "12px 13px", borderRadius: 12, background: "var(--pl-theme-surface,#F5FAFF)", border: "1px solid var(--pl-theme-line,#E9DDF6)", color: "var(--pl-theme-ink,#4C6E8E)" }}>

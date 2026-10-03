@@ -181,7 +181,7 @@ export function CompactAnchor({ open, rows = [], viewDone = {}, period, toggle }
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 1 }}>
             <div style={{ flex: 1, minWidth: 0, fontSize: 12.5, lineHeight: 1.3, fontWeight: 900, color: "var(--pl-theme-ink)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{focusLabel || "Choose one habit you really want to work on"}</div>
-            {focusRow && !viewDone?.[focusRow.key] && <button type="button" onClick={() => toggle?.(focusRow.key)} style={{ border: 0, borderRadius: 999, background: "var(--pl-theme-surface)", color: "white", fontWeight: 900, fontSize: 10.5, padding: "12px 8px", minHeight: 44, margin: "-7px 0", cursor: "pointer", flexShrink: 0 }}>✓ Done</button>}
+            {focusRow && !viewDone?.[focusRow.key] && <button type="button" onClick={() => toggle?.(focusRow.key)} style={{ border: 0, borderRadius: 999, background: "var(--pl-theme-surface)", color: "var(--pl-theme-on-accent)", fontWeight: 900, fontSize: 10.5, padding: "12px 8px", minHeight: 44, margin: "-7px 0", cursor: "pointer", flexShrink: 0 }}>✓ Done</button>}
             {focusRow && viewDone?.[focusRow.key] && <span style={{ borderRadius: 999, background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink)", fontSize: 10.5, padding: "4px 7px", fontWeight: 900, flexShrink: 0 }}>✓ Done</span>}
           </div>
           {focusId && !focusRow && <div style={{ marginTop: 2, fontSize: 9.5, color: "var(--pl-theme-ink)" }}>Not scheduled today · still your Focus Habit</div>}
@@ -189,7 +189,7 @@ export function CompactAnchor({ open, rows = [], viewDone = {}, period, toggle }
       </div>
       {pickerOpen && <div style={{ display: "grid", gap: 6, marginTop: 7, paddingTop: 7, borderTop: "1px solid var(--pl-theme-line)" }}>
         <div style={{ fontSize: 10, lineHeight: 1.35, color: "var(--pl-theme-ink)" }}>Only habits are shown here — regular tasks, meals, schedules, and check-ins stay out of this list.</div>
-        {habitRows.slice(0, 14).map((row) => <button key={habitId(row)} type="button" onClick={() => chooseFocusHabit(row)} style={{ ...buttonStyle, textAlign: "left", background: habitId(row) === focusId ? "#FAF0FD" : "white" }}>{viewDone?.[row.key] ? "✓ " : ""}{habitLabel(row)}</button>)}
+        {habitRows.slice(0, 14).map((row) => <button key={habitId(row)} type="button" onClick={() => chooseFocusHabit(row)} style={{ ...buttonStyle, textAlign: "left", background: habitId(row) === focusId ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface)" }}>{viewDone?.[row.key] ? "✓ " : ""}{habitLabel(row)}</button>)}
         {!habitRows.length && <div style={{ fontSize: 11.5, color: "var(--pl-theme-ink)" }}>You do not have a habit scheduled today yet. Mark a task as “Build a habit” or “Reduce a habit,” then it can become your Focus Habit.</div>}
       </div>}
     </section>
