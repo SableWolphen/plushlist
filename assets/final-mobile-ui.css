@@ -94,32 +94,10 @@
 @media(max-width:520px){
   #main-content .classic-sync-strip{display:none!important}
 
-  #main-content .plushlife-app-header{
-    min-height:44px!important;
-    margin:0 0 8px!important;
-    justify-content:flex-end!important;
-    align-items:center!important;
-  }
-  #main-content .plushlife-app-header>div:first-child{display:none!important}
-  #main-content .plushlife-app-header>div:last-child{gap:8px!important}
-  #main-content .pl-header-add-button,
-  #main-content .pl-header-mascot-button{
-    width:44px!important;
-    height:44px!important;
-    min-width:44px!important;
-    min-height:44px!important;
-    border-radius:18px!important;
-    box-shadow:none!important;
-  }
-  #main-content .pl-header-add-button{
-    background:var(--pl-theme-surface-2)!important;
-    border:1px solid var(--pl-theme-line)!important;
-    color:var(--pl-theme-accent)!important;
-  }
-  #main-content .pl-header-mascot-button{
-    border:1px solid var(--pl-theme-line)!important;
-    background:var(--pl-theme-surface)!important;
-  }
+  /* Android already provides the status bar. The Figma phone layouts begin
+     directly with each page title, so the legacy global brand/add row is
+     removed on phones instead of competing with the page header. */
+  #main-content .plushlife-app-header{display:none!important}
 
   #main-content :is(.pl-home-shell,.pl-unified-page-shell){
     width:100%!important;
