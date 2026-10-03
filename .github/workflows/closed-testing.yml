@@ -1,18 +1,15 @@
 name: Historical closed testing (version 45)
 
-# Retained for intentional retries; only dispatch or [release-45] runs this job.
+# Retained for intentional retries only. Automatic publishing is owned by auto-play-release.yml.
 
 on:
   workflow_dispatch: {}
-  push:
-    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
   build-and-publish:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release-45]')
     runs-on: ubuntu-latest
     env:
       HAS_PLAY_SECRET: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
