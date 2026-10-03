@@ -1,4 +1,4 @@
-import { CozyScene } from "./theme-world.jsx";
+import { ThemeScene } from "./theme-world.jsx";
 /*
  * Progress regression markers retained while the visible copy stays friendlier:
  * ✨ What PlushLife noticed
@@ -132,14 +132,17 @@ function CompactGrowthOverview(props) {
       <ProgressTabs progressView={props.progressView} setProgressView={props.setProgressView} />
       </header>
 
-      <CozyScene title="Every return counts." subtitle="Your story is bigger than a streak." />
-      <section className="pl-growth-weekbar" aria-label="Weekly progress">
+      <section className="pl-growth-weekbar pl-growth-week-summary" aria-label="Weekly progress">
         <div className="pl-growth-weekbar-head">
           <span>🌷 This week</span>
           <span>{Math.max(0, Math.min(100, Number(props.weeklyOverallPct) || 0))}%</span>
         </div>
         <div className="pl-growth-weekbar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.max(0, Math.min(100, Number(props.weeklyOverallPct) || 0))}>
           <div className="pl-growth-weekbar-fill" style={{ width: `${Math.max(0, Math.min(100, Number(props.weeklyOverallPct) || 0))}%` }} />
+        </div>
+        <div className="pl-growth-companion">
+          <span className="pl-growth-companion-art"><ThemeScene focus decorative /></span>
+          <span className="pl-growth-companion-copy"><strong>Every return counts.</strong><span>Returning counts. Your care stays yours.</span></span>
         </div>
       </section>
 
