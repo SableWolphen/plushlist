@@ -18,7 +18,10 @@ if (typeof document !== "undefined" && !document.getElementById("plushlife-mobil
     html, body, #root { max-width: 100%; overflow-x: clip; }
     img, svg, video, canvas { max-width: 100%; }
     button, input, select, textarea { min-width: 0; max-width: 100%; }
+    button:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--pl-theme-accent); outline-offset: 3px; }
     button, [role="button"], [role="tab"], summary { overflow-wrap: anywhere; touch-action: manipulation; }
+    .pl-guardian-content button, .pl-guardian-content summary, .pl-calendar-cozy button { min-height:44px; }
+    .pl-guardian-content input, .pl-guardian-content select, .pl-guardian-content textarea { background:var(--pl-theme-surface); color:var(--pl-theme-ink); }
     @media (pointer: coarse) {
       button, [role="button"], [role="tab"], summary { min-height: 44px; }
     }
@@ -28,19 +31,19 @@ if (typeof document !== "undefined" && !document.getElementById("plushlife-mobil
       [role="tab"] { padding-left: 4px !important; padding-right: 4px !important; }
     }
     .pl-tool-backdrop{background:rgba(68,43,78,.40)!important;backdrop-filter:blur(9px) saturate(1.05)!important;-webkit-backdrop-filter:blur(9px) saturate(1.05)!important}
-    .pl-tool-panel{position:relative;background:linear-gradient(155deg,#FFFDFE 0%,#FFF7FC 48%,#F5F0FF 100%)!important;border:1px solid rgba(226,201,234,.92)!important;box-shadow:0 24px 70px rgba(71,42,88,.28),inset 0 1px 0 rgba(255,255,255,.95)!important}
+    .pl-tool-panel{position:relative;background:var(--pl-theme-surface)!important;border:1px solid rgba(226,201,234,.92)!important;box-shadow:0 24px 70px rgba(71,42,88,.28),inset 0 1px 0 rgba(255,255,255,.95)!important}
     .pl-tool-panel:before{content:"";position:absolute;inset:0 0 auto auto;width:130px;height:130px;border-radius:0 22px 0 100%;background:radial-gradient(circle at 65% 25%,rgba(255,192,228,.28),rgba(219,206,255,.13) 55%,transparent 73%);pointer-events:none}
-    .pl-tool-header{background:linear-gradient(145deg,rgba(255,252,254,.96),rgba(248,241,255,.92))!important;border-bottom:1px solid rgba(230,209,236,.88)!important}
-    .pl-tool-title{font-size:15.5px!important;color:#563B63!important;letter-spacing:-.01em}
-    .pl-tool-close{border-radius:999px!important;border-color:#E3CDE9!important;background:linear-gradient(145deg,#FFFDFE,#F8F0FF)!important;color:#81548F!important;box-shadow:0 4px 12px rgba(92,59,110,.06)}
+    .pl-tool-header{background:var(--pl-theme-surface)!important;border-bottom:1px solid rgba(230,209,236,.88)!important}
+    .pl-tool-title{font-size:15.5px!important;color:var(--pl-theme-ink)!important;letter-spacing:-.01em}
+    .pl-tool-close{border-radius:999px!important;border-color:var(--pl-theme-line)!important;background:var(--pl-theme-surface)!important;color:var(--pl-theme-ink)!important;box-shadow:0 4px 12px rgba(92,59,110,.06)}
     .pl-tool-body{position:relative}
     .pl-tool-body>div>section,.pl-tool-body>section{border-radius:20px}
     .pl-tool-body button{transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
     .pl-tool-body button:active{transform:scale(.985)}
-    .pl-tool-body input,.pl-tool-body select,.pl-tool-body textarea{border-color:#E3D3E8!important;background:linear-gradient(145deg,#FFFDFE,#FFFAFD)!important;color:#5C4967!important;box-shadow:inset 0 1px 2px rgba(90,57,105,.035)!important}
+    .pl-tool-body input,.pl-tool-body select,.pl-tool-body textarea{border-color:var(--pl-theme-line)!important;background:var(--pl-theme-surface)!important;color:var(--pl-theme-ink)!important;box-shadow:inset 0 1px 2px rgba(90,57,105,.035)!important}
     .pl-tool-body summary{border-radius:14px}
-    .pl-tool-body ::selection{background:#EED8F4;color:#543760}
-    .pl-tool-panel::-webkit-scrollbar{width:8px}.pl-tool-panel::-webkit-scrollbar-thumb{background:#E0C9E7;border-radius:999px;border:2px solid #FFF7FC}.pl-tool-panel::-webkit-scrollbar-track{background:transparent}
+    .pl-tool-body ::selection{background:var(--pl-theme-surface);color:var(--pl-theme-ink)}
+    .pl-tool-panel::-webkit-scrollbar{width:8px}.pl-tool-panel::-webkit-scrollbar-thumb{background:var(--pl-theme-surface);border-radius:999px;border:2px solid #FFF7FC}.pl-tool-panel::-webkit-scrollbar-track{background:transparent}
 
     /* PlushLife visual language: soft, playful, compact, and consistent. */
     .pl-tool-panel{
@@ -49,18 +52,18 @@ if (typeof document !== "undefined" && !document.getElementById("plushlife-mobil
       --pl-shadow:0 8px 24px rgba(94,58,111,.07);
     }
     .pl-tool-header:after{
-      content:"✦";margin-left:auto;margin-right:4px;color:#D68BD9;font-size:12px;
+      content:"✦";margin-left:auto;margin-right:4px;color:var(--pl-theme-ink);font-size:12px;
       filter:drop-shadow(0 2px 4px rgba(194,101,199,.14));
     }
     .pl-tool-title{display:flex!important;align-items:center!important;gap:6px!important}
-    .pl-tool-body :is(h1,h2,h3){color:#563B63}
+    .pl-tool-body :is(h1,h2,h3){color:var(--pl-theme-ink)}
     .pl-tool-body :is(p,small){color:var(--pl-muted)}
     .pl-tool-body :is(button,[role="button"]){-webkit-tap-highlight-color:transparent}
     .pl-tool-body :is(button,[role="button"]):not(:disabled):hover{filter:brightness(1.015);box-shadow:0 6px 16px rgba(102,62,119,.07)}
-    .pl-tool-body :is(input,select,textarea):focus{outline:0!important;border-color:#C982D4!important;box-shadow:0 0 0 3px rgba(194,105,207,.10)!important}
+    .pl-tool-body :is(input,select,textarea):focus{outline:0!important;border-color:var(--pl-theme-line)!important;box-shadow:0 0 0 3px rgba(194,105,207,.10)!important}
     .pl-tool-body [role="tablist"]{box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
     .pl-tool-body [role="tab"][aria-selected="true"]{box-shadow:0 5px 14px rgba(155,79,180,.09)!important}
-    .pl-tool-body details[open]>summary{color:#74417F!important}
+    .pl-tool-body details[open]>summary{color:var(--pl-theme-ink)!important}
 
     /* Older utility screens inherit the same cozy card treatment without changing their behavior. */
     [aria-label="🌷 Add & organize"] .pl-tool-body>div>div,
@@ -80,7 +83,7 @@ if (typeof document !== "undefined" && !document.getElementById("plushlife-mobil
     [aria-label="🌷 Add & organize"] .pl-tool-body button[aria-pressed="true"],
     [aria-label="🧸 Plush & Keepsakes"] .pl-tool-body button[aria-pressed="true"],
     [aria-label="Settings"] .pl-tool-body button[aria-pressed="true"]{
-      border-color:#C779D3!important;background:linear-gradient(145deg,#FFF3FB,#F1E9FF)!important;color:#74417F!important;
+      border-color:var(--pl-theme-line)!important;background:var(--pl-theme-surface)!important;color:var(--pl-theme-ink)!important;
     }
 
     @keyframes plSoftPop{0%{transform:scale(.96)}70%{transform:scale(1.025)}100%{transform:scale(1)}}
@@ -117,10 +120,10 @@ class PanelErrorBoundary extends React.Component {
   render() {
     if (!this.state.failed) return this.props.children;
     return (
-      <div role="alert" style={{ margin: "12px 0", padding: 14, borderRadius: 14, border: "1px solid #E9C7D0", background: "#FFF5F7", color: "#704D58" }}>
+      <div role="alert" style={{ margin: "12px 0", padding: 14, borderRadius: 14, border: "1px solid var(--pl-theme-line)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink)" }}>
         <div style={{ fontWeight: 900, fontSize: 13 }}>This section hit a snag.</div>
         <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.5 }}>Your saved data was not changed. Close this panel and try opening it again.</div>
-        <button type="button" onClick={() => this.setState({ failed: false })} style={{ marginTop: 9, minHeight: 44, padding: "8px 12px", borderRadius: 10, border: "1px solid #D9A7B4", background: "white", color: "#7C4D5B", fontWeight: 900, cursor: "pointer" }}>Try this section again</button>
+        <button type="button" onClick={() => this.setState({ failed: false })} style={{ marginTop: 9, minHeight: 44, padding: "8px 12px", borderRadius: 10, border: "1px solid var(--pl-theme-line)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink)", fontWeight: 900, cursor: "pointer" }}>Try this section again</button>
       </div>
     );
   }
@@ -178,23 +181,23 @@ export function ToolPanel({ title, displayTitle, onClose, children, inline = fal
         className="pl-tool-panel"
         onMouseDown={(event) => event.stopPropagation()}
         style={inline ? {
-          width: "100%", borderRadius: 22, background: "#FFF9FD", border: "1px solid #E8D5EF",
+          width: "100%", borderRadius: 22, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line)",
           boxShadow: "0 10px 28px rgba(62,35,75,.12)",
         } : {
           width: "min(760px,100%)", maxHeight: "calc(100dvh - 24px)", overflowY: "auto",
-          borderRadius: 22, background: "#FFF9FD", border: "1px solid #E8D5EF",
+          borderRadius: 22, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line)",
           boxShadow: "0 24px 70px rgba(62,35,75,.34)", overscrollBehavior: "contain",
         }}
       >
         <div className="pl-tool-header" style={{
           position: "sticky", top: 0, zIndex: 2, display: "flex", justifyContent: "space-between", alignItems: "center",
-          gap: 12, padding: "13px 15px", background: "rgba(255,249,253,.96)", borderBottom: "1px solid #E8D5EF",
+          gap: 12, padding: "13px 15px", background: "rgba(255,249,253,.96)", borderBottom: "1px solid var(--pl-theme-line)",
           backdropFilter: "blur(8px)",
         }}>
-          <div className="pl-tool-title" style={{ minWidth: 0, fontSize: 15, fontWeight: 900, color: "#5B4B6B" }}>{displayTitle || title}</div>
+          <div className="pl-tool-title" style={{ minWidth: 0, fontSize: 15, fontWeight: 900, color: "var(--pl-theme-ink)" }}>{displayTitle || title}</div>
           {!hideClose && <button type="button" className="pl-tool-close" onClick={onClose} aria-label={`Close ${title}`} style={{
-            minWidth: 58, minHeight: 44, padding: "7px 11px", borderRadius: 11, border: "1px solid #D9C5E2",
-            background: "white", color: "#7A598C", fontWeight: 900, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, overflowWrap: "normal",
+            minWidth: 58, minHeight: 44, padding: "7px 11px", borderRadius: 11, border: "1px solid var(--pl-theme-line)",
+            background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink)", fontWeight: 900, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, overflowWrap: "normal",
           }}>{inline ? "Back to tracker" : "Close"}</button>}
         </div>
         <div className="pl-tool-body" style={{ padding: "14px" }}><PanelErrorBoundary label={title}>{children}</PanelErrorBoundary></div>
@@ -248,12 +251,12 @@ export function useConfirmation() {
 
   const dialog = request ? (
     <div role="dialog" aria-modal="true" aria-labelledby="plushlife-confirm-title" aria-describedby="plushlife-confirm-message" onMouseDown={(event) => { if (event.target === event.currentTarget) answer(false); }} style={{ position: "fixed", inset: 0, zIndex: 70, display: "grid", placeItems: "center", padding: 18, background: "rgba(45,32,56,.45)", backdropFilter: "blur(4px)" }}>
-      <div style={{ position: "relative", width: "min(100%, 390px)", padding: 20, borderRadius: 22, background: "#FFFDFE", border: "1px solid #E3C9EC", boxShadow: "0 24px 70px rgba(45,32,56,.25)" }}>
-        <button type="button" aria-label="Close" onClick={() => answer(false)} style={{ position: "absolute", top: 10, right: 10, width: 44, height: 44, borderRadius: 999, border: "1px solid #E3C9EC", background: "white", color: "#76558A", fontSize: 20, fontWeight: 900, cursor: "pointer" }}>×</button>
-        <div id="plushlife-confirm-title" style={{ paddingRight: 48, fontSize: 19, fontWeight: 900, color: "#5B3D70" }}>{request.title}</div>
-        <div id="plushlife-confirm-message" style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: "#6B5A7D", whiteSpace: "pre-wrap" }}>{request.message}</div>
+      <div style={{ position: "relative", width: "min(100%, 390px)", padding: 20, borderRadius: 22, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line)", boxShadow: "0 24px 70px rgba(45,32,56,.25)" }}>
+        <button type="button" aria-label="Close" onClick={() => answer(false)} style={{ position: "absolute", top: 10, right: 10, width: 44, height: 44, borderRadius: 999, border: "1px solid var(--pl-theme-line)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink)", fontSize: 20, fontWeight: 900, cursor: "pointer" }}>×</button>
+        <div id="plushlife-confirm-title" style={{ paddingRight: 48, fontSize: 19, fontWeight: 900, color: "var(--pl-theme-ink)" }}>{request.title}</div>
+        <div id="plushlife-confirm-message" style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: "var(--pl-theme-ink)", whiteSpace: "pre-wrap" }}>{request.message}</div>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
-          <button ref={cancelButtonRef} type="button" onClick={() => answer(false)} style={{ minHeight: 44, padding: "8px 14px", borderRadius: 10, border: "1px solid #D8C8E2", background: "white", color: "#76558A", fontWeight: 900, cursor: "pointer" }}>{request.cancelLabel}</button>
+          <button ref={cancelButtonRef} type="button" onClick={() => answer(false)} style={{ minHeight: 44, padding: "8px 14px", borderRadius: 10, border: "1px solid var(--pl-theme-line)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink)", fontWeight: 900, cursor: "pointer" }}>{request.cancelLabel}</button>
           <button type="button" onClick={() => answer(true)} style={{ minHeight: 44, padding: "8px 14px", borderRadius: 10, border: 0, background: request.danger ? "#C45D74" : "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>{request.confirmLabel}</button>
         </div>
       </div>

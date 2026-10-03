@@ -94,7 +94,7 @@ export function ShapeMyDay({ rows, viewDone, toggle, dailyCheckIn, period }) {
       </div>
       <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
         <button type="button" onClick={startFocusTimer} style={{ flex: 1, minWidth: 150, minHeight: 44, padding: "9px 13px", borderRadius: 14, border: 0, background: "var(--pl-theme-accent)", color: "white", fontWeight: 900, fontSize: 13, cursor: "pointer" }}>⏱&nbsp; Start a gentle timer</button>
-        <button type="button" onClick={dismiss} style={{ minHeight: 44, padding: "9px 13px", borderRadius: 14, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white", color: "var(--pl-theme-muted,#8B6797)", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>Not today</button>
+        <button type="button" onClick={dismiss} style={{ minHeight: 44, padding: "9px 13px", borderRadius: 14, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-muted,#8B6797)", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>Not today</button>
       </div>
     </section>
   );

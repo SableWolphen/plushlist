@@ -49,18 +49,19 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
           <div className="pl-guardian-content">
           <CozyScene title="You choose who walks with you." subtitle="Support at your pace. You stay in control." />
           {canUseCaretakerDashboard && (
-            <div className="pl-guardian-person-switcher" role="tablist" aria-label="Guardian views">
-              <button type="button" role="tab" aria-selected={supportViewMode === "mine"} onClick={() => setSupportViewMode("mine")}>🧸 My Support</button>
-              <button type="button" role="tab" aria-selected={supportViewMode === "caretaker"} onClick={() => { setSupportViewMode("caretaker"); if (invitedSupportLinks[0]) loadSupportOwner(invitedSupportLinks[0].owner_user_id); }}>💛 People I Support</button>
+            <div className="pl-guardian-person-switcher" role="group" aria-label="Guardian views">
+              <button type="button" aria-pressed={supportViewMode === "mine"} onClick={() => setSupportViewMode("mine")}>🧸 My Support</button>
+              <button type="button" aria-pressed={supportViewMode === "caretaker"} onClick={() => { setSupportViewMode("caretaker"); if (invitedSupportLinks[0]) loadSupportOwner(invitedSupportLinks[0].owner_user_id); }}>💛 People I Support</button>
             </div>
           )}
-          <div className="pl-guardian-switcher" role="tablist" aria-label="Guardian sections">
-            {[["overview","💛","Overview"],["together","🤝","Together"],["support","💌","Support"]].map(([id,icon,label]) => (
-              <button key={id} type="button" role="tab" aria-selected={guardianArea === id} onClick={() => setGuardianArea(id)}>
+          <div className="pl-guardian-switcher" role="group" aria-label="Guardian sections">
+            {[["overview","💛",supportViewMode === "mine" ? "My Guardian" : "My Cozy"],["together","🤝","Together"],["support","💌",supportViewMode === "mine" ? "Sharing & privacy" : "Support"]].map(([id,icon,label]) => (
+              <button key={id} type="button" aria-pressed={guardianArea === id} onClick={() => setGuardianArea(id)}>
                 <span aria-hidden="true">{icon}</span><span>{label}</span>
               </button>
             ))}
           </div>
+          <p className="pl-guardian-intro" aria-live="polite">{guardianArea === "together" ? "Spend a little time together, at your pace." : guardianArea === "support" ? (supportViewMode === "mine" ? "Manage invitations, sharing permissions, and requests for support." : "Offer encouragement and practical help within the sharing they chose.") : (supportViewMode === "mine" ? "Your Cozy card and the people you choose to share it with." : "The Cozy card they have chosen to share with you.")}</p>
           {guardianArea === "overview" && (supportViewMode === "mine" ? <CozySharing links={ownedSupportLinks} /> : <SharedCozyCard client={client} ownerId={supportOwnerId} userId={user?.id} />)}
           {guardianArea === "together" && <TogetherCorner
             client={client}
@@ -203,7 +204,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                           ["reward","🎁","Reward",canAddSupportRewards],
                           ["task","🌱","Task",!!activeSupportLink?.can_suggest_tasks],
                         ].filter(([, , , enabled]) => enabled).map(([id, icon, label]) => (
-                          <button key={id} type="button" role="tab" aria-selected={supportAction === id} onClick={() => setSupportAction(id)}>
+                          <button key={id} type="button" aria-pressed={supportAction === id} onClick={() => setSupportAction(id)}>
                             <span aria-hidden="true">{icon}</span><span>{label}</span>
                           </button>
                         ))}
@@ -259,7 +260,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
               <div>
                 <p className="pl-guardian-intro">Invite someone you trust. You choose what they see, and can pause access anytime.</p>
                 <div className="pl-guardian-invite" style={{ display: "flex", gap: 7, marginTop: 10 }}>
-                  <input type="email" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="guardian@example.com" style={{ flex: 1, minWidth: 0, padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
+                  <input type="email" aria-label="Guardian email address" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="guardian@example.com" style={{ flex: 1, minWidth: 0, padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
                   <button onClick={inviteSupportAdult} style={{ padding: "8px 11px", borderRadius: 10, border: 0, background: "var(--pl-theme-accent,#4C8FE8)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800, cursor: "pointer" }}>Invite guardian</button>
                 </div>
                 <div style={{ marginTop: 9 }}>
@@ -288,8 +289,8 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                     const pending = !link.accepted_at;
                     const mutual = supportRelationships.find((rel) => rel.they_support_me_link_id === link.id && rel.i_support_them);
                     const statusLabel = pending ? "WAITING TO ACCEPT" : link.active ? "ACTIVE" : "PAUSED";
-                    const statusColor = pending ? "#A56D14" : link.active ? "#268A50" : "#75677D";
-                    const statusBg = pending ? "#FFF3D6" : link.active ? "#E9F8EF" : "#EEE9F1";
+                    const statusColor = "var(--pl-theme-ink)";
+                    const statusBg = "var(--pl-theme-surface)";
                     return (
                     <div key={link.id} style={{ padding: "10px", marginTop: 6, borderRadius: 10, background: link.active ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface-2)", border: "1px solid var(--pl-theme-line)" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
