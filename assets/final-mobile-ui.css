@@ -290,3 +290,116 @@ html[data-plushlife-color-mode="dark"] #main-content :is(
   border-color:var(--pl-theme-line)!important;
   color:var(--pl-theme-ink)!important;
 }
+
+/* Screenshot regression fix: keep the mobile Home hierarchy physically separated. */
+@media(max-width:520px){
+  #main-content#main-content[data-pl-world] .classic-sync-strip,
+  #main-content#main-content[data-pl-world] .plushlife-app-header{
+    display:none!important;
+  }
+
+  #main-content#main-content[data-pl-world] .pl-home-hero{
+    position:relative!important;
+    display:grid!important;
+    grid-template-columns:82px minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:14px!important;
+    min-height:132px!important;
+    padding:14px 16px!important;
+    overflow:hidden!important;
+    border-radius:20px!important;
+    box-sizing:border-box!important;
+  }
+  #main-content#main-content[data-pl-world] .pl-home-hero:before,
+  #main-content#main-content[data-pl-world] .pl-home-hero:after{
+    display:none!important;
+  }
+  #main-content#main-content[data-pl-world] .pl-home-hero>.pl-mascot-pat{
+    position:relative!important;
+    inset:auto!important;
+    width:82px!important;
+    height:82px!important;
+    min-width:82px!important;
+    min-height:82px!important;
+    margin:0!important;
+    transform:none!important;
+    overflow:hidden!important;
+    align-self:center!important;
+    justify-self:center!important;
+  }
+  #main-content#main-content[data-pl-world] .pl-home-hero>.pl-mascot-pat>span:first-child{
+    display:block!important;
+    width:82px!important;
+    height:82px!important;
+    overflow:hidden!important;
+  }
+  #main-content#main-content[data-pl-world] .pl-home-hero .pl-theme-scene.pl-mascot-focus{
+    position:relative!important;
+    width:82px!important;
+    height:82px!important;
+    max-width:82px!important;
+    overflow:hidden!important;
+    inset:auto!important;
+  }
+  #main-content#main-content[data-pl-world] .pl-home-hero .pl-mascot-focus .pl-scene-art{
+    max-width:none!important;
+  }
+  #main-content#main-content[data-pl-world] .pl-home-hero>.pl-companion-copy{
+    position:relative!important;
+    inset:auto!important;
+    min-width:0!important;
+    width:auto!important;
+    height:auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    align-items:flex-start!important;
+    overflow:hidden!important;
+  }
+  #main-content#main-content[data-pl-world] .pl-home-hero>.pl-companion-copy h2{
+    margin:0!important;
+    max-width:100%!important;
+    font-size:18px!important;
+    line-height:1.15!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+  }
+  #main-content#main-content[data-pl-world] .pl-home-hero>.pl-companion-copy p{
+    margin:5px 0 0!important;
+    max-width:100%!important;
+    font-size:12px!important;
+    line-height:1.35!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+  }
+  #main-content#main-content[data-pl-world] .pl-home-hero :is(.pl-companion-comfort,.pl-companion-reward,.pl-home-cozy-link){
+    display:none!important;
+  }
+
+  #main-content#main-content[data-pl-world] .pl-home-day-card{
+    margin-top:2px!important;
+  }
+  #main-content#main-content[data-pl-world] .pl-home-day-card .pl-list-row{
+    min-height:52px!important;
+    padding:10px 2px!important;
+  }
+
+  #main-content#main-content[data-pl-world] .pl-app-bottom-nav{
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+    bottom:max(10px,env(safe-area-inset-bottom))!important;
+  }
+  #main-content#main-content[data-pl-world] .pl-app-nav-btn{
+    height:58px!important;
+    min-height:58px!important;
+    max-height:58px!important;
+  }
+  #main-content#main-content[data-pl-world] :is(.pl-app-add-float,#plushlife-gentle-launcher){
+    display:none!important;
+  }
+  #main-content#main-content[data-pl-world] :is(.pl-home-shell,.pl-unified-page-shell){
+    padding-bottom:148px!important;
+  }
+}
