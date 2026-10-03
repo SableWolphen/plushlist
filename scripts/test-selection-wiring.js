@@ -17,6 +17,8 @@ const dailyCopy = read("assets/daily-checkin-copy.js");
 const checks = [
   [settings.includes("APPEARANCE_THEMES.map((theme)") && settings.includes("onClick={() => selectAppearanceTheme(theme.id)}"), "every ambient theme button calls selectAppearanceTheme"],
   [app.includes("const selectAppearanceTheme = (themeId) => {") && app.includes("setAppearanceTheme(validTheme);") && app.includes("plushlist-appearance-"), "theme selection updates state and persists per user"],
+  [app.includes('window.localStorage.setItem("plushlife:appearance-mode:v1", mode)') && app.includes('paletteWorld = preferences.dark_mode && !babyMode ? "twilight" : activeWorld'), "dark appearance persists without replacing the chosen theme world"],
+  [settings.includes('title="🌙 Dark appearance"') && settings.includes('updatePreference({ dark_mode: event.target.checked })'), "Personalize exposes a dark appearance toggle"],
   [app.includes("const updatePreference = (patch) => {") && app.includes("savePreferences(next);"), "preference toggles persist through savePreferences"],
 
   [settings.includes('onClick={() => updatePreference({ nickname_style: "baby", dino_theme: false })}'), "Baby Mode toggle updates nickname style"],
@@ -37,8 +39,8 @@ const checks = [
   [!entitlements.includes("./assets/dark-mode.js"), "dark-mode runtime is not loaded"],
   [!billing.includes("./assets/checkin-theme-mode.js") && !billing.includes("./assets/unified-dark-home.js"), "dark check-in and dark-home detectors are not loaded"],
   [!billing.includes("./assets/checkin-theme.js") && !billing.includes("./assets/checkin-comfort-prompt.js") && !billing.includes("./assets/daily-checkin-copy.js") && !billing.includes("./assets/experience-system-v2.js") && !billing.includes("./assets/nursery-layout-unifier.js"), "runtime must not mutate React-owned DOM after selections"],
-  [fastStart.includes('dataset.plushlifeColorMode = "light"') && fastStart.includes('style.colorScheme = "light"'), "startup forces light mode before React"],
-  [checkinTheme.includes('function detectScheme(){\n    return "light";'), "check-in styling is pinned to light palettes"],
+  [fastStart.includes('startupMode = savedAppearance === "light" || savedAppearance === "dark" ? savedAppearance : "dark"') && fastStart.includes('dataset.plushlifeColorMode = startupMode'), "startup restores saved appearance and falls back to dark"],
+  [checkinTheme.includes('dataset.plushlifeColorMode === "dark" ? "dark" : "light"'), "check-in styling follows the active appearance"],
 
   [(dailyCopy.match(/today\?"/g) || []).length >= 10 && dailyCopy.includes("const normal=[") && dailyCopy.includes("const baby=["), "daily check-in has a large rotating question bank for regular and Nursery wording"],
   [dailyCopy.includes("86400000") && dailyCopy.includes("getFullYear()") && dailyCopy.includes("getDate()"), "daily check-in rotation data remains available without owning React DOM"],
