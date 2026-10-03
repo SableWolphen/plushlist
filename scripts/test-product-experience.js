@@ -12,6 +12,7 @@ const states = read("assets/state-polish.js");
 const entitlements = read("assets/entitlements.js");
 const app = read("src/app-source.jsx");
 const today = read("src/components/today-panel-core.jsx");
+const widgetSettings = read("src/components/widget-settings.jsx");
 const failures = [];
 const expect = (value, message) => { if (!value) failures.push(message); };
 
@@ -39,9 +40,11 @@ expect(app.includes('className="classic-sync-strip"') && app.includes('borderRad
 expect(app.includes('className="pl-home-checkin-row"') && app.includes('flex: "0 1 auto"'), "Home check-in stays a compact status pill instead of a full-width card");
 expect(today.includes("pl-home-today-row") && !today.includes("Start a gentle timer"), "Today header stays compact and does not duplicate the large timer control");
 expect(today.includes("min-height:128px!important") && today.includes("pl-home-cozy-link"), "mobile Home hero stays compact while Cozy Space remains reachable");
+expect(today.includes('border: "1px solid var(--pl-theme-line)"') && today.includes('background: C.card'), "Home cards use theme surfaces instead of light-only card chrome");
+expect(widgetSettings.includes("var(--pl-theme-surface-2)") && widgetSettings.includes("var(--pl-theme-bg)") && widgetSettings.includes("var(--pl-theme-accent-2)"), "widget preview follows the active app theme");
 
 if (failures.length) {
   console.error("Product experience checks failed:\n- " + failures.join("\n- "));
   process.exit(1);
 }
-console.log(`Product experience checks passed (${25} checks).`);
+console.log(`Product experience checks passed (${27} checks).`);
