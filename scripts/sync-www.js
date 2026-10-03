@@ -250,8 +250,8 @@ function rewriteVendorSupabaseIntegrity(content) {
   );
 }
 
-function prepareHtml(file, source) {
-  let content = source;
+function prepareHtml(file, source, buildSha) {
+  let content = source.replaceAll("__PLUSHLIFE_BUILD_SHA__", buildSha);
   for (const [from, to] of CDN_REPLACEMENTS) content = content.split(from).join(to);
   content = rewriteVendorSupabaseIntegrity(content);
 
@@ -303,6 +303,7 @@ function formatKb(bytes) {
 }
 
 async function main() {
+  const buildSha = String(process.env.GITHUB_SHA || process.env.PLUSHLIFE_GIT_SHA || process.env.WORKERS_CI_COMMIT_SHA || process.env.CF_PAGES_COMMIT_SHA || "local").trim() || "local";
   rimraf(WWW);
   fs.mkdirSync(VENDOR, { recursive: true });
 
@@ -313,7 +314,7 @@ async function main() {
     const destination = path.join(WWW, file);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     if (/\.html$/.test(file)) {
-      const content = prepareHtml(file, fs.readFileSync(src, "utf8"));
+      const content = prepareHtml(file, fs.readFileSync(src, "utf8"), buildSha);
       fs.writeFileSync(destination, content);
     } else {
       fs.copyFileSync(src, destination);
@@ -330,7 +331,6 @@ async function main() {
 
   // Stamp the generated artifact so every host / packaged app can be verified
   // against the exact source commit that produced it.
-  const buildSha = String(process.env.GITHUB_SHA || process.env.PLUSHLIFE_GIT_SHA || process.env.WORKERS_CI_COMMIT_SHA || process.env.CF_PAGES_COMMIT_SHA || "local").trim() || "local";
   fs.writeFileSync(
     path.join(WWW, "build-info.json"),
     JSON.stringify({

@@ -30,7 +30,7 @@ const gates = [
   [backButtonSource.includes('backButton') && backButtonSource.includes('KeyboardEvent("keydown", { key: "Escape" })'), "Android back button continues to close app panels"],
   [serviceWorker.includes("fetch") && serviceWorker.includes("cache"), "offline service-worker path remains present"],
   [syncWww.includes("check-bundle-budget") || read("package.json").includes("check-bundle-budget.js"), "bundle budget remains enforced"],
-  [mainActivity.includes("UpdateAvailability.UPDATE_AVAILABLE") && mainActivity.includes("PlushLife update available") && mainActivity.includes("Update now"), "older Android builds show an update prompt only when Google Play reports a newer version"],
+  [mainActivity.includes("UpdateAvailability.UPDATE_AVAILABLE") && mainActivity.includes("AppUpdateType.FLEXIBLE") && mainActivity.includes("completeUpdate()"), "older Android builds automatically start and finish Google Play in-app updates"],
   [mainActivity.includes("postDelayed") && mainActivity.includes("2500") && !mainActivity.includes("checkForUpdate();\n        super.onCreate"), "in-app update checking stays out of the fragile Activity startup path"],
 ];
 

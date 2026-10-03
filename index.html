@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#b75acb">
+<meta name="plushlife-build" content="__PLUSHLIFE_BUILD_SHA__">
 <meta name="color-scheme" content="light only">
 <meta name="description" content="PlushLife is a gentle, private care and routine companion that adapts to the day you are actually having.">
 <!-- Interim Content Security Policy: allows the app's own inline scripts and
@@ -63,29 +64,51 @@
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+
     navigator.serviceWorker.register("./service-worker.js").then((registration) => {
-      // Tell the app when a newer build is ready so it can offer a refresh
-      // instead of silently running the old version in a long-lived tab.
-      const notifyUpdateReady = () => {
-        window.__plushlifeSwUpdateReady = true;
-        window.dispatchEvent(new CustomEvent("plushlife:sw-update-ready"));
+      const activateWaitingWorker = () => {
+        const waiting = registration.waiting;
+        if (waiting) waiting.postMessage({ type: "SKIP_WAITING" });
       };
-      if (registration.waiting) notifyUpdateReady();
+
+      if (registration.waiting) activateWaitingWorker();
       registration.addEventListener("updatefound", () => {
         const incoming = registration.installing;
         if (!incoming) return;
         incoming.addEventListener("statechange", () => {
-          if (incoming.state === "installed" && navigator.serviceWorker.controller) notifyUpdateReady();
+          if (incoming.state === "installed" && navigator.serviceWorker.controller) {
+            activateWaitingWorker();
+          }
         });
       });
-      // Long-lived tabs never re-check on their own; nudge on visibility.
+
+      // Keep long-lived installs current without making users hunt for refresh.
+      const UPDATE_CHECK_MS = 15 * 60 * 1000;
+      const currentBuild = document.querySelector('meta[name="plushlife-build"]')?.content || "";
       let lastUpdateCheck = 0;
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState !== "visible") return;
+      const checkForUpdate = () => {
         const now = Date.now();
-        if (now - lastUpdateCheck < 3600000) return;
+        if (now - lastUpdateCheck < UPDATE_CHECK_MS) return;
         lastUpdateCheck = now;
-        registration.update().catch(() => {});
+        registration.update().then(activateWaitingWorker).catch(() => {});
+        if (currentBuild && currentBuild !== "__PLUSHLIFE_BUILD_SHA__" && currentBuild !== "local") {
+          fetch("./build-info.json?update=" + now, { cache: "no-store" })
+            .then((response) => response.ok ? response.json() : null)
+            .then((live) => {
+              if (live?.gitSha && live.gitSha !== currentBuild) window.location.reload();
+            })
+            .catch(() => {});
+        }
+      };
+      window.setInterval(checkForUpdate, UPDATE_CHECK_MS);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") checkForUpdate();
       });
     }).catch(() => {});
   });
