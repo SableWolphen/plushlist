@@ -7172,13 +7172,10 @@ function GlowUpTracker() {
         style={{ maxWidth: 640, margin: "0 auto", touchAction: "pan-y" }}>
         {/* Classic top sync strip from the original PlushList shell. */}
         {user ? (
-          <div className="classic-sync-strip" style={{ marginBottom: 14, padding: "9px 12px", borderRadius: 13, background: "rgba(255,255,255,.72)", border: "1px solid rgba(233,211,239,.95)", fontSize: 12.5, color: "#7E678D", boxShadow: "0 4px 14px rgba(88,55,105,.04)" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-              <span style={{ fontWeight: 800 }}>{!online || syncStatus === "offline" ? "📡 Offline" : syncStatus === "error" ? "⚠️ Sync failed" : syncStatus === "syncing" ? "☁️ Syncing…" : "☁️ Synced"}</span>
-              <button type="button" disabled={syncStatus === "syncing"} onClick={syncNow} style={{ minHeight: 36, padding: "5px 11px", borderRadius: 9, border: "1px solid #D7B8E2", background: "rgba(255,255,255,.94)", color: "#8D5CA5", fontWeight: 900, fontSize: 11, cursor: syncStatus === "syncing" ? "wait" : "pointer", boxShadow: "0 2px 7px rgba(91,56,109,.06)" }}>
-                {syncStatus === "error" ? "Retry" : "Sync now"}
-              </button>
-            </div>
+          <div className="classic-sync-strip" style={{ marginBottom: 7, display: "flex", justifyContent: "flex-end" }}>
+            <button type="button" disabled={syncStatus === "syncing"} onClick={syncNow} aria-label={syncStatus === "error" ? "Retry sync" : "Sync now"} title="Sync now" style={{ minHeight: 32, padding: "5px 9px", borderRadius: 999, border: "1px solid rgba(233,211,239,.9)", background: "rgba(255,255,255,.66)", color: "#7E678D", fontWeight: 850, fontSize: 10.5, cursor: syncStatus === "syncing" ? "wait" : "pointer", boxShadow: "0 2px 8px rgba(88,55,105,.035)" }}>
+              {!online || syncStatus === "offline" ? "📡 Offline" : syncStatus === "error" ? "⚠️ Retry sync" : syncStatus === "syncing" ? "☁️ Syncing…" : "☁️ Synced"}
+            </button>
           </div>
         ) : (
           <div style={{ marginBottom: 14, padding: "9px 12px", borderRadius: 12, background: "rgba(255,255,255,0.55)", border: "1px solid #F3D9EC", fontSize: 12.5, color: "#8C6B9E" }}>
@@ -7195,23 +7192,23 @@ function GlowUpTracker() {
             {signInMessage && <div style={{ marginTop: 8, fontSize: 12, color: "#8C6B9E" }}>{signInMessage}</div>}
           </div>
         )}
-        {<div className="plushlife-app-header" style={{ marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+        {<div className="plushlife-app-header" style={{ marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 9 }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "#B08AC7", fontWeight: 700 }}>{dinoTheme ? "ONE LITTLE STEP AT A TIME 🦕✨" : "ONE LITTLE STEP AT A TIME ✨"}</div>
-            <h1 className="app-title" style={{ fontSize: 28, margin: "6px 0 0", fontWeight: 800, letterSpacing: "-0.02em" }}>
+            <div style={{ fontSize: 9.5, letterSpacing: "0.16em", color: "#B08AC7", fontWeight: 800 }}>{dinoTheme ? "ONE LITTLE STEP AT A TIME 🦕✨" : "ONE LITTLE STEP AT A TIME ✨"}</div>
+            <h1 className="app-title" style={{ fontSize: 24, margin: "3px 0 0", fontWeight: 850, letterSpacing: "-0.02em", lineHeight: 1.05 }}>
               {user ? personalPlushlistTitle : "PlushLife"} 💜
             </h1>
           </div>
           {user && <div style={{ display: "flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
-            <button type="button" className="pl-header-add-button" aria-label="Add a task" onClick={() => { setCollectionOpen(false); openTaskManager(); }}>＋</button>
+            <button type="button" className="pl-header-add-button" aria-label="Add a task" title="Add a task" onClick={() => { setCollectionOpen(false); openTaskManager(); }}>＋</button>
             <button type="button" className={`pl-header-mascot-button ${headerMascotDancing ? "is-dancing" : ""}`} onClick={() => {
               setHeaderMascotDancing(false);
               window.requestAnimationFrame(() => {
                 setHeaderMascotDancing(true);
                 window.setTimeout(() => setHeaderMascotDancing(false), 900);
               });
-            }} aria-label="Tap your plush to make it dance" title="Tap me!" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 46, height: 46, padding: 0, borderRadius: "50%", border: "1px solid #E9C96E", background: "#FFFDF4", cursor: "pointer", overflow: "hidden" }}>
-              <PlushMascot theme={activeWorld} outfit={selectedOutfit} size={46} mood="happy" activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
+            }} aria-label="Tap your plush to make it dance" title="Tap me!" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 42, height: 42, padding: 0, borderRadius: "50%", border: "1px solid #E9C96E", background: "#FFFDF4", cursor: "pointer", overflow: "hidden" }}>
+              <PlushMascot theme={activeWorld} outfit={selectedOutfit} size={42} mood="happy" activityDays={activityDaysTotal} darkMode={preferences.dark_mode} />
             </button>
           </div>}
         </div>}
@@ -7279,12 +7276,12 @@ function GlowUpTracker() {
         </div>}
 
         {dashboard === "today" && (
-          <div style={{ display: "flex", alignItems: "center", gap: 7, margin: "-2px 0 14px", flexWrap: "wrap" }}>
-            <button id="plushlife-checkin-trigger" type="button" onClick={() => { setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); }} style={{ flex: "1 1 220px", display: "flex", alignItems: "center", gap: 7, padding: "9px 11px", borderRadius: 11, border: "1px solid #E6D4F2", background: "#FFFFFFC7", color: "#76558A", fontWeight: 800, fontSize: 12, cursor: "pointer", textAlign: "left" }}>
+          <div className="pl-home-checkin-row" style={{ display: "flex", alignItems: "center", gap: 6, margin: "0 0 8px", flexWrap: "wrap" }}>
+            <button id="plushlife-checkin-trigger" type="button" onClick={() => { setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); }} style={{ flex: "0 1 auto", maxWidth: "100%", display: "flex", alignItems: "center", gap: 6, padding: "6px 9px", minHeight: 34, borderRadius: 999, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.7)", color: "#76558A", fontWeight: 850, fontSize: 11, cursor: "pointer", textAlign: "left" }}>
               {babyMode ? "🍼 How does my little self feel?" : "🎯"} {dailyCheckIn.mood ? `${CHECKIN_MOODS.find(([value]) => value === dailyCheckIn.mood)?.[1] || ""} ${CHECKIN_MOODS.find(([value]) => value === dailyCheckIn.mood)?.[2] || ""}` : dailyCheckIn.capacity ? { very_low: "😞 Very low", low: "😕 Low", usual: "🙂 Usual", high: "💪 High" }[dailyCheckIn.capacity] : babyMode ? "Tell me when you are ready" : "Check in"}
               {dailyCheckIn.day_type ? ` · ${DAY_TYPES.find(([value]) => value === dailyCheckIn.day_type)?.[2] || dailyCheckIn.day_type}` : ""}
               {dailyCheckIn.custom_essentials?.length ? ` · ${dailyCheckIn.custom_essentials.length} picked` : ""}
-              <span style={{ marginLeft: "auto", color: "#A65DC1", fontSize: 11 }}>{babyMode ? "Tell me" : "Change"}</span>
+              <span style={{ marginLeft: 5, color: "#A65DC1", fontSize: 10 }}>{babyMode ? "Tell me" : "Change"}</span>
             </button>
             {dailyCheckIn.day_type && dailyCheckIn.day_type !== "full" && <button type="button" onClick={() => selectDayType("full")} style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#76558A", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>Full Day</button>}
             {rows.some((row) => row.sourceTask?.schedule_type === "once" && !viewDone[row.key]) && ["soft", "tiny", "recovery"].includes(dailyCheckIn.day_type) && <button type="button" onClick={moveAllOneTimeTasksToTomorrow} style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #E7C98D", background: "#FFFBF2", color: "#9A6918", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>Move extras</button>}
