@@ -8,11 +8,11 @@ import { RecommendationSettings } from "./recommendation-settings.jsx";
 const LazyAppearanceThemePicker = React.lazy(() => import("./appearance-theme-picker.jsx").then((module) => ({ default: module.AppearanceThemePicker })));
 
 const cardStyle = {
-  background: "linear-gradient(145deg,rgba(255,253,254,.96),rgba(249,243,255,.92))",
+  background: "var(--pl-theme-surface)",
   border: "1px solid var(--pl-theme-line,#E9DDF6)",
   borderRadius: 20,
   overflow: "hidden",
-  boxShadow: "0 8px 22px rgba(87,53,104,.06), inset 0 1px 0 rgba(255,255,255,.9)",
+  boxShadow: "0 8px 22px rgba(25,18,31,.10)",
 };
 
 const inputStyle = {
