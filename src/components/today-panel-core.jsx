@@ -106,7 +106,7 @@ function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, 
       <header className="pl-page-heading pl-home-today-row">
         <h1>Today</h1>
         <div className="pl-home-today-actions">
-          <button type="button" className="pl-heading-date" onClick={() => goToDashboard?.("week")} aria-label="Open Calendar"><span aria-hidden="true">📅</span> {formatDate(period?.date)}</button>
+          <button type="button" className="pl-heading-date" onClick={() => goToDashboard?.("week")} aria-label="Open Calendar"><span aria-hidden="true">📅</span> Calendar · {formatDate(period?.date)}</button>
           <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen?.(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
         </div>
       </header>
