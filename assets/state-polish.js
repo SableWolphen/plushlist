@@ -30,16 +30,6 @@
   `;
   document.head.appendChild(style);
 
-  function markStates(root) {
-    const scope = root?.querySelectorAll ? root : document;
-    scope.querySelectorAll('[role="status"],[role="alert"],[aria-busy="true"]').forEach((node) => {
-      if (!(node instanceof HTMLElement)) return;
-      node.dataset.plushlifeState = node.getAttribute("role") || "busy";
-    });
-  }
-  markStates(document);
-  const observer = new MutationObserver((records) => {
-    records.forEach((record) => record.addedNodes.forEach((node) => { if (node.nodeType === 1) markStates(node); }));
-  });
-  observer.observe(document.documentElement, { childList:true, subtree:true });
+  // State styling uses role/aria selectors directly. No DOM observer is needed:
+  // React remains the owner of rendered state and this layer is CSS-only.
 })();
