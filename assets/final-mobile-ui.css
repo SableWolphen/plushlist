@@ -105,6 +105,13 @@
     margin-inline:auto!important;
     padding-bottom:142px!important;
   }
+  #main-content .pl-inline-tool{
+    width:100%!important;
+    max-width:358px!important;
+    margin:0 auto!important;
+    padding-bottom:148px!important;
+    box-sizing:border-box!important;
+  }
 
   #main-content .pl-unified-page-hero{
     position:relative!important;
