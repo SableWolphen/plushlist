@@ -50,7 +50,7 @@ export function WeekPanel({ open, openTodayJournal, weekCardIndex, setWeekCardIn
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
             <div>
               <div style={{ fontSize: 11, letterSpacing: "0.14em", fontWeight: 900, color: "var(--pl-theme-muted,#8E4EAA)" }}>📅 PROGRESS CALENDAR</div>
-              <div style={{ marginTop: 4, fontSize: 11.5, color: "var(--pl-theme-muted,#8C6B9E)" }}>Darker means more completed that day. A purple dot means you saved a private reflection — tap a past day to open it.</div>
+              <div style={{ marginTop: 4, fontSize: 11.5, color: "var(--pl-theme-muted,#8C6B9E)" }}>Darker means more completed that day. 📖 means a PlushJournal post is saved. Tap any past day to open its Day Replay.</div>
             </div>
             <div style={{ display: "flex", gap: 5 }}>
               <button type="button" aria-label="Previous month" onClick={() => {
@@ -88,11 +88,10 @@ export function WeekPanel({ open, openTodayJournal, weekCardIndex, setWeekCardIn
                 if (isFutureDate) return;
                 setSelectedProgressDate(date);
                 setDayViewDate(date);
+                setWeekCardIndex(2);
                 if (date === period.date) setActive("daily");
-                if (hasReflection && !checkIn) setReflectionViewerDate(date);
-                if (checkIn) setCheckInViewerDate(date);
               }} style={{ position: "relative", minHeight: 34, borderRadius: 9, border: isSelectedDate ? "2px solid #A65DC1" : "1px solid #E9DDEC", background: bg, color: textColor, fontWeight: 800, cursor: isFutureDate ? "not-allowed" : "pointer", opacity: isFutureDate ? 0.5 : 1 }}>
-                {isRestDay ? "🌴" : number}{moodEmoji && <span aria-label={`Feeling ${moodOption[2]}`} style={{ position: "absolute", left: 3, bottom: 1, fontSize: 11 }}>{moodEmoji}</span>}{hasReflection && <span aria-label="Reflection saved" style={{ position: "absolute", right: 4, bottom: 2, color: textColor === "#FFFFFF" ? "#FFFFFF" : "#A65DC1", fontSize: 12 }}>•</span>}
+                {isRestDay ? "🌴" : number}{moodEmoji && <span aria-label={`Feeling ${moodOption[2]}`} style={{ position: "absolute", left: 3, bottom: 1, fontSize: 11 }}>{moodEmoji}</span>}{hasReflection && <span aria-label="PlushJournal post saved" title="PlushJournal post saved" style={{ position: "absolute", right: 2, top: 1, fontSize: 9, lineHeight: 1 }}>📖</span>}
               </button>;
             })}
           </div>
