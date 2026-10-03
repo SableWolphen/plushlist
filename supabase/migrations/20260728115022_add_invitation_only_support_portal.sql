@@ -1,0 +1,5 @@
+-- Historical migration marker.
+-- This migration version is already applied to the live PlushList Supabase project.
+-- The original SQL was created in Supabase before the repository's migration history
+-- was synchronized. Keep this file so GitHub/Supabase branch previews can reconcile
+-- migration history without re-running or guessing at already-applied schema changes.

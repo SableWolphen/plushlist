@@ -19,7 +19,7 @@ original seed-data statements removed before being committed here: the live
 versions seeded one real account's personal task list and copied personal
 progress data between two real accounts. Only the schema and RLS policies
 are preserved for those two files, with a comment marking what was redacted
-and why. Every other file in this folder matches the live migration exactly.
+and why. Four historical versions (`20260728115022`, `20260728115306`, `20260916132709`, and `20260916133351`) were applied in Supabase before their SQL was preserved in Git. They are represented here by explicit no-op history markers so the repository and production migration version lists stay reconcilable without guessing at or re-running already-applied schema/RLS changes. All other preserved historical SQL matches the corresponding live migration.
 
 Going forward, prefer running new schema changes through the Supabase CLI's
 migration workflow (or committing the SQL here before/alongside applying it
