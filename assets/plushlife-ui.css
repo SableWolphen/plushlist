@@ -1594,3 +1594,7 @@
     font-size:8.8px!important;
   }
 }
+
+/* Keep the full Today task list stable without post-render DOM/style injection. */
+[data-plushlife-home-overflow="true"] { display:flex !important; }
+#plushlife-home-more { display:none !important; }

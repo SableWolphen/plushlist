@@ -42,15 +42,3 @@
   }
   return { PLUSH_PLANS, PLUSH_FEATURE_FLAGS, CORE_FREE_FEATURES, PLAN_FEATURES, hasPlushFeature };
 });
-
-(function keepFullTodayTaskListStable() {
-  if (typeof window === "undefined" || typeof document === "undefined") return;
-  const installOverride = () => {
-    if (document.getElementById("plushlife-full-task-list-override")) return;
-    const style = document.createElement("style");
-    style.id = "plushlife-full-task-list-override";
-    style.textContent = `[data-plushlife-home-overflow="true"] { display:flex!important; } #plushlife-home-more { display:none!important; }`;
-    document.head.appendChild(style);
-  };
-  if (document.readyState === "loading") window.addEventListener("load", installOverride, { once: true }); else installOverride();
-})();

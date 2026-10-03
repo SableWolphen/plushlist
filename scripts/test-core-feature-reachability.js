@@ -20,6 +20,16 @@ const taskPrivacy = read("supabase/migrations/20261002001500_tighten_task_privac
 
 expect(app.includes("setCheckInPopupOpen(true)") && app.includes("dailyCheckInLoaded"), "daily check-in can still surface automatically");
 expect(app.includes("plushlife:daily-journal-prompt") && app.includes("setDailyJournalPromptOpen(true)"), "daily journal prompt remains automatic");
+const checkInPriority = app.indexOf('if (checkInPopupOpen) return "check_in"');
+const journalPriority = app.indexOf('if (dailyJournalPromptOpen) return "daily_journal"');
+const weeklyPriority = app.indexOf('if (weeklyKickoffOpen) return "weekly_kickoff"');
+const changelogPriority = app.indexOf('preferences.last_seen_changelog !== CURRENT_CHANGELOG_VERSION');
+expect(checkInPriority >= 0 && journalPriority > checkInPriority && weeklyPriority > journalPriority && changelogPriority > weeklyPriority, "daily check-in and journal stay ahead of weekly/release-note popups");
+const journalPromptEffectStart = app.indexOf('const storageKey = `plushlife:daily-journal-prompt:');
+const journalPromptTimer = app.indexOf('const timer = window.setTimeout(() => {', journalPromptEffectStart);
+const prematureShownWrite = app.indexOf('window.localStorage.setItem(storageKey, "shown")', journalPromptEffectStart);
+expect(journalPromptEffectStart >= 0 && journalPromptTimer > journalPromptEffectStart && (prematureShownWrite < 0 || prematureShownWrite > journalPromptTimer), "daily journal is not marked shown before it can become visible");
+expect(app.includes('onVisible={() => { if (!dailyJournalPromptOpen || !user?.id) return;') && app.includes('window.localStorage.setItem(`plushlife:daily-journal-prompt:'), "daily journal records shown state from the visible panel");
 expect(weekly.includes("scheduleMaybeShow") && weekly.includes("maybeShow();") && weekly.includes("plushlife:weekly-reflection-request"), "weekly reflection remains automatic and manually reachable");
 expect(app.includes("setWeeklyKickoffOpen(true)") && app.includes("setWeeklyKickoffNote(entries.find"), "weekly kickoff remains reachable and loads last week's intention");
 
