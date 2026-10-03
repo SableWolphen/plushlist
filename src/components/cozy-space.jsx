@@ -121,18 +121,27 @@ export function CozySharing({ links = [] }) {
   const saved = cozy?.cards.find(card=>card.link_id===link?.id);
   React.useEffect(()=>{setSelected(Object.keys(saved?.card?.fields || {}));setMemories((saved?.card?.memories || []).map(m=>m.id));},[link?.id,saved]);
   if (!cozy) return null;
-  return <section style={box} aria-label="Cozy Card sharing"><h3 style={{margin:0,fontSize:18}}>💌 My Cozy Card</h3><p style={{fontSize:14,lineHeight:1.5}}>Share a little guide with one Guardian. You choose every detail; your private feedback stays yours.</p>
-    {!link ? <p style={{fontSize:14}}>Accept a Guardian connection below to share a card.</p> : <>
-      <label style={{display:'grid',gap:6,fontSize:14}}>Choose a Guardian<select style={input} value={link.id} onChange={event=>setLinkId(event.target.value)}>{accepted.map(l=><option key={l.id} value={l.id}>{l.label || 'Guardian'} · {l.caregiver_email}</option>)}</select></label>
-      <p role="status" style={{fontSize:13,fontWeight:800}}>{saved?.active ? 'Card sharing on' : 'Card sharing paused / private'}</p>
-      <details><summary style={{minHeight:44,display:'flex',alignItems:'center',fontWeight:800,cursor:'pointer'}}>Choose what to share</summary><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:4}}>{COZY_FIELDS.filter(([key])=>cozy.profile.fields[key]).map(([key,label])=><label key={key} style={{minHeight:44,display:'flex',alignItems:'center',gap:8,fontSize:14}}><input type="checkbox" checked={selected.includes(key)} onChange={event=>setSelected(keys=>event.target.checked?[...keys,key]:keys.filter(k=>k!==key))}/>{label}</label>)}</div>
-      <strong style={{fontSize:14}}>Choose little wins to share</strong>{cozy.profile.memories.map(m=><label key={m.id} style={{minHeight:44,display:'flex',alignItems:'center',gap:8,fontSize:14}}><input type="checkbox" checked={memories.includes(m.id)} onChange={event=>setMemories(ids=>event.target.checked?[...ids,m.id]:ids.filter(id=>id!==m.id))}/>{m.text}</label>)}</details>
-      <div style={{...box,background:'var(--pl-theme-surface-2)'}}><strong>What this Guardian will see</strong><CardContents card={cozyCardSnapshot(cozy.profile,selected,memories)}/></div>
-      <div style={flex}><button type="button" style={button} disabled={cozy.busy || cozy.status!=='ready'} onClick={()=>cozy.publish(link,selected,memories)}>Publish these choices</button><button type="button" style={button} disabled={cozy.busy || !saved?.active} onClick={()=>cozy.publish(link,[],[],false)}>Pause card sharing</button></div>
-      <p style={{fontSize:13,color:'var(--pl-theme-muted)'}}>Pausing this card keeps other sharing permissions unchanged. Use the Guardian’s pause control below to pause the whole connection.</p>
-    </>}
-    {cozy.status==='error' && <button style={button} type="button" onClick={cozy.retry}>Retry loading my card</button>}
-    {cozy.message && <p role="status" style={{fontSize:14}}>{cozy.message}</p>}
+  return <section style={box} aria-label="Cozy Card sharing">
+    <details className="pl-cozy-sharing-details">
+      <summary style={{minHeight:52,display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,cursor:'pointer',listStyle:'none'}}>
+        <span><strong style={{display:'block',fontSize:17}}>💌 My Cozy Card</strong><span style={{display:'block',marginTop:3,fontSize:13,color:'var(--pl-theme-muted)'}}>{saved?.active ? 'Sharing with your chosen Guardian' : 'Private until you publish'}</span></span>
+        <span aria-hidden="true" style={{fontSize:18,color:'var(--pl-theme-muted)'}}>›</span>
+      </summary>
+      <div style={{paddingTop:10,borderTop:'1px solid var(--pl-theme-line)'}}>
+        <p style={{margin:'0 0 12px',fontSize:14,lineHeight:1.5}}>Share a little guide with one Guardian. You choose every detail; your private feedback stays yours.</p>
+        {!link ? <p style={{fontSize:14}}>Accept a Guardian connection below to share a card.</p> : <>
+          <label style={{display:'grid',gap:6,fontSize:14}}>Choose a Guardian<select style={input} value={link.id} onChange={event=>setLinkId(event.target.value)}>{accepted.map(l=><option key={l.id} value={l.id}>{l.label || 'Guardian'} · {l.caregiver_email}</option>)}</select></label>
+          <p role="status" style={{fontSize:13,fontWeight:800}}>{saved?.active ? 'Card sharing on' : 'Card sharing paused / private'}</p>
+          <details><summary style={{minHeight:44,display:'flex',alignItems:'center',fontWeight:800,cursor:'pointer'}}>Choose what to share</summary><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:4}}>{COZY_FIELDS.filter(([key])=>cozy.profile.fields[key]).map(([key,label])=><label key={key} style={{minHeight:44,display:'flex',alignItems:'center',gap:8,fontSize:14}}><input type="checkbox" checked={selected.includes(key)} onChange={event=>setSelected(keys=>event.target.checked?[...keys,key]:keys.filter(k=>k!==key))}/>{label}</label>)}</div>
+          <strong style={{fontSize:14}}>Choose little wins to share</strong>{cozy.profile.memories.map(m=><label key={m.id} style={{minHeight:44,display:'flex',alignItems:'center',gap:8,fontSize:14}}><input type="checkbox" checked={memories.includes(m.id)} onChange={event=>setMemories(ids=>event.target.checked?[...ids,m.id]:ids.filter(id=>id!==m.id))}/>{m.text}</label>)}</details>
+          <div style={{...box,marginTop:10,background:'var(--pl-theme-surface-2)'}}><strong>What this Guardian will see</strong><CardContents card={cozyCardSnapshot(cozy.profile,selected,memories)}/></div>
+          <div style={flex}><button type="button" style={button} disabled={cozy.busy || cozy.status!=='ready'} onClick={()=>cozy.publish(link,selected,memories)}>Publish these choices</button><button type="button" style={button} disabled={cozy.busy || !saved?.active} onClick={()=>cozy.publish(link,[],[],false)}>Pause card sharing</button></div>
+          <p style={{fontSize:13,color:'var(--pl-theme-muted)'}}>Pausing this card keeps other sharing permissions unchanged. Use the Guardian’s pause control below to pause the whole connection.</p>
+        </>}
+        {cozy.status==='error' && <button style={button} type="button" onClick={cozy.retry}>Retry loading my card</button>}
+        {cozy.message && <p role="status" style={{fontSize:14}}>{cozy.message}</p>}
+      </div>
+    </details>
   </section>;
 }
 
