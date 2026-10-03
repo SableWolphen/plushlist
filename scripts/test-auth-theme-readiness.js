@@ -44,9 +44,9 @@ expect(manifest.includes('android:scheme="plushlife"'), "Android manifest must r
 expect(manifest.includes('android:host="login-callback"'), "Android manifest must register the login-callback host");
 expect(manifest.includes('android.intent.category.BROWSABLE'), "Android auth callback must be browsable");
 
-expect(!entitlements.includes('./assets/dark-mode.js'), "Main app runtime must not load dark-mode.js");
-expect(fastStart.includes('dataset.plushlifeColorMode = "light"'), "Startup must force light appearance before React mounts");
-expect(fastStart.includes('removeItem(APPEARANCE_STORAGE_KEY)'), "Legacy dark appearance preference must be cleared");
+expect(!entitlements.includes('./assets/dark-mode.js'), "Main app runtime must not load a separate dark-mode runtime");
+expect(fastStart.includes('dataset.plushlifeColorMode = startupMode'), "Startup must restore the saved appearance before React mounts");
+expect(fastStart.includes('startupMode = savedAppearance === "light" || savedAppearance === "dark" ? savedAppearance : "dark"'), "Startup must fall back to dark when no appearance is stored");
 
 expect(googleSetup.includes('plushlife://login-callback'), "Google setup docs must name the Android redirect URI");
 expect(googleSetup.includes('https://sablewolphen.github.io/plushlist/**'), "Google setup docs must name the web redirect allow-list entry");
