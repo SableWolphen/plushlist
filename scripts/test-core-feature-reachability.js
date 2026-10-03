@@ -15,6 +15,8 @@ const guardian = read("src/components/guardian-panel.jsx");
 const together = read("src/components/together-corner.jsx");
 const rewards = read("src/components/rewards-panel.jsx");
 const settings = read("src/components/organized-settings.jsx");
+const calendarMonth = read("src/components/week-panel-existing.jsx");
+const calendarDay = read("src/components/week-panel-purpose.jsx");
 const weekly = read("assets/weekly-reflection-window.js");
 const taskPrivacy = read("supabase/migrations/20261002001500_tighten_task_privacy.sql");
 
@@ -36,6 +38,9 @@ expect(app.includes("setWeeklyKickoffOpen(true)") && app.includes("setWeeklyKick
 expect(today.includes("<GentleDayTools") && today.includes("<ShapeMyDay") && today.includes("<EveningGratitude") && today.includes("<CozyDaily"), "Today retains adaptive day, evening journal, and cozy tools");
 expect(today.includes("<RestDayCard") && today.includes("<HabitStudio compact"), "Today retains rest-day and habit tools");
 expect(todayCore.includes("A little more, when you want it") && todayCore.includes("Reflect on my week · optional"), "Today keeps secondary tools reachable without crowding Home");
+expect(todayCore.includes("Calendar · {formatDate(period?.date)}") && todayCore.includes('goToDashboard?.("week")'), "Home exposes Calendar as a clearly labeled destination");
+expect(calendarMonth.includes("setWeekCardIndex(2)") && calendarMonth.includes("📖 means a PlushJournal post is saved"), "month calendar opens past dates in Day Replay and marks saved journal posts");
+expect(calendarDay.includes("PlushJournal from this day") && calendarDay.includes("Check-in from this day") && calendarDay.includes("setReflectionViewerDate(date)") && calendarDay.includes("setCheckInViewerDate(date)"), "Day Replay exposes past journal posts and check-ins independently");
 
 expect(tasks.includes("🗑️ Delete") && tasks.includes("startEditingTask") && tasks.includes("QuickCapture"), "Tasks retains add, edit, and delete");
 expect(tasks.includes("importTasksFromText") && tasks.includes("starterPack"), "Tasks retains import and starter-pack paths");
