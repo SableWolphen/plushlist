@@ -1598,3 +1598,305 @@
 /* Keep the full Today task list stable without post-render DOM/style injection. */
 [data-plushlife-home-overflow="true"] { display:flex !important; }
 #plushlife-home-more { display:none !important; }
+
+/* 2026-10-03 calm mobile cleanup: screenshot-driven hierarchy lock. */
+/*
+   The Android references showed three recurring problems: overlapping Home
+   hero content, nested cards inside nested cards, and content disappearing
+   underneath the floating navigation. Keep this final pass intentionally
+   small and structural: one rhythm, flatter surfaces, and guaranteed nav
+   clearance across every theme.
+*/
+#main-content .pl-home-shell,
+#main-content .pl-unified-page-shell{
+  padding-bottom:118px!important;
+}
+#main-content [data-plushlife-home-stack],
+#main-content .pl-unified-page-content,
+#main-content .pl-growth-shell,
+#main-content .pl-care-shell{
+  gap:12px!important;
+}
+#main-content :is(
+  [data-plushlife-home-stack]>section:not(.pl-home-hero),
+  .pl-growth-card,.pl-growth-stat,.pl-growth-weekbar,
+  .pl-care-card,.pl-care-memory,.pl-care-tonight,.pl-care-reco,.pl-care-extra,
+  .pl-calendar-cozy>section,.pl-calendar-cozy>div,.pl-calendar-cozy details
+){
+  border-radius:18px!important;
+  box-shadow:0 5px 16px color-mix(in srgb,var(--pl-theme-accent) 6%,transparent)!important;
+}
+#main-content .pl-app-bottom-nav{
+  left:12px!important;
+  right:12px!important;
+  bottom:max(10px,env(safe-area-inset-bottom))!important;
+  height:68px!important;
+  min-height:68px!important;
+  max-height:68px!important;
+  padding:5px 8px!important;
+  border-radius:22px!important;
+}
+#main-content .pl-app-nav-btn{
+  height:56px!important;
+  min-height:56px!important;
+  max-height:56px!important;
+  border-radius:16px!important;
+  font-size:10px!important;
+}
+#main-content .pl-app-nav-btn .ico{font-size:20px!important}
+#main-content .pl-app-nav-add{
+  width:46px!important;height:46px!important;min-height:46px!important;max-height:46px!important;
+  margin-top:-7px!important;
+}
+
+/* Flatten the Home task/schedule card so it reads as one object, not three. */
+#main-content .pl-home-day-card{
+  overflow:hidden;
+  border:1px solid var(--pl-theme-line)!important;
+  border-radius:20px!important;
+  background:var(--pl-theme-surface)!important;
+  box-shadow:0 5px 16px color-mix(in srgb,var(--pl-theme-accent) 6%,transparent)!important;
+  padding:14px!important;
+}
+#main-content .pl-home-day-card .pl-agenda-next{
+  width:100%!important;
+  min-height:52px!important;
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:3px!important;
+  align-items:start!important;
+  text-align:left!important;
+  padding:0 0 12px!important;
+  border:0!important;
+  border-bottom:1px solid var(--pl-theme-line)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:var(--pl-theme-ink)!important;
+  box-shadow:none!important;
+}
+#main-content .pl-home-day-card .pl-agenda-next span{
+  color:var(--pl-theme-muted)!important;
+  font-size:12px!important;
+}
+#main-content .pl-home-day-card .pl-agenda-next strong{
+  color:var(--pl-theme-ink)!important;
+  font-size:15px!important;
+  line-height:1.35!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+#main-content .pl-agenda-tabs{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:8px!important;
+  margin:12px 0 2px!important;
+  padding:0!important;
+  background:transparent!important;
+}
+#main-content .pl-agenda-tabs button{
+  min-height:46px!important;
+  border:1px solid var(--pl-theme-line)!important;
+  border-radius:14px!important;
+  background:var(--pl-theme-surface-2)!important;
+  color:var(--pl-theme-ink)!important;
+  font-weight:850!important;
+}
+#main-content .pl-agenda-tabs button[aria-selected="true"]{
+  border-color:color-mix(in srgb,var(--pl-theme-accent) 44%,var(--pl-theme-line))!important;
+  background:color-mix(in srgb,var(--pl-theme-accent) 12%,var(--pl-theme-surface))!important;
+}
+#main-content .pl-home-day-card .pl-agenda-panels section{
+  margin:0!important;
+  padding:10px 0 0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+#main-content .pl-home-day-card .pl-list{
+  margin-top:8px!important;
+  gap:0!important;
+}
+#main-content .pl-home-day-card .pl-list-row{
+  min-height:50px!important;
+  padding:8px 2px!important;
+  border:0!important;
+  border-bottom:1px solid color-mix(in srgb,var(--pl-theme-line) 70%,transparent)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+#main-content .pl-home-day-card .pl-list-row:last-child{border-bottom:0!important}
+
+/* Guardian/Cozy should feel like a relationship space, not a settings console. */
+#main-content .pl-guardian-switcher{
+  gap:7px!important;
+  padding:4px!important;
+  border:1px solid var(--pl-theme-line)!important;
+  border-radius:18px!important;
+  background:var(--pl-theme-surface-2)!important;
+}
+#main-content .pl-guardian-switcher button{
+  min-height:46px!important;
+  border:0!important;
+  border-radius:14px!important;
+  background:transparent!important;
+  color:var(--pl-theme-muted)!important;
+  box-shadow:none!important;
+}
+#main-content .pl-guardian-switcher button[aria-pressed="true"]{
+  background:var(--pl-theme-surface)!important;
+  color:var(--pl-theme-ink)!important;
+  box-shadow:0 3px 10px color-mix(in srgb,var(--pl-theme-accent) 8%,transparent)!important;
+}
+#main-content .pl-guardian-permissions{
+  margin-top:10px!important;
+  padding:0!important;
+  border-top:1px solid var(--pl-theme-line)!important;
+}
+#main-content .pl-guardian-permissions>summary{
+  min-height:48px!important;
+  display:flex!important;
+  align-items:center!important;
+  color:var(--pl-theme-ink)!important;
+  font-weight:850!important;
+}
+
+/* Typography that was too small in the screenshot is promoted to readable UI text. */
+#main-content .pl-growth-stat .label,
+#main-content .pl-growth-note span,
+#main-content .pl-care-copy{
+  font-size:11.5px!important;
+  line-height:1.4!important;
+}
+#main-content .pl-growth-stat .value{font-size:22px!important}
+
+/* Mobile: keep the mascot and copy in separate lanes and remove tertiary hero copy. */
+@media(max-width:520px){
+  #main-content .pl-home-shell,
+  #main-content .pl-unified-page-shell{
+    padding-bottom:128px!important;
+  }
+  #main-content .pl-app-bottom-nav{
+    left:12px!important;right:12px!important;
+    height:68px!important;min-height:68px!important;max-height:68px!important;
+  }
+  #main-content .pl-home-hero{
+    min-height:158px!important;
+    margin:0!important;
+    border-radius:20px!important;
+  }
+  #main-content.dino-theme .pl-home-hero,
+  #main-content.baby-mode .pl-home-hero,
+  #main-content.simple-mode .pl-home-hero{
+    min-height:158px!important;
+  }
+  #main-content .pl-home-hero:after{display:none!important}
+  #main-content .pl-home-hero>.pl-mascot-pat{
+    left:14px!important;
+    top:50%!important;
+    bottom:auto!important;
+    width:80px!important;height:80px!important;
+    min-width:80px!important;min-height:80px!important;
+    transform:translateY(-50%)!important;
+  }
+  #main-content .pl-home-hero>.pl-mascot-pat .plush-mascot{
+    width:74px!important;height:74px!important;
+  }
+  #main-content .pl-home-hero>.pl-companion-copy{
+    left:106px!important;
+    right:14px!important;
+    top:16px!important;
+    bottom:16px!important;
+    justify-content:center!important;
+  }
+  #main-content .pl-home-hero>.pl-companion-copy h2{
+    margin:0!important;
+    font-size:19px!important;
+    line-height:1.14!important;
+    display:-webkit-box!important;
+    -webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;
+    overflow:hidden!important;
+  }
+  #main-content .pl-home-hero>.pl-companion-copy p{
+    margin:6px 0 0!important;
+    font-size:12px!important;
+    line-height:1.35!important;
+    display:-webkit-box!important;
+    -webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;
+    overflow:hidden!important;
+  }
+  #main-content .pl-home-hero .pl-companion-comfort,
+  #main-content .pl-home-hero .pl-companion-reward,
+  #main-content .pl-home-hero .pl-home-cozy-link{
+    display:none!important;
+  }
+  #main-content .pl-home-today-row{
+    padding:4px 2px!important;
+  }
+  #main-content .pl-home-today-row h1{font-size:30px!important}
+  #main-content .pl-home-today-row .pl-heading-date{
+    max-width:190px!important;
+    min-height:40px!important;
+    font-size:11px!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+  #main-content .pl-home-today-row .pl-heading-gear{
+    width:40px!important;height:40px!important;
+    min-width:40px!important;min-height:40px!important;
+  }
+  #main-content .pl-home-day-card{padding:12px!important}
+  #main-content .pl-home-day-card .pl-section-topline{
+    gap:8px!important;
+  }
+  #main-content .pl-home-day-card .pl-kicker{
+    font-size:12px!important;
+  }
+  #main-content .pl-home-day-card .pl-row-text{
+    font-size:14px!important;
+    line-height:1.35!important;
+  }
+  #main-content .pl-home-day-card .pl-check{
+    width:28px!important;height:28px!important;
+    flex:0 0 28px!important;
+  }
+  #main-content .pl-growth-stats{gap:8px!important}
+  #main-content .pl-growth-stat{
+    min-height:104px!important;
+    padding:12px 7px!important;
+  }
+  #main-content .pl-growth-stat .label{font-size:11px!important}
+  #main-content .pl-care-feelings{gap:8px!important}
+  #main-content .pl-care-feeling{
+    min-height:76px!important;
+    padding:10px!important;
+  }
+  #main-content .pl-care-feeling-icon{
+    width:38px!important;height:38px!important;
+  }
+}
+
+/* Twilight should actually be dark throughout utility surfaces. */
+html[data-plushlife-color-mode="dark"] #main-content :is(
+  .pl-home-day-card,
+  .pl-app-bottom-nav,
+  .pl-tool-panel,
+  .pl-tool-header
+){
+  background:var(--pl-theme-surface)!important;
+  border-color:var(--pl-theme-line)!important;
+  color:var(--pl-theme-ink)!important;
+}
+
+@media(min-width:760px){
+  #main-content .pl-app-bottom-nav{
+    left:50%!important;
+    right:auto!important;
+    width:min(660px,calc(100% - 24px))!important;
+    transform:translateX(-50%)!important;
+  }
+}
