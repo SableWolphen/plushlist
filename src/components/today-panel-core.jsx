@@ -458,6 +458,69 @@ export function TodayPanel({
           .pl-home-shortcuts{gap:4px}.pl-shortcut{min-height:44px;padding:6px 7px;border-radius:11px}.pl-shortcut-icon{font-size:16px}.pl-shortcut-title{font-size:10px}.pl-shortcut-sub{font-size:8.2px}.pl-shortcut-arrow{font-size:13px}
           .pl-noticed{min-height:38px;border-radius:11px;padding:6px 7px}.pl-noticed-icon{font-size:16px}.pl-noticed-title{font-size:9.5px}.pl-noticed-copy{font-size:8.5px}.pl-noticed-arrow{font-size:13px}
           [data-plushlife-compact-card="next-step"],[data-plushlife-home-schedule-preview="true"],.pl-home-shell>section[aria-label="Tasks today"],.pl-home-shell>section[aria-label="Habits today"]{border-radius:13px!important;box-shadow:0 3px 10px rgba(86,54,98,.035)!important}
+
+          /* Structural mobile layout: no absolute child can cross into another lane. */
+          .pl-home-hero{
+            display:grid!important;
+            grid-template-columns:78px minmax(0,1fr)!important;
+            align-items:center!important;
+            gap:12px!important;
+            min-height:124px!important;
+            padding:14px!important;
+            box-sizing:border-box!important;
+            overflow:hidden!important;
+          }
+          .pl-home-hero>.pl-mascot-pat{
+            position:relative!important;
+            inset:auto!important;
+            width:78px!important;height:78px!important;
+            min-width:78px!important;min-height:78px!important;
+            margin:0!important;
+            transform:none!important;
+            align-self:center!important;
+            justify-self:center!important;
+            overflow:hidden!important;
+          }
+          .pl-home-hero>.pl-mascot-pat>span{
+            display:grid!important;
+            place-items:center!important;
+            width:78px!important;height:78px!important;
+            overflow:hidden!important;
+          }
+          .pl-home-hero>.pl-mascot-pat .plush-mascot{
+            width:72px!important;height:72px!important;
+            max-width:72px!important;max-height:72px!important;
+          }
+          .pl-home-hero>.pl-companion-copy{
+            position:relative!important;
+            inset:auto!important;
+            width:auto!important;height:auto!important;
+            min-width:0!important;
+            max-width:100%!important;
+            overflow:hidden!important;
+            display:flex!important;
+            flex-direction:column!important;
+            align-items:flex-start!important;
+            justify-content:center!important;
+          }
+          .pl-home-hero>.pl-companion-copy h2{
+            margin:0!important;
+            max-width:100%!important;
+            font-size:17px!important;
+            line-height:1.18!important;
+            overflow-wrap:anywhere!important;
+          }
+          .pl-home-hero>.pl-companion-copy p{
+            margin:5px 0 0!important;
+            max-width:100%!important;
+            font-size:11px!important;
+            line-height:1.35!important;
+            overflow-wrap:anywhere!important;
+          }
+          .pl-home-hero :is(.pl-companion-comfort,.pl-companion-reward,.pl-home-cozy-link){
+            display:none!important;
+          }
+          .pl-home-hero:before,.pl-home-hero:after{display:none!important}
         }
       `}</style>
 
