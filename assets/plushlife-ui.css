@@ -1891,3 +1891,12 @@ html[data-plushlife-color-mode="dark"] #main-content :is(
   border-color:var(--pl-theme-line)!important;
   color:var(--pl-theme-ink)!important;
 }
+
+@media(min-width:760px){
+  #main-content .pl-app-bottom-nav{
+    left:50%!important;
+    right:auto!important;
+    width:min(660px,calc(100% - 24px))!important;
+    transform:translateX(-50%)!important;
+  }
+}
