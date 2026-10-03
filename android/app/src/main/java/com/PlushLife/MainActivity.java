@@ -10,7 +10,6 @@ import androidx.activity.SystemBarStyle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AlertDialog;
 import com.getcapacitor.BridgeActivity;
 import com.google.android.play.core.appupdate.AppUpdateManager;
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
@@ -28,11 +27,10 @@ public class MainActivity extends BridgeActivity {
 
     private AppUpdateManager appUpdateManager;
     private InstallStateUpdatedListener installStateListener;
-    private AlertDialog updateReadyDialog;
-    private AlertDialog updateAvailableDialog;
     private final Handler updateHandler = new Handler(Looper.getMainLooper());
+    private static final long UPDATE_CHECK_INTERVAL_MS = 4L * 60L * 60L * 1000L;
     private boolean updateCheckScheduled = false;
-    private boolean updateCheckedThisSession = false;
+    private long lastUpdateCheckAt = 0L;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -89,93 +87,81 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void checkForUpdate() {
-        if (updateCheckedThisSession || isFinishing() || isDestroyed()) return;
-        updateCheckedThisSession = true;
+        if (isFinishing() || isDestroyed()) return;
+        final long now = System.currentTimeMillis();
+        if (now - lastUpdateCheckAt < UPDATE_CHECK_INTERVAL_MS) return;
+        lastUpdateCheckAt = now;
 
         try {
-            appUpdateManager = AppUpdateManagerFactory.create(this);
+            if (appUpdateManager == null) appUpdateManager = AppUpdateManagerFactory.create(this);
             appUpdateManager.getAppUpdateInfo()
                 .addOnSuccessListener(info -> {
-                    // Play only reports UPDATE_AVAILABLE when the installed
-                    // versionCode is older than a version available to this
-                    // user on Google Play. Current-version users see nothing.
+                    if (info.installStatus() == InstallStatus.DOWNLOADED) {
+                        updateHandler.postDelayed(() -> {
+                            try { appUpdateManager.completeUpdate(); } catch (Throwable ignored) {}
+                        }, 500);
+                        return;
+                    }
+                    if (info.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
+                        && info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                        launchPlayUpdate(info, AppUpdateType.IMMEDIATE);
+                        return;
+                    }
                     if (info.updateAvailability() != UpdateAvailability.UPDATE_AVAILABLE) return;
-                    showUpdateAvailableDialog(info);
+
+                    if (info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                        launchPlayUpdate(info, AppUpdateType.FLEXIBLE);
+                    } else if (info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                        launchPlayUpdate(info, AppUpdateType.IMMEDIATE);
+                    }
                 })
-                .addOnFailureListener(error -> {
-                    // Update checks are nonessential. Never let Play services
-                    // availability or an OEM issue affect normal app startup.
-                    appUpdateManager = null;
-                });
+                .addOnFailureListener(error -> appUpdateManager = null);
         } catch (Throwable ignored) {
             appUpdateManager = null;
         }
     }
 
-    private void showUpdateAvailableDialog(com.google.android.play.core.appupdate.AppUpdateInfo info) {
-        if (isFinishing() || isDestroyed()) return;
-        if (updateAvailableDialog != null && updateAvailableDialog.isShowing()) return;
-
-        final boolean immediateAllowed = info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE);
-        final boolean flexibleAllowed = info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE);
-        if (!immediateAllowed && !flexibleAllowed) return;
-
-        updateAvailableDialog = new AlertDialog.Builder(this)
-            .setTitle("PlushLife update available")
-            .setMessage("A newer version of PlushLife is ready. Update now to get the latest fixes and improvements.")
-            .setPositiveButton("Update now", (dialog, which) -> {
-                try {
-                    if (immediateAllowed) {
-                        appUpdateManager.startUpdateFlowForResult(
-                            info,
-                            updateLauncher,
-                            AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build());
-                    } else {
-                        installStateListener = state -> {
-                            if (state.installStatus() == InstallStatus.DOWNLOADED) {
-                                promptToRestartForUpdate();
-                            }
-                        };
-                        appUpdateManager.registerListener(installStateListener);
-                        appUpdateManager.startUpdateFlowForResult(
-                            info,
-                            updateLauncher,
-                            AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build());
+    private void launchPlayUpdate(com.google.android.play.core.appupdate.AppUpdateInfo info, int updateType) {
+        if (isFinishing() || isDestroyed() || appUpdateManager == null) return;
+        try {
+            if (updateType == AppUpdateType.FLEXIBLE && installStateListener == null) {
+                installStateListener = state -> {
+                    if (state.installStatus() == InstallStatus.DOWNLOADED) {
+                        updateHandler.postDelayed(() -> {
+                            try { appUpdateManager.completeUpdate(); } catch (Throwable ignored) {}
+                        }, 500);
                     }
-                } catch (Throwable ignored) {
-                    // If Play cannot launch its UI, leave the app usable.
-                }
-            })
-            .setNegativeButton("Later", null)
-            .setCancelable(true)
-            .create();
-        updateAvailableDialog.setOnDismissListener(dialog -> updateAvailableDialog = null);
-        updateAvailableDialog.show();
-    }
-
-    private void promptToRestartForUpdate() {
-        if (isFinishing() || isDestroyed()) return;
-        if (updateReadyDialog != null && updateReadyDialog.isShowing()) return;
-
-        updateReadyDialog = new AlertDialog.Builder(this)
-            .setTitle("Update ready")
-            .setMessage("A newer version of PlushLife has finished downloading.")
-            .setPositiveButton("Restart now", (dialog, which) -> appUpdateManager.completeUpdate())
-            .setNegativeButton("Later", null)
-            .setCancelable(true)
-            .create();
-        updateReadyDialog.setOnDismissListener(dialog -> updateReadyDialog = null);
-        updateReadyDialog.show();
+                };
+                appUpdateManager.registerListener(installStateListener);
+            }
+            appUpdateManager.startUpdateFlowForResult(
+                info,
+                updateLauncher,
+                AppUpdateOptions.newBuilder(updateType).build());
+        } catch (Throwable ignored) {
+            // Google Play owns the confirmation UI; update failure must never block startup.
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (!updateCheckScheduled && !updateCheckedThisSession) {
+        if (!updateCheckScheduled) {
             updateCheckScheduled = true;
             updateHandler.postDelayed(() -> {
                 updateCheckScheduled = false;
-                checkForUpdate();
+                if (lastUpdateCheckAt == 0L || System.currentTimeMillis() - lastUpdateCheckAt >= UPDATE_CHECK_INTERVAL_MS) {
+                    checkForUpdate();
+                } else if (appUpdateManager != null) {
+                    appUpdateManager.getAppUpdateInfo().addOnSuccessListener(info -> {
+                        if (info.installStatus() == InstallStatus.DOWNLOADED) {
+                            try { appUpdateManager.completeUpdate(); } catch (Throwable ignored) {}
+                        } else if (info.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
+                            && info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                            launchPlayUpdate(info, AppUpdateType.IMMEDIATE);
+                        }
+                    });
+                }
             }, 2500);
         }
     }
@@ -214,14 +200,6 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onDestroy() {
         updateHandler.removeCallbacksAndMessages(null);
-        if (updateAvailableDialog != null) {
-            updateAvailableDialog.dismiss();
-            updateAvailableDialog = null;
-        }
-        if (updateReadyDialog != null) {
-            updateReadyDialog.dismiss();
-            updateReadyDialog = null;
-        }
         if (appUpdateManager != null && installStateListener != null) {
             appUpdateManager.unregisterListener(installStateListener);
         }
