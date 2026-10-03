@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
-      PLAY_TRACK: ${{ vars.PLAY_AUTO_TRACK || 'production' }}
+      PLAY_TRACK: ${{ vars.PLAY_AUTO_TRACK || 'alpha' }}
     steps:
       - name: Checkout the exact green commit
         uses: actions/checkout@v6
