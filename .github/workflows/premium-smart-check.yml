@@ -1,4 +1,6 @@
-name: Premium smart validation
+name: Historical personalization branch validation
+
+# Full tests for the original feature branch; production release also runs npm test.
 
 on:
   workflow_dispatch: {}

@@ -72,7 +72,7 @@ export function CompletedTaskArea({ rows = [], viewDone = {}, lingerKeys = [], t
           <div style={{ display: "grid", gap: 6, marginTop: 8 }}>
             {completed.map((task) => (
               <button key={task.key} type="button" onClick={() => toggle?.(task.key)} aria-label={`Undo completion for ${task.label}`} style={{ minHeight: 44, display: "grid", gridTemplateColumns: "24px minmax(0,1fr) auto", gap: 8, alignItems: "center", padding: compact ? "8px 9px" : "9px 10px", borderRadius: 11, border: "1px solid var(--pl-theme-line)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink)", textAlign: "left", cursor: "pointer" }}>
-                <span aria-hidden="true" style={{ width: 22, height: 22, borderRadius: "50%", background: "var(--pl-theme-surface)", color: "white", display: "grid", placeItems: "center", fontWeight: 900 }}>✓</span>
+                <span aria-hidden="true" style={{ width: 22, height: 22, borderRadius: "50%", background: "var(--pl-theme-surface)", color: "var(--pl-theme-on-accent)", display: "grid", placeItems: "center", fontWeight: 900 }}>✓</span>
                 <span style={{ minWidth: 0, fontSize: 12.5, lineHeight: 1.35, fontWeight: 800, textDecoration: "line-through", overflow: "hidden", textOverflow: "ellipsis" }}>{task.label}</span>
                 <span aria-hidden="true" style={{ fontSize: 10.5, fontWeight: 900, color: "var(--pl-theme-ink)" }}>Undo</span>
               </button>

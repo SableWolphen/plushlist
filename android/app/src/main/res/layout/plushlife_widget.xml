@@ -35,7 +35,7 @@
                 android:text="PLUSH LIFE · TODAY"
                 android:textAllCaps="false"
                 android:textColor="#8C5B9A"
-                android:textSize="10sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -51,8 +51,9 @@
 
         <TextView
             android:id="@+id/widget_refresh"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:contentDescription="Refresh PlushLife widget"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:gravity="center"
             android:text="↻"
             android:textColor="#8B5A9C"
@@ -93,8 +94,8 @@
 
         <TextView
             android:id="@+id/widget_task_check_0"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:gravity="center"
             android:text="○"
             android:textColor="#B34BC7"
@@ -129,8 +130,8 @@
 
         <TextView
             android:id="@+id/widget_task_check_1"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:gravity="center"
             android:text="○"
             android:textColor="#B34BC7"
@@ -165,8 +166,8 @@
 
         <TextView
             android:id="@+id/widget_task_check_2"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:gravity="center"
             android:text="○"
             android:textColor="#B34BC7"
@@ -194,7 +195,7 @@
         android:gravity="center"
         android:text="Tap ○ to check it off · tiny steps count ✨"
         android:textColor="#8A708F"
-        android:textSize="9sp"
+        android:textSize="11sp"
         android:textStyle="bold" />
 
     <LinearLayout
@@ -220,7 +221,7 @@
                 android:layout_height="wrap_content"
                 android:text="Today 0%"
                 android:textColor="#725981"
-                android:textSize="10sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <ProgressBar
@@ -249,7 +250,7 @@
                 android:layout_height="wrap_content"
                 android:text="Week 0%"
                 android:textColor="#725981"
-                android:textSize="10sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <ProgressBar

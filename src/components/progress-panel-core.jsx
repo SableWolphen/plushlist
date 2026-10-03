@@ -31,10 +31,10 @@ function HabitGardenCard({ habitTasks, habitGardenGrowthPct, habitGardenTotalChe
       return <div key={habit.task_key} style={{ padding: "10px 11px", borderRadius: 12, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
           <div style={{ fontSize: 13.5, fontWeight: 900, color: "var(--pl-theme-ink,#4F405C)" }}>{habit.habitType === "build" ? "🌱" : "🍂"} {habit.task}</div>
-          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}><span style={{ padding: "3px 7px", borderRadius: 999, background: habit.habitType === "build" ? "#EAF4FF" : "#FFF3E4", color: habit.habitType === "build" ? "#4C8FE8" : "#B4761D", fontSize: 9.5, fontWeight: 800 }}>{habit.habitType === "build" ? "Building" : "Breaking"}</span>{habit.stats.current > 0 && (preferences?.gentle_streaks ? <span style={{ padding: "4px 7px", borderRadius: 999, background: "var(--pl-theme-surface-2,#E7F7EF)", color: "var(--pl-theme-ink,#318C79)", fontSize: 10.5, fontWeight: 900 }}>💚 {habit.stats.current} caring {habit.stats.current === 1 ? "day" : "days"}</span> : <span style={{ padding: "4px 7px", borderRadius: 999, background: "var(--pl-theme-surface-2,#FFF3E4)", color: "var(--pl-theme-ink,#B4761D)", fontSize: 10.5, fontWeight: 900 }}>🔥 {habit.stats.current}-day streak</span>)}<span style={{ padding: "4px 7px", borderRadius: 999, background: "var(--pl-theme-surface-2,#E7F7EF)", color: "var(--pl-theme-ink,#318C79)", fontSize: 10.5, fontWeight: 900 }}>{habit.stats.total} total</span></div>
+          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}><span style={{ padding: "3px 7px", borderRadius: 999, background: habit.habitType === "build" ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface-2)", color: habit.habitType === "build" ? "var(--pl-theme-ink)" : "var(--pl-theme-ink)", fontSize: 9.5, fontWeight: 800 }}>{habit.habitType === "build" ? "Building" : "Breaking"}</span>{habit.stats.current > 0 && (preferences?.gentle_streaks ? <span style={{ padding: "4px 7px", borderRadius: 999, background: "var(--pl-theme-surface-2,#E7F7EF)", color: "var(--pl-theme-ink,#318C79)", fontSize: 10.5, fontWeight: 900 }}>💚 {habit.stats.current} caring {habit.stats.current === 1 ? "day" : "days"}</span> : <span style={{ padding: "4px 7px", borderRadius: 999, background: "var(--pl-theme-surface-2,#FFF3E4)", color: "var(--pl-theme-ink,#B4761D)", fontSize: 10.5, fontWeight: 900 }}>🔥 {habit.stats.current}-day streak</span>)}<span style={{ padding: "4px 7px", borderRadius: 999, background: "var(--pl-theme-surface-2,#E7F7EF)", color: "var(--pl-theme-ink,#318C79)", fontSize: 10.5, fontWeight: 900 }}>{habit.stats.total} total</span></div>
         </div>
         {habit.stats.earnedReward && <div style={{ marginTop: 5, fontSize: 11.5, color: "var(--pl-theme-muted,#6B7E78)" }}>Earned: {habit.stats.earnedReward.badge} {habit.stats.earnedReward.label}</div>}
-        {habit.stats.nextReward && <><div style={{ marginTop: 6, fontSize: 11.5, color: "var(--pl-theme-muted,#6B7E78)" }}>Next: {habit.stats.nextReward.badge} {habit.stats.nextReward.label} — {remaining === 0 ? "almost there!" : `${remaining} more ${remaining === 1 ? "check-in" : "check-ins"}`}</div><div style={{ height: 6, background: "var(--pl-theme-surface-2,#E2F3EA)", borderRadius: 4, marginTop: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${progressPct}%`, background: habit.habitType === "build" ? "#4C8FE8" : "#D4A017", borderRadius: 4 }} /></div></>}
+        {habit.stats.nextReward && <><div style={{ marginTop: 6, fontSize: 11.5, color: "var(--pl-theme-muted,#6B7E78)" }}>Next: {habit.stats.nextReward.badge} {habit.stats.nextReward.label} — {remaining === 0 ? "almost there!" : `${remaining} more ${remaining === 1 ? "check-in" : "check-ins"}`}</div><div style={{ height: 6, background: "var(--pl-theme-surface-2,#E2F3EA)", borderRadius: 4, marginTop: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${progressPct}%`, background: habit.habitType === "build" ? "var(--pl-theme-accent)" : "var(--pl-theme-accent)", borderRadius: 4 }} /></div></>}
       </div>;
     })}</div>}
   </div>;
@@ -48,7 +48,7 @@ export function ProgressPanel({ open, user, progressView, setProgressView, weekl
         <div role="tablist" aria-label="Progress views" className="pl-growth-tabs" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 6, marginBottom: 12, padding: 5, borderRadius: 14, background: "var(--pl-theme-surface-2,#F3E8FA)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
           {[{ id: "overview", label: "PlushView", icon: "📊" }, { id: "story", label: "PlushStory", icon: "📖" }, { id: "areas", label: "PlushSpaces", icon: "🪴" }].map((item) => {
             const selected = progressView === item.id;
-            return <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} style={{ minWidth: 0, padding: "8px 4px", borderRadius: 10, border: selected ? "2px solid #A65DC1" : "1px solid transparent", background: selected ? "white" : "transparent", color: selected ? "#7A3D93" : "#8C6B9E", fontSize: 10.5, fontWeight: 900, cursor: "pointer" }}><span aria-hidden="true">{item.icon}</span><span>{item.label}</span></button>;
+            return <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} style={{ minWidth: 0, padding: "8px 4px", borderRadius: 10, border: selected ? "2px solid var(--pl-theme-line)" : "1px solid transparent", background: selected ? "var(--pl-theme-surface)" : "transparent", color: selected ? "var(--pl-theme-ink)" : "var(--pl-theme-ink)", fontSize: 10.5, fontWeight: 900, cursor: "pointer" }}><span aria-hidden="true">{item.icon}</span><span>{item.label}</span></button>;
           })}
         </div>
         {progressView === "overview" && <>
@@ -60,8 +60,8 @@ export function ProgressPanel({ open, user, progressView, setProgressView, weekl
           <div style={{ marginTop: 4, fontSize: 10.5, color: "var(--pl-theme-muted,#927C9E)" }}>Weekly planning and Sunday follow-up · separate from PlushJournal</div>
           {weeklyIntentionEditing ? <>
             <textarea value={weeklyIntentionDraft} onChange={(event) => setWeeklyIntentionDraft(event.target.value)} maxLength={2000} placeholder="Example: Be a little gentler with myself this week." style={{ width: "100%", boxSizing: "border-box", minHeight: 70, marginTop: 8, padding: 10, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)", resize: "vertical" }} />
-            <div style={{ display: "flex", gap: 7, marginTop: 7 }}><button type="button" onClick={saveWeeklyIntentionEdit} style={{ padding: "7px 11px", borderRadius: 9, border: 0, background: "var(--pl-theme-accent,#A65DC1)", color: "white", fontWeight: 900, cursor: "pointer" }}>Save</button><button type="button" onClick={() => setWeeklyIntentionEditing(false)} style={{ padding: "7px 11px", borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-muted,#8E4EAA)", fontWeight: 800, cursor: "pointer" }}>Cancel</button></div>
-          </> : <div style={{ marginTop: 5, fontSize: 12.5, lineHeight: 1.45, color: weeklyIntentionText ? "#6B5A7D" : "#9A86A7" }}>{weeklyIntentionText || "Optional—a simple direction for the week, not another task."}</div>}
+            <div style={{ display: "flex", gap: 7, marginTop: 7 }}><button type="button" onClick={saveWeeklyIntentionEdit} style={{ padding: "7px 11px", borderRadius: 9, border: 0, background: "var(--pl-theme-accent,#A65DC1)", color: "var(--pl-theme-on-accent)", fontWeight: 900, cursor: "pointer" }}>Save</button><button type="button" onClick={() => setWeeklyIntentionEditing(false)} style={{ padding: "7px 11px", borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-muted,#8E4EAA)", fontWeight: 800, cursor: "pointer" }}>Cancel</button></div>
+          </> : <div style={{ marginTop: 5, fontSize: 12.5, lineHeight: 1.45, color: weeklyIntentionText ? "var(--pl-theme-ink)" : "var(--pl-theme-ink)" }}>{weeklyIntentionText || "Optional—a simple direction for the week, not another task."}</div>}
         </div>
         {!hasWeeklyActivity && <div style={{ marginBottom: 18, padding: "16px 15px", borderRadius: 18, background: "var(--pl-theme-surface-2,#F2FFFB)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 8px 24px rgba(77,132,112,.08)", color: "var(--pl-theme-ink,#55766E)" }}>
           <div style={{ fontSize: 10.5, letterSpacing: "0.12em", fontWeight: 900, color: "var(--pl-theme-ink,#318C79)" }}>🌱 YOUR PROGRESS CAN START TINY</div>
@@ -81,7 +81,7 @@ export function ProgressPanel({ open, user, progressView, setProgressView, weekl
             <div style={{ height: "100%", width: `${weeklyOverallPct}%`, borderRadius: 8, background: "var(--pl-theme-accent)", transition: "width .4s ease" }} />
           </div>
           {weekOverWeekDelta !== null && (
-            <div style={{ marginTop: 8, fontSize: 12, fontWeight: 700, color: weekOverWeekDelta > 0 ? "#318C79" : weekOverWeekDelta < 0 ? "#8C6B9E" : "#8C6B9E" }}>
+            <div style={{ marginTop: 8, fontSize: 12, fontWeight: 700, color: weekOverWeekDelta > 0 ? "var(--pl-theme-ink)" : weekOverWeekDelta < 0 ? "var(--pl-theme-ink)" : "var(--pl-theme-ink)" }}>
               {weekOverWeekDelta > 0 ? `📈 ${weekOverWeekDelta}% more than last week` : weekOverWeekDelta < 0 ? `${Math.abs(weekOverWeekDelta)}% less than last week — that's okay 💛` : "Same as last week"}
             </div>
           )}
@@ -102,8 +102,8 @@ export function ProgressPanel({ open, user, progressView, setProgressView, weekl
                       minWidth: 0,
                       height: point.pct === null ? 3 : Math.max(4, Math.round((point.pct / 100) * 56)),
                       borderRadius: "4px 4px 0 0",
-                      border: point.isCurrent ? "2px solid #7A3D93" : tappedTrendWeek === point.weekStart ? "2px solid #A65DC1" : "none",
-                      background: point.pct === null ? "#EDE0F5" : point.isCurrent ? "linear-gradient(180deg, #C77DD6, #7FC8F8)" : "#D9B3E8",
+                      border: point.isCurrent ? "2px solid var(--pl-theme-line)" : tappedTrendWeek === point.weekStart ? "2px solid var(--pl-theme-line)" : "none",
+                      background: point.pct === null ? "var(--pl-theme-surface-2)" : point.isCurrent ? "var(--pl-theme-accent)" : "var(--pl-theme-surface-2)",
                       padding: 0,
                       cursor: "pointer",
                     }}
@@ -196,7 +196,7 @@ export function ProgressPanel({ open, user, progressView, setProgressView, weekl
             <div style={{ height: "100%", width: `${monthlyOverallPct}%`, borderRadius: 8, background: "var(--pl-theme-accent)", transition: "width .4s ease" }} />
           </div>
           {monthOverMonthDelta !== null && (
-            <div style={{ marginTop: 8, fontSize: 12, fontWeight: 700, color: monthOverMonthDelta > 0 ? "#318C79" : "#8C6B9E" }}>
+            <div style={{ marginTop: 8, fontSize: 12, fontWeight: 700, color: monthOverMonthDelta > 0 ? "var(--pl-theme-ink)" : "var(--pl-theme-ink)" }}>
               {monthOverMonthDelta > 0 ? `📈 ${monthOverMonthDelta}% ahead of where you were at this point last month` : monthOverMonthDelta < 0 ? `${Math.abs(monthOverMonthDelta)}% behind where you were at this point last month — that's okay 💛` : "Same as this point last month"}
             </div>
           )}
@@ -217,8 +217,8 @@ export function ProgressPanel({ open, user, progressView, setProgressView, weekl
                       minWidth: 0,
                       height: point.pct === null ? 3 : Math.max(4, Math.round((point.pct / 100) * 56)),
                       borderRadius: "4px 4px 0 0",
-                      border: point.isCurrent ? "2px solid #7A3D93" : tappedTrendMonth === point.monthKey ? "2px solid #A65DC1" : "none",
-                      background: point.pct === null ? "#EDE0F5" : point.isCurrent ? "linear-gradient(180deg, #C77DD6, #7FC8F8)" : "#D9B3E8",
+                      border: point.isCurrent ? "2px solid var(--pl-theme-line)" : tappedTrendMonth === point.monthKey ? "2px solid var(--pl-theme-line)" : "none",
+                      background: point.pct === null ? "var(--pl-theme-surface-2)" : point.isCurrent ? "var(--pl-theme-accent)" : "var(--pl-theme-surface-2)",
                       padding: 0,
                       cursor: "pointer",
                     }}

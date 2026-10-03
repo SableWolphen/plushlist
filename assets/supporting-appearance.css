@@ -1,0 +1,5 @@
+body.pl-supporting-page{background:var(--pl-theme-bg,#F5F0FB);color:var(--pl-theme-ink,#4E3A60);--plum:var(--pl-theme-ink,#4E3A60);--soft:var(--pl-theme-muted,#705A84);--line:var(--pl-theme-line,#DDD0EA);--orchid:var(--pl-theme-accent,#705295)}
+body.pl-supporting-page :is(section,nav a,.contact){background:var(--pl-theme-surface,#FFF);border-color:var(--pl-theme-line,#DDD0EA)}
+body.pl-supporting-page :is(h1,h2,h3,p,li,summary,a,.contact a){color:var(--pl-theme-ink,#4E3A60)}
+body.pl-supporting-page :is(a,summary){min-height:44px}
+body.pl-supporting-page :is(a,summary):focus-visible{outline:3px solid var(--pl-theme-accent,#705295);outline-offset:3px}

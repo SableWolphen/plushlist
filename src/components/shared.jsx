@@ -31,9 +31,9 @@ if (typeof document !== "undefined" && !document.getElementById("plushlife-mobil
       [role="tab"] { padding-left: 4px !important; padding-right: 4px !important; }
     }
     .pl-tool-backdrop{background:rgba(68,43,78,.40)!important;backdrop-filter:blur(9px) saturate(1.05)!important;-webkit-backdrop-filter:blur(9px) saturate(1.05)!important}
-    .pl-tool-panel{position:relative;background:var(--pl-theme-surface)!important;border:1px solid rgba(226,201,234,.92)!important;box-shadow:0 24px 70px rgba(71,42,88,.28),inset 0 1px 0 rgba(255,255,255,.95)!important}
+    .pl-tool-panel{position:relative;background:var(--pl-theme-surface)!important;border:1px solid var(--pl-theme-line)!important;box-shadow:0 24px 70px rgba(71,42,88,.28),inset 0 1px 0 rgba(255,255,255,.95)!important}
     .pl-tool-panel:before{content:"";position:absolute;inset:0 0 auto auto;width:130px;height:130px;border-radius:0 22px 0 100%;background:radial-gradient(circle at 65% 25%,rgba(255,192,228,.28),rgba(219,206,255,.13) 55%,transparent 73%);pointer-events:none}
-    .pl-tool-header{background:var(--pl-theme-surface)!important;border-bottom:1px solid rgba(230,209,236,.88)!important}
+    .pl-tool-header{background:var(--pl-theme-surface)!important;border-bottom:1px solid var(--pl-theme-line)!important}
     .pl-tool-title{font-size:15.5px!important;color:var(--pl-theme-ink)!important;letter-spacing:-.01em}
     .pl-tool-close{border-radius:999px!important;border-color:var(--pl-theme-line)!important;background:var(--pl-theme-surface)!important;color:var(--pl-theme-ink)!important;box-shadow:0 4px 12px rgba(92,59,110,.06)}
     .pl-tool-body{position:relative}
@@ -47,8 +47,8 @@ if (typeof document !== "undefined" && !document.getElementById("plushlife-mobil
 
     /* PlushLife visual language: soft, playful, compact, and consistent. */
     .pl-tool-panel{
-      --pl-ink:#5B4666;--pl-muted:#89748F;--pl-accent:#B95CC8;--pl-accent-2:#E178BD;
-      --pl-line:#E7D5EC;--pl-soft:#FFF8FC;--pl-lilac:#F5EFFF;--pl-mint:#F3FBF7;
+      --pl-ink:var(--pl-theme-ink);--pl-muted:var(--pl-theme-muted);--pl-accent:var(--pl-theme-accent);--pl-accent-2:var(--pl-theme-accent-2);
+      --pl-line:var(--pl-theme-line);--pl-soft:var(--pl-theme-surface-2);--pl-lilac:var(--pl-theme-surface-2);--pl-mint:var(--pl-theme-surface-2);
       --pl-shadow:0 8px 24px rgba(94,58,111,.07);
     }
     .pl-tool-header:after{
@@ -61,6 +61,7 @@ if (typeof document !== "undefined" && !document.getElementById("plushlife-mobil
     .pl-tool-body :is(button,[role="button"]){-webkit-tap-highlight-color:transparent}
     .pl-tool-body :is(button,[role="button"]):not(:disabled):hover{filter:brightness(1.015);box-shadow:0 6px 16px rgba(102,62,119,.07)}
     .pl-tool-body :is(input,select,textarea):focus{outline:0!important;border-color:var(--pl-theme-line)!important;box-shadow:0 0 0 3px rgba(194,105,207,.10)!important}
+    .pl-tool-body :is(input,select,textarea):focus-visible{outline:3px solid var(--pl-theme-accent)!important;outline-offset:3px}
     .pl-tool-body [role="tablist"]{box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
     .pl-tool-body [role="tab"][aria-selected="true"]{box-shadow:0 5px 14px rgba(155,79,180,.09)!important}
     .pl-tool-body details[open]>summary{color:var(--pl-theme-ink)!important}
@@ -88,7 +89,7 @@ if (typeof document !== "undefined" && !document.getElementById("plushlife-mobil
 
     @keyframes plSoftPop{0%{transform:scale(.96)}70%{transform:scale(1.025)}100%{transform:scale(1)}}
     @keyframes plTinyFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
-    .pl-tool-body button:focus-visible{outline:2px solid #D99AE1!important;outline-offset:2px}
+    .pl-tool-body button:focus-visible{outline:2px solid var(--pl-theme-accent)!important;outline-offset:2px}
     .pl-tool-body button[aria-pressed="true"],.pl-tool-body [role="tab"][aria-selected="true"]{animation:plSoftPop .2s ease-out}
     @media(max-width:520px){.pl-tool-backdrop{padding:8px 7px max(8px,env(safe-area-inset-bottom))!important}.pl-tool-panel{border-radius:22px!important;max-height:calc(100dvh - 16px)!important}.pl-tool-header{padding:11px 12px!important}.pl-tool-body{padding:11px!important}}
   `;
@@ -191,7 +192,7 @@ export function ToolPanel({ title, displayTitle, onClose, children, inline = fal
       >
         <div className="pl-tool-header" style={{
           position: "sticky", top: 0, zIndex: 2, display: "flex", justifyContent: "space-between", alignItems: "center",
-          gap: 12, padding: "13px 15px", background: "rgba(255,249,253,.96)", borderBottom: "1px solid var(--pl-theme-line)",
+          gap: 12, padding: "13px 15px", background: "var(--pl-theme-surface)", borderBottom: "1px solid var(--pl-theme-line)",
           backdropFilter: "blur(8px)",
         }}>
           <div className="pl-tool-title" style={{ minWidth: 0, fontSize: 15, fontWeight: 900, color: "var(--pl-theme-ink)" }}>{displayTitle || title}</div>
@@ -257,7 +258,7 @@ export function useConfirmation() {
         <div id="plushlife-confirm-message" style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: "var(--pl-theme-ink)", whiteSpace: "pre-wrap" }}>{request.message}</div>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
           <button ref={cancelButtonRef} type="button" onClick={() => answer(false)} style={{ minHeight: 44, padding: "8px 14px", borderRadius: 10, border: "1px solid var(--pl-theme-line)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink)", fontWeight: 900, cursor: "pointer" }}>{request.cancelLabel}</button>
-          <button type="button" onClick={() => answer(true)} style={{ minHeight: 44, padding: "8px 14px", borderRadius: 10, border: 0, background: request.danger ? "#C45D74" : "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>{request.confirmLabel}</button>
+          <button type="button" onClick={() => answer(true)} style={{ minHeight: 44, padding: "8px 14px", borderRadius: 10, border: 0, background: request.danger ? "var(--pl-theme-accent)" : "var(--pl-theme-accent)", color: "var(--pl-theme-on-accent)", fontWeight: 900, cursor: "pointer" }}>{request.confirmLabel}</button>
         </div>
       </div>
     </div>

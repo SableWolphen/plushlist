@@ -1,4 +1,4 @@
-name: Build signed Android App Bundle
+name: Manual Android bundle and optional Play publish
 
 # Manual dispatch. The existing production workflow owns automatic main releases.
 # This builds app-release.aab and
