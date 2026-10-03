@@ -7,7 +7,7 @@ esbuild.buildSync({entryPoints:['src/components/cozy-daily.jsx','src/components/
 const model=require(path.join(temp,'cozy-profile.js'));
 const {CozyDaily}=require(path.join(temp,'components/cozy-daily.js'));
 // Bundle together so context identity matches across the components.
-fs.writeFileSync(path.join(temp,'entry.jsx'),`export {CozyDaily} from '${process.cwd()}/src/components/cozy-daily.jsx';export {CozyComfortContext,CozySetup,CozySpace} from '${process.cwd()}/src/components/cozy-space.jsx';`);
+fs.writeFileSync(path.join(temp,'entry.jsx'),`export {CozyDaily} from '${process.cwd().replace(/\\/g, "/")}/src/components/cozy-daily.jsx';export {CozyComfortContext,CozySetup,CozySpace} from '${process.cwd().replace(/\\/g, "/")}/src/components/cozy-space.jsx';`);
 esbuild.buildSync({entryPoints:[path.join(temp,'entry.jsx')],bundle:true,platform:'node',format:'cjs',outfile:path.join(temp,'entry.cjs')});
 const Components=require(path.join(temp,'entry.cjs'));
 const {act}=Renderer;

@@ -101,34 +101,34 @@ export function GrowthNextMove() {
   }, [move.title, move.text, move.reason]);
 
   return <>
-    <section aria-label="Growth at a glance" style={{ marginBottom: 10, padding: "10px 11px", borderRadius: 14, border: "1px solid #E5D9EA", background: "rgba(255,255,255,.76)" }}>
-      <div style={{ fontSize: 9.8, letterSpacing: ".12em", fontWeight: 900, color: "#765F84" }}>10-SECOND GROWTH CHECK</div>
+    <section aria-label="Growth at a glance" style={{ marginBottom: 10, padding: "10px 11px", borderRadius: 14, border: "1px solid var(--pl-theme-line)", background: "var(--pl-theme-surface)" }}>
+      <div style={{ fontSize: 9.8, letterSpacing: ".12em", fontWeight: 900, color: "var(--pl-theme-ink)" }}>10-SECOND GROWTH CHECK</div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 6, marginTop: 7 }}>
-        <div style={{ padding: "7px 8px", borderRadius: 10, background: "#F4FBF8" }}><div style={{ fontSize: 15, fontWeight: 900, color: "#3E746A" }}>{summary.strong}</div><div style={{ fontSize: 9.7, color: "#6D827C" }}>strong clues</div></div>
-        <div style={{ padding: "7px 8px", borderRadius: 10, background: "#FBF7FD" }}><div style={{ fontSize: 15, fontWeight: 900, color: "#765F84" }}>{summary.growing}</div><div style={{ fontSize: 9.7, color: "#897590" }}>growing clues</div></div>
-        <div style={{ padding: "7px 8px", borderRadius: 10, background: "#FFF9ED" }}><div style={{ fontSize: 15, fontWeight: 900, color: "#8A6A27" }}>{summary.learning}</div><div style={{ fontSize: 9.7, color: "#95805A" }}>still learning</div></div>
+        <div style={{ padding: "7px 8px", borderRadius: 10, background: "var(--pl-theme-surface)" }}><div style={{ fontSize: 15, fontWeight: 900, color: "var(--pl-theme-ink)" }}>{summary.strong}</div><div style={{ fontSize: 9.7, color: "var(--pl-theme-ink)" }}>strong clues</div></div>
+        <div style={{ padding: "7px 8px", borderRadius: 10, background: "var(--pl-theme-surface)" }}><div style={{ fontSize: 15, fontWeight: 900, color: "var(--pl-theme-ink)" }}>{summary.growing}</div><div style={{ fontSize: 9.7, color: "var(--pl-theme-ink)" }}>growing clues</div></div>
+        <div style={{ padding: "7px 8px", borderRadius: 10, background: "var(--pl-theme-surface)" }}><div style={{ fontSize: 15, fontWeight: 900, color: "var(--pl-theme-ink)" }}>{summary.learning}</div><div style={{ fontSize: 9.7, color: "var(--pl-theme-ink)" }}>still learning</div></div>
       </div>
     </section>
 
-    {recentChange && <section aria-label="What changed since yesterday" style={{ marginBottom: 10, padding: "9px 10px", borderRadius: 13, border: "1px solid #E4D7EA", background: "linear-gradient(145deg,#FFF9FD,#F7FCFA)" }}>
-      <div style={{ fontSize: 9.8, letterSpacing: ".1em", fontWeight: 900, color: "#8B5F99" }}>↻ WHAT CHANGED SINCE YESTERDAY</div>
-      <div style={{ marginTop: 3, fontSize: 11.2, lineHeight: 1.42, color: "#695875" }}>PlushLife shifted from <strong>{recentChange.from}</strong> to <strong>{recentChange.to}</strong>.</div>
-      <div style={{ marginTop: 3, fontSize: 10.2, lineHeight: 1.4, color: "#8A7895" }}>{recentChange.reason}</div>
+    {recentChange && <section aria-label="What changed since yesterday" style={{ marginBottom: 10, padding: "9px 10px", borderRadius: 13, border: "1px solid var(--pl-theme-line)", background: "var(--pl-theme-surface)" }}>
+      <div style={{ fontSize: 9.8, letterSpacing: ".1em", fontWeight: 900, color: "var(--pl-theme-ink)" }}>↻ WHAT CHANGED SINCE YESTERDAY</div>
+      <div style={{ marginTop: 3, fontSize: 11.2, lineHeight: 1.42, color: "var(--pl-theme-ink)" }}>PlushLife shifted from <strong>{recentChange.from}</strong> to <strong>{recentChange.to}</strong>.</div>
+      <div style={{ marginTop: 3, fontSize: 10.2, lineHeight: 1.4, color: "var(--pl-theme-ink)" }}>{recentChange.reason}</div>
     </section>}
 
-    <section aria-label="Plush Coach: best next adjustment" style={{ marginBottom: 12, padding: "13px 14px", borderRadius: 16, border: "1px solid #D8E7E2", background: "linear-gradient(145deg,#F6FCFA,#FFF9FD)" }}>
-      <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "#3E746A" }}>🧭 PLUSH COACH</div>
-      <div style={{ marginTop: 4, fontSize: 15, fontWeight: 900, color: "#4F405C" }}>{move.icon} {move.title}</div>
-      <div style={{ marginTop: 5, fontSize: 12, lineHeight: 1.5, color: "#637B74" }}>{move.text}</div>
-      <details style={{ marginTop: 7 }}><summary style={{ minHeight: 44, display: "flex", alignItems: "center", cursor: "pointer", color: "#765F84", fontSize: 11, fontWeight: 900 }}>Why this suggestion?</summary><div style={{ padding: "7px 9px", borderRadius: 10, background: "rgba(255,255,255,.68)", color: "#766981", fontSize: 10.7, lineHeight: 1.45 }}><strong>Why PlushLife changed this:</strong> {move.reason}<div style={{ marginTop: 4, color: "#8A9A95" }}>{move.evidence}</div></div></details>
+    <section aria-label="Plush Coach: best next adjustment" style={{ marginBottom: 12, padding: "13px 14px", borderRadius: 16, border: "1px solid var(--pl-theme-line)", background: "var(--pl-theme-surface)" }}>
+      <div style={{ fontSize: 10.5, letterSpacing: ".12em", fontWeight: 900, color: "var(--pl-theme-ink)" }}>🧭 PLUSH COACH</div>
+      <div style={{ marginTop: 4, fontSize: 15, fontWeight: 900, color: "var(--pl-theme-ink)" }}>{move.icon} {move.title}</div>
+      <div style={{ marginTop: 5, fontSize: 12, lineHeight: 1.5, color: "var(--pl-theme-ink)" }}>{move.text}</div>
+      <details style={{ marginTop: 7 }}><summary style={{ minHeight: 44, display: "flex", alignItems: "center", cursor: "pointer", color: "var(--pl-theme-ink)", fontSize: 11, fontWeight: 900 }}>Why this suggestion?</summary><div style={{ padding: "7px 9px", borderRadius: 10, background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink)", fontSize: 10.7, lineHeight: 1.45 }}><strong>Why PlushLife changed this:</strong> {move.reason}<div style={{ marginTop: 4, color: "var(--pl-theme-ink)" }}>{move.evidence}</div></div></details>
     </section>
 
-    <section aria-label="What PlushLife knows" style={{ marginBottom: 12, padding: "12px 13px", borderRadius: 16, border: "1px solid #E5D9EA", background: "rgba(255,255,255,.78)" }}>
-      <div style={{ fontSize: 10.5, letterSpacing: ".11em", fontWeight: 900, color: "#765F84" }}>✨ WHAT PLUSHLIFE KNOWS LATELY</div>
-      <div style={{ display: "grid", gap: 5, marginTop: 7 }}>{summary.knows.map((line) => <div key={line} style={{ fontSize: 11, lineHeight: 1.42, color: "#685873" }}>• {line}</div>)}</div>
-      <div style={{ marginTop: 8, paddingTop: 7, borderTop: "1px solid #EEE5F1", fontSize: 10.5, lineHeight: 1.4, color: "#93849C" }}><strong>Still learning:</strong> {summary.unsure}</div>
+    <section aria-label="What PlushLife knows" style={{ marginBottom: 12, padding: "12px 13px", borderRadius: 16, border: "1px solid var(--pl-theme-line)", background: "var(--pl-theme-surface)" }}>
+      <div style={{ fontSize: 10.5, letterSpacing: ".11em", fontWeight: 900, color: "var(--pl-theme-ink)" }}>✨ WHAT PLUSHLIFE KNOWS LATELY</div>
+      <div style={{ display: "grid", gap: 5, marginTop: 7 }}>{summary.knows.map((line) => <div key={line} style={{ fontSize: 11, lineHeight: 1.42, color: "var(--pl-theme-ink)" }}>• {line}</div>)}</div>
+      <div style={{ marginTop: 8, paddingTop: 7, borderTop: "1px solid var(--pl-theme-line)", fontSize: 10.5, lineHeight: 1.4, color: "var(--pl-theme-ink)" }}><strong>Still learning:</strong> {summary.unsure}</div>
     </section>
 
-    {history.length > 1 && <details style={{ marginBottom: 12, padding: "9px 12px", borderRadius: 14, border: "1px solid #E6DCEF", background: "#FBF8FC" }}><summary style={{ minHeight: 44, display: "flex", alignItems: "center", cursor: "pointer", color: "#765F84", fontSize: 11.2, fontWeight: 900 }}>🧭 What PlushLife changed and why</summary><div style={{ display: "grid", gap: 7, marginTop: 5 }}>{history.slice(-5).reverse().map((item, index) => <div key={`${item.at}-${index}`} style={{ padding: "8px 9px", borderRadius: 10, background: "white", border: "1px solid #EEE6F1" }}><div style={{ fontSize: 11, fontWeight: 900, color: "#66536F" }}>{item.title}</div><div style={{ marginTop: 2, fontSize: 10.3, lineHeight: 1.4, color: "#8A7895" }}>{item.reason || item.text}</div></div>)}</div></details>}
+    {history.length > 1 && <details style={{ marginBottom: 12, padding: "9px 12px", borderRadius: 14, border: "1px solid var(--pl-theme-line)", background: "var(--pl-theme-surface)" }}><summary style={{ minHeight: 44, display: "flex", alignItems: "center", cursor: "pointer", color: "var(--pl-theme-ink)", fontSize: 11.2, fontWeight: 900 }}>🧭 What PlushLife changed and why</summary><div style={{ display: "grid", gap: 7, marginTop: 5 }}>{history.slice(-5).reverse().map((item, index) => <div key={`${item.at}-${index}`} style={{ padding: "8px 9px", borderRadius: 10, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line)" }}><div style={{ fontSize: 11, fontWeight: 900, color: "var(--pl-theme-ink)" }}>{item.title}</div><div style={{ marginTop: 2, fontSize: 10.3, lineHeight: 1.4, color: "var(--pl-theme-ink)" }}>{item.reason || item.text}</div></div>)}</div></details>}
   </>;
 }

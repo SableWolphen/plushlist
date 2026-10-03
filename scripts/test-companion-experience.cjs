@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const React=require('react'),Renderer=require('react-test-renderer');global.React=React;
 global.window=new EventTarget();global.document=new EventTarget();window.PlushLifeContent=require('../assets/plush-content.js');window.PlushLifeThemeCopy=require('../assets/plush-theme-copy.js');
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'plush-companion-'));
-fs.writeFileSync(path.join(temp,'entry.jsx'),`export * from '${process.cwd()}/src/companion-experience.js';export * from '${process.cwd()}/src/cozy-profile.js';export * from '${process.cwd()}/src/keepsake-art.js';export * from '${process.cwd()}/src/components/cozy-corner.jsx';export * from '${process.cwd()}/src/components/weekly-keepsake.jsx';export * from '${process.cwd()}/src/components/theme-world.jsx';`);
+fs.writeFileSync(path.join(temp,'entry.jsx'),`export * from '${process.cwd().replace(/\\/g, "/")}/src/companion-experience.js';export * from '${process.cwd().replace(/\\/g, "/")}/src/cozy-profile.js';export * from '${process.cwd().replace(/\\/g, "/")}/src/keepsake-art.js';export * from '${process.cwd().replace(/\\/g, "/")}/src/components/cozy-corner.jsx';export * from '${process.cwd().replace(/\\/g, "/")}/src/components/weekly-keepsake.jsx';export * from '${process.cwd().replace(/\\/g, "/")}/src/components/theme-world.jsx';`);
 require('esbuild').buildSync({entryPoints:[path.join(temp,'entry.jsx')],bundle:true,platform:'node',format:'cjs',outfile:path.join(temp,'entry.cjs')});
 const api=require(path.join(temp,'entry.cjs')),{act}=Renderer;
 const outfits=window.PlushLifeContent.MASCOT_OUTFITS;

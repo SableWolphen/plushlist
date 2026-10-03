@@ -1408,7 +1408,7 @@
   cursor:pointer;
 }
 #main-content .pl-guardian-switcher button span:first-child{font-size:18px}
-#main-content .pl-guardian-switcher button[aria-selected="true"]{
+#main-content .pl-guardian-switcher button[aria-pressed="true"]{
   background:var(--pl-theme-surface,#FFF);
   color:var(--pl-theme-accent,#A65DC1);
   box-shadow:0 4px 12px rgba(91,55,109,.08),inset 0 0 0 1px color-mix(in srgb,var(--pl-theme-accent,#A65DC1) 25%,transparent);
