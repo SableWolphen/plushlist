@@ -67,6 +67,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run complete app tests
+        run: npm test
+
       - name: Generate the Capacitor Android project
         run: npm run android:sync
 
