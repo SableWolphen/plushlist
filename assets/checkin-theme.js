@@ -208,7 +208,7 @@
   }
   function clean(value){return String(value||"").replace(/\s+/g," ").trim()}
   function detectScheme(){
-    return "light";
+    return document.documentElement.dataset.plushlifeColorMode === "dark" ? "dark" : "light";
   }
   function tagLeaf(root,regex,attr){
     const node=[...root.querySelectorAll("div,p,span")].find((item)=>!item.children.length&&regex.test(clean(item.textContent)));
