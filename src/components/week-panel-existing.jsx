@@ -81,8 +81,8 @@ export function WeekPanel({ open, openTodayJournal, weekCardIndex, setWeekCardIn
               const isFutureDate = date > period.date;
               const isSelectedDate = date === selectedProgressDate;
               const pct = dayCompletionPct(date);
-              const bg = isRestDay ? "#8FD4B8" : pct === null ? (isSelectedDate ? "#F4E8FA" : "rgba(255,255,255,0.82)") : pct === 0 ? "#F7EFFA" : pct < 50 ? "#E4C6EE" : pct < 100 ? "#C77DD6" : "#8E4EAA";
-              const textColor = isFutureDate ? "#C7BBCF" : isRestDay || pct >= 50 ? "#FFFFFF" : "#6D5A7C";
+              const bg = !isRestDay && pct >= 50 ? "var(--pl-theme-accent)" : "var(--pl-theme-surface-2)";
+              const textColor = !isRestDay && pct >= 50 ? "var(--pl-theme-on-accent)" : "var(--pl-theme-ink)";
               const calendarTitle = [isRestDay ? "Resting" : pct === null ? null : `${pct}% complete`, moodOption ? `Feeling ${moodOption[2]}` : null, checkIn?.energy ? `${checkIn.energy} energy` : null, checkIn?.day_type ? `${checkIn.day_type} day` : null].filter(Boolean).join(" · ");
               return <button key={date} type="button" disabled={isFutureDate} title={calendarTitle || undefined} aria-label={calendarTitle ? `${number}: ${calendarTitle}` : String(number)} onClick={() => {
                 if (isFutureDate) return;
@@ -90,19 +90,14 @@ export function WeekPanel({ open, openTodayJournal, weekCardIndex, setWeekCardIn
                 setDayViewDate(date);
                 setWeekCardIndex(2);
                 if (date === period.date) setActive("daily");
-              }} style={{ position: "relative", minHeight: 34, borderRadius: 9, border: isSelectedDate ? "2px solid var(--pl-theme-line)" : "1px solid var(--pl-theme-line)", background: bg, color: textColor, fontWeight: 800, cursor: isFutureDate ? "not-allowed" : "pointer", opacity: isFutureDate ? 0.5 : 1 }}>
+              }} aria-pressed={isSelectedDate} style={{ position: "relative", minHeight: 52, borderRadius: 9, border: isSelectedDate ? "2px solid var(--pl-theme-ink)" : "1px solid var(--pl-theme-line)", background: bg, color: textColor, fontWeight: 800, cursor: isFutureDate ? "not-allowed" : "pointer", opacity: isFutureDate ? 0.5 : 1 }}>
                 {isRestDay ? "🌴" : number}{moodEmoji && <span aria-label={`Feeling ${moodOption[2]}`} style={{ position: "absolute", left: 3, bottom: 1, fontSize:12 }}>{moodEmoji}</span>}{hasReflection && <span aria-label="PlushJournal post saved" title="PlushJournal post saved" style={{ position: "absolute", right: 2, top: 1, fontSize:12, lineHeight: 1 }}>📖</span>}
+                {!isFutureDate && !isRestDay && <span style={{display:"block",fontSize:12,marginTop:3}}>{pct === null ? "—" : `${pct}%`}</span>}
               </button>;
             })}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10, fontSize:12, color: "var(--pl-theme-muted,#8C6B9E)", flexWrap: "wrap" }}>
-            Less
-            <span style={{ width: 12, height: 12, borderRadius: 3, background: "var(--pl-theme-surface-2,#F7EFFA)", display: "inline-block" }} />
-            <span style={{ width: 12, height: 12, borderRadius: 3, background: "var(--pl-theme-surface-2,#E4C6EE)", display: "inline-block" }} />
-            <span style={{ width: 12, height: 12, borderRadius: 3, background: "var(--pl-theme-accent,#C77DD6)", display: "inline-block" }} />
-            <span style={{ width: 12, height: 12, borderRadius: 3, background: "var(--pl-theme-accent,#8E4EAA)", display: "inline-block" }} />
-            More
-            <span style={{ width: 12, height: 12, borderRadius: 3, background: "var(--pl-theme-accent,#8FD4B8)", display: "inline-block", marginLeft: 8 }} /> 🌴 Resting
+            Recorded completion · 🌴 Resting · 📖 Journal saved
           </div>
         </div>
         <details style={{ marginBottom: 10, padding: 14, borderRadius: 16, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
