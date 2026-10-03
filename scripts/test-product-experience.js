@@ -29,8 +29,10 @@ expect(reward.includes("prefers-reduced-motion:reduce"), "completion atmosphere 
 expect(states.includes('[role="status"]') && states.includes('[role="alert"]'), "loading and error states must share polish rules");
 expect(states.includes("max-width:340px") && states.includes("orientation:landscape"), "edge-state polish must cover very small phones and short landscape screens");
 expect(states.includes("forced-colors:active") && states.includes("prefers-reduced-motion:reduce"), "edge-state polish must preserve accessibility modes");
+expect(!states.includes("MutationObserver"), "state polish stays CSS-only instead of mutating React-owned DOM");
 expect(entitlements.includes("./assets/state-polish.js") && entitlements.includes("./assets/gentle-reward.js") && !entitlements.includes("./assets/resume-context.js"), "experience layers must load without the removed resume prompt");
 expect(!entitlements.includes("enforced: true"), "experience work must not activate billing entitlements");
+expect(!entitlements.includes("keepFullTodayTaskListStable") && !entitlements.includes("plushlife-full-task-list-override"), "Today layout stability is declarative, not injected after render");
 
 if (failures.length) {
   console.error("Product experience checks failed:\n- " + failures.join("\n- "));
