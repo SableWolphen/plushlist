@@ -1,0 +1,162 @@
+name: Auto publish Android after green CodeQL
+
+on:
+  workflow_run:
+    workflows: ["CodeQL"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: plushlife-auto-play-publish
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    env:
+      PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - id: check
+        name: Check automatic publishing credentials
+        shell: bash
+        run: |
+          ready=true
+          for name in PLAY_SERVICE_ACCOUNT_JSON ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::warning::Automatic Play publishing is waiting for repository secret: $name"
+              ready=false
+            fi
+          done
+          echo "ready=$ready" >> "$GITHUB_OUTPUT"
+          if [ "$ready" = true ]; then
+            echo "Automatic Play publishing is configured." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Automatic Play publishing is enabled in code but skipped until all Play/signing secrets are configured." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  publish:
+    needs: gate
+    if: needs.gate.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+      PLAY_TRACK: ${{ vars.PLAY_AUTO_TRACK || 'alpha' }}
+    steps:
+      - name: Checkout the exact green commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
+
+      - name: Install Android API 36
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run complete app tests
+        run: npm test
+
+      - name: Build web and sync Android
+        env:
+          GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: npm run android:sync
+
+      - name: Resolve the next unused Play version
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          REQUESTED_VERSION_CODE: ""
+          REQUESTED_VERSION_NAME: ""
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          python -m pip install 'google-auth==2.40.3' 'requests==2.32.4'
+          python scripts/resolve-play-version.py
+
+      - name: Stamp Android version
+        run: |
+          python - <<'PYVERSION'
+          import os, re
+          from pathlib import Path
+          file = Path("android/app/build.gradle")
+          source = file.read_text()
+          source, codes = re.subn(r"versionCode \d+", "versionCode " + os.environ["RELEASE_VERSION_CODE"], source)
+          source, names = re.subn(r'versionName "[^"]+"', 'versionName "' + os.environ["RELEASE_VERSION_NAME"] + '"', source)
+          if codes != 1 or names != 1:
+              raise RuntimeError("Expected one Android versionCode and versionName")
+          file.write_text(source)
+          PYVERSION
+
+      - name: Decode signing keystore
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
+
+      - name: Build signed AAB
+        working-directory: android
+        env:
+          PLUSHLIFE_KEYSTORE_PATH: release.keystore
+          PLUSHLIFE_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          PLUSHLIFE_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          PLUSHLIFE_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          PLUSHLIFE_GIT_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: ./gradlew --no-daemon bundleRelease
+
+      - name: Validate bundle
+        run: |
+          curl --fail --location --silent --show-error \
+            --output bundletool.jar \
+            https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
+          java -jar bundletool.jar validate --bundle=android/app/build/outputs/bundle/release/app-release.aab
+          test "$(java -jar bundletool.jar dump manifest \
+            --bundle=android/app/build/outputs/bundle/release/app-release.aab \
+            --xpath=/manifest/uses-sdk/@android:targetSdkVersion)" = "36"
+          keytool -printcert -jarfile android/app/build/outputs/bundle/release/app-release.aab | grep 'Owner: CN=PlushLife Upload'
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: auto-play-release-${{ env.RELEASE_VERSION_CODE }}
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+      - name: Publish to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.PlushLife
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: ${{ env.PLAY_TRACK }}
+          status: completed
+
+      - name: Remove decoded keystore
+        if: always()
+        run: rm -f android/app/release.keystore
+
+      - name: Release summary
+        if: success()
+        run: |
+          echo "Published PlushLife ${RELEASE_VERSION_NAME} (${RELEASE_VERSION_CODE}) to Google Play track '${PLAY_TRACK}'." >> "$GITHUB_STEP_SUMMARY"
+          echo "Source commit: ${RELEASE_SHA}" >> "$GITHUB_STEP_SUMMARY"
