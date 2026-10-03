@@ -1,0 +1,33 @@
+const fs = require("fs");
+const path = require("path");
+
+function read(file) {
+  return fs.readFileSync(path.join(__dirname, "..", file), "utf8").replace(/\r\n/g, "\n");
+}
+
+const auto = read(".github/workflows/auto-play-release.yml");
+const historical44 = read(".github/workflows/closed-testing-version-44.yml");
+const historical45 = read(".github/workflows/closed-testing.yml");
+const manual = read(".github/workflows/android-release.yml");
+const pages = read(".github/workflows/deploy-pages.yml");
+const cloudflare = read(".github/workflows/deploy-cloudflare.yml");
+const codeql = read(".github/workflows/codeql.yml");
+
+const failures = [];
+function check(ok, label) { if (!ok) failures.push(label); }
+
+check(auto.includes("workflow_run:") && auto.includes('workflows: ["CodeQL"]'), "automatic Play release must wait for CodeQL");
+check(auto.includes("github.event.workflow_run.conclusion == 'success'") && auto.includes("github.event.workflow_run.head_branch == 'main'"), "automatic Play release must require green main");
+check(auto.includes("PLAY_TRACK: ${{ vars.PLAY_AUTO_TRACK || 'alpha' }}"), "automatic Play release must default to closed testing");
+check(auto.includes("group: google-play-publish") && manual.includes("group: google-play-publish") && historical44.includes("group: google-play-publish"), "all Play publishers must share one concurrency lock");
+check(!historical44.includes("push:\n") && historical44.includes("workflow_dispatch:"), "historical v44 release must stay manual-only");
+check(!historical45.includes("push:\n") && historical45.includes("workflow_dispatch:"), "historical v45 release must stay manual-only");
+check(pages.includes("branches: [main]") && cloudflare.includes("branches: [main]") && codeql.includes("branches: [main]"), "current deploy/security workflows must stay scoped to main");
+check(cloudflare.includes("Require Cloudflare deployment credentials"), "Cloudflare deployment must fail early with an explicit credential reason");
+check(auto.includes("ready=false") && auto.includes("needs.gate.outputs.ready == 'true'"), "missing Play credentials must skip publishing instead of failing the release job");
+
+if (failures.length) {
+  console.error("Workflow safety checks failed:\n- " + failures.join("\n- "));
+  process.exit(1);
+}
+console.log("Workflow safety checks passed.");
