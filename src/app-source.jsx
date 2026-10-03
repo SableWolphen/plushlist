@@ -846,6 +846,15 @@ function GlowUpTracker() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [classicMoreOpen, setClassicMoreOpen] = useState(false);
   const [headerMascotDancing, setHeaderMascotDancing] = useState(false);
+  const [compactAppShell, setCompactAppShell] = useState(() => typeof window !== "undefined" && window.matchMedia?.("(max-width: 520px)").matches);
+  useEffect(() => {
+    const media = window.matchMedia?.("(max-width: 520px)");
+    if (!media) return undefined;
+    const syncCompact = () => setCompactAppShell(media.matches);
+    syncCompact();
+    media.addEventListener?.("change", syncCompact);
+    return () => media.removeEventListener?.("change", syncCompact);
+  }, []);
   const [arrivalRitualVisible, setArrivalRitualVisible] = useState(true);
   const [habitGardenOpen, setHabitGardenOpen] = useState(false);
   const [progressDetailsOpen, setProgressDetailsOpen] = useState(false);
@@ -7158,7 +7167,7 @@ function GlowUpTracker() {
         className="plushlife-app-column"
         style={{ maxWidth: 640, margin: "0 auto", touchAction: "pan-y" }}>
         {/* Classic top sync strip from the original PlushList shell. */}
-        {user ? (
+        {!compactAppShell && (user ? (
           <div className="classic-sync-strip" style={{ marginBottom: 7, display: "flex", justifyContent: "flex-end" }}>
             <button type="button" disabled={syncStatus === "syncing"} onClick={syncNow} aria-label={syncStatus === "error" ? "Retry sync" : "Sync now"} title="Sync now" style={{ minHeight: 32, padding: "5px 9px", borderRadius: 999, border: "1px solid rgba(233,211,239,.9)", background: "rgba(255,255,255,.66)", color: "#7E678D", fontWeight: 850, fontSize: 10.5, cursor: syncStatus === "syncing" ? "wait" : "pointer", boxShadow: "0 2px 8px rgba(88,55,105,.035)" }}>
               {!online || syncStatus === "offline" ? "📡 Offline" : syncStatus === "error" ? "⚠️ Retry sync" : syncStatus === "syncing" ? "☁️ Syncing…" : "☁️ Synced"}
@@ -7168,7 +7177,7 @@ function GlowUpTracker() {
           <div style={{ marginBottom: 14, padding: "9px 12px", borderRadius: 12, background: "rgba(255,255,255,0.55)", border: "1px solid #F3D9EC", fontSize: 12.5, color: "#8C6B9E" }}>
             ☁️ Sign in to keep checkmarks on every device
           </div>
-        )}
+        ))}
         {!user && showSignIn && (
           <div style={{ margin: "-5px 0 14px", padding: 12, borderRadius: 12, background: "rgba(255,255,255,0.7)", border: "1px solid #F3D9EC" }}>
             <div style={{ fontSize: 12, color: "#8C6B9E", marginBottom: 8 }}>Use the same email on your phone and computer.</div>
@@ -7179,7 +7188,7 @@ function GlowUpTracker() {
             {signInMessage && <div style={{ marginTop: 8, fontSize: 12, color: "#8C6B9E" }}>{signInMessage}</div>}
           </div>
         )}
-        {<div className="plushlife-app-header" style={{ marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 9 }}>
+        {!compactAppShell && <div className="plushlife-app-header" style={{ marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 9 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 9.5, letterSpacing: "0.16em", color: "#B08AC7", fontWeight: 800 }}>{dinoTheme ? "ONE LITTLE STEP AT A TIME 🦕✨" : "ONE LITTLE STEP AT A TIME ✨"}</div>
             <h1 className="app-title" style={{ fontSize: 24, margin: "3px 0 0", fontWeight: 850, letterSpacing: "-0.02em", lineHeight: 1.05 }}>
