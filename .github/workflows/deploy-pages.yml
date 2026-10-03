@@ -1,9 +1,8 @@
 name: Deploy to GitHub Pages
 
 on:
-  workflow_run:
-    workflows: ["CodeQL"]
-    types: [completed]
+  push:
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
@@ -24,8 +23,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Set up Node
         uses: actions/setup-node@v4
