@@ -84,7 +84,7 @@ const requiredRegressionMarkers = [
   'Why this experiment?',
   'const APPEARANCE_THEMES = [',
   'Rainy-Day Coat',
-  'AMBIENT THEME',
+  'aria-label="Choose light or dark appearance"',
   '!["soft", "soft-light"].includes(appearanceTheme)',
   'Ambient themes never recolor content.',
   'A little hello from Mommy 🍼',
