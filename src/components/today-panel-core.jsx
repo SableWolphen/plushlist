@@ -64,7 +64,7 @@ function greeting() {
   return "Good evening";
 }
 
-function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, reducedMotion, selectedOutfit, activityDaysTotal, darkMode, appearanceTheme, dinoTheme, babyMode }) {
+function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, reducedMotion, selectedOutfit, activityDaysTotal, darkMode, appearanceTheme, dinoTheme, babyMode, rows = [], viewDone = {} }) {
   const copy = useThemeCopy();
   const companion = React.useContext(ThemeWorldContext);
   const cozy = React.useContext(CozyComfortContext);
@@ -72,6 +72,16 @@ function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, 
   const personName = String(cozy?.profile?.fields?.nickname || "").trim() || "Cozy";
   const comfort = cozy?.profile?.fields?.comfort_item;
   const evening = new Date().getHours() >= 20 || new Date().getHours() < 5;
+  const taskRows = rows.filter((row) => row && !row.isBonus && !isHabitRow(row));
+  const remainingTasks = taskRows.filter((row) => !viewDone?.[row.key]).length;
+  const taskWord = babyMode ? "little job" : dinoTheme ? "Dino Mission" : "task";
+  const taskWords = babyMode ? "little jobs" : dinoTheme ? "Dino Missions" : "tasks";
+  const themeEmoji = dinoTheme ? "🦕" : "💜";
+  const progressLine = remainingTasks === 0
+    ? (dinoTheme ? "Your Dino Missions are all tucked away for today." : babyMode ? "Your little jobs are all tucked in for today." : "You’re all caught up on today’s tasks.")
+    : evening
+      ? (dinoTheme ? `Your dino is settling in. ${remainingTasks} ${remainingTasks === 1 ? taskWord : taskWords} left.` : babyMode ? `Your evening is getting tucked in. ${remainingTasks} ${remainingTasks === 1 ? taskWord : taskWords} left.` : `Your evening is almost tucked in. ${remainingTasks} ${remainingTasks === 1 ? taskWord : taskWords} left.`)
+      : `You have ${remainingTasks} ${remainingTasks === 1 ? taskWord : taskWords} left today.`;
   const nextReward = companion.rewardProgress ? nextCompanionReward(window.PlushLifeContent.MASCOT_OUTFITS, companion.unlockedIds, companion.rewardProgress) : null;
   // The living mascot reacts to task completions: the completed-task flow
   // dispatches plushlife:task-completion-feedback on window, and the mascot
@@ -116,8 +126,8 @@ function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, 
           <span className={!mascotCelebrating && !reducedMotion ? "pl-companion-idle" : ""}><ThemeScene outfit={selectedOutfit} focus mood={mascotCelebrating ? "happy" : "neutral"} /></span>
         </button>
         <div className="pl-companion-copy">
-        <h2>{mascotMessage || (returning ? `Welcome back, ${personName}.` : (copy["A little counts."] || `Happy you’re here, ${personName}! 💜`).replace(/\bCozy\b/g, personName))}</h2>
-        <p>{returning ? "Good to see you. One tiny thing is plenty." : evening ? `${petName} is winding down with you.` : cozy?.profile?.pet_name ? `${petName} is happy you’re here.` : copy["Your plush is happy you\'re here."] || "Your plush is happy you\'re here."}</p>
+        <h2>{mascotMessage || (returning ? `Welcome back, ${personName}.` : `Happy you’re here, ${personName}! ${themeEmoji}`)}</h2>
+        <p>{returning ? progressLine : progressLine}</p>
         {comfort && <small className="pl-companion-comfort" title={comfort}>Keep {comfort.slice(0,80)} close.</small>}
         {nextReward && <span className="pl-companion-reward"><small>{nextReward.copy}</small><progress value={nextReward.count} max={nextReward.total} aria-label={`Progress toward ${nextReward.outfit.name}`} /></span>}
         <button type="button" className="pl-link-btn pl-home-cozy-link" onClick={() => { if(returning){onSofterDay?.();return;} goToDashboard?.("care"); setTimeout(() => window.dispatchEvent(new Event("plushlife:open-cozy-space")),100); }}>{returning ? "Make today softer →" : "My Cozy Space →"}</button>
@@ -215,7 +225,7 @@ function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = []
   );
 }
 
-function DayAgenda({ tasks, schedule, selectedSchedule, exceptions, date, timezone }) {
+function DayAgenda({ tasks, schedule, selectedSchedule, exceptions, date, timezone, taskLabel = "Tasks" }) {
   const [tab,setTab]=React.useState('tasks');
   const [wide,setWide]=React.useState(()=>window.matchMedia?.('(min-width:720px)').matches || false);
   const [now,setNow]=React.useState(()=>new Date());
@@ -233,7 +243,7 @@ function DayAgenda({ tasks, schedule, selectedSchedule, exceptions, date, timezo
   const key=(event)=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();select(event.key==='Home'?'tasks':event.key==='End'?'schedule':tab==='tasks'?'schedule':'tasks',true);};
   return <section className="pl-home-day-card" aria-label="Today’s tasks and schedule">
     {next && <button type="button" className="pl-agenda-next" onClick={()=>select('schedule')} aria-label={`Open schedule. Next up: ${next.text}`}><span>Next up · {window.PlushLifeSchedule?.formatTime12?.(next.time) || next.time}</span><strong>{next.text}</strong></button>}
-    {!wide && <div className="pl-agenda-tabs" role="tablist" aria-label="Today view">{['tasks','schedule'].map(value=><button type="button" key={value} role="tab" id={`${id}-${value}-tab`} aria-controls={`${id}-${value}-panel`} aria-selected={tab===value} tabIndex={tab===value?0:-1} onKeyDown={key} onClick={()=>select(value)}>{value==='tasks'?'Tasks':'Schedule'}</button>)}</div>}
+    {!wide && <div className="pl-agenda-tabs" role="tablist" aria-label="Today view">{['tasks','schedule'].map(value=><button type="button" key={value} role="tab" id={`${id}-${value}-tab`} aria-controls={`${id}-${value}-panel`} aria-selected={tab===value} tabIndex={tab===value?0:-1} onKeyDown={key} onClick={()=>select(value)}>{value==='tasks'?taskLabel:'Schedule'}</button>)}</div>}
     <div className="pl-agenda-panels">{[['tasks',tasks],['schedule',schedule]].map(([value,content])=><div key={value} id={`${id}-${value}-panel`} role={wide?undefined:'tabpanel'} aria-labelledby={wide?undefined:`${id}-${value}-tab`} hidden={!wide && tab!==value}>{content}</div>)}</div>
   </section>;
 }
@@ -271,7 +281,7 @@ function isHabitRow(row) {
   return row && !row.isBonus && String(row.habitType || row.sourceTask?.habit_type || "regular") !== "regular";
 }
 
-function TasksToday({ rows = [], viewDone = {}, toggle, openTaskManager, period }) {
+function TasksToday({ rows = [], viewDone = {}, toggle, openTaskManager, period, babyMode = false, dinoTheme = false }) {
   const copy = useThemeCopy();
   const taskRows = rows.filter((row) => row && !row.isBonus && !isHabitRow(row));
   const completed = taskRows.filter((row) => !!viewDone[row.key]).length;
@@ -281,7 +291,7 @@ function TasksToday({ rows = [], viewDone = {}, toggle, openTaskManager, period 
   return (
     <section style={{...card, padding: "15px 17px 16px"}} aria-label="Tasks today">
       <div className="pl-section-topline">
-        <div className="pl-kicker">{copy.Today || "Today"} · {completed}/{taskRows.length}</div>
+        <div className="pl-kicker">{babyMode ? "Little Jobs" : dinoTheme ? "Dino Missions" : "Today’s tasks"} · {completed}/{taskRows.length}</div>
         <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)} aria-label="View all today’s tasks">All →</button>
       </div>
       <div className="pl-list">
@@ -293,7 +303,7 @@ function TasksToday({ rows = [], viewDone = {}, toggle, openTaskManager, period 
         )) : (
           <div className="pl-list-row pl-note-row">
             <div className="pl-row-icon">{taskRows.length ? "✨" : "📝"}</div>
-            <div className="pl-row-text">{taskRows.length ? "All of today’s tasks are done." : "No tasks are scheduled for today."}</div>
+            <div className="pl-row-text">{taskRows.length ? (babyMode ? "All of your little jobs are tucked in." : dinoTheme ? "All of today’s Dino Missions are complete." : "All of today’s tasks are done.") : (babyMode ? "No little jobs are scheduled for today." : dinoTheme ? "No Dino Missions are scheduled for today." : "No tasks are scheduled for today.")}</div>
           </div>
         )}
       </div>
@@ -347,13 +357,13 @@ export function TodayPanel({
   const homeLayout = normalizeHomeLayout(preferences?.home_layout);
   const homeSections = {
     tiny: (<OneTinyThing nextStepTask={nextStepTask} nextStepReason={nextStepReason} nextStepHint={nextStepHint} toggle={unifiedToggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} />),
-    tasks: (<TasksToday rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={selectedProgressDate ? {...period,date:selectedProgressDate} : period} />),
+    tasks: (<TasksToday rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={selectedProgressDate ? {...period,date:selectedProgressDate} : period} babyMode={babyMode} dinoTheme={dinoTheme} />),
     habits: (<Habits rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />),
     schedule: (<TodaySchedule selectedSchedule={selectedSchedule} selectedScheduleExceptionEntries={selectedScheduleExceptionEntries} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} />),
     shortcuts: (<div className="pl-home-shortcuts">
           <button type="button" className="pl-shortcut" onClick={() => openTaskManager?.(period?.date, "habits")}>
             <span className="pl-shortcut-icon">🧸</span>
-            <span><div className="pl-shortcut-title">Little Jobs</div><div className="pl-shortcut-sub">Small tasks, big progress</div></span>
+            <span><div className="pl-shortcut-title">{babyMode ? "Little Jobs" : dinoTheme ? "Dino Missions" : "Tasks"}</div><div className="pl-shortcut-sub">{babyMode ? "Your tasks, made extra cozy" : dinoTheme ? "Your tasks with a dino twist" : "Manage today’s tasks"}</div></span>
             <span className="pl-shortcut-arrow">›</span>
           </button>
           <button type="button" className="pl-shortcut" onClick={() => setCalmQuickOpen?.(true)}>
@@ -524,9 +534,9 @@ export function TodayPanel({
       `}</style>
 
       <div data-plushlife-home-stack className="pl-home-shell">
-        <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} />
+        <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} />
         {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }
-        {homeDisplayGroups(homeLayout).map(group => group.length===2 ? <DayAgenda key="schedule-tasks" tasks={homeSections.tasks} schedule={homeSections.schedule} selectedSchedule={selectedSchedule} exceptions={selectedScheduleExceptionEntries} date={selectedProgressDate || period?.date} timezone={preferences?.timezone}/> : <React.Fragment key={group[0]}>{homeSections[group[0]]}</React.Fragment>)}
+        {homeDisplayGroups(homeLayout).map(group => group.length===2 ? <DayAgenda key="schedule-tasks" tasks={homeSections.tasks} schedule={homeSections.schedule} selectedSchedule={selectedSchedule} exceptions={selectedScheduleExceptionEntries} date={selectedProgressDate || period?.date} timezone={preferences?.timezone} taskLabel={babyMode ? "Little Jobs" : dinoTheme ? "Dino Missions" : "Tasks"}/> : <React.Fragment key={group[0]}>{homeSections[group[0]]}</React.Fragment>)}
         <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
           <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>A little more, when you want it</summary>
           <div style={{display:'grid',gap:12,paddingTop:8}}>
