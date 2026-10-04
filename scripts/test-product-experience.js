@@ -37,7 +37,7 @@ expect(entitlements.includes("./assets/state-polish.js") && entitlements.include
 expect(!entitlements.includes("enforced: true"), "experience work must not activate billing entitlements");
 expect(!entitlements.includes("keepFullTodayTaskListStable") && !entitlements.includes("plushlife-full-task-list-override"), "Today layout stability is declarative, not injected after render");
 expect(app.includes('className="classic-sync-strip"') && app.includes('borderRadius: 999') && !app.includes('{syncStatus === "error" ? "Retry" : "Sync now"}'), "Home sync status stays a compact single control");
-expect(app.includes('className="pl-home-checkin-row"') && app.includes('flex: "0 1 auto"'), "Home check-in stays a compact status pill instead of a full-width card");
+expect(app.includes('id="plushlife-checkin-trigger"') && app.includes('style={{ display: "none" }}') && today.includes("pl-reference-quick-grid"), "Home check-in stays reachable without duplicating a status banner above the reference layout");
 expect(today.includes("pl-home-today-row") && !today.includes("Start a gentle timer"), "Today header stays compact and does not duplicate the large timer control");
 expect(today.includes("min-height:128px!important") && today.includes("pl-home-cozy-link"), "mobile Home hero stays compact while Cozy Space remains reachable");
 expect(today.includes('border: "1px solid var(--pl-theme-line)"') && today.includes('background: C.card'), "Home cards use theme surfaces instead of light-only card chrome");

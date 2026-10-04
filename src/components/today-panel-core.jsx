@@ -3,7 +3,7 @@ import { nextCompanionReward } from "../companion-experience.js";
 import { CozyComfortContext } from "./cozy-space.jsx";
 import { upcomingSchedule } from "../home-agenda.js";
 import { RewardMoment } from "./reward-moment.jsx";
-import { normalizeHomeLayout, homeDisplayGroups } from "../home-layout.js";
+import { normalizeHomeLayout } from "../home-layout.js";
 import { ThemeScene, DesignIcon, useThemeCopy, ThemeWorldContext } from "./theme-world.jsx";
 import { HabitTypeIcon } from "./shared.jsx";
 import { CalmPanel } from "./info-panels.jsx";
@@ -141,10 +141,13 @@ function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, 
   );
 }
 
-function ReferenceHomeOverview({ pct = 0, doneCount = 0, rows = [], openTodayJournal, openDailyCheckIn, openTaskManager, period, setCalmQuickOpen }) {
-  const total = rows.filter((row) => row && !row.isBonus).length;
+function ReferenceHomeOverview({ pct = 0, doneCount = 0, rows = [], viewDone = {}, toggle, openTodayJournal, openDailyCheckIn, openTaskManager, period, setCalmQuickOpen, babyMode = false, dinoTheme = false }) {
+  const activeRows = rows.filter((row) => row && !row.isBonus);
+  const total = activeRows.length;
   const safePct = Math.max(0, Math.min(100, Math.round(Number(pct) || 0)));
-  const completed = Number.isFinite(doneCount) ? doneCount : rows.filter((row) => row && !row.isBonus && row.done).length;
+  const completed = Number.isFinite(doneCount) ? doneCount : activeRows.filter((row) => !!viewDone?.[row.key]).length;
+  const nextRows = activeRows.filter((row) => !viewDone?.[row.key]).slice(0, 2);
+  const taskNoun = babyMode ? "little jobs" : dinoTheme ? "Dino Missions" : "tasks";
   return (
     <div className="pl-reference-home-overview">
       <section className="pl-reference-progress" aria-label="Today's progress">
@@ -160,6 +163,20 @@ function ReferenceHomeOverview({ pct = 0, doneCount = 0, rows = [], openTodayJou
           <button type="button" onClick={() => openDailyCheckIn?.()}><span>♡</span><small>Check-in</small></button>
           <button type="button" onClick={() => startFocusTimer({ minutes: 10 })}><span>◷</span><small>Timer</small></button>
           <button type="button" onClick={() => setCalmQuickOpen?.(true)}><span>✿</span><small>Breathe</small></button>
+        </div>
+      </section>
+      <section className="pl-reference-next" aria-label="Next up">
+        <div className="pl-reference-next-head"><h2>Next up</h2><button type="button" onClick={() => openTaskManager?.(period?.date)}>View all {taskNoun} →</button></div>
+        <div className="pl-reference-next-list">
+          {nextRows.length ? nextRows.map((row) => (
+            <div className="pl-reference-next-row" key={row.key}>
+              <button type="button" className="pl-reference-next-check pl-mini-control" aria-label={`Complete ${row.label || "task"}`} onClick={() => toggle?.(row.key)} />
+              <span className="pl-reference-next-label">{row.sourceTask && <HabitTypeIcon task={row.sourceTask} />}{row.label || "Untitled task"}</span>
+              <button type="button" className="pl-reference-next-open" onClick={() => openTaskManager?.(period?.date)}>Open</button>
+            </div>
+          )) : (
+            <div className="pl-reference-next-empty">✨ You’re caught up for today.</div>
+          )}
         </div>
       </section>
     </div>
@@ -565,12 +582,15 @@ export function TodayPanel({
 
       <div data-plushlife-home-stack className="pl-home-shell">
         <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} />
-        {!isHistoricalView && !isFutureView && <ReferenceHomeOverview pct={pct} doneCount={doneCount} rows={rows} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} openTaskManager={openTaskManager} period={period} setCalmQuickOpen={setCalmQuickOpen} />}
+        {!isHistoricalView && !isFutureView && <ReferenceHomeOverview pct={pct} doneCount={doneCount} rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} openTaskManager={openTaskManager} period={period} setCalmQuickOpen={setCalmQuickOpen} babyMode={babyMode} dinoTheme={dinoTheme} />}
         {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }
-        {homeDisplayGroups(homeLayout).map(group => group.length===2 ? <DayAgenda key="schedule-tasks" tasks={homeSections.tasks} schedule={homeSections.schedule} selectedSchedule={selectedSchedule} exceptions={selectedScheduleExceptionEntries} date={selectedProgressDate || period?.date} timezone={preferences?.timezone} taskLabel={babyMode ? "Little Jobs" : dinoTheme ? "Dino Missions" : "Tasks"}/> : <React.Fragment key={group[0]}>{homeSections[group[0]]}</React.Fragment>)}
         <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
-          <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>A little more, when you want it</summary>
+          <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>More for today</summary>
           <div style={{display:'grid',gap:12,paddingTop:8}}>
+            <DayAgenda tasks={homeSections.tasks} schedule={homeSections.schedule} selectedSchedule={selectedSchedule} exceptions={selectedScheduleExceptionEntries} date={selectedProgressDate || period?.date} timezone={preferences?.timezone} taskLabel={babyMode ? "Little Jobs" : dinoTheme ? "Dino Missions" : "Tasks"}/>
+            {homeSections.habits}
+            {homeSections.tiny}
+            <CompletedToday rows={rows} viewDone={viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} expanded={completedTodayExpanded} setExpanded={setCompletedTodayExpanded} />
             <button type="button" onClick={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard?.('care');}} style={{minHeight:44,border:'1px solid var(--pl-theme-line)',borderRadius:14,padding:10,background:'var(--pl-theme-surface-2)',color:'var(--pl-theme-ink)',font:'inherit'}}>My Cozy Space · add a comfort when you like</button>
             {cozyDaily}
             {homeLayout.order.filter(id => !homeLayout.hidden.includes(id) && ['shortcuts','noticed'].includes(id)).map(id => <React.Fragment key={id}>{homeSections[id]}</React.Fragment>)}
@@ -580,7 +600,6 @@ export function TodayPanel({
             <TomorrowNote tomorrowTasksCount={tomorrowTasksCount} />
           </div>
         </details>
-        <CompletedToday rows={rows} viewDone={viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} expanded={completedTodayExpanded} setExpanded={setCompletedTodayExpanded} />
 
 
       </div>
