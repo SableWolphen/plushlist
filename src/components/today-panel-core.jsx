@@ -3,7 +3,7 @@ import { nextCompanionReward } from "../companion-experience.js";
 import { CozyComfortContext } from "./cozy-space.jsx";
 import { upcomingSchedule } from "../home-agenda.js";
 import { RewardMoment } from "./reward-moment.jsx";
-import { normalizeHomeLayout, homeDisplayGroups } from "../home-layout.js";
+import { normalizeHomeLayout } from "../home-layout.js";
 import { ThemeScene, DesignIcon, useThemeCopy, ThemeWorldContext } from "./theme-world.jsx";
 import { HabitTypeIcon } from "./shared.jsx";
 import { CalmPanel } from "./info-panels.jsx";
