@@ -185,7 +185,7 @@ export function CarePanel(props) {
             {props.babyMode ? `${props.babyCaregiverName} check-in` : "Check in"}
           </button>
         </div>
-        <div className="pl-care-copy">Pick one feeling. We’ll find one small step.</div>
+        <div className="pl-care-copy">Care is for the moment you’re in. Pick one feeling and we’ll find one small step; the bigger tool library can wait.</div>
 
         <div className="pl-care-feelings">
           {visibleOptions.map((option) => <SituationButton key={option.id} option={option} selected={selectedSituationId === option.id} onClick={() => chooseSituation(option)} />)}
