@@ -361,8 +361,8 @@ export function TodayPanel({
     habits: (<Habits rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} period={period} />),
     schedule: (<TodaySchedule selectedSchedule={selectedSchedule} selectedScheduleExceptionEntries={selectedScheduleExceptionEntries} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} />),
     shortcuts: (<div className="pl-home-shortcuts">
-          <button type="button" className="pl-shortcut" onClick={() => openTaskManager?.(period?.date, "habits")}>
-            <span className="pl-shortcut-icon">🧸</span>
+          <button type="button" className="pl-shortcut" onClick={() => openTaskManager?.(period?.date)}>
+            <span className="pl-shortcut-icon">{dinoTheme ? "🦕" : babyMode ? "🧸" : "✓"}</span>
             <span><div className="pl-shortcut-title">{babyMode ? "Little Jobs" : dinoTheme ? "Dino Missions" : "Tasks"}</div><div className="pl-shortcut-sub">{babyMode ? "Your tasks, made extra cozy" : dinoTheme ? "Your tasks with a dino twist" : "Manage today’s tasks"}</div></span>
             <span className="pl-shortcut-arrow">›</span>
           </button>
@@ -393,7 +393,7 @@ export function TodayPanel({
           radial-gradient(ellipse at 31% 91%,rgba(255,255,255,.68) 0 13%,transparent 14%),
           radial-gradient(ellipse at 83% 88%,rgba(255,255,255,.76) 0 14%,transparent 15%),
           linear-gradient(90deg,rgba(255,255,255,.22),transparent 34%,rgba(255,255,255,.10));pointer-events:none}
-        .pl-home-hero:after{content:"✦  ·  ♡  ·  ✦";position:absolute;right:8%;top:44%;color:rgba(255,255,255,.92);font-size:16px;letter-spacing:8px;text-shadow:0 2px 12px rgba(160,88,180,.18);pointer-events:none}
+        .pl-home-hero:after{display:none!important}
         .pl-home-brand,.pl-home-actions,.pl-home-copy,.pl-home-plush,.pl-home-bubble{position:absolute;z-index:3}
         .pl-home-brand{left:20px!important;top:18px!important;transform:none!important;text-align:left!important;max-width:58%!important}
         .pl-home-logo{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:900;font-size:32px!important;line-height:1!important;color:#4B2460;letter-spacing:-1.5px;text-shadow:0 2px 0 rgba(255,255,255,.45)}
