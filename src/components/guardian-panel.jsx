@@ -45,9 +45,9 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
     ...(supportScheduleExceptions || []).flatMap((item) => (item.entries || []).map((entry) => ({ ...entry, isException: true }))),
   ].sort((a, b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")));
   return (
-          <ToolPanel inline title="💛 PlushSupport" displayTitle="Support" onClose={onClose}>
+          <ToolPanel inline title="💛 PlushSupport" displayTitle="Guardians" onClose={onClose}>
           <div className="pl-guardian-content">
-          <CozyScene title="You choose who walks with you." subtitle="A Guardian is a partner, parent, friend, caregiver, or other trusted person you choose. You control what they can see and do." />
+          <CozyScene title="Cozy & Guardian" subtitle="You’re the Cozy — this is your space. A Guardian is a partner, parent, friend, caregiver, or other trusted person you choose. Do things together and support each other; you control what gets shared." />
           {canUseCaretakerDashboard && (
             <div className="pl-guardian-person-switcher" role="group" aria-label="Guardian views">
               <button type="button" aria-pressed={supportViewMode === "mine"} onClick={() => setSupportViewMode("mine")}>🧸 My Support</button>
