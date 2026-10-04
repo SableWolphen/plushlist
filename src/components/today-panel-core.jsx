@@ -69,6 +69,7 @@ function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, 
   const companion = React.useContext(ThemeWorldContext);
   const cozy = React.useContext(CozyComfortContext);
   const petName = cozy?.profile?.pet_name || "Your plush";
+  const personName = String(cozy?.profile?.fields?.nickname || "").trim() || "Cozy";
   const comfort = cozy?.profile?.fields?.comfort_item;
   const evening = new Date().getHours() >= 20 || new Date().getHours() < 5;
   const nextReward = companion.rewardProgress ? nextCompanionReward(window.PlushLifeContent.MASCOT_OUTFITS, companion.unlockedIds, companion.rewardProgress) : null;
@@ -111,11 +112,11 @@ function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, 
         </div>
       </header>
       <section className="pl-home-hero" aria-label="PlushLife welcome">
-        <button type="button" className={`pl-mascot-pat ${mascotCelebrating && !reducedMotion ? "pl-mascot-happy-hop" : ""}`} onClick={() => reactToCozy(cozy?.profile?.pet_name ? `${petName} is happy you’re here! 💜` : "Happy you're here, Cozy! 💜")} aria-label="Say hi to your plush" title="Tap to say hi">
+        <button type="button" className={`pl-mascot-pat ${mascotCelebrating && !reducedMotion ? "pl-mascot-happy-hop" : ""}`} onClick={() => reactToCozy(cozy?.profile?.pet_name ? `${petName} is happy you’re here, ${personName}! 💜` : `Happy you’re here, ${personName}! 💜`)} aria-label="Say hi to your plush" title="Tap to say hi">
           <span className={!mascotCelebrating && !reducedMotion ? "pl-companion-idle" : ""}><ThemeScene outfit={selectedOutfit} focus mood={mascotCelebrating ? "happy" : "neutral"} /></span>
         </button>
         <div className="pl-companion-copy">
-        <h2>{mascotMessage || (returning ? "Welcome back, Cozy." : copy["A little counts."] || "A little counts.")}</h2>
+        <h2>{mascotMessage || (returning ? `Welcome back, ${personName}.` : (copy["A little counts."] || `Happy you’re here, ${personName}! 💜`).replace(/\bCozy\b/g, personName))}</h2>
         <p>{returning ? "Good to see you. One tiny thing is plenty." : evening ? `${petName} is winding down with you.` : cozy?.profile?.pet_name ? `${petName} is happy you’re here.` : copy["Your plush is happy you\'re here."] || "Your plush is happy you\'re here."}</p>
         {comfort && <small className="pl-companion-comfort" title={comfort}>Keep {comfort.slice(0,80)} close.</small>}
         {nextReward && <span className="pl-companion-reward"><small>{nextReward.copy}</small><progress value={nextReward.count} max={nextReward.total} aria-label={`Progress toward ${nextReward.outfit.name}`} /></span>}
