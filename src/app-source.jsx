@@ -669,7 +669,7 @@ const HABIT_REWARDS = [
 function GlowUpTracker() {
   const [active, setActive] = useState(() => dayIdForDate(trackerPeriod().date));
   const [dashboard, setDashboard] = useState("today");
-  const [appearanceTheme, setAppearanceTheme] = useState("soft");
+  const [appearanceTheme, setAppearanceTheme] = useState("none");
   const [deviceBackupStatus, setDeviceBackupStatus] = useState({ exists: false, savedAt: null });
   const [deviceBackupBusy, setDeviceBackupBusy] = useState(false);
   const [deviceBackupVerifyBusy, setDeviceBackupVerifyBusy] = useState(false);
@@ -709,7 +709,7 @@ function GlowUpTracker() {
   useEffect(() => {
     if (!user?.id) return;
     const savedTheme = window.localStorage.getItem(`plushlist-appearance-${user.id}`);
-    if (APPEARANCE_THEMES.some((theme) => theme.id === savedTheme)) setAppearanceTheme(savedTheme);
+    if (savedTheme === "none" || APPEARANCE_THEMES.some((theme) => theme.id === savedTheme)) setAppearanceTheme(savedTheme);
   }, [user?.id]);
   const [weeklyHistory, setWeeklyHistory] = useState([]);
   const [longHistory, setLongHistory] = useState([]);
@@ -1244,7 +1244,7 @@ function GlowUpTracker() {
       if (!active) return;
       if (data) {
         setPreferences((current) => ({ ...current, ...data, home_layout: normalizeHomeLayout(data.home_layout), reminder_times: Array.isArray(data.reminder_times) ? data.reminder_times : current.reminder_times }));
-        if (APPEARANCE_THEMES.some(theme => theme.id === data.appearance_theme)) setAppearanceTheme(data.appearance_theme);
+        if (data.appearance_theme === "none" || APPEARANCE_THEMES.some(theme => theme.id === data.appearance_theme)) setAppearanceTheme(data.appearance_theme);
       }
       // A failed fetch also leaves `data` null, same as a genuinely new
       // account with no preferences row yet — those aren't the same thing.
@@ -5933,7 +5933,7 @@ function GlowUpTracker() {
     nav: "#FFFDFEF5",
     art: "baby",
   };
-  const activeWorld = babyMode ? ((isNightHour || preferences.dark_mode) ? "baby-night" : "baby") : dinoTheme ? "dino" : appearanceTheme;
+  const activeWorld = babyMode ? ((isNightHour || preferences.dark_mode) ? "baby-night" : "baby") : dinoTheme ? "dino" : (appearanceTheme === "none" ? "soft" : appearanceTheme);
   const paletteWorld = preferences.dark_mode && !babyMode ? "twilight" : activeWorld;
   useEffect(() => {
     try { window.localStorage.setItem("plushlife-login-theme", JSON.stringify({ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit })); } catch (_error) {}
@@ -5944,7 +5944,7 @@ function GlowUpTracker() {
  * Ambient themes remain visible through the dedicated theme layer; the old heavy frame stays removed.
  */
   const selectAppearanceTheme = (themeId) => {
-    const validTheme = APPEARANCE_THEMES.some((theme) => theme.id === themeId) ? themeId : "soft";
+    const validTheme = themeId === "none" || APPEARANCE_THEMES.some((theme) => theme.id === themeId) ? themeId : "none";
     setAppearanceTheme(validTheme);
     updatePreference({ appearance_theme: validTheme, dino_theme: false, nickname_style: "warm" });
     if (user?.id) window.localStorage.setItem(`plushlist-appearance-${user.id}`, validTheme);
