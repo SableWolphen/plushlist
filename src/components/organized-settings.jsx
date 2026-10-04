@@ -114,6 +114,21 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
   const [section, setSection] = React.useState("home");
   const [search, setSearch] = React.useState("");
   const cozy = React.useContext(CozyComfortContext);
+  const [preferredNameDraft, setPreferredNameDraft] = React.useState("");
+  const [plushNameDraft, setPlushNameDraft] = React.useState("");
+  React.useEffect(() => {
+    if (!open || cozy?.status !== "ready") return;
+    setPreferredNameDraft(String(cozy?.profile?.fields?.nickname || ""));
+    setPlushNameDraft(String(cozy?.profile?.pet_name || ""));
+  }, [open, cozy?.status, cozy?.profile?.fields?.nickname, cozy?.profile?.pet_name]);
+  const savePreferredName = async () => {
+    if (!cozy || cozy.status !== "ready") return;
+    await cozy.save({...cozy.profile, fields:{...cozy.profile.fields, nickname:preferredNameDraft.trim()}});
+  };
+  const savePlushName = async () => {
+    if (!cozy || cozy.status !== "ready") return;
+    await cozy.save({...cozy.profile, pet_name:plushNameDraft.trim()});
+  };
   const [comebackOptOut, setComebackOptOut] = React.useState(() => {
     try { return !!window.PlushLifeComebackReminder?.isOptedOut?.(); } catch (_error) { return false; }
   });
@@ -190,8 +205,28 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
       <DetailHeader title="Personalize" onBack={() => setSection("home")} />
       <SectionTitle icon="👤" title="Make PlushLife yours" description="Your name, comfort wording, and visual style live here." />
       <Card>
+        <div style={{marginBottom:12,padding:11,borderRadius:13,background:"var(--pl-theme-surface-2,#F7F1FB)",fontSize:12,lineHeight:1.45,color:"var(--pl-theme-muted,#8A7895)"}}>
+          <strong style={{color:"var(--pl-theme-ink,#5B4B6B)"}}>Personal names</strong><br/>
+          Your preferred name is what your Plush uses in greetings. Your account/display name is used elsewhere in PlushLife.
+        </div>
         <label style={{ display: "grid", gap: 6, fontSize: 11.5, fontWeight: 900, color: "var(--pl-theme-ink,#745D81)" }}>
-          YOUR NAME
+          PREFERRED NAME
+          <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 8 }}>
+            <input type="text" value={preferredNameDraft} onChange={(event) => setPreferredNameDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") savePreferredName(); }} maxLength={40} placeholder="What your Plush should call you" style={inputStyle} />
+            <button type="button" onClick={savePreferredName} disabled={cozy?.status !== "ready"} style={primaryButton}>Save</button>
+          </div>
+        </label>
+        <label style={{ display: "grid", gap: 6, marginTop: 15, fontSize: 11.5, fontWeight: 900, color: "var(--pl-theme-ink,#745D81)" }}>
+          PLUSH NAME · OPTIONAL
+          <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 8 }}>
+            <input type="text" value={plushNameDraft} onChange={(event) => setPlushNameDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") savePlushName(); }} maxLength={40} placeholder="Name your companion" style={inputStyle} />
+            <button type="button" onClick={savePlushName} disabled={cozy?.status !== "ready"} style={primaryButton}>Save</button>
+          </div>
+        </label>
+      </Card>
+      <Card>
+        <label style={{ display: "grid", gap: 6, fontSize: 11.5, fontWeight: 900, color: "var(--pl-theme-ink,#745D81)" }}>
+          ACCOUNT / DISPLAY NAME
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 8 }}>
             <input type="text" value={displayNameDraft} onChange={(event) => setDisplayNameDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") saveDisplayName(); }} maxLength={40} placeholder="Your name" style={inputStyle} />
             <button type="button" onClick={saveDisplayName} style={primaryButton}>Save</button>
