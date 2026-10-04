@@ -37,6 +37,12 @@ export function AppearanceThemePicker({ preferences, appearanceTheme, selectAppe
   const { APPEARANCE_THEMES } = window.PlushLifeContent;
   return (
     <>
+      <div style={{ fontSize: 11.5, fontWeight: 900, color: "var(--pl-theme-ink,#745D81)" }}>APPEARANCE</div>
+      <div role="group" aria-label="Choose light or dark appearance" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 7, marginBottom: 13, padding: 4, borderRadius: 14, background: "var(--pl-theme-surface-2)", border: "1px solid var(--pl-theme-line)" }}>
+        <button type="button" aria-pressed={!preferences.dark_mode} onClick={() => updatePreference({ dark_mode: false })} style={{ minHeight: 44, borderRadius: 11, border: !preferences.dark_mode ? "2px solid var(--pl-theme-accent)" : "1px solid transparent", background: !preferences.dark_mode ? "var(--pl-theme-surface)" : "transparent", color: "var(--pl-theme-ink)", fontWeight: 900, cursor: "pointer" }}>☀️ Light</button>
+        <button type="button" aria-pressed={!!preferences.dark_mode} onClick={() => updatePreference({ dark_mode: true })} style={{ minHeight: 44, borderRadius: 11, border: preferences.dark_mode ? "2px solid var(--pl-theme-accent)" : "1px solid transparent", background: preferences.dark_mode ? "var(--pl-theme-surface)" : "transparent", color: "var(--pl-theme-ink)", fontWeight: 900, cursor: "pointer" }}>🌙 Dark</button>
+      </div>
+      <div style={{ fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#8A7895)", marginBottom: 12 }}>Light or dark changes the palette, not your chosen world. Lavender stays Lavender, Dino stays Dino, and so on.</div>
       <div style={{ fontSize: 11.5, fontWeight: 900, color: "var(--pl-theme-ink,#745D81)" }}>AMBIENT THEME</div>
       <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#8A7895)" }}>Swipe to choose your world. Your routines and progress stay with you.</div>
       <div className="pl-theme-picker" aria-label="Choose your theme">
