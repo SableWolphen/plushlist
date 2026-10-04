@@ -40,11 +40,11 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
           <ToolPanel title="🌷 Add & organize" displayTitle="Tasks" inline={inline} hideClose={inline} onClose={onClose}>
           <div className="pl-task-page">
             <div className="pl-design-tabs" role="tablist" aria-label="Task views">
-              {[["today", "Today"], ["later", "Later"], ["habits", "Habits"]].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={taskView === id} onClick={() => setTaskView(id)}>{label}</button>)}
+              {[["today", "All"], ["habits", "Habits"], ["later", "Later"]].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={taskView === id} onClick={() => setTaskView(id)}>{label}</button>)}
             </div>
             <section className="pl-design-card" aria-label="Your task list">
-              <div className="pl-task-title"><button type="button" className={`pl-mascot-pat ${plushHappy ? "pl-mascot-happy-hop" : ""}`} onClick={cheer} aria-label="Say hi to your plush"><ThemeScene focus decorative mood={plushHappy ? "happy" : "neutral"} /></button><h2>{taskView === "habits" ? "Your gentle routines" : taskView === "later" ? "Another day is okay" : "Your little list"}</h2></div>
-              <p className="pl-design-caption">{taskView === "today" ? "Just a few at a time. The rest are still here when you want them." : "No need to do everything. Moving a task is allowed."}</p>
+              <div className="pl-task-title"><button type="button" className={`pl-mascot-pat ${plushHappy ? "pl-mascot-happy-hop" : ""}`} onClick={cheer} aria-label="Say hi to your plush"><ThemeScene focus decorative mood={plushHappy ? "happy" : "neutral"} /></button><h2>{taskView === "habits" ? "Habits" : taskView === "later" ? "Later" : "Tasks for the day"}</h2></div>
+              <p className="pl-design-caption">{taskView === "today" ? "Check things off, open details, or move them when the day changes." : "No need to do everything. Moving a task is allowed."}</p>
               <details style={{ marginTop: 8 }}>
                 <summary style={{ cursor: "pointer", fontSize: 12, fontWeight: 800, color: "var(--pl-theme-muted,#806B8D)" }}>Find a task</summary>
                 <input style={{ marginTop: 7 }} value={taskSearchQuery} onChange={(event) => setTaskSearchQuery(event.target.value)} placeholder="Search your little list" aria-label="Search today's tasks" />
@@ -67,7 +67,7 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
                     </button>
                     {row.sourceTask && (
                       <details style={{ position: "relative", flex: "0 0 auto" }}>
-                        <summary className="pl-task-edit" aria-label={`More options for ${row.label}`} style={{ listStyle: "none", cursor: "pointer", display: "grid", placeItems: "center" }}>•••</summary>
+                        <summary className="pl-task-edit" aria-label={`More options for ${row.label}`} style={{ listStyle: "none", cursor: "pointer", display: "grid", placeItems: "center" }}>Open</summary>
                         <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 20, minWidth: 132, padding: 6, borderRadius: 11, background: "var(--pl-theme-surface,#FFF)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 10px 26px rgba(74,45,94,.16)" }}>
                           <button type="button" onClick={() => startEditingTask(row.sourceTask)} style={{ width: "100%", minHeight: 38, border: 0, borderRadius: 8, background: "transparent", textAlign: "left", color: "var(--pl-theme-ink,#5B4B6B)", fontWeight: 850, cursor: "pointer" }}>✏️ Edit</button>
                           <button type="button" onClick={() => setPendingTaskDelete({ key: row.sourceTask.task_key, label: row.sourceTask.task, section: row.sourceTask.section })} style={{ width: "100%", minHeight: 38, border: 0, borderRadius: 8, background: "transparent", textAlign: "left", color: "var(--pl-theme-muted,#C45D74)", fontWeight: 850, cursor: "pointer" }}>🗑️ Delete</button>

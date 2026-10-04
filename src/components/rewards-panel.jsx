@@ -28,9 +28,9 @@ export function RewardsPanel({ saveMessage, open, onClose, inline = false, selec
       {!unlocked && <small>{outfit.hint}</small>}
     </button>;
   };
-  return <ToolPanel title="🧸 Plush & Keepsakes" displayTitle="Plush Corner" inline={inline} hideClose={inline} onClose={onClose}>
+  return <ToolPanel title="🧸 Plush & Keepsakes" displayTitle="Plush" inline={inline} hideClose={inline} onClose={onClose}>
     <div className="pl-closet-shell">
-      <CozyScene title="Your plush, growing with you." subtitle={copy["Your story is bigger than a streak."] || "Tiny steps. Big hugs."} outfit={selectedOutfit} focus />
+      <CozyScene title="Your Plush" subtitle={copy["Your story is bigger than a streak."] || "Keep going! Each completed task helps your plush feel happier."} outfit={selectedOutfit} focus />
       <section className="pl-design-card pl-closet-summary">
         <h2>Wearing · {selectedOutfit.name}</h2>
         {saveMessage && <p role="status">{saveMessage}</p>}
