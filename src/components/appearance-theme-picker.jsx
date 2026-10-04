@@ -37,9 +37,15 @@ export function AppearanceThemePicker({ preferences, appearanceTheme, selectAppe
   const { APPEARANCE_THEMES } = window.PlushLifeContent;
   return (
     <>
-      <div style={{ fontSize: 11.5, fontWeight: 900, color: "var(--pl-theme-ink,#745D81)" }}>AMBIENT THEME</div>
-      <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#8A7895)" }}>Swipe to choose your world. Your routines and progress stay with you.</div>
+      <div style={{ fontSize: 11.5, fontWeight: 900, color: "var(--pl-theme-ink,#745D81)" }}>APPEARANCE</div>
+      <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#8A7895)" }}>Themes are optional. PlushLife starts clean and neutral; choose a world only when you want one.</div>
       <div className="pl-theme-picker" aria-label="Choose your theme">
+        <button type="button" onClick={() => selectAppearanceTheme("none")} aria-pressed={!dinoTheme && preferences.nickname_style !== "baby" && appearanceTheme === "none"} style={{ position: "relative", overflow: "hidden", minHeight: 102, padding: 0, borderRadius: 16, border: !dinoTheme && preferences.nickname_style !== "baby" && appearanceTheme === "none" ? "2px solid #7D61AB" : "1px solid var(--pl-theme-line,#D4CCE0)", background: "#F6F4F9", color: "#40334F", fontWeight: 900, cursor: "pointer", boxShadow: !dinoTheme && preferences.nickname_style !== "baby" && appearanceTheme === "none" ? "0 7px 18px rgba(94,76,126,.16)" : "0 4px 12px rgba(64,51,79,.04)" }}>
+          <span aria-hidden="true" style={{ minHeight: 69, display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 5, alignItems: "center", padding: "0 16px" }}>
+            {["#F6F4F9","#FEFCFF","#EDE8F5","#B299D6"].map((color) => <span key={color} style={{ height: 30, borderRadius: 9, background: color, border: "1px solid #D4CCE0" }} />)}
+          </span>
+          <span style={{ display: "block", padding: "6px 4px 8px", background: "#FEFCFF", color: "#40334F", borderTop: "1px solid #D4CCE0", fontSize: 12 }}>No theme{!dinoTheme && preferences.nickname_style !== "baby" && appearanceTheme === "none" ? " ✓" : ""}</span>
+        </button>
         <button type="button" onClick={() => updatePreference({ dino_theme: true, nickname_style: "warm" })} aria-pressed={!!dinoTheme} style={{ position: "relative", overflow: "hidden", minHeight: 102, padding: 0, borderRadius: 16, border: dinoTheme ? "2px solid #9B67C6" : "1px solid #E4D8E8", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink,#5D3F73)", fontWeight: 900, cursor: "pointer", boxShadow: dinoTheme ? "0 7px 18px rgba(155,103,198,.22)" : "0 4px 12px rgba(96,62,108,.05)" }}>
           <span aria-hidden="true" style={{ display: "grid", placeItems: "center", minHeight: 69, background: "radial-gradient(circle at 30% 30%,#FFF6D5,transparent 42%),linear-gradient(145deg,#EFE5FF,#E8F6ED)" }}><PlushMascot theme="dino" size={104} /></span>
           <span style={{ display: "block", padding: "6px 4px 8px", background: "var(--pl-theme-surface-2)", color: "var(--pl-theme-ink)", borderTop: "1px solid var(--pl-theme-line)", fontSize: 12 }}>Dino{dinoTheme ? " ✓" : ""}</span>
