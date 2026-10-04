@@ -282,7 +282,7 @@
     height:80px!important;
     min-height:80px!important;
     max-height:80px!important;
-    bottom:max(8px,env(safe-area-inset-bottom))!important;
+    bottom:max(10px,env(safe-area-inset-bottom))!important;
     padding:8px 4px max(8px,env(safe-area-inset-bottom))!important;
     border-radius:22px!important;
     background:var(--pl-theme-surface)!important;
@@ -1175,11 +1175,11 @@ html[data-plushlife-color-mode="dark"] #main-content .pl-home-hero{
    ================================================================ */
 
 #main-content .plushlife-app-column{
-  padding-bottom:calc(132px + env(safe-area-inset-bottom))!important;
+  padding-bottom:calc(148px + env(safe-area-inset-bottom))!important;
 }
 #main-content .pl-home-shell{
   gap:12px!important;
-  padding-bottom:calc(128px + env(safe-area-inset-bottom))!important;
+  padding-bottom:calc(148px + env(safe-area-inset-bottom))!important;
 }
 
 /* Home should read top-to-bottom once, not repeat the same state in three places. */
@@ -1398,7 +1398,7 @@ html[data-plushlife-color-mode="dark"] #main-content .pl-home-hero{
 
 /* App-wide mobile ergonomics discovered by the Figma audit. */
 #main-content :is(.pl-task-page,.pl-care-shell,.pl-growth-shell,.pl-calendar-cozy,.pl-guardian-content,.pl-closet-shell,.pl-inline-tool,.pl-unified-page-shell){
-  padding-bottom:calc(128px + env(safe-area-inset-bottom))!important;
+  padding-bottom:calc(148px + env(safe-area-inset-bottom))!important;
 }
 #main-content :is(button,summary,[role="button"],[role="tab"],input[type="checkbox"],input[type="radio"]){
   touch-action:manipulation;
@@ -1469,6 +1469,6 @@ body>[role="dialog"]>div{
   }
   #main-content .plushlife-app-column{
     padding-inline:12px!important;
-    padding-bottom:calc(136px + env(safe-area-inset-bottom))!important;
+    padding-bottom:calc(152px + env(safe-area-inset-bottom))!important;
   }
 }
