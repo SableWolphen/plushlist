@@ -1,5 +1,5 @@
 import { CozySharing, SharedCozyCard } from "./cozy-space.jsx";
-import { TogetherCorner } from "./together-corner.jsx";
+const LazyTogetherCorner = React.lazy(() => import("./together-corner.jsx").then((module) => ({ default: module.TogetherCorner })));
 // The inline Guardian/support ToolPanel — module split phase 7,
 // eighth slice, last of the "big four" (see docs/module-split-plan.md).
 // Covers both roles of the Guardian relationship: managing Guardians
@@ -68,7 +68,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             {ownedSupportLinks.length ? <ul style={{paddingLeft:20,color:"var(--pl-theme-ink)",overflowWrap:"anywhere"}}>{ownedSupportLinks.map(link=><li key={link.id}>{link.caregiver_email} · {!link.accepted_at ? "Invitation pending" : link.active ? "Active" : "Paused"}</li>)}</ul> : <p style={{color:"var(--pl-theme-muted)"}}>Choose someone you trust when you’re ready.</p>}
             <button type="button" onClick={()=>setGuardianArea("support")} style={{minHeight:44,padding:"8px 12px",borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)",color:"var(--pl-theme-ink)",fontWeight:800}}>Manage sharing & invitations</button>
           </section>}
-          {guardianArea === "together" && <TogetherCorner
+          {guardianArea === "together" && <React.Suspense fallback={<div role="status" style={{padding:14,color:"var(--pl-theme-muted)"}}>Opening Together…</div>}><LazyTogetherCorner
             client={client}
             user={user}
             supportOwnerId={supportOwnerId}
@@ -80,7 +80,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             supportNotes={supportNotes}
             loadSupportData={loadSupportData}
             loadSupportOwner={loadSupportOwner}
-          />}
+          /></React.Suspense>}
           {guardianArea === "support" && <div className="pl-guardian-support-card" style={{ marginBottom: 18, padding: 18, borderRadius: 20, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 8px 24px rgba(92,57,108,0.07)" }}>
             {supportViewMode === "caretaker" && guardianSupportRequests.filter((request) => request.owner_user_id === supportOwnerId && request.status !== "resolved" && request.status !== "cancelled").length > 0 && (
               <div style={{ marginBottom: 14, padding: 13, borderRadius: 13, background: "var(--pl-theme-surface,#FFF9FD)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
