@@ -97,7 +97,7 @@
 #main-content .pl-calendar-cozy{
   color:var(--pl-theme-ink)!important;
 }
-#main-content :is(.pl-growth-card,.pl-growth-stat,.pl-growth-weekbar,.pl-care-card,.pl-care-reco,.pl-care-memory,.pl-care-extra,.pl-care-tonight,.pl-calendar-cozy>div,.pl-calendar-cozy>section,.pl-calendar-cozy details){
+#main-content :is(.pl-growth-card,.pl-growth-stat,.pl-growth-weekbar,.pl-care-card,.pl-care-reco,.pl-care-memory,.pl-care-extra,.pl-care-tonight,.pl-calendar-cozy>section,.pl-calendar-cozy details){
   background:linear-gradient(145deg,color-mix(in srgb,var(--pl-theme-surface) 96%,transparent),color-mix(in srgb,var(--pl-theme-surface-2) 90%,transparent))!important;
   border-color:var(--pl-theme-line)!important;
   box-shadow:0 8px 22px color-mix(in srgb,var(--pl-theme-accent) 8%,transparent)!important;
@@ -1036,7 +1036,7 @@
   .pl-noticed,
   .pl-growth-card,.pl-growth-stat,.pl-growth-weekbar,
   .pl-care-card,.pl-care-reco,.pl-care-memory,.pl-care-extra,.pl-care-tonight,
-  .pl-calendar-cozy>div,.pl-calendar-cozy>section,.pl-calendar-cozy details
+  .pl-calendar-cozy>section,.pl-calendar-cozy details
 ){
   background:
     linear-gradient(145deg,rgba(255,253,255,.94),rgba(251,244,255,.90))!important;
@@ -1170,7 +1170,7 @@
   gap:11px!important;
 }
 #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-unified-page-content :is(
-  .pl-care-card,.pl-care-memory,.pl-growth-card,.pl-growth-weekbar,.pl-calendar-cozy>section,.pl-calendar-cozy>div
+  .pl-care-card,.pl-care-memory,.pl-growth-card,.pl-growth-weekbar,.pl-calendar-cozy>section
 ){
   background:linear-gradient(145deg,rgba(255,253,255,.95),rgba(249,243,255,.91))!important;
   border:1px solid #E4D1EB!important;
@@ -1621,7 +1621,7 @@
   [data-plushlife-home-stack]>section:not(.pl-home-hero),
   .pl-growth-card,.pl-growth-stat,.pl-growth-weekbar,
   .pl-care-card,.pl-care-memory,.pl-care-tonight,.pl-care-reco,.pl-care-extra,
-  .pl-calendar-cozy>section,.pl-calendar-cozy>div,.pl-calendar-cozy details
+  .pl-calendar-cozy>section,.pl-calendar-cozy details
 ){
   border-radius:18px!important;
   box-shadow:0 5px 16px color-mix(in srgb,var(--pl-theme-accent) 6%,transparent)!important;
