@@ -42,6 +42,7 @@ const checks = [
   [tasks.includes('minWidth: 0') && tasks.includes('width: "100%"') && tasks.includes('flexWrap: "wrap"'), "task editing fields and schedule controls can shrink/wrap on narrow phones"],
   [tasks.includes("showAllToday") && tasks.includes("Tasks for the day") && tasks.includes("See the rest"), "Tasks defaults to a calm day view with the rest available on demand"],
   [tasks.includes("More options for") && tasks.includes("🗑️ Delete") && tasks.includes("setPendingTaskDelete"), "visible task rows expose a direct delete action with confirmation"],
+  [tasks.includes('row.label || "Untitled task"') && read("src/components/week-panel-purpose.jsx").includes('task.task || "Untitled task"'), "Tasks and Day Replay never render mysterious blank task rows"],
   [taskPrivacy.includes("can_view_tasks") && taskPrivacy.includes("accepted_at is not null") && taskPrivacy.includes("auth.uid()) = user_id"), "task RLS keeps lists private except explicitly permitted Guardian sharing"],
   [app.includes("padding-bottom:calc(104px + env(safe-area-inset-bottom))") && app.includes('bottom: "calc(68px + env(safe-area-inset-bottom))"'), "content and transient notices stay above the fixed bottom navigation"],
   [app.includes("/* compact-phone-shell */") && app.includes("padding-bottom:calc(104px + env(safe-area-inset-bottom))"), "main mobile shell keeps fixed navigation from covering content"],
