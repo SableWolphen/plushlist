@@ -4,7 +4,7 @@ The approved reference screenshots are the visual target for the product. UI wor
 
 ## Screens
 
-Home, Progress, Care, Calendar, Add / Edit Task, Plush / Rewards, Habits, Little Jobs, My Story, Settings, Schedule Editor, Themes, and Guardians / PlushSupport must look like one PlushLife app.
+Home, Progress, Care, Calendar, Add / Edit Task, Plush / Rewards, Tasks, Habits, My Story, Settings, Schedule Editor, Themes, and Guardians / PlushSupport must look like one PlushLife app. "Little Jobs" is Baby Mode’s themed label for Tasks, not a separate screen or data type. Dino Mode may label Tasks as "Dino Missions"; both modes use the same underlying task data.
 
 ## Shared visual system
 
