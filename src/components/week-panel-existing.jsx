@@ -84,15 +84,17 @@ export function WeekPanel({ open, openTodayJournal, weekCardIndex, setWeekCardIn
               const bg = !isRestDay && pct >= 50 ? "var(--pl-theme-accent)" : "var(--pl-theme-surface-2)";
               const textColor = !isRestDay && pct >= 50 ? "var(--pl-theme-on-accent)" : "var(--pl-theme-ink)";
               const calendarTitle = [isRestDay ? "Resting" : pct === null ? null : `${pct}% complete`, moodOption ? `Feeling ${moodOption[2]}` : null, checkIn?.energy ? `${checkIn.energy} energy` : null, checkIn?.day_type ? `${checkIn.day_type} day` : null].filter(Boolean).join(" · ");
-              return <button key={date} type="button" disabled={isFutureDate} title={calendarTitle || undefined} aria-label={calendarTitle ? `${number}: ${calendarTitle}` : String(number)} onClick={() => {
+              return <button className="pl-calendar-day" key={date} type="button" disabled={isFutureDate} title={calendarTitle || undefined} aria-label={calendarTitle ? `${number}: ${calendarTitle}` : String(number)} onClick={() => {
                 if (isFutureDate) return;
                 setSelectedProgressDate(date);
                 setDayViewDate(date);
                 setWeekCardIndex(2);
                 if (date === period.date) setActive("daily");
-              }} aria-pressed={isSelectedDate} style={{ position: "relative", minHeight: 52, borderRadius: 9, border: isSelectedDate ? "2px solid var(--pl-theme-ink)" : "1px solid var(--pl-theme-line)", background: bg, color: textColor, fontWeight: 800, cursor: isFutureDate ? "not-allowed" : "pointer", opacity: isFutureDate ? 0.5 : 1 }}>
-                {isRestDay ? "🌴" : number}{moodEmoji && <span aria-label={`Feeling ${moodOption[2]}`} style={{ position: "absolute", left: 3, bottom: 1, fontSize:12 }}>{moodEmoji}</span>}{hasReflection && <span aria-label="PlushJournal post saved" title="PlushJournal post saved" style={{ position: "absolute", right: 2, top: 1, fontSize:12, lineHeight: 1 }}>📖</span>}
-                {!isFutureDate && !isRestDay && <span style={{display:"block",fontSize:12,marginTop:3}}>{pct === null ? "—" : `${pct}%`}</span>}
+              }} aria-pressed={isSelectedDate} style={{ position: "relative", minHeight: 62, borderRadius: 9, padding:"5px 2px", border: isSelectedDate ? "2px solid var(--pl-theme-ink)" : "1px solid var(--pl-theme-line)", background: bg, color: textColor, fontWeight: 800, cursor: isFutureDate ? "not-allowed" : "pointer", opacity: isFutureDate ? 0.5 : 1 }}>
+                <span className="pl-calendar-day-number">{isRestDay ? "🌴" : number}</span>
+                {!isFutureDate && !isRestDay && <span className="pl-calendar-day-pct" style={{display:"block",fontSize:11.5,marginTop:4}}>{pct === null ? "—" : `${pct}%`}</span>}
+                {moodEmoji && <span className="pl-calendar-day-mood" aria-label={`Feeling ${moodOption[2]}`} style={{display:"block",marginTop:3,fontSize:12}}>{moodEmoji}</span>}
+                {hasReflection && <span aria-label="PlushJournal post saved" title="PlushJournal post saved" style={{ position: "absolute", right: 2, top: 2, fontSize:10, lineHeight: 1 }}>📖</span>}
               </button>;
             })}
           </div>
