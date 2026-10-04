@@ -1167,3 +1167,308 @@ html[data-plushlife-color-mode="dark"] #main-content .pl-home-hero{
     word-break:normal!important;
   }
 }
+
+
+/* ================================================================
+   UX walkthrough hardening · 2026-10-04
+   Figma source-of-truth audit + Android production screenshot pass.
+   ================================================================ */
+
+#main-content .plushlife-app-column{
+  padding-bottom:calc(132px + env(safe-area-inset-bottom))!important;
+}
+#main-content .pl-home-shell{
+  gap:12px!important;
+  padding-bottom:calc(128px + env(safe-area-inset-bottom))!important;
+}
+
+/* Home should read top-to-bottom once, not repeat the same state in three places. */
+#main-content .pl-home-today-row{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:start!important;
+  gap:10px!important;
+  min-height:64px!important;
+}
+#main-content .pl-home-greeting h1{
+  max-width:100%!important;
+  font-size:20px!important;
+  line-height:1.12!important;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+}
+#main-content .pl-home-greeting-date{
+  font-size:11px!important;
+}
+#main-content .pl-home-today-actions{
+  align-self:start!important;
+}
+#main-content .pl-home-today-row .pl-heading-date{
+  width:44px!important;
+  min-width:44px!important;
+  max-width:44px!important;
+  height:44px!important;
+  min-height:44px!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  overflow:hidden!important;
+  color:var(--pl-theme-ink)!important;
+  font-size:0!important;
+}
+#main-content .pl-home-today-row .pl-heading-date>span:first-child{
+  font-size:18px!important;
+}
+#main-content .pl-home-today-row .pl-heading-gear{
+  width:44px!important;
+  height:44px!important;
+  min-width:44px!important;
+  min-height:44px!important;
+}
+#main-content .pl-home-day-mode-note{
+  display:flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  width:max-content!important;
+  max-width:100%!important;
+  padding:5px 7px!important;
+  margin:-3px 0 1px!important;
+  border:1px solid var(--pl-theme-line)!important;
+  border-radius:999px!important;
+  background:var(--pl-ref-card-soft)!important;
+  color:var(--pl-theme-muted)!important;
+  font-size:10.5px!important;
+}
+#main-content .pl-home-day-mode-note button{
+  min-height:32px!important;
+  padding:4px 9px!important;
+  border:0!important;
+  border-radius:999px!important;
+  background:var(--pl-ref-card)!important;
+  color:var(--pl-theme-ink)!important;
+  font-size:10px!important;
+  font-weight:850!important;
+}
+#main-content .pl-home-hero{
+  min-height:132px!important;
+  max-height:148px!important;
+  grid-template-columns:104px minmax(0,1fr)!important;
+  gap:10px!important;
+  padding:12px!important;
+  border-radius:20px!important;
+}
+#main-content .pl-home-hero>.pl-mascot-pat{
+  width:94px!important;height:94px!important;min-width:94px!important;min-height:94px!important;
+}
+#main-content .pl-home-hero>.pl-mascot-pat>span{
+  width:94px!important;height:94px!important;
+}
+#main-content .pl-home-hero>.pl-mascot-pat .plush-mascot{
+  width:88px!important;height:88px!important;max-width:88px!important;max-height:88px!important;
+}
+#main-content .pl-home-hero>.pl-companion-copy h2{
+  font-size:17px!important;
+  line-height:1.15!important;
+}
+#main-content .pl-home-hero>.pl-companion-copy p{
+  font-size:11px!important;
+  line-height:1.35!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;
+  overflow:hidden!important;
+}
+#main-content .pl-reference-progress{
+  padding:12px 14px!important;
+}
+#main-content .pl-reference-progress-value{
+  font-size:22px!important;
+}
+#main-content .pl-reference-journal{
+  min-height:48px!important;
+  max-height:52px!important;
+}
+#main-content .pl-reference-quick{
+  margin-top:1px!important;
+}
+#main-content .pl-reference-quick-grid{
+  gap:8px!important;
+}
+#main-content .pl-reference-quick-grid button{
+  height:78px!important;
+  min-height:78px!important;
+  max-height:78px!important;
+  padding:8px 3px!important;
+}
+#main-content .pl-reference-quick-grid button>span{
+  font-size:22px!important;
+}
+#main-content .pl-reference-quick-grid small{
+  margin-top:7px!important;
+  font-size:10px!important;
+  line-height:1.15!important;
+}
+#main-content .pl-reference-next{
+  display:grid!important;
+  gap:8px!important;
+}
+#main-content .pl-reference-next-head{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:10px!important;
+  padding:0 2px!important;
+}
+#main-content .pl-reference-next-head h2{
+  margin:0!important;
+  font-size:13px!important;
+  color:var(--pl-theme-ink)!important;
+}
+#main-content .pl-reference-next-head button{
+  min-height:36px!important;
+  padding:5px 8px!important;
+  border:0!important;
+  background:transparent!important;
+  color:var(--pl-theme-accent)!important;
+  font-size:10px!important;
+  font-weight:900!important;
+}
+#main-content .pl-reference-next-list{
+  display:grid!important;
+  gap:7px!important;
+}
+#main-content .pl-reference-next-row{
+  display:grid!important;
+  grid-template-columns:22px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:10px!important;
+  width:100%!important;
+  min-height:54px!important;
+  padding:8px 10px!important;
+  border:1px solid var(--pl-theme-line)!important;
+  border-radius:14px!important;
+  background:var(--pl-ref-card)!important;
+  color:var(--pl-theme-ink)!important;
+  box-shadow:var(--pl-ref-shadow-soft)!important;
+  text-align:left!important;
+}
+#main-content .pl-reference-next-check{
+  width:20px!important;height:20px!important;border:1.5px solid var(--pl-theme-muted)!important;border-radius:6px!important;
+}
+#main-content .pl-reference-next-label{
+  min-width:0!important;
+  font-size:11.5px!important;
+  line-height:1.35!important;
+  overflow-wrap:break-word!important;
+  word-break:normal!important;
+}
+#main-content .pl-reference-next-open{
+  white-space:nowrap!important;
+  padding:6px 9px!important;
+  border-radius:10px!important;
+  background:var(--pl-ref-card-soft)!important;
+  color:var(--pl-theme-ink)!important;
+  font-size:10px!important;
+  font-weight:900!important;
+}
+#main-content .pl-reference-next-empty{
+  padding:14px!important;
+  border:1px solid var(--pl-theme-line)!important;
+  border-radius:14px!important;
+  background:var(--pl-ref-card)!important;
+  color:var(--pl-theme-muted)!important;
+  font-size:11px!important;
+}
+#main-content .pl-home-extras{
+  margin-top:2px!important;
+  border-radius:16px!important;
+  background:var(--pl-ref-card)!important;
+  box-shadow:none!important;
+}
+#main-content .pl-home-extras>summary{
+  min-height:46px!important;
+  padding:0 2px!important;
+  color:var(--pl-theme-muted)!important;
+  font-size:11.5px!important;
+  font-weight:850!important;
+}
+#main-content .pl-home-extras[open]>summary{
+  color:var(--pl-theme-ink)!important;
+}
+
+/* App-wide mobile ergonomics discovered by the Figma audit. */
+#main-content :is(.pl-task-page,.pl-care-shell,.pl-growth-shell,.pl-calendar-cozy,.pl-guardian-content,.pl-closet-shell,.pl-inline-tool,.pl-unified-page-shell){
+  padding-bottom:calc(128px + env(safe-area-inset-bottom))!important;
+}
+#main-content :is(button,summary,[role="button"],[role="tab"],input[type="checkbox"],input[type="radio"]){
+  touch-action:manipulation;
+}
+#main-content :is(button,summary,[role="button"],[role="tab"]):not(.pl-mini-control){
+  min-height:44px;
+}
+#main-content :is(.pl-task-toggle strong,.pl-day-task-label,.pl-row-text,.pl-guardian-content p,.pl-care-copy,.pl-growth-copy){
+  overflow-wrap:break-word!important;
+  word-break:normal!important;
+}
+#main-content :is(.pl-task-edit,.pl-day-task-status,.pl-calendar-day-pct,.pl-growth-stat .value){
+  white-space:nowrap!important;
+}
+#main-content .pl-app-bottom-nav{
+  bottom:max(8px,env(safe-area-inset-bottom))!important;
+}
+#main-content .pl-app-nav-btn{
+  font-size:10px!important;
+}
+
+/* Keep modals/sheets usable above both Android and app navigation. */
+#main-content [role="dialog"]>div,
+body>[role="dialog"]>div{
+  max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+  overscroll-behavior:contain!important;
+}
+#main-content [role="dialog"] :is(button,summary,[role="button"]){
+  min-height:44px;
+}
+
+/* Care shows the four high-confidence paths first; the rest reads as secondary. */
+#main-content .pl-reference-care-launchers{
+  margin-bottom:4px!important;
+}
+#main-content .pl-reference-care-launchers>button{
+  min-height:62px!important;
+}
+#main-content .pl-care-shell>.pl-care-card,
+#main-content .pl-care-shell>.pl-care-memory{
+  margin-top:2px!important;
+}
+
+/* Guardians: short labels first, long policy controls stay readable rather than dense. */
+#main-content .pl-guardian-content{
+  gap:10px!important;
+}
+#main-content .pl-guardian-support-card{
+  padding:13px!important;
+}
+#main-content .pl-guardian-support-card :is(label,p,small){
+  line-height:1.4!important;
+}
+
+/* Settings/theme tiles remain finger-sized and readable. */
+[data-plush-panel="Settings"] .pl-theme-picker>button{
+  min-height:104px!important;
+}
+[data-plush-panel="Settings"] .pl-theme-picker>button span:last-child{
+  font-size:10.5px!important;
+}
+
+/* Figma reference minimum microcopy size. */
+@media(max-width:520px){
+  #main-content .pl-app-nav-btn{font-size:10px!important}
+  #main-content :is(.pl-task-toggle small,.pl-reference-progress-head span,.pl-care-copy,.pl-growth-stat .label,.pl-reference-care-launchers small){
+    font-size:10px!important;
+  }
+  #main-content .plushlife-app-column{
+    padding-inline:12px!important;
+    padding-bottom:calc(136px + env(safe-area-inset-bottom))!important;
+  }
+}
