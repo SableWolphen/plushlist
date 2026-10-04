@@ -5885,7 +5885,18 @@ function GlowUpTracker() {
   const dinoTheme = !!preferences.dino_theme;
   const nightHour = new Date().getHours();
   const isNightHour = nightHour >= 19 || nightHour < 6;
-  const selectedAppearanceTheme = APPEARANCE_THEMES.find((theme) => theme.id === appearanceTheme) || APPEARANCE_THEMES[0];
+  const noThemePalette = preferences.dark_mode ? {
+    background: "#1F1D25", glowA: "transparent", glowB: "transparent", glowC: "transparent", glowD: "transparent",
+    wash: "transparent", accent: "#B9A6C8", accent2: "#B9A6C8", surface: "#2A2732", surface2: "#34303E",
+    ink: "#F7F2FB", muted: "#C2B7CC", line: "#484150", nav: "#2A2732", art: "soft",
+  } : {
+    background: "#F8F7FA", glowA: "transparent", glowB: "transparent", glowC: "transparent", glowD: "transparent",
+    wash: "transparent", accent: "#806F8C", accent2: "#806F8C", surface: "#FFFFFF", surface2: "#F0EDF3",
+    ink: "#3F3946", muted: "#746B7C", line: "#DDD7E2", nav: "#FFFFFF", art: "soft",
+  };
+  const selectedAppearanceTheme = appearanceTheme === "none"
+    ? noThemePalette
+    : (APPEARANCE_THEMES.find((theme) => theme.id === appearanceTheme) || noThemePalette);
   const softLightPalette = (() => {
     if (appearanceTheme !== "soft-light") return selectedAppearanceTheme;
     const hour = new Date().getHours();
@@ -5934,12 +5945,12 @@ function GlowUpTracker() {
     art: "baby",
   };
   const activeWorld = babyMode ? ((isNightHour || preferences.dark_mode) ? "baby-night" : "baby") : dinoTheme ? "dino" : (appearanceTheme === "none" ? "soft" : appearanceTheme);
-  const paletteWorld = preferences.dark_mode && !babyMode ? "twilight" : activeWorld;
+  const paletteWorld = preferences.dark_mode && !babyMode && appearanceTheme !== "none" ? "twilight" : activeWorld;
   useEffect(() => {
     try { window.localStorage.setItem("plushlife-login-theme", JSON.stringify({ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit })); } catch (_error) {}
   }, [activeWorld, preferences.baby_voice]);
   const designPalette = FIGMA_WORLDS[paletteWorld] || FIGMA_WORLDS[activeWorld];
-  const activeThemePalette = designPalette ? { ...selectedAppearanceTheme, ...designPalette, accent2: designPalette.accent, line: designPalette.line, nav: designPalette.surface, art: activeWorld, wash: designPalette.background } : selectedAppearanceTheme;
+  const activeThemePalette = appearanceTheme === "none" && !babyMode && !dinoTheme ? noThemePalette : (designPalette ? { ...selectedAppearanceTheme, ...designPalette, accent2: designPalette.accent, line: designPalette.line, nav: designPalette.surface, art: activeWorld, wash: designPalette.background } : selectedAppearanceTheme);
   /* Theme regression marker retained for validation: !["soft", "soft-light"].includes(appearanceTheme)
  * Ambient themes remain visible through the dedicated theme layer; the old heavy frame stays removed.
  */
@@ -6132,7 +6143,7 @@ function GlowUpTracker() {
     <HabitStudioProvider key={user.id} userId={user.id} tasks={trackerTasks} rows={rows} done={done} history={habitHistory} date={period.date} editableDay={selectedProgressDate===period.date} onToggle={toggle}><CozyComfortContext.Provider value={cozyComfort}><CozyGuideSuggestions rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} onOpen={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard("care");}}/><ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit, unlockedIds: unlockedIdSet, rewardProgress: mascotRequirementProgress }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
       background: activeThemePalette.background,
-      backgroundImage: preferences.simple_mode && !preferences.dark_mode ? `
+      backgroundImage: appearanceTheme === "none" && !babyMode && !dinoTheme ? "none" : preferences.simple_mode && !preferences.dark_mode ? `
         linear-gradient(180deg, #FFFEFD 0%, #FBF9FC 100%),
         radial-gradient(circle at 50% 0%, #F3EAF6 0%, transparent 45%)
       ` : babyMode && !preferences.dark_mode ? `

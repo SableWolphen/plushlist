@@ -50,7 +50,7 @@ export function WeekPanel({ open, openTodayJournal, weekCardIndex, setWeekCardIn
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
             <div>
               <div style={{ fontSize:12, letterSpacing: "0.14em", fontWeight: 900, color: "var(--pl-theme-muted,#8E4EAA)" }}>📅 PROGRESS CALENDAR</div>
-              <div style={{ marginTop: 4, fontSize:12, color: "var(--pl-theme-muted,#8C6B9E)" }}>Darker means more completed that day. 📖 means a PlushJournal post is saved. Tap any past day to open its Day Replay.</div>
+              <div style={{ marginTop: 4, fontSize:12, color: "var(--pl-theme-muted,#8C6B9E)" }}>Tap a day to open its replay. Darker days mean more completed; 📖 marks a saved journal.</div>
             </div>
             <div style={{ display: "flex", gap: 5 }}>
               <button type="button" aria-label="Previous month" onClick={() => {
@@ -97,7 +97,7 @@ export function WeekPanel({ open, openTodayJournal, weekCardIndex, setWeekCardIn
             })}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10, fontSize:12, color: "var(--pl-theme-muted,#8C6B9E)", flexWrap: "wrap" }}>
-            Recorded completion · 🌴 Resting · 📖 Journal saved
+            🌴 Rest day · 📖 Journal saved · tap any past day for details
           </div>
         </div>
         <details style={{ marginBottom: 10, padding: 14, borderRadius: 16, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>

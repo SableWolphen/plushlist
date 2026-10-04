@@ -19,7 +19,8 @@ const dailyCopy = read("assets/daily-checkin-copy.js");
 const checks = [
   [appearancePicker.includes("APPEARANCE_THEMES.map((theme)") && appearancePicker.includes("onClick={() => selectAppearanceTheme(theme.id)}"), "every ambient theme button calls selectAppearanceTheme"],
   [app.includes("const selectAppearanceTheme = (themeId) => {") && app.includes("setAppearanceTheme(validTheme);") && app.includes("plushlist-appearance-"), "theme selection updates state and persists per user"],
-  [appearanceMode.includes('window.localStorage.setItem("plushlife:appearance-mode:v1", mode)') && app.includes('useAppearanceMode(preferences.dark_mode)') && app.includes('paletteWorld = preferences.dark_mode && !babyMode ? "twilight" : activeWorld'), "dark appearance persists without replacing the chosen theme world"],
+  [appearanceMode.includes('window.localStorage.setItem("plushlife:appearance-mode:v1", mode)') && app.includes('useAppearanceMode(preferences.dark_mode)') && app.includes('appearanceTheme !== "none" ? "twilight" : activeWorld'), "dark appearance persists without replacing a chosen theme and leaves No theme neutral"],
+  [appearancePicker.includes('selectAppearanceTheme("none")') && app.includes('useState("none")') && app.includes('appearanceTheme === "none" && !babyMode && !dinoTheme ? "none"'), "No theme is explicit, persisted, and renders without an ambient world background"],
   [settings.includes('title="🌙 Dark appearance"') && settings.includes('updatePreference({ dark_mode: event.target.checked })') && settings.includes("LazyAppearanceThemePicker"), "Personalize exposes dark appearance and lazy-loads theme selection"],
   [app.includes("const updatePreference = (patch) => {") && app.includes("savePreferences(next);"), "preference toggles persist through savePreferences"],
 
