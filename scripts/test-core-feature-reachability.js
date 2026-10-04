@@ -37,7 +37,7 @@ expect(app.includes("setWeeklyKickoffOpen(true)") && app.includes("setWeeklyKick
 
 expect(today.includes("<GentleDayTools") && today.includes("<ShapeMyDay") && today.includes("<EveningGratitude") && today.includes("<CozyDaily"), "Today retains adaptive day, evening journal, and cozy tools");
 expect(today.includes("<RestDayCard") && today.includes("<HabitStudio compact"), "Today retains rest-day and habit tools");
-expect(todayCore.includes("A little more, when you want it") && todayCore.includes("Reflect on my week · optional"), "Today keeps secondary tools reachable without crowding Home");
+expect(todayCore.includes("More for today") && todayCore.includes("Reflect on my week · optional") && todayCore.includes("pl-reference-next"), "Today keeps Next up primary and secondary tools reachable behind one disclosure");
 expect(todayCore.includes('aria-label="Open Calendar"') && todayCore.includes('goToDashboard?.("week")') && todayCore.includes("pl-home-greeting-date"), "Home exposes Calendar and the current date without duplicating the heading");
 expect(calendarMonth.includes("setWeekCardIndex(2)") && calendarMonth.includes("const hasReflection = reflectionDateSet.has(date)") && calendarMonth.includes('aria-label="PlushJournal post saved"'), "month calendar opens past dates in Day Replay and marks saved journal posts");
 expect(calendarDay.includes("PlushJournal from this day") && calendarDay.includes("Check-in from this day") && calendarDay.includes("setReflectionViewerDate(date)") && calendarDay.includes("setCheckInViewerDate(date)"), "Day Replay exposes past journal posts and check-ins independently");
