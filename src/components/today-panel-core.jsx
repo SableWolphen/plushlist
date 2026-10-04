@@ -170,7 +170,7 @@ function ReferenceHomeOverview({ pct = 0, doneCount = 0, rows = [], viewDone = {
         <div className="pl-reference-next-list">
           {nextRows.length ? nextRows.map((row) => (
             <div className="pl-reference-next-row" key={row.key}>
-              <button type="button" className="pl-reference-next-check" aria-label={`Complete ${row.label || "task"}`} onClick={() => toggle?.(row.key)} />
+              <button type="button" className="pl-reference-next-check pl-mini-control" aria-label={`Complete ${row.label || "task"}`} onClick={() => toggle?.(row.key)} />
               <span className="pl-reference-next-label">{row.sourceTask && <HabitTypeIcon task={row.sourceTask} />}{row.label || "Untitled task"}</span>
               <button type="button" className="pl-reference-next-open" onClick={() => openTaskManager?.(period?.date)}>Open</button>
             </div>
