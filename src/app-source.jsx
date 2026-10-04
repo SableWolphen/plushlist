@@ -7298,16 +7298,16 @@ function GlowUpTracker() {
         </div>}
 
         {dashboard === "today" && (
-          <div className="pl-home-checkin-row" style={{ display: "flex", alignItems: "center", gap: 6, margin: "0 0 8px", flexWrap: "wrap" }}>
-            <button id="plushlife-checkin-trigger" type="button" onClick={() => { setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); }} style={{ flex: "0 1 auto", maxWidth: "100%", display: "flex", alignItems: "center", gap: 6, padding: "6px 9px", minHeight: 34, borderRadius: 999, border: "1px solid #E6D4F2", background: "rgba(255,255,255,.7)", color: "#76558A", fontWeight: 850, fontSize: 11, cursor: "pointer", textAlign: "left" }}>
-              {babyMode ? "🍼 How does my little self feel?" : "🎯"} {dailyCheckIn.mood ? `${CHECKIN_MOODS.find(([value]) => value === dailyCheckIn.mood)?.[1] || ""} ${CHECKIN_MOODS.find(([value]) => value === dailyCheckIn.mood)?.[2] || ""}` : dailyCheckIn.capacity ? { very_low: "😞 Very low", low: "😕 Low", usual: "🙂 Usual", high: "💪 High" }[dailyCheckIn.capacity] : babyMode ? "Tell me when you are ready" : "Check in"}
-              {dailyCheckIn.day_type ? ` · ${DAY_TYPES.find(([value]) => value === dailyCheckIn.day_type)?.[2] || dailyCheckIn.day_type}` : ""}
-              {dailyCheckIn.custom_essentials?.length ? ` · ${dailyCheckIn.custom_essentials.length} picked` : ""}
-              <span style={{ marginLeft: 5, color: "#A65DC1", fontSize: 10 }}>{babyMode ? "Tell me" : "Change"}</span>
-            </button>
-            {dailyCheckIn.day_type && dailyCheckIn.day_type !== "full" && <button type="button" onClick={() => selectDayType("full")} style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #E6D4F2", background: "white", color: "#76558A", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>Full Day</button>}
-            {rows.some((row) => row.sourceTask?.schedule_type === "once" && !viewDone[row.key]) && ["soft", "tiny", "recovery"].includes(dailyCheckIn.day_type) && <button type="button" onClick={moveAllOneTimeTasksToTomorrow} style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #E7C98D", background: "#FFFBF2", color: "#9A6918", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>Move extras</button>}
-          </div>
+          <>
+            <button id="plushlife-checkin-trigger" type="button" aria-hidden="true" tabIndex={-1} onClick={() => { setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); }} style={{ display: "none" }}>Open check-in</button>
+            {dailyCheckIn.day_type && dailyCheckIn.day_type !== "full" && (
+              <div className="pl-home-day-mode-note" role="status">
+                <span>{DAY_TYPES.find(([value]) => value === dailyCheckIn.day_type)?.[2] || dailyCheckIn.day_type} day</span>
+                <button type="button" onClick={() => { setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); }}>Change</button>
+                <button type="button" onClick={() => selectDayType("full")}>Full day</button>
+              </div>
+            )}
+          </>
         )}
 
         <style>{`
