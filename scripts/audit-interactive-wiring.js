@@ -83,7 +83,7 @@ const mustContain = {
     ['onMode={setOnboardingMode}', 'Guardian invitations remain reachable from the welcome panel'],
   ],
   'src/components/gentle-onboarding.jsx': [
-    ['Comforts, reminders, and Guardian connections can wait.', 'Guardian connection is optional and deferred'],
+    ['Guardian connections can wait until you need them.', 'Guardian connection is optional and deferred'],
     ['Here to support someone? Guardian invitations', 'Guardian supporters have an explicit entry point'],
   ],
   'src/components/baby-mode.jsx': [
