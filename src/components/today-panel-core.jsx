@@ -112,9 +112,7 @@ function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, 
       </header>
       <section className="pl-home-hero" aria-label="PlushLife welcome">
         <button type="button" className={`pl-mascot-pat ${mascotCelebrating && !reducedMotion ? "pl-mascot-happy-hop" : ""}`} onClick={() => reactToCozy(cozy?.profile?.pet_name ? `${petName} is happy you’re here! 💜` : "Happy you're here, Cozy! 💜")} aria-label="Say hi to your plush" title="Tap to say hi">
-          <span className={!mascotCelebrating && !reducedMotion ? "pl-companion-idle" : ""}><ThemeScene outfit={selectedOutfit} focus mood={mascotCelebrating ? "happy" : "neutral"} decorative /></span>
-          {evening && !mascotCelebrating && <span className="pl-companion-sleep" aria-hidden="true">z z</span>}
-          {mascotCelebrating && <span className="pl-mascot-heart" aria-hidden="true">💜</span>}
+          <span className={!mascotCelebrating && !reducedMotion ? "pl-companion-idle" : ""}><ThemeScene outfit={selectedOutfit} focus mood={mascotCelebrating ? "happy" : "neutral"} /></span>
         </button>
         <div className="pl-companion-copy">
         <h2>{mascotMessage || (returning ? "Welcome back, Cozy." : copy["A little counts."] || "A little counts.")}</h2>
