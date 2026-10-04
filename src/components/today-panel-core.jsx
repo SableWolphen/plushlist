@@ -115,9 +115,12 @@ function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, 
   return (
     <>
       <header className="pl-page-heading pl-home-today-row">
-        <h1>Today</h1>
+        <div className="pl-home-greeting">
+          <h1>{greeting()}, {personName} <span aria-hidden="true">💗</span></h1>
+          <div className="pl-home-greeting-date">{formatDate(period?.date)}</div>
+        </div>
         <div className="pl-home-today-actions">
-          <button type="button" className="pl-heading-date" onClick={() => goToDashboard?.("week")} aria-label="Open Calendar"><span aria-hidden="true">📅</span> Calendar · {formatDate(period?.date)}</button>
+          <button type="button" className="pl-heading-date" onClick={() => goToDashboard?.("week")} aria-label="Open Calendar"><span aria-hidden="true">📅</span><span className="pl-home-calendar-label"> Calendar · </span>{formatDate(period?.date)}</button>
           <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen?.(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
         </div>
       </header>
@@ -134,6 +137,32 @@ function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, 
         </div>
       </section>
     </>
+
+  );
+}
+
+function ReferenceHomeOverview({ pct = 0, doneCount = 0, rows = [], openTodayJournal, openDailyCheckIn, openTaskManager, period, setCalmQuickOpen }) {
+  const total = rows.filter((row) => row && !row.isBonus).length;
+  const safePct = Math.max(0, Math.min(100, Math.round(Number(pct) || 0)));
+  const completed = Number.isFinite(doneCount) ? doneCount : rows.filter((row) => row && !row.isBonus && row.done).length;
+  return (
+    <div className="pl-reference-home-overview">
+      <section className="pl-reference-progress" aria-label="Today's progress">
+        <div className="pl-reference-progress-head"><strong>Today’s progress</strong><span>{completed} / {total} tasks</span></div>
+        <div className="pl-reference-progress-value">{safePct}%</div>
+        <div className="pl-reference-progress-track" aria-hidden="true"><span style={{ width: `${safePct}%` }} /></div>
+      </section>
+      <button type="button" className="pl-reference-journal" onClick={() => openTodayJournal?.()}>📝 Open today&apos;s PlushJournal</button>
+      <section className="pl-reference-quick" aria-label="Quick actions">
+        <h2>Quick actions</h2>
+        <div className="pl-reference-quick-grid">
+          <button type="button" onClick={() => openTaskManager?.(period?.date)}><span>＋</span><small>Add task</small></button>
+          <button type="button" onClick={() => openDailyCheckIn?.()}><span>♡</span><small>Check-in</small></button>
+          <button type="button" onClick={() => startFocusTimer({ minutes: 10 })}><span>◷</span><small>Timer</small></button>
+          <button type="button" onClick={() => setCalmQuickOpen?.(true)}><span>✿</span><small>Breathe</small></button>
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -347,7 +376,8 @@ export function TodayPanel({
   rows, viewDone, openTaskManager, setCalmQuickOpen, calmQuickOpen, currentCopingOption,
   reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen, setSettingsOpen,
   completedTodayExpanded, setCompletedTodayExpanded, tomorrowTasksCount, preferences,
-  activityDaysTotal, selectedOutfit, appearanceTheme, dinoTheme, babyMode, cozyDaily, optionalTools, rewardMoment, onWearReward, onDismissReward, returnGapDays, returnBannerDismissed, setReturnBannerDismissed, selectDayType, isHistoricalView, isFutureView
+  activityDaysTotal, selectedOutfit, appearanceTheme, dinoTheme, babyMode, cozyDaily, optionalTools, rewardMoment, onWearReward, onDismissReward, returnGapDays, returnBannerDismissed, setReturnBannerDismissed, selectDayType, isHistoricalView, isFutureView,
+  pct, doneCount, openTodayJournal, openDailyCheckIn
 }) {
   // Wraps the app toggle with the shared completion flow: newly completed
   // tasks linger briefly for undo, and every completion dispatches
@@ -535,6 +565,7 @@ export function TodayPanel({
 
       <div data-plushlife-home-stack className="pl-home-shell">
         <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} />
+        {!isHistoricalView && !isFutureView && <ReferenceHomeOverview pct={pct} doneCount={doneCount} rows={rows} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} openTaskManager={openTaskManager} period={period} setCalmQuickOpen={setCalmQuickOpen} />}
         {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }
         {homeDisplayGroups(homeLayout).map(group => group.length===2 ? <DayAgenda key="schedule-tasks" tasks={homeSections.tasks} schedule={homeSections.schedule} selectedSchedule={selectedSchedule} exceptions={selectedScheduleExceptionEntries} date={selectedProgressDate || period?.date} timezone={preferences?.timezone} taskLabel={babyMode ? "Little Jobs" : dinoTheme ? "Dino Missions" : "Tasks"}/> : <React.Fragment key={group[0]}>{homeSections[group[0]]}</React.Fragment>)}
         <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
