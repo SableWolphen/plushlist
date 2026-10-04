@@ -20,7 +20,7 @@ check(auto.includes("workflow_call:") && !auto.includes("workflow_run:"), "autom
 check(codeql.includes("release-android:") && codeql.includes("analyze-source") && codeql.includes("analyze-android"), "CodeQL must call Android publishing only after all analysis jobs succeed");
 check(codeql.includes("github.event_name == 'push'") && codeql.includes("refs/heads/main") && codeql.includes("secrets: inherit"), "Android publishing must only receive secrets from trusted main pushes");
 check(!auto.includes("github.event.workflow_run.head_sha"), "automatic Play release must never use a workflow_run supplied SHA");
-check(auto.includes("PLAY_TRACK: ${{ vars.PLAY_AUTO_TRACK || 'alpha' }}"), "automatic Play release must default to closed testing");
+check(auto.includes("[play-production]") && auto.includes("&& 'production' || vars.PLAY_AUTO_TRACK || 'alpha'"), "automatic Play release must require an explicit trusted commit marker for production and otherwise default to closed testing");
 check(auto.includes("group: google-play-publish") && manual.includes("group: google-play-publish") && historical44.includes("group: google-play-publish"), "all Play publishers must share one concurrency lock");
 check(!historical44.includes("push:\n") && historical44.includes("workflow_dispatch:"), "historical v44 release must stay manual-only");
 check(!historical45.includes("push:\n") && historical45.includes("workflow_dispatch:"), "historical v45 release must stay manual-only");
