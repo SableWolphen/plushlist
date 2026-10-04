@@ -99,6 +99,9 @@ export function CarePanel(props) {
     props.setSleepToolOpen(toolId);
   };
   const chooseSituation = (option) => { setSelectedSituationId(option.id); props.setCareMessage(option.next); };
+  const breathTool = COMFORT_TOOLS.find((tool) => /breath/i.test(String(tool?.id || "") + " " + String(tool?.name || "") + " " + String(tool?.title || ""))) || COMFORT_TOOLS[0] || null;
+  const calmTool = COMFORT_TOOLS.find((tool) => /calm|ground|reset|soothe/i.test(String(tool?.id || "") + " " + String(tool?.name || "") + " " + String(tool?.title || ""))) || breathTool;
+
   const savePathFit = (feedback) => {
     if (!activePath) return;
     recordPathFeedback(userId, activePath.id, Number(activeProgress?.current_day) || 1, feedback);
@@ -114,6 +117,12 @@ export function CarePanel(props) {
 
   return (
     <div data-plushcare-redesign="true" className="pl-care-shell">
+      <section className="pl-reference-care-launchers" aria-label="Care shortcuts">
+        <button type="button" onClick={() => props.setCheckInPopupOpen?.(true)}><span aria-hidden="true">💗</span><span><strong>Daily check-in</strong><small>How are you feeling today?</small></span><span aria-hidden="true">›</span></button>
+        <button type="button" onClick={() => props.openTodayJournal?.()}><span aria-hidden="true">📝</span><span><strong>Journal</strong><small>Write about your day.</small></span><span aria-hidden="true">›</span></button>
+        <button type="button" onClick={() => breathTool && startCare(breathTool.id)}><span aria-hidden="true">🌿</span><span><strong>Breathe</strong><small>Short calming exercises.</small></span><span aria-hidden="true">›</span></button>
+        <button type="button" onClick={() => calmTool && startCare(calmTool.id)}><span aria-hidden="true">🫶</span><span><strong>Calmness pass</strong><small>Simpler support, less clutter.</small></span><span aria-hidden="true">›</span></button>
+      </section>
       <style>{`
         .pl-care-shell{display:grid;gap:6px;margin-bottom:8px;padding:2px 0 12px}
         .pl-care-card,.pl-care-memory{position:relative;overflow:hidden;border:1px solid rgba(222,190,232,.72);border-radius:26px;background:linear-gradient(145deg,rgba(255,250,253,.98),rgba(247,240,255,.95));box-shadow:0 12px 30px rgba(104,71,132,.09),inset 0 1px 0 rgba(255,255,255,.9);padding:15px}
