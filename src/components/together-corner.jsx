@@ -256,9 +256,11 @@ export function TogetherCorner({
 
       {!togetherEnabled ? (
         <div style={{ marginTop: 10, padding: "10px 11px", borderRadius: 12, background: "var(--pl-theme-surface,#FFF)", border: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 13, lineHeight: 1.4, color: "var(--pl-theme-muted,#806B8D)" }}>
-          {isSupportAdult
-            ? "This Cozy hasn’t turned on Together sharing for this relationship."
-            : "Turn on “Together space” in this Guardian’s Sharing & care agreement when you’re ready to use this shared space."}
+          {!plusEnabled
+            ? <><strong style={{color:"var(--pl-theme-ink,#5B4B6B)"}}>PlushLife Plus · Together</strong><div style={{marginTop:4}}>This shared activity space is a Plus feature and is not enabled here yet. Regular Guardian invitations, sharing controls, and support stay available.</div></>
+            : isSupportAdult
+              ? "This Cozy hasn’t turned on Together sharing for this relationship."
+              : "Turn on “Together space” in this Guardian’s Sharing & care agreement when you’re ready to use this shared space."}
         </div>
       ) : (
         <>
@@ -360,7 +362,7 @@ export function TogetherCorner({
           )}
         </>
       )}
-      {message && <div role="status" style={{ marginTop: 7, fontSize: 12.5, color: "var(--pl-theme-muted,#7B6888)" }}>{message}</div>}
+      {message && <div role="status" style={{ marginTop: 7, fontSize: 12.5, color: "var(--pl-theme-muted,#7B6888)" }}>{message}{message.startsWith("Couldn\'t load") && <button type="button" onClick={load} style={{marginLeft:8,minHeight:36,padding:"5px 9px",borderRadius:9,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface)",color:"var(--pl-theme-ink)",fontWeight:800}}>Try again</button>}</div>}
     </section>
   );
 }
