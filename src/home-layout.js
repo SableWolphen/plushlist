@@ -3,7 +3,7 @@ export const HOME_SECTIONS = [
   { id: "tasks", label: "Today tasks" },
   { id: "habits", label: "Habits" },
   { id: "schedule", label: "Today's plan" },
-  { id: "shortcuts", label: "Little Jobs & support" },
+  { id: "shortcuts", label: "Tasks & support" },
   { id: "noticed", label: "PlushLife noticed" },
 ];
 
