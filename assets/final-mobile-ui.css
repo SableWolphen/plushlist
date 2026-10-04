@@ -92,6 +92,17 @@
 }
 
 @media(max-width:520px){
+  html{scroll-padding-bottom:calc(156px + env(safe-area-inset-bottom))}
+  body{overflow-wrap:anywhere}
+  #main-content{padding-bottom:env(safe-area-inset-bottom);scroll-padding-bottom:calc(156px + env(safe-area-inset-bottom))}
+  #main-content :is(input,select,textarea){font-size:16px!important}
+  #main-content :is(button,summary,[role="button"],[role="tab"]){min-height:44px}
+  #main-content :is(.pl-row-text,.pl-care-copy,.pl-growth-copy,.pl-guardian-content,.pl-unified-page-title p){overflow-wrap:anywhere;word-break:normal}
+  .pl-tool-panel{max-height:calc(100dvh - max(16px,env(safe-area-inset-top)) - max(16px,env(safe-area-inset-bottom)))!important;scroll-padding-bottom:96px}
+  .pl-tool-body{padding-bottom:max(28px,env(safe-area-inset-bottom))!important}
+  .pl-tool-title{min-width:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pl-tool-close{flex:0 0 auto}
+
   #main-content .classic-sync-strip{display:none!important}
 
   /* Android already provides the status bar. The Figma phone layouts begin
