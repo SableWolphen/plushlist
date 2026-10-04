@@ -292,7 +292,7 @@ function TasksToday({ rows = [], viewDone = {}, toggle, openTaskManager, period,
     <section style={{...card, padding: "15px 17px 16px"}} aria-label="Tasks today">
       <div className="pl-section-topline">
         <div className="pl-kicker">{babyMode ? "Little Jobs" : dinoTheme ? "Dino Missions" : "Today’s tasks"} · {completed}/{taskRows.length}</div>
-        <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)} aria-label="View all today’s tasks">All →</button>
+        <button type="button" className="pl-link-btn" onClick={() => openTaskManager?.(period?.date)} aria-label="View all today’s tasks">View all →</button>
       </div>
       <div className="pl-list">
         {shown.length ? shown.map((row) => (
