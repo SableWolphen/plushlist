@@ -67,7 +67,7 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
                     </button>
                     {row.sourceTask && (
                       <details style={{ position: "relative", flex: "0 0 auto" }}>
-                        <summary className="pl-task-edit" aria-label={`More options for ${row.label}`} style={{ listStyle: "none", cursor: "pointer", display: "grid", placeItems: "center" }}>•••</summary>
+                        <summary className="pl-task-edit" aria-label={`More options for ${row.label}`} style={{ listStyle: "none", cursor: "pointer", display: "grid", placeItems: "center" }}>Open</summary>
                         <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 20, minWidth: 132, padding: 6, borderRadius: 11, background: "var(--pl-theme-surface,#FFF)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 10px 26px rgba(74,45,94,.16)" }}>
                           <button type="button" onClick={() => startEditingTask(row.sourceTask)} style={{ width: "100%", minHeight: 38, border: 0, borderRadius: 8, background: "transparent", textAlign: "left", color: "var(--pl-theme-ink,#5B4B6B)", fontWeight: 850, cursor: "pointer" }}>✏️ Edit</button>
                           <button type="button" onClick={() => setPendingTaskDelete({ key: row.sourceTask.task_key, label: row.sourceTask.task, section: row.sourceTask.section })} style={{ width: "100%", minHeight: 38, border: 0, borderRadius: 8, background: "transparent", textAlign: "left", color: "var(--pl-theme-muted,#C45D74)", fontWeight: 850, cursor: "pointer" }}>🗑️ Delete</button>
