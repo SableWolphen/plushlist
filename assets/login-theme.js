@@ -6,13 +6,23 @@
   let savedMode;
   try { savedMode = localStorage.getItem("plushlife:appearance-mode:v1"); } catch (_error) {}
   const dark = savedMode === "dark";
-  const paletteWorld = dark ? (world.startsWith("baby") ? "baby-night" : "twilight") : world;
-  const theme = worlds[paletteWorld];
-  if (!theme) return;
+  const paletteWorld = world;
+  const baseTheme = worlds[world];
+  if (!baseTheme) return;
+  const darkTheme = {
+    background: "#211F27",
+    surface: "#2D2933",
+    surface2: "#3A3442",
+    ink: "#F8F2FB",
+    muted: "#C5BACD",
+    accent: baseTheme.accent,
+    line: "#4A4252",
+  };
+  const theme = dark ? { ...baseTheme, ...darkTheme } : baseTheme;
   const names = { background: "bg", surface: "surface", surface2: "surface-2", ink: "ink", muted: "muted", accent: "accent", line: "line" };
   for (const [key, name] of Object.entries(names)) document.body.style.setProperty(`--pl-theme-${name}`, theme[key]);
-  document.body.style.setProperty("--pl-theme-on-accent", ["twilight", "baby-night"].includes(paletteWorld) ? "#29223E" : "#FFFFFF");
-  document.documentElement.style.colorScheme = dark || ["twilight", "baby-night"].includes(paletteWorld) ? "dark" : "light";
+  document.body.style.setProperty("--pl-theme-on-accent", dark ? "#211F27" : "#FFFFFF");
+  document.documentElement.style.colorScheme = dark ? "dark" : "light";
   if (document.body.classList.contains("pl-supporting-page")) document.body.dataset.supportingWorld = world;
   else if (document.querySelector(".auth-card")) document.body.dataset.loginWorld = world;
   else document.body.dataset.landingWorld = world;

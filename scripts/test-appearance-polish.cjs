@@ -11,7 +11,8 @@ function appearance(hint, mode, supporting = false, blocked = false) {
 }
 const dark = appearance(JSON.stringify({world:'dino'}), 'dark');
 assert.equal(dark.body.dataset.loginWorld, 'dino');
-assert.equal(dark.values['--pl-theme-surface'], themes.twilight.surface);
+assert.equal(dark.values['--pl-theme-surface'], '#2D2933');
+assert.equal(dark.values['--pl-theme-accent'], themes.dino.accent);
 assert.equal(dark.scheme, 'dark');
 assert.equal(appearance(JSON.stringify({world:'dino'}),'light').values['--pl-theme-surface'],themes.dino.surface);
 const support = appearance(JSON.stringify({world:'pink'}),'dark',true);
@@ -19,7 +20,7 @@ assert.equal(support.body.dataset.supportingWorld,'pink');
 assert.equal(support.body.dataset.loginWorld,undefined);
 assert.equal(appearance('{bad','light').body.dataset.loginWorld,'soft');
 assert.equal(appearance('{}','light',false,true).body.dataset.loginWorld,'soft');
-console.log('Appearance restoration, dark-world independence and supporting page tests passed.');
+console.log('Appearance restoration, themed dark variants and supporting page tests passed.');
 
 const os = require('node:os'), path = require('node:path');
 const React = require('react'), Renderer = require('react-test-renderer');

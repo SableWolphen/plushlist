@@ -243,14 +243,6 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
       </Card>
       <Card><HomeLayoutEditor value={preferences.home_layout} onSave={home_layout => updatePreference({ home_layout })} /></Card>
       <Card>
-        <ToggleRow
-          checked={!!preferences.dark_mode}
-          onChange={(event) => updatePreference({ dark_mode: event.target.checked })}
-          title="🌙 Dark appearance"
-          description="Keep the app cozy and low-glare without changing your chosen world, mascot, tasks, or progress."
-        />
-      </Card>
-      <Card>
         <React.Suspense fallback={<div style={{ minHeight: 120, display: "grid", placeItems: "center", color: "var(--pl-theme-muted,#8A7895)", fontSize: 12.5 }}>Loading themes…</div>}>
           <LazyAppearanceThemePicker
             preferences={preferences}

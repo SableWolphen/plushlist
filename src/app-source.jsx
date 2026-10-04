@@ -5885,6 +5885,19 @@ function GlowUpTracker() {
   const dinoTheme = !!preferences.dino_theme;
   const nightHour = new Date().getHours();
   const isNightHour = nightHour >= 19 || nightHour < 6;
+  const DARK_THEME_PALETTES = {
+    soft: { background:"#211C29", surface:"#2D2537", surface2:"#3A2E48", ink:"#F7F0FF", muted:"#C9B9D8", line:"#4A3A59", accent:"#C5A7E8", accent2:"#D7B6F2", nav:"#2D2537", wash:"#241E2DBF", glowA:"#5C3D8070", glowB:"#7C446F55", glowC:"#7C654455", glowD:"#365E4A55" },
+    pink: { background:"#2A1D25", surface:"#382630", surface2:"#49303C", ink:"#FFF1F7", muted:"#D7BBC8", line:"#5A3B49", accent:"#E6A0C1", accent2:"#F0B0CC", nav:"#382630", wash:"#2E2028BF", glowA:"#7A385A66", glowB:"#6D3F7960", glowC:"#7A654355", glowD:"#36574655" },
+    meadow: { background:"#19251F", surface:"#243229", surface2:"#304238", ink:"#EFFBF3", muted:"#B7CCBE", line:"#405647", accent:"#8FC8A9", accent2:"#9AD7B5", nav:"#243229", wash:"#1C2922BF", glowA:"#35634A66", glowB:"#35685A55", glowC:"#6A5B3550", glowD:"#334D6A50" },
+    peach: { background:"#2A211C", surface:"#382B24", surface2:"#4A372D", ink:"#FFF4EC", muted:"#D7C0B1", line:"#5C4437", accent:"#E5A47D", accent2:"#F1B28B", nav:"#382B24", wash:"#2E241EBF", glowA:"#7B4A3566", glowB:"#7B513C55", glowC:"#6B5A3150", glowD:"#36574650" },
+    twilight: { background:"#211F39", surface:"#302C49", surface2:"#403657", ink:"#F4ECFF", muted:"#BEB1D3", line:"#504567", accent:"#C6ACEF", accent2:"#D4BCF6", nav:"#302C49", wash:"#24285ABF", glowA:"#483D9E", glowB:"#5D65C7", glowC:"#E2A8E755", glowD:"#314D87" },
+    strawberry: { background:"#2A1E20", surface:"#39282B", surface2:"#493438", ink:"#FFF2F2", muted:"#D8BEC0", line:"#5C4044", accent:"#E49AAA", accent2:"#EEAABA", nav:"#39282B", wash:"#2E2022BF", glowA:"#7A3A4966", glowB:"#78445455", glowC:"#6D5A3150", glowD:"#36574650" },
+    "soft-light": { background:"#1C2530", surface:"#273340", surface2:"#344455", ink:"#EFF7FF", muted:"#B7C7D8", line:"#40566B", accent:"#9FC2E7", accent2:"#B0CDEE", nav:"#273340", wash:"#1F2935BF", glowA:"#355B7A66", glowB:"#564A7960", glowC:"#6A5E3650", glowD:"#35605A50" },
+    garden: { background:"#20231F", surface:"#2B302A", surface2:"#393F37", ink:"#F4F7F1", muted:"#C2C8BE", line:"#4A5147", accent:"#94B8A4", accent2:"#A6C6B5", nav:"#2B302A", wash:"#232722BF", glowA:"#3D604F55", glowB:"#554B6655", glowC:"#70503F50", glowD:"#6A5A3650" },
+    dino: { background:"#1C261D", surface:"#273328", surface2:"#334335", ink:"#F1F8EE", muted:"#BDCCB7", line:"#435845", accent:"#9FC58B", accent2:"#D99CC5", nav:"#273328", wash:"#202A21BF", glowA:"#4E6B4860", glowB:"#5C4E7960", glowC:"#74506450", glowD:"#705F3D50" },
+    baby: { background:"#2A1F2A", surface:"#382938", surface2:"#493549", ink:"#FFF1FB", muted:"#D8BDD4", line:"#5A4258", accent:"#E8A6D6", accent2:"#CDB6F0", nav:"#382938", wash:"#2D222DBF", glowA:"#7A3F6460", glowB:"#594A7B60", glowC:"#705E3850", glowD:"#3A604D50" },
+    "baby-night": { background:"#2A1F2A", surface:"#382938", surface2:"#493549", ink:"#FFF1FB", muted:"#D8BDD4", line:"#5A4258", accent:"#E8A6D6", accent2:"#CDB6F0", nav:"#382938", wash:"#2D222DBF", glowA:"#7A3F6460", glowB:"#594A7B60", glowC:"#705E3850", glowD:"#3A604D50" },
+  };
   const noThemePalette = preferences.dark_mode ? {
     background: "#1F1D25", glowA: "transparent", glowB: "transparent", glowC: "transparent", glowD: "transparent",
     wash: "transparent", accent: "#B9A6C8", accent2: "#B9A6C8", surface: "#2A2732", surface2: "#34303E",
@@ -5944,13 +5957,15 @@ function GlowUpTracker() {
     nav: "#FFFDFEF5",
     art: "baby",
   };
-  const activeWorld = babyMode ? ((isNightHour || preferences.dark_mode) ? "baby-night" : "baby") : dinoTheme ? "dino" : (appearanceTheme === "none" ? "soft" : appearanceTheme);
-  const paletteWorld = preferences.dark_mode && !babyMode && appearanceTheme !== "none" ? "twilight" : activeWorld;
+  const activeWorld = babyMode ? (preferences.dark_mode ? "baby-night" : "baby") : dinoTheme ? "dino" : (appearanceTheme === "none" ? "soft" : appearanceTheme);
+  const paletteWorld = activeWorld;
   useEffect(() => {
     try { window.localStorage.setItem("plushlife-login-theme", JSON.stringify({ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit })); } catch (_error) {}
   }, [activeWorld, preferences.baby_voice]);
   const designPalette = FIGMA_WORLDS[paletteWorld] || FIGMA_WORLDS[activeWorld];
-  const activeThemePalette = appearanceTheme === "none" && !babyMode && !dinoTheme ? noThemePalette : (designPalette ? { ...selectedAppearanceTheme, ...designPalette, accent2: designPalette.accent, line: designPalette.line, nav: designPalette.surface, art: activeWorld, wash: designPalette.background } : selectedAppearanceTheme);
+  const lightThemePalette = designPalette ? { ...selectedAppearanceTheme, ...designPalette, accent2: selectedAppearanceTheme.accent2 || designPalette.accent, line: designPalette.line, nav: designPalette.surface, art: activeWorld, wash: selectedAppearanceTheme.wash || designPalette.background, glowA: selectedAppearanceTheme.glowA, glowB: selectedAppearanceTheme.glowB, glowC: selectedAppearanceTheme.glowC, glowD: selectedAppearanceTheme.glowD } : selectedAppearanceTheme;
+  const darkThemePalette = DARK_THEME_PALETTES[activeWorld] || DARK_THEME_PALETTES[appearanceTheme] || DARK_THEME_PALETTES.soft;
+  const activeThemePalette = appearanceTheme === "none" && !babyMode && !dinoTheme ? noThemePalette : (preferences.dark_mode ? { ...lightThemePalette, ...darkThemePalette, art: activeWorld } : lightThemePalette);
   /* Theme regression marker retained for validation: !["soft", "soft-light"].includes(appearanceTheme)
  * Ambient themes remain visible through the dedicated theme layer; the old heavy frame stays removed.
  */
