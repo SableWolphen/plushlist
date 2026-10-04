@@ -47,7 +47,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
   return (
           <ToolPanel inline title="💛 PlushSupport" displayTitle="Support" onClose={onClose}>
           <div className="pl-guardian-content">
-          <CozyScene title="You choose who walks with you." subtitle="Support at your pace. You stay in control." />
+          <CozyScene title="You choose who walks with you." subtitle="A Guardian is a partner, parent, friend, caregiver, or other trusted person you choose. You control what they can see and do." />
           {canUseCaretakerDashboard && (
             <div className="pl-guardian-person-switcher" role="group" aria-label="Guardian views">
               <button type="button" aria-pressed={supportViewMode === "mine"} onClick={() => setSupportViewMode("mine")}>🧸 My Support</button>
@@ -64,7 +64,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
           <p className="pl-guardian-intro" aria-live="polite">{guardianArea === "together" ? "Spend a little time together, at your pace." : guardianArea === "support" ? (supportViewMode === "mine" ? "Manage invitations, sharing permissions, and requests for support." : "Offer encouragement and practical help within the sharing they chose.") : (supportViewMode === "mine" ? "Your Cozy card and the people you choose to share it with." : "The Cozy card they have chosen to share with you.")}</p>
           {guardianArea === "overview" && (supportViewMode === "mine" ? <CozySharing links={ownedSupportLinks} /> : <SharedCozyCard client={client} ownerId={supportOwnerId} userId={user?.id} />)}
           {guardianArea === "overview" && supportViewMode === "mine" && <section style={{padding:16,borderRadius:16,background:"var(--pl-theme-surface)",border:"1px solid var(--pl-theme-line)"}}>
-            <h2 style={{margin:0,fontSize:16,color:"var(--pl-theme-ink)"}}>Your Guardians</h2>
+            <h2 style={{margin:0,fontSize:16,color:"var(--pl-theme-ink)"}}>Your Guardians</h2><p style={{margin:"5px 0 0",fontSize:13,lineHeight:1.45,color:"var(--pl-theme-muted)"}}>Trusted people you choose to support you. Sharing stays off until you allow it.</p>
             {ownedSupportLinks.length ? <ul style={{paddingLeft:20,color:"var(--pl-theme-ink)",overflowWrap:"anywhere"}}>{ownedSupportLinks.map(link=><li key={link.id}>{link.caregiver_email} · {!link.accepted_at ? "Invitation pending" : link.active ? "Active" : "Paused"}</li>)}</ul> : <p style={{color:"var(--pl-theme-muted)"}}>Choose someone you trust when you’re ready.</p>}
             <button type="button" onClick={()=>setGuardianArea("support")} style={{minHeight:44,padding:"8px 12px",borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)",color:"var(--pl-theme-ink)",fontWeight:800}}>Manage sharing & invitations</button>
           </section>}
