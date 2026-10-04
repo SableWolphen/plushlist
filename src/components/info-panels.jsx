@@ -92,10 +92,13 @@ export function HelpPanel({ open, onClose, babyMode, goToFeedback }) {
           <ToolPanel title="Help" onClose={onClose}>
           <div style={{ marginBottom: 18, padding: 16, borderRadius: 18, background: "var(--pl-theme-surface-2,#FFFDF4)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 8px 22px rgba(166,109,20,.08)" }}>
             <div style={{ display: "grid", gap: 7, marginTop: 9, fontSize: 12.5, lineHeight: 1.45, color: "var(--pl-theme-ink,#5B4B6B)" }}>
-              <div><strong>{babyMode ? "NURSERY" : "TODAY"}:</strong> shows today’s everyday tasks and today’s schedule.</div>
+              <div><strong>{babyMode ? "NURSERY" : "TODAY"}:</strong> shows what matters now.</div>
+              <div><strong>Tasks:</strong> things to do. <strong>Habits:</strong> things you repeat or build over time. <strong>Schedule:</strong> when things happen.</div>
+              <div><strong>Theme names:</strong> Baby Mode can call Tasks “Little Jobs,” and Dino Mode can call them “Dino Missions.” They are still the same Tasks underneath.</div>
+              <div><strong>Cozy:</strong> you — the person using PlushLife for yourself. <strong>Plush:</strong> your customizable companion that reacts to progress and earns rewards with you.</div>
               <div><strong>{babyMode ? "PLUSHCALENDAR" : "CALENDAR"}:</strong> lets you preview or change a particular day.</div>
               <div><strong>Required:</strong> counts toward your main score. <strong>Bonus:</strong> is optional and never lowers it.</div>
-              <div><strong>Guardian (in Profile):</strong> is where you invite, pause, or remove a trusted guardian, and where you view anyone you support.</div>
+              <div><strong>Guardian (in Profile):</strong> a partner, parent, friend, caregiver, or other trusted person you choose. You control what they can see and do.</div>
               <div><strong>People I Support:</strong> read-only. You can encourage, but you can't check off or change someone else's tasks, and their private reflections are never shown to you.</div>
               <div><strong>Private reflection:</strong> belongs only to you and stays with the date you wrote it on.</div>
             </div>
@@ -111,7 +114,8 @@ export function HelpPanel({ open, onClose, babyMode, goToFeedback }) {
                 ["What's the difference between Required and Bonus tasks?", "Required tasks count toward your daily percentage. Bonus tasks are extras — completing them never lowers your score, and skipping them never counts against you."],
                 ["What are Full, Soft, Tiny, and Recovery Days?", "They are four ways to size today around your real capacity. Full shows your usual versions, Soft uses gentler versions and hides bonuses, Tiny keeps the smallest essentials, and Recovery helps you restart without a backlog."],
                 ["How do mood and energy patterns work?", "Your check-ins stay private and appear in your PlushGrowth calendar. With pattern suggestions on, PlushLife may notice a repeated day-of-week pattern and offer a small routine change. It never diagnoses you, assumes a cause, or changes anything without your approval."],
-                ["Is PlushCare free?", "Yes. PlushCare, PlushPaths, PlushSleep, mood and energy tracking, adaptive habits, accessibility tools, and Guardian support are all free right now."],
+                ["What is Care for?", "Care is the “help me right now” area: pick what is happening and PlushLife offers a small next step. Calm tools, guided paths, and sleep tools are available deeper in the Care library."],
+                ["Is PlushCare free?", "Yes. PlushCare, PlushPaths, PlushSleep, mood and energy tracking, adaptive habits, accessibility tools, and Guardian support are all free right now. Any future Plus feature should be labeled before you open or invest time in it."],
                 ["What is PlushFocus?", "Instead of your full checklist, PlushFocus shows just your next task, one at a time — good for when a long list feels like too many decisions."],
                 ["Who can see my private reflections?", "Only you, always. They're never shown to a Guardian, never included in any shared summary, and stored separately from anything else."],
                 ["Can I get my data, or delete my account?", "Yes to both, anytime — Settings → Your Data has a full export, and Settings → Account has the Delete account button. Deletion is permanent and requires confirmation."],
