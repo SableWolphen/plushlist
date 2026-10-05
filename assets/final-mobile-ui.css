@@ -1472,3 +1472,223 @@ body>[role="dialog"]>div{
     padding-bottom:calc(152px + env(safe-area-inset-bottom))!important;
   }
 }
+
+
+/* ================================================================
+   Android Home viewport-fit regression · 2026-10-05
+   Keep every Home surface inside the real phone viewport. The shared
+   overflow clip is a safety net, not a layout strategy.
+   ================================================================ */
+
+#main-content#main-content{
+  overflow-x:clip!important;
+  box-sizing:border-box!important;
+}
+
+#main-content#main-content .plushlife-app-column,
+#main-content#main-content .pl-home-shell,
+#main-content#main-content .pl-reference-home-overview,
+#main-content#main-content .pl-reference-progress,
+#main-content#main-content .pl-reference-journal,
+#main-content#main-content .pl-reference-quick,
+#main-content#main-content .pl-reference-quick-grid,
+#main-content#main-content .pl-reference-next,
+#main-content#main-content .pl-reference-next-list,
+#main-content#main-content .pl-reference-next-row,
+#main-content#main-content .pl-home-extras,
+#main-content#main-content .pl-home-extras>div,
+#main-content#main-content .pl-home-day-card,
+#main-content#main-content .pl-agenda-panels,
+#main-content#main-content .pl-agenda-panels>div{
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+
+#main-content#main-content .plushlife-app-column{
+  width:min(100%,390px)!important;
+  max-width:390px!important;
+  margin-inline:auto!important;
+}
+
+#main-content#main-content .pl-home-shell,
+#main-content#main-content .pl-reference-home-overview,
+#main-content#main-content .pl-reference-progress,
+#main-content#main-content .pl-reference-journal,
+#main-content#main-content .pl-reference-quick,
+#main-content#main-content .pl-reference-quick-grid,
+#main-content#main-content .pl-reference-next,
+#main-content#main-content .pl-reference-next-list,
+#main-content#main-content .pl-home-extras,
+#main-content#main-content .pl-home-day-card,
+#main-content#main-content .pl-agenda-panels{
+  width:100%!important;
+}
+
+#main-content#main-content .pl-reference-progress-head,
+#main-content#main-content .pl-reference-next-head,
+#main-content#main-content .pl-section-topline{
+  min-width:0!important;
+  max-width:100%!important;
+}
+
+#main-content#main-content .pl-reference-progress-head strong,
+#main-content#main-content .pl-reference-next-head h2,
+#main-content#main-content .pl-reference-next-label{
+  min-width:0!important;
+}
+
+#main-content#main-content .pl-reference-progress-head span{
+  flex:0 0 auto!important;
+  white-space:nowrap!important;
+  text-align:right!important;
+}
+
+#main-content#main-content .pl-reference-quick-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+}
+
+#main-content#main-content .pl-reference-quick-grid>button{
+  min-width:0!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+
+#main-content#main-content .pl-reference-quick-grid small{
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+#main-content#main-content .pl-reference-next-head>button{
+  flex:0 1 auto!important;
+  min-width:0!important;
+  max-width:68%!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+#main-content#main-content .pl-reference-next-row{
+  width:100%!important;
+  grid-template-columns:24px minmax(0,1fr) 58px!important;
+  padding:9px 10px!important;
+}
+
+#main-content#main-content .pl-reference-next-check{
+  width:22px!important;
+  height:22px!important;
+  min-width:22px!important;
+  min-height:22px!important;
+  max-width:22px!important;
+  max-height:22px!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+}
+
+#main-content#main-content .pl-reference-next-open{
+  appearance:none!important;
+  width:58px!important;
+  min-width:58px!important;
+  max-width:58px!important;
+  min-height:38px!important;
+  height:38px!important;
+  padding:0 8px!important;
+  border:1px solid var(--pl-theme-line)!important;
+  border-radius:10px!important;
+  box-shadow:none!important;
+  box-sizing:border-box!important;
+}
+
+#main-content#main-content .pl-home-extras{
+  padding:0!important;
+  overflow:hidden!important;
+}
+
+#main-content#main-content .pl-home-extras>summary{
+  display:flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  min-height:50px!important;
+  padding:0 14px!important;
+  list-style:none!important;
+  box-sizing:border-box!important;
+}
+
+#main-content#main-content .pl-home-extras>summary::-webkit-details-marker{
+  display:none!important;
+}
+
+#main-content#main-content .pl-home-extras>summary::before{
+  content:"▸";
+  flex:0 0 auto;
+  color:var(--pl-theme-accent);
+}
+
+#main-content#main-content .pl-home-extras[open]>summary::before{
+  content:"▾";
+}
+
+#main-content#main-content .pl-home-extras>div{
+  width:100%!important;
+  padding:0 10px 12px!important;
+}
+
+#main-content#main-content .pl-home-extras:not([open])>div{
+  display:none!important;
+}
+
+#main-content#main-content .pl-home-extras :is(section,article,details,.pl-list,.pl-list-row,.pl-habit-row),
+#main-content#main-content .pl-agenda-panels :is(section,article,details,.pl-list,.pl-list-row,.pl-habit-row){
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+
+#main-content#main-content .pl-app-bottom-nav{
+  left:50%!important;
+  right:auto!important;
+  width:min(390px,calc(100% - 24px))!important;
+  max-width:390px!important;
+  transform:translateX(-50%)!important;
+  box-sizing:border-box!important;
+}
+
+@media(max-width:520px){
+  #main-content#main-content{
+    padding-top:max(24px,env(safe-area-inset-top))!important;
+    padding-left:max(8px,env(safe-area-inset-left))!important;
+    padding-right:max(8px,env(safe-area-inset-right))!important;
+    padding-bottom:calc(120px + env(safe-area-inset-bottom))!important;
+  }
+
+  #main-content#main-content .plushlife-app-column{
+    width:100%!important;
+    max-width:390px!important;
+    margin-inline:auto!important;
+    padding-left:8px!important;
+    padding-right:8px!important;
+    padding-bottom:calc(176px + env(safe-area-inset-bottom))!important;
+  }
+
+  #main-content#main-content :is(.pl-home-shell,.pl-unified-page-shell,.pl-task-page,.pl-care-shell,.pl-growth-shell,.pl-calendar-cozy,.pl-guardian-content,.pl-closet-shell,.pl-inline-tool){
+    padding-bottom:calc(176px + env(safe-area-inset-bottom))!important;
+  }
+
+  #main-content#main-content .pl-app-bottom-nav{
+    width:min(390px,calc(100% - 20px))!important;
+    height:72px!important;
+    min-height:72px!important;
+    max-height:72px!important;
+    bottom:max(8px,env(safe-area-inset-bottom))!important;
+    padding:6px 5px!important;
+  }
+
+  #main-content#main-content .pl-app-nav-btn{
+    min-width:0!important;
+    height:58px!important;
+    min-height:58px!important;
+    max-height:58px!important;
+  }
+}
