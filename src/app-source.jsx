@@ -692,6 +692,8 @@ function GlowUpTracker() {
   const [openRow, setOpenRow] = useState(null);
   const [focusModeShowAll, setFocusModeShowAll] = useState(false);
   const [user, setUser] = useState(null);
+  const activeUserIdRef = React.useRef(user?.id);
+  activeUserIdRef.current = user?.id;
   const cozyComfort = useCozyComfort(user, supabase);
   const [syncStatus, setSyncStatus] = useState("loading");
   const pendingQueueRef = React.useRef([]);
@@ -1195,6 +1197,8 @@ function GlowUpTracker() {
           endProgressWrite(item.progressDate, revision, acknowledged);
         }
       }
+      // Do not apply an old account's pending queue to the next Cozy.
+      if (activeUserIdRef.current !== ownerId) return;
       // An edit made during replay must remain after the retried earlier edits.
       pendingQueueRef.current = [...failed, ...pendingQueueRef.current];
       try { window.localStorage.setItem(`plushlist-pending-${ownerId}`, JSON.stringify(pendingQueueRef.current)); } catch (_error) {
@@ -1213,10 +1217,18 @@ function GlowUpTracker() {
   };
 
   useEffect(() => {
+    pendingQueueRef.current = [];
+    progressRevisionRef.current = {};
+    activeProgressWritesRef.current = {};
+    acknowledgedProgressAtRef.current = {};
+    queueFlushRef.current = null;
     if (!user) return;
     try {
       const stored = window.localStorage.getItem(`plushlist-pending-${user.id}`);
-      if (stored) pendingQueueRef.current = JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        pendingQueueRef.current = Array.isArray(parsed) ? parsed.filter(item => item?.progressDate && Array.isArray(item.completedKeys)) : [];
+      }
     } catch (_error) {}
     flushPendingQueue();
     const handleOnline = () => flushPendingQueue();
