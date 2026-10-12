@@ -1443,7 +1443,7 @@ function GlowUpTracker() {
     Promise.all([
       supabase
         .from("daily_progress")
-        .select("completed_keys")
+        .select("completed_keys, updated_at")
         .eq("user_id", user.id)
         .eq("progress_date", period.date)
         .maybeSingle(),
@@ -1495,6 +1495,8 @@ function GlowUpTracker() {
           unsynced: hasUnsyncedProgress(period.date),
           atRequest: startedRevision,
           current: progressRevisionRef.current[period.date] || 0,
+          remoteUpdatedAt: dailyResult.data?.updated_at || "",
+          lastLocalWriteAt: acknowledgedProgressAtRef.current[period.date] || "",
         })) {
           setSyncStatus(navigator.onLine ? "syncing" : "offline");
           return;
