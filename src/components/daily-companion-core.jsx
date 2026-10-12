@@ -13,11 +13,13 @@ function safeRead(key, fallback) {
   }
 }
 
-function safeWrite(key, value) {
+export function safeWrite(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
+    return true;
   } catch (_error) {
-    // Companion features are optional; the core tracker still works if storage is unavailable.
+    // Do not claim an offline/local save succeeded if the device rejected it.
+    return false;
   }
 }
 
@@ -65,6 +67,7 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
     setGentleDone(safeRead(`plushlife:gentle-day:${dateKey}`, {}));
     setWindDown(safeRead(`plushlife:wind-down:${dateKey}`, { feeling: "", win: "", carry: "" }));
     setSupportNeed(safeRead(`plushlife:support-need:${dateKey}`, ""));
+    setSavedMessage("");
   }, [dateKey]);
 
   useEffect(() => {
@@ -202,7 +205,7 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
             </div>
             <label style={{ display: "grid", gap: 4, marginTop: 9, fontSize: 10.5, fontWeight: 900, color: "#76558A" }}>ONE WIN · OPTIONAL<input value={windDown.win} onChange={(event) => setWindDown((current) => ({ ...current, win: event.target.value }))} maxLength={240} placeholder="Something that counted today" style={{ padding: 9, borderRadius: 9, border: "1px solid #DCC9E8" }} /></label>
             <label style={{ display: "grid", gap: 4, marginTop: 8, fontSize: 10.5, fontWeight: 900, color: "#76558A" }}>CARRY INTO TOMORROW · OPTIONAL<input value={windDown.carry} onChange={(event) => setWindDown((current) => ({ ...current, carry: event.target.value }))} maxLength={240} placeholder="One thing to remember tomorrow" style={{ padding: 9, borderRadius: 9, border: "1px solid #DCC9E8" }} /></label>
-            <button type="button" onClick={() => { safeWrite(`plushlife:wind-down:${dateKey}`, windDown); setSavedMessage("Evening reset saved privately on this device. 🌙"); window.setTimeout(() => setSavedMessage(""), 2500); }} style={{ marginTop: 9, padding: "7px 10px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save reset</button>
+            <button type="button" onClick={() => { const saved = safeWrite(`plushlife:wind-down:${dateKey}`, windDown); setSavedMessage(saved ? "Evening reset saved privately on this device. 🌙" : "Couldn’t save on this device. Your text is still here — please try again."); if (saved) window.setTimeout(() => setSavedMessage(""), 2500); }} style={{ marginTop: 9, padding: "7px 10px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save reset</button>
             {savedMessage && <div role="status" style={{ marginTop: 6, fontSize: 11, color: "#76558A" }}>{savedMessage}</div>}
           </div>
         )}
