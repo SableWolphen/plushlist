@@ -1,3 +1,4 @@
+import { companionAccountKey } from "../companion-account-storage.mjs";
 const { useEffect, useState } = React;
 
 const FIRST_SEEN_KEY = "plushlife:companion:first-seen:v1";
@@ -6,6 +7,7 @@ const HISTORY_KEY = "plushlife:companion:history:v1";
 
 function safeRead(key, fallback) {
   try {
+    if (!key) return fallback;
     const value = localStorage.getItem(key);
     return value ? JSON.parse(value) : fallback;
   } catch (_error) {
@@ -15,6 +17,7 @@ function safeRead(key, fallback) {
 
 export function safeWrite(key, value) {
   try {
+    if (!key) return false;
     localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch (_error) {
@@ -39,17 +42,18 @@ function sectionButton(label, icon, open, onClick) {
   );
 }
 
-export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCheckIn = {}, pct = 0, returnGapDays = 0, nextStepTask, selectDayType, toggleRestToday, openTaskManager, openJournalForSelectedDate, setCareSection, goToDashboard }) {
+export function DailyCompanion({ open, accountId, period, rows = [], viewDone = {}, dailyCheckIn = {}, pct = 0, returnGapDays = 0, nextStepTask, selectDayType, toggleRestToday, openTaskManager, openJournalForSelectedDate, setCareSection, goToDashboard }) {
   const dateKey = period?.date || new Date().toISOString().slice(0, 10);
+  const privateKey = key => companionAccountKey(key, accountId);
   const [openSection, setOpenSection] = useState("");
-  const [gentleDone, setGentleDone] = useState(() => safeRead(`plushlife:gentle-day:${dateKey}`, {}));
-  const [windDown, setWindDown] = useState(() => safeRead(`plushlife:wind-down:${dateKey}`, { feeling: "", win: "", carry: "" }));
-  const [supportNeed, setSupportNeed] = useState(() => safeRead(`plushlife:support-need:${dateKey}`, ""));
+  const [gentleDone, setGentleDone] = useState(() => safeRead(privateKey(`plushlife:gentle-day:${dateKey}`), {}));
+  const [windDown, setWindDown] = useState(() => safeRead(privateKey(`plushlife:wind-down:${dateKey}`), { feeling: "", win: "", carry: "" }));
+  const [supportNeed, setSupportNeed] = useState(() => safeRead(privateKey(`plushlife:support-need:${dateKey}`), ""));
   const [savedMessage, setSavedMessage] = useState("");
   const [firstSeen] = useState(() => {
-    const existing = safeRead(FIRST_SEEN_KEY, "");
+    const existing = safeRead(privateKey(FIRST_SEEN_KEY), "");
     if (existing) return existing;
-    safeWrite(FIRST_SEEN_KEY, dateKey);
+    safeWrite(privateKey(FIRST_SEEN_KEY), dateKey);
     return dateKey;
   });
 
@@ -58,21 +62,21 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
   // after that the guide stays manually accessible for the rest of the week.
   useEffect(() => {
     if (!open || firstSeen !== dateKey) return;
-    if (safeRead(FIRST_WEEK_SURFACED_KEY, "")) return;
-    safeWrite(FIRST_WEEK_SURFACED_KEY, dateKey);
+    if (safeRead(privateKey(FIRST_WEEK_SURFACED_KEY), "")) return;
+    safeWrite(privateKey(FIRST_WEEK_SURFACED_KEY), dateKey);
     setOpenSection("firstweek");
-  }, [open, firstSeen, dateKey]);
+  }, [open, firstSeen, dateKey, accountId]);
 
   useEffect(() => {
-    setGentleDone(safeRead(`plushlife:gentle-day:${dateKey}`, {}));
-    setWindDown(safeRead(`plushlife:wind-down:${dateKey}`, { feeling: "", win: "", carry: "" }));
-    setSupportNeed(safeRead(`plushlife:support-need:${dateKey}`, ""));
+    setGentleDone(safeRead(privateKey(`plushlife:gentle-day:${dateKey}`), {}));
+    setWindDown(safeRead(privateKey(`plushlife:wind-down:${dateKey}`), { feeling: "", win: "", carry: "" }));
+    setSupportNeed(safeRead(privateKey(`plushlife:support-need:${dateKey}`), ""));
     setSavedMessage("");
-  }, [dateKey]);
+  }, [dateKey, accountId]);
 
   useEffect(() => {
     if (!open) return;
-    const history = safeRead(HISTORY_KEY, []);
+    const history = safeRead(privateKey(HISTORY_KEY), []);
     const completed = rows.filter((row) => !!viewDone[row.key]).length;
     const snapshot = {
       date: dateKey,
@@ -86,8 +90,8 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
     const next = [snapshot, ...history.filter((item) => item?.date && item.date !== dateKey)]
       .sort((a, b) => b.date.localeCompare(a.date))
       .slice(0, 45);
-    safeWrite(HISTORY_KEY, next);
-  }, [open, dateKey, pct, rows, viewDone, dailyCheckIn.day_type, dailyCheckIn.mood, dailyCheckIn.energy]);
+    safeWrite(privateKey(HISTORY_KEY), next);
+  }, [open, dateKey, accountId, pct, rows, viewDone, dailyCheckIn.day_type, dailyCheckIn.mood, dailyCheckIn.energy]);
 
   const firstWeekElapsed = dateDiffDays(firstSeen, dateKey) + 1;
   const firstWeekDay = Math.min(7, firstWeekElapsed);
@@ -163,7 +167,7 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
                   <input type="checkbox" checked={!!gentleDone[id]} onChange={(event) => {
                     const next = { ...gentleDone, [id]: event.target.checked };
                     setGentleDone(next);
-                    safeWrite(`plushlife:gentle-day:${dateKey}`, next);
+                    safeWrite(privateKey(`plushlife:gentle-day:${dateKey}`), next);
                   }} />
                   <span>{icon}</span><span>{label}</span>
                 </label>
@@ -205,7 +209,7 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
             </div>
             <label style={{ display: "grid", gap: 4, marginTop: 9, fontSize: 10.5, fontWeight: 900, color: "#76558A" }}>ONE WIN · OPTIONAL<input value={windDown.win} onChange={(event) => setWindDown((current) => ({ ...current, win: event.target.value }))} maxLength={240} placeholder="Something that counted today" style={{ padding: 9, borderRadius: 9, border: "1px solid #DCC9E8" }} /></label>
             <label style={{ display: "grid", gap: 4, marginTop: 8, fontSize: 10.5, fontWeight: 900, color: "#76558A" }}>CARRY INTO TOMORROW · OPTIONAL<input value={windDown.carry} onChange={(event) => setWindDown((current) => ({ ...current, carry: event.target.value }))} maxLength={240} placeholder="One thing to remember tomorrow" style={{ padding: 9, borderRadius: 9, border: "1px solid #DCC9E8" }} /></label>
-            <button type="button" onClick={() => { const saved = safeWrite(`plushlife:wind-down:${dateKey}`, windDown); setSavedMessage(saved ? "Evening reset saved privately on this device. 🌙" : "Couldn’t save on this device. Your text is still here — please try again."); if (saved) window.setTimeout(() => setSavedMessage(""), 2500); }} style={{ marginTop: 9, padding: "7px 10px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save reset</button>
+            <button type="button" onClick={() => { const saved = safeWrite(privateKey(`plushlife:wind-down:${dateKey}`), windDown); setSavedMessage(saved ? "Evening reset saved privately on this device. 🌙" : "Couldn’t save on this device. Your text is still here — please try again."); if (saved) window.setTimeout(() => setSavedMessage(""), 2500); }} style={{ marginTop: 9, padding: "7px 10px", borderRadius: 9, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, cursor: "pointer" }}>Save reset</button>
             {savedMessage && <div role="status" style={{ marginTop: 6, fontSize: 11, color: "#76558A" }}>{savedMessage}</div>}
           </div>
         )}
@@ -215,7 +219,7 @@ export function DailyCompanion({ open, period, rows = [], viewDone = {}, dailyCh
           <div style={{ padding: "11px 12px", borderRadius: 12, background: "#FFFFFFD9", border: "1px solid #D6EEE7" }}>
             <div style={{ fontSize: 11.5, color: "#607A73", lineHeight: 1.45 }}>Choose what would help. PlushLife keeps the choice yours and sends you to the existing private care/support flow rather than posting anything publicly.</div>
             <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
-              {["Encouragement", "Check on me", "Quiet company", "Practical help"].map((need) => <button key={need} type="button" aria-pressed={supportNeed === need} onClick={() => { setSupportNeed(need); safeWrite(`plushlife:support-need:${dateKey}`, need); }} style={{ padding: "6px 9px", borderRadius: 999, border: supportNeed === need ? "2px solid #318C79" : "1px solid #CFE8E1", background: supportNeed === need ? "#EEF9F6" : "white", color: "#318C79", fontWeight: 800, cursor: "pointer" }}>{need}</button>)}
+              {["Encouragement", "Check on me", "Quiet company", "Practical help"].map((need) => <button key={need} type="button" aria-pressed={supportNeed === need} onClick={() => { setSupportNeed(need); safeWrite(privateKey(`plushlife:support-need:${dateKey}`), need); }} style={{ padding: "6px 9px", borderRadius: 999, border: supportNeed === need ? "2px solid #318C79" : "1px solid #CFE8E1", background: supportNeed === need ? "#EEF9F6" : "white", color: "#318C79", fontWeight: 800, cursor: "pointer" }}>{need}</button>)}
             </div>
             <button type="button" onClick={openCare} style={{ marginTop: 9, padding: "7px 10px", borderRadius: 9, border: 0, background: "#318C79", color: "white", fontWeight: 900, cursor: "pointer" }}>Open private support tools</button>
           </div>
