@@ -85,4 +85,13 @@ assert.ok(companionCloud.includes('localCompanionState(userId)'), 'Cloud export 
 const companionCore = fs.readFileSync('src/components/daily-companion-core.jsx','utf8');
 assert.ok(companionCore.includes('privateKey(HISTORY_KEY)'), 'Local companion history must stay account-scoped');
 
+const mobileCss = fs.readFileSync('assets/final-mobile-ui.css', 'utf8');
+const terminalMobileRule = mobileCss.slice(mobileCss.lastIndexOf('/* One scrolling container owns'));
+assert.ok(terminalMobileRule.includes('padding-bottom:calc(120px + env(safe-area-inset-bottom))!important'),
+  'The outer app scroll area must clear the fixed bottom navigation and safe area');
+assert.equal((terminalMobileRule.match(/padding-bottom:12px!important/g) || []).length, 2,
+  'Nested mobile shells add only small visual spacing, not duplicate navigation clearances');
+assert.ok(!terminalMobileRule.includes('176px'),
+  'The final mobile layout must not stack multiple 176px bottom spacers');
+
 console.log('Quality fixes passed: Guardian permissions, local saves, account isolation, stale progress guards, and navigation.');
