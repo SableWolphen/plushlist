@@ -1154,35 +1154,62 @@ function GlowUpTracker() {
   const [badgeCelebration, setBadgeCelebration] = useState(null);
   const [celebrateKey, setCelebrateKey] = useState(null);
   const [recentlyCompletedKeys, setRecentlyCompletedKeys] = useState([]);
+  const queueFlushRef = React.useRef(null);
   const flushPendingQueue = async () => {
+    if (queueFlushRef.current) return queueFlushRef.current;
     if (!user || !navigator.onLine || pendingQueueRef.current.length === 0) return;
-    setSyncStatus("syncing");
-    const queue = [...pendingQueueRef.current];
-    pendingQueueRef.current = [];
-    for (const item of queue) {
-      const { error: dailyError } = await supabase.from("daily_progress").upsert({
-        user_id: user.id,
-        progress_date: item.progressDate,
-        completed_keys: item.completedKeys,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "user_id,progress_date" });
-      let taskError = null;
-      if (item.taskKey) {
-        const result = await supabase.from("tracker_progress").upsert(
-          { user_id: user.id, task_key: item.taskKey, completed: item.completed, updated_at: new Date().toISOString() },
-          { onConflict: "user_id,task_key" }
-        );
-        taskError = result.error;
+    const ownerId = user.id;
+    const run = (async () => {
+      setSyncStatus("syncing");
+      // The disk outbox is not cleared until all replay attempts finish.
+      const queue = [...pendingQueueRef.current];
+      pendingQueueRef.current = [];
+      const failed = [];
+      for (const item of queue) {
+        const revision = beginProgressWrite(item.progressDate);
+        const writtenAt = new Date().toISOString();
+        let acknowledged = "";
+        try {
+          const { dailyError, taskError } = await serializeProgressWrite(async () => {
+            const { error: dailyError } = await supabase.from("daily_progress").upsert({
+              user_id: ownerId,
+              progress_date: item.progressDate,
+              completed_keys: item.completedKeys,
+              updated_at: writtenAt,
+            }, { onConflict: "user_id,progress_date" });
+            let taskError = null;
+            if (!dailyError && item.taskKey) {
+              const result = await supabase.from("tracker_progress").upsert(
+                { user_id: ownerId, task_key: item.taskKey, completed: item.completed, updated_at: writtenAt },
+                { onConflict: "user_id,task_key" }
+              );
+              taskError = result.error;
+            }
+            return { dailyError, taskError };
+          });
+          if (dailyError || taskError) failed.push(item);
+          else acknowledged = writtenAt;
+        } catch (_error) {
+          failed.push(item);
+        } finally {
+          endProgressWrite(item.progressDate, revision, acknowledged);
+        }
       }
-      if (dailyError || taskError) pendingQueueRef.current.push(item);
-    }
-    try { window.localStorage.setItem(`plushlist-pending-${user.id}`, JSON.stringify(pendingQueueRef.current)); } catch (_error) {}
-    if (pendingQueueRef.current.length === 0) {
-      setSyncStatus("ready");
-      setLastSyncedAt(new Date().toISOString());
-    } else {
-      setSyncStatus("offline");
-    }
+      // An edit made during replay must remain after the retried earlier edits.
+      pendingQueueRef.current = [...failed, ...pendingQueueRef.current];
+      try { window.localStorage.setItem(`plushlist-pending-${ownerId}`, JSON.stringify(pendingQueueRef.current)); } catch (_error) {
+        setSyncStatus("error");
+        return;
+      }
+      if (pendingQueueRef.current.length === 0) {
+        setSyncStatus("ready");
+        setLastSyncedAt(new Date().toISOString());
+      } else {
+        setSyncStatus(navigator.onLine ? "error" : "offline");
+      }
+    })();
+    queueFlushRef.current = run;
+    try { return await run; } finally { if (queueFlushRef.current === run) queueFlushRef.current = null; }
   };
 
   useEffect(() => {
