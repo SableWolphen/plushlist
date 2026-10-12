@@ -1,4 +1,5 @@
 import { useAppearanceMode } from "./hooks/use-appearance-mode.js";
+import { canApplyRemoteProgress, pendingProgressForDate } from "./progress-intent-guard.mjs";
 import { useJournalPresentation } from "./hooks/use-journal-presentation.js";
 import { useCalendarNavigation } from "./hooks/use-calendar-navigation.js";
 import { HabitStudioProvider } from "./components/habit-studio.jsx";
@@ -692,6 +693,30 @@ function GlowUpTracker() {
   const cozyComfort = useCozyComfort(user, supabase);
   const [syncStatus, setSyncStatus] = useState("loading");
   const pendingQueueRef = React.useRef([]);
+  const progressRevisionRef = React.useRef({});
+  const activeProgressWritesRef = React.useRef({});
+  const acknowledgedProgressAtRef = React.useRef({});
+  const progressWriteChainRef = React.useRef(Promise.resolve());
+  const hasUnsyncedProgress = date => pendingProgressForDate(
+    pendingQueueRef.current, date, activeProgressWritesRef.current[date] || 0
+  );
+  const beginProgressWrite = date => {
+    const revision = (progressRevisionRef.current[date] || 0) + 1;
+    progressRevisionRef.current[date] = revision;
+    activeProgressWritesRef.current[date] = (activeProgressWritesRef.current[date] || 0) + 1;
+    return revision;
+  };
+  const endProgressWrite = (date, revision, acknowledgedAt = "") => {
+    activeProgressWritesRef.current[date] = Math.max(0, (activeProgressWritesRef.current[date] || 0) - 1);
+    if (acknowledgedAt && progressRevisionRef.current[date] === revision) {
+      acknowledgedProgressAtRef.current[date] = acknowledgedAt;
+    }
+  };
+  const serializeProgressWrite = request => {
+    const next = progressWriteChainRef.current.then(request, request);
+    progressWriteChainRef.current = next.catch(() => {});
+    return next;
+  };
   const latestSupportOwnerRequestRef = React.useRef(null);
   const [lastSyncedAt, setLastSyncedAt] = useState(null);
   const [online, setOnline] = useState(() => navigator.onLine);
@@ -1373,6 +1398,7 @@ function GlowUpTracker() {
       setDone({});
     }
     setSyncStatus("syncing");
+    const startedRevision = progressRevisionRef.current[period.date] || 0;
     Promise.all([
       supabase
         .from("daily_progress")
@@ -1423,6 +1449,15 @@ function GlowUpTracker() {
               )
               .map((row) => row.task_key);
 
+        // An old response must not erase taps made after this load began.
+        if (!canApplyRemoteProgress({
+          unsynced: hasUnsyncedProgress(period.date),
+          atRequest: startedRevision,
+          current: progressRevisionRef.current[period.date] || 0,
+        })) {
+          setSyncStatus(navigator.onLine ? "syncing" : "offline");
+          return;
+        }
         const serverDone = Object.fromEntries(completedKeys.map((key) => [key, true]));
         setDone(serverDone);
         setWeeklyHistory((entries) => [
@@ -1492,6 +1527,11 @@ function GlowUpTracker() {
       }, (payload) => {
         const next = payload?.new;
         if (!next || next.progress_date !== period.date) return;
+        if (!canApplyRemoteProgress({
+          unsynced: hasUnsyncedProgress(period.date),
+          remoteUpdatedAt: next.updated_at || "",
+          lastLocalWriteAt: acknowledgedProgressAtRef.current[period.date] || "",
+        })) return;
         const completedKeys = Array.isArray(next.completed_keys) ? next.completed_keys : [];
         setDone(Object.fromEntries(completedKeys.map((key) => [key, true])));
         setWeeklyHistory((entries) => [
@@ -4650,6 +4690,13 @@ function GlowUpTracker() {
     }
     setOnline(true);
     setSyncStatus("syncing");
+    // Never replace a newer local check with an older cloud snapshot.
+    if (pendingQueueRef.current.length) await flushPendingQueue();
+    if (hasUnsyncedProgress(period.date)) {
+      setSyncStatus(navigator.onLine ? "syncing" : "offline");
+      return;
+    }
+    const startedRevision = progressRevisionRef.current[period.date] || 0;
     const { data, error } = await supabase
       .from("daily_progress")
       .select("completed_keys, updated_at")
@@ -4660,6 +4707,13 @@ function GlowUpTracker() {
       setSyncStatus("error");
       return;
     }
+    if (!canApplyRemoteProgress({
+      unsynced: hasUnsyncedProgress(period.date),
+      atRequest: startedRevision,
+      current: progressRevisionRef.current[period.date] || 0,
+      remoteUpdatedAt: data?.updated_at || "",
+      lastLocalWriteAt: acknowledgedProgressAtRef.current[period.date] || "",
+    })) return;
     const completedKeys = data?.completed_keys || [];
     setDone(Object.fromEntries(completedKeys.map((key) => [key, true])));
     setWeeklyHistory((entries) => [
