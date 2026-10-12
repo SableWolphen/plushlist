@@ -1,10 +1,12 @@
+import { currentCompanionAccountId } from "../companion-account-storage.mjs";
 import { useCompanionCloudSync } from "./companion-cloud-sync.jsx";
 
 const LazyDailyCompanionCore = React.lazy(() => import("./daily-companion-core.jsx").then((module) => ({ default: module.DailyCompanion })));
 
 export function DailyCompanion(props) {
   const [open, setOpen] = React.useState(false);
-  const { ready, status } = useCompanionCloudSync(!!props.open);
+  const accountId = props.user?.id || currentCompanionAccountId(window.localStorage);
+  const { ready, status } = useCompanionCloudSync(!!props.open, accountId);
   if (!props.open) return null;
   const syncLabel = status === "synced" ? "Account protected" : status === "offline" ? "Saved here · sync later" : "Saved on this device";
   return (
@@ -18,7 +20,7 @@ export function DailyCompanion(props) {
         <span aria-hidden="true" style={{ color: "var(--pl-theme-ink)", fontSize: 21, fontWeight: 900 }}>{open ? "▾" : "›"}</span>
       </button>
       {open && <div style={{ padding: "0 10px 10px" }}>
-        {!ready ? <div role="status" style={{ padding: "12px 10px", color: "var(--pl-theme-ink)", fontSize: 11.5 }}>Restoring your companion tools…</div> : <React.Suspense fallback={<div role="status" style={{ padding: "12px 10px", color: "var(--pl-theme-ink)", fontSize: 11.5 }}>Opening companion tools…</div>}><LazyDailyCompanionCore {...props} /></React.Suspense>}
+        {!ready ? <div role="status" style={{ padding: "12px 10px", color: "var(--pl-theme-ink)", fontSize: 11.5 }}>Restoring your companion tools…</div> : <React.Suspense fallback={<div role="status" style={{ padding: "12px 10px", color: "var(--pl-theme-ink)", fontSize: 11.5 }}>Opening companion tools…</div>}><LazyDailyCompanionCore key={accountId || "signed-out"} {...props} accountId={accountId} /></React.Suspense>}
       </div>}
     </section>
   );

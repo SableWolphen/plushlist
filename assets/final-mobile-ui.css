@@ -1655,6 +1655,8 @@ body>[role="dialog"]>div{
   box-sizing:border-box!important;
 }
 
+/* One scrolling container owns the mobile nav and bottom safe-area clearance.
+   Nested page shells add breathing room, not a second screen-height spacer. */
 @media(max-width:520px){
   #main-content#main-content{
     padding-top:max(24px,env(safe-area-inset-top))!important;
@@ -1669,11 +1671,11 @@ body>[role="dialog"]>div{
     margin-inline:auto!important;
     padding-left:8px!important;
     padding-right:8px!important;
-    padding-bottom:calc(176px + env(safe-area-inset-bottom))!important;
+    padding-bottom:12px!important;
   }
 
   #main-content#main-content :is(.pl-home-shell,.pl-unified-page-shell,.pl-task-page,.pl-care-shell,.pl-growth-shell,.pl-calendar-cozy,.pl-guardian-content,.pl-closet-shell,.pl-inline-tool){
-    padding-bottom:calc(176px + env(safe-area-inset-bottom))!important;
+    padding-bottom:12px!important;
   }
 
   #main-content#main-content .pl-app-bottom-nav{

@@ -1,4 +1,5 @@
 import { useAppearanceMode } from "./hooks/use-appearance-mode.js";
+import { canApplyRemoteProgress, pendingProgressForDate } from "./progress-intent-guard.mjs";
 import { useJournalPresentation } from "./hooks/use-journal-presentation.js";
 import { useCalendarNavigation } from "./hooks/use-calendar-navigation.js";
 import { HabitStudioProvider } from "./components/habit-studio.jsx";
@@ -686,12 +687,40 @@ function GlowUpTracker() {
   const [taskListCollapsed, setTaskListCollapsed] = useState(true);
   const { weekCardIndex, setWeekCardIndex, upcomingPreviewDate, setUpcomingPreviewDate, calendarWeekOffset, setCalendarWeekOffset, calendarWeekPreviewDate, setCalendarWeekPreviewDate, dayViewDate, setDayViewDate, dayViewExpanded, setDayViewExpanded } = useCalendarNavigation(trackerPeriod);
   const [done, setDone] = useState({});
+  const doneRef = React.useRef(done);
+  doneRef.current = done;
   const [openRow, setOpenRow] = useState(null);
   const [focusModeShowAll, setFocusModeShowAll] = useState(false);
   const [user, setUser] = useState(null);
+  const activeUserIdRef = React.useRef(user?.id);
+  activeUserIdRef.current = user?.id;
   const cozyComfort = useCozyComfort(user, supabase);
   const [syncStatus, setSyncStatus] = useState("loading");
   const pendingQueueRef = React.useRef([]);
+  const progressRevisionRef = React.useRef({});
+  const activeProgressWritesRef = React.useRef({});
+  const acknowledgedProgressAtRef = React.useRef({});
+  const progressWriteChainRef = React.useRef(Promise.resolve());
+  const hasUnsyncedProgress = date => pendingProgressForDate(
+    pendingQueueRef.current, date, activeProgressWritesRef.current[date] || 0
+  );
+  const beginProgressWrite = date => {
+    const revision = (progressRevisionRef.current[date] || 0) + 1;
+    progressRevisionRef.current[date] = revision;
+    activeProgressWritesRef.current[date] = (activeProgressWritesRef.current[date] || 0) + 1;
+    return revision;
+  };
+  const endProgressWrite = (date, revision, acknowledgedAt = "") => {
+    activeProgressWritesRef.current[date] = Math.max(0, (activeProgressWritesRef.current[date] || 0) - 1);
+    if (acknowledgedAt && progressRevisionRef.current[date] === revision) {
+      acknowledgedProgressAtRef.current[date] = acknowledgedAt;
+    }
+  };
+  const serializeProgressWrite = request => {
+    const next = progressWriteChainRef.current.then(request, request);
+    progressWriteChainRef.current = next.catch(() => {});
+    return next;
+  };
   const latestSupportOwnerRequestRef = React.useRef(null);
   const [lastSyncedAt, setLastSyncedAt] = useState(null);
   const [online, setOnline] = useState(() => navigator.onLine);
@@ -1127,42 +1156,79 @@ function GlowUpTracker() {
   const [badgeCelebration, setBadgeCelebration] = useState(null);
   const [celebrateKey, setCelebrateKey] = useState(null);
   const [recentlyCompletedKeys, setRecentlyCompletedKeys] = useState([]);
+  const queueFlushRef = React.useRef(null);
   const flushPendingQueue = async () => {
+    if (queueFlushRef.current) return queueFlushRef.current;
     if (!user || !navigator.onLine || pendingQueueRef.current.length === 0) return;
-    setSyncStatus("syncing");
-    const queue = [...pendingQueueRef.current];
-    pendingQueueRef.current = [];
-    for (const item of queue) {
-      const { error: dailyError } = await supabase.from("daily_progress").upsert({
-        user_id: user.id,
-        progress_date: item.progressDate,
-        completed_keys: item.completedKeys,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "user_id,progress_date" });
-      let taskError = null;
-      if (item.taskKey) {
-        const result = await supabase.from("tracker_progress").upsert(
-          { user_id: user.id, task_key: item.taskKey, completed: item.completed, updated_at: new Date().toISOString() },
-          { onConflict: "user_id,task_key" }
-        );
-        taskError = result.error;
+    const ownerId = user.id;
+    const run = (async () => {
+      setSyncStatus("syncing");
+      // The disk outbox is not cleared until all replay attempts finish.
+      const queue = [...pendingQueueRef.current];
+      pendingQueueRef.current = [];
+      const failed = [];
+      for (const item of queue) {
+        const revision = beginProgressWrite(item.progressDate);
+        const writtenAt = new Date().toISOString();
+        let acknowledged = "";
+        try {
+          const { dailyError, taskError } = await serializeProgressWrite(async () => {
+            const { error: dailyError } = await supabase.from("daily_progress").upsert({
+              user_id: ownerId,
+              progress_date: item.progressDate,
+              completed_keys: item.completedKeys,
+              updated_at: writtenAt,
+            }, { onConflict: "user_id,progress_date" });
+            let taskError = null;
+            if (!dailyError && item.taskKey) {
+              const result = await supabase.from("tracker_progress").upsert(
+                { user_id: ownerId, task_key: item.taskKey, completed: item.completed, updated_at: writtenAt },
+                { onConflict: "user_id,task_key" }
+              );
+              taskError = result.error;
+            }
+            return { dailyError, taskError };
+          });
+          if (dailyError || taskError) failed.push(item);
+          else acknowledged = writtenAt;
+        } catch (_error) {
+          failed.push(item);
+        } finally {
+          endProgressWrite(item.progressDate, revision, acknowledged);
+        }
       }
-      if (dailyError || taskError) pendingQueueRef.current.push(item);
-    }
-    try { window.localStorage.setItem(`plushlist-pending-${user.id}`, JSON.stringify(pendingQueueRef.current)); } catch (_error) {}
-    if (pendingQueueRef.current.length === 0) {
-      setSyncStatus("ready");
-      setLastSyncedAt(new Date().toISOString());
-    } else {
-      setSyncStatus("offline");
-    }
+      // Do not apply an old account's pending queue to the next Cozy.
+      if (activeUserIdRef.current !== ownerId) return;
+      // An edit made during replay must remain after the retried earlier edits.
+      pendingQueueRef.current = [...failed, ...pendingQueueRef.current];
+      try { window.localStorage.setItem(`plushlist-pending-${ownerId}`, JSON.stringify(pendingQueueRef.current)); } catch (_error) {
+        setSyncStatus("error");
+        return;
+      }
+      if (pendingQueueRef.current.length === 0) {
+        setSyncStatus("ready");
+        setLastSyncedAt(new Date().toISOString());
+      } else {
+        setSyncStatus(navigator.onLine ? "error" : "offline");
+      }
+    })();
+    queueFlushRef.current = run;
+    try { return await run; } finally { if (queueFlushRef.current === run) queueFlushRef.current = null; }
   };
 
   useEffect(() => {
+    pendingQueueRef.current = [];
+    progressRevisionRef.current = {};
+    activeProgressWritesRef.current = {};
+    acknowledgedProgressAtRef.current = {};
+    queueFlushRef.current = null;
     if (!user) return;
     try {
       const stored = window.localStorage.getItem(`plushlist-pending-${user.id}`);
-      if (stored) pendingQueueRef.current = JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        pendingQueueRef.current = Array.isArray(parsed) ? parsed.filter(item => item?.progressDate && Array.isArray(item.completedKeys)) : [];
+      }
     } catch (_error) {}
     flushPendingQueue();
     const handleOnline = () => flushPendingQueue();
@@ -1373,10 +1439,11 @@ function GlowUpTracker() {
       setDone({});
     }
     setSyncStatus("syncing");
+    const startedRevision = progressRevisionRef.current[period.date] || 0;
     Promise.all([
       supabase
         .from("daily_progress")
-        .select("completed_keys")
+        .select("completed_keys, updated_at")
         .eq("user_id", user.id)
         .eq("progress_date", period.date)
         .maybeSingle(),
@@ -1423,6 +1490,17 @@ function GlowUpTracker() {
               )
               .map((row) => row.task_key);
 
+        // An old response must not erase taps made after this load began.
+        if (!canApplyRemoteProgress({
+          unsynced: hasUnsyncedProgress(period.date),
+          atRequest: startedRevision,
+          current: progressRevisionRef.current[period.date] || 0,
+          remoteUpdatedAt: dailyResult.data?.updated_at || "",
+          lastLocalWriteAt: acknowledgedProgressAtRef.current[period.date] || "",
+        })) {
+          setSyncStatus(navigator.onLine ? "syncing" : "offline");
+          return;
+        }
         const serverDone = Object.fromEntries(completedKeys.map((key) => [key, true]));
         setDone(serverDone);
         setWeeklyHistory((entries) => [
@@ -1492,6 +1570,11 @@ function GlowUpTracker() {
       }, (payload) => {
         const next = payload?.new;
         if (!next || next.progress_date !== period.date) return;
+        if (!canApplyRemoteProgress({
+          unsynced: hasUnsyncedProgress(period.date),
+          remoteUpdatedAt: next.updated_at || "",
+          lastLocalWriteAt: acknowledgedProgressAtRef.current[period.date] || "",
+        })) return;
         const completedKeys = Array.isArray(next.completed_keys) ? next.completed_keys : [];
         setDone(Object.fromEntries(completedKeys.map((key) => [key, true])));
         setWeeklyHistory((entries) => [
@@ -4650,6 +4733,13 @@ function GlowUpTracker() {
     }
     setOnline(true);
     setSyncStatus("syncing");
+    // Never replace a newer local check with an older cloud snapshot.
+    if (pendingQueueRef.current.length) await flushPendingQueue();
+    if (hasUnsyncedProgress(period.date)) {
+      setSyncStatus(navigator.onLine ? "syncing" : "offline");
+      return;
+    }
+    const startedRevision = progressRevisionRef.current[period.date] || 0;
     const { data, error } = await supabase
       .from("daily_progress")
       .select("completed_keys, updated_at")
@@ -4660,6 +4750,13 @@ function GlowUpTracker() {
       setSyncStatus("error");
       return;
     }
+    if (!canApplyRemoteProgress({
+      unsynced: hasUnsyncedProgress(period.date),
+      atRequest: startedRevision,
+      current: progressRevisionRef.current[period.date] || 0,
+      remoteUpdatedAt: data?.updated_at || "",
+      lastLocalWriteAt: acknowledgedProgressAtRef.current[period.date] || "",
+    })) return;
     const completedKeys = data?.completed_keys || [];
     setDone(Object.fromEntries(completedKeys.map((key) => [key, true])));
     setWeeklyHistory((entries) => [
@@ -4700,12 +4797,15 @@ function GlowUpTracker() {
         { progress_date: targetDate, completed_keys: completedKeys },
       ]);
       setSyncStatus("syncing");
-      supabase.from("daily_progress").upsert({
+      const writeRevision = beginProgressWrite(targetDate);
+      const writtenAt = new Date().toISOString();
+      let acknowledgedAt = "";
+      serializeProgressWrite(() => supabase.from("daily_progress").upsert({
         user_id: user.id,
         progress_date: targetDate,
         completed_keys: completedKeys,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "user_id,progress_date" }).then(({ error }) => {
+        updated_at: writtenAt,
+      }, { onConflict: "user_id,progress_date" })).then(({ error }) => {
         if (error) {
           if (!navigator.onLine) {
             pendingQueueRef.current.push({ progressDate: targetDate, completedKeys, taskKey: null, completed: null });
@@ -4713,25 +4813,32 @@ function GlowUpTracker() {
             setSyncStatus("offline");
             return;
           }
-          setWeeklyHistory(previousHistory);
-          setLongHistory(previousLongHistory);
-          setHabitHistory(previousHabitHistory);
-          setSyncStatus("error");
+          if (progressRevisionRef.current[targetDate] === writeRevision) {
+            setWeeklyHistory(previousHistory);
+            setLongHistory(previousLongHistory);
+            setHabitHistory(previousHabitHistory);
+            setSyncStatus("error");
+          }
           return;
         }
-        setSyncStatus("ready");
-        setLastSyncedAt(new Date().toISOString());
-      });
+        acknowledgedAt = writtenAt;
+        if (progressRevisionRef.current[targetDate] === writeRevision) {
+          setSyncStatus("ready");
+          setLastSyncedAt(writtenAt);
+        }
+      }).catch(() => setSyncStatus("error"))
+        .finally(() => endProgressWrite(targetDate, writeRevision, acknowledgedAt));
       return;
     }
 
-    const next = !done[key];
+    const next = !doneRef.current[key];
     if (next) triggerCelebrate(key);
     if (next && taskSnoozes.some((item) => item.task_key === key)) clearTaskSnooze(key);
-    const previousDone = { ...done };
-    const nextDone = { ...done, [key]: next };
+    const previousDone = { ...doneRef.current };
+    const nextDone = { ...doneRef.current, [key]: next };
     if (!next) delete nextDone[key];
     const completedKeys = Object.keys(nextDone).filter((taskKey) => nextDone[taskKey]);
+    doneRef.current = nextDone;
     setDone(nextDone);
     setWeeklyHistory((entries) => [
       ...entries.filter((entry) => entry.progress_date !== period.date),
@@ -4742,18 +4849,21 @@ function GlowUpTracker() {
       { progress_date: period.date, completed_keys: completedKeys },
     ]);
     setSyncStatus("syncing");
-    Promise.all([
+    const writeRevision = beginProgressWrite(period.date);
+    const writtenAt = new Date().toISOString();
+    let acknowledgedAt = "";
+    serializeProgressWrite(() => Promise.all([
       supabase.from("tracker_progress").upsert(
-        { user_id: user.id, task_key: key, completed: next, updated_at: new Date().toISOString() },
+        { user_id: user.id, task_key: key, completed: next, updated_at: writtenAt },
         { onConflict: "user_id,task_key" }
       ),
       supabase.from("daily_progress").upsert({
         user_id: user.id,
         progress_date: period.date,
         completed_keys: completedKeys,
-        updated_at: new Date().toISOString(),
+        updated_at: writtenAt,
       }, { onConflict: "user_id,progress_date" }),
-    ]).then(([legacyResult, dailyResult]) => {
+    ])).then(([legacyResult, dailyResult]) => {
         if (legacyResult.error || dailyResult.error) {
           if (!navigator.onLine) {
             pendingQueueRef.current.push({ progressDate: period.date, completedKeys, taskKey: key, completed: next });
@@ -4761,21 +4871,28 @@ function GlowUpTracker() {
             setSyncStatus("offline");
             return;
           }
-          setDone(previousDone);
-          setWeeklyHistory((entries) => [
-            ...entries.filter((entry) => entry.progress_date !== period.date),
-            { progress_date: period.date, completed_keys: Object.keys(previousDone).filter((taskKey) => previousDone[taskKey]) },
-          ]);
-          setHabitHistory((entries) => [
-            ...entries.filter((entry) => entry.progress_date !== period.date),
-            { progress_date: period.date, completed_keys: Object.keys(previousDone).filter((taskKey) => previousDone[taskKey]) },
-          ]);
-          setSyncStatus("error");
+          if (progressRevisionRef.current[period.date] === writeRevision) {
+            doneRef.current = previousDone;
+            setDone(previousDone);
+            setWeeklyHistory((entries) => [
+              ...entries.filter((entry) => entry.progress_date !== period.date),
+              { progress_date: period.date, completed_keys: Object.keys(previousDone).filter((taskKey) => previousDone[taskKey]) },
+            ]);
+            setHabitHistory((entries) => [
+              ...entries.filter((entry) => entry.progress_date !== period.date),
+              { progress_date: period.date, completed_keys: Object.keys(previousDone).filter((taskKey) => previousDone[taskKey]) },
+            ]);
+            setSyncStatus("error");
+          }
           return;
         }
-        setSyncStatus("ready");
-        setLastSyncedAt(new Date().toISOString());
-      });
+        acknowledgedAt = writtenAt;
+        if (progressRevisionRef.current[period.date] === writeRevision) {
+          setSyncStatus("ready");
+          setLastSyncedAt(writtenAt);
+        }
+      }).catch(() => setSyncStatus("error"))
+        .finally(() => endProgressWrite(period.date, writeRevision, acknowledgedAt));
   };
 
 

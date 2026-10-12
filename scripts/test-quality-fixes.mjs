@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { transformSync } from 'esbuild';
+import { buildSync } from 'esbuild';
+import { companionAccountKey, currentCompanionAccountId } from '../src/companion-account-storage.mjs';
+import { canApplyRemoteProgress, pendingProgressForDate } from '../src/progress-intent-guard.mjs';
 import { resolveSupportAction } from '../src/guardian-action-selection.mjs';
 
 // These are real behavior tests, not searches for marker strings.
@@ -18,7 +20,7 @@ assert.equal(resolveSupportAction('note', { note: 1, reward: 'yes' }), null,
 
 globalThis.React = { useState() {}, useEffect() {} };
 const source = fs.readFileSync('src/components/daily-companion-core.jsx', 'utf8');
-const transformed = transformSync(source, { loader: 'jsx', format: 'esm', target: 'es2022' }).code;
+const transformed = buildSync({ entryPoints: ['src/components/daily-companion-core.jsx'], bundle: true, write: false, format: 'esm', platform: 'neutral', target: 'es2022' }).outputFiles[0].text;
 const { safeWrite } = await import('data:text/javascript;base64,' + Buffer.from(transformed).toString('base64'));
 const values = new Map();
 globalThis.localStorage = {
@@ -43,4 +45,53 @@ assert.ok(navDoc.includes('Home · Tasks · Care · Progress · Plush'));
 for (const tab of ['Home', 'Tasks', 'Care', 'Progress', 'Plush']) {
   assert.ok(app.includes(`<span>${tab}</span>`), `Live navigation is missing ${tab}`);
 }
-console.log('Quality fixes passed: permission-aware Guardian actions, honest local saves, and navigation source-of-truth.');
+
+const alice = 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
+const bob = 'bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb';
+const baseKey = 'plushlife:wind-down:2026-10-12';
+const aliceKey = companionAccountKey(baseKey, alice);
+const bobKey = companionAccountKey(baseKey, bob);
+assert.notEqual(aliceKey, bobKey, 'Two accounts must not share private companion storage');
+assert.equal(companionAccountKey(baseKey, null), null, 'Never save private notes under an anonymous key');
+assert.equal(companionAccountKey(baseKey, 'no'), null, 'Reject invalid account identifiers');
+values.set(baseKey, JSON.stringify({ win: 'legacy unowned private note' }));
+assert.equal(values.get(aliceKey), undefined, 'Never silently assign legacy notes to the first sign-in');
+values.set(aliceKey, JSON.stringify({ win: 'Alice only' }));
+values.set(bobKey, JSON.stringify({ win: 'Bob only' }));
+assert.notDeepEqual(JSON.parse(values.get(aliceKey)), JSON.parse(values.get(bobKey)));
+const sessionStorage = {getItem: () => JSON.stringify({access_token:'signed-session',user:{id:alice}})};
+assert.equal(currentCompanionAccountId(sessionStorage), alice);
+assert.equal(currentCompanionAccountId({getItem:()=>'{bad-json'}), null);
+assert.equal(currentCompanionAccountId({getItem:()=>null}), null);
+
+assert.equal(canApplyRemoteProgress({ unsynced: true }), false);
+assert.equal(canApplyRemoteProgress({ atRequest: 1, current: 2 }), false,
+  'A response started before the latest tap cannot replace the latest tap');
+assert.equal(canApplyRemoteProgress({ atRequest: 2, current: 2 }), true);
+assert.equal(canApplyRemoteProgress({
+  lastLocalWriteAt: '2026-10-12T11:32:13Z',
+  remoteUpdatedAt: '2026-10-12T11:32:11Z',
+}), false, 'Late older Realtime events cannot undo a newer local completion');
+assert.equal(canApplyRemoteProgress({
+  lastLocalWriteAt: '2026-10-12T11:32:13Z',
+  remoteUpdatedAt: '2026-10-12T11:32:14Z',
+}), true, 'Fresh progress from a watch can still refresh the phone');
+assert.equal(pendingProgressForDate([{progressDate:'2026-10-12'}], '2026-10-12'), true);
+assert.equal(pendingProgressForDate([], '2026-10-12', 1), true);
+assert.equal(pendingProgressForDate([], '2026-10-12'), false);
+const companionCloud = fs.readFileSync('src/components/companion-cloud-sync.jsx','utf8');
+assert.ok(companionCloud.includes('hydrateLocal(merged, userId)'), 'Cloud hydration must stay account-scoped');
+assert.ok(companionCloud.includes('localCompanionState(userId)'), 'Cloud export must stay account-scoped');
+const companionCore = fs.readFileSync('src/components/daily-companion-core.jsx','utf8');
+assert.ok(companionCore.includes('privateKey(HISTORY_KEY)'), 'Local companion history must stay account-scoped');
+
+const mobileCss = fs.readFileSync('assets/final-mobile-ui.css', 'utf8');
+const terminalMobileRule = mobileCss.slice(mobileCss.lastIndexOf('/* One scrolling container owns'));
+assert.ok(terminalMobileRule.includes('padding-bottom:calc(120px + env(safe-area-inset-bottom))!important'),
+  'The outer app scroll area must clear the fixed bottom navigation and safe area');
+assert.equal((terminalMobileRule.match(/padding-bottom:12px!important/g) || []).length, 2,
+  'Nested mobile shells add only small visual spacing, not duplicate navigation clearances');
+assert.ok(!terminalMobileRule.includes('176px'),
+  'The final mobile layout must not stack multiple 176px bottom spacers');
+
+console.log('Quality fixes passed: Guardian permissions, local saves, account isolation, stale progress guards, and navigation.');
