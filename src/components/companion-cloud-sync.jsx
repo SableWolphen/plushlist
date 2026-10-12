@@ -1,3 +1,4 @@
+import { companionAccountKey } from "../companion-account-storage.mjs";
 const AUTH_KEY = "sb-pvitdhixycegmcovapyh-auth-token";
 const SUPABASE_URL = "https://pvitdhixycegmcovapyh.supabase.co";
 const SUPABASE_KEY = "sb_publishable_SScDCEHovc68ITiEUu6lCg_mHPe2oaI";
@@ -46,13 +47,13 @@ function isoDateOffset(days) {
   const date = new Date(); date.setHours(12, 0, 0, 0); date.setDate(date.getDate() + days); return date.toISOString().slice(0, 10);
 }
 
-function localCompanionState() {
+function localCompanionState(userId) {
   const days = {};
   for (let offset = -(SYNCED_DAYS - 1); offset <= 1; offset += 1) {
     const date = isoDateOffset(offset);
-    const gentleKey = `plushlife:gentle-day:${date}`;
-    const windDownKey = `plushlife:wind-down:${date}`;
-    const supportKey = `plushlife:support-need:${date}`;
+    const gentleKey = companionAccountKey(`plushlife:gentle-day:${date}`, userId);
+    const windDownKey = companionAccountKey(`plushlife:wind-down:${date}`, userId);
+    const supportKey = companionAccountKey(`plushlife:support-need:${date}`, userId);
     const day = {};
     if (storageHas(gentleKey)) day.gentle_done = storageJson(gentleKey, {});
     if (storageHas(windDownKey)) day.wind_down = storageJson(windDownKey, {});
@@ -61,8 +62,8 @@ function localCompanionState() {
   }
   return {
     version: 2,
-    first_seen: storageJson(FIRST_SEEN_KEY, "") || "",
-    history: Array.isArray(storageJson(HISTORY_KEY, [])) ? storageJson(HISTORY_KEY, []).slice(0, SYNCED_DAYS) : [],
+    first_seen: storageJson(companionAccountKey(FIRST_SEEN_KEY, userId), "") || "",
+    history: Array.isArray(storageJson(companionAccountKey(HISTORY_KEY, userId), [])) ? storageJson(companionAccountKey(HISTORY_KEY, userId), []).slice(0, SYNCED_DAYS) : [],
     days,
     habit_coach: plainObject(storageJson(HABIT_STATE_KEY, {})),
     updated_at: new Date().toISOString(),
@@ -166,14 +167,14 @@ function mergeState(cloud = {}, local = {}) {
   };
 }
 
-function hydrateLocal(state) {
+function hydrateLocal(state, userId) {
   if (!state || typeof state !== "object" || Array.isArray(state)) return;
-  if (state.first_seen) storageSet(FIRST_SEEN_KEY, state.first_seen);
-  if (Array.isArray(state.history)) storageSet(HISTORY_KEY, state.history.slice(0, SYNCED_DAYS));
+  if (state.first_seen) storageSet(companionAccountKey(FIRST_SEEN_KEY, userId), state.first_seen);
+  if (Array.isArray(state.history)) storageSet(companionAccountKey(HISTORY_KEY, userId), state.history.slice(0, SYNCED_DAYS));
   for (const [date, day] of Object.entries(plainObject(state.days))) {
-    if (day && Object.prototype.hasOwnProperty.call(day, "gentle_done")) storageSet(`plushlife:gentle-day:${date}`, day.gentle_done || {});
-    if (day && Object.prototype.hasOwnProperty.call(day, "wind_down")) storageSet(`plushlife:wind-down:${date}`, day.wind_down || {});
-    if (day && Object.prototype.hasOwnProperty.call(day, "support_need")) storageSet(`plushlife:support-need:${date}`, day.support_need || "");
+    if (day && Object.prototype.hasOwnProperty.call(day, "gentle_done")) storageSet(companionAccountKey(`plushlife:gentle-day:${date}`, userId), day.gentle_done || {});
+    if (day && Object.prototype.hasOwnProperty.call(day, "wind_down")) storageSet(companionAccountKey(`plushlife:wind-down:${date}`, userId), day.wind_down || {});
+    if (day && Object.prototype.hasOwnProperty.call(day, "support_need")) storageSet(companionAccountKey(`plushlife:support-need:${date}`, userId), day.support_need || "");
   }
   if (state.habit_coach && typeof state.habit_coach === "object" && !Array.isArray(state.habit_coach)) {
     storageSet(HABIT_STATE_KEY, state.habit_coach);
@@ -202,7 +203,7 @@ async function writeCloud(token, userId, state, keepalive = false) {
   if (!response.ok) throw new Error(`write ${response.status}`);
 }
 
-export function useCompanionCloudSync(active) {
+export function useCompanionCloudSync(active, accountId) {
   const [ready, setReady] = React.useState(false);
   const [status, setStatus] = React.useState("local");
   React.useEffect(() => {
@@ -217,7 +218,7 @@ export function useCompanionCloudSync(active) {
       if (syncing && !initial) { queued = true; return; }
       const token = currentAccessToken();
       const userId = userIdFromToken(token);
-      if (!token || !userId || !navigator.onLine) {
+      if (!token || !userId || userId !== accountId || !navigator.onLine) {
         if (!cancelled) { setStatus(token ? "offline" : "local"); if (initial) setReady(true); }
         return;
       }
@@ -225,13 +226,14 @@ export function useCompanionCloudSync(active) {
       try {
         if (initial) {
           const cloud = await readCloud(token, userId);
-          const merged = mergeState(cloud, localCompanionState());
-          hydrateLocal(merged);
+          if (cancelled) return;
+          const merged = mergeState(cloud, localCompanionState(userId));
+          hydrateLocal(merged, userId);
           hydratedState = merged;
           await writeCloud(token, userId, merged);
           try { window.PlushLifeRuntime?.metric("companion-sync-ready", performance.now()); } catch (_error) {}
         } else {
-          const local = localCompanionState();
+          const local = localCompanionState(userId);
           const merged = mergeState(hydratedState || {}, local);
           hydratedState = merged;
           await writeCloud(token, userId, merged, keepalive);
@@ -268,7 +270,7 @@ export function useCompanionCloudSync(active) {
     const onHabitChanged = () => scheduleSync(700);
     const onStorage = (event) => {
       const key = String(event?.key || "");
-      if (key === HABIT_STATE_KEY || key === HISTORY_KEY || key.startsWith("plushlife:gentle-day:") || key.startsWith("plushlife:wind-down:") || key.startsWith("plushlife:support-need:")) scheduleSync(900);
+      if (key === HABIT_STATE_KEY || (accountId && key?.startsWith(`plushlife:account:${accountId}:`))) scheduleSync(900);
     };
 
     window.addEventListener("online", onOnline);
@@ -286,6 +288,6 @@ export function useCompanionCloudSync(active) {
       window.removeEventListener("plushlife:habit-coach-updated", onHabitChanged);
       window.removeEventListener("storage", onStorage);
     };
-  }, [active]);
+  }, [active, accountId]);
   return { ready, status };
 }
