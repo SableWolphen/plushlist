@@ -1,4 +1,4 @@
-import { chooseRescueMode, searchPrivateEveryday, buildLittleWins } from "../everyday-upgrades.mjs";
+import { chooseRescueMode, searchPrivateEveryday, buildLittleWins, shouldReviewQuickSchedule } from "../everyday-upgrades.mjs";
 import { companionAccountKey } from "../companion-account-storage.mjs";
 import { QuickCapture } from "./quick-capture.jsx";
 
@@ -10,7 +10,7 @@ export function DayRescue({ currentMode = "full", onSelect, openTaskManager }) {
   const [busy, setBusy] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [previous, setPrevious] = React.useState(null);
-  const choose = async mode => {
+  const choose = async (mode, restoring = false) => {
     const option = chooseRescueMode(mode);
     if (!option || busy || typeof onSelect !== "function") return;
     setBusy(true); setMessage("");
@@ -18,7 +18,7 @@ export function DayRescue({ currentMode = "full", onSelect, openTaskManager }) {
     try {
       const saved = await onSelect(mode);
       if (saved === false) { setMessage("Couldn’t save this change. Your previous day plan is still here."); return; }
-      setPrevious(old);
+      setPrevious(restoring ? null : old);
       setMessage(option.message);
       setExpanded(false);
     } catch (_error) {
@@ -39,13 +39,13 @@ export function DayRescue({ currentMode = "full", onSelect, openTaskManager }) {
       {currentMode !== "full" && <button type="button" disabled={busy} onClick={() => choose("full")} style={button}>Return to my usual day</button>}
     </div>}
     {message && <div role="status" style={{ marginTop: 8, fontSize: 12.5, lineHeight: 1.4 }}>{message}
-      {previous && previous !== currentMode && <button type="button" disabled={busy} onClick={() => {const mode = previous;setPrevious(null);choose(mode);}} style={{...button,marginLeft:8,minHeight:32}}>Undo</button>}
+      {previous && previous !== currentMode && <button type="button" disabled={busy} onClick={() => {const mode = previous;setPrevious(null);choose(mode, true);}} style={{...button,marginLeft:8,minHeight:32}}>Undo</button>}
     </div>}
   </section>;
 }
 
 export function EverydayActions({ userId, client, tasks = [], schedules = [], onQuickAdd, quickAddMessage,
-  onMoreOptions, onOpenTask, onOpenSchedule, onOpenNote, onOpenProgress, onOpenGuardian }) {
+  onMoreOptions, onOpenTask, onOpenSchedule, onOpenNote, onOpenProgress, onOpenGuardian, onReviewScheduledTask }) {
   const [panel, setPanel] = React.useState("");
   const [query, setQuery] = React.useState("");
   const [notes, setNotes] = React.useState([]);
@@ -65,6 +65,10 @@ export function EverydayActions({ userId, client, tasks = [], schedules = [], on
   }, [panel, userId, client]);
   React.useEffect(() => { setPanel(""); setQuery(""); setNotes([]); }, [userId]);
   const results = searchPrivateEveryday({ query, tasks, schedules, notes });
+  const fastAdd = (name, when) => {
+    if (shouldReviewQuickSchedule(name) && onReviewScheduledTask) { onReviewScheduledTask(name); return false; }
+    return onQuickAdd?.(name, when);
+  };
   const choose = result => {
     setPanel(""); setQuery("");
     if (result.type === "task") onOpenTask?.(result.source);
@@ -77,7 +81,7 @@ export function EverydayActions({ userId, client, tasks = [], schedules = [], on
       <button type="button" aria-expanded={panel === "search"} onClick={()=>setPanel(v=>v==="search"?"":"search")} style={{...button, flex:1}}>⌕ Find anything</button>
     </div>
     {panel === "quick" && <div style={{ marginTop: 9 }}>
-      <QuickCapture onQuickAdd={onQuickAdd} quickAddMessage={quickAddMessage} onMoreOptions={()=>{setPanel("");onMoreOptions?.();}} />
+      <QuickCapture onQuickAdd={fastAdd} quickAddMessage={quickAddMessage} onMoreOptions={draft=>{setPanel("");onMoreOptions?.(draft);}} />
       <p style={{margin:"4px 2px",fontSize:12,color:"var(--pl-theme-muted)"}}>For repeating tasks and exact reminder times, use More options to review the schedule before saving.</p>
     </div>}
     {panel === "search" && <div style={{ ...surface, padding: 12, marginTop: 9 }}>
