@@ -87,6 +87,38 @@ const BOOT_SHELL_HTML = `<div id="plush-boot-shell" role="status" aria-live="pol
   </div>
 </div>`;
 
+// If the app module fails before React mounts, its skeleton must not stay frozen.
+// We show a user-initiated retry without clearing accounts, tasks, or offline data.
+const BOOT_RECOVERY_SCRIPT = `<script id="plush-boot-recovery">
+(function () {
+  var failed = false;
+  var hasShell = function () { return !!document.getElementById("plush-boot-shell"); };
+  function showRecovery() {
+    if (!hasShell() || document.getElementById("plush-boot-retry")) return;
+    var shell = document.getElementById("plush-boot-shell");
+    if (!shell) return;
+    var status = shell.querySelector(".boot-status");
+    if (status) status.textContent = "PlushLife is taking longer than expected.";
+    var card = shell.querySelector(".boot-card") || shell;
+    var note = document.createElement("p");
+    note.textContent = navigator.onLine ? "Your data is safe. Try opening the app again." : "You seem offline. Reconnect or try again when ready.";
+    note.style.cssText = "font:600 13px/1.5 system-ui;color:#755e83;margin:12px 0 8px";
+    var retry = document.createElement("button");
+    retry.type = "button";
+    retry.id = "plush-boot-retry";
+    retry.textContent = "Retry PlushLife";
+    retry.style.cssText = "min-height:46px;padding:10px 18px;border:0;border-radius:13px;background:#9d6cc0;color:white;font:800 14px system-ui;cursor:pointer";
+    retry.addEventListener("click", function () { window.location.reload(); });
+    card.appendChild(note);card.appendChild(retry);
+  }
+  window.addEventListener("error", function (event) {
+    if (event && (event.filename || event.target && event.target.tagName === "SCRIPT")) { failed = true; setTimeout(showRecovery, 500); }
+  }, true);
+  window.addEventListener("unhandledrejection", function () { failed = true; setTimeout(showRecovery, 500); });
+  setTimeout(function () { if (hasShell()) showRecovery(); }, 15000);
+})();
+</script>`;
+
 // These panels are rendered in the root tree even while closed. Keeping their
 // tiny wrappers in the startup bundle, while loading their real implementations
 // only when open becomes true, prevents rarely-used screens from bloating the
@@ -285,6 +317,7 @@ function prepareHtml(file, source, buildSha) {
 
     if (!content.includes('id="plush-boot-style"')) content = content.replace("</head>", `  ${BOOT_SHELL_STYLE}\n</head>`);
     content = content.replace('<div id="root"></div>', `<div id="root">${BOOT_SHELL_HTML}</div>`);
+    if (!content.includes('id="plush-boot-recovery"')) content = content.replace("</body>", BOOT_RECOVERY_SCRIPT + "\n</body>");
 
     for (const preload of GENERATED_INDEX_PRELOADS) {
       if (!content.includes(preload)) content = content.replace("</head>", `  ${preload}\n</head>`);
