@@ -60,6 +60,6 @@ export function StorybookHome({world="soft",rows=[],viewDone={},period,pct=0,tog
       <div className="pl-storybook-mood-grid">{STORYBOOK_MOODS.map(([id,label,emoji])=><button type="button" key={id} onClick={()=>openDailyCheckIn?.()} aria-label={"Check in feeling "+label}><span className="pl-storybook-face" aria-hidden="true">{emoji}</span><span>{label}</span></button>)}</div>
       <p className="pl-storybook-mood-help">Tap a feeling to open your private check-in.</p>
     </section>
-    <aside className="pl-storybook-goodnight"><span className="pl-storybook-bottom-bear" aria-hidden="true"><ThemeScene decorative focus mood="happy"/></span><div><strong>{copy.ending} ♡</strong><p>Rest, reset, and keep going. We're glad you're here.</p></div></aside>
+    <aside className="pl-storybook-goodnight"><span className="pl-storybook-bottom-bear" aria-hidden="true"><ThemeScene decorative focus /></span><div><strong>{copy.ending} ♡</strong><p>Rest, reset, and keep going. We're glad you're here.</p></div></aside>
   </div>;
 }
