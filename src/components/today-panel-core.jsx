@@ -395,7 +395,7 @@ export function TodayPanel({
   reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen, setSettingsOpen,
   completedTodayExpanded, setCompletedTodayExpanded, tomorrowTasksCount, preferences,
   activityDaysTotal, selectedOutfit, appearanceTheme, dinoTheme, babyMode, cozyDaily, optionalTools, rewardMoment, onWearReward, onDismissReward, returnGapDays, returnBannerDismissed, setReturnBannerDismissed, selectDayType, isHistoricalView, isFutureView,
-  pct, doneCount, openTodayJournal, openDailyCheckIn
+  pct, doneCount, openTodayJournal, openDailyCheckIn, dailyCheckIn
 }) {
   // Wraps the app toggle with the shared completion flow: newly completed
   // tasks linger briefly for undo, and every completion dispatches
