@@ -75,3 +75,12 @@
 #main-content .pl-storybook[data-storybook-world="twilight"] .pl-storybook-today{background:#29234e}
 @media(max-width:360px){#main-content .pl-storybook{gap:9px}#main-content .pl-storybook-banner{min-height:174px}#main-content .pl-storybook-greeting{width:64%}#main-content .pl-storybook-mascot{width:42%}#main-content .pl-storybook-today{padding:13px 11px}#main-content .pl-storybook-door{padding:8px 6px!important}#main-content .pl-storybook-door strong{font-size:12px}#main-content .pl-storybook-face{height:33px;width:33px;font-size:17px}}
 @media(prefers-reduced-motion:reduce){#main-content .pl-storybook-progress>div{transition:none!important}}
+
+#main-content .pl-storybook-banner .pl-storybook-settings{position:absolute;right:10px;top:12px;z-index:4;border:1px solid var(--sb-border);background:var(--sb-card);color:var(--sb-ink);width:38px;min-height:38px!important;border-radius:50%;display:grid;place-items:center;font-size:20px;box-shadow:0 4px 12px #38213d18}
+#main-content .pl-storybook-planning{border:1px solid var(--pl-theme-line);background:var(--pl-theme-surface);border-radius:19px;padding:10px;color:var(--pl-theme-ink)}
+#main-content .pl-storybook-planning>summary{font:900 13px Nunito,system-ui;min-height:45px;display:flex;align-items:center;cursor:pointer;list-style:revert}
+#main-content .pl-storybook-planning[open]>summary{margin-bottom:8px}
+#main-content .pl-storybook.pl-storybook-dark:not([data-storybook-world="twilight"]){--sb-sky:#302640;--sb-sky2:#493555;--sb-card:#2a2334;--sb-soft:#423348;--sb-border:#56445f;--sb-ink:#faf0ff;--sb-muted:#d5c2e1}
+#main-content .pl-storybook.pl-storybook-dark[data-storybook-world="dino"]{--sb-sky:#243c30;--sb-sky2:#344b3b;--sb-card:#243129;--sb-soft:#314638;--sb-border:#44614b;--sb-ink:#f1fff3;--sb-muted:#bddec4}
+#main-content .pl-storybook.pl-storybook-dark[data-storybook-world="meadow"]{--sb-sky:#21463c;--sb-sky2:#2c554b;--sb-card:#20382f;--sb-soft:#305448;--sb-border:#41685c;--sb-ink:#e9fff4;--sb-muted:#add6c7}
+#main-content .pl-storybook.pl-storybook-dark[data-storybook-world="strawberry"]{--sb-sky:#482b3b;--sb-sky2:#573442;--sb-card:#382830;--sb-soft:#50333f;--sb-border:#6a4651;--sb-ink:#fff1f6;--sb-muted:#edbdcb}
