@@ -134,7 +134,7 @@ import { cozyReminderCopy } from './cozy-profile.js';
           { id: "SKIP", title: "Skip today" },
           { id: "SNOOZE_10", title: "10 min" },
           { id: "SNOOZE_30", title: "30 min" },
-          { id: "SNOOZE_60", title: "1 hour" },
+          { id: "SNOOZE_60", title: "Move later · 1 hour" },
         ],
       }],
     }).catch(function () {});
