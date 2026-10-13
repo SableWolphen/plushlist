@@ -1,3 +1,6 @@
+export function shouldReviewQuickSchedule(text) {
+  return /\b(?:every\s+(?:day|morning|evening|night|week|weekday|weekend|mon|tue|wed|thu|fri|sat|sun)|tomorrow|tonight|next\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)|at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?|on\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/i.test(String(text || ""));
+}
 export function chooseRescueMode(mode) {
   if (!["soft", "tiny", "rest", "full"].includes(mode)) return null;
   return { mode, message: mode === "rest" ? "Resting is allowed. Your finished tasks stay finished." :
