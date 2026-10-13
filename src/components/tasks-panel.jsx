@@ -29,6 +29,15 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
   };
   React.useEffect(() => () => { if (plushTimer.current) window.clearTimeout(plushTimer.current); }, []);
   React.useEffect(() => { if (open) { setTaskView(initialView); setComposerOpen(!inline); setTaskAddMoreOpen(false); setShowAllToday(false); } }, [open, inline, initialView, viewRequest]);
+  React.useEffect(() => {
+    if (!open) return undefined;
+    const showCapture = () => {
+      setComposerOpen(true);
+      window.requestAnimationFrame(() => document.querySelector('input[aria-label="Quickly add a task"]')?.focus?.());
+    };
+    window.addEventListener("plushlife:open-quick-add", showCapture);
+    return () => window.removeEventListener("plushlife:open-quick-add", showCapture);
+  }, [open]);
   if (!open) return null;
   const { DAYS, TEMPLATE_PACKS } = window.PlushLifeContent;
   const { WEEKDAY_PRESET_IDS, WEEKEND_PRESET_IDS, scheduleLabelForTask, taskIsScheduledForDate, offsetDate } = window.PlushLifeSchedule;
