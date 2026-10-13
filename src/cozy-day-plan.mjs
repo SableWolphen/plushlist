@@ -12,8 +12,13 @@ const safeMinutes = value => {
   const n=Number(value);
   return Number.isFinite(n) && n>=1 ? Math.min(180,Math.round(n)) : 5;
 };
-export function buildCozyDayPlan({ rows=[],viewDone={},mode="full",minutesAvailable=30 }={}) {
-  const valid = rows.filter(row=>row && row.key && row.label && !viewDone[row.key]);
+export function buildCozyDayPlan({ rows=[],viewDone={},mode="full",minutesAvailable=30,date="" }={}) {
+  const valid = rows.filter(row=> {
+    if(!row?.key || !row.label || viewDone[row.key] || row.sourceTask?.archived_at) return false;
+    const task=row.sourceTask;
+    if(task?.paused_since && date && date>=task.paused_since && (!task.paused_until || date<=task.paused_until)) return false;
+    return true;
+  });
   const essential=valid.filter(row=>!row.isBonus);
   const optional=valid.filter(row=>!!row.isBonus);
   const cap=mode==="rest"?0:mode==="tiny"?1:mode==="soft"||mode==="recovery"?2:3;
