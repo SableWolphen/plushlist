@@ -66,7 +66,7 @@ export function EverydayActions({ userId, client, tasks = [], schedules = [], on
   React.useEffect(() => { setPanel(""); setQuery(""); setNotes([]); }, [userId]);
   const results = searchPrivateEveryday({ query, tasks, schedules, notes });
   const fastAdd = (name, when) => {
-    if (shouldReviewQuickSchedule(name) && onReviewScheduledTask) { onReviewScheduledTask(name); return false; }
+    if (shouldReviewQuickSchedule(name) && onReviewScheduledTask) { setPanel(""); onReviewScheduledTask(name); return false; }
     return onQuickAdd?.(name, when);
   };
   const choose = result => {
