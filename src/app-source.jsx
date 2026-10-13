@@ -7387,7 +7387,8 @@ function GlowUpTracker() {
         <EverydayActions userId={user.id} client={supabase}
           tasks={trackerTasks} schedules={personalSchedules}
           onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage}
-          onMoreOptions={() => openTaskManager()}
+          onMoreOptions={draft => { openTaskManager(); if (draft?.trim()) { setNewTaskName(draft.trim()); setNaturalScheduleText(draft.trim()); setTaskAdvancedOpen(true); } }}
+          onReviewScheduledTask={draft => { openTaskManager(); setNewTaskName(draft.trim()); setNaturalScheduleText(draft.trim()); setTaskAdvancedOpen(true); setQuickAddMessage("Review the repeating date or reminder time before saving."); }}
           onOpenTask={task => { openTaskManager(); setTaskSearchQuery(task?.task || ""); }}
           onOpenSchedule={() => goToDashboard("week")}
           onOpenNote={note => { setJournalQuickOpenDate(note.note_date); setPrivateNote(note.body || ""); setPrivateNoteDraft(note.body || ""); setPrivateNotePrompt(note.prompt || ""); setPrivateNoteMessage(""); setPrivateNoteEditing(false); setJournalQuickOpen(true); }}
