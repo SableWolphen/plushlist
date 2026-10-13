@@ -274,7 +274,7 @@ export function TogetherCorner({
                 ))}
               </div>
               <div role="group" aria-label="Easy shared activity ideas" style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:9}}>
-                {[["activity","Take a ten-minute walk together"],["checkin","What's one thing that felt good today?"],["promise","Send each other one kind reminder this week"]].map(([kind,idea])=>
+                {[["activity","Take a ten-minute walk together"],["checkin","What's one thing that felt good today?"],["promise","Send each other one kind reminder this week"],["task","Pick one tiny shared goal and cheer each other on"],["activity","Try a ten-minute tidy together"]].map(([kind,idea])=>
                   <button type="button" key={idea} onClick={()=>{setTypeId(kind);setDraft(idea);}} style={{minHeight:40,padding:"8px 10px",borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)",color:"var(--pl-theme-ink)",fontSize:12,fontWeight:800,cursor:"pointer"}}>{kind==="activity"?"🚶":kind==="checkin"?"🌷":"💛"} {idea}</button>)}
               </div>
               <textarea value={draft} onChange={(event) => setDraft(event.target.value)} maxLength={500} placeholder={selectedType.hint} aria-label={`Write a ${selectedType.label.toLowerCase()}`} style={{ width: "100%", boxSizing: "border-box", minHeight: 68, marginTop: 8, padding: 10, borderRadius: 12, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface,#FFF)", color: "var(--pl-theme-ink,#5B4B6B)", resize: "vertical" }} />
