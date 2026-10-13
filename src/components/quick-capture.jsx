@@ -65,7 +65,7 @@ export function QuickCapture({ onQuickAdd, quickAddMessage, onMoreOptions }) {
             </button>
           );
         })}
-        <button type="button" onClick={onMoreOptions} style={{ marginLeft: "auto", padding: "8px 6px", minHeight: 40, border: 0, background: "transparent", color: "var(--pl-theme-muted,#9A57AC)", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>
+        <button type="button" onClick={() => onMoreOptions?.(text)} style={{ marginLeft: "auto", padding: "8px 6px", minHeight: 40, border: 0, background: "transparent", color: "var(--pl-theme-muted,#9A57AC)", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>
           More options ↓
         </button>
       </div>

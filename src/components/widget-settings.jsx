@@ -1,5 +1,5 @@
 import { widgetSnapshot } from '../widget-model.js';
-import { ThemeWorldContext } from './theme-world.jsx';
+import { ThemeWorldContext, ThemeScene } from './theme-world.jsx';
 
 export function WidgetSettings({ rows=[], viewDone={}, dailyCheckIn={}, pct=0, weeklyOverallPct=0 }) {
   const context=React.useContext(ThemeWorldContext);
@@ -25,7 +25,7 @@ export function WidgetSettings({ rows=[], viewDone={}, dailyCheckIn={}, pct=0, w
     <div role="group" aria-label="Widget size preview" style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}}>{[['single','Small preview'],['list','Roomy preview']].map(([value,label])=><button type="button" key={value} aria-pressed={mode===value} style={{...btn,borderWidth:mode===value?2:1}} onClick={()=>setMode(value)}>{label}</button>)}</div>
     <div style={{...previewCard,padding:14}} aria-label="Widget preview">
       <div style={{display:'grid',gridTemplateColumns:'38px 1fr auto',gap:8,alignItems:'center'}}>
-        <div style={{fontSize:27,textAlign:'center'}} aria-hidden="true">🧸</div>
+        <div style={{width:38,height:38,display:"grid",placeItems:"center",overflow:"hidden"}} aria-hidden="true"><ThemeScene focus decorative /></div>
         <div><div style={{fontSize:10,fontWeight:900,letterSpacing:'.08em',color:'var(--pl-theme-muted)'}}>PLUSH LIFE · {snapshot.dayType.toUpperCase()}</div><div style={{fontSize:16,fontWeight:950,color:'var(--pl-theme-ink)',marginTop:1}}>One little step ✨</div></div>
         <div style={{fontSize:20,fontWeight:900,color:'var(--pl-theme-accent)'}} aria-hidden="true">↻</div>
       </div>
