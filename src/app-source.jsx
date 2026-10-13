@@ -3069,6 +3069,7 @@ function GlowUpTracker() {
       }
     }
     const someday = when === "someday";
+    const quickDate = when === "tomorrow" ? offsetDate(period.date, 1) : period.date;
     const sections = taskSectionsForDay(targetDayId);
     const section = sections[0] || "My tasks";
     const taskKey = `custom-${crypto.randomUUID()}`;
@@ -3084,10 +3085,10 @@ function GlowUpTracker() {
       detail: encodeTaskDetail("regular"),
       sort_order: dayTasks.length + 1,
       is_bonus: sectionIsOptional(targetDayId, section),
-      schedule_type: "weekly",
+      schedule_type: someday ? "weekly" : "once",
       start_date: null,
       end_date: null,
-      one_time_date: null,
+      one_time_date: someday ? null : quickDate,
       schedule_days: [],
       reminder_time: null,
       why_note: "",
