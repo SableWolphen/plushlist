@@ -20,6 +20,10 @@ assert.equal(tiny.essentials[0].key,"b");
 assert.equal(buildCozyDayPlan({rows,mode:"rest"}).essentials.length,0);
 assert.equal(buildCozyDayPlan({rows:[]}).essentials.length,0);
 assert.equal(buildCozyDayPlan({rows:[{key:"z",label:"Unestimated",sourceTask:{estimated_minutes:-1}}]}).suggestedMinutes,5);
+assert.deepEqual(buildCozyDayPlan({rows:[
+ {key:"paused",label:"Pause me",sourceTask:{paused_since:"2026-10-12",paused_until:"2026-10-18"}},
+ {key:"ready",label:"Active"}
+],date:"2026-10-13"}).essentials.map(x=>x.key),["ready"],"Temporarily paused tasks must not be recommended");
 assert.equal(safeHomeMode("companion"),"companion");
 assert.equal(safeHomeMode("untrusted"),"minimal");
 assert.equal(ROUTINE_TEMPLATES.length,6);
