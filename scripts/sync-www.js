@@ -317,7 +317,9 @@ function prepareHtml(file, source, buildSha) {
 
     if (!content.includes('id="plush-boot-style"')) content = content.replace("</head>", `  ${BOOT_SHELL_STYLE}\n</head>`);
     content = content.replace('<div id="root"></div>', `<div id="root">${BOOT_SHELL_HTML}</div>`);
-    if (!content.includes('id="plush-boot-recovery"')) content = content.replace("</body>", BOOT_RECOVERY_SCRIPT + "\n</body>");
+    // Arm recovery before any blocking SDK script. A stalled script must not
+    // prevent the timer/error handlers themselves from being installed.
+    if (!content.includes('id="plush-boot-recovery"')) content = content.replace(BOOT_SHELL_HTML + '</div>', BOOT_SHELL_HTML + '</div>\n' + BOOT_RECOVERY_SCRIPT);
 
     for (const preload of GENERATED_INDEX_PRELOADS) {
       if (!content.includes(preload)) content = content.replace("</head>", `  ${preload}\n</head>`);
@@ -409,7 +411,8 @@ async function main() {
   console.log(`Critical app entry: ${formatKb(bundleStats.entryBytes)}; largest lazy chunk: ${formatKb(bundleStats.largestChunkBytes)}.`);
 }
 
-main().catch((error) => {
+if (require.main === module) main().catch((error) => {
   console.error(error);
   process.exit(1);
 });
+module.exports = { prepareHtml };

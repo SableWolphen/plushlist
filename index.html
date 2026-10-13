@@ -43,27 +43,10 @@
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 <div id="root"></div>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0/dist/umd/supabase.min.js" integrity="sha384-faMlYZUtkJj+Sh6Bmu/L0GzPcraRWN6CW+9RH3GUrK/Z0WS9tgaNNt0tHiLxsbdb sha384-fPWur1rx/DE6YtXP/x0MD6dd90RgnVsz5yX/DIg7CcVAnTBZsENWuIcpvVTM39ti" crossorigin="anonymous"></script>
-<!-- Two SRI hashes (either may match): the bytes vendored to ./vendor/ by
-     the web build and the pinned jsDelivr bytes served to this root copy.
-     Both are @supabase/supabase-js 2.111.0 (aligned with package-lock). -->
-<script src="./assets/care-upgrades.js"></script>
-<script src="./assets/entitlements.js"></script>
-<script src="./assets/plush-content.js"></script>
-  <script src="./assets/plush-theme-copy.js"></script>
-  <script defer src="./assets/login-theme.js"></script>
-<script src="./assets/plush-helpers.js"></script>
-<script src="./assets/plush-schedule.js"></script>
-<script src="./assets/plush-billing.js"></script>
-<!-- Native bridge: the Capacitor back-button, splash, push-channel, and
-     on-device notification scheduler code that used to live in an inline
-     <script> here now lives in src/native-bridge.js, imported at the top of
-     src/app-source.jsx so esbuild bundles it ahead of the app code. -->
-<script src="./assets/app.bundle.js"></script>
 <script>
-if ("serviceWorker" in navigator) {
+// Packaged assets are already available offline. A web service worker can
+// retain an entry/chunk graph from a previous APK across app upgrades.
+if ("serviceWorker" in navigator && !window.Capacitor?.isNativePlatform?.()) {
   window.addEventListener("load", () => {
     let refreshing = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
@@ -114,6 +97,37 @@ if ("serviceWorker" in navigator) {
     }).catch(() => {});
   });
 }
+// Retire workers installed by older native releases, without deleting caches,
+// localStorage, IndexedDB, sessions, or account data. Reload only once when an
+// existing controller must release this document.
+if ("serviceWorker" in navigator && window.Capacitor?.isNativePlatform?.()) {
+  navigator.serviceWorker.getRegistrations().then(async (registrations) => {
+    const appScope = new URL("./", window.location.href).href;
+    const own = registrations.filter(registration => registration.scope === appScope);
+    const removed = await Promise.all(own.map(registration => registration.unregister()));
+    if (removed.some(Boolean) && navigator.serviceWorker.controller) window.location.reload();
+  }).catch(() => {});
+}
 </script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0/dist/umd/supabase.min.js" integrity="sha384-faMlYZUtkJj+Sh6Bmu/L0GzPcraRWN6CW+9RH3GUrK/Z0WS9tgaNNt0tHiLxsbdb sha384-fPWur1rx/DE6YtXP/x0MD6dd90RgnVsz5yX/DIg7CcVAnTBZsENWuIcpvVTM39ti" crossorigin="anonymous"></script>
+<!-- Two SRI hashes (either may match): the bytes vendored to ./vendor/ by
+     the web build and the pinned jsDelivr bytes served to this root copy.
+     Both are @supabase/supabase-js 2.111.0 (aligned with package-lock). -->
+<script src="./assets/care-upgrades.js"></script>
+<script src="./assets/entitlements.js"></script>
+<script src="./assets/plush-content.js"></script>
+  <script src="./assets/plush-theme-copy.js"></script>
+  <script defer src="./assets/login-theme.js"></script>
+<script src="./assets/plush-helpers.js"></script>
+<script src="./assets/plush-schedule.js"></script>
+<script src="./assets/plush-billing.js"></script>
+<!-- Native bridge: the Capacitor back-button, splash, push-channel, and
+     on-device notification scheduler code that used to live in an inline
+     <script> here now lives in src/native-bridge.js, imported at the top of
+     src/app-source.jsx so esbuild bundles it ahead of the app code. -->
+<script src="./assets/app.bundle.js"></script>
+
 </body>
 </html>
