@@ -48,6 +48,8 @@ const together=fs.readFileSync("src/components/together-corner.jsx","utf8");
 const notification=fs.readFileSync("src/native-bridge.js","utf8");
 assert.ok(today.includes("<DayRescue currentMode="),"Day rescue is reachable from Home");
 assert.ok(app.includes("<EverydayActions userId={user.id}"),"Add/search available across logged-in screens");
+assert.ok(app.includes('schedule_type: someday ? "weekly" : "once"') && app.includes("one_time_date: someday ? null : quickDate"),
+  "Quick Add Today/Tomorrow must not silently create recurring weekly tasks");
 assert.ok(app.includes("littleWinHistory={habitHistory}"),"Little Wins reuse recorded account data");
 assert.ok(progress.includes("<LittleWins userId={user?.id}"),"Little Wins is reachable from Progress");
 assert.ok(together.includes("Easy shared activity ideas"),"Guardian shared activities have one-tap starters");
