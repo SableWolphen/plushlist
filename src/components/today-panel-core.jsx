@@ -10,6 +10,7 @@ import { CalmPanel } from "./info-panels.jsx";
 import { PlushMascot } from "./mascot.jsx";
 import { CompletedTaskArea, useCompletedTaskFlow } from "./completed-task-flow.jsx";
 import { startFocusTimer } from "./focus-timer.jsx";
+import { DayRescue } from "./everyday-upgrades.jsx";
 
 /*
  * Reference-home compatibility markers kept deliberately:
@@ -583,6 +584,7 @@ export function TodayPanel({
       <div data-plushlife-home-stack className="pl-home-shell">
         <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} />
         {!isHistoricalView && !isFutureView && <ReferenceHomeOverview pct={pct} doneCount={doneCount} rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} openTaskManager={openTaskManager} period={period} setCalmQuickOpen={setCalmQuickOpen} babyMode={babyMode} dinoTheme={dinoTheme} />}
+        {!isHistoricalView && !isFutureView && <DayRescue currentMode={dailyCheckIn?.day_type || "full"} onSelect={selectDayType} openTaskManager={()=>openTaskManager?.(period?.date)} />}
         {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }
         <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
           <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>More for today</summary>
