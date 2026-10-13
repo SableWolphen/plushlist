@@ -1,12 +1,18 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { buildSync } from "esbuild";
-import { chooseRescueMode, searchPrivateEveryday, buildLittleWins } from "../src/everyday-upgrades.mjs";
+import { chooseRescueMode, searchPrivateEveryday, buildLittleWins, shouldReviewQuickSchedule } from "../src/everyday-upgrades.mjs";
 import { companionAccountKey } from "../src/companion-account-storage.mjs";
 
 assert.equal(chooseRescueMode("soft").mode, "soft");
 assert.match(chooseRescueMode("rest").message, /finished tasks stay finished/);
 assert.equal(chooseRescueMode("nope"), null, "Unrecognized day types must not be saved");
+
+assert.equal(shouldReviewQuickSchedule("Take vitamins every morning at 8"), true);
+assert.equal(shouldReviewQuickSchedule("dentist tomorrow at 2pm"), true);
+assert.equal(shouldReviewQuickSchedule("Call a friend on Monday"), true);
+assert.equal(shouldReviewQuickSchedule("Brush my teeth"), false);
+assert.equal(shouldReviewQuickSchedule("Eat at home"), false);
 
 const tasks = [
   { task_key: "a", task: "Take vitamins", section: "Morning", why_note: "Health" },
