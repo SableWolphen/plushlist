@@ -84,3 +84,9 @@
 #main-content .pl-storybook.pl-storybook-dark[data-storybook-world="dino"]{--sb-sky:#243c30;--sb-sky2:#344b3b;--sb-card:#243129;--sb-soft:#314638;--sb-border:#44614b;--sb-ink:#f1fff3;--sb-muted:#bddec4}
 #main-content .pl-storybook.pl-storybook-dark[data-storybook-world="meadow"]{--sb-sky:#21463c;--sb-sky2:#2c554b;--sb-card:#20382f;--sb-soft:#305448;--sb-border:#41685c;--sb-ink:#e9fff4;--sb-muted:#add6c7}
 #main-content .pl-storybook.pl-storybook-dark[data-storybook-world="strawberry"]{--sb-sky:#482b3b;--sb-sky2:#573442;--sb-card:#382830;--sb-soft:#50333f;--sb-border:#6a4651;--sb-ink:#fff1f6;--sb-muted:#edbdcb}
+
+#main-content .pl-storybook-plush-drawer{border:1px solid var(--pl-theme-line);border-radius:17px;background:var(--pl-theme-surface);padding:0 10px;color:var(--pl-theme-ink);min-width:0;overflow:hidden}
+#main-content .pl-storybook-plush-drawer>summary{min-height:46px;display:flex;align-items:center;cursor:pointer;font:900 13px Nunito,system-ui}
+#main-content .pl-storybook-plush-drawer:not([open]) .pl-home-hero{display:none}
+#main-content .pl-storybook-plush-drawer[open] .pl-home-hero{margin:0 0 10px!important}
+#main-content .pl-storybook-plush-drawer[open] .pl-home-today-row{margin-bottom:10px!important}
