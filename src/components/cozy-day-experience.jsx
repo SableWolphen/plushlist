@@ -126,7 +126,7 @@ export function RoutineStarter({ onChoose }) {
   </details>;
 }
 
-export function CozyWeeklyStory({history=[],checkIns=[],period,userId}){
+export function CozyWeeklyStory({history=[],checkIns=[],period,userId,onShareImage}){
   const story=weeklyCozyStory({history,checkIns,today:period?.date});
   const [status,setStatus]=React.useState("");
   React.useEffect(()=>setStatus(""),[userId,period?.date]);
@@ -144,7 +144,8 @@ export function CozyWeeklyStory({history=[],checkIns=[],period,userId}){
       <p style={{margin:0,fontSize:14}}>{story.line}</p>
       <p style={{margin:"8px 0 0",fontSize:13}}>You've earned every small moment of care. Rest never erases it.</p>
     </div>
-    <button type="button" style={{...btn,width:"100%",marginTop:10}} onClick={share}>♡ Share my weekly win</button>
+    {onShareImage&&<button type="button" style={{...action,width:"100%",marginTop:10}} onClick={onShareImage}>🖼️ Make a shareable PlushLife card</button>}
+    <button type="button" style={{...btn,width:"100%",marginTop:8}} onClick={share}>♡ Share my weekly story as text</button>
     <p style={{fontSize:11.5,color:"var(--pl-theme-muted)",margin:"6px 0 0"}}>Sharing includes counts only, never task names, journal notes or personal feelings. Nothing posts automatically.</p>
     {status&&<p role="status" style={{fontSize:12}}>{status}</p>}
   </details>;
