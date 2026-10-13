@@ -23,6 +23,19 @@ import { cozyReminderCopy } from './cozy-profile.js';
   if (Plugins.StatusBar) Plugins.StatusBar.setStyle({ style: "DARK" }).catch(function () {});
 
   if (Plugins.App) {
+    // Only recognize these explicit app-launch routes; leave auth callbacks untouched.
+    var applyShortcut = function (url) {
+      try {
+        var parsed = new URL(String(url || ""));
+        if (parsed.protocol !== "plushlife:" || parsed.hostname !== "shortcut") return;
+        var action = parsed.pathname.replace(/^\//, "");
+        if (action !== "add" && action !== "focus") return;
+        try { sessionStorage.setItem("plushlife:pending-shortcut:v1", action); } catch (_error) {}
+        window.dispatchEvent(new CustomEvent("plushlife:android-shortcut", { detail: { action: action } }));
+      } catch (_error) { /* Ignore all unrelated deep links. */ }
+    };
+    Plugins.App.addListener("appUrlOpen", function (event) { applyShortcut(event && event.url); }).catch(function () {});
+    if (Plugins.App.getLaunchUrl) Plugins.App.getLaunchUrl().then(function (result) { applyShortcut(result && result.url); }).catch(function () {});
     var exitArmed = false;
     var exitArmTimer = null;
     var OVERLAY_SELECTOR = '[role="dialog"], [role="alertdialog"], dialog[open]';

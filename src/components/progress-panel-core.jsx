@@ -41,6 +41,7 @@ function HabitGardenCard({ habitTasks, habitGardenGrowthPct, habitGardenTotalChe
 }
 
 import { LittleWins } from "./everyday-upgrades.jsx";
+import { CozyWeeklyStory } from "./cozy-day-experience.jsx";
 
 export function ProgressPanel({ open, user, progressView, setProgressView, weeklyIntentionEditing, setWeeklyIntentionEditing, weeklyIntentionDraft, setWeeklyIntentionDraft, weeklyIntentionText, saveWeeklyIntentionEdit, hasWeeklyActivity, goToDashboard, weeklyOverallPct, weekOverWeekDelta, preferences, weeklyEssentialPct, weeklyOverallDone, weeklyOverallPossible, weeklyBonusDone, caringDays, weeklyEssentialDone, careStory, careAreas, openTaskManager, patternInsightCards, insightCardIndex, setInsightCardIndex, weeklyHighlights, period, goWriteWeeklyIntention, setShareCardOpen, progressDetailsOpen, setProgressDetailsOpen, TREND_WEEKS, TREND_MONTHS, currentMonthKey, monthlyOverallPct, monthOverMonthDelta, monthlyTrendPoints, tappedTrendMonth, setTappedTrendMonth, monthlyMostConsistent, currentMonthDates, weeklyTrendPoints, tappedTrendWeek, setTappedTrendWeek, habitTasks, habitGardenGrowthPct, habitGardenTotalCheckIns, habitGardenOpen, setHabitGardenOpen, littleWinHistory = [], littleWinCheckIns = [] }) {
   if (!open) return null;
@@ -53,6 +54,7 @@ export function ProgressPanel({ open, user, progressView, setProgressView, weekl
             return <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} style={{ minWidth: 0, padding: "8px 4px", borderRadius: 10, border: selected ? "2px solid var(--pl-theme-line)" : "1px solid transparent", background: selected ? "var(--pl-theme-surface)" : "transparent", color: selected ? "var(--pl-theme-ink)" : "var(--pl-theme-ink)", fontSize: 10.5, fontWeight: 900, cursor: "pointer" }}><span aria-hidden="true">{item.icon}</span><span>{item.label}</span></button>;
           })}
         </div>
+        <CozyWeeklyStory userId={user?.id} period={period} history={littleWinHistory} checkIns={littleWinCheckIns} onShareImage={() => setShareCardOpen(true)} />
         <LittleWins userId={user?.id} period={period} history={littleWinHistory} checkIns={littleWinCheckIns} />
         {progressView === "overview" && <>
         <div style={{ marginBottom: 12, padding: "11px 12px", borderRadius: 12, background: "var(--pl-theme-surface-2,#F9F1FC)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>

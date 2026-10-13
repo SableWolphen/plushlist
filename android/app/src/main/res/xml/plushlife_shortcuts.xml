@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="plushlife_add"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_add_task">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.PlushLife"
+            android:targetClass="com.PlushLife.MainActivity"
+            android:data="plushlife://shortcut/add" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="plushlife_focus"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_focus">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.PlushLife"
+            android:targetClass="com.PlushLife.MainActivity"
+            android:data="plushlife://shortcut/focus" />
+    </shortcut>
+</shortcuts>

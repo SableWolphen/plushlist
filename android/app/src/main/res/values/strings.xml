@@ -4,4 +4,6 @@
     <string name="app_name">PlushLife</string>
     <string name="title_activity_main">PlushLife</string>
     <string name="default_notification_channel_id">plushlife-care</string>
+    <string name="shortcut_add_task">Add task</string>
+    <string name="shortcut_focus">One-step focus</string>
 </resources>

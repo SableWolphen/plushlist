@@ -799,6 +799,7 @@ function GlowUpTracker() {
   const [starterPackMessage, setStarterPackMessage] = useState("");
 
   const [onboardingReason, setOnboardingReason] = useState(null);
+  const [onboardingFirstTask, setOnboardingFirstTask] = useState("Drink water");
   const [onboardingMode, setOnboardingMode] = useState("cozy");
   const [onboardingBusy, setOnboardingBusy] = useState(false);
   const [onboardingMessage, setOnboardingMessage] = useState("");
@@ -2787,6 +2788,28 @@ function GlowUpTracker() {
   };
 
   useEffect(() => {
+    if (!user?.id) return undefined;
+    const receiveShortcut = (event) => {
+      let action = event?.detail?.action || "";
+      if (!action) { try { action = sessionStorage.getItem("plushlife:pending-shortcut:v1") || ""; } catch (_error) {} }
+      if (!["add","focus"].includes(action)) return;
+      try { sessionStorage.removeItem("plushlife:pending-shortcut:v1"); } catch (_error) {}
+      if (action === "add") {
+        openTaskManager(period.date);
+        window.setTimeout(() => window.dispatchEvent(new Event("plushlife:open-quick-add")), 150);
+      } else {
+        setDashboard("today");
+        setSelectedProgressDate(period.date);
+        try { sessionStorage.setItem("plushlife:focus-open:v1", "1"); } catch (_error) {}
+        window.setTimeout(() => window.dispatchEvent(new Event("plushlife:focus-one-step")), 150);
+      }
+    };
+    window.addEventListener("plushlife:android-shortcut", receiveShortcut);
+    receiveShortcut();
+    return () => window.removeEventListener("plushlife:android-shortcut", receiveShortcut);
+  }, [user?.id, period.date]);
+
+  useEffect(() => {
     if (!manageTasks) return;
     const nextSections = taskSectionsForDay(newTaskDay);
     setNewTaskSection((current) => current === "__custom__" || nextSections.includes(current) ? current : (nextSections[0] || "My tasks"));
@@ -4045,8 +4068,8 @@ function GlowUpTracker() {
       setOnboardingMessage("Your space couldn't be saved yet. Please try again.");
       return;
     }
-    if (onboardingMode !== "supporter" && trackerTasks.length === 0) {
-      const pack = {tasks:[{task:"Drink water",section:"Every day"}]};
+    if (onboardingMode !== "supporter" && trackerTasks.length === 0 && onboardingFirstTask.trim()) {
+      const pack = {tasks:[{task:onboardingFirstTask.trim().slice(0,140),section:"Every day"}]};
       if (pack.tasks.length > 0) {
         const starterTasks = pack.tasks.map((item, index) => ({
           user_id: user.id, task_key: `starter-${Date.now()}-${index}`, day_id: "daily", section: item.section,
@@ -7279,7 +7302,7 @@ function GlowUpTracker() {
           </div>
         </div>
       )}
-      {onboardingStep > 0 && <GentleOnboarding name={displayNameDraft} onName={setDisplayNameDraft} reason={onboardingReason} onReason={setOnboardingReason} mode={onboardingMode} onMode={setOnboardingMode} onFinish={completeOnboarding} onClose={() => setOnboardingStep(0)} busy={onboardingBusy} message={onboardingMessage} invitationCount={pendingSupportInvites.length}/>}
+      {onboardingStep > 0 && <GentleOnboarding name={displayNameDraft} onName={setDisplayNameDraft} reason={onboardingReason} onReason={setOnboardingReason} mode={onboardingMode} onMode={setOnboardingMode} onFinish={completeOnboarding} firstTask={onboardingFirstTask} onFirstTask={setOnboardingFirstTask} onClose={() => setOnboardingStep(0)} busy={onboardingBusy} message={onboardingMessage} invitationCount={pendingSupportInvites.length}/>}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 0, overflow: "visible" }}>
         {(preferences.simple_mode ? [] : (dinoTheme ? [
           { e: "🦕", top: "2%", left: "4%", size: 54 }, { e: "🦖", top: "4%", left: "82%", size: 58 },

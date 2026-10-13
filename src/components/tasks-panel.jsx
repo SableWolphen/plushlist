@@ -10,6 +10,7 @@ import { HabitStudio, HabitGoalCaption } from "./habit-studio.jsx";
 // startEditingTask), not the modals themselves.
 import { ToolPanel, HabitTypeIcon } from "./shared.jsx";
 import { QuickCapture } from "./quick-capture.jsx";
+import { RoutineStarter } from "./cozy-day-experience.jsx";
 import { ThemeScene } from "./theme-world.jsx";
 import { useCompletedTaskFlow } from "./completed-task-flow.jsx";
 
@@ -28,6 +29,15 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
   };
   React.useEffect(() => () => { if (plushTimer.current) window.clearTimeout(plushTimer.current); }, []);
   React.useEffect(() => { if (open) { setTaskView(initialView); setComposerOpen(!inline); setTaskAddMoreOpen(false); setShowAllToday(false); } }, [open, inline, initialView, viewRequest]);
+  React.useEffect(() => {
+    if (!open) return undefined;
+    const showCapture = () => {
+      setComposerOpen(true);
+      window.requestAnimationFrame(() => document.querySelector('input[aria-label="Quickly add a task"]')?.focus?.());
+    };
+    window.addEventListener("plushlife:open-quick-add", showCapture);
+    return () => window.removeEventListener("plushlife:open-quick-add", showCapture);
+  }, [open]);
   if (!open) return null;
   const { DAYS, TEMPLATE_PACKS } = window.PlushLifeContent;
   const { WEEKDAY_PRESET_IDS, WEEKEND_PRESET_IDS, scheduleLabelForTask, taskIsScheduledForDate, offsetDate } = window.PlushLifeSchedule;
@@ -135,7 +145,13 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
             {starterPackMessage && <div role={starterPackMessage.includes("Couldn't") ? "alert" : "status"} aria-live="polite" style={{ marginTop: 8, fontSize: 11.5, lineHeight: 1.45, color: starterPackMessage.includes("Couldn't") ? "#B24D65" : "#318C79", fontWeight: 700 }}>{starterPackMessage}</div>}
           </div>
 
-          <div style={{ marginBottom: 14, padding: 16, borderRadius: 16, background: "rgba(255,255,255,0.72)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
+          <RoutineStarter onChoose={template => {
+            setNewTaskDay("daily");
+            setImportText(template.tasks.join("\n"));
+            setImportOpen(true);
+            window.requestAnimationFrame(() => document.getElementById("pl-routine-import")?.scrollIntoView?.({ behavior: "smooth", block: "start" }));
+          }} />
+          <div id="pl-routine-import" style={{ marginBottom: 14, padding: 16, borderRadius: 16, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
             <button type="button" onClick={() => setImportOpen((open) => !open)} aria-expanded={importOpen} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: 0, padding: 0, cursor: "pointer" }}>
               <span style={{ fontSize: 13, fontWeight: 900, color: "var(--pl-theme-muted,#9A57AC)" }}>📥 Import a list of tasks</span>
               <span style={{ color: "var(--pl-theme-muted,#9A57AC)", fontSize: 12, transform: importOpen ? "rotate(180deg)" : "none", transition: "transform .2s" }}>▾</span>
