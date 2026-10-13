@@ -22,7 +22,7 @@ export function storybookRows(rows=[],viewDone={},limit=5) {
   return rows.filter(row=>row && row.key && row.label && !row.isBonus && !row.sourceTask?.archived_at)
     .slice(0,limit).map(row=>({key:row.key,label:String(row.label),done:!!viewDone[row.key]}));
 }
-export function StorybookHome({world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,selectedOutfit}) {
+export function StorybookHome({world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit}) {
   const copy=storybookTheme(world);
   const visible=storybookRows(rows,viewDone);
   const completed=rows.filter(row=>row && row.key && row.label && !row.isBonus && !row.sourceTask?.archived_at && viewDone[row.key]).length;
@@ -38,12 +38,13 @@ export function StorybookHome({world="soft",rows=[],viewDone={},period,pct=0,tog
   return <div className="pl-storybook" data-storybook-world={world}>
     <header className="pl-storybook-banner">
       <div className="pl-storybook-brand"><span aria-hidden="true" className="pl-storybook-brand-bear">🧸</span><span>PlushLife</span></div>
+      <button type="button" className="pl-storybook-settings" aria-label="Open settings" onClick={()=>setSettingsOpen?.(true)}>⚙</button>
       <div className="pl-storybook-sky" aria-hidden="true"><span className="pl-storybook-moon">☾</span><span className="pl-storybook-star">✦</span><span className="pl-storybook-cloud">☁</span></div>
       <div className="pl-storybook-greeting"><p className="pl-storybook-small">{copy.symbol} {copy.tag}</p><h1>{world==="twilight"?"Good evening!":"Good morning, Cozy!"}</h1><p>{copy.detail}</p></div>
       <div className="pl-storybook-mascot" aria-label="Your original PlushLife teddy bear"><ThemeScene decorative focus outfit={selectedOutfit} /></div>
     </header>
     <section className="pl-storybook-today" aria-label="Today's checklist">
-      <div className="pl-storybook-topline"><span>TODAY</span><button type="button" onClick={()=>goToDashboard?.("calendar")} aria-label="Open calendar">{dayLabel} <span aria-hidden="true">▦</span></button></div>
+      <div className="pl-storybook-topline"><span>TODAY</span><button type="button" onClick={()=>goToDashboard?.("week")} aria-label="Open calendar">{dayLabel} <span aria-hidden="true">▦</span></button></div>
       <div className="pl-storybook-intro"><div><h2>{copy.greeting} <span aria-hidden="true">{copy.symbol}</span></h2><p>{total ? "Every little step deserves a little celebration." : "Your page is ready. Start with one little thing."}</p></div><span className="pl-storybook-mini-plush" aria-hidden="true"><ThemeScene decorative focus outfit={selectedOutfit}/></span></div>
       <div className="pl-storybook-progress-label"><strong>{completed} / {total} completed</strong><span>{total ? progress+"%" : "Fresh start"}</span></div>
       <div className="pl-storybook-progress" role="progressbar" aria-label="Today's tasks completed" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}><div style={{width:progress+"%"}} /></div>
