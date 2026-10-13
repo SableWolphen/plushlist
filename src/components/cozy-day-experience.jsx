@@ -34,7 +34,7 @@ export function CozyDayHome({userId,rows=[],viewDone={},period,mode="full",pct=0
     document.getElementById("plushlife-one-step-dialog")?.focus();
     return()=>{document.removeEventListener("keydown",onKey);previous?.focus?.();};
   },[focus]);
-  const plan=buildCozyDayPlan({rows,viewDone,mode,minutesAvailable:minutes});
+  const plan=buildCozyDayPlan({rows,viewDone,mode,minutesAvailable:minutes,date:period?.date});
   React.useEffect(()=>{
     if(!userId)return undefined;
     const openShortcutFocus=()=>{
