@@ -1,4 +1,5 @@
 import { useAppearanceMode } from "./hooks/use-appearance-mode.js";
+import { createStartupClient } from "./startup-client.js";
 import { canApplyRemoteProgress, pendingProgressForDate } from "./progress-intent-guard.mjs";
 import { useJournalPresentation } from "./hooks/use-journal-presentation.js";
 import { useCalendarNavigation } from "./hooks/use-calendar-navigation.js";
@@ -39,7 +40,7 @@ const { useState, useEffect } = React;
 window.__plushlifeWidgetDataOwnedByApp = true;
 // The SDK script tag can fail (offline, blocked CDN, SRI mismatch). Never let
 // that turn into a blank white page: degrade to a friendly retry screen.
-const supabase = window.supabase ? window.supabase.createClient(
+const supabase = createStartupClient(window.supabase,
   "https://pvitdhixycegmcovapyh.supabase.co",
   "sb_publishable_SScDCEHovc68ITiEUu6lCg_mHPe2oaI",
   {
@@ -49,7 +50,7 @@ const supabase = window.supabase ? window.supabase.createClient(
       detectSessionInUrl: true,
     },
   }
-) : null;
+);
 const SUPABASE_AUTH_STORAGE_KEY = "sb-pvitdhixycegmcovapyh-auth-token";
 const WARM_START_CACHE_VERSION = 1;
 const WARM_START_CACHE_MAX_AGE_MS = 2 * 60 * 60 * 1000;

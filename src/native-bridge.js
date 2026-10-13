@@ -19,9 +19,19 @@ import { cozyReminderCopy } from './cozy-profile.js';
 (function () {
   if (!window.Capacitor || !window.Capacitor.Plugins) return;
   var Plugins = window.Capacitor.Plugins;
+  // Native calls can throw synchronously as well as reject. Each optional
+  // service must fail independently, before this module hands off to React.
+  var initializeNativeFeature = function (setup) {
+    try { setup(); } catch (_error) {
+      console.error("PlushLife: an optional native service could not initialize.");
+    }
+  };
 
+  initializeNativeFeature(function () {
   if (Plugins.StatusBar) Plugins.StatusBar.setStyle({ style: "DARK" }).catch(function () {});
+  });
 
+  initializeNativeFeature(function () {
   if (Plugins.App) {
     // Only recognize these explicit app-launch routes; leave auth callbacks untouched.
     var applyShortcut = function (url) {
@@ -101,11 +111,15 @@ import { cozyReminderCopy } from './cozy-profile.js';
       armExit();
     });
   }
-
-  window.addEventListener("load", function () {
-    if (Plugins.SplashScreen) Plugins.SplashScreen.hide().catch(function () {});
   });
 
+  window.addEventListener("load", function () {
+    initializeNativeFeature(function () {
+    if (Plugins.SplashScreen) Plugins.SplashScreen.hide().catch(function () {});
+    });
+  });
+
+  initializeNativeFeature(function () {
   if (Plugins.PushNotifications) {
     Plugins.PushNotifications.createChannel({
       id: "plushlife-care",
@@ -125,7 +139,9 @@ import { cozyReminderCopy } from './cozy-profile.js';
       if (typeof target === "string" && /^https:\/\/sablewolphen\.github\.io\/plushlist\/?/.test(target)) window.location.href = target;
     });
   }
+  });
 
+  initializeNativeFeature(function () {
   if (Plugins.LocalNotifications) {
     var LocalNotifications = Plugins.LocalNotifications;
     var reminderChannelId = "plushlife-reminders";
@@ -408,4 +424,5 @@ import { cozyReminderCopy } from './cozy-profile.js';
       }
     });
   }
+  });
 })();
