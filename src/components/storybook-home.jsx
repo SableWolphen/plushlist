@@ -22,7 +22,7 @@ export function storybookRows(rows=[],viewDone={},limit=5) {
   return rows.filter(row=>row && row.key && row.label && !row.isBonus && !row.sourceTask?.archived_at)
     .slice(0,limit).map(row=>({key:row.key,label:String(row.label),done:!!viewDone[row.key]}));
 }
-export function StorybookHome({world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit}) {
+export function StorybookHome({world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false}) {
   const copy=storybookTheme(world);
   const visible=storybookRows(rows,viewDone);
   const completed=rows.filter(row=>row && row.key && row.label && !row.isBonus && !row.sourceTask?.archived_at && viewDone[row.key]).length;
@@ -35,7 +35,7 @@ export function StorybookHome({world="soft",rows=[],viewDone={},period,pct=0,tog
     try{sessionStorage.setItem("plushlife:focus-open:v1","1");}catch(_error){}
     window.dispatchEvent(new Event("plushlife:focus-one-step"));
   };
-  return <div className="pl-storybook" data-storybook-world={world}>
+  return <div className={darkMode ? "pl-storybook pl-storybook-dark" : "pl-storybook"} data-storybook-world={world}>
     <header className="pl-storybook-banner">
       <div className="pl-storybook-brand"><span aria-hidden="true" className="pl-storybook-brand-bear">🧸</span><span>PlushLife</span></div>
       <button type="button" className="pl-storybook-settings" aria-label="Open settings" onClick={()=>setSettingsOpen?.(true)}>⚙</button>
