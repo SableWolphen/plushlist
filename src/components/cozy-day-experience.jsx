@@ -34,8 +34,19 @@ export function CozyDayHome({userId,rows=[],viewDone={},period,mode="full",pct=0
     document.getElementById("plushlife-one-step-dialog")?.focus();
     return()=>{document.removeEventListener("keydown",onKey);previous?.focus?.();};
   },[focus]);
-  if(!userId)return null;
   const plan=buildCozyDayPlan({rows,viewDone,mode,minutesAvailable:minutes});
+  React.useEffect(()=>{
+    if(!userId)return undefined;
+    const openShortcutFocus=()=>{
+      let requested=false;
+      try {requested=sessionStorage.getItem("plushlife:focus-open:v1")==="1"; if(requested)sessionStorage.removeItem("plushlife:focus-open:v1");}catch(_error){}
+      if(requested && plan.essentials[0]){setFocus(plan.essentials[0]);setTiny(false);}
+    };
+    window.addEventListener("plushlife:focus-one-step",openShortcutFocus);
+    openShortcutFocus();
+    return()=>window.removeEventListener("plushlife:focus-one-step",openShortcutFocus);
+  },[userId,mode,period?.date,JSON.stringify(plan.essentials.map(item=>item.key))]);
+  if(!userId)return null;
   const finished=rows.filter(row=>row&&!row.isBonus&&viewDone[row.key]).length;
   const essentialCount=rows.filter(row=>row&&!row.isBonus).length;
   const first=plan.essentials[0];
