@@ -1,0 +1,32 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import { buildSync } from "esbuild";
+const source=fs.readFileSync("src/components/storybook-home.jsx","utf8");
+const page=fs.readFileSync("src/components/today-panel-core.jsx","utf8");
+const css=fs.readFileSync("assets/storybook-themes.css","utf8");
+const html=fs.readFileSync("index.html","utf8");
+const sync=fs.readFileSync("scripts/sync-www.js","utf8");
+const app=fs.readFileSync("src/app-source.jsx","utf8");
+const theme=fs.readFileSync("src/components/theme-world.jsx","utf8");
+const build=buildSync({entryPoints:["src/components/storybook-home.jsx"],bundle:true,write:false,format:"esm",platform:"browser",target:"es2022",loader:{".jsx":"jsx"}});
+assert.ok(build.outputFiles?.[0]?.text.includes("Good morning, Cozy!"),"Storyboard JSX must bundle");
+assert.ok(page.includes("<StorybookHome world="),"Real Home must render storyboard");
+assert.ok(page.includes("<CozyDayHome userId="),"Adaptive Focus must remain reachable");
+assert.ok(page.includes("<DayRescue currentMode="),"Soft / Tiny / Rest modes must remain reachable");
+for(const mode of ["baby","dino","soft","meadow","strawberry","twilight"]) {
+ assert.ok(source.includes(mode+":"),"World "+mode+" must have unique copy");
+ assert.ok(css.includes('data-storybook-world="'+mode+'"'),"World "+mode+" must have a CSS palette");
+}
+assert.ok(source.includes("<ThemeScene decorative focus"),"Use the actual repository mascot instead of introducing a rabbit image");
+assert.ok(theme.includes('const mascotWorld = "soft"'),"Mascot identity remains locked");
+assert.ok(source.includes("toggle?.(row.key)")&&source.includes("viewDone[row.key]"),"Checkmarks must use saved task state");
+assert.ok(source.includes("openDailyCheckIn?.()")&&source.includes("openTodayJournal?.()"));
+assert.ok(source.includes('plushlife:focus-one-step'),"Focus button must open actual Focus Mode");
+assert.ok(source.includes("goToDashboard?.(\"week\")"),"Date button must open real calendar");
+assert.ok(!source.includes('src="data:'),"Never inline simulated task screenshots");
+assert.ok(html.includes('storybook-themes.css'),"The theme stylesheet must actually ship");
+assert.ok(sync.includes("BOOT_RECOVERY_SCRIPT"),"App shell must not freeze with no recovery");
+assert.ok(sync.includes('id="plush-boot-retry"')||sync.includes('retry.id = "plush-boot-retry"'),"Retry should be available to the user");
+assert.ok(app.includes('authWait = window.setTimeout'),"Session startup needs a bounded wait");
+assert.ok(app.includes('setSyncStatus(status => status === "loading" ? "signed-out" : status)'));
+console.log("Teddy Storybook Home and startup-recovery regressions passed.");

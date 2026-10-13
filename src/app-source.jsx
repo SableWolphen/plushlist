@@ -1278,20 +1278,29 @@ function GlowUpTracker() {
 
   useEffect(() => {
     let active = true;
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Authentication or the platform key store can stall during Android cold
+    // start. Do not strand users behind an indefinite loading animation.
+    const authWait = window.setTimeout(() => {
+      if (active) setSyncStatus(status => status === "loading" ? "signed-out" : status);
+    }, 12000);
+    supabase.auth.getSession().then(({ data }) => {
       if (active) {
-        setUser(session?.user ?? null);
-        setSyncStatus(session ? "ready" : "signed-out");
+        setUser(data?.session?.user ?? null);
+        setSyncStatus(data?.session ? "ready" : "signed-out");
       }
-    });
+    }).catch(() => {
+      if (active) setSyncStatus(status => status === "loading" ? "signed-out" : status);
+    }).finally(() => window.clearTimeout(authWait));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (active) {
+        window.clearTimeout(authWait);
         setUser(session?.user ?? null);
         setSyncStatus(session ? "ready" : "signed-out");
       }
     });
     return () => {
       active = false;
+      window.clearTimeout(authWait);
       subscription.unsubscribe();
     };
   }, []);
