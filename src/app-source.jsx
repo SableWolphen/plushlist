@@ -2788,6 +2788,28 @@ function GlowUpTracker() {
   };
 
   useEffect(() => {
+    if (!user?.id) return undefined;
+    const receiveShortcut = (event) => {
+      let action = event?.detail?.action || "";
+      if (!action) { try { action = sessionStorage.getItem("plushlife:pending-shortcut:v1") || ""; } catch (_error) {} }
+      if (!["add","focus"].includes(action)) return;
+      try { sessionStorage.removeItem("plushlife:pending-shortcut:v1"); } catch (_error) {}
+      if (action === "add") {
+        openTaskManager(period.date);
+        window.setTimeout(() => window.dispatchEvent(new Event("plushlife:open-quick-add")), 150);
+      } else {
+        setDashboard("today");
+        setSelectedProgressDate(period.date);
+        try { sessionStorage.setItem("plushlife:focus-open:v1", "1"); } catch (_error) {}
+        window.setTimeout(() => window.dispatchEvent(new Event("plushlife:focus-one-step")), 150);
+      }
+    };
+    window.addEventListener("plushlife:android-shortcut", receiveShortcut);
+    receiveShortcut();
+    return () => window.removeEventListener("plushlife:android-shortcut", receiveShortcut);
+  }, [user?.id, period.date]);
+
+  useEffect(() => {
     if (!manageTasks) return;
     const nextSections = taskSectionsForDay(newTaskDay);
     setNewTaskSection((current) => current === "__custom__" || nextSections.includes(current) ? current : (nextSections[0] || "My tasks"));
