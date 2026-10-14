@@ -1,6 +1,7 @@
 import { VOICES, HOME_CARDS } from "../plush-guardian-model.mjs";
 import { GuardianPortableBackup } from "./guardian-portable-backup.jsx";
 import { activateBotMommy } from "../guardian-bot.mjs";
+import { guardianBotDisplayName } from "../guardian-mode.mjs";
 export function GuardianSettings({ userId, state, update, onForget, onDeleteChat }) {
   const [memory, setMemory] = React.useState("");
   const [confirm, setConfirm] = React.useState(false);
@@ -31,11 +32,10 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
   };
   return (
     <section>
-      <h2>My Bot Guardian</h2>
+      <h2>Guardian settings</h2>
       <p>
-        Bot Mommy is a rule-based Guardian for when you do not have a human
-        Guardian. It helps with little jobs, routines and reminders — not AI chat.
-        Your choices stay private on this device.
+        Give your automatic Guardian a name and choose how they encourage you.
+        The automatic option uses device rules, not conversations. A connected person always takes priority.
       </p>
       <label>
         Guardian style
@@ -50,6 +50,16 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
             </option>
           ))}
         </select>
+      </label>
+      <label>
+        Guardian's name
+        <input
+          aria-label="Guardian's name"
+          maxLength={36}
+          value={prefs.guardianName || ""}
+          onChange={event=>preference("guardianName",event.target.value)}
+          placeholder={guardianBotDisplayName({voice:prefs.voice})}
+        />
       </label>
       <label>
         Guidance
@@ -88,10 +98,10 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
         />
       </label>
       <section className="pl-virtual-guardian-options" aria-label="Virtual Guardian reminders">
-        <h3>Bot Mommy · Automatic Guardian</h3>
-        <p>This is a reminder bot, not a chatbot. It follows your real tasks and saved routines. No AI or private data sharing is needed.</p>
-        {!prefs.automaticReminders && <button type="button" className="pl-companion-primary" onClick={() => update({prefs:activateBotMommy(prefs)})}>Turn on Bot Mommy 🧸</button>}
-        {check("automaticReminders", "Enable my Bot Guardian's automatic reminders")}
+        <h3>Guardian reminders</h3>
+        <p>Automatic reminders follow your real tasks and routines when no person is connected. No AI or sharing is needed.</p>
+        {!prefs.automaticReminders && <button type="button" className="pl-companion-primary" onClick={() => update({prefs:activateBotMommy(prefs)})}>Enable automatic Guardian 🧸</button>}
+        {check("automaticReminders", "Enable automatic Guardian reminders")}
         {prefs.automaticReminders && <>
           {check("routineNudges", "Remind me about an unfinished routine")}
           {prefs.routineNudges && <label>Routine reminder time <input type="time" value={prefs.routineReminderTime} onChange={event => preference("routineReminderTime", event.target.value)} /></label>}
