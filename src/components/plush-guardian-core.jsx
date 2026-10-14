@@ -113,6 +113,7 @@ export default function PlushGuardianCore(props) {
     <ToolPanel title="Plush Guardian" onClose={onClose}>
       <div
         className={"pl-guardian-companion" + (state.prefs.careMode && state.prefs.littleMode ? " pl-guardian-little" : "")}
+        style={state.prefs.careMode && state.prefs.littleMode ? { fontSize:"1.1rem", lineHeight:1.6 } : undefined}
         onKeyDown={(event) => {
           if (event.key !== "Tab") return;
           const panel = event.currentTarget.closest('[role="dialog"]');
@@ -204,7 +205,7 @@ export default function PlushGuardianCore(props) {
               })}
               <button type="button" onClick={() => navigate("settings")}>Change my care preferences ›</button>
             </section>}
-            <div className="pl-companion-choices">
+            <div className="pl-companion-choices" style={state.prefs.careMode && state.prefs.littleMode ? {display:"grid",gridTemplateColumns:"1fr",gap:12} : undefined}>
               {[
                 ["Comfort", "comfort"],
                 ["Help me start", "start"],
