@@ -71,3 +71,14 @@ assert(letter?.text);
 assert.equal(surpriseLetter({...letterState,surpriseLetterHistory:[letter]},"2026-10-14"),null);
 assert.equal(surpriseLetter({...letterState,prefs:{...letterState.prefs,surpriseLetters:false}},"2026-10-14"),null);
 assert.equal(surpriseLetter({...letterState,prefs:{...letterState.prefs,lettersEnabledOn:"2026-10-14"}},"2026-10-14"),null);
+
+import { nextSurpriseBox } from "../src/guardian-smart-care.mjs";
+const bx={prefs:{surpriseBox:true,automaticReminders:true,surpriseBoxChoices:["movie","color"]},surpriseBoxHistory:[]};
+const chosen=nextSurpriseBox(bx,"2026-10-14");
+assert(chosen && ["movie","color"].includes(chosen.id));
+assert.equal(nextSurpriseBox({...bx,surpriseBoxHistory:[chosen]},"2026-10-14"),null);
+assert.equal(nextSurpriseBox({...bx,surpriseBoxHistory:[chosen]},"2026-10-15"),null);
+assert(nextSurpriseBox({...bx,surpriseBoxHistory:[chosen]},"2026-10-17"));
+assert.equal(nextSurpriseBox({...bx,prefs:{...bx.prefs,surpriseBox:false}},"2026-10-14"),null);
+assert.equal(nextSurpriseBox({...bx,prefs:{...bx.prefs,surpriseBoxChoices:[]}},"2026-10-14"),null);
+assert.match(smartCarePlan([{key:"timed",label:"Wash up",time:"19:00"}],{},"some",false,new Date("2026-10-14T18:30:00"))[0].detail,/19:00/);
