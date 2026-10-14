@@ -34,9 +34,18 @@ assert.ok(app.includes('setSyncStatus(status => status === "loading" ? "signed-o
 globalThis.React = React;
 globalThis.window = { PlushLifeThemeCopy: { worlds: {} } };
 window.PlushLifeSchedule=createRequire(import.meta.url)('../assets/plush-schedule.js');
-const { storybookRows, storybookGreeting } = await import('data:text/javascript;base64,' + Buffer.from(build.outputFiles[0].text).toString('base64'));
+const { storybookRows, storybookGreeting, homeTaskPriority } = await import('data:text/javascript;base64,' + Buffer.from(build.outputFiles[0].text).toString('base64'));
 const tasks = Array.from({length:16}, (_,i)=>({key:'task-'+i,label:'Task '+i}));
 assert.equal(storybookRows(tasks).length, 3, 'Home keeps a manageable three-task preview');
+const prioritized = [
+  {key:"later",label:"Later task"},
+  {key:"small",label:"Quick task",sourceTask:{estimated_minutes:5}},
+  {key:"urgent",label:"Timed",sourceTask:{reminder_time:"12:10"}},
+  {key:"essential",label:"Essential",sourceTask:{essential:true}},
+];
+assert.deepEqual(storybookRows(prioritized,{},3,12*60).map(row=>row.key),["essential","urgent","small"],"Home highlights essentials, nearby reminders and smaller wins");
+assert.ok(homeTaskPriority(prioritized[3]) > homeTaskPriority(prioritized[0]));
+assert.ok(source.includes("pl-storybook-world-win"), "Completed days celebrate in the chosen theme");
 const habitSource={task_key:'water',detail:'[[plushlist-habit:build]] Drink a glass after breakfast'};
 const habitGoal={target:3,unit:'cups',value:1};
 const habitPreview=storybookRows([{key:'water',label:'Drink water',sourceTask:habitSource,goal:habitGoal},{key:'scroll',label:'Less scrolling',habitType:'reduce'}]);
