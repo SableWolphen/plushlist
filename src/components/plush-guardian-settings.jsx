@@ -68,10 +68,10 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
         <p>Once your automatic Guardian is enabled, it picks and awards little surprises automatically. You never need to make a reward or claim one. These are virtual celebrations, not purchases or essential care.</p>
         {check("automaticGifts", "Let Guardian choose and unlock rewards automatically")}
         {prefs.automaticGifts && <div aria-label="Allowed Guardian surprise types">
-          {["stickers","celebrations","trophies"].map(category=><label className="pl-companion-check" key={category}>
+          {["stickers","celebrations","trophies","activities","babyDays"].map(category=><label className="pl-companion-check" key={category}>
             <input type="checkbox" checked={(prefs.giftCategories || []).includes(category)}
               onChange={event=>preference("giftCategories",event.target.checked ? [...new Set([...(prefs.giftCategories||[]),category])] : (prefs.giftCategories||[]).filter(x=>x!==category))}/>
-            {category.charAt(0).toUpperCase()+category.slice(1)}
+            {category === "babyDays" ? "Optional cozy baby day (Saturdays, never earned through chores)" : category === "activities" ? "Free-time surprises (movies, stories, coloring, games)" : category.charAt(0).toUpperCase()+category.slice(1)}
           </label>)}
         </div>}
         {check("careMode", "Enable nurturing caretaker routines")}
