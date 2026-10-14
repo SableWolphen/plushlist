@@ -9,7 +9,7 @@ import {
   inQuietHours,
   openPlushGuardian,
 } from "../plush-guardian-model.mjs";
-import { botGuardianName } from "../guardian-bot.mjs";
+import { guardianBotDisplayName } from "../guardian-mode.mjs";
 export { openPlushGuardian };
 class GuardianBoundary extends React.Component {
   constructor(props) {
@@ -126,7 +126,7 @@ export function CompanionHomeCard({ userId, onOpenGuardian }) {
             ? "Welcome back, Cozy"
             : state.activeRoutine
               ? "Your routine is waiting"
-              : state.prefs.automaticReminders ? `${botGuardianName(state.prefs.voice)} is ready` : "A little support for your day"}
+              : state.prefs.automaticReminders ? `${guardianBotDisplayName(state.prefs)} is ready` : "A little support for your day"}
         </strong>
         <p>
           {gap >= 3
@@ -142,7 +142,7 @@ export function CompanionHomeCard({ userId, onOpenGuardian }) {
             ? "Choose a fresh start"
             : state.activeRoutine
               ? "Continue my routine"
-              : state.prefs.automaticReminders ? `My ${botGuardianName(state.prefs.voice)}` : "Meet Bot Mommy"}{" "}
+              : state.prefs.automaticReminders ? "Open Guardian" : "Choose my Guardian"}{" "}
           ›
         </button>
         <div className="pl-companion-home-shortcuts">
