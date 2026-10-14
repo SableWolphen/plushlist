@@ -124,11 +124,25 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
         int background = night ? R.drawable.plushlife_widget_night
             : "dino".equals(theme) ? R.drawable.plushlife_widget_dino
             : "baby".equals(theme) ? R.drawable.plushlife_widget_nursery
-            : "pink".equals(theme) || "strawberry".equals(theme) ? R.drawable.plushlife_widget_pink
+            : "pink".equals(theme) ? R.drawable.plushlife_widget_pink
+            : "strawberry".equals(theme) ? R.drawable.plushlife_widget_strawberry
+            : "meadow".equals(theme) ? R.drawable.plushlife_widget_mint
+            : "peach".equals(theme) ? R.drawable.plushlife_widget_peach
+            : "soft-light".equals(theme) ? R.drawable.plushlife_widget_cloud
+            : "garden".equals(theme) ? R.drawable.plushlife_widget_garden
             : R.drawable.plushlife_widget_background;
         int ink = Color.parseColor(night ? "#F6EEFF" : "#4F405A");
         int muted = Color.parseColor(night ? "#D5C5EA" : "#7D6588");
-        int accent = Color.parseColor(night ? "#DCA8F2" : "#B34BC7");
+        int accent = Color.parseColor(
+            night ? "#DCA8F2"
+            : "dino".equals(theme) ? "#427D43"
+            : "meadow".equals(theme) ? "#2E7B60"
+            : "strawberry".equals(theme) ? "#B24764"
+            : "peach".equals(theme) ? "#AC6B3E"
+            : "soft-light".equals(theme) ? "#4778A1"
+            : "garden".equals(theme) ? "#667C36"
+            : "#B34BC7"
+        );
         int doneInk = Color.parseColor(night ? "#C7E8D7" : "#4B7F68");
         int rowBackground = night ? R.drawable.plushlife_widget_task_row_night : R.drawable.plushlife_widget_task_row;
         int rowDoneBackground = night ? R.drawable.plushlife_widget_task_row_done_night : R.drawable.plushlife_widget_task_row_done;
@@ -146,7 +160,13 @@ public class PlushLifeWidgetProvider extends AppWidgetProvider {
 
         String dayType = prefs.getString("dayType", "Today");
         views.setTextViewText(R.id.widget_day_type, "PLUSH LIFE · " + dayType.toUpperCase());
-        views.setTextViewText(R.id.widget_title, prefs.getInt("progress", 0) >= 100 ? "You did enough today 💜" : "One little step ✨");
+        String themeTitle = "dino".equals(theme) ? "Your next mission 🦕"
+            : "baby".equals(theme) || "baby-night".equals(theme) ? "One little job 🧸"
+            : "strawberry".equals(theme) ? "One sweet little win 🍓"
+            : "garden".equals(theme) || "meadow".equals(theme) ? "Keep growing 🌱"
+            : "twilight".equals(theme) ? "A quiet little step 🌙"
+            : "One little step ✨";
+        views.setTextViewText(R.id.widget_title, prefs.getInt("progress", 0) >= 100 ? "You did enough today 💜" : themeTitle);
         views.setTextViewText(R.id.widget_today_label, "Today " + prefs.getInt("progress", 0) + "%");
         views.setTextViewText(R.id.widget_week_label, "Week " + prefs.getInt("weeklyProgress", 0) + "%");
 
