@@ -1,4 +1,3 @@
-import { handlePlushGuardian } from './plush-guardian-api.mjs';
 const SUPABASE_URL = "https://pvitdhixycegmcovapyh.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_SScDCEHovc68ITiEUu6lCg_mHPe2oaI";
 
@@ -86,7 +85,9 @@ async function authenticatedUser(request) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname === "/api/plush-guardian") return handlePlushGuardian(request, env);
+    // Retire the old optional chatbot endpoint. An older Android build must
+    // never silently continue sending Guardian messages to AI.
+    if (url.pathname === "/api/plush-guardian") return json({ error: "AI Guardian chat has been retired. Use the offline Bot Mommy Guardian." }, 410);
     if (url.pathname !== "/api/mamas-corner") return env.ASSETS.fetch(request);
     if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
 

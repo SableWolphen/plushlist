@@ -9,18 +9,17 @@ import {
   chooseTask,
   effort,
   taskSteps,
-  buildGuardianPayload,
 } from "../plush-guardian-model.mjs";
 import { GuardianTools } from "./plush-guardian-tools.jsx";
 import { GuardianSettings } from "./plush-guardian-settings.jsx";
 import { startFocusTimer } from "./focus-timer.jsx";
+import { botGuardianName, botGuardianDailyPlan, activateBotMommy } from "../guardian-bot.mjs";
 export default function PlushGuardianCore(props) {
   const {
     user,
     rows = [],
     viewDone = {},
     dailyCheckIn = {},
-    client,
     request,
     onClose,
   } = props;
@@ -33,22 +32,8 @@ export default function PlushGuardianCore(props) {
   const [taskKey, setTaskKey] = React.useState(request.taskKey);
   const [message, setMessage] = React.useState("");
   const [busy, setBusy] = React.useState(false);
-  const [input, setInput] = React.useState("");
-  const [journal, setJournal] = React.useState("");
-  const [chat, setChat] = React.useState(() =>
-    state.prefs.keepChat ? state.chat : [],
-  );
   const [review, setReview] = React.useState(null);
   const [step, setStep] = React.useState(0);
-  const abort = React.useRef(null);
-  const alive = React.useRef(true);
-  React.useEffect(
-    () => () => {
-      alive.current = false;
-      abort.current?.abort();
-    },
-    [],
-  );
   React.useEffect(() => {
     setPage(request.page);
     setTaskKey(request.taskKey);
@@ -69,13 +54,6 @@ export default function PlushGuardianCore(props) {
     return true;
   };
   const update = (patch) => save({ ...ref.current, ...patch });
-  React.useEffect(() => {
-    if (!state.prefs.aiConsent) {
-      abort.current?.abort();
-      setReview(null);
-    }
-    if (!state.prefs.keepChat && state.chat.length) update({ chat: [] });
-  }, [state.prefs.aiConsent, state.prefs.keepChat]);
   const navigate = (p) => {
     setPage(p);
     setReview(null);
@@ -92,77 +70,7 @@ export default function PlushGuardianCore(props) {
   const steps = selected
     ? state.taskSteps[selected.key] || taskSteps(selected)
     : [];
-  const ask = async () => {
-    if (busy || !input.trim() || !state.prefs.aiConsent) return;
-    const messages = [
-      ...chat,
-      { role: "user", content: input.trim().slice(0, 1200) },
-    ];
-    const payload = buildGuardianPayload(
-      state,
-      messages,
-      rows,
-      viewDone,
-      dailyCheckIn,
-      journal,
-    );
-    setReview(payload);
-  };
-  const send = async () => {
-    if (!review || busy) return;
-    setBusy(true);
-    setMessage("");
-    const controller = new AbortController();
-    abort.current = controller;
-    const timer = setTimeout(() => controller.abort(), 25000);
-    try {
-      const { data, error } = await client.auth.getSession();
-      if (error || data?.session?.user?.id !== user.id)
-        throw Error("Please sign in again to chat.");
-      const response = await fetch(
-        "https://plushlife.plushlife-app.workers.dev/api/plush-guardian",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${data.session.access_token}`,
-          },
-          body: JSON.stringify(review),
-          signal: controller.signal,
-        },
-      );
-      const body = await response.json();
-      if (!response.ok)
-        throw Error(
-          body.error || "Chat is unavailable. Your offline tools still work.",
-        );
-      if (
-        !alive.current ||
-        controller.signal.aborted ||
-        !ref.current.prefs.aiConsent
-      )
-        return;
-      const next = [
-        ...review.messages,
-        { role: "assistant", content: String(body.reply) },
-      ].slice(-24);
-      setChat(next);
-      setInput("");
-      setJournal("");
-      setReview(null);
-      if (ref.current.prefs.keepChat) update({ chat: next });
-    } catch (error) {
-      if (alive.current)
-        setMessage(
-          error.name === "AbortError"
-            ? "Chat took too long. Your message is still here; try again or use offline support."
-            : error.message,
-        );
-    } finally {
-      clearTimeout(timer);
-      if (alive.current) setBusy(false);
-    }
-  };
+  const botPlan = botGuardianDailyPlan(rows, viewDone, state.prefs.voice, dailyCheckIn?.day_type === "rest");
   const action = async (fn) => {
     if (busy) return;
     setBusy(true);
@@ -220,10 +128,10 @@ export default function PlushGuardianCore(props) {
             <span className="pl-companion-badge">
               {VOICES[state.prefs.voice]} · {state.prefs.guidance}
             </span>
-            <p>Optional AI companion · Offline tools always available</p>
+            <p>Automatic, rule-based help · No AI chat or conversations</p>
           </div>
           <button
-            aria-label="Companion settings"
+            aria-label="Guardian settings"
             onClick={() => navigate("settings")}
           >
             ⚙
@@ -234,17 +142,17 @@ export default function PlushGuardianCore(props) {
             className="pl-companion-back"
             onClick={() => navigate("guardian")}
           >
-            ‹ Back to my companion
+            ‹ Back to my Guardian
           </button>
         )}
         {page === "guardian" && (
           <>
             <section className="pl-companion-hero">
               <div>
-                <h2>What would help right now?</h2>
+                <h2>{state.prefs.automaticReminders ? `${botGuardianName(state.prefs.voice)} is here` : "Need a Guardian? Meet Bot Mommy"}</h2>
                 <p>
                   {state.prefs.phrases ||
-                    "A little kindness, a small plan, or company while you begin."}
+                    "Gentle reminders, routines, check-ins and encouragement — even without a human Guardian."}
                 </p>
               </div>
               <img
@@ -254,10 +162,20 @@ export default function PlushGuardianCore(props) {
                 alt="Your Plush"
               />
             </section>
-            <section className="pl-virtual-guardian-options" aria-label="Automatic companion status">
-              <h3>Virtual Guardian reminders</h3>
-              <p>{state.prefs.automaticReminders ? "On — your chosen Guardian voice is used when app notifications are enabled." : "Off — your Plush can give gentle reminders without needing a conversation."}</p>
-              <button onClick={() => navigate("settings")}>Set up my reminders ›</button>
+            <section className="pl-virtual-guardian-options" aria-label="Automatic Bot Guardian">
+              <h3>{state.prefs.automaticReminders ? botGuardianName(state.prefs.voice) : "Bot Mommy · Your optional Guardian"}</h3>
+              {state.prefs.automaticReminders ? <>
+                <p role="status">{botPlan.encouragement}</p>
+                <p>{botPlan.completed} of {botPlan.total} little jobs complete today. You can pause or change your Guardian anytime.</p>
+                {botPlan.next && <button onClick={() => { setTaskKey(botPlan.next.key); navigate("start"); }}>Help me do: {botPlan.next.label} ›</button>}
+                <button onClick={() => navigate("routines")}>Guide me through my routine ›</button>
+                <button onClick={() => navigate("settings")}>My reminders & Guardian voice ›</button>
+              </> : <>
+                <p>No real Guardian? Bot Mommy can support your tasks, remind you about routines, help you prepare for tomorrow, and celebrate your progress — without AI or chatting.</p>
+                <button className="pl-companion-primary" onClick={() => update({ prefs: activateBotMommy(state.prefs) })}>Turn on Bot Mommy 🧸</button>
+                <button onClick={() => navigate("settings")}>Choose a different Guardian style ›</button>
+              </>}
+              <p>Automatic notifications require PlushLife notification permission. Quiet hours, rest days and your privacy choices still apply.</p>
             </section>
             <div className="pl-companion-choices">
               {[
@@ -298,95 +216,6 @@ export default function PlushGuardianCore(props) {
                 </button>
               ))}
             </div>
-            <details>
-              <summary>Talk with my AI companion</summary>
-              <p>
-                Chat uses Cloudflare Workers AI. It can make mistakes and does
-                not monitor emergencies. Only messages and context shown in your
-                send preview leave your device.
-              </p>
-              {!state.prefs.aiConsent ? (
-                <button
-                  onClick={() =>
-                    update({ prefs: { ...state.prefs, aiConsent: true } })
-                  }
-                >
-                  Enable AI chat with Cloudflare
-                </button>
-              ) : (
-                <>
-                  <div className="pl-companion-chat" aria-live="polite">
-                    {chat.map((m, i) => (
-                      <p key={i} className={m.role}>
-                        <strong>
-                          {m.role === "user" ? "You" : "Plush Guardian"}
-                        </strong>
-                        <span>{m.content}</span>
-                      </p>
-                    ))}
-                  </div>
-                  <label>
-                    Your message
-                    <textarea
-                      value={input}
-                      maxLength={1200}
-                      onChange={(e) => setInput(e.target.value)}
-                      placeholder="Tell me what you need…"
-                    />
-                  </label>
-                  <details>
-                    <summary>Include one journal excerpt (optional)</summary>
-                    <p>
-                      Nothing from your journal is included automatically. Paste
-                      only what you want to send this time.
-                    </p>
-                    <textarea
-                      aria-label="Journal excerpt to share this time"
-                      value={journal}
-                      maxLength={1200}
-                      onChange={(e) => setJournal(e.target.value)}
-                    />
-                  </details>
-                  <button disabled={busy || !input.trim()} onClick={ask}>
-                    Review before sending
-                  </button>
-                  {review?.consent && (
-                    <section className="pl-companion-review">
-                      <h3>Send preview</h3>
-                      <p>
-                        {review.messages.length} messages from this
-                        conversation, your chosen voice and boundaries.
-                      </p>
-                      <p>
-                        Tasks: {review.context.tasks.join(", ") || "None"}
-                        <br />
-                        Mood: {review.context.mood || "None"}
-                        <br />
-                        Memories: {review.context.memories.join("; ") || "None"}
-                        <br />
-                        Journal excerpt: {review.context.journal || "None"}
-                      </p>
-                      <button disabled={busy} onClick={send}>
-                        {busy ? "Thinking…" : "Send to Plush Guardian"}
-                      </button>
-                      <button disabled={busy} onClick={() => setReview(null)}>
-                        Cancel
-                      </button>
-                    </section>
-                  )}
-                  <button
-                    onClick={() => {
-                      abort.current?.abort();
-                      setChat([]);
-                      setReview(null);
-                      update({ chat: [] });
-                    }}
-                  >
-                    Delete conversation
-                  </button>
-                </>
-              )}
-            </details>
             <button
               onClick={() => {
                 onClose();
@@ -407,8 +236,8 @@ export default function PlushGuardianCore(props) {
               Ask a human Guardian
             </button>
             <p className="pl-companion-note">
-              You can close this whenever you’re ready. A real person or
-              professional can offer support this companion cannot.
+              Bot Mommy is an automatic routine helper, not a real person.
+              You can always invite a trusted human Guardian too.
             </p>
           </>
         )}
@@ -612,17 +441,9 @@ export default function PlushGuardianCore(props) {
             userId={user.id}
             state={state}
             update={update}
-            onDeleteChat={() => {
-              abort.current?.abort();
-              setChat([]);
-              setReview(null);
-              update({ chat: [] });
-            }}
+            onDeleteChat={() => update({ chat: [] })}
             onForget={() => {
-              abort.current?.abort();
-              setChat([]);
               setReview(null);
-              setJournal("");
               update({
                 memories: [],
                 chat: [],

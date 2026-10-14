@@ -17,10 +17,10 @@ export const HOME_CARDS = [
   ["kindness", "Encouragement"],
 ];
 export const VOICES = {
-  neutral: "Gentle companion",
-  mommy: "Mommy Mode",
-  daddy: "Daddy Mode",
-  playful: "Playful companion",
+  neutral: "Gentle Guardian",
+  mommy: "Bot Mommy",
+  daddy: "Bot Daddy",
+  playful: "Playful Guardian",
 };
 export const ROUTINES = [
   {
@@ -115,6 +115,14 @@ export function normalizeGuardianState(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return d;
   const next = { ...d, ...value, prefs: { ...d.prefs, ...value.prefs } };
   if (!VOICES[next.prefs.voice]) next.prefs.voice = "neutral";
+  // Existing local accounts may have opted into the old Cloudflare chatbot.
+  // The Guardian is now an offline, non-chat helper. Never reactivate that
+  // consent or share private tasks, moods and memories with an AI service.
+  next.prefs.aiConsent = false;
+  next.prefs.shareTasks = false;
+  next.prefs.shareMood = false;
+  next.prefs.shareMemories = false;
+  next.prefs.keepChat = false;
   next.prefs.automaticReminders = next.prefs.automaticReminders === true;
   next.prefs.routineNudges = next.prefs.routineNudges === true;
   next.prefs.tomorrowNudges = next.prefs.tomorrowNudges === true;
