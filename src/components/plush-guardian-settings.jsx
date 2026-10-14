@@ -1,5 +1,6 @@
 import { VOICES, HOME_CARDS } from "../plush-guardian-model.mjs";
-export function GuardianSettings({ state, update, onForget, onDeleteChat }) {
+import { GuardianPortableBackup } from "./guardian-portable-backup.jsx";
+export function GuardianSettings({ userId, state, update, onForget, onDeleteChat }) {
   const [memory, setMemory] = React.useState("");
   const [confirm, setConfirm] = React.useState(false);
   const prefs = state.prefs;
@@ -227,39 +228,7 @@ export function GuardianSettings({ state, update, onForget, onDeleteChat }) {
           </div>
         ))}
       </details>
-      <details>
-        <summary>Save a copy of my companion tools</summary>
-        <p>
-          Download a private copy of these device-only tools, including any
-          photos, saved conversations, and memories. Store it somewhere private.
-        </p>
-        <button
-          onClick={() => {
-            const blob = new Blob(
-              [
-                JSON.stringify(
-                  {
-                    app: "PlushLife",
-                    exported_at: new Date().toISOString(),
-                    companion: state,
-                  },
-                  null,
-                  2,
-                ),
-              ],
-              { type: "application/json" },
-            );
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "plushlife-companion-copy.json";
-            a.click();
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
-          }}
-        >
-          Download my companion copy
-        </button>
-      </details>
+      <GuardianPortableBackup userId={userId} state={state} update={update} />
       <details>
         <summary>Comfort & accessibility</summary>
         {check("motion", "Allow animations")}
