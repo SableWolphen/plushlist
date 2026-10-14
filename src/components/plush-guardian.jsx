@@ -96,7 +96,7 @@ export function PlushGuardianHost(props) {
     </GuardianBoundary>
   );
 }
-export function CompanionHomeCard({ userId }) {
+export function CompanionHomeCard({ userId, onOpenGuardian }) {
   const state = useGuardianState(userId);
   const [gap, setGap] = React.useState(() =>
     gapDays(state.lastVisit, localDate()),
@@ -136,15 +136,7 @@ export function CompanionHomeCard({ userId }) {
               : state.prefs.automaticReminders ? "Your chosen reminder times are ready." : "Your pace. Your choices."}
         </p>
         <button
-          onClick={() =>
-            openPlushGuardian(
-              gap >= 3
-                ? "welcome"
-                : state.activeRoutine
-                  ? "routines"
-                  : "guardian",
-            )
-          }
+          onClick={() => onOpenGuardian?.() || openPlushGuardian("guardian")}
         >
           {gap >= 3
             ? "Choose a fresh start"
@@ -154,8 +146,8 @@ export function CompanionHomeCard({ userId }) {
           ›
         </button>
         <div className="pl-companion-home-shortcuts">
-          <button onClick={() => openPlushGuardian("inbox")}>Brain dump</button>
-          <button onClick={() => openPlushGuardian("routines")}>
+          <button onClick={() => onOpenGuardian?.() || openPlushGuardian("inbox")}>Brain dump</button>
+          <button onClick={() => onOpenGuardian?.() || openPlushGuardian("routines")}>
             My routines
           </button>
         </div>
