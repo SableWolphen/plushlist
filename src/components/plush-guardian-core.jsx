@@ -208,6 +208,24 @@ export default function PlushGuardianCore(props) {
               })}
               <button type="button" onClick={() => navigate("settings")}>Change my care preferences ›</button>
             </section>}
+            <section className="pl-virtual-guardian-options" aria-label="Guardian plans and memories">
+              <h3>🧸 Guardian planned today</h3>
+              <p>Here is a gentle suggestion, not another list you must finish.</p>
+              <p>🌤️ Morning: get comfortable and choose your first small step.</p>
+              <p>🧸 Afternoon: enjoy a comforting break or a favorite activity.</p>
+              <p>🌙 Evening: unwind with a story, music, or quiet time.</p>
+              {state.prefs.careMode && state.prefs.littleMode && <p>🍼 Little Mode idea: {["Plushie picnic","Cartoons and cozy pajamas","Coloring with stickers","Storybook blanket fort","Stuffie tea party","Soft music time","Favorite toy play"][Math.floor(Date.parse(localDate()+"T12:00:00")/86400000)%7]}.</p>}
+              <details>
+                <summary>📖 Guardian Memory Book</summary>
+                <p>Your private history of little victories and surprises on this device.</p>
+                {(state.automaticGiftLedger || []).length === 0 && (state.careStickers || []).length === 0
+                  ? <p>New memories will appear after your first celebration.</p>
+                  : <>
+                    {(state.automaticGiftLedger || []).slice(-12).reverse().map(id=><p key={id}>🎁 {id.slice(0,10)} · Guardian surprise {id.slice(11)}</p>)}
+                    {(state.careStickers || []).slice(-12).reverse().map(id=><p key={id}>🌟 {id.slice(0,10)} · {id.slice(11)} routine</p>)}
+                  </>}
+              </details>
+            </section>
             <div className="pl-companion-choices" style={state.prefs.careMode && state.prefs.littleMode ? {display:"grid",gridTemplateColumns:"1fr",gap:12} : undefined}>
               {[
                 ["Comfort", "comfort"],
