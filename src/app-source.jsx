@@ -1,5 +1,6 @@
 import { guardianKey, readGuardian, saveGuardian, STATE_EVENT } from "./plush-guardian-model.mjs";
 import { companionAccountKey } from "./companion-account-storage.mjs";
+import { hasThemePreferenceChange, readThemeSelection, rememberThemeSelection, acknowledgeThemeSelection, restoreThemePreferences } from "./theme-selection-storage.mjs";
 import { PlushGuardianHost } from "./components/plush-guardian.jsx";
 import { DARK_THEME_PALETTES } from "./theme-atmosphere.js";
 import { useAppearanceMode } from "./hooks/use-appearance-mode.js";
@@ -742,9 +743,26 @@ function GlowUpTracker() {
   const [period, setPeriod] = useState(() => trackerPeriod());
 
   useEffect(() => {
+    // Restore the currently signed-in Cozy's personal world before waiting
+    // for Supabase. A previous account's theme must never survive switching.
+    setAppearanceTheme("none");
     if (!user?.id) return;
-    const savedTheme = window.localStorage.getItem(`plushlist-appearance-${user.id}`);
-    if (savedTheme === "none" || APPEARANCE_THEMES.some((theme) => theme.id === savedTheme)) setAppearanceTheme(savedTheme);
+    let saved = readThemeSelection(window.localStorage, user.id);
+    if (!saved) {
+      // Respect older installations' *account-scoped* appearance key. Never
+      // migrate an unowned global value into another Cozy's preferences.
+      try {
+        const previous = window.localStorage.getItem(`plushlist-appearance-${user.id}`);
+        if (previous === "none" || APPEARANCE_THEMES.some(theme => theme.id === previous)) {
+          saved = rememberThemeSelection(window.localStorage, user.id, { appearance_theme: previous });
+        }
+      } catch (_error) {}
+    }
+    if (saved?.values) {
+      setPreferences(current => ({ ...current, ...saved.values }));
+      const selected = saved.values.appearance_theme;
+      if (selected === "none" || APPEARANCE_THEMES.some(theme => theme.id === selected)) setAppearanceTheme(selected);
+    }
   }, [user?.id]);
   const [weeklyHistory, setWeeklyHistory] = useState([]);
   const [longHistory, setLongHistory] = useState([]);
@@ -1325,8 +1343,18 @@ function GlowUpTracker() {
     supabase.from("app_preferences").select("*").eq("user_id", user.id).maybeSingle().then(({ data, error }) => {
       if (!active) return;
       if (data) {
-        setPreferences((current) => ({ ...current, ...data, home_layout: normalizeHomeLayout(data.home_layout), reminder_times: Array.isArray(data.reminder_times) ? data.reminder_times : current.reminder_times }));
-        if (data.appearance_theme === "none" || APPEARANCE_THEMES.some(theme => theme.id === data.appearance_theme)) setAppearanceTheme(data.appearance_theme);
+        // An older cloud response must not roll back a recently selected
+        // theme, Dino/Nursery mode, voice, or dark/light appearance.
+        const cachedTheme = readThemeSelection(window.localStorage, user.id);
+        const restored = restoreThemePreferences(data, cachedTheme);
+        const effective = { ...restored, home_layout: normalizeHomeLayout(data.home_layout) };
+        setPreferences(current => ({ ...current, ...effective, reminder_times: Array.isArray(data.reminder_times) ? data.reminder_times : current.reminder_times }));
+        if (restored.appearance_theme === "none" || APPEARANCE_THEMES.some(theme => theme.id === restored.appearance_theme)) setAppearanceTheme(restored.appearance_theme);
+        if (cachedTheme?.pending) {
+          // Retry a selection made just before Android closed, or while
+          // offline. Uses the existing app_preferences fields and write path.
+          savePreferences({ ...preferences, ...effective, reminder_times: Array.isArray(data.reminder_times) ? data.reminder_times : preferences.reminder_times }).catch(() => {});
+        }
       }
       // A failed fetch also leaves `data` null, same as a genuinely new
       // account with no preferences row yet — those aren't the same thing.
@@ -3890,8 +3918,13 @@ function GlowUpTracker() {
     }
   };
 
+  const preferenceSaveChainRef = React.useRef(Promise.resolve());
+  const preferenceSaveVersionRef = React.useRef(0);
   const savePreferences = async (nextPreferences = preferences) => {
-    if (!user) return;
+    if (!user) return false;
+    const ownerId = user.id;
+    const version = ++preferenceSaveVersionRef.current;
+    const savedThemeRevision = readThemeSelection(window.localStorage, ownerId)?.revision;
     setSettingsMessage("Saving your settings…");
     const row = {
       user_id: user.id,
@@ -3925,10 +3958,24 @@ function GlowUpTracker() {
       last_seen_changelog: nextPreferences.last_seen_changelog || "",
       updated_at: new Date().toISOString(),
     };
-    const { error } = await supabase.from("app_preferences").upsert(row, { onConflict: "user_id" });
-    setSettingsMessage(error ? "Those settings couldn't be saved." : "Settings saved privately ✨");
-    if (!error) setPreferences(nextPreferences);
-    return !error;
+    // Full preference upserts must run in click order. Otherwise toggling
+    // worlds quickly lets an old network response become the last write.
+    const write = async () => {
+      if (activeUserIdRef.current !== ownerId) return false;
+      let error;
+      try {
+        ({ error } = await supabase.from("app_preferences").upsert(row, { onConflict: "user_id" }));
+      } catch (caught) { error = caught; }
+      if (!error) acknowledgeThemeSelection(window.localStorage, ownerId, savedThemeRevision);
+      if (activeUserIdRef.current === ownerId && version === preferenceSaveVersionRef.current) {
+        setSettingsMessage(error ? "Those settings couldn't be saved. Your chosen theme remains saved on this device." : "Settings saved privately ✨");
+        if (!error) setPreferences(nextPreferences);
+      }
+      return !error;
+    };
+    const next = preferenceSaveChainRef.current.then(write, write);
+    preferenceSaveChainRef.current = next.catch(() => {});
+    return next;
   };
 
   // Opt-in, Android-only companion to connectWatch() above. Unlike the cloud
@@ -3985,6 +4032,9 @@ function GlowUpTracker() {
   };
 
   const updatePreference = (patch) => {
+    if (user?.id && hasThemePreferenceChange(patch)) {
+      rememberThemeSelection(window.localStorage, user.id, patch);
+    }
     setPreferences((current) => {
       const next = { ...current, ...patch };
       savePreferences(next);
@@ -6166,7 +6216,9 @@ function GlowUpTracker() {
     const validTheme = themeId === "none" || APPEARANCE_THEMES.some((theme) => theme.id === themeId) ? themeId : "none";
     setAppearanceTheme(validTheme);
     updatePreference({ appearance_theme: validTheme, dino_theme: false, nickname_style: "warm" });
-    if (user?.id) window.localStorage.setItem(`plushlist-appearance-${user.id}`, validTheme);
+    if (user?.id) {
+      try { window.localStorage.setItem(`plushlist-appearance-${user.id}`, validTheme); } catch (_error) {}
+    }
   };
 
   const BADGE_DEFS = [
