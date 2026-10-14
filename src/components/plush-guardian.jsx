@@ -9,6 +9,7 @@ import {
   inQuietHours,
   openPlushGuardian,
 } from "../plush-guardian-model.mjs";
+import { botGuardianName } from "../guardian-bot.mjs";
 export { openPlushGuardian };
 class GuardianBoundary extends React.Component {
   constructor(props) {
@@ -21,7 +22,7 @@ class GuardianBoundary extends React.Component {
   render() {
     return this.state.failed ? (
       <div role="alert" className="pl-companion-loading">
-        Your companion couldn’t open. Your tasks are still available.
+        Your Bot Guardian couldn’t open. Your tasks are still available.
         <button onClick={this.props.onClose}>Close</button>
       </div>
     ) : (
@@ -77,7 +78,7 @@ export function PlushGuardianHost(props) {
       <React.Suspense
         fallback={
           <div className="pl-companion-loading" role="status">
-            Opening your companion…{" "}
+            Opening your Guardian…{" "}
             <button onClick={() => setRequest(null)}>Close</button>
           </div>
         }
@@ -122,7 +123,7 @@ export function CompanionHomeCard({ userId }) {
             ? "Welcome back, Cozy"
             : state.activeRoutine
               ? "Your routine is waiting"
-              : state.prefs.automaticReminders ? "Your Virtual Guardian is ready" : "A little support for your day"}
+              : state.prefs.automaticReminders ? `${botGuardianName(state.prefs.voice)} is ready` : "A little support for your day"}
         </strong>
         <p>
           {gap >= 3
@@ -146,7 +147,7 @@ export function CompanionHomeCard({ userId }) {
             ? "Choose a fresh start"
             : state.activeRoutine
               ? "Continue my routine"
-              : state.prefs.automaticReminders ? "My Virtual Guardian" : "Meet your Plush Guardian"}{" "}
+              : state.prefs.automaticReminders ? `My ${botGuardianName(state.prefs.voice)}` : "Meet Bot Mommy"}{" "}
           ›
         </button>
         <div className="pl-companion-home-shortcuts">
