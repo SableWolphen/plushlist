@@ -9,7 +9,7 @@ import {
   inQuietHours,
   openPlushGuardian,
 } from "../plush-guardian-model.mjs";
-import { botGuardianName } from "../guardian-bot.mjs";
+import { guardianBotDisplayName } from "../guardian-mode.mjs";
 export { openPlushGuardian };
 class GuardianBoundary extends React.Component {
   constructor(props) {
@@ -52,15 +52,17 @@ export function PlushGuardianHost(props) {
   const state = useGuardianState(props.user?.id);
   React.useEffect(() => {
     setRequest(null);
-    const open = (e) =>
+    const open = (e) => {
+      if (!props.guardianLinksReady || props.humanGuardianConnected) return;
       setRequest({
         page: e.detail?.page || "guardian",
         taskKey: e.detail?.taskKey || null,
         id: Date.now(),
       });
+    };
     window.addEventListener(GUARDIAN_EVENT, open);
     return () => window.removeEventListener(GUARDIAN_EVENT, open);
-  }, [props.user?.id]);
+  }, [props.user?.id, props.guardianLinksReady, props.humanGuardianConnected]);
   React.useEffect(() => {
     if (!props.user?.id) return;
     document.documentElement.dataset.plCompanionMotion = state.prefs.motion
@@ -72,7 +74,8 @@ export function PlushGuardianHost(props) {
       delete document.documentElement.dataset.plCompanionText;
     };
   }, [props.user?.id, state.prefs.motion, state.prefs.textSize]);
-  if (!props.user || !request) return null;
+  // A newly accepted person immediately closes the automatic Guardian panel.
+  if (!props.user || !request || !props.guardianLinksReady || props.humanGuardianConnected) return null;
   return (
     <GuardianBoundary key={props.user.id} onClose={() => setRequest(null)}>
       <React.Suspense
@@ -93,7 +96,7 @@ export function PlushGuardianHost(props) {
     </GuardianBoundary>
   );
 }
-export function CompanionHomeCard({ userId }) {
+export function CompanionHomeCard({ userId, onOpenGuardian }) {
   const state = useGuardianState(userId);
   const [gap, setGap] = React.useState(() =>
     gapDays(state.lastVisit, localDate()),
@@ -123,7 +126,7 @@ export function CompanionHomeCard({ userId }) {
             ? "Welcome back, Cozy"
             : state.activeRoutine
               ? "Your routine is waiting"
-              : state.prefs.automaticReminders ? `${botGuardianName(state.prefs.voice)} is ready` : "A little support for your day"}
+              : state.prefs.automaticReminders ? `${guardianBotDisplayName(state.prefs)} is ready` : "A little support for your day"}
         </strong>
         <p>
           {gap >= 3
@@ -133,26 +136,18 @@ export function CompanionHomeCard({ userId }) {
               : state.prefs.automaticReminders ? "Your chosen reminder times are ready." : "Your pace. Your choices."}
         </p>
         <button
-          onClick={() =>
-            openPlushGuardian(
-              gap >= 3
-                ? "welcome"
-                : state.activeRoutine
-                  ? "routines"
-                  : "guardian",
-            )
-          }
+          onClick={() => onOpenGuardian ? onOpenGuardian() : openPlushGuardian("guardian")}
         >
           {gap >= 3
             ? "Choose a fresh start"
             : state.activeRoutine
               ? "Continue my routine"
-              : state.prefs.automaticReminders ? `My ${botGuardianName(state.prefs.voice)}` : "Meet Bot Mommy"}{" "}
+              : state.prefs.automaticReminders ? "Open Guardian" : "Choose my Guardian"}{" "}
           ›
         </button>
         <div className="pl-companion-home-shortcuts">
-          <button onClick={() => openPlushGuardian("inbox")}>Brain dump</button>
-          <button onClick={() => openPlushGuardian("routines")}>
+          <button onClick={() => onOpenGuardian ? onOpenGuardian() : openPlushGuardian("inbox")}>Brain dump</button>
+          <button onClick={() => onOpenGuardian ? onOpenGuardian() : openPlushGuardian("routines")}>
             My routines
           </button>
         </div>

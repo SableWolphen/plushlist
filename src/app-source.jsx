@@ -1,4 +1,5 @@
 import { guardianKey, readGuardian, saveGuardian, STATE_EVENT } from "./plush-guardian-model.mjs";
+import { guardianMode } from "./guardian-mode.mjs";
 import { companionAccountKey } from "./companion-account-storage.mjs";
 import { hasThemePreferenceChange, readThemeSelection, rememberThemeSelection, acknowledgeThemeSelection, restoreThemePreferences } from "./theme-selection-storage.mjs";
 import { PlushGuardianHost } from "./components/plush-guardian.jsx";
@@ -784,6 +785,7 @@ function GlowUpTracker() {
   const { journalHistoryExpanded, setJournalHistoryExpanded, reflectionCalendarMonth, setReflectionCalendarMonth, reflectionViewerDate, setReflectionViewerDate, checkInViewerDate, setCheckInViewerDate, reflectionViewerNote, setReflectionViewerNote, reflectionViewerPrompt, setReflectionViewerPrompt, reflectionViewerLoading, setReflectionViewerLoading } = useJournalPresentation(trackerPeriod);
   const [supportViewMode, setSupportViewMode] = useState("mine");
   const [supportLinks, setSupportLinks] = useState([]);
+  const [supportLinksLoadedFor, setSupportLinksLoadedFor] = useState(null);
   const [supportNotes, setSupportNotes] = useState([]);
   const [unreadNoteCount, setUnreadNoteCount] = useState(0);
   useEffect(() => {
@@ -1742,11 +1744,13 @@ function GlowUpTracker() {
       .select("id, owner_user_id, caregiver_email, label, active, can_view_progress, can_send_notes, can_add_rewards, can_suggest_tasks, care_agreement, created_at, last_viewed_at, accepted_at")
       .order("created_at", { ascending: false });
     if (linksError) {
+      setSupportLinksLoadedFor(null); // Unknown is not equivalent to no Guardian.
       setSupportMessage("Couldn't load guardian access right now.");
       return;
     }
     const linkRows = links || [];
     setSupportLinks(linkRows);
+    setSupportLinksLoadedFor(currentUser.id);
     const { data: requestRows } = await supabase.from("guardian_support_requests").select("id, owner_user_id, caregiver_email, request_type, message, status, created_at").ilike("caregiver_email", currentUser.email || "").order("created_at", { ascending: false }).limit(30);
     setGuardianSupportRequests(requestRows || []);
     const adultLink = linkRows.find((link) =>
@@ -1773,6 +1777,7 @@ function GlowUpTracker() {
 
   useEffect(() => {
     if (!user) {
+      setSupportLinksLoadedFor(null);
       setSupportLinks([]);
       setSupportNotes([]);
       setSupportRewards([]);
@@ -5120,6 +5125,21 @@ function GlowUpTracker() {
     return () => document.removeEventListener("plushlife-notification-task-action", consumeTaskAction);
   }, [period.date, rows, viewDone]);
   const [guardianReminderRevision, setGuardianReminderRevision] = useState(0);
+  const guardianLinksReady = !!user && supportLinksLoadedFor === user.id;
+  const activeGuardianMode = guardianMode(supportLinks, user?.id, supportLinksLoadedFor, readGuardian(deviceStorage(), user?.id).prefs.automaticReminders);
+  useEffect(() => {
+    // A connected person supersedes local automatic guidance. This is an
+    // explicit one-way handoff: removal of the relationship never silently
+    // reactivates old bot notifications. Keep the saved Guardian name/style.
+    if (!user?.id || guardianMode(supportLinks, user.id, supportLinksLoadedFor) !== "person") return;
+    const stored = readGuardian(deviceStorage(), user.id);
+    if (!stored.prefs.automaticReminders && !stored.prefs.routineNudges && !stored.prefs.tomorrowNudges) return;
+    const next = {
+      ...stored,
+      prefs: { ...stored.prefs, automaticReminders: false, routineNudges: false, tomorrowNudges: false },
+    };
+    if (saveGuardian(deviceStorage(), user.id, next)) window.dispatchEvent(new Event(STATE_EVENT));
+  }, [user?.id, supportLinksLoadedFor, JSON.stringify(supportLinks.map(link => [link.owner_user_id, link.active, link.accepted_at]))]);
   useEffect(() => {
     const refresh = () => setGuardianReminderRevision((value) => value + 1);
     window.addEventListener(STATE_EVENT, refresh);
@@ -5135,6 +5155,7 @@ function GlowUpTracker() {
     }
     const guardianState = readGuardian(deviceStorage(), user.id);
     const virtualGuardian = guardianState.prefs;
+    const automaticGuardian = guardianMode(supportLinks, user.id, supportLinksLoadedFor, virtualGuardian.automaticReminders) === "automatic";
     const activeGuardianRoutine = guardianState.activeRoutine;
     const guardianRoutine = activeGuardianRoutine && !activeGuardianRoutine.paused && activeGuardianRoutine.index < activeGuardianRoutine.steps?.length
       ? { name: activeGuardianRoutine.name, nextStep: activeGuardianRoutine.steps[activeGuardianRoutine.index]?.text || "" }
@@ -5163,17 +5184,17 @@ function GlowUpTracker() {
       restDates,
       taskReminders,
       cozyReminderStyle: cozyComfort.status === "ready" ? cozyComfort.profile.reminder_style : "Gentle",
-      virtualGuardian: virtualGuardian.automaticReminders === true,
+      virtualGuardian: automaticGuardian,
       guardianVoice: virtualGuardian.voice,
       guardianGuidance: virtualGuardian.guidance,
       guardianRoutine,
-      routineNudges: virtualGuardian.automaticReminders && virtualGuardian.routineNudges,
+      routineNudges: automaticGuardian && virtualGuardian.routineNudges,
       routineReminderTime: virtualGuardian.routineReminderTime,
-      tomorrowNudges: virtualGuardian.automaticReminders && virtualGuardian.tomorrowNudges,
+      tomorrowNudges: automaticGuardian && virtualGuardian.tomorrowNudges,
       tomorrowReminderTime: virtualGuardian.tomorrowReminderTime,
       tomorrowTasksCount,
     }).catch(() => {});
-  }, [user?.id, guardianReminderRevision, tomorrowTasksCount, cozyComfort.status, cozyComfort.profile.reminder_style, preferences.notifications_enabled, preferences.discreet_notifications, JSON.stringify(preferences.reminder_times || []), preferences.quiet_start, preferences.quiet_end, JSON.stringify(restDates), JSON.stringify(viewDone), JSON.stringify(trackerTasks.map((task) => [task.task_key, task.archived_at, task.reminder_time, task.schedule_days, task.day_id, task.tiny_label]))]);
+  }, [user?.id, supportLinksLoadedFor, JSON.stringify(supportLinks.map((link) => [link.owner_user_id, link.active, link.accepted_at])), guardianReminderRevision, tomorrowTasksCount, cozyComfort.status, cozyComfort.profile.reminder_style, preferences.notifications_enabled, preferences.discreet_notifications, JSON.stringify(preferences.reminder_times || []), preferences.quiet_start, preferences.quiet_end, JSON.stringify(restDates), JSON.stringify(viewDone), JSON.stringify(trackerTasks.map((task) => [task.task_key, task.archived_at, task.reminder_time, task.schedule_days, task.day_id, task.tiny_label]))]);
   const doneCount = rows.filter((r) => viewDone[r.key]).length;
   const requiredRows = rows.filter((row) => !row.isBonus);
   const optionalRows = rows.filter((row) => row.isBonus);
@@ -7583,7 +7604,7 @@ function GlowUpTracker() {
         </header>}
 
                 {dashboard === "care" && <div className="pl-unified-page-content"><CarePanel comfortItem={trackerProfile?.comfort_item_name} supportNotes={supportNotes.filter(note => note.owner_user_id === user.id)} onOpenSettings={() => setSettingsOpen(true)} onReset={startCozyReset} onReminderTime={async time=>{const okay=await savePreferences({...preferences,reminder_times:[time]});return okay;}} dailyCheckInHistory={dailyCheckInHistory} reflectionHistory={reflectionHistory} checkInHistoryStatus={checkInHistoryStatus} journalHistoryStatus={journalHistoryStatus} retryCareHistory={retryCareHistory} setCheckInViewerDate={setCheckInViewerDate} setReflectionViewerDate={setReflectionViewerDate} openTodayJournal={openTodayJournal} CHECKIN_MOODS={CHECKIN_MOODS} onOpenSupport={() => goToDashboard("guardian")} open={dashboard === "care"} babyMode={babyMode} setCheckInPopupOpen={setCheckInPopupOpen} babyCaregiverName={babyCaregiverName} careSituationsExpanded={careSituationsExpanded} setCareSituationsExpanded={setCareSituationsExpanded} setCareMessage={setCareMessage} openCareSession={openCareSession} careMessage={careMessage} user={user} preferences={preferences} rows={rows} viewDone={viewDone} toggle={toggle} supabase={supabase} careSection={careSection} setCareSection={setCareSection} careSessionHistory={careSessionHistory} HELP_ME_NOW_OPTIONS={HELP_ME_NOW_OPTIONS} pathProgress={pathProgress} setSelectedCarePath={setSelectedCarePath} period={period} setSleepToolOpen={setSleepToolOpen} soundscapePlaying={soundscapePlaying} toggleSoundscape={toggleSoundscape} soundscapeVolume={soundscapeVolume} changeSoundscapeVolume={changeSoundscapeVolume} setSoundscapeSleepTimer={setSoundscapeSleepTimer} soundscapeTimerMinutes={soundscapeTimerMinutes} /></div>}
-        <PlushGuardianHost user={user} client={supabase} rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} toggle={toggle} onQuickAdd={quickAddTrackerTask} onDayType={selectDayType} onSupport={text => { if(typeof text === "string") setSupportRequestText(text.slice(0,500)); goToDashboard("guardian"); }} onJournal={openTodayJournal} onEditTask={row => { openTaskManager(); if(row.sourceTask) startEditingTask(row.sourceTask); }} />
+        <PlushGuardianHost user={user} guardianLinksReady={guardianLinksReady} humanGuardianConnected={activeGuardianMode === "person"} client={supabase} rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} toggle={toggle} onQuickAdd={quickAddTrackerTask} onDayType={selectDayType} onSupport={text => { if(typeof text === "string") setSupportRequestText(text.slice(0,500)); goToDashboard("guardian"); }} onJournal={openTodayJournal} onEditTask={row => { openTaskManager(); if(row.sourceTask) startEditingTask(row.sourceTask); }} />
         <ProfilePanel open={profileOpen} onClose={() => setProfileOpen(false)} pendingSupportInvites={pendingSupportInvites} hasOwnGuardian={hasOwnGuardian} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} setSafetyOpen={setSafetyOpen} setHelpOpen={setHelpOpen} goToFeedback={goToFeedback} isAdminUser={isAdminUser} setAdminOpen={setAdminOpen} loadAdminData={loadAdminData} nativeBuildInfo={nativeBuildInfo} />
 
         <MoodViewer checkInViewerDate={checkInViewerDate} onClose={() => setCheckInViewerDate(null)} dailyCheckInHistory={dailyCheckInHistory} reflectionDateSet={reflectionDateSet} setReflectionViewerDate={setReflectionViewerDate} deleteDailyCheckIn={deleteDailyCheckIn} CHECKIN_MOODS={CHECKIN_MOODS} ENERGY_LEVELS={ENERGY_LEVELS} DAY_TYPES={DAY_TYPES} SUPPORT_PREFERENCES={SUPPORT_PREFERENCES} />
@@ -7608,7 +7629,7 @@ function GlowUpTracker() {
 
         <ScheduleEditorPanel open={manageSchedule} onClose={() => setManageSchedule(false)} scheduleEditingDayId={scheduleEditingDayId} setScheduleEditDayId={setScheduleEditDayId} personalSchedules={personalSchedules} scheduleDraft={scheduleDraft} updateScheduleEntry={updateScheduleEntry} removeScheduleEntry={removeScheduleEntry} addScheduleEntry={addScheduleEntry} savePersonalSchedule={savePersonalSchedule} copyScheduleToAllDays={copyScheduleToAllDays} clearPersonalSchedule={clearPersonalSchedule} copyToDayIds={copyToDayIds} toggleCopyToDay={toggleCopyToDay} copyScheduleToSelectedDays={copyScheduleToSelectedDays} scheduleMessage={scheduleMessage} scheduleExceptionDraft={scheduleExceptionDraft} setScheduleExceptionDraft={setScheduleExceptionDraft} updateScheduleExceptionEntry={updateScheduleExceptionEntry} removeScheduleExceptionEntry={removeScheduleExceptionEntry} addScheduleExceptionEntry={addScheduleExceptionEntry} saveScheduleException={saveScheduleException} scheduleExceptionMessage={scheduleExceptionMessage} scheduleExceptions={scheduleExceptions} deleteScheduleException={deleteScheduleException} />
 
-        <GuardianPanel client={supabase} open={user && dashboard === "guardian"} onClose={() => setDashboard("today")} isGuardianAccount={isGuardianAccount} hasOwnGuardian={hasOwnGuardian} supportViewMode={supportViewMode} setSupportViewMode={setSupportViewMode} isSupportAdult={isSupportAdult} selectedSupportName={selectedSupportName} guardianSupportRequests={guardianSupportRequests} supportOwnerId={supportOwnerId} updateGuardianSupportRequest={updateGuardianSupportRequest} pendingSupportInvites={pendingSupportInvites} supportPeople={supportPeople} acceptSupportInvitation={acceptSupportInvitation} declineSupportInvitation={declineSupportInvitation} canUseCaretakerDashboard={canUseCaretakerDashboard} invitedSupportLinks={invitedSupportLinks} loadSupportOwner={loadSupportOwner} loadSupportData={loadSupportData} user={user} supportAchievements={supportAchievements} period={period} ownerIsRestingToday={ownerIsRestingToday} restDatesSet={restDatesSet} todayRequiredDone={todayRequiredDone} supportProgress={supportProgress} activeSupportLink={activeSupportLink} canViewSupportProgress={canViewSupportProgress} canViewSupportTasks={canViewSupportTasks} canViewSupportSchedule={canViewSupportSchedule} canViewSupportMood={canViewSupportMood} supportTrackerTasks={supportTrackerTasks} supportSchedules={supportSchedules} supportScheduleExceptions={supportScheduleExceptions} supportMoodSummary={supportMoodSummary} supportProgressView={supportProgressView} setSupportProgressView={setSupportProgressView} supportTodayDayLabel={supportTodayDayLabel} displayedSupportPercent={displayedSupportPercent} displayedSupportCompleted={displayedSupportCompleted} displayedSupportPossible={displayedSupportPossible} supportDailyEssentialCompleted={supportDailyEssentialCompleted} supportDailyEssentialKeys={supportDailyEssentialKeys} supportScheduledTodayCompleted={supportScheduledTodayCompleted} supportScheduledTodayKeys={supportScheduledTodayKeys} canSendSupportNotes={canSendSupportNotes} newNote={newNote} setNewNote={setNewNote} addSupportNote={addSupportNote} suggestComfortTool={suggestComfortTool} canAddSupportRewards={canAddSupportRewards} rewardTitle={rewardTitle} setRewardTitle={setRewardTitle} rewardDetails={rewardDetails} setRewardDetails={setRewardDetails} rewardTarget={rewardTarget} setRewardTarget={setRewardTarget} rewardTargetPeriod={rewardTargetPeriod} setRewardTargetPeriod={setRewardTargetPeriod} rewardApprovalRequired={rewardApprovalRequired} setRewardApprovalRequired={setRewardApprovalRequired} addSupportReward={addSupportReward} suggestedTask={suggestedTask} setSuggestedTask={setSuggestedTask} suggestedTaskDay={suggestedTaskDay} setSuggestedTaskDay={setSuggestedTaskDay} submitTaskSuggestion={submitTaskSuggestion} inviteEmail={inviteEmail} setInviteEmail={setInviteEmail} inviteSupportAdult={inviteSupportAdult} GUARDIAN_ROLE_PRESETS={GUARDIAN_ROLE_PRESETS} guardianRolePreset={guardianRolePreset} setGuardianRolePreset={setGuardianRolePreset} ownedSupportLinks={ownedSupportLinks} supportRelationships={supportRelationships} setSupportAdultActive={setSupportAdultActive} removeSupportAdult={removeSupportAdult} updateCaretakerPermission={updateCaretakerPermission} updateCareAgreement={updateCareAgreement} supportRequestGuardian={supportRequestGuardian} setSupportRequestGuardian={setSupportRequestGuardian} supportRequestType={supportRequestType} setSupportRequestType={setSupportRequestType} supportRequestText={supportRequestText} setSupportRequestText={setSupportRequestText} sendGuardianSupportRequest={sendGuardianSupportRequest} taskSuggestions={taskSuggestions} suggestionSectionsById={suggestionSectionsById} setSuggestionSectionsById={setSuggestionSectionsById} taskSectionsForDay={taskSectionsForDay} decideTaskSuggestion={decideTaskSuggestion} supportMessage={supportMessage} supportRewards={supportRewards} supportWeeklyPercent={supportWeeklyPercent} supportPercent={supportPercent} updateRewardStatus={updateRewardStatus} supportNotes={supportNotes} setComfortToolOpen={setComfortToolOpen} deleteSupportNote={deleteSupportNote} onOpenSettings={() => setSettingsOpen(true)} />
+        <GuardianPanel client={supabase} guardianLinksReady={guardianLinksReady} onRetryGuardian={() => loadSupportData(user)} onOpenTasks={() => openTaskManager(period.date,"today")} open={user && dashboard === "guardian"} onClose={() => setDashboard("today")} isGuardianAccount={isGuardianAccount} hasOwnGuardian={hasOwnGuardian} supportViewMode={supportViewMode} setSupportViewMode={setSupportViewMode} isSupportAdult={isSupportAdult} selectedSupportName={selectedSupportName} guardianSupportRequests={guardianSupportRequests} supportOwnerId={supportOwnerId} updateGuardianSupportRequest={updateGuardianSupportRequest} pendingSupportInvites={pendingSupportInvites} supportPeople={supportPeople} acceptSupportInvitation={acceptSupportInvitation} declineSupportInvitation={declineSupportInvitation} canUseCaretakerDashboard={canUseCaretakerDashboard} invitedSupportLinks={invitedSupportLinks} loadSupportOwner={loadSupportOwner} loadSupportData={loadSupportData} user={user} supportAchievements={supportAchievements} period={period} ownerIsRestingToday={ownerIsRestingToday} restDatesSet={restDatesSet} todayRequiredDone={todayRequiredDone} supportProgress={supportProgress} activeSupportLink={activeSupportLink} canViewSupportProgress={canViewSupportProgress} canViewSupportTasks={canViewSupportTasks} canViewSupportSchedule={canViewSupportSchedule} canViewSupportMood={canViewSupportMood} supportTrackerTasks={supportTrackerTasks} supportSchedules={supportSchedules} supportScheduleExceptions={supportScheduleExceptions} supportMoodSummary={supportMoodSummary} supportProgressView={supportProgressView} setSupportProgressView={setSupportProgressView} supportTodayDayLabel={supportTodayDayLabel} displayedSupportPercent={displayedSupportPercent} displayedSupportCompleted={displayedSupportCompleted} displayedSupportPossible={displayedSupportPossible} supportDailyEssentialCompleted={supportDailyEssentialCompleted} supportDailyEssentialKeys={supportDailyEssentialKeys} supportScheduledTodayCompleted={supportScheduledTodayCompleted} supportScheduledTodayKeys={supportScheduledTodayKeys} canSendSupportNotes={canSendSupportNotes} newNote={newNote} setNewNote={setNewNote} addSupportNote={addSupportNote} suggestComfortTool={suggestComfortTool} canAddSupportRewards={canAddSupportRewards} rewardTitle={rewardTitle} setRewardTitle={setRewardTitle} rewardDetails={rewardDetails} setRewardDetails={setRewardDetails} rewardTarget={rewardTarget} setRewardTarget={setRewardTarget} rewardTargetPeriod={rewardTargetPeriod} setRewardTargetPeriod={setRewardTargetPeriod} rewardApprovalRequired={rewardApprovalRequired} setRewardApprovalRequired={setRewardApprovalRequired} addSupportReward={addSupportReward} suggestedTask={suggestedTask} setSuggestedTask={setSuggestedTask} suggestedTaskDay={suggestedTaskDay} setSuggestedTaskDay={setSuggestedTaskDay} submitTaskSuggestion={submitTaskSuggestion} inviteEmail={inviteEmail} setInviteEmail={setInviteEmail} inviteSupportAdult={inviteSupportAdult} GUARDIAN_ROLE_PRESETS={GUARDIAN_ROLE_PRESETS} guardianRolePreset={guardianRolePreset} setGuardianRolePreset={setGuardianRolePreset} ownedSupportLinks={ownedSupportLinks} supportRelationships={supportRelationships} setSupportAdultActive={setSupportAdultActive} removeSupportAdult={removeSupportAdult} updateCaretakerPermission={updateCaretakerPermission} updateCareAgreement={updateCareAgreement} supportRequestGuardian={supportRequestGuardian} setSupportRequestGuardian={setSupportRequestGuardian} supportRequestType={supportRequestType} setSupportRequestType={setSupportRequestType} supportRequestText={supportRequestText} setSupportRequestText={setSupportRequestText} sendGuardianSupportRequest={sendGuardianSupportRequest} taskSuggestions={taskSuggestions} suggestionSectionsById={suggestionSectionsById} setSuggestionSectionsById={setSuggestionSectionsById} taskSectionsForDay={taskSectionsForDay} decideTaskSuggestion={decideTaskSuggestion} supportMessage={supportMessage} supportRewards={supportRewards} supportWeeklyPercent={supportWeeklyPercent} supportPercent={supportPercent} updateRewardStatus={updateRewardStatus} supportNotes={supportNotes} setComfortToolOpen={setComfortToolOpen} deleteSupportNote={deleteSupportNote} onOpenSettings={() => setSettingsOpen(true)} />
 
         <>
         <DailyJournalPanel open={journalQuickOpen && (!dailyJournalPromptOpen || autoPopupToShow === "daily_journal")} onVisible={() => { if (!dailyJournalPromptOpen || !user?.id) return; try { window.localStorage.setItem(`plushlife:daily-journal-prompt:${user.id}:${period.date}`, "shown"); } catch (_error) {} }} onClose={() => { setJournalQuickOpen(false); setDailyJournalPromptOpen(false); setPrivateNoteEditing(false); }} dailyJournalPromptOpen={dailyJournalPromptOpen} journalQuickOpenDate={journalQuickOpenDate} journalDisplayedPrompt={journalDisplayedPrompt} privateNoteEditing={privateNoteEditing} setPrivateNoteEditing={setPrivateNoteEditing} privateNoteDraft={privateNoteDraft} setPrivateNoteDraft={setPrivateNoteDraft} savePrivateNote={savePrivateNote} privateNote={privateNote} privateNoteMessage={privateNoteMessage} />

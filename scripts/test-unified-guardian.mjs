@@ -1,0 +1,60 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import { buildSync } from "esbuild";
+import {
+  activeHumanGuardians, guardianMode, guardianTypeLabel, guardianPersonName,
+  guardianBotDisplayName, automaticGuardianAllowed, guardianSuggestedReward,
+} from "../src/guardian-mode.mjs";
+import { normalizeGuardianState } from "../src/plush-guardian-model.mjs";
+
+const cozy="00000000-0000-4000-8000-000000000001", other="00000000-0000-4000-8000-000000000002";
+const accepted={owner_user_id:cozy,active:true,accepted_at:"2026-10-14T12:00:00Z",caregiver_email:"trusted@example.com",label:"Mommy"};
+const pending={...accepted,accepted_at:null}, paused={...accepted,active:false}, stranger={...accepted,owner_user_id:other};
+assert.equal(guardianMode([],cozy,null,true),"checking","Unknown connection must never start local bot");
+assert.equal(guardianMode([accepted],cozy,cozy,true),"person","Human Guardian always wins");
+assert.equal(guardianMode([pending],cozy,cozy,true),"automatic","Pending invitation does not replace automatic Guardian");
+assert.equal(guardianMode([paused],cozy,cozy,true),"automatic","Paused Guardian does not have access");
+assert.equal(guardianMode([stranger],cozy,cozy,true),"automatic","Another account's Guardian never applies");
+assert.equal(guardianMode([],cozy,cozy,false),"choose");
+assert.equal(guardianMode([],cozy,cozy,true),"automatic");
+assert.equal(activeHumanGuardians([accepted,pending,paused,stranger],cozy).length,1);
+assert.equal(automaticGuardianAllowed("person"),false);
+assert.equal(automaticGuardianAllowed("checking"),false);
+assert.equal(guardianTypeLabel("person"),"Connected person");
+assert.match(guardianTypeLabel("automatic"),/Automatic/);
+assert.equal(guardianPersonName(accepted),"Mommy");
+assert.equal(guardianPersonName({...accepted,label:"Guardian"}),"trusted@example.com");
+assert.equal(guardianBotDisplayName({voice:"mommy"}),"Mommy");
+assert.equal(guardianBotDisplayName({voice:"daddy",guardianName:"Papa"}),"Papa");
+assert.equal(guardianBotDisplayName({guardianName:"x".repeat(60)}).length,36);
+assert.equal(normalizeGuardianState({prefs:{guardianName:42}}).prefs.guardianName,"");
+assert.equal(normalizeGuardianState({prefs:{guardianName:"x".repeat(100)}}).prefs.guardianName.length,36);
+assert.equal(guardianSuggestedReward(0,3),null);
+assert.equal(guardianSuggestedReward(2,3,true),null,"Rest days do not trigger reward pressure");
+assert.match(guardianSuggestedReward(2,3),/effort/);
+assert.match(guardianSuggestedReward(3,3),/celebration/);
+
+const app=fs.readFileSync("src/app-source.jsx","utf8");
+const main=fs.readFileSync("src/components/guardian-panel.jsx","utf8");
+const host=fs.readFileSync("src/components/plush-guardian.jsx","utf8");
+const core=fs.readFileSync("src/components/plush-guardian-core.jsx","utf8");
+const tools=fs.readFileSync("src/components/plush-guardian-tools.jsx","utf8");
+const settings=fs.readFileSync("src/components/plush-guardian-settings.jsx","utf8");
+const home=fs.readFileSync("src/components/storybook-home.jsx","utf8");
+assert(app.includes("supportLinksLoadedFor"),"Never infer 'no human' before relationships load");
+assert(app.includes('guardianMode(supportLinks, user.id, supportLinksLoadedFor, virtualGuardian.automaticReminders) === "automatic"'),"Native reminder switch must honor human priority");
+assert(app.includes("virtualGuardian: automaticGuardian") && app.includes("routineNudges: automaticGuardian &&") && app.includes("tomorrowNudges: automaticGuardian &&"),"Task/routine/tomorrow bot notifications must be switched off together");
+assert(app.includes("automaticReminders: false, routineNudges: false, tomorrowNudges: false"),"When human connects, old bot should remain disabled after disconnect");
+assert(app.includes("humanGuardianConnected={activeGuardianMode === \"person\"}"),"Human mode must reach automatic Guardian host");
+assert(host.includes("props.humanGuardianConnected") && host.includes("!props.guardianLinksReady"),"Deep-link bot panel must close and refuse old links when human Guardian connected");
+assert(main.includes('aria-label="Guardian support"') && main.includes('guardianTypeLabel(mode)') && main.includes("guardianDisplayName"),"One Guardian header with distinguished support type");
+for(const text of ["> Tasks</button>","> Routines</button>","> Encouragement</button>","> Rewards</button>"]) assert(main.includes(text), "Common Guardian action absent: "+text);
+assert(main.includes('openPlushGuardian("rewards")') && main.includes('className="pl-human-guardian-rewards"'),"Rewards must work in both modes");
+assert(main.includes('setGuardianArea("together")') && main.includes('onOpenTasks?.()'),"Human tasks/routines must route to existing features");
+assert(home.includes('goToDashboard?.("guardian")'),"Home should route to one Guardian interface");
+assert(settings.includes('aria-label="Guardian\'s name"'),"Automatic Guardian can have its own name");
+assert(core.includes('guardianBotDisplayName(state.prefs)'),"Automatic panel displays same chosen name");
+assert(tools.includes('value={rewardMode}') && tools.includes('todayPercent') && tools.includes('targetPercent: rewardMode === "progress"'),"Automatic Guardian must offer task-based rewards and preserve effort rewards");
+assert(tools.includes('Count one effort') && tools.includes('Undo one step'),"Existing manual rewards remain");
+buildSync({entryPoints:["src/components/guardian-panel.jsx","src/components/plush-guardian-core.jsx","src/components/plush-guardian-tools.jsx","src/app-source.jsx"],bundle:true,write:false,outdir:"out",format:"esm",platform:"browser",target:"es2022",loader:{".jsx":"jsx"}});
+console.log("Unified Guardian passed: single name, exclusive human priority, safe loading, task/routine/reward parity, no auto-reactivation and real-account boundaries.");

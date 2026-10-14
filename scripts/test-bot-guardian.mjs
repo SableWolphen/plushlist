@@ -64,7 +64,7 @@ assert(!core.includes("fetch(") && !core.includes("client.auth") && !core.includ
 assert(!settings.includes('check("aiConsent"') && !settings.includes('check("shareTasks"') && !settings.includes("Enable AI chat"), "No legacy AI consent controls in Bot settings");
 assert(settings.includes("activateBotMommy(prefs)") && settings.includes('preference("voice"'), "Guardian setup includes one-tap Mommy with other role options");
 assert(settings.includes("Delete old saved chat"), "Old private local conversation remains deletable");
-assert(guardianPanel.includes('aria-label="Bot Mommy shortcut"') && guardianPanel.includes("Meet Bot Mommy") && !guardianPanel.includes("!(ownedSupportLinks || []).some(link=>link.active && link.accepted_at)"), "Bot Mommy is now offered to every Cozy, even with an active human Guardian");
+assert(guardianPanel.includes('aria-label="Guardian support"') && guardianPanel.includes('mode === "person"') && guardianPanel.includes('mode === "automatic"'), "Guardian has one interface with mutually exclusive person and automatic modes");
 assert(worker.includes('if (url.pathname === "/api/plush-guardian") return json(') && worker.includes(", 410)"), "Retire legacy AI route at Worker boundary");
 assert(!worker.includes("handlePlushGuardian(request, env)"), "Legacy API must no longer invoke the AI handler");
 assert(app.includes("guardianReminderRevision"), "Guardian preferences keep current scheduler hook");

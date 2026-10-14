@@ -13,7 +13,8 @@ import {
 import { GuardianTools } from "./plush-guardian-tools.jsx";
 import { GuardianSettings } from "./plush-guardian-settings.jsx";
 import { startFocusTimer } from "./focus-timer.jsx";
-import { botGuardianName, botGuardianDailyPlan, activateBotMommy } from "../guardian-bot.mjs";
+import { botGuardianDailyPlan, activateBotMommy } from "../guardian-bot.mjs";
+import { guardianBotDisplayName, guardianSuggestedReward } from "../guardian-mode.mjs";
 export default function PlushGuardianCore(props) {
   const {
     user,
@@ -125,9 +126,8 @@ export default function PlushGuardianCore(props) {
       >
         <div className="pl-companion-top">
           <div>
-            <span className="pl-companion-badge">
-              {VOICES[state.prefs.voice]} · {state.prefs.guidance}
-            </span>
+            <span className="pl-companion-badge">Guardian · Automatic</span>
+            <strong>{guardianBotDisplayName(state.prefs)}</strong>
             <p>Automatic, rule-based help · No AI chat or conversations</p>
           </div>
           <button
@@ -149,7 +149,7 @@ export default function PlushGuardianCore(props) {
           <>
             <section className="pl-companion-hero">
               <div>
-                <h2>{state.prefs.automaticReminders ? `${botGuardianName(state.prefs.voice)} is here` : "Need a Guardian? Meet Bot Mommy"}</h2>
+                <h2>Guardian</h2>
                 <p>
                   {state.prefs.phrases ||
                     "Gentle reminders, routines, check-ins and encouragement — even without a human Guardian."}
@@ -162,17 +162,19 @@ export default function PlushGuardianCore(props) {
                 alt="Your Plush"
               />
             </section>
-            <section className="pl-virtual-guardian-options" aria-label="Automatic Bot Guardian">
-              <h3>{state.prefs.automaticReminders ? botGuardianName(state.prefs.voice) : "Bot Mommy · Your optional Guardian"}</h3>
+            <section className="pl-virtual-guardian-options" aria-label="Automatic Guardian">
+              <h3>{guardianBotDisplayName(state.prefs)}</h3>
               {state.prefs.automaticReminders ? <>
                 <p role="status">{botPlan.encouragement}</p>
                 <p>{botPlan.completed} of {botPlan.total} little jobs complete today. You can pause or change your Guardian anytime.</p>
                 {botPlan.next && <button onClick={() => { setTaskKey(botPlan.next.key); navigate("start"); }}>Help me do: {botPlan.next.label} ›</button>}
-                <button onClick={() => navigate("routines")}>Guide me through my routine ›</button>
+                <button onClick={() => navigate("routines")}>Routines ›</button>
+                <button onClick={() => navigate("rewards")}>🎁 Rewards ›</button>
+                {guardianSuggestedReward(botPlan.completed,botPlan.total,dailyCheckIn?.day_type === "rest") && <p>{guardianSuggestedReward(botPlan.completed,botPlan.total,dailyCheckIn?.day_type === "rest")}</p>}
                 <button onClick={() => navigate("settings")}>My reminders & Guardian voice ›</button>
               </> : <>
-                <p>No real Guardian? Bot Mommy can support your tasks, remind you about routines, help you prepare for tomorrow, and celebrate your progress — without AI or chatting.</p>
-                <button className="pl-companion-primary" onClick={() => update({ prefs: activateBotMommy(state.prefs) })}>Turn on Bot Mommy 🧸</button>
+                <p>Choose an automatic Guardian when no person is connected. Tasks, routines, encouragement and rewards are all here, without AI chat.</p>
+                <button className="pl-companion-primary" onClick={() => update({ prefs: activateBotMommy(state.prefs) })}>Choose automatic Guardian 🧸</button>
                 <button onClick={() => navigate("settings")}>Choose a different Guardian style ›</button>
               </>}
               <p>Automatic notifications require PlushLife notification permission. Quiet hours, rest days and your privacy choices still apply.</p>
@@ -236,8 +238,8 @@ export default function PlushGuardianCore(props) {
               Ask a human Guardian
             </button>
             <p className="pl-companion-note">
-              Bot Mommy is an automatic routine helper, not a real person.
-              You can always invite a trusted human Guardian too.
+              This Guardian is an automatic routine helper, not a real person.
+              You can invite someone you trust whenever you're ready.
             </p>
           </>
         )}

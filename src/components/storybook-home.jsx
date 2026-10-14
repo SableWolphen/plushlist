@@ -1,4 +1,4 @@
-import { CompanionHomeCard,useGuardianState,openPlushGuardian } from "./plush-guardian.jsx";
+import { CompanionHomeCard,useGuardianState } from "./plush-guardian.jsx";
 import { ThemeScene, ThemeWorldContext } from "./theme-world.jsx";
 import { buildCozyDayPlan, weeklyCozyStory } from "../cozy-day-plan.mjs";
 import { themeAtmosphere } from "../theme-atmosphere.js";
@@ -95,10 +95,10 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
     <nav style={cardStyle("shortcuts")} className="pl-storybook-doors" aria-label="Your everyday actions">
       <button type="button" className="pl-storybook-door pl-door-checkin" onClick={()=>openDailyCheckIn?.()}><span className="pl-storybook-door-emoji" aria-hidden="true">💗</span><strong>Check in</strong></button>
       <button type="button" className="pl-storybook-door pl-door-journal" onClick={()=>openTodayJournal?.()}><span className="pl-storybook-door-emoji" aria-hidden="true">📝</span><strong>Journal</strong></button>
-      <button type="button" className="pl-storybook-door pl-door-guardian" onClick={()=>openPlushGuardian()}><span className="pl-storybook-door-emoji" aria-hidden="true">🧸</span><strong>Guardian</strong></button>
+      <button type="button" className="pl-storybook-door pl-door-guardian" onClick={()=>goToDashboard?.("guardian")}><span className="pl-storybook-door-emoji" aria-hidden="true">🧸</span><strong>Guardian</strong></button>
       <button type="button" className="pl-storybook-door pl-door-focus" onClick={focus}><span className="pl-storybook-door-emoji" aria-hidden="true">⏱</span><strong>Focus</strong></button>
     </nav>
-    {world === "baby-night" && <button type="button" className="pl-storybook-bedtime" onClick={()=>openPlushGuardian("routines")}>🌙 Ready for my bedtime routine? <span aria-hidden="true">›</span></button>}
+    {world === "baby-night" && <button type="button" className="pl-storybook-bedtime" onClick={()=>goToDashboard?.("guardian")}>🌙 Ready for my bedtime routine? <span aria-hidden="true">›</span></button>}
     {(tomorrowPreviewRows.length > 0 || hasWeeklyStory) && <details className="pl-storybook-lookahead">
       <summary>📅 Looking ahead <span>Tomorrow & my week</span></summary>
       {tomorrowPreviewRows.length > 0 && <section className="pl-storybook-tomorrow">
@@ -117,8 +117,8 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
     </details>}
     <details className="pl-storybook-support">
       <summary>♡ My comfort & Guardian settings <span>Personalize</span></summary>
-      <div className="pl-companion-home-card" style={cardStyle("companion")}><CompanionHomeCard userId={userId}/></div>
-      <button type="button" className="pl-companion-home-customize" onClick={()=>openPlushGuardian("settings")}>Customize my Guardian & Home</button>
+      <div className="pl-companion-home-card" style={cardStyle("companion")}><CompanionHomeCard userId={userId} onOpenGuardian={()=>goToDashboard?.("guardian")}/></div>
+      <button type="button" className="pl-companion-home-customize" onClick={()=>goToDashboard?.("guardian")}>Open my Guardian</button>
       <div style={cardStyle("moods")} className="pl-storybook-mood-choices">
         <strong>How am I feeling?</strong>
         <div className="pl-storybook-mood-grid">{STORYBOOK_MOODS.map(([id,label,emoji])=><button type="button" key={id} onClick={()=>openDailyCheckIn?.()} aria-label={"Check in feeling "+label}><span className="pl-storybook-face" aria-hidden="true">{emoji}</span><span>{label}</span></button>)}</div>

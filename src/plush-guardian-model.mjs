@@ -71,6 +71,7 @@ export const freshGuardianState = () => ({
   version: 1,
   prefs: {
     voice: "neutral",
+    guardianName: "",
     guidance: "gentle",
     name: "",
     avoid: "",
@@ -115,6 +116,7 @@ export function normalizeGuardianState(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return d;
   const next = { ...d, ...value, prefs: { ...d.prefs, ...value.prefs } };
   if (!VOICES[next.prefs.voice]) next.prefs.voice = "neutral";
+  next.prefs.guardianName = typeof next.prefs.guardianName === "string" ? next.prefs.guardianName.slice(0, 36) : "";
   // Existing local accounts may have opted into the old Cloudflare chatbot.
   // The Guardian is now an offline, non-chat helper. Never reactivate that
   // consent or share private tasks, moods and memories with an AI service.

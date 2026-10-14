@@ -48,3 +48,14 @@ On the Guardians page, a Cozy with **no active, accepted human Guardian** gets a
 The dashboard uses the real completion state to show tasks done, tasks left, and a start-with-one button. Existing routines provide step-by-step, pause, skip and resume controls; real tasks remain manually checked. Rest days suppress extra notifications and the day's task pressure. Quiet hours, discreet lock-screen copy and platform delivery restrictions remain in force. No promises of guaranteed delivery while closed are made. In-app prompts and private Guardian memories are not AI conversations.
 
 The old chatbot UI, consent controls and network request code were removed from the Guardian client. Legacy local conversation records are not automatically destroyed, but can be deleted in Bot Guardian settings. The server route is intentionally retired to protect existing old app builds.
+
+
+## One Guardian, two ways to receive help
+
+The user-facing destination and feature are simply **Guardian**. The card displays the chosen name and a short status, **Connected person** or **Automatic · On this device**, rather than presenting two unrelated products.
+
+An **active, accepted person** takes priority. The automatic panel and its notification delivery are disabled while a person is connected. When the person first connects, previously enabled automatic reminders are switched off on this device. Removing the person later does not reactivate those reminders: the Cozy must explicitly opt back in. Pending invitations and paused access do not count as active human relationships. If the app cannot verify relationships yet, it cannot activate the automatic Guardian and offers retry.
+
+Both modes expose the same **Tasks, Routines, Encouragement and Rewards** choices. People work through the existing shared Guardian permissions, progress rewards, notes and Together screen; automatic support uses existing private on-device routines, task suggestions and rewards. The automatic Guardian can offer a locally stored, user-chosen reward based on 25/50/75/100% of today's *real* scheduled tasks, or the earlier manual effort-count method. It does not grant human approvals, edit task completion history or transmit new data.
+
+The automatic Guardian's display name is editable on its device. A human Guardian is shown by their existing label or connected account address; no sharing permissions are silently broadened. This is feature-level consistency, **not** an assertion that an unattended local helper can make decisions or send personal messages from a human account. The Cozy controls their tasks and claimed rewards.
