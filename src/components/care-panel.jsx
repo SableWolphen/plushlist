@@ -118,12 +118,11 @@ export function CarePanel(props) {
 
   return (
     <div data-plushcare-redesign="true" className="pl-care-shell">
-      <button type="button" className="pl-companion-care-entry" onClick={()=>openPlushGuardian()}>Plush Guardian <small>Optional AI companion, routines & private tools</small><span aria-hidden="true">›</span></button>
       <section className="pl-reference-care-launchers" aria-label="Care shortcuts">
         <button type="button" onClick={() => props.setCheckInPopupOpen?.(true)}><span aria-hidden="true">💗</span><span><strong>Daily check-in</strong><small>How are you feeling today?</small></span><span aria-hidden="true">›</span></button>
         <button type="button" onClick={() => props.openTodayJournal?.()}><span aria-hidden="true">📝</span><span><strong>Journal</strong><small>Write about your day.</small></span><span aria-hidden="true">›</span></button>
         <button type="button" onClick={() => breathTool && startCare(breathTool.id)}><span aria-hidden="true">🌿</span><span><strong>Breathe</strong><small>Short calming exercises.</small></span><span aria-hidden="true">›</span></button>
-        <button type="button" onClick={() => calmTool && startCare(calmTool.id)}><span aria-hidden="true">🫶</span><span><strong>Calmness pass</strong><small>Simpler support, less clutter.</small></span><span aria-hidden="true">›</span></button>
+        <button type="button" onClick={() => openPlushGuardian()}><span aria-hidden="true">🧸</span><span><strong>Guardian</strong><small>Routines, encouragement & reminders.</small></span><span aria-hidden="true">›</span></button>
       </section>
       <style>{`
         .pl-care-shell{display:grid;gap:6px;margin-bottom:8px;padding:2px 0 12px}
@@ -180,23 +179,15 @@ export function CarePanel(props) {
         }
       `}</style>
 
-      <details className="pl-design-card" style={{ marginBottom: 0 }}>
-        <summary style={{ minHeight: 44, display: "list-item", alignContent: "center", cursor: "pointer", fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>🧸 My Cozy Space</summary>
-        <div style={{ paddingTop: 8 }}>
-          <CozySpace comfortItem={props.comfortItem} rows={props.rows} viewDone={props.viewDone} onReset={props.onReset} onSupport={props.onOpenSupport} onSettings={props.onOpenSettings} onSound={props.toggleSoundscape} onReminderTime={props.onReminderTime} soundscapes={window.PlushLifeContent.SOUNDSCAPES} notes={props.supportNotes} />
-        </div>
-      </details>
       <section className="pl-care-card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
           <div>
 
-            <div className="pl-care-title">What would feel nicest right now?</div>
+            <div className="pl-care-title">What do I need right now?</div>
           </div>
-          <button type="button" className="pl-care-checkin" onClick={() => props.setCheckInPopupOpen(true)}>
-            {props.babyMode ? `${props.babyCaregiverName} check-in` : "Check in"}
-          </button>
+
         </div>
-        <div className="pl-care-copy">Care is for the moment you’re in. Pick one feeling and we’ll find one small step; the bigger tool library can wait.</div>
+        <div className="pl-care-copy">Choose how you feel. PlushLife will suggest one small next step.</div>
 
         <div className="pl-care-feelings">
           {visibleOptions.map((option) => <SituationButton key={option.id} option={option} selected={selectedSituationId === option.id} onClick={() => chooseSituation(option)} />)}
@@ -221,6 +212,12 @@ export function CarePanel(props) {
         )}
       </section>
 
+      <details className="pl-design-card" style={{ marginBottom: 0 }}>
+        <summary style={{ minHeight: 44, display: "list-item", alignContent: "center", cursor: "pointer", fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>🧸 My Cozy Space</summary>
+        <div style={{ paddingTop: 8 }}>
+          <CozySpace comfortItem={props.comfortItem} rows={props.rows} viewDone={props.viewDone} onReset={props.onReset} onSupport={props.onOpenSupport} onSettings={props.onOpenSettings} onSound={props.toggleSoundscape} onReminderTime={props.onReminderTime} soundscapes={window.PlushLifeContent.SOUNDSCAPES} notes={props.supportNotes} />
+        </div>
+      </details>
       <details className="pl-care-history-door pl-design-card">
         <summary>Your history <span>Check-ins & journals →</span></summary>
         <CareHistory {...props} />
