@@ -48,7 +48,7 @@ export function storybookRows(rows=[],viewDone={},limit=3,nowMinutes = 12*60) {
 export function storybookGreeting(hour = new Date().getHours()) {
   return hour < 12 ? "Good morning, Cozy!" : hour < 18 ? "Good afternoon, Cozy!" : "Good evening, Cozy!";
 }
-export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false,syncStatus,online}) {
+export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false,syncStatus,online,tomorrowPreviewRows=[],tomorrowDateString=""}) {
   const companion=useGuardianState(userId);
   const cardStyle=id=>({order:companion.home.order.indexOf(id)+1,display:companion.home.hidden.includes(id)?"none":undefined});
   const context=React.useContext(ThemeWorldContext);
@@ -95,6 +95,12 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
       <button type="button" className="pl-storybook-door pl-door-journal" onClick={()=>openTodayJournal?.()}><span className="pl-storybook-door-emoji" aria-hidden="true">{atmosphere.journal}</span><strong>Journal</strong></button>
       <button type="button" className="pl-storybook-door pl-door-focus" onClick={focus}><span className="pl-storybook-door-emoji" aria-hidden="true">{atmosphere.focus}</span><strong>Focus</strong></button>
     </nav>
+    {world === "baby-night" && <button type="button" className="pl-storybook-bedtime" onClick={()=>openPlushGuardian("routines")}>🌙 Ready for my bedtime routine? <span aria-hidden="true">›</span></button>}
+    {tomorrowPreviewRows.length > 0 && <details className="pl-storybook-tomorrow">
+      <summary>🌤 Tomorrow’s little plan <span>Preview</span></summary>
+      <ul>{tomorrowPreviewRows.map(row=><li key={row.key}>{row.label}</li>)}</ul>
+      <button type="button" onClick={()=>openTaskManager?.(tomorrowDateString)}>View tomorrow’s tasks ›</button>
+    </details>}
     <details style={cardStyle("moods")} className="pl-storybook-moods"><summary>How are you feeling?</summary><div className="pl-storybook-mood-head"><div><p>A little room to check in.</p></div><button type="button" onClick={()=>goToDashboard?.("care")}>My Care ›</button></div>
       <div className="pl-storybook-mood-grid">{STORYBOOK_MOODS.map(([id,label,emoji])=><button type="button" key={id} onClick={()=>openDailyCheckIn?.()} aria-label={"Check in feeling "+label}><span className="pl-storybook-face" aria-hidden="true">{emoji}</span><span>{label}</span></button>)}</div>
       <p className="pl-storybook-mood-help">Tap a feeling to open your private check-in.</p>
