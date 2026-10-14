@@ -31,7 +31,7 @@ export function guardianRoutineCopy(routineName = "", step = "", voice = "neutra
 export function guardianTomorrowCopy(voice = "neutral", guidance = "gentle") {
   const messages = {
     mommy: "Sweetheart, let's peek at tomorrow's little plan before bedtime. You can change anything.",
-    daddy: "Kiddo, let's get one thing ready for tomorrow. No pressure.",
+    daddy: "Tomorrow, kiddo, let's get one thing ready. No pressure.",
     neutral: "Tomorrow is getting ready. Take a peek at your little plan whenever you're comfortable.",
     playful: "Tomorrow's mission preview is ready! Just a peek, no rush.",
   };
