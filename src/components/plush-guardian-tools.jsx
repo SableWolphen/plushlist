@@ -700,7 +700,7 @@ export function GuardianTools({
             <p>{x.text}</p>
             <progress value={x.mode === "progress" ? todayPercent : x.count} max={x.mode === "progress" ? 100 : x.goal} />
             <p>{x.mode === "progress" ? `Today: ${todayDone}/${todayTasks.length} little jobs · ${todayPercent}% · Goal ${x.targetPercent}%` : `${x.count} / ${x.goal} steps`}</p>
-            {x.mode !== "progress" && x.count < x.goal ? (
+            {x.claimed ? <p role="status">🎁 {x.autoAwardedAt ? "Guardian unlocked this for you automatically!" : "Reward already enjoyed!"}</p> : x.mode !== "progress" && x.count < x.goal ? (
               <button
                 onClick={() =>
                   update({
@@ -723,7 +723,7 @@ export function GuardianTools({
                   })
                 }
               >
-                {x.claimed ? "Enjoy your reward" : "Enjoy my reward"}
+                {x.claimed ? "Reward unlocked" : "Enjoy my reward"}
               </button>
             )}
             {x.mode !== "progress" && x.count > 0 && !x.claimed && (
