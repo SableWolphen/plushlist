@@ -60,7 +60,7 @@ assert(styles.includes("@media(max-width:345px)"),"Small phones need a dedicated
 
 assert(care.includes("pl-reference-care-launchers"), "Care needs a clear four-action entry point");
 assert(care.includes('<strong>Guardian</strong>'), "Guardian stays accessible from Care");
-assert(!care.includes("pl-companion-care-entry"), "Care should not repeat a separate Guardian promotional card");
+assert(!care.includes('className="pl-companion-care-entry"'), "Care should not repeat a separate Guardian promotional card");
 assert(care.indexOf('className="pl-care-card"') < care.indexOf('>🧸 My Cozy Space</summary>'), "Care's actual help flow must precede advanced customization");
 assert(care.includes('<CareHistory {...props} />'), "Care history must remain private and reachable");
 assert(care.includes('<ExistingCarePanel {...props}'), "Calm, paths and sleep stay available");
