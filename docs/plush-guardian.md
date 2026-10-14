@@ -24,3 +24,11 @@ The endpoint limits requests to 20 per account per 10-minute window per Worker i
 `npm test` includes behavior tests for account isolation, failed local writes, default-off context sharing, task selection, explicit excerpts, API authentication, consent, CORS, input size and rate limits. Browser verification covers Brain dump conversion, paused routine reload/resume, editable voice, Home visibility, AI send preview and excluded context, personal rewards, and 320/393/412/740px layouts in both appearances.
 
 Real-device notification scheduling and simultaneous remote routine synchronization are not added by this change. Existing notifications and permission-controlled Guardian features remain available. Together routines here are intentionally on one device, with reviewed invitations through the existing Guardian flow.
+
+## Reminder-first Virtual Guardian
+
+The separate, **default-off** `automaticReminders` setting makes the Virtual Guardian a rule-based reminder helper first, rather than an AI chatbot. It reuses the existing Android local notification scheduler and the user's configured notification permission, reminder times, quiet hours, rest days and discreet lock-screen settings. No extra permission, network service, AI chat consent or remote automation is created.
+
+When on, the chosen neutral/Mommy/Daddy/playful voice changes scheduled reminder wording. When app notifications are off, the feature does not independently notify. Switching Guardian preferences reschedules the existing daily reminders. Signing out cancels scheduled task reminders on that device, and completing a repeating task today no longer mutes tomorrow's reminder.
+
+This phase does not yet support remote synchronization of active together-routines, guaranteed Android delivery despite OS restrictions, unattended task edits, or cloud restoration of Guardian device-only photos/reflections.
