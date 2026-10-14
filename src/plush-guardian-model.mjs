@@ -134,7 +134,7 @@ export function normalizeGuardianState(value) {
   next.prefs.littleMode = next.prefs.littleMode === true;
   next.prefs.careStyle = ["gentle","baby","structured"].includes(next.prefs.careStyle) ? next.prefs.careStyle : "gentle";
   next.prefs.petName = typeof next.prefs.petName === "string" ? next.prefs.petName.slice(0,40) : "";
-  next.careChecks = value.careChecks && typeof value.careChecks.date === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(value.careChecks.date) && value.careChecks.items && typeof value.careChecks.items === "object" && !Array.isArray(value.careChecks.items)
+  next.careChecks = value.careChecks && typeof value.careChecks.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.careChecks.date) && value.careChecks.items && typeof value.careChecks.items === "object" && !Array.isArray(value.careChecks.items)
     ? { date: value.careChecks.date, items: Object.fromEntries(Object.entries(value.careChecks.items).filter(([k,v]) => /^[a-z]+:[0-9]+$/.test(k) && v === true).slice(0,80)) }
     : d.careChecks;
   next.prefs.automaticReminders = next.prefs.automaticReminders === true;
