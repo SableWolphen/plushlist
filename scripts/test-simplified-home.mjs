@@ -11,7 +11,7 @@ const tasks = fs.readFileSync("src/components/tasks-panel.jsx", "utf8");
 const care = fs.readFileSync("src/components/care-panel.jsx", "utf8");
 const progress = fs.readFileSync("src/components/progress-panel-core.jsx", "utf8");
 
-buildSync({ entryPoints: ["src/components/today-panel-core.jsx", "src/components/organized-settings.jsx", "src/components/care-panel.jsx", "src/components/progress-panel-core.jsx", "src/components/tasks-panel.jsx"], bundle: true, write: false, format: "esm", platform: "browser", target: "es2022", loader: { ".jsx": "jsx" } });
+buildSync({ entryPoints: ["src/components/today-panel-core.jsx", "src/components/organized-settings.jsx", "src/components/care-panel.jsx", "src/components/progress-panel-core.jsx", "src/components/tasks-panel.jsx"], bundle: true, write: false, outdir: "out", format: "esm", platform: "browser", target: "es2022", loader: { ".jsx": "jsx" } });
 
 assert(home.includes('aria-label="Today\'s checklist"'), "The actual Home checklist remains primary");
 assert(home.indexOf('className="pl-storybook-today"') < home.indexOf('className="pl-storybook-doors"'), "Show tasks before actions");
