@@ -5051,8 +5051,21 @@ function GlowUpTracker() {
     document.addEventListener("plushlife-notification-task-action", consumeTaskAction);
     return () => document.removeEventListener("plushlife-notification-task-action", consumeTaskAction);
   }, [period.date, rows, viewDone]);
+  const [guardianReminderRevision, setGuardianReminderRevision] = useState(0);
   useEffect(() => {
-    if (!user || !window.PlushLifeNativeNotifications) return;
+    const refresh = () => setGuardianReminderRevision((value) => value + 1);
+    window.addEventListener(STATE_EVENT, refresh);
+    window.addEventListener("storage", refresh);
+    return () => { window.removeEventListener(STATE_EVENT, refresh); window.removeEventListener("storage", refresh); };
+  }, []);
+  useEffect(() => {
+    if (!window.PlushLifeNativeNotifications) return;
+    if (!user) {
+      // Cancel the prior account’s scheduled task labels when signing out.
+      window.PlushLifeNativeNotifications.syncDailyReminders({ enabled: false }).catch(() => {});
+      return;
+    }
+    const virtualGuardian = readGuardian(deviceStorage(), user.id).prefs;
     let habitCoachMeta = {};
     try { habitCoachMeta = JSON.parse(localStorage.getItem("plushlife:habit-coach:v1") || "{}")?.meta || {}; } catch (_error) {}
     const taskReminders = trackerTasks
@@ -5077,8 +5090,11 @@ function GlowUpTracker() {
       restDates,
       taskReminders,
       cozyReminderStyle: cozyComfort.status === "ready" ? cozyComfort.profile.reminder_style : "Gentle",
+      virtualGuardian: virtualGuardian.automaticReminders === true,
+      guardianVoice: virtualGuardian.voice,
+      guardianGuidance: virtualGuardian.guidance,
     }).catch(() => {});
-  }, [user?.id, cozyComfort.status, cozyComfort.profile.reminder_style, preferences.notifications_enabled, preferences.discreet_notifications, JSON.stringify(preferences.reminder_times || []), preferences.quiet_start, preferences.quiet_end, JSON.stringify(restDates), JSON.stringify(viewDone), JSON.stringify(trackerTasks.map((task) => [task.task_key, task.archived_at, task.reminder_time, task.schedule_days, task.day_id, task.tiny_label]))]);
+  }, [user?.id, guardianReminderRevision, cozyComfort.status, cozyComfort.profile.reminder_style, preferences.notifications_enabled, preferences.discreet_notifications, JSON.stringify(preferences.reminder_times || []), preferences.quiet_start, preferences.quiet_end, JSON.stringify(restDates), JSON.stringify(viewDone), JSON.stringify(trackerTasks.map((task) => [task.task_key, task.archived_at, task.reminder_time, task.schedule_days, task.day_id, task.tiny_label]))]);
   const doneCount = rows.filter((r) => viewDone[r.key]).length;
   const requiredRows = rows.filter((row) => !row.isBonus);
   const optionalRows = rows.filter((row) => row.isBonus);
