@@ -15,13 +15,18 @@ import { ToolPanel } from "./shared.jsx";
 import { resolveSupportAction } from "../guardian-action-selection.mjs";
 import { CozyScene } from "./theme-world.jsx";
 import { openPlushGuardian, useGuardianState } from "./plush-guardian.jsx";
-import { botGuardianName } from "../guardian-bot.mjs";
+import { guardianMode, guardianTypeLabel, guardianPersonName, guardianBotDisplayName } from "../guardian-mode.mjs";
 
-export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwnGuardian, supportViewMode, setSupportViewMode, isSupportAdult, selectedSupportName, guardianSupportRequests, supportOwnerId, updateGuardianSupportRequest, pendingSupportInvites, supportPeople, acceptSupportInvitation, declineSupportInvitation, canUseCaretakerDashboard, invitedSupportLinks, loadSupportOwner, loadSupportData, user, supportAchievements, period, ownerIsRestingToday, restDatesSet, todayRequiredDone, supportProgress, activeSupportLink, canViewSupportProgress, canViewSupportTasks, canViewSupportSchedule, canViewSupportMood, supportTrackerTasks = [], supportSchedules = [], supportScheduleExceptions = [], supportMoodSummary, supportProgressView, setSupportProgressView, supportTodayDayLabel, displayedSupportPercent, displayedSupportCompleted, displayedSupportPossible, supportDailyEssentialCompleted, supportDailyEssentialKeys, supportScheduledTodayCompleted, supportScheduledTodayKeys, canSendSupportNotes, newNote, setNewNote, addSupportNote, suggestComfortTool, canAddSupportRewards, rewardTitle, setRewardTitle, rewardDetails, setRewardDetails, rewardTarget, setRewardTarget, rewardTargetPeriod, setRewardTargetPeriod, rewardApprovalRequired, setRewardApprovalRequired, addSupportReward, suggestedTask, setSuggestedTask, suggestedTaskDay, setSuggestedTaskDay, submitTaskSuggestion, inviteEmail, setInviteEmail, inviteSupportAdult, GUARDIAN_ROLE_PRESETS, guardianRolePreset, setGuardianRolePreset, ownedSupportLinks, supportRelationships, setSupportAdultActive, removeSupportAdult, updateCaretakerPermission, updateCareAgreement, supportRequestGuardian, setSupportRequestGuardian, supportRequestType, setSupportRequestType, supportRequestText, setSupportRequestText, sendGuardianSupportRequest, taskSuggestions, suggestionSectionsById, setSuggestionSectionsById, taskSectionsForDay, decideTaskSuggestion, supportMessage, supportRewards, supportWeeklyPercent, supportPercent, updateRewardStatus, supportNotes, setComfortToolOpen, deleteSupportNote, onOpenSettings }) {
+export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwnGuardian, supportViewMode, setSupportViewMode, isSupportAdult, selectedSupportName, guardianSupportRequests, supportOwnerId, updateGuardianSupportRequest, pendingSupportInvites, supportPeople, acceptSupportInvitation, declineSupportInvitation, canUseCaretakerDashboard, invitedSupportLinks, loadSupportOwner, loadSupportData, user, supportAchievements, period, ownerIsRestingToday, restDatesSet, todayRequiredDone, supportProgress, activeSupportLink, canViewSupportProgress, canViewSupportTasks, canViewSupportSchedule, canViewSupportMood, supportTrackerTasks = [], supportSchedules = [], supportScheduleExceptions = [], supportMoodSummary, supportProgressView, setSupportProgressView, supportTodayDayLabel, displayedSupportPercent, displayedSupportCompleted, displayedSupportPossible, supportDailyEssentialCompleted, supportDailyEssentialKeys, supportScheduledTodayCompleted, supportScheduledTodayKeys, canSendSupportNotes, newNote, setNewNote, addSupportNote, suggestComfortTool, canAddSupportRewards, rewardTitle, setRewardTitle, rewardDetails, setRewardDetails, rewardTarget, setRewardTarget, rewardTargetPeriod, setRewardTargetPeriod, rewardApprovalRequired, setRewardApprovalRequired, addSupportReward, suggestedTask, setSuggestedTask, suggestedTaskDay, setSuggestedTaskDay, submitTaskSuggestion, inviteEmail, setInviteEmail, inviteSupportAdult, GUARDIAN_ROLE_PRESETS, guardianRolePreset, setGuardianRolePreset, ownedSupportLinks, supportRelationships, setSupportAdultActive, removeSupportAdult, updateCaretakerPermission, updateCareAgreement, supportRequestGuardian, setSupportRequestGuardian, supportRequestType, setSupportRequestType, supportRequestText, setSupportRequestText, sendGuardianSupportRequest, taskSuggestions, suggestionSectionsById, setSuggestionSectionsById, taskSectionsForDay, decideTaskSuggestion, supportMessage, supportRewards, supportWeeklyPercent, supportPercent, updateRewardStatus, supportNotes, setComfortToolOpen, deleteSupportNote, onOpenSettings, guardianLinksReady = false, onRetryGuardian, onOpenTasks }) {
   const [checkInDelay, setCheckInDelay] = React.useState("0");
   const [guardianArea, setGuardianArea] = React.useState("overview");
   const [supportAction, setSupportAction] = React.useState("note");
   const botGuardian = useGuardianState(user?.id);
+  const mode = guardianMode(ownedSupportLinks, user?.id, guardianLinksReady ? user?.id : null, botGuardian.prefs.automaticReminders);
+  const activePeople = (ownedSupportLinks || []).filter(link => link.active && !!link.accepted_at);
+  const guardianDisplayName = mode === "person"
+    ? guardianPersonName(activePeople[0]) + (activePeople.length > 1 ? ` +${activePeople.length - 1}` : "")
+    : guardianBotDisplayName(botGuardian.prefs);
   const availableSupportActions = [
     ["note", "💌", "Note", canSendSupportNotes],
     ["reward", "🎁", "Reward", canAddSupportRewards],
@@ -61,17 +66,38 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
   return (
           <ToolPanel inline title="💛 PlushSupport" displayTitle="Guardians" onClose={onClose}>
           <div className="pl-guardian-content">
-          <CozyScene title="My Guardians" subtitle="Your trusted people and your automatic Bot Guardian. You choose the support you want." />
-          <section className="pl-bot-guardian-entry" aria-label="Bot Mommy shortcut" style={{padding:"13px 15px",borderRadius:17,background:"var(--pl-theme-surface-2)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
-            <div style={{display:"flex",alignItems:"center",gap:10}}>
-              <span aria-hidden="true" style={{fontSize:28}}>🧸</span>
-              <div style={{minWidth:0,flex:1}}>
-                <h2 style={{margin:0,fontSize:17,color:"var(--pl-theme-ink)"}}>{botGuardian.prefs.automaticReminders ? botGuardianName(botGuardian.prefs.voice) : "Bot Mommy"}</h2>
-                <p style={{margin:"4px 0 0",fontSize:12.5,lineHeight:1.45,color:"var(--pl-theme-muted)"}}>{botGuardian.prefs.automaticReminders ? "Automatic Guardian ready · routines, reminders & little jobs" : "A caring automatic Guardian for tasks and routines. No AI chat."}</p>
+          <CozyScene title="My Guardian" subtitle="One place for support, little jobs, routines, encouragement and rewards." />
+          {supportViewMode === "mine" && <section className="pl-bot-guardian-entry" aria-label="Guardian support" style={{padding:15,borderRadius:17,background:"var(--pl-theme-surface-2)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
+            {mode === "checking" ? <>
+              <strong>Checking Guardian connection…</strong>
+              <p style={{margin:"8px 0",fontSize:13}}>Your Guardian settings are loading. Automatic help stays paused until we know who is connected.</p>
+              <button type="button" onClick={()=>onRetryGuardian?.()} style={{minHeight:44,padding:"8px 12px",borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface)",color:"var(--pl-theme-ink)"}}>Retry Guardian connection</button>
+            </> : <>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <span aria-hidden="true" style={{fontSize:27}}>{mode === "person" ? "💛" : "🧸"}</span>
+                <div style={{minWidth:0,flex:1}}>
+                  <h2 style={{margin:0,fontSize:19,color:"var(--pl-theme-ink)"}}>Guardian</h2>
+                  <span style={{fontSize:12,fontWeight:850,color:"var(--pl-theme-muted)"}}>{guardianTypeLabel(mode)}</span>
+                  <p style={{margin:"5px 0 0",fontSize:14,fontWeight:850,overflowWrap:"anywhere"}}>{mode === "choose" ? "Choose your Guardian" : guardianDisplayName}</p>
+                </div>
               </div>
-            </div>
-            <button type="button" style={{minHeight:44,width:"100%",marginTop:10,border:0,borderRadius:12,background:"var(--pl-theme-accent)",color:"var(--pl-theme-on-accent)",fontWeight:900,fontSize:13,cursor:"pointer"}} onClick={()=>openPlushGuardian()}>{botGuardian.prefs.automaticReminders ? "Open my Bot Guardian ›" : "Meet Bot Mommy ›"}</button>
-          </section>
+              <p style={{fontSize:12.5,lineHeight:1.5,color:"var(--pl-theme-muted)",margin:"10px 0"}}>{mode === "person"
+                ? "Your connected Guardian can help with tasks, routines, encouragement and rewards. You control the sharing permissions."
+                : mode === "automatic"
+                  ? "Your Guardian uses gentle rules on this device, not chat. You choose all task changes and rewards."
+                  : "Invite someone you trust or choose an automatic Guardian for now. You can change later."}</p>
+              {mode === "choose" ? <div className="pl-guardian-unified-actions">
+                <button type="button" onClick={()=>openPlushGuardian()}><span>🧸</span> Set up Guardian</button>
+                <button type="button" onClick={()=>setGuardianArea("support")}><span>💛</span> Invite someone</button>
+              </div> : <nav className="pl-guardian-unified-actions" aria-label="Guardian actions">
+                <button type="button" onClick={()=>mode === "person" ? onOpenTasks?.() : openPlushGuardian("start")}><span>✅</span> Tasks</button>
+                <button type="button" onClick={()=>mode === "person" ? setGuardianArea("together") : openPlushGuardian("routines")}><span>📅</span> Routines</button>
+                <button type="button" onClick={()=>mode === "person" ? setGuardianArea("support") : openPlushGuardian("guardian")}><span>💌</span> Encouragement</button>
+                <button type="button" onClick={()=>mode === "person" ? setGuardianArea("support") : openPlushGuardian("rewards")}><span>🎁</span> Rewards</button>
+              </nav>}
+              {mode === "automatic" && <button type="button" onClick={()=>openPlushGuardian("settings")} style={{marginTop:10,minHeight:40,width:"100%",border:"1px solid var(--pl-theme-line)",borderRadius:11,background:"var(--pl-theme-surface)",color:"var(--pl-theme-ink)",fontWeight:800}}>Guardian name & reminders ›</button>}
+            </>}
+          </section>}
           {canUseCaretakerDashboard && (
             <div className="pl-guardian-person-switcher" role="group" aria-label="Guardian views">
               <button type="button" aria-pressed={supportViewMode === "mine"} onClick={() => setSupportViewMode("mine")}>🧸 My Support</button>
