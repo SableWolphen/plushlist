@@ -16,6 +16,7 @@
  * immediately when the Capacitor runtime is not present.
  */
 import { cozyReminderCopy } from './cozy-profile.js';
+import { virtualGuardianReminderCopy } from './guardian-reminders.mjs';
 (function () {
   if (!window.Capacitor || !window.Capacitor.Plugins) return;
   var Plugins = window.Capacitor.Plugins;
@@ -210,7 +211,10 @@ import { cozyReminderCopy } from './cozy-profile.js';
     };
 
     var taskAppliesToDate = function (task, date) {
-      if (!task || task.done || task.completed || task.isDone) return false;
+      if (!task) return false;
+      // Completing a repeating task today must not suppress future days.
+      var isToday = window.PlushLifeCare.localDateString(date) === window.PlushLifeCare.localDateString(new Date());
+      if (isToday && (task.done || task.completed || task.isDone)) return false;
       var dayId = window.PlushLifeCare.DAY_IDS[date.getDay()];
       return !(Array.isArray(task.scheduleDays) && task.scheduleDays.length && !task.scheduleDays.includes(dayId));
     };
@@ -330,7 +334,9 @@ import { cozyReminderCopy } from './cozy-profile.js';
                 coveredTasks.add(dateKey + "::" + suggestedTask.taskKey);
               }
             }
-            var cozyCopy = cozyReminderCopy(options.cozyReminderStyle, suggestedTask ? suggestedTask.label : "");
+            var cozyCopy = options.virtualGuardian
+              ? virtualGuardianReminderCopy(options.guardianVoice, suggestedTask ? suggestedTask.label : "", options.guardianGuidance)
+              : cozyReminderCopy(options.cozyReminderStyle, suggestedTask ? suggestedTask.label : "");
             notifications.push({
               id: window.PlushLifeCare.notificationId("daily-" + dateKey + "-" + timeIndex),
               title: options.discreet ? "A gentle PlushLife reminder" : cozyCopy.title,
@@ -348,7 +354,7 @@ import { cozyReminderCopy } from './cozy-profile.js';
           }
 
           taskReminders.forEach(function (task) {
-            if (!task || !task.time || task.done || task.completed || task.isDone) return;
+            if (!task || !task.time) return;
             var date = new Date();
             date.setDate(date.getDate() + dayOffset);
             var dateKey = window.PlushLifeCare.localDateString(date);
@@ -361,8 +367,8 @@ import { cozyReminderCopy } from './cozy-profile.js';
             if (isQuietAt(date)) return;
             notifications.push({
               id: window.PlushLifeCare.notificationId("task-" + task.taskKey + "-" + dateKey),
-              title: options.discreet ? "A gentle PlushLife reminder" : cozyReminderCopy(options.cozyReminderStyle, task.label).title,
-              body: options.discreet ? "You have something waiting in PlushLife." : cozyReminderCopy(options.cozyReminderStyle, task.label).body,
+              title: options.discreet ? "A gentle PlushLife reminder" : (options.virtualGuardian ? virtualGuardianReminderCopy(options.guardianVoice, task.label, options.guardianGuidance) : cozyReminderCopy(options.cozyReminderStyle, task.label)).title,
+              body: options.discreet ? "You have something waiting in PlushLife." : (options.virtualGuardian ? virtualGuardianReminderCopy(options.guardianVoice, task.label, options.guardianGuidance) : cozyReminderCopy(options.cozyReminderStyle, task.label)).body,
               schedule: { at: date, allowWhileIdle: true },
               channelId: reminderChannelId,
               actionTypeId: "PLUSHLIFE_REMINDER",

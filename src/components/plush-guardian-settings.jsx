@@ -84,6 +84,12 @@ export function GuardianSettings({ state, update, onForget, onDeleteChat }) {
           onChange={(e) => preference("phrases", e.target.value)}
         />
       </label>
+      <section className="pl-virtual-guardian-options" aria-label="Virtual Guardian reminders">
+        <h3>Automatic Virtual Guardian</h3>
+        <p>Gentle rule-based reminders for your real tasks, even when the Android app is closed. No AI chat needed.</p>
+        {check("automaticReminders", "Let my Virtual Guardian guide existing reminders")}
+        <p>To receive reminders, first enable notifications and choose times under Settings → Notifications & Reminders. PlushLife respects those quiet hours, rest days, and discreet lock-screen settings. You can turn this off anytime.</p>
+      </section>
       <details>
         <summary>AI access & conversation privacy</summary>
         <p>

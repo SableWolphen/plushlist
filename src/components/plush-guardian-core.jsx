@@ -254,6 +254,11 @@ export default function PlushGuardianCore(props) {
                 alt="Your Plush"
               />
             </section>
+            <section className="pl-virtual-guardian-options" aria-label="Automatic companion status">
+              <h3>Virtual Guardian reminders</h3>
+              <p>{state.prefs.automaticReminders ? "On — your chosen Guardian voice is used when app notifications are enabled." : "Off — your Plush can give gentle reminders without needing a conversation."}</p>
+              <button onClick={() => navigate("settings")}>Set up my reminders ›</button>
+            </section>
             <div className="pl-companion-choices">
               {[
                 ["Comfort", "comfort"],

@@ -45,7 +45,7 @@ assert.equal(create({createClient(url,key,received) {assert.equal(url,'url');ass
 assert.equal(create(null), null);
 assert.equal(create({createClient(){throw new Error('platform unavailable');}}), null, 'SDK construction failure must reach the React retry screen');
 
-const bridge = fs.readFileSync('src/native-bridge.js','utf8').replace(/^import .*;$/m,'');
+const bridge = fs.readFileSync('src/native-bridge.js','utf8').replace(/^import .*;$/gm,''); // VM simulates native setup without module imports
 let appStarted=0, pushStarted=0;
 const noop=()=>Promise.resolve({});
 const Plugins={StatusBar:{setStyle(){throw new Error('native unavailable');}}, App:{addListener(){appStarted++;return Promise.resolve({});}}, PushNotifications:{createChannel(){pushStarted++;return Promise.resolve();},addListener:noop}};
