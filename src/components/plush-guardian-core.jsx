@@ -14,7 +14,7 @@ import { GuardianTools } from "./plush-guardian-tools.jsx";
 import { GuardianSettings } from "./plush-guardian-settings.jsx";
 import { startFocusTimer } from "./focus-timer.jsx";
 import { botGuardianDailyPlan, activateBotMommy } from "../guardian-bot.mjs";
-import { smartCarePlan, surpriseLetter } from "../guardian-smart-care.mjs";
+import { smartCarePlan, surpriseLetter, nextSurpriseBox } from "../guardian-smart-care.mjs";
 import { CARE_ROUTINES, careWords, careChecksForToday } from "../guardian-care.mjs";
 import { guardianBotDisplayName, guardianSuggestedReward } from "../guardian-mode.mjs";
 export default function PlushGuardianCore(props) {
@@ -87,6 +87,11 @@ export default function PlushGuardianCore(props) {
     if (!letter) return;
     update({surpriseLetterHistory:[...(ref.current.surpriseLetterHistory||[]),letter].slice(-40)});
   }, [state.prefs.surpriseLetters, state.prefs.automaticReminders, dailyCheckIn?.day_type]);
+  React.useEffect(() => {
+    const surprise=nextSurpriseBox(ref.current,localDate());
+    if (!surprise) return;
+    update({surpriseBoxHistory:[...(ref.current.surpriseBoxHistory||[]),surprise].slice(-40)});
+  },[state.prefs.surpriseBox,state.prefs.automaticReminders]);
   const botPlan = botGuardianDailyPlan(rows, viewDone, state.prefs.voice, dailyCheckIn?.day_type === "rest");
   const action = async (fn) => {
     if (busy) return;
@@ -218,6 +223,9 @@ export default function PlushGuardianCore(props) {
               <h3>🧸 Guardian planned today</h3>
               <p>Here is a gentle suggestion, not another list you must finish.</p>
               {smartCarePlan(rows,viewDone,state.energy,dailyCheckIn?.day_type==="rest",new Date(),state.prefs.littleMode).map(item=><p key={item.label}>{item.icon} <strong>{item.label}:</strong> {item.detail}</p>)}
+              <details><summary>🎁 Guardian's Surprise Box ({(state.surpriseBoxHistory||[]).length})</summary>
+                {(state.surpriseBoxHistory||[]).length ? (state.surpriseBoxHistory||[]).slice(-6).reverse().map(gift=><article key={gift.date}><small>{gift.date}</small><p>{gift.label} — a gift of time for yourself, no chores required.</p></article>) : <p>Guardian will choose from your favorites when Surprise Box is enabled.</p>}
+              </details>
               <details><summary>💌 Surprise Letters ({(state.surpriseLetterHistory||[]).length})</summary>
                 {(state.surpriseLetterHistory||[]).length ? (state.surpriseLetterHistory||[]).slice(-8).reverse().map(letter=><article key={letter.date}><small>{letter.date}</small><p>{letter.text}</p></article>) : <p>Guardian will leave a gentle note occasionally when letters are enabled.</p>}
               </details>
