@@ -1,6 +1,6 @@
 import { guardianKey, readGuardian, saveGuardian, STATE_EVENT } from "./plush-guardian-model.mjs";
 import { guardianMode } from "./guardian-mode.mjs";
-import { awardEligibleRewards } from "./guardian-auto-rewards.mjs";
+import { awardEligibleRewards, autoGuardianGifts } from "./guardian-auto-rewards.mjs";
 import { companionAccountKey } from "./companion-account-storage.mjs";
 import { hasThemePreferenceChange, readThemeSelection, rememberThemeSelection, acknowledgeThemeSelection, restoreThemePreferences } from "./theme-selection-storage.mjs";
 import { PlushGuardianHost } from "./components/plush-guardian.jsx";
@@ -5133,8 +5133,9 @@ function GlowUpTracker() {
     const stored = readGuardian(deviceStorage(), user.id);
     if (!stored.prefs.automaticReminders || guardianMode(supportLinks, user.id, supportLinksLoadedFor, true) !== "automatic") return;
     const result = awardEligibleRewards(stored.rewards, rows, viewDone, period.date);
-    if (!result.unlocked.length) return;
-    if (!saveGuardian(deviceStorage(), user.id, { ...stored, rewards:result.rewards })) return;
+    const gifts = autoGuardianGifts(stored.automaticGiftLedger, rows, viewDone, period.date, stored.prefs, false);
+    if (!result.unlocked.length && !gifts.unlocked.length) return;
+    if (!saveGuardian(deviceStorage(), user.id, { ...stored, rewards:result.rewards, automaticGiftLedger:gifts.ledger })) return;
     window.dispatchEvent(new Event(STATE_EVENT));
     // A single friendly, dismissible announcement for this batch of rewards.
     const old = document.getElementById("pl-guardian-unlock");
@@ -5144,7 +5145,8 @@ function GlowUpTracker() {
     notice.setAttribute("role", "status");
     notice.style.cssText = "position:fixed;bottom:calc(env(safe-area-inset-bottom, 0px) + 95px);left:16px;right:16px;max-width:430px;margin:0 auto;z-index:2147483000;padding:14px 16px;border-radius:20px;background:var(--pl-theme-surface,#352944);color:var(--pl-theme-ink,#fff);border:2px solid var(--pl-theme-line,#bc9ecb);box-shadow:0 10px 32px #0004;font-size:15px;";
     const copy = document.createElement("span");
-    copy.textContent = result.unlocked.length === 1 ? "🎁 Guardian unlocked your reward: " + result.unlocked[0].name : "🎁 Guardian unlocked " + result.unlocked.length + " cozy rewards!";
+    const allGifts = [...result.unlocked, ...gifts.unlocked];
+    copy.textContent = allGifts.length === 1 ? "🎁 Guardian surprised you with " + allGifts[0].name + "! I'm proud of you!" : "🎁 Guardian has " + allGifts.length + " sweet surprises for you! You're doing lovely!";
     const close = document.createElement("button");
     close.type = "button";
     close.setAttribute("aria-label", "Dismiss reward celebration");
