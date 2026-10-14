@@ -1,5 +1,6 @@
 import { VOICES, HOME_CARDS } from "../plush-guardian-model.mjs";
 import { GuardianPortableBackup } from "./guardian-portable-backup.jsx";
+import { activateBotMommy } from "../guardian-bot.mjs";
 export function GuardianSettings({ userId, state, update, onForget, onDeleteChat }) {
   const [memory, setMemory] = React.useState("");
   const [confirm, setConfirm] = React.useState(false);
@@ -30,15 +31,16 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
   };
   return (
     <section>
-      <h2>My companion, my choices</h2>
+      <h2>My Bot Guardian</h2>
       <p>
-        These choices and memories are saved privately on this device for your
-        account.
+        Bot Mommy is a rule-based Guardian for when you do not have a human
+        Guardian. It helps with little jobs, routines and reminders — not AI chat.
+        Your choices stay private on this device.
       </p>
       <label>
-        Voice
+        Guardian style
         <select
-          aria-label="Voice"
+          aria-label="Guardian style"
           value={prefs.voice}
           onChange={(e) => preference("voice", e.target.value)}
         >
@@ -70,7 +72,7 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
         />
       </label>
       <label>
-        Words or topics to avoid
+        Words or topics to avoid (personal note)
         <textarea
           maxLength={300}
           value={prefs.avoid}
@@ -78,7 +80,7 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
         />
       </label>
       <label>
-        Encouragement I like
+        A phrase I want to see on my Guardian dashboard
         <textarea
           maxLength={300}
           value={prefs.phrases}
@@ -86,41 +88,28 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
         />
       </label>
       <section className="pl-virtual-guardian-options" aria-label="Virtual Guardian reminders">
-        <h3>Automatic Virtual Guardian</h3>
-        <p>Gentle rule-based reminders for your real tasks, even when the Android app is closed. No AI chat needed.</p>
-        {check("automaticReminders", "Let my Virtual Guardian guide existing reminders")}
+        <h3>Bot Mommy · Automatic Guardian</h3>
+        <p>This is a reminder bot, not a chatbot. It follows your real tasks and saved routines. No AI or private data sharing is needed.</p>
+        {!prefs.automaticReminders && <button type="button" className="pl-companion-primary" onClick={() => update({prefs:activateBotMommy(prefs)})}>Turn on Bot Mommy 🧸</button>}
+        {check("automaticReminders", "Enable my Bot Guardian's automatic reminders")}
         {prefs.automaticReminders && <>
           {check("routineNudges", "Remind me about an unfinished routine")}
           {prefs.routineNudges && <label>Routine reminder time <input type="time" value={prefs.routineReminderTime} onChange={event => preference("routineReminderTime", event.target.value)} /></label>}
           {check("tomorrowNudges", "Offer a gentle tomorrow-preparation reminder")}
           {prefs.tomorrowNudges && <label>Tomorrow preview time <input type="time" value={prefs.tomorrowReminderTime} onChange={event => preference("tomorrowReminderTime", event.target.value)} /></label>}
         </>}
-        <p>To receive reminders, first enable notifications and choose times under Settings → Notifications & Reminders. PlushLife respects those quiet hours, rest days, and discreet lock-screen settings. You can turn this off anytime.</p>
+        <p>To receive reminders while the app is closed, enable notifications under Settings → Notifications & Reminders. PlushLife respects quiet hours, rest days and discreet lock-screen text. You can turn this off anytime. Without notification permission, your bot still helps when you open the app.</p>
       </section>
-      <details>
-        <summary>AI access & conversation privacy</summary>
-        <p>
-          Cloudflare Workers AI receives only the chat and context in each send
-          preview. Photos are never sent. Journals require a manually selected
-          excerpt for each message. This app does not store chat on its server.
-        </p>
-        {check("aiConsent", "Enable AI chat with Cloudflare")}
-        {check("shareTasks", "Include up to six unfinished task names")}
-        {check("shareMood", "Include my current mood label")}
-        {check("shareMemories", "Include my explicitly saved memories")}
-        {check("keepChat", "Keep conversation history on this device")}
-        <button onClick={onDeleteChat}>Delete saved conversation</button>
-        <p>
-          Deleting local data does not retract messages already processed by
-          Cloudflare.
-        </p>
-      </details>
+      {state.chat.length > 0 && <details>
+        <summary>Old saved chat history</summary>
+        <p>PlushLife no longer offers AI chat in the Guardian. These older messages stay on this device until you choose to delete them.</p>
+        <button type="button" onClick={onDeleteChat}>Delete old saved chat</button>
+      </details>}
       <details>
         <summary>What I remember</summary>
         {check("remember", "Use memories I explicitly save")}
         <p>
-          No automatic memory extraction. Add only what you want the companion
-          to remember.
+          No automatic memory extraction. These are your own notes and stay on this device.
         </p>
         <label>
           A preference or goal
@@ -172,12 +161,12 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           </div>
         ))}
         <button onClick={() => setConfirm(true)}>
-          Forget memories and turn off AI
+          Clear my saved Guardian memories
         </button>
         {confirm && (
           <div className="pl-companion-review">
             <p>
-              Delete saved conversations and memories, and disable AI access?
+              Delete old saved conversations and Guardian memories?
               Your tasks, routines, photos, and reflections remain.
             </p>
             <button
@@ -241,7 +230,7 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
         {check("sound", "Play a gentle sound after routine steps")}
         {check("haptics", "Vibrate after routine steps when supported")}
         <label>
-          Companion text size
+          Guardian text size
           <select
             value={prefs.textSize}
             onChange={(e) => preference("textSize", e.target.value)}
