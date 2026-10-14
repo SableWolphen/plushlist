@@ -59,3 +59,15 @@ assert.equal(autoGuardianGifts([],[],{},"2026-10-17",{...babyConfig,giftCategori
 
 assert.equal(autoGuardianGifts([],[],{},"2026-10-17",{...babyConfig,littleMode:false}).unlocked.length,0);
 assert.equal(autoGuardianGifts([],[],{},"2026-10-17",{...babyConfig,careMode:false}).unlocked.length,0);
+
+import { smartCarePlan, surpriseLetter } from "../src/guardian-smart-care.mjs";
+const plan = smartCarePlan([{key:"first",label:"Brush teeth"}],{},"some",false,new Date("2026-10-14T09:00:00"),true);
+assert.equal(plan.length,3);
+assert.match(plan[0].detail,/Brush teeth/);
+assert.match(smartCarePlan([],{},"low",true)[0].detail,/rest day/i);
+const letterState={prefs:{surpriseLetters:true,automaticReminders:true,lettersEnabledOn:"2026-10-10"},surpriseLetterHistory:[]};
+const letter=surpriseLetter(letterState,"2026-10-14");
+assert(letter?.text);
+assert.equal(surpriseLetter({...letterState,surpriseLetterHistory:[letter]},"2026-10-14"),null);
+assert.equal(surpriseLetter({...letterState,prefs:{...letterState.prefs,surpriseLetters:false}},"2026-10-14"),null);
+assert.equal(surpriseLetter({...letterState,prefs:{...letterState.prefs,lettersEnabledOn:"2026-10-14"}},"2026-10-14"),null);
