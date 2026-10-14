@@ -51,7 +51,7 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
           <ToolPanel title="🌷 Add & organize" displayTitle="Tasks" inline={inline} hideClose={inline} onClose={onClose}>
           <div className="pl-task-page">
             <div className="pl-design-tabs" role="tablist" aria-label="Task views">
-              {[["today", "All"], ["habits", "Habits"], ["later", "Later"]].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={taskView === id} onClick={() => setTaskView(id)}>{label}{id === "habits" ? ` (${rows.filter(row=>row && habitTypeForRow(row)!=="regular").length})` : ""}</button>)}
+              {[["today", "Today"], ["habits", "Habits"], ["later", "Later"]].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={taskView === id} onClick={() => setTaskView(id)}>{label}{id === "habits" ? ` (${rows.filter(row=>row && habitTypeForRow(row)!=="regular").length})` : ""}</button>)}
             </div>
             <section className="pl-design-card" aria-label="Your task list">
               <div className="pl-task-title"><button type="button" className={`pl-mascot-pat ${plushHappy ? "pl-mascot-happy-hop" : ""}`} onClick={cheer} aria-label="Say hi to your plush"><ThemeScene focus decorative mood={plushHappy ? "happy" : "neutral"} /></button><h2>{taskView === "habits" ? "Habits" : taskView === "later" ? "Later" : "Tasks for the day"}</h2></div>
@@ -98,10 +98,10 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
             {taskView === "habits" && <HabitStudio/>}
             <button type="button" className="pl-design-primary" aria-expanded={composerOpen} onClick={() => setComposerOpen(value => !value)}>Add a task</button>
             <details className="pl-task-composer" open={composerOpen} onToggle={event => setComposerOpen(event.currentTarget.open)}>
-              <summary>Add & shape a little task</summary>
+              <summary>Quick add · Just give it a name</summary>
           <QuickCapture onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage} onMoreOptions={scrollToFullForm} />
           <details open={taskAddMoreOpen} onToggle={(event) => setTaskAddMoreOpen(event.currentTarget.open)} style={{ marginTop: 10 }}>
-            <summary style={{ minHeight: 44, display: "list-item", alignContent: "center", cursor: "pointer", fontSize: 13, fontWeight: 900, color: "var(--pl-theme-muted,#7B6888)" }}>More ways to add & organize</summary>
+            <summary style={{ minHeight: 44, display: "list-item", alignContent: "center", cursor: "pointer", fontSize: 13, fontWeight: 900, color: "var(--pl-theme-muted,#7B6888)" }}>Templates, imports & custom schedules</summary>
             <div style={{ paddingTop: 8 }}>
           <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 8px 22px rgba(103,65,122,.06), inset 0 1px 0 rgba(255,255,255,.9)" }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: "var(--pl-theme-ink,#76558A)" }}>PICK A COZY SPOT</div>
@@ -285,7 +285,7 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
             </div>
           </details>
             </details>
-            <details className="pl-task-management"><summary>Manage routines, lists & archived tasks</summary>
+            <details className="pl-task-management"><summary>Manage saved tasks & archives</summary>
           <div style={{ marginBottom: 18, padding: 16, borderRadius: 16, background: "rgba(255,255,255,0.82)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: "var(--pl-theme-ink,#318C79)" }}>MANAGE MY {(newTaskDay === "daily" ? "EVERY DAY" : DAYS.find((day) => day.id === newTaskDay)?.label || newTaskDay.toUpperCase())} TASKS</div>
             <input value={taskSearchQuery} onChange={(event) => setTaskSearchQuery(event.target.value)} placeholder="🔎 Search all your tasks by name…" aria-label="Search tasks" style={{ width: "100%", boxSizing: "border-box", marginTop: 8, padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />

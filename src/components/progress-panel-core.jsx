@@ -49,13 +49,16 @@ export function ProgressPanel({ open, user, progressView, setProgressView, weekl
   return (
   <>
         <div role="tablist" aria-label="Progress views" className="pl-growth-tabs" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 6, marginBottom: 12, padding: 5, borderRadius: 14, background: "var(--pl-theme-surface-2,#F3E8FA)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
-          {[{ id: "overview", label: "PlushView", icon: "📊" }, { id: "story", label: "PlushStory", icon: "📖" }, { id: "areas", label: "PlushSpaces", icon: "🪴" }].map((item) => {
+          {[{ id: "overview", label: "Overview", icon: "📊" }, { id: "story", label: "My Story", icon: "📖" }, { id: "areas", label: "Care Areas", icon: "🪴" }].map((item) => {
             const selected = progressView === item.id;
             return <button key={item.id} type="button" role="tab" aria-selected={selected} onClick={() => setProgressView(item.id)} style={{ minWidth: 0, padding: "8px 4px", borderRadius: 10, border: selected ? "2px solid var(--pl-theme-line)" : "1px solid transparent", background: selected ? "var(--pl-theme-surface)" : "transparent", color: selected ? "var(--pl-theme-ink)" : "var(--pl-theme-ink)", fontSize: 10.5, fontWeight: 900, cursor: "pointer" }}><span aria-hidden="true">{item.icon}</span><span>{item.label}</span></button>;
           })}
         </div>
-        <CozyWeeklyStory userId={user?.id} period={period} history={littleWinHistory} checkIns={littleWinCheckIns} onShareImage={() => setShareCardOpen(true)} />
-        <LittleWins userId={user?.id} period={period} history={littleWinHistory} checkIns={littleWinCheckIns} />
+        <details className="pl-progress-highlights" style={{border:"1px solid var(--pl-theme-line)",borderRadius:15,padding:"0 12px",background:"var(--pl-theme-surface)",marginBottom:12}}>
+          <summary style={{minHeight:46,cursor:"pointer",alignContent:"center",fontWeight:850,color:"var(--pl-theme-ink)",fontSize:13}}>✨ My little wins & weekly memories</summary>
+          <CozyWeeklyStory userId={user?.id} period={period} history={littleWinHistory} checkIns={littleWinCheckIns} onShareImage={() => setShareCardOpen(true)} />
+          <LittleWins userId={user?.id} period={period} history={littleWinHistory} checkIns={littleWinCheckIns} />
+        </details>
         {progressView === "overview" && <>
         <div style={{ marginBottom: 12, padding: "11px 12px", borderRadius: 12, background: "var(--pl-theme-surface-2,#F9F1FC)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>

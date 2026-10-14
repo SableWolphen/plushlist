@@ -175,3 +175,50 @@ html:has(#main-content[data-pl-world]),body:has(#main-content[data-pl-world]){ba
 #main-content .pl-storybook-week-body strong{font:900 13px Quicksand,Nunito,sans-serif}
 #main-content .pl-storybook-week-body p{margin:7px 0;color:var(--sb-muted);font:600 12px/1.5 Nunito,system-ui}
 #main-content .pl-storybook-week-body button{min-height:44px;border-radius:12px;padding:8px 11px;background:var(--sb-soft);color:var(--sb-ink);border:1px solid var(--sb-border);font:850 12px Nunito,system-ui}
+
+
+/* Calm Home: tasks first, four clear daily actions, one discoverable toolbox.
+   All surfaces inherit the active PlushLife world (including dark themes). */
+#main-content .pl-storybook{gap:9px}
+#main-content .pl-storybook-banner{min-height:142px;padding:12px 14px}
+#main-content .pl-storybook-greeting{padding-top:5px}
+#main-content .pl-storybook-greeting>p:last-child{max-width:29ch}
+#main-content .pl-storybook-brand{font-size:19px}
+#main-content .pl-storybook-today{padding:15px}
+#main-content .pl-storybook-add-task{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:10px;border:1px solid var(--sb-accent);border-radius:14px;background:var(--sb-accent);color:var(--pl-theme-on-accent,#fff);font:900 13px Nunito,system-ui;cursor:pointer}
+#main-content .pl-storybook-add-task:focus-visible,#main-content .pl-storybook-door:focus-visible,#main-content .pl-home-tool-links button:focus-visible{outline:3px solid var(--sb-accent,var(--pl-theme-accent));outline-offset:3px}
+#main-content .pl-storybook-doors{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+#main-content .pl-storybook-door{min-height:76px!important;border-radius:15px;padding:9px 2px!important;box-shadow:none}
+#main-content .pl-storybook-door-emoji{font-size:22px;height:27px}
+#main-content .pl-storybook-door strong{font-size:11px;line-height:1.2;overflow-wrap:anywhere;margin:5px 0 0}
+#main-content .pl-storybook-lookahead,#main-content .pl-storybook-support{border:1px solid var(--sb-border);border-radius:16px;background:var(--sb-card);min-width:0;color:var(--sb-ink);padding:0 12px}
+#main-content .pl-storybook-lookahead>summary,#main-content .pl-storybook-support>summary{min-height:48px;display:flex;align-items:center;gap:7px;cursor:pointer;font:850 13px Nunito,system-ui;list-style:none}
+#main-content .pl-storybook-lookahead>summary::-webkit-details-marker,#main-content .pl-storybook-support>summary::-webkit-details-marker{display:none}
+#main-content .pl-storybook-lookahead>summary span,#main-content .pl-storybook-support>summary span{margin-left:auto;font:700 11px Nunito,system-ui;color:var(--sb-muted)}
+#main-content .pl-storybook-lookahead>summary::after,#main-content .pl-storybook-support>summary::after{content:"⌄";color:var(--sb-accent);font-size:15px}
+#main-content .pl-storybook-lookahead[open]>summary::after,#main-content .pl-storybook-support[open]>summary::after{content:"⌃"}
+#main-content .pl-storybook-lookahead .pl-storybook-tomorrow,#main-content .pl-storybook-lookahead .pl-storybook-week{border:0;border-top:1px solid var(--sb-border);border-radius:0;padding:10px 0;background:transparent}
+#main-content .pl-storybook-lookahead h3{margin:0 0 7px;color:var(--sb-ink);font:900 13px Nunito,system-ui}
+#main-content .pl-storybook-lookahead .pl-storybook-week-body{border-top:0;padding:4px 0 8px}
+#main-content .pl-storybook-support .pl-companion-home-card{margin:8px 0}
+#main-content .pl-storybook-support .pl-companion-home-customize{position:static;display:block;width:100%;margin:8px 0 12px;min-height:44px;border:1px solid var(--sb-border);border-radius:12px;background:var(--sb-soft);color:var(--sb-ink);font:850 12px Nunito,system-ui}
+#main-content .pl-storybook-mood-choices{border-top:1px solid var(--sb-border);padding:10px 0 14px;color:var(--sb-ink)}
+#main-content .pl-storybook-mood-choices>strong{font-size:12px}
+#main-content .pl-home-extras{background:var(--pl-theme-surface)!important;border:1px solid var(--pl-theme-line)!important;border-radius:16px!important;box-shadow:none!important;color:var(--pl-theme-ink)!important}
+#main-content .pl-home-extras-content{display:grid;gap:12px;padding-top:7px;min-width:0}
+#main-content .pl-home-extras-intro{font:650 12px/1.45 Nunito,system-ui;margin:0!important;color:var(--pl-theme-muted)}
+#main-content .pl-home-tool-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#main-content .pl-home-tool-links button{min-height:47px;border:1px solid var(--pl-theme-line);border-radius:13px;background:var(--pl-theme-surface-2);color:var(--pl-theme-ink);display:flex;align-items:center;gap:8px;text-align:left;padding:10px;font:850 12px Nunito,system-ui;min-width:0}
+#main-content .pl-home-tool-links button span{overflow-wrap:anywhere;min-width:0}
+#main-content .pl-home-advanced{min-width:0;border-top:1px solid var(--pl-theme-line);padding-top:6px}
+#main-content .pl-home-advanced>summary{min-height:44px;display:flex;align-items:center;font:800 12px Nunito,system-ui;cursor:pointer;color:var(--pl-theme-muted)}
+#main-content .pl-home-advanced-content{display:grid;gap:10px;padding:8px 0;min-width:0}
+#main-content .pl-home-extra-link{min-height:44px;border-radius:12px;border:1px solid var(--pl-theme-line);background:var(--pl-theme-surface-2);color:var(--pl-theme-ink);text-align:left;padding:10px;font:800 12px Nunito,system-ui}
+@media(max-width:345px){
+ #main-content .pl-storybook-doors{gap:5px}
+ #main-content .pl-storybook-door strong{font-size:10px}
+ #main-content .pl-storybook-lookahead>summary span,#main-content .pl-storybook-support>summary span{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ #main-content .pl-storybook-add-task,#main-content .pl-storybook-door{transition:none}
+}

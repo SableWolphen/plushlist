@@ -46,7 +46,7 @@ expect(tasks.includes("🗑️ Delete") && tasks.includes("startEditingTask") &&
 expect(tasks.includes("importTasksFromText") && tasks.includes("starterPack"), "Tasks retains import and starter-pack paths");
 expect(app.includes('.eq("user_id", user.id).order("sort_order")') && taskPrivacy.includes("can_view_tasks"), "task loading stays user-scoped and Guardian sharing remains permission-gated");
 
-expect(care.includes("setCheckInPopupOpen(true)") && care.includes("CareHistory"), "Care retains check-in and journal/check-in history");
+expect(care.includes("setCheckInPopupOpen?.(true)") && care.includes("openTodayJournal?.()") && care.includes("CareHistory"), "Care retains working check-in, journal and private history");
 expect(care.includes("PLUSH_PATHS") && care.includes("SLEEP_TOOLS") && care.includes("soundscape"), "Care retains paths, sleep, and sound tools");
 
 expect(progress.includes("HabitGardenCard") && progress.includes("Show insights & monthly trends"), "Progress retains habit garden and deeper insights");
