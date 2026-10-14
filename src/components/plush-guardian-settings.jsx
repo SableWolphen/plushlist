@@ -64,6 +64,16 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
       <section className="pl-virtual-guardian-options" aria-label="Guardian caretaker options">
         <h3>🍼 Guardian Care Mode</h3>
         <p>Choose how nurturing your Guardian feels. Care routines are optional and stay on this device. No chat or automatic personal-care tracking.</p>
+        <h3>🎁 Guardian surprises</h3>
+        <p>Once your automatic Guardian is enabled, it picks and awards little surprises automatically. You never need to make a reward or claim one. These are virtual celebrations, not purchases or essential care.</p>
+        {check("automaticGifts", "Let Guardian choose and unlock rewards automatically")}
+        {prefs.automaticGifts && <div aria-label="Allowed Guardian surprise types">
+          {["stickers","celebrations","trophies"].map(category=><label className="pl-companion-check" key={category}>
+            <input type="checkbox" checked={(prefs.giftCategories || []).includes(category)}
+              onChange={event=>preference("giftCategories",event.target.checked ? [...new Set([...(prefs.giftCategories||[]),category])] : (prefs.giftCategories||[]).filter(x=>x!==category))}/>
+            {category.charAt(0).toUpperCase()+category.slice(1)}
+          </label>)}
+        </div>}
         {check("careMode", "Enable nurturing caretaker routines")}
         {prefs.careMode && <>
           {check("littleMode", "Little Mode: simple choices and larger controls throughout the app")} 
