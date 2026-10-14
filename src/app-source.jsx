@@ -3861,6 +3861,14 @@ function GlowUpTracker() {
         await supabase.from("push_subscriptions").delete().eq("fcm_token", window.__plushlifeNativePushToken).eq("user_id", user.id);
       } catch (_error) {}
     }
+    // Cancel pending device-local reminders before clearing this account's
+    // session: a shared phone must not display the old Cozy's task labels.
+    try {
+      await Promise.race([
+        window.PlushLifeNativeNotifications?.syncDailyReminders?.({ enabled: false }) || Promise.resolve(),
+        new Promise((resolve) => window.setTimeout(resolve, 1500)),
+      ]);
+    } catch (_error) { /* Sign-out must remain available offline. */ }
     setUser(null);
     setDone({});
     setTrackerTasks([]);
