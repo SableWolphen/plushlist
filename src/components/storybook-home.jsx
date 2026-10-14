@@ -74,15 +74,13 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
   };
   return <div className={darkMode ? "pl-storybook pl-storybook-dark" : "pl-storybook"} data-storybook-world={world}>
     <header className="pl-storybook-banner">
-      <div className="pl-storybook-brand"><span aria-hidden="true" className="pl-storybook-brand-bear">🧸</span><span>PlushLife</span></div>
+      <div className="pl-storybook-brand"><span>PlushLife</span></div>
       <button type="button" className="pl-storybook-settings" aria-label="Open settings" onClick={()=>setSettingsOpen?.(true)}>⚙</button>
       {atmosphere.scene && <div className="pl-storybook-sky" aria-hidden="true"><img src={`./assets/worlds/${atmosphere.scene}.svg`} alt="" width="640" height="240" /></div>}
       <div className="pl-storybook-greeting">{copy.tag && <p className={nursery ? "pl-storybook-small pl-nursery-mode-label" : "pl-storybook-small"}>{copy.symbol} {copy.tag}</p>}<h1>{nursery ? storybookGreeting().replace("Cozy!",caregiver === "Mommy" ? "sweetheart!" : "kiddo!") : storybookGreeting()}</h1><p>{copy.detail}</p></div>
       <div className="pl-storybook-mascot" aria-label="Your original PlushLife teddy bear"><ThemeScene decorative focus outfit={selectedOutfit} /></div>
-      <button type="button" className="pl-companion-home-customize" onClick={()=>openPlushGuardian("settings")}>Customize Home</button>
-      <span className="pl-companion-sync" role="status">{online===false?"Offline":syncStatus==="syncing"?"Saving…":syncStatus==="error"?"Sync needs attention":syncStatus==="synced"?"Synced":"Account connected"}</span>
+      {(online===false || syncStatus==="error" || syncStatus==="syncing") && <span className="pl-companion-sync" role="status">{online===false?"Offline · changes will sync later":syncStatus==="error"?"Sync needs attention":"Saving…"}</span>}
     </header>
-    <div className="pl-companion-home-card" style={cardStyle("companion")}><CompanionHomeCard userId={userId}/></div>
     <section style={cardStyle("tasks")} className="pl-storybook-today" aria-label="Today's checklist">
       <div className="pl-storybook-topline"><span>TODAY</span><button type="button" onClick={()=>goToDashboard?.("week")} aria-label="Open calendar">{dayLabel} <span aria-hidden="true">▦</span></button></div>
       <div className="pl-storybook-intro"><div><h2>{dayType === "rest" ? "Today is for rest" : completed === total && total ? "Your little wins" : atmosphere.heading}</h2><p>{dayType === "rest" ? "Your tasks are safe. You can come back when you are ready." : dayType === "tiny" ? "One small step is enough for today." : ["soft","recovery"].includes(dayType) ? "Just two gentle steps to focus on." : total ? atmosphere.hint : "Your page is ready. Start with one little thing."}</p></div></div>
@@ -91,31 +89,40 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
       {dayType !== "rest" && <div className="pl-storybook-progress" role="progressbar" aria-label="Today's tasks completed" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}><div style={{width:progress+"%"}} /></div>}
       {habitCount>0 && <button type="button" className="pl-storybook-habits-link" aria-label={`View ${habitCount} habits for today`} onClick={()=>openTaskManager?.(period?.date,"habits")}><span aria-hidden="true">🌱</span> {habitCount} {habitCount===1 ? "habit" : "habits"} in today’s list <span aria-hidden="true">›</span></button>}
       {visible.length ? <ul className="pl-storybook-list">{visible.map(row=><li key={row.key} data-habit-kind={row.habitType}><button className="pl-storybook-check" type="button" aria-label={(row.done?"Undo ":"Complete ")+row.label} aria-pressed={row.done} onClick={()=>toggle?.(row.key)}><span aria-hidden="true">{row.done?"✓":""}</span></button><span className="pl-storybook-task-copy"><HabitTypeIcon task={row.sourceTask} habitType={row.habitType}/><span className={row.done?"pl-storybook-complete":""}>{row.label}</span>{row.done && <span className="pl-storybook-world-motif" aria-hidden="true">{atmosphere.check}</span>}{row.habitType!=="regular" && <HabitGoalCaption taskKey={row.key} fallbackGoal={row.goal}/>}</span><button type="button" className="pl-storybook-detail" aria-label={"Edit "+row.label} onClick={()=>openTaskManager?.(period?.date)}>›</button></li>)}</ul> : dayType === "rest" ? <div className="pl-storybook-empty"><p>💜 Your little jobs can wait. Rest counts.</p></div> : <div className="pl-storybook-empty"><p>A fresh page, just for you. 🌷</p><button type="button" onClick={()=>openTaskManager?.(period?.date)}>＋ Add your first little task</button></div>}
-      {total>visible.length&&<button type="button" className="pl-storybook-more" onClick={()=>openTaskManager?.(period?.date)}>View all {total} {atmosphere.noun} ›</button>}
+      {dayType !== "rest" && total>visible.length&&<button type="button" className="pl-storybook-more" onClick={()=>openTaskManager?.(period?.date)}>See my full list · {total} {atmosphere.noun} ›</button>}
+      {total > 0 && <button type="button" className="pl-storybook-add-task" onClick={()=>openTaskManager?.(period?.date)}>＋ Add a task</button>}
     </section>
-    <nav style={cardStyle("shortcuts")} className="pl-storybook-doors" aria-label="Your cozy shortcuts">
-      <button type="button" className="pl-storybook-door pl-door-checkin" onClick={()=>openDailyCheckIn?.()}><span className="pl-storybook-door-emoji" aria-hidden="true">{atmosphere.check}</span><strong>Check In</strong></button>
-      <button type="button" className="pl-storybook-door pl-door-journal" onClick={()=>openTodayJournal?.()}><span className="pl-storybook-door-emoji" aria-hidden="true">{atmosphere.journal}</span><strong>Journal</strong></button>
-      <button type="button" className="pl-storybook-door pl-door-focus" onClick={focus}><span className="pl-storybook-door-emoji" aria-hidden="true">{atmosphere.focus}</span><strong>Focus</strong></button>
+    <nav style={cardStyle("shortcuts")} className="pl-storybook-doors" aria-label="Your everyday actions">
+      <button type="button" className="pl-storybook-door pl-door-checkin" onClick={()=>openDailyCheckIn?.()}><span className="pl-storybook-door-emoji" aria-hidden="true">💗</span><strong>Check in</strong></button>
+      <button type="button" className="pl-storybook-door pl-door-journal" onClick={()=>openTodayJournal?.()}><span className="pl-storybook-door-emoji" aria-hidden="true">📝</span><strong>Journal</strong></button>
+      <button type="button" className="pl-storybook-door pl-door-guardian" onClick={()=>openPlushGuardian()}><span className="pl-storybook-door-emoji" aria-hidden="true">🧸</span><strong>Guardian</strong></button>
+      <button type="button" className="pl-storybook-door pl-door-focus" onClick={focus}><span className="pl-storybook-door-emoji" aria-hidden="true">⏱</span><strong>Focus</strong></button>
     </nav>
     {world === "baby-night" && <button type="button" className="pl-storybook-bedtime" onClick={()=>openPlushGuardian("routines")}>🌙 Ready for my bedtime routine? <span aria-hidden="true">›</span></button>}
-    {tomorrowPreviewRows.length > 0 && <details className="pl-storybook-tomorrow">
-      <summary>🌤 Tomorrow’s little plan <span>Preview</span></summary>
-      <ul>{tomorrowPreviewRows.map(row=><li key={row.key}>{row.label}</li>)}</ul>
-      <button type="button" onClick={()=>openTaskManager?.(tomorrowDateString)}>View tomorrow’s tasks ›</button>
+    {(tomorrowPreviewRows.length > 0 || hasWeeklyStory) && <details className="pl-storybook-lookahead">
+      <summary>📅 Looking ahead <span>Tomorrow & my week</span></summary>
+      {tomorrowPreviewRows.length > 0 && <section className="pl-storybook-tomorrow">
+        <h3>Tomorrow's little plan</h3>
+        <ul>{tomorrowPreviewRows.map(row=><li key={row.key}>{row.label}</li>)}</ul>
+        <button type="button" onClick={()=>openTaskManager?.(tomorrowDateString)}>View tomorrow's tasks ›</button>
+      </section>}
+      {hasWeeklyStory && <section className="pl-storybook-week">
+        <h3>📖 Our little week · {weekStory.caringDays} caring {weekStory.caringDays===1?"day":"days"}</h3>
+        <div className="pl-storybook-week-body">
+          <strong>{weekStory.heading}</strong>
+          <p>{weekStory.line}</p>
+          <button type="button" onClick={()=>goToDashboard?.("progress")}>See my progress & little wins ›</button>
+        </div>
+      </section>}
     </details>}
-    {hasWeeklyStory && <details className="pl-storybook-week">
-      <summary>📖 Our little week <span>{weekStory.caringDays} caring {weekStory.caringDays===1?"day":"days"}</span></summary>
-      <div className="pl-storybook-week-body">
-        <strong>{weekStory.heading}</strong>
-        <p>{weekStory.line}</p>
-        <p>Every check-in and every little step belongs to your story.</p>
-        <button type="button" onClick={()=>goToDashboard?.("progress")}>See my progress & little wins ›</button>
+    <details className="pl-storybook-support">
+      <summary>♡ My comfort & Guardian settings <span>Personalize</span></summary>
+      <div className="pl-companion-home-card" style={cardStyle("companion")}><CompanionHomeCard userId={userId}/></div>
+      <button type="button" className="pl-companion-home-customize" onClick={()=>openPlushGuardian("settings")}>Customize my Guardian & Home</button>
+      <div style={cardStyle("moods")} className="pl-storybook-mood-choices">
+        <strong>How am I feeling?</strong>
+        <div className="pl-storybook-mood-grid">{STORYBOOK_MOODS.map(([id,label,emoji])=><button type="button" key={id} onClick={()=>openDailyCheckIn?.()} aria-label={"Check in feeling "+label}><span className="pl-storybook-face" aria-hidden="true">{emoji}</span><span>{label}</span></button>)}</div>
       </div>
-    </details>}
-    <details style={cardStyle("moods")} className="pl-storybook-moods"><summary>How are you feeling?</summary><div className="pl-storybook-mood-head"><div><p>A little room to check in.</p></div><button type="button" onClick={()=>goToDashboard?.("care")}>My Care ›</button></div>
-      <div className="pl-storybook-mood-grid">{STORYBOOK_MOODS.map(([id,label,emoji])=><button type="button" key={id} onClick={()=>openDailyCheckIn?.()} aria-label={"Check in feeling "+label}><span className="pl-storybook-face" aria-hidden="true">{emoji}</span><span>{label}</span></button>)}</div>
-      <p className="pl-storybook-mood-help">Tap a feeling to open your private check-in.</p>
     </details>
     <p style={cardStyle("kindness")} className="pl-storybook-kind-note">{copy.ending} ♡</p>
   </div>;
