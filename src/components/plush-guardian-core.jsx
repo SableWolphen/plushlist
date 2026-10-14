@@ -77,7 +77,9 @@ export default function PlushGuardianCore(props) {
     const items = { ...todayCare };
     if (checked) items[key] = true;
     else delete items[key];
-    update({ careChecks: { date: localDate(), items } });
+    const completeNow = CARE_ROUTINES.filter(r => r.steps.every((_,i) => !!items[r.id+":"+i])).map(r => localDate()+":"+r.id);
+    const stickers = [...new Set([...(state.careStickers || []), ...completeNow])].slice(-90);
+    update({ careChecks: { date: localDate(), items }, careStickers: stickers });
   };
   const botPlan = botGuardianDailyPlan(rows, viewDone, state.prefs.voice, dailyCheckIn?.day_type === "rest");
   const action = async (fn) => {
@@ -190,6 +192,7 @@ export default function PlushGuardianCore(props) {
             </section>
             {state.prefs.careMode && <section className="pl-virtual-guardian-options" aria-label="Caretaker routines">
               <h3>🍼 My care time</h3>
+              <p aria-live="polite">🌟 {(state.careStickers || []).length} caretaker stickers collected · one sticker per completed routine, per day.</p>
               <p>{careWords(state.prefs,"welcome")}</p>
               {CARE_ROUTINES.map(routine => {
                 const count = routine.steps.filter((_,i) => todayCare[routine.id+":"+i]).length;
