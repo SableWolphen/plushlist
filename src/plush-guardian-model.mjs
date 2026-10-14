@@ -73,6 +73,10 @@ export const freshGuardianState = () => ({
     voice: "neutral",
     guardianName: "",
     guidance: "gentle",
+    careMode: false,
+    littleMode: false,
+    careStyle: "gentle",
+    petName: "",
     name: "",
     avoid: "",
     phrases: "",
@@ -105,6 +109,7 @@ export const freshGuardianState = () => ({
   routines: [],
   chat: [],
   activeRoutine: null,
+  careChecks: { date: "", items: {} },
   taskSteps: {},
   partial: {},
   lastVisit: "",
@@ -125,6 +130,13 @@ export function normalizeGuardianState(value) {
   next.prefs.shareMood = false;
   next.prefs.shareMemories = false;
   next.prefs.keepChat = false;
+  next.prefs.careMode = next.prefs.careMode === true;
+  next.prefs.littleMode = next.prefs.littleMode === true;
+  next.prefs.careStyle = ["gentle","baby","structured"].includes(next.prefs.careStyle) ? next.prefs.careStyle : "gentle";
+  next.prefs.petName = typeof next.prefs.petName === "string" ? next.prefs.petName.slice(0,40) : "";
+  next.careChecks = value.careChecks && typeof value.careChecks.date === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(value.careChecks.date) && value.careChecks.items && typeof value.careChecks.items === "object" && !Array.isArray(value.careChecks.items)
+    ? { date: value.careChecks.date, items: Object.fromEntries(Object.entries(value.careChecks.items).filter(([k,v]) => /^[a-z]+:[0-9]+$/.test(k) && v === true).slice(0,80)) }
+    : d.careChecks;
   next.prefs.automaticReminders = next.prefs.automaticReminders === true;
   next.prefs.routineNudges = next.prefs.routineNudges === true;
   next.prefs.tomorrowNudges = next.prefs.tomorrowNudges === true;
