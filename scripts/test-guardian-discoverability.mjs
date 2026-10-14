@@ -17,12 +17,12 @@ assert(nav.includes('setCollectionOpen(false); goToDashboard("guardian")'), "Swi
 assert(fs.existsSync("assets/figma/icon-guardian.svg"), "Real Guardian tab icon must be included in the build");
 assert(fs.readFileSync("assets/figma/icon-guardian.svg", "utf8").includes("<svg"), "Guardian icon must have valid SVG content");
 
-assert(guardian.includes('aria-label="Bot Mommy shortcut"'), "Bot Mommy needs an obvious independent shortcut");
+assert(guardian.includes('aria-label="Guardian support"'), "Guardian needs a clear, unified support card");
 assert(guardian.includes("useGuardianState(user?.id)"), "Bot entry must reflect the chosen, account-scoped bot style");
-assert(guardian.includes('onClick={()=>openPlushGuardian()}'), "Bot Mommy opens the real Guardian, not a dead-end panel");
-assert(guardian.indexOf('aria-label="Bot Mommy shortcut"') < guardian.indexOf('aria-label="Guardian sections"'), "Bot Mommy must be visible near the top of Guardians");
-assert(!guardian.includes('!(ownedSupportLinks || []).some(link=>link.active && link.accepted_at)'), "Human Guardian connections must not hide Bot Mommy");
-assert(!guardian.includes('ownedSupportLinks.length === 0 && <section className="pl-bot-guardian-entry"'), "Bot Mommy remains available with a real Guardian");
+assert(guardian.includes('openPlushGuardian("rewards")'), "Automatic Guardian rewards remain reachable");
+assert(guardian.indexOf('aria-label="Guardian support"') < guardian.indexOf('aria-label="Guardian sections"'), "Guardian selection remains prominent above advanced sections");
+assert(guardian.includes('mode === "person"') && guardian.includes('mode === "automatic"'), "Guardian distinguishes connected person from automatic mode");
+assert(guardian.includes('guardianMode(ownedSupportLinks'), "Automatic mode must defer to an accepted human Guardian");
 assert(guardian.includes("<CozySharing links={ownedSupportLinks} />") && guardian.includes('guardianArea === "together"'), "Human Guardian and Together features stay intact");
 assert(guardian.includes('guardianArea === "support"'), "Existing sharing and invitations remain accessible");
 
@@ -37,4 +37,4 @@ buildSync({
   bundle: true, format: "esm", platform: "browser", target: "es2022",
   loader: {".jsx":"jsx"}, write: false, outdir: "out",
 });
-console.log("Guardian findability passed: one-tap bottom tab, Bot Mommy even with human Guardians, and Plush rewards still accessible.");
+console.log("Guardian findability passed: unified Guardian navigation, exclusive person/automatic type and visible rewards.");
