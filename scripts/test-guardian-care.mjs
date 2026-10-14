@@ -33,3 +33,16 @@ assert.equal(awardEligibleRewards(award.rewards,tasks,{one:true},"2026-10-14").u
 assert.equal(awardEligibleRewards([gift],tasks,{},"2026-10-14").unlocked.length,0);
 assert.equal(awardEligibleRewards([gift],[],{},"2026-10-14").unlocked.length,0);
 assert.equal(awardEligibleRewards([{id:"manual",mode:"effort",goal:2,count:2}],[],{},"2026-10-14").unlocked.length,1);
+
+import { autoGuardianGifts } from "../src/guardian-auto-rewards.mjs";
+const config={automaticGifts:true,giftCategories:["stickers","celebrations","trophies"]};
+const first=autoGuardianGifts([],tasks,{one:true},"2026-10-14",config);
+assert.equal(first.unlocked.length,2);
+assert.equal(autoGuardianGifts(first.ledger,tasks,{one:true},"2026-10-14",config).unlocked.length,0);
+assert.equal(autoGuardianGifts(first.ledger,tasks,{one:true,two:true},"2026-10-14",config).unlocked.length,1);
+assert.equal(autoGuardianGifts(first.ledger,tasks,{one:true},"2026-10-15",config).unlocked.length,2);
+assert.equal(autoGuardianGifts([],[],{},"2026-10-14",config).unlocked.length,0);
+assert.equal(autoGuardianGifts([],tasks,{one:true},"2026-10-14",{...config,automaticGifts:false}).unlocked.length,0);
+assert.equal(autoGuardianGifts([],tasks,{one:true},"2026-10-14",{...config,giftCategories:["trophies"]}).unlocked.length,0);
+assert.equal(autoGuardianGifts([],tasks,{one:true},"2026-10-14",config,true).unlocked.length,0);
+assert.deepEqual(normalizeGuardianState({automaticGiftLedger:["2026-10-14:25","2026-10-14:25","unsafe"]}).automaticGiftLedger,["2026-10-14:25"]);
