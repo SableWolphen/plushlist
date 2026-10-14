@@ -21,3 +21,15 @@ assert.deepEqual(careChecksForToday(normalized,"2026-10-14"),{"wake:0":true,"nig
 assert.deepEqual(careChecksForToday(normalized,"2026-10-15"),{});
 assert.equal(normalizeGuardianState({prefs:{careStyle:"invalid"}}).prefs.careStyle,"gentle");
 console.log("Guardian caretaker preferences, wording, local daily checkmarks and privacy defaults passed.");
+
+import { awardEligibleRewards } from "../src/guardian-auto-rewards.mjs";
+const gift = {id:"gift1",name:"Sticker time",mode:"progress",targetPercent:50,claimed:false};
+const tasks=[{key:"one",label:"One"},{key:"two",label:"Two"}];
+let award=awardEligibleRewards([gift],tasks,{one:true},"2026-10-14");
+assert.equal(award.unlocked.length,1);
+assert.equal(award.rewards[0].claimed,true);
+assert.equal(award.rewards[0].autoAwardedAt,"2026-10-14");
+assert.equal(awardEligibleRewards(award.rewards,tasks,{one:true},"2026-10-14").unlocked.length,0);
+assert.equal(awardEligibleRewards([gift],tasks,{},"2026-10-14").unlocked.length,0);
+assert.equal(awardEligibleRewards([gift],[],{},"2026-10-14").unlocked.length,0);
+assert.equal(awardEligibleRewards([{id:"manual",mode:"effort",goal:2,count:2}],[],{},"2026-10-14").unlocked.length,1);
