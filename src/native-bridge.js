@@ -16,7 +16,7 @@
  * immediately when the Capacitor runtime is not present.
  */
 import { cozyReminderCopy } from './cozy-profile.js';
-import { virtualGuardianReminderCopy, guardianRoutineCopy, guardianTomorrowCopy } from './guardian-reminders.mjs';
+import { virtualGuardianReminderCopy, guardianRoutineCopy, guardianTomorrowCopy, guardianCaretakerCopy } from './guardian-reminders.mjs';
 (function () {
   if (!window.Capacitor || !window.Capacitor.Plugins) return;
   var Plugins = window.Capacitor.Plugins;
@@ -291,7 +291,7 @@ import { virtualGuardianReminderCopy, guardianRoutineCopy, guardianTomorrowCopy 
       syncDailyReminders: async function (options) {
         var pending = await LocalNotifications.getPending();
         var old = (pending.notifications || []).filter(function (item) {
-          return item.extra && (item.extra.plushlifeKind === "daily-reminder" || item.extra.plushlifeKind === "task-reminder" || item.extra.plushlifeKind === "guardian-routine" || item.extra.plushlifeKind === "guardian-tomorrow");
+          return item.extra && (item.extra.plushlifeKind === "daily-reminder" || item.extra.plushlifeKind === "task-reminder" || item.extra.plushlifeKind === "guardian-routine" || item.extra.plushlifeKind === "guardian-tomorrow" || item.extra.plushlifeKind === "guardian-care");
         });
         if (old.length) await LocalNotifications.cancel({ notifications: old.map(function (item) { return { id: item.id }; }) });
         if (!options || !options.enabled) return;
@@ -395,6 +395,16 @@ import { virtualGuardianReminderCopy, guardianRoutineCopy, guardianTomorrowCopy 
               copy: guardianTomorrowCopy(options.guardianVoice, options.guardianGuidance),
             },
           ];
+          if (options.careReminders) {
+            special.push({
+              enabled: true, clock: options.careMorningTime, kind: "guardian-care",
+              copy: guardianCaretakerCopy("morning", options.careStyle)
+            });
+            special.push({
+              enabled: true, clock: options.careBedtimeTime, kind: "guardian-care",
+              copy: guardianCaretakerCopy("bedtime", options.careStyle)
+            });
+          }
           for (var candidate of special) {
             if (!candidate.enabled) continue;
             var minute = parseClockMinutes(candidate.clock, -1);
@@ -408,7 +418,7 @@ import { virtualGuardianReminderCopy, guardianRoutineCopy, guardianTomorrowCopy 
               return other >= 0 && Math.abs(other - minute) < 30;
             })) continue;
             notifications.push({
-              id: window.PlushLifeCare.notificationId(candidate.kind + "-" + window.PlushLifeCare.localDateString(at)),
+              id: window.PlushLifeCare.notificationId(candidate.kind + "-" + candidate.clock + "-" + window.PlushLifeCare.localDateString(at)),
               title: options.discreet ? "A gentle PlushLife reminder" : candidate.copy.title,
               body: options.discreet ? "You have something waiting in PlushLife." : candidate.copy.body,
               schedule: { at: at, allowWhileIdle: true },
