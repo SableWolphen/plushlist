@@ -14,6 +14,8 @@ export function GuardianTools({
   onSupport,
   onClose,
   onJournal,
+  rows = [],
+  viewDone = {},
 }) {
   const [draft, setDraft] = React.useState("");
   const [name, setName] = React.useState("");
@@ -25,6 +27,8 @@ export function GuardianTools({
   const [review, setReview] = React.useState(null);
   const [busy, setBusy] = React.useState(false);
   const [goal, setGoal] = React.useState(3);
+  const [rewardMode, setRewardMode] = React.useState("progress");
+  const [rewardTargetPercent, setRewardTargetPercent] = React.useState(75);
   const [small, setSmall] = React.useState(false);
   const [together, setTogether] = React.useState(false);
   React.useEffect(() => {
@@ -627,14 +631,14 @@ export function GuardianTools({
         ))}
       </section>
     );
-  if (page === "rewards")
+  if (page === "rewards") {
+    const todayTasks = rows.filter(r => r?.key && !r.isBonus && !r.sourceTask?.archived_at);
+    const todayDone = todayTasks.filter(r => !!viewDone[r.key]).length;
+    const todayPercent = todayTasks.length ? Math.round(todayDone * 100 / todayTasks.length) : 0;
     return (
       <section>
-        <h2>Rewards I choose</h2>
-        <p>
-          Choose something kind to work toward. Count effort, asking for help,
-          or coming back. Basic needs never have to be earned.
-        </p>
+        <h2>Guardian rewards</h2>
+        <p>Choose a little celebration. Your automatic Guardian can notice your real task progress, or you can count effort yourself. Basic needs never have to be earned.</p>
         <label>
           My reward
           <input
@@ -654,20 +658,26 @@ export function GuardianTools({
           />
         </label>
         <label>
-          Number of steps
-          <input
-            type="number"
-            min="1"
-            max="100"
-            value={goal}
-            onChange={(e) => setGoal(e.target.value)}
-          />
+          When to unlock
+          <select aria-label="Reward goal type" value={rewardMode} onChange={e=>setRewardMode(e.target.value)}>
+            <option value="progress">Today's task progress</option>
+            <option value="effort">Count my effort manually</option>
+          </select>
         </label>
+        {rewardMode === "progress" ? <label>
+          Unlock at task completion
+          <select aria-label="Reward target percent" value={rewardTargetPercent} onChange={e=>setRewardTargetPercent(Number(e.target.value))}>
+            <option value={25}>25%</option><option value={50}>50%</option><option value={75}>75%</option><option value={100}>100%</option>
+          </select>
+        </label> : <label>
+          Number of steps
+          <input type="number" min="1" max="100" value={goal} onChange={e=>setGoal(e.target.value)} />
+        </label>}
         <button
           disabled={
             !name.trim() ||
             !draft.trim() ||
-            !(Number(goal) >= 1 && Number(goal) <= 100)
+            (rewardMode === "effort" && !(Number(goal) >= 1 && Number(goal) <= 100))
           }
           onClick={() =>
             persistList("rewards", {
@@ -676,6 +686,8 @@ export function GuardianTools({
               text: draft.trim(),
               goal: Math.floor(Number(goal)),
               count: 0,
+              mode: rewardMode,
+              targetPercent: rewardMode === "progress" ? rewardTargetPercent : null,
               claimed: false,
             })
           }
@@ -686,11 +698,9 @@ export function GuardianTools({
           <article key={x.id}>
             <h3>{x.name}</h3>
             <p>{x.text}</p>
-            <progress value={x.count} max={x.goal} />
-            <p>
-              {x.count} / {x.goal} steps
-            </p>
-            {x.count < x.goal ? (
+            <progress value={x.mode === "progress" ? todayPercent : x.count} max={x.mode === "progress" ? 100 : x.goal} />
+            <p>{x.mode === "progress" ? `Today: ${todayDone}/${todayTasks.length} little jobs · ${todayPercent}% · Goal ${x.targetPercent}%` : `${x.count} / ${x.goal} steps`}</p>
+            {x.mode !== "progress" && x.count < x.goal ? (
               <button
                 onClick={() =>
                   update({
@@ -704,7 +714,7 @@ export function GuardianTools({
               </button>
             ) : (
               <button
-                disabled={x.claimed}
+                disabled={x.claimed || (x.mode === "progress" && (todayTasks.length === 0 || todayPercent < (x.targetPercent || 100)))}
                 onClick={() =>
                   update({
                     rewards: state.rewards.map((r) =>
@@ -716,7 +726,7 @@ export function GuardianTools({
                 {x.claimed ? "Enjoy your reward" : "Enjoy my reward"}
               </button>
             )}
-            {x.count > 0 && !x.claimed && (
+            {x.mode !== "progress" && x.count > 0 && !x.claimed && (
               <button
                 onClick={() =>
                   update({
@@ -736,6 +746,7 @@ export function GuardianTools({
         ))}
       </section>
     );
+  }
   if (page === "experiments")
     return (
       <section>
