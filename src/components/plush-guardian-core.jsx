@@ -609,6 +609,7 @@ export default function PlushGuardianCore(props) {
         )}
         {page === "settings" && (
           <GuardianSettings
+            userId={user.id}
             state={state}
             update={update}
             onDeleteChat={() => {
