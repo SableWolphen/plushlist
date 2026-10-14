@@ -88,6 +88,7 @@ export const freshGuardianState = () => ({
     quietStart: "21:00",
     quietEnd: "08:00",
     reminders: false,
+    automaticReminders: false, // Opt-in rule-based reminders through the existing Android scheduler.
   },
   home: { order: HOME_CARDS.map(([id]) => id), hidden: [] },
   inbox: [],
@@ -110,6 +111,7 @@ export function normalizeGuardianState(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return d;
   const next = { ...d, ...value, prefs: { ...d.prefs, ...value.prefs } };
   if (!VOICES[next.prefs.voice]) next.prefs.voice = "neutral";
+  next.prefs.automaticReminders = next.prefs.automaticReminders === true;
   for (const key of [
     "inbox",
     "memories",
