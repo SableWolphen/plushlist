@@ -595,7 +595,7 @@ export function TodayPanel({
             <nav className="pl-home-tool-links" aria-label="More PlushLife tools">
               <button type="button" onClick={()=>goToDashboard?.("week")}>📅 <span>Calendar</span></button>
               <button type="button" onClick={()=>openTaskManager?.(period?.date,"habits")}>🌱 <span>Habits</span></button>
-              <button type="button" onClick={()=>openPlushGuardian("routines")}>🧸 <span>Routines</span></button>
+              <button type="button" onClick={()=>goToDashboard?.("guardian")}>🧸 <span>Routines</span></button>
               <button type="button" onClick={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard?.("care");}}>💜 <span>Cozy Space</span></button>
               <button type="button" onClick={()=>setCalmQuickOpen?.(true)}>🌿 <span>Calm</span></button>
               <button type="button" onClick={()=>setSettingsOpen?.(true)}>⚙ <span>Settings</span></button>
