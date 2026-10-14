@@ -1,4 +1,5 @@
 import { VOICES, HOME_CARDS, localDate } from "../plush-guardian-model.mjs";
+import { SURPRISE_BOX_CHOICES } from "../guardian-smart-care.mjs";
 import { GuardianPortableBackup } from "./guardian-portable-backup.jsx";
 import { activateBotMommy } from "../guardian-bot.mjs";
 import { guardianBotDisplayName } from "../guardian-mode.mjs";
@@ -64,6 +65,13 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
       <section className="pl-virtual-guardian-options" aria-label="Guardian caretaker options">
         <h3>🍼 Guardian Care Mode</h3>
         <p>Choose how nurturing your Guardian feels. Care routines are optional and stay on this device. No chat or automatic personal-care tracking.</p>
+        <h3>🎁 Guardian's Surprise Box</h3>
+        <p>Choose your favorite activities once. Guardian occasionally picks one as a free surprise, without requiring chores or manual claiming.</p>
+        {check("surpriseBox","Let Guardian offer occasional activity surprises")}
+        {prefs.surpriseBox && SURPRISE_BOX_CHOICES.map(item=><label key={item.id} className="pl-companion-check">
+          <input type="checkbox" checked={(prefs.surpriseBoxChoices||[]).includes(item.id)} onChange={e=>preference("surpriseBoxChoices",e.target.checked?[...(prefs.surpriseBoxChoices||[]),item.id]:(prefs.surpriseBoxChoices||[]).filter(id=>id!==item.id))}/>
+          {item.label}
+        </label>)}
         <h3>💌 Surprise Letters</h3>
         <p>Receive an occasional private, supportive letter when your automatic Guardian is active. No AI or messages to other people.</p>
         <label className="pl-companion-check"><input type="checkbox" checked={!!prefs.surpriseLetters} onChange={e=>update({prefs:{...prefs,surpriseLetters:e.target.checked,lettersEnabledOn:e.target.checked ? localDate() : ""}})} />Enable surprise letters</label>
