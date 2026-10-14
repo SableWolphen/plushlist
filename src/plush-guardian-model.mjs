@@ -74,6 +74,8 @@ export const freshGuardianState = () => ({
     guardianName: "",
     guidance: "gentle",
     careMode: false,
+    surpriseLetters: false,
+    lettersEnabledOn: "",
     automaticGifts: true,
     giftCategories: ["stickers","celebrations","trophies","activities"],
     careReminders: false,
@@ -116,6 +118,7 @@ export const freshGuardianState = () => ({
   activeRoutine: null,
   careChecks: { date: "", items: {} },
   careStickers: [],
+  surpriseLetterHistory: [],
   automaticGiftLedger: [],
   taskSteps: {},
   partial: {},
@@ -140,6 +143,9 @@ export function normalizeGuardianState(value) {
   next.prefs.automaticGifts = next.prefs.automaticGifts !== false;
   next.prefs.giftCategories = Array.isArray(next.prefs.giftCategories) ? [...new Set(next.prefs.giftCategories.filter(x=>["stickers","celebrations","trophies","activities","babyDays"].includes(x)))] : [...d.prefs.giftCategories];
   next.automaticGiftLedger = Array.isArray(value.automaticGiftLedger) ? [...new Set(value.automaticGiftLedger.filter(x=>typeof x==="string" && /^\d{4}-\d{2}-\d{2}:(25|50|75|100|baby-day)$/.test(x)))].slice(-180) : [];
+  next.prefs.surpriseLetters = next.prefs.surpriseLetters === true;
+  next.prefs.lettersEnabledOn = typeof next.prefs.lettersEnabledOn === "string" && /^\d{4}-\d{2}-\d{2}$/.test(next.prefs.lettersEnabledOn) ? next.prefs.lettersEnabledOn : "";
+  next.surpriseLetterHistory = Array.isArray(value.surpriseLetterHistory) ? value.surpriseLetterHistory.filter(x=>x && typeof x.text==="string" && typeof x.date==="string" && /^\d{4}-\d{2}-\d{2}$/.test(x.date)).slice(-40) : [];
   next.prefs.careMode = next.prefs.careMode === true;
   next.prefs.littleMode = next.prefs.littleMode === true;
   next.prefs.careReminders = next.prefs.careReminders === true;
