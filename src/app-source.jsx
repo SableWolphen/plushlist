@@ -1,5 +1,6 @@
 import { guardianKey, readGuardian, saveGuardian, STATE_EVENT } from "./plush-guardian-model.mjs";
 import { guardianMode } from "./guardian-mode.mjs";
+import { awardEligibleRewards } from "./guardian-auto-rewards.mjs";
 import { companionAccountKey } from "./companion-account-storage.mjs";
 import { hasThemePreferenceChange, readThemeSelection, rememberThemeSelection, acknowledgeThemeSelection, restoreThemePreferences } from "./theme-selection-storage.mjs";
 import { PlushGuardianHost } from "./components/plush-guardian.jsx";
@@ -5125,6 +5126,34 @@ function GlowUpTracker() {
     return () => document.removeEventListener("plushlife-notification-task-action", consumeTaskAction);
   }, [period.date, rows, viewDone]);
   const [guardianReminderRevision, setGuardianReminderRevision] = useState(0);
+  // Reward grants happen when task progress is saved, not when the Cozy visits the reward screen.
+  // The saved claimed flag ensures a reward is never granted twice.
+  useEffect(() => {
+    if (!user?.id || supportLinksLoadedFor !== user.id) return;
+    const stored = readGuardian(deviceStorage(), user.id);
+    if (!stored.prefs.automaticReminders || guardianMode(supportLinks, user.id, supportLinksLoadedFor, true) !== "automatic") return;
+    const result = awardEligibleRewards(stored.rewards, rows, viewDone, period.date);
+    if (!result.unlocked.length) return;
+    if (!saveGuardian(deviceStorage(), user.id, { ...stored, rewards:result.rewards })) return;
+    window.dispatchEvent(new Event(STATE_EVENT));
+    // A single friendly, dismissible announcement for this batch of rewards.
+    const old = document.getElementById("pl-guardian-unlock");
+    old?.remove();
+    const notice = document.createElement("div");
+    notice.id = "pl-guardian-unlock";
+    notice.setAttribute("role", "status");
+    notice.style.cssText = "position:fixed;bottom:calc(env(safe-area-inset-bottom, 0px) + 95px);left:16px;right:16px;max-width:430px;margin:0 auto;z-index:2147483000;padding:14px 16px;border-radius:20px;background:var(--pl-theme-surface,#352944);color:var(--pl-theme-ink,#fff);border:2px solid var(--pl-theme-line,#bc9ecb);box-shadow:0 10px 32px #0004;font-size:15px;";
+    const copy = document.createElement("span");
+    copy.textContent = result.unlocked.length === 1 ? "🎁 Guardian unlocked your reward: " + result.unlocked[0].name : "🎁 Guardian unlocked " + result.unlocked.length + " cozy rewards!";
+    const close = document.createElement("button");
+    close.type = "button";
+    close.setAttribute("aria-label", "Dismiss reward celebration");
+    close.textContent = " ×";
+    close.style.cssText = "float:right;min-width:44px;min-height:44px;border-radius:12px;background:transparent;color:inherit;border:0;font-size:24px;cursor:pointer;";
+    close.addEventListener("click", () => notice.remove());
+    notice.append(copy,close);
+    document.body.appendChild(notice);
+  }, [user?.id, period.date, guardianReminderRevision, supportLinksLoadedFor, JSON.stringify(supportLinks.map(link=>[link.owner_user_id,link.active,link.accepted_at])), JSON.stringify(rows.map(row=>[row.key,row.isBonus,row.sourceTask?.archived_at])), JSON.stringify(viewDone)]);
   const guardianLinksReady = !!user && supportLinksLoadedFor === user.id;
   const activeGuardianMode = guardianMode(supportLinks, user?.id, supportLinksLoadedFor, readGuardian(deviceStorage(), user?.id).prefs.automaticReminders);
   useEffect(() => {
