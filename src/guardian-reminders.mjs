@@ -37,3 +37,13 @@ export function guardianTomorrowCopy(voice = "neutral", guidance = "gentle") {
   };
   return { ...virtualGuardianReminderCopy(voice, "", guidance), body: messages[voice] || messages.neutral };
 }
+
+export function guardianCaretakerCopy(period = "morning", style = "gentle") {
+  const bedtime = period === "bedtime";
+  const messages = {
+    gentle: bedtime ? "A cozy bedtime check-in is here, if you'd like one." : "Your gentle morning care routine is here when you're ready.",
+    baby: bedtime ? "Sweet little one, time to get comfy and cozy for bed. 💗" : "Good morning, little one! Ready for a cozy care routine? 🍼",
+    structured: bedtime ? "Bedtime routine: pick one comfortable step, or rest." : "Morning care: choose one small step at your own pace."
+  };
+  return { title: "A little care from Guardian 🧸", body: messages[style] || messages.gentle };
+}
