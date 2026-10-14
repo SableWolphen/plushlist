@@ -1,14 +1,42 @@
-// Offline guidance. Nothing here changes scheduled tasks or contacts another service.
+export const SURPRISE_BOX_CHOICES = [
+  {id:"movie",label:"🎬 A cozy movie night"},
+  {id:"storybook",label:"📖 Favorite story time"},
+  {id:"color",label:"🖍️ Coloring or sticker play"},
+  {id:"plush",label:"🧸 A plushie picnic"},
+  {id:"game",label:"🎮 A comfy game session"},
+  {id:"music",label:"🎵 Soft music and relaxation"}
+];
+export function nextSurpriseBox(state={},date="") {
+  const prefs=state.prefs||{}, history=Array.isArray(state.surpriseBoxHistory)?state.surpriseBoxHistory:[];
+  if (!prefs.surpriseBox || !prefs.automaticReminders || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const selected=SURPRISE_BOX_CHOICES.filter(x=>(prefs.surpriseBoxChoices||[]).includes(x.id));
+  if (!selected.length || history.some(x=>x.date===date)) return null;
+  const day=Math.floor(Date.parse(date+"T12:00:00")/86400000);
+  const latest=history.at(-1);
+  if (latest && day-Math.floor(Date.parse(latest.date+"T12:00:00")/86400000)<3) return null;
+  const lastId=latest?.id;
+  const pool=selected.filter(x=>x.id!==lastId);
+  const possible=pool.length?pool:selected;
+  const choice=possible[day%possible.length];
+  return {date,id:choice.id,label:choice.label};
+}
 export function smartCarePlan(rows=[], done={}, energy="some", resting=false, now=new Date(), little=false) {
-  const hour=now.getHours();
+  const current=now.getHours()*60+now.getMinutes();
   const pending=(Array.isArray(rows)?rows:[]).filter(r=>r?.key && !done[r.key] && !r.isBonus && !r.sourceTask?.archived_at);
-  const timed=pending.filter(r=>/^([01]\d|2[0-3]):[0-5]\d$/.test(String(r.time||r.sourceTask?.reminder_time||""))).sort((a,b)=>String(a.time||a.sourceTask?.reminder_time).localeCompare(String(b.time||b.sourceTask?.reminder_time)));
-  const next=timed.find(r=>String(r.time||r.sourceTask?.reminder_time)>=String(hour).padStart(2,"0")+":"+String(now.getMinutes()).padStart(2,"0"))||pending[0];
-  const item=resting?"It's a rest day. Take care of yourself at your own pace.":energy==="low"?"Choose a tiny step or rest.":next?"Next little job: "+String(next.label).slice(0,100):"Your scheduled jobs are caught up. Enjoy some free time.";
+  const clock=r=>String(r.time||r.sourceTask?.reminder_time||"");
+  const mins=r=>{const v=clock(r);return /^([01]\d|2[0-3]):[0-5]\d$/.test(v)?Number(v.slice(0,2))*60+Number(v.slice(3,5)):null;};
+  const timed=pending.map(r=>({r,time:mins(r)})).filter(x=>x.time!==null).sort((a,b)=>a.time-b.time);
+  const next=timed.find(x=>x.time>=current)||timed[0];
+  const untimed=pending.find(r=>mins(r)===null);
+  const task=next?.r||untimed;
+  const time=next?clock(task)+" · ":"";
+  const immediate=resting?"Rest day: tasks can wait.":energy==="low"?"Keep it tiny today: choose one step or rest.":task?time+"Next: "+String(task.label).slice(0,90):"You're caught up. Enjoy a moment for yourself.";
+  const nextClock=timed.find(x=>x.time>current)?.time;
+  const available=nextClock===undefined?"No timed task is coming up.":"Your next scheduled job is in "+Math.max(1,Math.round((nextClock-current)/5)*5)+" minutes.";
   return [
-    {icon:"🌤️",label:"Right now",detail:item},
-    {icon:"🧸",label:"Comfort break",detail:little?"Pick a plushie, cartoon, coloring or quiet play.":"Take a break for something enjoyable."},
-    {icon:"🌙",label:"Later",detail:hour>=18?"Wind down with a calm bedtime routine.":"Leave some room to unwind this evening."}
+    {icon:"🌤️",label:"Now",detail:immediate},
+    {icon:"🧸",label:"Comfort",detail:(little?"Cartoon, plushie cuddle or coloring. ":"Stretch, rest or enjoy a favorite activity. ")+(resting?"Take all the time you need.":available)},
+    {icon:"🌙",label:"Later",detail:now.getHours()>=18?"Choose a calm bedtime routine when ready.":"Save some space this evening to unwind."}
   ];
 }
 export function surpriseLetter(state={}, today="", resting=false) {
