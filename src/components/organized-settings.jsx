@@ -186,7 +186,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
         ))}
         {!query && moreCategories.length > 0 && (
           <details>
-            <summary style={{ minHeight: 48, padding: "0 14px", display: "list-item", alignContent: "center", cursor: "pointer", fontSize: 13, fontWeight: 900, color: "var(--pl-theme-muted,#7B6888)" }}>Other settings · {moreCategories.length} optional areas</summary>
+            <summary style={{ minHeight: 48, padding: "0 14px", display: "list-item", alignContent: "center", cursor: "pointer", fontSize: 13, fontWeight: 900, color: "var(--pl-theme-muted,#7B6888)" }}>More settings · {moreCategories.length} optional areas</summary>
             <div style={{ borderTop: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
               {moreCategories.map(([id, icon, title, description]) => (
                 <SettingsHomeRow key={id} icon={icon} title={title} description={description} onClick={() => setSection(id)} badge={id === "account" && (!online || syncStatus === "offline") ? "Offline" : null} />
