@@ -72,6 +72,10 @@ if (fs.existsSync(manifestPath)) {
 
 if (fs.existsSync(providerPath)) {
   const provider = read(providerPath);
+  for (const theme of ["mint", "peach", "strawberry", "cloud", "garden"]) {
+    const resource = path.join(ROOT, `android/app/src/main/res/drawable/plushlife_widget_${theme}.xml`);
+    if (!fs.existsSync(resource) || !provider.includes(`R.drawable.plushlife_widget_${theme}`)) failures.push(`Widget is missing the ${theme} world treatment.`);
+  }
   for (const requiredId of ["widget_root", "widget_day_type", "widget_progress", "widget_weekly_progress"]) {
     if (!provider.includes(`R.id.${requiredId}`)) failures.push(`Widget provider no longer references ${requiredId}.`);
   }

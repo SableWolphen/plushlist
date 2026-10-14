@@ -5075,7 +5075,12 @@ function GlowUpTracker() {
       window.PlushLifeNativeNotifications.syncDailyReminders({ enabled: false }).catch(() => {});
       return;
     }
-    const virtualGuardian = readGuardian(deviceStorage(), user.id).prefs;
+    const guardianState = readGuardian(deviceStorage(), user.id);
+    const virtualGuardian = guardianState.prefs;
+    const activeGuardianRoutine = guardianState.activeRoutine;
+    const guardianRoutine = activeGuardianRoutine && !activeGuardianRoutine.paused && activeGuardianRoutine.index < activeGuardianRoutine.steps?.length
+      ? { name: activeGuardianRoutine.name, nextStep: activeGuardianRoutine.steps[activeGuardianRoutine.index]?.text || "" }
+      : null;
     let habitCoachMeta = {};
     try { habitCoachMeta = JSON.parse(localStorage.getItem("plushlife:habit-coach:v1") || "{}")?.meta || {}; } catch (_error) {}
     const taskReminders = trackerTasks
@@ -5103,8 +5108,14 @@ function GlowUpTracker() {
       virtualGuardian: virtualGuardian.automaticReminders === true,
       guardianVoice: virtualGuardian.voice,
       guardianGuidance: virtualGuardian.guidance,
+      guardianRoutine,
+      routineNudges: virtualGuardian.automaticReminders && virtualGuardian.routineNudges,
+      routineReminderTime: virtualGuardian.routineReminderTime,
+      tomorrowNudges: virtualGuardian.automaticReminders && virtualGuardian.tomorrowNudges,
+      tomorrowReminderTime: virtualGuardian.tomorrowReminderTime,
+      tomorrowTasksCount,
     }).catch(() => {});
-  }, [user?.id, guardianReminderRevision, cozyComfort.status, cozyComfort.profile.reminder_style, preferences.notifications_enabled, preferences.discreet_notifications, JSON.stringify(preferences.reminder_times || []), preferences.quiet_start, preferences.quiet_end, JSON.stringify(restDates), JSON.stringify(viewDone), JSON.stringify(trackerTasks.map((task) => [task.task_key, task.archived_at, task.reminder_time, task.schedule_days, task.day_id, task.tiny_label]))]);
+  }, [user?.id, guardianReminderRevision, tomorrowTasksCount, cozyComfort.status, cozyComfort.profile.reminder_style, preferences.notifications_enabled, preferences.discreet_notifications, JSON.stringify(preferences.reminder_times || []), preferences.quiet_start, preferences.quiet_end, JSON.stringify(restDates), JSON.stringify(viewDone), JSON.stringify(trackerTasks.map((task) => [task.task_key, task.archived_at, task.reminder_time, task.schedule_days, task.day_id, task.tiny_label]))]);
   const doneCount = rows.filter((r) => viewDone[r.key]).length;
   const requiredRows = rows.filter((row) => !row.isBonus);
   const optionalRows = rows.filter((row) => row.isBonus);

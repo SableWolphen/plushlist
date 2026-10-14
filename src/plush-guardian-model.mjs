@@ -89,6 +89,10 @@ export const freshGuardianState = () => ({
     quietEnd: "08:00",
     reminders: false,
     automaticReminders: false, // Opt-in rule-based reminders through the existing Android scheduler.
+    routineNudges: false,
+    tomorrowNudges: false,
+    routineReminderTime: "18:30",
+    tomorrowReminderTime: "20:00",
   },
   home: { order: HOME_CARDS.map(([id]) => id), hidden: [] },
   inbox: [],
@@ -112,6 +116,11 @@ export function normalizeGuardianState(value) {
   const next = { ...d, ...value, prefs: { ...d.prefs, ...value.prefs } };
   if (!VOICES[next.prefs.voice]) next.prefs.voice = "neutral";
   next.prefs.automaticReminders = next.prefs.automaticReminders === true;
+  next.prefs.routineNudges = next.prefs.routineNudges === true;
+  next.prefs.tomorrowNudges = next.prefs.tomorrowNudges === true;
+  for (const key of ["routineReminderTime", "tomorrowReminderTime"]) {
+    if (!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(next.prefs[key])) next.prefs[key] = d.prefs[key];
+  }
   for (const key of [
     "inbox",
     "memories",
