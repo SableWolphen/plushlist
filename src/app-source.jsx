@@ -5141,6 +5141,19 @@ function GlowUpTracker() {
     if (saveGuardian(deviceStorage(), user.id, next)) window.dispatchEvent(new Event(STATE_EVENT));
   }, [user?.id, supportLinksLoadedFor, JSON.stringify(supportLinks.map(link => [link.owner_user_id, link.active, link.accepted_at]))]);
   useEffect(() => {
+    if (!user?.id) {
+      document.documentElement.classList.remove("pl-global-little-mode");
+      return;
+    }
+    const applyLittle = () => {
+      const prefs = readGuardian(deviceStorage(), user.id).prefs;
+      document.documentElement.classList.toggle("pl-global-little-mode", !!(prefs.careMode && prefs.littleMode));
+    };
+    applyLittle();
+    window.addEventListener(STATE_EVENT, applyLittle);
+    return () => { window.removeEventListener(STATE_EVENT, applyLittle); document.documentElement.classList.remove("pl-global-little-mode"); };
+  }, [user?.id]);
+  useEffect(() => {
     const refresh = () => setGuardianReminderRevision((value) => value + 1);
     window.addEventListener(STATE_EVENT, refresh);
     window.addEventListener("storage", refresh);
@@ -5187,6 +5200,10 @@ function GlowUpTracker() {
       virtualGuardian: automaticGuardian,
       guardianVoice: virtualGuardian.voice,
       guardianGuidance: virtualGuardian.guidance,
+      careReminders: automaticGuardian && virtualGuardian.careMode && virtualGuardian.careReminders,
+      careStyle: virtualGuardian.careStyle,
+      careMorningTime: virtualGuardian.careMorningTime,
+      careBedtimeTime: virtualGuardian.careBedtimeTime,
       guardianRoutine,
       routineNudges: automaticGuardian && virtualGuardian.routineNudges,
       routineReminderTime: virtualGuardian.routineReminderTime,
