@@ -4,7 +4,7 @@ Plush Guardian opens from Care, the optional Home card, or task options. It exte
 
 ## Delivered tools
 
-- Guided AI chat with neutral, Mommy, Daddy, or playful voice; optional task/mood/explicit-memory context; each send has a preview; manually selected journal excerpts only.
+- **Bot Mommy (or Bot Daddy, Gentle Guardian, or Playful Guardian)**: an opt-in **rule-based** substitute for daily Guardian support when a Cozy has no human Guardian. It shows real task progress, the next small task, routines and locally scheduled nudges. **There is no AI chat.**
 - Offline support choices, energy-based task selection, editable tiny steps, partial effort records, Tiny/Rest day preview, and existing task edit/completion controls.
 - Brain dump with reviewed one-time task creation and reflection conversion.
 - Reviewed morning, after-work, bedtime, and tomorrow routines; custom routines; separate step checkmarks; pause/skip/resume after reload. Together mode shares the current screen. Guardian invitations open the existing recipient and message review UI; nothing sends automatically.
@@ -13,15 +13,13 @@ Plush Guardian opens from Care, the optional Home card, or task options. It exte
 
 ## Data boundaries
 
-The new `guardian-companion:v1` record is scoped by authenticated account ID. It is device-only and is not added to the existing companion cloud-sync payload. Optional saved chat is off by default. Each private item can be deleted in its tool, memories/chat can be forgotten, and a downloadable companion copy is available. Account deletion clears the new companion and Focus keys on that device. Device-only data does not automatically move to another phone.
+The `guardian-companion:v1` record is scoped by authenticated account ID and stays device-only. Old locally saved chat from earlier versions is retained solely for explicit deletion or export, not used for generation. All legacy AI permissions and sharing toggles are switched off on load without silently deleting memories or saved chat. Each private item can be deleted in its tool, and a downloadable companion copy is available. Account deletion clears the companion and Focus keys on that device. Device-only data does not automatically move to another phone.
 
-`POST /api/plush-guardian` uses the existing Cloudflare Workers AI binding and model. It verifies the bearer token through Supabase Auth, requires explicit consent, accepts only bounded user/assistant messages, allowlists origins, and returns no-store responses. It has no tool execution or database writes. System instructions treat all user context as data, maintain human/AI distinctions, avoid dependency and medical claims, and preserve user choice. The old owner-only `/api/mamas-corner` gate remains intact.
-
-The endpoint limits requests to 20 per account per 10-minute window per Worker isolate. This limits accidental bursts, not a global billing cap. Requests are limited to 24 KB and inference has a 20-second response deadline. Conversations and context are not logged by this handler. Provider processing remains subject to Cloudflare's terms; local deletion cannot retract a previous request.
+The old public `POST /api/plush-guardian` chat route is retired in the Worker source: it returns HTTP 410 instead of calling AI. This takes effect when that Worker build is deployed; editing the repository alone does not update the running Cloudflare Worker. The distinct historical owner-only `/api/mamas-corner` code was not expanded or repurposed into Bot Mommy. The new bot's task previews and notification copy are generated entirely on-device from existing data.
 
 ## Verification
 
-`npm test` includes behavior tests for account isolation, failed local writes, default-off context sharing, task selection, explicit excerpts, API authentication, consent, CORS, input size and rate limits. Browser verification covers Brain dump conversion, paused routine reload/resume, editable voice, Home visibility, AI send preview and excluded context, personal rewards, and 320/393/412/740px layouts in both appearances.
+`npm test` includes behavior tests for account isolation, failed local writes, default-off context sharing, task selection, explicit excerpts, API authentication, consent, CORS, input size and rate limits. Browser verification covers Brain dump conversion, paused routine reload/resume, editable voice, Home visibility, Bot Mommy opt-in, personal rewards, and 320/393/412/740px layouts in both appearances.
 
 Real-device notification scheduling and simultaneous remote routine synchronization are not added by this change. Existing notifications and permission-controlled Guardian features remain available. Together routines here are intentionally on one device, with reviewed invitations through the existing Guardian flow.
 
@@ -42,3 +40,11 @@ This phase does not yet support remote synchronization of active together-routin
 
 ### Unchanged security and product boundaries
 No Supabase schema or cloud-sync payload edits, billing changes, new analytics SDK, third-party flows, new Android permissions, or `daily_progress`/task-history semantics have been changed. Multi-device Guardian routine collaboration and Cloud backup are not part of this change. Follow #346/#347 and the project checkpoints before undertaking those changes.
+
+## Bot Mommy is not a chatbot
+
+On the Guardians page, a Cozy with **no active, accepted human Guardian** gets a Bot Mommy entry point without having to invite anyone. Inside the Bot Guardian, the user explicitly chooses **Turn on Bot Mommy**. That sets a caring Mommy voice and enables existing automatic task/reminder style plus unfinished-routine and tomorrow-preparation nudges. It does not grant Android notification permission, send a human invite, edit task history, or change database schemas. Other Guardian voices can be selected later.
+
+The dashboard uses the real completion state to show tasks done, tasks left, and a start-with-one button. Existing routines provide step-by-step, pause, skip and resume controls; real tasks remain manually checked. Rest days suppress extra notifications and the day's task pressure. Quiet hours, discreet lock-screen copy and platform delivery restrictions remain in force. No promises of guaranteed delivery while closed are made. In-app prompts and private Guardian memories are not AI conversations.
+
+The old chatbot UI, consent controls and network request code were removed from the Guardian client. Legacy local conversation records are not automatically destroyed, but can be deleted in Bot Guardian settings. The server route is intentionally retired to protect existing old app builds.
