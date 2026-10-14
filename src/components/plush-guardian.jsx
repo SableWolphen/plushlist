@@ -52,15 +52,17 @@ export function PlushGuardianHost(props) {
   const state = useGuardianState(props.user?.id);
   React.useEffect(() => {
     setRequest(null);
-    const open = (e) =>
+    const open = (e) => {
+      if (!props.guardianLinksReady || props.humanGuardianConnected) return;
       setRequest({
         page: e.detail?.page || "guardian",
         taskKey: e.detail?.taskKey || null,
         id: Date.now(),
       });
+    };
     window.addEventListener(GUARDIAN_EVENT, open);
     return () => window.removeEventListener(GUARDIAN_EVENT, open);
-  }, [props.user?.id]);
+  }, [props.user?.id, props.guardianLinksReady, props.humanGuardianConnected]);
   React.useEffect(() => {
     if (!props.user?.id) return;
     document.documentElement.dataset.plCompanionMotion = state.prefs.motion
@@ -72,7 +74,8 @@ export function PlushGuardianHost(props) {
       delete document.documentElement.dataset.plCompanionText;
     };
   }, [props.user?.id, state.prefs.motion, state.prefs.textSize]);
-  if (!props.user || !request) return null;
+  // A newly accepted person immediately closes the automatic Guardian panel.
+  if (!props.user || !request || !props.guardianLinksReady || props.humanGuardianConnected) return null;
   return (
     <GuardianBoundary key={props.user.id} onClose={() => setRequest(null)}>
       <React.Suspense
