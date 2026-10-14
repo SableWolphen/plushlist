@@ -74,6 +74,9 @@ export const freshGuardianState = () => ({
     guardianName: "",
     guidance: "gentle",
     careMode: false,
+    careReminders: false,
+    careMorningTime: "09:00",
+    careBedtimeTime: "20:15",
     littleMode: false,
     careStyle: "gentle",
     petName: "",
@@ -110,6 +113,7 @@ export const freshGuardianState = () => ({
   chat: [],
   activeRoutine: null,
   careChecks: { date: "", items: {} },
+  careStickers: [],
   taskSteps: {},
   partial: {},
   lastVisit: "",
@@ -132,6 +136,9 @@ export function normalizeGuardianState(value) {
   next.prefs.keepChat = false;
   next.prefs.careMode = next.prefs.careMode === true;
   next.prefs.littleMode = next.prefs.littleMode === true;
+  next.prefs.careReminders = next.prefs.careReminders === true;
+  for (const key of ["careMorningTime","careBedtimeTime"]) if (!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(next.prefs[key])) next.prefs[key] = d.prefs[key];
+  next.careStickers = Array.isArray(value.careStickers) ? [...new Set(value.careStickers.filter(x=>typeof x==="string" && /^\\d{4}-\\d{2}-\\d{2}:(wake|midday|nap|night)$/.test(x)))].slice(-90) : [];
   next.prefs.careStyle = ["gentle","baby","structured"].includes(next.prefs.careStyle) ? next.prefs.careStyle : "gentle";
   next.prefs.petName = typeof next.prefs.petName === "string" ? next.prefs.petName.slice(0,40) : "";
   next.careChecks = value.careChecks && typeof value.careChecks.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.careChecks.date) && value.careChecks.items && typeof value.careChecks.items === "object" && !Array.isArray(value.careChecks.items)
