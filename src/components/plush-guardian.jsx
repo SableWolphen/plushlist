@@ -122,14 +122,14 @@ export function CompanionHomeCard({ userId }) {
             ? "Welcome back, Cozy"
             : state.activeRoutine
               ? "Your routine is waiting"
-              : "A little support for your day"}
+              : state.prefs.automaticReminders ? "Your Virtual Guardian is ready" : "A little support for your day"}
         </strong>
         <p>
           {gap >= 3
             ? "Start with one manageable step. Your history stays safe."
             : reminder
               ? "A gentle check-in, whenever you’re ready."
-              : "Your pace. Your choices."}
+              : state.prefs.automaticReminders ? "Your chosen reminder times are ready." : "Your pace. Your choices."}
         </p>
         <button
           onClick={() =>
@@ -146,7 +146,7 @@ export function CompanionHomeCard({ userId }) {
             ? "Choose a fresh start"
             : state.activeRoutine
               ? "Continue my routine"
-              : "Meet your Plush Guardian"}{" "}
+              : state.prefs.automaticReminders ? "My Virtual Guardian" : "Meet your Plush Guardian"}{" "}
           ›
         </button>
         <div className="pl-companion-home-shortcuts">
