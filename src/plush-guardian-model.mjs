@@ -75,6 +75,8 @@ export const freshGuardianState = () => ({
     guidance: "gentle",
     careMode: false,
     surpriseLetters: false,
+    surpriseBox: false,
+    surpriseBoxChoices: ["movie","storybook","color","plush","game","music"],
     lettersEnabledOn: "",
     automaticGifts: true,
     giftCategories: ["stickers","celebrations","trophies","activities"],
@@ -119,6 +121,7 @@ export const freshGuardianState = () => ({
   careChecks: { date: "", items: {} },
   careStickers: [],
   surpriseLetterHistory: [],
+  surpriseBoxHistory: [],
   automaticGiftLedger: [],
   taskSteps: {},
   partial: {},
@@ -143,6 +146,9 @@ export function normalizeGuardianState(value) {
   next.prefs.automaticGifts = next.prefs.automaticGifts !== false;
   next.prefs.giftCategories = Array.isArray(next.prefs.giftCategories) ? [...new Set(next.prefs.giftCategories.filter(x=>["stickers","celebrations","trophies","activities","babyDays"].includes(x)))] : [...d.prefs.giftCategories];
   next.automaticGiftLedger = Array.isArray(value.automaticGiftLedger) ? [...new Set(value.automaticGiftLedger.filter(x=>typeof x==="string" && /^\d{4}-\d{2}-\d{2}:(25|50|75|100|baby-day)$/.test(x)))].slice(-180) : [];
+  next.prefs.surpriseBox = next.prefs.surpriseBox === true;
+  next.prefs.surpriseBoxChoices = Array.isArray(next.prefs.surpriseBoxChoices) ? [...new Set(next.prefs.surpriseBoxChoices.filter(id=>["movie","storybook","color","plush","game","music"].includes(id)))] : d.prefs.surpriseBoxChoices;
+  next.surpriseBoxHistory = Array.isArray(value.surpriseBoxHistory) ? value.surpriseBoxHistory.filter(x=>x && /^\d{4}-\d{2}-\d{2}$/.test(x.date||"") && next.prefs.surpriseBoxChoices.includes(x.id) && typeof x.label==="string").slice(-40) : [];
   next.prefs.surpriseLetters = next.prefs.surpriseLetters === true;
   next.prefs.lettersEnabledOn = typeof next.prefs.lettersEnabledOn === "string" && /^\d{4}-\d{2}-\d{2}$/.test(next.prefs.lettersEnabledOn) ? next.prefs.lettersEnabledOn : "";
   next.surpriseLetterHistory = Array.isArray(value.surpriseLetterHistory) ? value.surpriseLetterHistory.filter(x=>x && typeof x.text==="string" && typeof x.date==="string" && /^\d{4}-\d{2}-\d{2}$/.test(x.date)).slice(-40) : [];
