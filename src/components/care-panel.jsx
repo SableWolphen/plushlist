@@ -1,3 +1,4 @@
+import { openPlushGuardian } from "./plush-guardian.jsx";
 import { CozySpace } from "./cozy-space.jsx";
 import { CareHistory } from "./care-history.jsx";
 /*
@@ -117,6 +118,7 @@ export function CarePanel(props) {
 
   return (
     <div data-plushcare-redesign="true" className="pl-care-shell">
+      <button type="button" className="pl-companion-care-entry" onClick={()=>openPlushGuardian()}>Plush Guardian <small>Optional AI companion, routines & private tools</small><span aria-hidden="true">›</span></button>
       <section className="pl-reference-care-launchers" aria-label="Care shortcuts">
         <button type="button" onClick={() => props.setCheckInPopupOpen?.(true)}><span aria-hidden="true">💗</span><span><strong>Daily check-in</strong><small>How are you feeling today?</small></span><span aria-hidden="true">›</span></button>
         <button type="button" onClick={() => props.openTodayJournal?.()}><span aria-hidden="true">📝</span><span><strong>Journal</strong><small>Write about your day.</small></span><span aria-hidden="true">›</span></button>

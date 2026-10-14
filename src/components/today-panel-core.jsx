@@ -397,7 +397,7 @@ export function TodayPanel({
   reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen, setSettingsOpen,
   completedTodayExpanded, setCompletedTodayExpanded, tomorrowTasksCount, preferences,
   activityDaysTotal, selectedOutfit, appearanceTheme, dinoTheme, babyMode, cozyDaily, optionalTools, rewardMoment, onWearReward, onDismissReward, returnGapDays, returnBannerDismissed, setReturnBannerDismissed, selectDayType, isHistoricalView, isFutureView,
-  pct, doneCount, openTodayJournal, openDailyCheckIn, dailyCheckIn, userId
+  pct, doneCount, openTodayJournal, openDailyCheckIn, dailyCheckIn, userId, syncStatus, online
 }) {
   // Wraps the app toggle with the shared completion flow: newly completed
   // tasks linger briefly for undo, and every completion dispatches
@@ -585,7 +585,7 @@ export function TodayPanel({
 
       <div data-plushlife-home-stack className="pl-home-shell">
         {(isHistoricalView || isFutureView) ? <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} /> : null}
-        {!isHistoricalView && !isFutureView && <StorybookHome world={babyMode ? (preferences?.dark_mode ? "baby-night" : "baby") : dinoTheme ? "dino" : appearanceTheme} rows={rows} viewDone={viewDone} period={period} pct={pct} toggle={unifiedToggle} openTaskManager={openTaskManager} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} selectedOutfit={selectedOutfit} darkMode={preferences?.dark_mode} />}
+        {!isHistoricalView && !isFutureView && <StorybookHome world={babyMode ? (preferences?.dark_mode ? "baby-night" : "baby") : dinoTheme ? "dino" : appearanceTheme} rows={rows} viewDone={viewDone} period={period} pct={pct} toggle={unifiedToggle} openTaskManager={openTaskManager} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} selectedOutfit={selectedOutfit} darkMode={preferences?.dark_mode} userId={userId} syncStatus={syncStatus} online={online} />}
         {!isHistoricalView && !isFutureView && <details className="pl-storybook-planning"><summary>♡ Make today easier · Plan & focus</summary><CozyDayHome userId={userId} rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} onComfort={()=>setCalmQuickOpen?.(true)} period={period} pct={pct} mode={dailyCheckIn?.day_type || "full"} babyMode={babyMode} />{!isHistoricalView && !isFutureView && <DayRescue currentMode={dailyCheckIn?.day_type || "full"} onSelect={selectDayType} openTaskManager={()=>openTaskManager?.(period?.date)} />}</details>}
 
         {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }

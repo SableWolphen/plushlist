@@ -1,3 +1,4 @@
+import { CompanionHomeCard,useGuardianState,openPlushGuardian } from "./plush-guardian.jsx";
 import { ThemeScene, ThemeWorldContext } from "./theme-world.jsx";
 import { buildCozyDayPlan } from "../cozy-day-plan.mjs";
 import { themeAtmosphere } from "../theme-atmosphere.js";
@@ -31,7 +32,9 @@ export function storybookRows(rows=[],viewDone={},limit=3) {
 export function storybookGreeting(hour = new Date().getHours()) {
   return hour < 12 ? "Good morning, Cozy!" : hour < 18 ? "Good afternoon, Cozy!" : "Good evening, Cozy!";
 }
-export function StorybookHome({world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false}) {
+export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false,syncStatus,online}) {
+  const companion=useGuardianState(userId);
+  const cardStyle=id=>({order:companion.home.order.indexOf(id)+1,display:companion.home.hidden.includes(id)?"none":undefined});
   const context=React.useContext(ThemeWorldContext);
   const nursery=world === "baby" || world === "baby-night";
   const caregiver=context.voice === "fatherly" ? "Daddy" : "Mommy";
@@ -56,8 +59,11 @@ export function StorybookHome({world="soft",rows=[],viewDone={},period,pct=0,tog
       {atmosphere.scene && <div className="pl-storybook-sky" aria-hidden="true"><img src={`./assets/worlds/${atmosphere.scene}.svg`} alt="" width="640" height="240" /></div>}
       <div className="pl-storybook-greeting">{copy.tag && <p className={nursery ? "pl-storybook-small pl-nursery-mode-label" : "pl-storybook-small"}>{copy.symbol} {copy.tag}</p>}<h1>{nursery ? storybookGreeting().replace("Cozy!",caregiver === "Mommy" ? "sweetheart!" : "kiddo!") : storybookGreeting()}</h1><p>{copy.detail}</p></div>
       <div className="pl-storybook-mascot" aria-label="Your original PlushLife teddy bear"><ThemeScene decorative focus outfit={selectedOutfit} /></div>
+      <button type="button" className="pl-companion-home-customize" onClick={()=>openPlushGuardian("settings")}>Customize Home</button>
+      <span className="pl-companion-sync" role="status">{online===false?"Offline":syncStatus==="syncing"?"Saving…":syncStatus==="error"?"Sync needs attention":syncStatus==="synced"?"Synced":"Account connected"}</span>
     </header>
-    <section className="pl-storybook-today" aria-label="Today's checklist">
+    <div className="pl-companion-home-card" style={cardStyle("companion")}><CompanionHomeCard userId={userId}/></div>
+    <section style={cardStyle("tasks")} className="pl-storybook-today" aria-label="Today's checklist">
       <div className="pl-storybook-topline"><span>TODAY</span><button type="button" onClick={()=>goToDashboard?.("week")} aria-label="Open calendar">{dayLabel} <span aria-hidden="true">▦</span></button></div>
       <div className="pl-storybook-intro"><div><h2>{completed === total && total ? "Your little wins" : atmosphere.heading}</h2><p>{total ? atmosphere.hint : "Your page is ready. Start with one little thing."}</p></div></div>
       <div className="pl-storybook-progress-label"><strong>{completed} / {total} completed</strong><span>{total ? progress+"%" : "Fresh start"}</span></div>
@@ -66,15 +72,15 @@ export function StorybookHome({world="soft",rows=[],viewDone={},period,pct=0,tog
       {visible.length ? <ul className="pl-storybook-list">{visible.map(row=><li key={row.key} data-habit-kind={row.habitType}><button className="pl-storybook-check" type="button" aria-label={(row.done?"Undo ":"Complete ")+row.label} aria-pressed={row.done} onClick={()=>toggle?.(row.key)}><span aria-hidden="true">{row.done?"✓":""}</span></button><span className="pl-storybook-task-copy"><HabitTypeIcon task={row.sourceTask} habitType={row.habitType}/><span className={row.done?"pl-storybook-complete":""}>{row.label}</span>{row.habitType!=="regular" && <HabitGoalCaption taskKey={row.key} fallbackGoal={row.goal}/>}</span><button type="button" className="pl-storybook-detail" aria-label={"Edit "+row.label} onClick={()=>openTaskManager?.(period?.date)}>›</button></li>)}</ul> : <div className="pl-storybook-empty"><p>A fresh page, just for you. 🌷</p><button type="button" onClick={()=>openTaskManager?.(period?.date)}>＋ Add your first little task</button></div>}
       {total>visible.length&&<button type="button" className="pl-storybook-more" onClick={()=>openTaskManager?.(period?.date)}>View all {total} {atmosphere.noun} ›</button>}
     </section>
-    <nav className="pl-storybook-doors" aria-label="Your cozy shortcuts">
+    <nav style={cardStyle("shortcuts")} className="pl-storybook-doors" aria-label="Your cozy shortcuts">
       <button type="button" className="pl-storybook-door pl-door-checkin" onClick={()=>openDailyCheckIn?.()}><span className="pl-storybook-door-emoji" aria-hidden="true">{atmosphere.check}</span><strong>Check In</strong></button>
       <button type="button" className="pl-storybook-door pl-door-journal" onClick={()=>openTodayJournal?.()}><span className="pl-storybook-door-emoji" aria-hidden="true">{atmosphere.journal}</span><strong>Journal</strong></button>
       <button type="button" className="pl-storybook-door pl-door-focus" onClick={focus}><span className="pl-storybook-door-emoji" aria-hidden="true">{atmosphere.focus}</span><strong>Focus</strong></button>
     </nav>
-    <details className="pl-storybook-moods"><summary>How are you feeling?</summary><div className="pl-storybook-mood-head"><div><p>A little room to check in.</p></div><button type="button" onClick={()=>goToDashboard?.("care")}>My Care ›</button></div>
+    <details style={cardStyle("moods")} className="pl-storybook-moods"><summary>How are you feeling?</summary><div className="pl-storybook-mood-head"><div><p>A little room to check in.</p></div><button type="button" onClick={()=>goToDashboard?.("care")}>My Care ›</button></div>
       <div className="pl-storybook-mood-grid">{STORYBOOK_MOODS.map(([id,label,emoji])=><button type="button" key={id} onClick={()=>openDailyCheckIn?.()} aria-label={"Check in feeling "+label}><span className="pl-storybook-face" aria-hidden="true">{emoji}</span><span>{label}</span></button>)}</div>
       <p className="pl-storybook-mood-help">Tap a feeling to open your private check-in.</p>
     </details>
-    <p className="pl-storybook-kind-note">{copy.ending} ♡</p>
+    <p style={cardStyle("kindness")} className="pl-storybook-kind-note">{copy.ending} ♡</p>
   </div>;
 }

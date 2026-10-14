@@ -1,3 +1,4 @@
+import { openPlushGuardian } from "./plush-guardian.jsx";
 import { HOME_SECTIONS, normalizeHomeLayout, moveHomeSection } from "../home-layout.js";
 
 export function HomeLayoutEditor({ value, onSave }) {
@@ -7,6 +8,7 @@ export function HomeLayoutEditor({ value, onSave }) {
   const change = next => { setDraft(next); setSaved(false); };
   return <section className="pl-home-customizer" aria-label="Customize Home">
     <h3>Your Home, at your pace</h3>
+    <button type="button" onClick={()=>openPlushGuardian("settings")}>Customize main Home cards</button>
     <p>Choose which cards you see and what comes first. Your tasks and progress stay yours.</p>
     <ol>
       {draft.order.map((id, index) => <li key={id}>

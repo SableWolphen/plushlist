@@ -1,3 +1,4 @@
+import { handlePlushGuardian } from './plush-guardian-api.mjs';
 const SUPABASE_URL = "https://pvitdhixycegmcovapyh.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_SScDCEHovc68ITiEUu6lCg_mHPe2oaI";
 
@@ -85,6 +86,7 @@ async function authenticatedUser(request) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === "/api/plush-guardian") return handlePlushGuardian(request, env);
     if (url.pathname !== "/api/mamas-corner") return env.ASSETS.fetch(request);
     if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
 

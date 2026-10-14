@@ -1,10 +1,11 @@
+import { companionAccountKey } from "../companion-account-storage.mjs";
 import { ThemeScene } from "./theme-world.jsx";
 // A gentle "do it with me" timer.
 //
 // Focus mode isolates one task but there was no time container for starting.
 // This is a soft timer — 2/5/10/25 minutes — with the mascot present and a
-// soft Web Audio chime at the end. The copy never scolds: cancelling or
-// ignoring it is always fine. Session-only, nothing is persisted.
+// soft Web Audio chime at the end. The copy never scolds. An unfinished
+// session saves its remaining time only on this device, scoped to its account.
 const TIMER_DURATIONS = [2, 5, 10, 25];
 
 function playGentleChime() {
@@ -44,8 +45,10 @@ export function startFocusTimer(detail = {}) {
   window.dispatchEvent(new CustomEvent("plushlife:start-focus-timer", {detail}));
 }
 
-export function FocusTimer() {
+export function FocusTimer({ userId } = {}) {
+  const focusKey = companionAccountKey("focus-resume:v1", userId);
   const [task, setTask] = React.useState({});
+  const [sessionOwner, setSessionOwner] = React.useState(null);
   const [sound, setSound] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [durationMin, setDurationMin] = React.useState(5);
@@ -65,6 +68,10 @@ export function FocusTimer() {
   React.useEffect(() => {
     const onStart = event => {
       clearTimer();
+      setSessionOwner(userId || null);
+      if(event.detail?.resume && focusKey){
+        try {const saved=JSON.parse(localStorage.getItem(focusKey)||'null');if(saved&&saved.remaining>0&&TIMER_DURATIONS.includes(saved.minutes)){setDurationMin(saved.minutes);setTask(saved.task||{});setRemaining(Math.min(saved.remaining,saved.minutes*60));setRunning(false);setFinished(false);setOpen(true);return;}}catch(_){}
+      }
       const minutes = TIMER_DURATIONS.includes(event.detail?.minutes) ? event.detail.minutes : durationMin;
       setDurationMin(minutes);
       setTask({label:event.detail?.taskLabel || "",step:event.detail?.step || ""});
@@ -78,16 +85,17 @@ export function FocusTimer() {
       window.removeEventListener("plushlife:start-focus-timer", onStart);
       clearTimer();
     };
-  }, [durationMin]);
+  }, [durationMin, focusKey]);
 
   React.useEffect(() => () => clearTimer(), []);
+  React.useEffect(()=>{clearTimer();setOpen(false);setRunning(false);setTask({});setSessionOwner(null);},[focusKey]);
+  React.useEffect(()=>{if(!focusKey||!open||sessionOwner!==userId)return;try{if(finished)localStorage.removeItem(focusKey);else localStorage.setItem(focusKey,JSON.stringify({task,minutes:durationMin,remaining,updatedAt:Date.now()}));}catch(_){}},[focusKey,open,task,durationMin,remaining,finished,sessionOwner,userId]);
 
   const start = () => {
     clearTimer();
     setFinished(false);
-    setRemaining(durationMin * 60);
     setRunning(true);
-    const endAt = Date.now() + durationMin * 60 * 1000;
+    const endAt = Date.now() + (remaining > 0 ? remaining : durationMin * 60) * 1000;
     timerRef.current = window.setInterval(() => {
       const left = Math.max(0, Math.round((endAt - Date.now()) / 1000));
       setRemaining(left);
