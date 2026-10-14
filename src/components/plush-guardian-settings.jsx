@@ -61,6 +61,25 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           placeholder={guardianBotDisplayName({voice:prefs.voice})}
         />
       </label>
+      <section className="pl-virtual-guardian-options" aria-label="Guardian caretaker options">
+        <h3>🍼 Guardian Care Mode</h3>
+        <p>Choose how nurturing your Guardian feels. Care routines are optional and stay on this device. No chat or automatic personal-care tracking.</p>
+        {check("careMode", "Enable nurturing caretaker routines")}
+        {prefs.careMode && <>
+          {check("littleMode", "Little Mode: simple choices and larger controls")}
+          <label>Caretaker personality
+            <select aria-label="Caretaker personality" value={prefs.careStyle || "gentle"} onChange={event => preference("careStyle",event.target.value)}>
+              <option value="gentle">Gentle and nurturing</option>
+              <option value="baby">Extra babyish and affectionate</option>
+              <option value="structured">Structured and reassuring</option>
+            </select>
+          </label>
+          <label>Guardian can call me
+            <input aria-label="Caretaker pet name" maxLength={40} value={prefs.petName || ""} onChange={event => preference("petName",event.target.value)} placeholder="Little one, pup, baby…" />
+          </label>
+          <p>You control every step. Changing, potty and bath checks are suggestions only; skip anything that doesn't fit. No points are deducted for resting.</p>
+        </>}
+      </section>
       <label>
         Guidance
         <select
