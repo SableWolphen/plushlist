@@ -162,7 +162,7 @@ export default function PlushGuardianCore(props) {
                 alt="Your Plush"
               />
             </section>
-            <section className="pl-virtual-guardian-options" aria-label="Automatic Bot Guardian">
+            <section className="pl-virtual-guardian-options" aria-label="Automatic Guardian">
               <h3>{guardianBotDisplayName(state.prefs)}</h3>
               {state.prefs.automaticReminders ? <>
                 <p role="status">{botPlan.encouragement}</p>
@@ -238,8 +238,8 @@ export default function PlushGuardianCore(props) {
               Ask a human Guardian
             </button>
             <p className="pl-companion-note">
-              Bot Mommy is an automatic routine helper, not a real person.
-              You can always invite a trusted human Guardian too.
+              This Guardian is an automatic routine helper, not a real person.
+              You can invite someone you trust whenever you're ready.
             </p>
           </>
         )}
