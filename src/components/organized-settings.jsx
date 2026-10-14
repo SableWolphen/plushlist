@@ -153,7 +153,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
   if (!open) return null;
 
   const categories = [
-    ["personalize", "👤", "Personalize", "Name, comfort item, dark appearance, themes, Nursery, Dino Theme", "name profile theme dark baby dino appearance comfort"],
+    ["personalize", "👤", "Personalize", "Your name, themes, Mommy/Daddy Mode & Dino", "name profile theme dark baby mommy daddy nursery dino appearance comfort"],
     ["notifications", "🔔", "Notifications & Reminders", "Reminder times, quiet hours, push notifications", "notifications reminders quiet push nurturing discreet"],
     ["experience", "✨", "Experience", "Focus, accessibility, motion, contrast, PlushInsights", "focus accessibility text motion contrast simple insights colorblind consistency"],
     ["recommendations", "🧠", "Recommendations", "Suggestion boundaries and learned-pattern corrections", "recommendations learning profile boundaries forget correction"],

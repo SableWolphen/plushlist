@@ -1684,7 +1684,7 @@ body>[role="dialog"]>div{
   }
   #main-content#main-content[data-pl-world]::-webkit-scrollbar{display:none}
   body:has(#main-content){background:var(--pl-app-chrome,#f6f0fa)}
-  html[data-plushlife-color-mode="dark"] body:has(#main-content){--pl-app-chrome:#21182c}
+  html[data-plushlife-color-mode="dark"] body:has(#main-content){background:var(--pl-app-chrome,#21182c)}
 
   #main-content#main-content[data-pl-world] .plushlife-app-column{
     width:100%!important;

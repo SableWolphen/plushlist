@@ -16,17 +16,51 @@ const fastStart = read("assets/fast-start.js");
 const checkinTheme = read("assets/checkin-theme.js");
 const dailyCopy = read("assets/daily-checkin-copy.js");
 
+// Exercise the rendered picker: a source-string match misses mapped controls.
+const assert = require("node:assert/strict");
+const os = require("node:os");
+const React = require("react");
+const Renderer = require("react-test-renderer");
+global.React = React;
+global.window = { PlushLifeContent: require("../assets/plush-content.js"), PlushLifeThemeCopy: require("../assets/plush-theme-copy.js") };
+const temp = fs.mkdtempSync(path.join(os.tmpdir(), "theme-picker-"));
+require("esbuild").buildSync({entryPoints:[path.join(__dirname,"../src/components/appearance-theme-picker.jsx")],bundle:true,platform:"node",format:"cjs",outfile:path.join(temp,"picker.cjs")});
+const {AppearanceThemePicker} = require(path.join(temp,"picker.cjs"));
+const chosen=[],patches=[];
+let tree;
+Renderer.act(()=>{tree=Renderer.create(React.createElement(AppearanceThemePicker,{preferences:{dark_mode:true,nickname_style:"warm"},appearanceTheme:"none",dinoTheme:false,selectAppearanceTheme:id=>chosen.push(id),updatePreference:patch=>patches.push(patch)}));});
+const choiceButtons=tree.root.findAllByType("button").filter(button=>button.props["data-theme-choice"]);
+Renderer.act(()=>choiceButtons.forEach(button=>button.props.onClick()));
+assert.deepEqual(chosen,["none",...window.PlushLifeContent.APPEARANCE_THEMES.map(theme=>theme.id)]);
+assert.deepEqual(patches,[{dino_theme:true,nickname_style:"warm"},{nickname_style:"baby",dino_theme:false}]);
+const appearanceButtons=tree.root.findByProps({"aria-label":"Choose light or dark appearance"}).findAllByType("button");
+Renderer.act(()=>appearanceButtons.forEach(button=>button.props.onClick()));
+assert.deepEqual(patches.slice(-2),[{dark_mode:false},{dark_mode:true}]);
+assert.equal(choiceButtons.filter(button=>button.props["aria-pressed"]).length,1);
+assert.equal(choiceButtons.find(button=>button.props["aria-pressed"]).props["data-theme-choice"],"none");
+assert.equal(choiceButtons.find(button=>button.props["data-theme-choice"] === "baby").findByProps({className:"pl-world-choice-name"}).props.children[0],"Mommy Mode", "The picker must name Mommy Mode explicitly");
+Renderer.act(()=>tree.update(React.createElement(AppearanceThemePicker,{preferences:{dark_mode:true,nickname_style:"baby",baby_voice:"motherly"},appearanceTheme:"none",dinoTheme:false,selectAppearanceTheme:id=>chosen.push(id),updatePreference:patch=>patches.push(patch)})));
+Renderer.act(()=>tree.root.findAllByType("button").find(button=>button.props.children === "Daddy Mode · Fatherly").props.onClick());
+assert.deepEqual(patches.at(-1),{baby_voice:"fatherly"},"Daddy remains an explicit saved voice choice");
+Renderer.act(()=>tree.update(React.createElement(AppearanceThemePicker,{preferences:{dark_mode:true,nickname_style:"baby",baby_voice:"fatherly"},appearanceTheme:"none",dinoTheme:false,selectAppearanceTheme:id=>chosen.push(id),updatePreference:patch=>patches.push(patch)})));
+assert.equal(tree.root.findByProps({"data-theme-choice":"baby"}).findByProps({className:"pl-world-choice-name"}).props.children[0],"Daddy Mode");
+Renderer.act(()=>tree.root.findAllByType("button").find(button=>button.props.children === "Mommy Mode · Motherly").props.onClick());
+assert.deepEqual(patches.at(-1),{baby_voice:"motherly"},"Mommy remains an explicit saved voice choice");
+Renderer.act(()=>tree.unmount());
+fs.rmSync(temp,{recursive:true,force:true});
+const pickerBehaviorPassed=true;
+
 const checks = [
-  [appearancePicker.includes("APPEARANCE_THEMES.map((theme)") && appearancePicker.includes("onClick={() => selectAppearanceTheme(theme.id)}"), "every ambient theme button calls selectAppearanceTheme"],
+  [pickerBehaviorPassed, "every ambient theme button calls selectAppearanceTheme"],
   [app.includes("const selectAppearanceTheme = (themeId) => {") && app.includes("setAppearanceTheme(validTheme);") && app.includes("plushlist-appearance-"), "theme selection updates state and persists per user"],
   [appearanceMode.includes('window.localStorage.setItem("plushlife:appearance-mode:v1", mode)') && app.includes('useAppearanceMode(preferences.dark_mode)') && app.includes('const paletteWorld = activeWorld;') && app.includes('DARK_THEME_PALETTES'), "light/dark appearance persists independently while each chosen theme keeps its own world"],
-  [appearancePicker.includes('selectAppearanceTheme("none")') && app.includes('useState("none")') && app.includes('appearanceTheme === "none" && !babyMode && !dinoTheme ? noThemePalette'), "No theme is explicit, persisted, and uses a neutral palette"],
-  [appearancePicker.includes('aria-label="Choose light or dark appearance"') && appearancePicker.includes('updatePreference({ dark_mode: false })') && appearancePicker.includes('updatePreference({ dark_mode: true })') && settings.includes("LazyAppearanceThemePicker"), "Personalize exposes explicit Light and Dark choices next to theme selection"],
+  [pickerBehaviorPassed && app.includes('useState("none")') && app.includes('appearanceTheme === "none" && !babyMode && !dinoTheme ? noThemePalette'), "No theme is explicit, persisted, and uses a neutral palette"],
+  [appearancePicker.includes('aria-label="Choose light or dark appearance"') && pickerBehaviorPassed && settings.includes("LazyAppearanceThemePicker"), "Personalize exposes explicit Light and Dark choices next to theme selection"],
   [app.includes("const updatePreference = (patch) => {") && app.includes("savePreferences(next);"), "preference toggles persist through savePreferences"],
 
-  [appearancePicker.includes('onClick={() => updatePreference({ nickname_style: "baby", dino_theme: false })}'), "Baby Mode toggle updates nickname style"],
+  [pickerBehaviorPassed, "Baby Mode toggle updates nickname style"],
   [appearancePicker.includes('nickname_style: "baby", dino_theme: false'), "enabling Baby Mode disables Dino Theme"],
-  [appearancePicker.includes('onClick={() => updatePreference({ dino_theme: true, nickname_style: "warm" })}'), "Dino Theme selection leaves the shared layout and exits Baby wording mode"],
+  [pickerBehaviorPassed, "Dino Theme selection leaves the shared layout and exits Baby wording mode"],
 
   [settings.includes("onClick={openDailyCheckIn}") && settings.includes("openDailyCheckIn, watchPairingCode"), "Settings can reopen the unified daily check-in directly"],
   [growth.includes('document.getElementById("plushlife-checkin-trigger")') && growth.includes("openCapacityPicker: openDailyCheckIn"), "legacy capacity API routes into the unified daily check-in"],

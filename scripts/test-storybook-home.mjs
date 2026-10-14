@@ -16,7 +16,7 @@ assert.ok(page.includes("<CozyDayHome userId="),"Adaptive Focus must remain reac
 assert.ok(page.includes("<DayRescue currentMode="),"Soft / Tiny / Rest modes must remain reachable");
 for(const mode of ["baby","dino","soft","meadow","strawberry","twilight"]) {
  assert.ok(source.includes(mode+":"),"World "+mode+" must have unique copy");
- assert.ok(css.includes('data-storybook-world="'+mode+'"'),"World "+mode+" must have a CSS palette");
+ assert.ok(css.includes('data-pl-world="'+mode+'"'),"World "+mode+" must have page atmosphere rules");
 }
 assert.ok(source.includes("<ThemeScene decorative focus"),"Use the actual repository mascot instead of introducing a rabbit image");
 assert.ok(theme.includes('const mascotWorld = "soft"'),"Mascot identity remains locked");
@@ -41,4 +41,14 @@ assert.deepEqual(storybookRows([{key:'bonus',label:'Bonus',isBonus:true},{key:'o
 assert.equal(storybookGreeting(8), 'Good morning, Cozy!');
 assert.equal(storybookGreeting(15), 'Good afternoon, Cozy!');
 assert.equal(storybookGreeting(23), 'Good evening, Cozy!');
+const atmosphereBuild=buildSync({entryPoints:['src/theme-atmosphere.js'],bundle:true,write:false,format:'esm'});
+const {THEME_ATMOSPHERES,themeAtmosphere,DARK_THEME_PALETTES}=await import('data:text/javascript;base64,'+Buffer.from(atmosphereBuild.outputFiles[0].text).toString('base64'));
+assert.equal(themeAtmosphere('none').scene,null);
+assert.equal(themeAtmosphere('unknown').scene,null,'Unknown settings must fall back to a neutral world');
+const scenes=Object.entries(THEME_ATMOSPHERES).filter(([,value])=>value.scene);
+assert.equal(new Set(scenes.map(([,value])=>value.scene)).size,scenes.length,'Themes cannot share the same backdrop');
+for(const [world,atmosphere] of scenes){
+  assert.ok(fs.existsSync('assets/worlds/'+atmosphere.scene+'.svg'),world+' needs shipped scenery');
+  assert.ok(DARK_THEME_PALETTES[world]?.surface,world+' needs its own dark palette');
+}
 console.log("Teddy Storybook Home and startup-recovery regressions passed.");

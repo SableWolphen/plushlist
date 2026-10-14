@@ -1,0 +1,30 @@
+// Surroundings change; the original mascot and real task state never do.
+export const THEME_ATMOSPHERES = {
+  none: { label: 'No theme', description: 'A quiet, simple space', scene: null, heading: 'One little thing at a time', hint: 'Go at your own pace.', noun: 'tasks', check: '♡', journal: '📖', focus: '◌' },
+  soft: { label: 'Lavender', description: 'A lavender cottage', scene: 'lavender', heading: 'A little kindness today', hint: 'Tiny steps in your cozy cottage.', noun: 'tasks', check: '♡', journal: '📖', focus: '✦' },
+  dino: { label: 'Dino', description: 'A leafy jungle trail', scene: 'dino', heading: 'Your little quests', hint: 'One gentle stomp along the trail.', noun: 'quests', check: '🌿', journal: '🗺️', focus: '🐾' },
+  baby: { label: 'Nursery', description: 'A soft nursery', scene: 'nursery', heading: 'Your little jobs', hint: 'We can do one little thing together.', noun: 'little jobs', check: '🍼', journal: '📔', focus: '🧸' },
+  'baby-night': { label: 'Nursery', description: 'A tucked-in nursery', scene: 'nursery-night', heading: 'Your little jobs', hint: 'Little steps, then a cozy rest.', noun: 'little jobs', check: '🍼', journal: '📔', focus: '🧸' },
+  pink: { label: 'Pink', description: 'A blossom nook', scene: 'blossom', heading: 'Little kindnesses', hint: 'Let a little kindness bloom.', noun: 'tasks', check: '🌸', journal: '💌', focus: '♡' },
+  meadow: { label: 'Mint', description: 'A leafy greenhouse', scene: 'mint', heading: 'A little room to grow', hint: 'Fresh air. A fresh little start.', noun: 'tasks', check: '🍃', journal: '📗', focus: '🌱' },
+  peach: { label: 'Peach', description: 'A warm sunset corner', scene: 'peach', heading: 'Small golden moments', hint: 'Take your time in the warm glow.', noun: 'tasks', check: '🍑', journal: '📔', focus: '☀' },
+  twilight: { label: 'Night', description: 'A moonlit lookout', scene: 'night', heading: 'A few gentle glows', hint: 'Rest belongs on your list, too.', noun: 'tasks', check: '☾', journal: '📓', focus: '✦' },
+  strawberry: { label: 'Strawberry', description: 'A strawberry picnic', scene: 'strawberry', heading: 'Your sweet little steps', hint: 'A tiny win for your picnic basket.', noun: 'tasks', check: '🍓', journal: '📕', focus: '🌼' },
+  'soft-light': { label: 'Cloud', description: 'A floating cloud sky', scene: 'cloud', heading: 'One cloud-light step', hint: 'A little breathing room, just for you.', noun: 'tasks', check: '☁', journal: '📘', focus: '🫧' },
+  garden: { label: 'Garden', description: 'A sunny flower garden', scene: 'garden', heading: 'Little seeds of progress', hint: 'Every little seed grows in its own time.', noun: 'tasks', check: '🌼', journal: '📒', focus: '🌱' },
+};
+export function themeAtmosphere(world) { return THEME_ATMOSPHERES[world] || THEME_ATMOSPHERES.none; }
+
+export const DARK_THEME_PALETTES = {
+    soft: { background:"#211C29", surface:"#2D2537", surface2:"#3A2E48", ink:"#F7F0FF", muted:"#C9B9D8", line:"#4A3A59", accent:"#C5A7E8", accent2:"#D7B6F2", nav:"#2D2537", wash:"#241E2DBF", glowA:"#5C3D8070", glowB:"#7C446F55", glowC:"#7C654455", glowD:"#365E4A55" },
+    pink: { background:"#2A1D25", surface:"#382630", surface2:"#49303C", ink:"#FFF1F7", muted:"#D7BBC8", line:"#5A3B49", accent:"#E6A0C1", accent2:"#F0B0CC", nav:"#382630", wash:"#2E2028BF", glowA:"#7A385A66", glowB:"#6D3F7960", glowC:"#7A654355", glowD:"#36574655" },
+    meadow: { background:"#19251F", surface:"#243229", surface2:"#304238", ink:"#EFFBF3", muted:"#B7CCBE", line:"#405647", accent:"#8FC8A9", accent2:"#9AD7B5", nav:"#243229", wash:"#1C2922BF", glowA:"#35634A66", glowB:"#35685A55", glowC:"#6A5B3550", glowD:"#334D6A50" },
+    peach: { background:"#2A211C", surface:"#382B24", surface2:"#4A372D", ink:"#FFF4EC", muted:"#D7C0B1", line:"#5C4437", accent:"#E5A47D", accent2:"#F1B28B", nav:"#382B24", wash:"#2E241EBF", glowA:"#7B4A3566", glowB:"#7B513C55", glowC:"#6B5A3150", glowD:"#36574650" },
+    twilight: { background:"#211F39", surface:"#302C49", surface2:"#403657", ink:"#F4ECFF", muted:"#BEB1D3", line:"#504567", accent:"#C6ACEF", accent2:"#D4BCF6", nav:"#302C49", wash:"#24285ABF", glowA:"#483D9E", glowB:"#5D65C7", glowC:"#E2A8E755", glowD:"#314D87" },
+    strawberry: { background:"#2A1E20", surface:"#39282B", surface2:"#493438", ink:"#FFF2F2", muted:"#D8BEC0", line:"#5C4044", accent:"#E49AAA", accent2:"#EEAABA", nav:"#39282B", wash:"#2E2022BF", glowA:"#7A3A4966", glowB:"#78445455", glowC:"#6D5A3150", glowD:"#36574650" },
+    "soft-light": { background:"#1C2530", surface:"#273340", surface2:"#344455", ink:"#EFF7FF", muted:"#B7C7D8", line:"#40566B", accent:"#9FC2E7", accent2:"#B0CDEE", nav:"#273340", wash:"#1F2935BF", glowA:"#355B7A66", glowB:"#564A7960", glowC:"#6A5E3650", glowD:"#35605A50" },
+    garden: { background:"#20231F", surface:"#2B302A", surface2:"#393F37", ink:"#F4F7F1", muted:"#C2C8BE", line:"#4A5147", accent:"#94B8A4", accent2:"#A6C6B5", nav:"#2B302A", wash:"#232722BF", glowA:"#3D604F55", glowB:"#554B6655", glowC:"#70503F50", glowD:"#6A5A3650" },
+    dino: { background:"#1C261D", surface:"#273328", surface2:"#334335", ink:"#F1F8EE", muted:"#BDCCB7", line:"#435845", accent:"#9FC58B", accent2:"#D99CC5", nav:"#273328", wash:"#202A21BF", glowA:"#4E6B4860", glowB:"#5C4E7960", glowC:"#74506450", glowD:"#705F3D50" },
+    baby: { background:"#2A1F2A", surface:"#382938", surface2:"#493549", ink:"#FFF1FB", muted:"#D8BDD4", line:"#5A4258", accent:"#E8A6D6", accent2:"#CDB6F0", nav:"#382938", wash:"#2D222DBF", glowA:"#7A3F6460", glowB:"#594A7B60", glowC:"#705E3850", glowD:"#3A604D50" },
+    "baby-night": { background:"#2A1F2A", surface:"#382938", surface2:"#493549", ink:"#FFF1FB", muted:"#D8BDD4", line:"#5A4258", accent:"#E8A6D6", accent2:"#CDB6F0", nav:"#382938", wash:"#2D222DBF", glowA:"#7A3F6460", glowB:"#594A7B60", glowC:"#705E3850", glowD:"#3A604D50" },
+  };
