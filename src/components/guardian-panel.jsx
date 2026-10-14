@@ -14,12 +14,14 @@ const LazyTogetherCorner = React.lazy(() => import("./together-corner.jsx").then
 import { ToolPanel } from "./shared.jsx";
 import { resolveSupportAction } from "../guardian-action-selection.mjs";
 import { CozyScene } from "./theme-world.jsx";
-import { openPlushGuardian } from "./plush-guardian.jsx";
+import { openPlushGuardian, useGuardianState } from "./plush-guardian.jsx";
+import { botGuardianName } from "../guardian-bot.mjs";
 
 export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwnGuardian, supportViewMode, setSupportViewMode, isSupportAdult, selectedSupportName, guardianSupportRequests, supportOwnerId, updateGuardianSupportRequest, pendingSupportInvites, supportPeople, acceptSupportInvitation, declineSupportInvitation, canUseCaretakerDashboard, invitedSupportLinks, loadSupportOwner, loadSupportData, user, supportAchievements, period, ownerIsRestingToday, restDatesSet, todayRequiredDone, supportProgress, activeSupportLink, canViewSupportProgress, canViewSupportTasks, canViewSupportSchedule, canViewSupportMood, supportTrackerTasks = [], supportSchedules = [], supportScheduleExceptions = [], supportMoodSummary, supportProgressView, setSupportProgressView, supportTodayDayLabel, displayedSupportPercent, displayedSupportCompleted, displayedSupportPossible, supportDailyEssentialCompleted, supportDailyEssentialKeys, supportScheduledTodayCompleted, supportScheduledTodayKeys, canSendSupportNotes, newNote, setNewNote, addSupportNote, suggestComfortTool, canAddSupportRewards, rewardTitle, setRewardTitle, rewardDetails, setRewardDetails, rewardTarget, setRewardTarget, rewardTargetPeriod, setRewardTargetPeriod, rewardApprovalRequired, setRewardApprovalRequired, addSupportReward, suggestedTask, setSuggestedTask, suggestedTaskDay, setSuggestedTaskDay, submitTaskSuggestion, inviteEmail, setInviteEmail, inviteSupportAdult, GUARDIAN_ROLE_PRESETS, guardianRolePreset, setGuardianRolePreset, ownedSupportLinks, supportRelationships, setSupportAdultActive, removeSupportAdult, updateCaretakerPermission, updateCareAgreement, supportRequestGuardian, setSupportRequestGuardian, supportRequestType, setSupportRequestType, supportRequestText, setSupportRequestText, sendGuardianSupportRequest, taskSuggestions, suggestionSectionsById, setSuggestionSectionsById, taskSectionsForDay, decideTaskSuggestion, supportMessage, supportRewards, supportWeeklyPercent, supportPercent, updateRewardStatus, supportNotes, setComfortToolOpen, deleteSupportNote, onOpenSettings }) {
   const [checkInDelay, setCheckInDelay] = React.useState("0");
   const [guardianArea, setGuardianArea] = React.useState("overview");
   const [supportAction, setSupportAction] = React.useState("note");
+  const botGuardian = useGuardianState(user?.id);
   const availableSupportActions = [
     ["note", "💌", "Note", canSendSupportNotes],
     ["reward", "🎁", "Reward", canAddSupportRewards],
@@ -59,7 +61,17 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
   return (
           <ToolPanel inline title="💛 PlushSupport" displayTitle="Guardians" onClose={onClose}>
           <div className="pl-guardian-content">
-          <CozyScene title="Cozy & Guardian" subtitle="You’re the Cozy — this is your space. A Guardian is a partner, parent, friend, caregiver, or other trusted person you choose. Do things together and support each other; you control what gets shared." />
+          <CozyScene title="My Guardians" subtitle="Your trusted people and your automatic Bot Guardian. You choose the support you want." />
+          <section className="pl-bot-guardian-entry" aria-label="Bot Mommy shortcut" style={{padding:"13px 15px",borderRadius:17,background:"var(--pl-theme-surface-2)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <span aria-hidden="true" style={{fontSize:28}}>🧸</span>
+              <div style={{minWidth:0,flex:1}}>
+                <h2 style={{margin:0,fontSize:17,color:"var(--pl-theme-ink)"}}>{botGuardian.prefs.automaticReminders ? botGuardianName(botGuardian.prefs.voice) : "Bot Mommy"}</h2>
+                <p style={{margin:"4px 0 0",fontSize:12.5,lineHeight:1.45,color:"var(--pl-theme-muted)"}}>{botGuardian.prefs.automaticReminders ? "Automatic Guardian ready · routines, reminders & little jobs" : "A caring automatic Guardian for tasks and routines. No AI chat."}</p>
+              </div>
+            </div>
+            <button type="button" style={{minHeight:44,width:"100%",marginTop:10,border:0,borderRadius:12,background:"var(--pl-theme-accent)",color:"var(--pl-theme-on-accent)",fontWeight:900,fontSize:13,cursor:"pointer"}} onClick={()=>openPlushGuardian()}>{botGuardian.prefs.automaticReminders ? "Open my Bot Guardian ›" : "Meet Bot Mommy ›"}</button>
+          </section>
           {canUseCaretakerDashboard && (
             <div className="pl-guardian-person-switcher" role="group" aria-label="Guardian views">
               <button type="button" aria-pressed={supportViewMode === "mine"} onClick={() => setSupportViewMode("mine")}>🧸 My Support</button>
@@ -74,12 +86,6 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             ))}
           </div>
           <p className="pl-guardian-intro" aria-live="polite">{guardianArea === "together" ? "Spend a little time together, at your pace." : guardianArea === "support" ? (supportViewMode === "mine" ? "Manage invitations, sharing permissions, and requests for support." : "Offer encouragement and practical help within the sharing they chose.") : (supportViewMode === "mine" ? "Your Cozy card and the people you choose to share it with." : "The Cozy card they have chosen to share with you.")}</p>
-          {guardianArea === "overview" && supportViewMode === "mine" && !(ownedSupportLinks || []).some(link=>link.active && link.accepted_at) && <section className="pl-bot-guardian-entry" style={{padding:15,borderRadius:17,background:"var(--pl-theme-surface-2)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
-            <h2 style={{margin:"0 0 5px",fontSize:17}}>🧸 Don't have a Guardian? Try Bot Mommy</h2>
-            <p style={{margin:"0 0 12px",fontSize:13,lineHeight:1.5,color:"var(--pl-theme-muted)"}}>An optional, automatic Guardian to remind you about tasks and routines, help you start, and celebrate little wins. No AI chat, no human invitation, and no sharing needed.</p>
-            <button type="button" style={{minHeight:44,width:"100%",border:0,borderRadius:12,background:"var(--pl-theme-accent)",color:"var(--pl-theme-on-accent)",fontWeight:900}} onClick={()=>openPlushGuardian()}>Meet my Bot Mommy ›</button>
-            <p style={{fontSize:11,margin:"8px 0 0",color:"var(--pl-theme-muted)"}}>You can also choose a Bot Daddy or a neutral Guardian, and invite a human Guardian later.</p>
-          </section>}
           {guardianArea === "overview" && (supportViewMode === "mine" ? <CozySharing links={ownedSupportLinks} /> : <SharedCozyCard client={client} ownerId={supportOwnerId} userId={user?.id} />)}
           {guardianArea === "overview" && supportViewMode === "mine" && <section style={{padding:16,borderRadius:16,background:"var(--pl-theme-surface)",border:"1px solid var(--pl-theme-line)"}}>
             <h2 style={{margin:0,fontSize:16,color:"var(--pl-theme-ink)"}}>Your Guardians</h2><p style={{margin:"5px 0 0",fontSize:13,lineHeight:1.45,color:"var(--pl-theme-muted)"}}>Trusted people you choose to support you. Sharing stays off until you allow it.</p>
