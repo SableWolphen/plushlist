@@ -46,6 +46,11 @@ const prioritized = [
 assert.deepEqual(storybookRows(prioritized,{},3,12*60).map(row=>row.key),["essential","urgent","small"],"Home highlights essentials, nearby reminders and smaller wins");
 assert.ok(homeTaskPriority(prioritized[3]) > homeTaskPriority(prioritized[0]));
 assert.ok(source.includes("pl-storybook-world-win"), "Completed days celebrate in the chosen theme");
+assert.ok(source.includes('dayType === "rest" ? 0'), "Rest days must show no pressured task list");
+assert.ok(source.includes('dayType === "tiny" ? 1'), "Tiny days must show just one suggested task");
+assert.ok(source.includes('["soft","recovery"].includes(dayType) ? 2'), "Soft days need at most two suggestions");
+assert.ok(source.includes('Rest counts.'), "Rest day must be reassuring instead of an empty-task prompt");
+assert.ok(page.includes('dayType={dailyCheckIn?.day_type || "full"}'), "Home must receive real daily capacity from Care");
 const habitSource={task_key:'water',detail:'[[plushlist-habit:build]] Drink a glass after breakfast'};
 const habitGoal={target:3,unit:'cups',value:1};
 const habitPreview=storybookRows([{key:'water',label:'Drink water',sourceTask:habitSource,goal:habitGoal},{key:'scroll',label:'Less scrolling',habitType:'reduce'}]);
