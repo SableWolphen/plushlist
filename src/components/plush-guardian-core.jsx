@@ -14,6 +14,7 @@ import { GuardianTools } from "./plush-guardian-tools.jsx";
 import { GuardianSettings } from "./plush-guardian-settings.jsx";
 import { startFocusTimer } from "./focus-timer.jsx";
 import { botGuardianDailyPlan, activateBotMommy } from "../guardian-bot.mjs";
+import { smartCarePlan, surpriseLetter } from "../guardian-smart-care.mjs";
 import { CARE_ROUTINES, careWords, careChecksForToday } from "../guardian-care.mjs";
 import { guardianBotDisplayName, guardianSuggestedReward } from "../guardian-mode.mjs";
 export default function PlushGuardianCore(props) {
@@ -81,6 +82,11 @@ export default function PlushGuardianCore(props) {
     const stickers = [...new Set([...(state.careStickers || []), ...completeNow])].slice(-90);
     update({ careChecks: { date: localDate(), items }, careStickers: stickers });
   };
+  React.useEffect(() => {
+    const letter = surpriseLetter(ref.current, localDate(), dailyCheckIn?.day_type === "rest");
+    if (!letter) return;
+    update({surpriseLetterHistory:[...(ref.current.surpriseLetterHistory||[]),letter].slice(-40)});
+  }, [state.prefs.surpriseLetters, state.prefs.automaticReminders, dailyCheckIn?.day_type]);
   const botPlan = botGuardianDailyPlan(rows, viewDone, state.prefs.voice, dailyCheckIn?.day_type === "rest");
   const action = async (fn) => {
     if (busy) return;
@@ -211,9 +217,10 @@ export default function PlushGuardianCore(props) {
             <section className="pl-virtual-guardian-options" aria-label="Guardian plans and memories">
               <h3>🧸 Guardian planned today</h3>
               <p>Here is a gentle suggestion, not another list you must finish.</p>
-              <p>🌤️ Morning: get comfortable and choose your first small step.</p>
-              <p>🧸 Afternoon: enjoy a comforting break or a favorite activity.</p>
-              <p>🌙 Evening: unwind with a story, music, or quiet time.</p>
+              {smartCarePlan(rows,viewDone,state.energy,dailyCheckIn?.day_type==="rest",new Date(),state.prefs.littleMode).map(item=><p key={item.label}>{item.icon} <strong>{item.label}:</strong> {item.detail}</p>)}
+              <details><summary>💌 Surprise Letters ({(state.surpriseLetterHistory||[]).length})</summary>
+                {(state.surpriseLetterHistory||[]).length ? (state.surpriseLetterHistory||[]).slice(-8).reverse().map(letter=><article key={letter.date}><small>{letter.date}</small><p>{letter.text}</p></article>) : <p>Guardian will leave a gentle note occasionally when letters are enabled.</p>}
+              </details>
               {state.prefs.careMode && state.prefs.littleMode && <p>🍼 Little Mode idea: {["Plushie picnic","Cartoons and cozy pajamas","Coloring with stickers","Storybook blanket fort","Stuffie tea party","Soft music time","Favorite toy play"][Math.floor(Date.parse(localDate()+"T12:00:00")/86400000)%7]}.</p>}
               <details>
                 <summary>📖 Guardian Memory Book</summary>
