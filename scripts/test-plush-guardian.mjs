@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { virtualGuardianReminderCopy } from "../src/guardian-reminders.mjs";
+import fs from "node:fs";
 import {
   freshGuardianState,
   saveGuardian,
@@ -43,6 +45,18 @@ assert.equal(
 );
 assert.notEqual(guardianKey(a), guardianKey(b));
 assert.equal(readGuardian(null, a).prefs.aiConsent, false);
+assert.equal(readGuardian(null, a).prefs.automaticReminders, false, "Automatic reminders require opt-in");
+assert.equal(normalizeGuardianState({prefs:{automaticReminders:true}}).prefs.automaticReminders, true);
+assert.equal(normalizeGuardianState({prefs:{automaticReminders:"true"}}).prefs.automaticReminders, false);
+assert.match(virtualGuardianReminderCopy("mommy","Brush teeth").body,/Brush teeth/);
+assert.match(virtualGuardianReminderCopy("daddy","Get dressed").title,/Daddy/);
+assert.doesNotMatch(virtualGuardianReminderCopy("neutral","", "structured").body,/undefined/);
+const notificationSource = fs.readFileSync("src/native-bridge.js","utf8");
+const appSource = fs.readFileSync("src/app-source.jsx","utf8");
+assert(notificationSource.includes("options.virtualGuardian"), "Guardian must reuse the existing Android reminder scheduler");
+assert(notificationSource.includes("if (isToday && (task.done || task.completed || task.isDone))"), "Checking today must not silence future days");
+assert(appSource.includes("guardianReminderRevision"), "Settings changes must reschedule native reminders");
+assert(appSource.includes("syncDailyReminders({ enabled: false })"), "Sign-out must cancel old account task reminders");
 const rows = [
   { key: "long", label: "Write", sourceTask: { estimated_minutes: 30 } },
   { key: "quick", label: "Drink water", sourceTask: { estimated_minutes: 2 } },
