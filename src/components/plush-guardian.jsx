@@ -136,7 +136,7 @@ export function CompanionHomeCard({ userId, onOpenGuardian }) {
               : state.prefs.automaticReminders ? "Your chosen reminder times are ready." : "Your pace. Your choices."}
         </p>
         <button
-          onClick={() => onOpenGuardian?.() || openPlushGuardian("guardian")}
+          onClick={() => onOpenGuardian ? onOpenGuardian() : openPlushGuardian("guardian")}
         >
           {gap >= 3
             ? "Choose a fresh start"
@@ -146,8 +146,8 @@ export function CompanionHomeCard({ userId, onOpenGuardian }) {
           ›
         </button>
         <div className="pl-companion-home-shortcuts">
-          <button onClick={() => onOpenGuardian?.() || openPlushGuardian("inbox")}>Brain dump</button>
-          <button onClick={() => onOpenGuardian?.() || openPlushGuardian("routines")}>
+          <button onClick={() => onOpenGuardian ? onOpenGuardian() : openPlushGuardian("inbox")}>Brain dump</button>
+          <button onClick={() => onOpenGuardian ? onOpenGuardian() : openPlushGuardian("routines")}>
             My routines
           </button>
         </div>
