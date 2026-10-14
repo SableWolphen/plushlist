@@ -1,4 +1,4 @@
-import { VOICES, HOME_CARDS } from "../plush-guardian-model.mjs";
+import { VOICES, HOME_CARDS, localDate } from "../plush-guardian-model.mjs";
 import { GuardianPortableBackup } from "./guardian-portable-backup.jsx";
 import { activateBotMommy } from "../guardian-bot.mjs";
 import { guardianBotDisplayName } from "../guardian-mode.mjs";
@@ -66,7 +66,7 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
         <p>Choose how nurturing your Guardian feels. Care routines are optional and stay on this device. No chat or automatic personal-care tracking.</p>
         <h3>💌 Surprise Letters</h3>
         <p>Receive an occasional private, supportive letter when your automatic Guardian is active. No AI or messages to other people.</p>
-        <label className="pl-companion-check"><input type="checkbox" checked={!!prefs.surpriseLetters} onChange={e=>update({prefs:{...prefs,surpriseLetters:e.target.checked,lettersEnabledOn:e.target.checked ? new Date().toLocaleDateString("en-CA") : ""}})} />Enable surprise letters</label>
+        <label className="pl-companion-check"><input type="checkbox" checked={!!prefs.surpriseLetters} onChange={e=>update({prefs:{...prefs,surpriseLetters:e.target.checked,lettersEnabledOn:e.target.checked ? localDate() : ""}})} />Enable surprise letters</label>
         <h3>🎁 Guardian surprises</h3>
         <p>Once your automatic Guardian is enabled, it picks and awards little surprises automatically. You never need to make a reward or claim one. These are virtual celebrations, not purchases or essential care.</p>
         {check("automaticGifts", "Let Guardian choose and unlock rewards automatically")}
