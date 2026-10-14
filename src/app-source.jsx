@@ -5128,6 +5128,19 @@ function GlowUpTracker() {
   const guardianLinksReady = !!user && supportLinksLoadedFor === user.id;
   const activeGuardianMode = guardianMode(supportLinks, user?.id, supportLinksLoadedFor, readGuardian(deviceStorage(), user?.id).prefs.automaticReminders);
   useEffect(() => {
+    // A connected person supersedes local automatic guidance. This is an
+    // explicit one-way handoff: removal of the relationship never silently
+    // reactivates old bot notifications. Keep the saved Guardian name/style.
+    if (!user?.id || guardianMode(supportLinks, user.id, supportLinksLoadedFor) !== "person") return;
+    const stored = readGuardian(deviceStorage(), user.id);
+    if (!stored.prefs.automaticReminders && !stored.prefs.routineNudges && !stored.prefs.tomorrowNudges) return;
+    const next = {
+      ...stored,
+      prefs: { ...stored.prefs, automaticReminders: false, routineNudges: false, tomorrowNudges: false },
+    };
+    if (saveGuardian(deviceStorage(), user.id, next)) window.dispatchEvent(new Event(STATE_EVENT));
+  }, [user?.id, supportLinksLoadedFor, JSON.stringify(supportLinks.map(link => [link.owner_user_id, link.active, link.accepted_at]))]);
+  useEffect(() => {
     const refresh = () => setGuardianReminderRevision((value) => value + 1);
     window.addEventListener(STATE_EVENT, refresh);
     window.addEventListener("storage", refresh);
