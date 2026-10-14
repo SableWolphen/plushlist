@@ -159,3 +159,10 @@ html:has(#main-content[data-pl-world]),body:has(#main-content[data-pl-world]){ba
 #main-content .pl-virtual-guardian-options h3{font:900 14px Quicksand,Nunito,sans-serif;margin:0 0 5px}
 #main-content .pl-virtual-guardian-options p{font:500 12px/1.5 Nunito,system-ui;margin:6px 0;color:var(--pl-theme-muted,#7F6A89)}
 #main-content .pl-virtual-guardian-options button{min-height:44px}
+
+#main-content .pl-storybook-tomorrow{border:1px solid var(--sb-border);border-radius:16px;background:var(--sb-card);padding:0 12px;color:var(--sb-ink)}
+#main-content .pl-storybook-tomorrow>summary{min-height:46px;display:flex;align-items:center;gap:8px;cursor:pointer;font:800 13px Nunito,system-ui}
+#main-content .pl-storybook-tomorrow>summary span{margin-left:auto;font:700 11px Nunito,system-ui;color:var(--sb-muted)}
+#main-content .pl-storybook-tomorrow ul{padding-left:19px;margin:1px 0 10px;font:700 12px/1.7 Nunito,system-ui}
+#main-content .pl-storybook-tomorrow button{min-height:44px;margin-bottom:8px;border:1px solid var(--sb-border);border-radius:12px;background:var(--sb-soft);color:var(--sb-ink);font:800 12px Nunito,system-ui}
+#main-content .pl-storybook-bedtime{width:100%;min-height:46px;border:1px solid var(--sb-border);border-radius:16px;background:var(--sb-soft);color:var(--sb-ink);font:850 13px Nunito,system-ui;display:flex;align-items:center;justify-content:space-between;padding:0 13px}
