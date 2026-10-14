@@ -46,3 +46,13 @@ assert.equal(autoGuardianGifts([],tasks,{one:true},"2026-10-14",{...config,autom
 assert.equal(autoGuardianGifts([],tasks,{one:true},"2026-10-14",{...config,giftCategories:["trophies"]}).unlocked.length,0);
 assert.equal(autoGuardianGifts([],tasks,{one:true},"2026-10-14",config,true).unlocked.length,0);
 assert.deepEqual(normalizeGuardianState({automaticGiftLedger:["2026-10-14:25","2026-10-14:25","unsafe"]}).automaticGiftLedger,["2026-10-14:25"]);
+
+const activities = {...config,giftCategories:[...config.giftCategories,"activities"]};
+assert.equal(autoGuardianGifts([], [{key:"a"},{key:"b"},{key:"c"},{key:"d"}], {a:true,b:true,c:true}, "2026-10-14", activities).unlocked.some(g=>g.category==="activities"),true);
+const babyConfig = {...config,giftCategories:["babyDays"]};
+const freeDay = autoGuardianGifts([],[],{},"2026-10-17",babyConfig);
+assert.equal(freeDay.unlocked.length,1);
+assert.match(freeDay.unlocked[0].name,/baby day/);
+assert.equal(autoGuardianGifts(freeDay.ledger,[],{},"2026-10-17",babyConfig).unlocked.length,0);
+assert.equal(autoGuardianGifts([],[],{},"2026-10-18",babyConfig).unlocked.length,0);
+assert.equal(autoGuardianGifts([],[],{},"2026-10-17",{...babyConfig,giftCategories:[]}).unlocked.length,0);
