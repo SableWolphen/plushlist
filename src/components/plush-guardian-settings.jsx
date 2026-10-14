@@ -46,7 +46,7 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
         >
           {Object.entries(VOICES).map(([id, label]) => (
             <option key={id} value={id}>
-              {label}
+              {label.replace(/^Bot /, "")}
             </option>
           ))}
         </select>
