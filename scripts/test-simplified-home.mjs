@@ -8,8 +8,10 @@ const app = fs.readFileSync("src/app-source.jsx", "utf8");
 const settings = fs.readFileSync("src/components/organized-settings.jsx", "utf8");
 const styles = fs.readFileSync("assets/storybook-themes.css", "utf8");
 const tasks = fs.readFileSync("src/components/tasks-panel.jsx", "utf8");
+const care = fs.readFileSync("src/components/care-panel.jsx", "utf8");
+const progress = fs.readFileSync("src/components/progress-panel-core.jsx", "utf8");
 
-buildSync({ entryPoints: ["src/components/today-panel-core.jsx", "src/components/organized-settings.jsx"], bundle: true, write: false, format: "esm", platform: "browser", target: "es2022", loader: { ".jsx": "jsx" } });
+buildSync({ entryPoints: ["src/components/today-panel-core.jsx", "src/components/organized-settings.jsx", "src/components/care-panel.jsx", "src/components/progress-panel-core.jsx", "src/components/tasks-panel.jsx"], bundle: true, write: false, format: "esm", platform: "browser", target: "es2022", loader: { ".jsx": "jsx" } });
 
 assert(home.includes('aria-label="Today\'s checklist"'), "The actual Home checklist remains primary");
 assert(home.indexOf('className="pl-storybook-today"') < home.indexOf('className="pl-storybook-doors"'), "Show tasks before actions");
@@ -55,4 +57,15 @@ assert(styles.includes("grid-template-columns:repeat(4,minmax(0,1fr))"),"Daily a
 assert(styles.includes("#main-content .pl-home-tool-links"),"Explore tools must be easy to tap");
 assert(styles.includes("var(--pl-theme-surface)"),"New UI must inherit the selected theme, including dark mode");
 assert(styles.includes("@media(max-width:345px)"),"Small phones need a dedicated layout");
-console.log("Simplified PlushLife Home passed: primary actions, one Explore hub, reachable features, preserved data wiring and responsive theme styling.");
+
+assert(care.includes("pl-reference-care-launchers"), "Care needs a clear four-action entry point");
+assert(care.includes('<strong>Guardian</strong>'), "Guardian stays accessible from Care");
+assert(!care.includes("pl-companion-care-entry"), "Care should not repeat a separate Guardian promotional card");
+assert(care.indexOf('className="pl-care-card"') < care.indexOf('>🧸 My Cozy Space</summary>'), "Care's actual help flow must precede advanced customization");
+assert(care.includes('<CareHistory {...props} />'), "Care history must remain private and reachable");
+assert(care.includes('<ExistingCarePanel {...props}'), "Calm, paths and sleep stay available");
+assert(progress.includes('label: "Overview"') && progress.includes('label: "My Story"') && progress.includes('label: "Care Areas"'), "Progress views should have plain-English labels");
+assert(progress.includes('className="pl-progress-highlights"') && progress.includes("<CozyWeeklyStory") && progress.includes("<LittleWins"), "Weekly win panels should be optional without losing entries");
+assert(tasks.includes('["today", "Today"]'), "The default Tasks tab must clearly mean today");
+assert(tasks.includes("Quick add · Just give it a name"), "Quick task creation should be labeled clearly");
+console.log("Simplified PlushLife passed: focused Home, Care, Tasks, Progress, Settings, safe routing and theme-aware mobile layout.");
