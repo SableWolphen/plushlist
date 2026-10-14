@@ -8,7 +8,7 @@ import { HabitStudio, HabitGoalCaption } from "./habit-studio.jsx";
 // in GlowUpTracker (not inside this ToolPanel), so this only needed
 // the setters/handlers that open them (setPendingTaskDelete,
 // startEditingTask), not the modals themselves.
-import { ToolPanel, HabitTypeIcon } from "./shared.jsx";
+import { ToolPanel, HabitTypeIcon, habitTypeForRow } from "./shared.jsx";
 import { QuickCapture } from "./quick-capture.jsx";
 import { RoutineStarter } from "./cozy-day-experience.jsx";
 import { ThemeScene } from "./theme-world.jsx";
@@ -50,7 +50,7 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
           <ToolPanel title="🌷 Add & organize" displayTitle="Tasks" inline={inline} hideClose={inline} onClose={onClose}>
           <div className="pl-task-page">
             <div className="pl-design-tabs" role="tablist" aria-label="Task views">
-              {[["today", "All"], ["habits", "Habits"], ["later", "Later"]].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={taskView === id} onClick={() => setTaskView(id)}>{label}</button>)}
+              {[["today", "All"], ["habits", "Habits"], ["later", "Later"]].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={taskView === id} onClick={() => setTaskView(id)}>{label}{id === "habits" ? ` (${rows.filter(row=>row && habitTypeForRow(row)!=="regular").length})` : ""}</button>)}
             </div>
             <section className="pl-design-card" aria-label="Your task list">
               <div className="pl-task-title"><button type="button" className={`pl-mascot-pat ${plushHappy ? "pl-mascot-happy-hop" : ""}`} onClick={cheer} aria-label="Say hi to your plush"><ThemeScene focus decorative mood={plushHappy ? "happy" : "neutral"} /></button><h2>{taskView === "habits" ? "Habits" : taskView === "later" ? "Later" : "Tasks for the day"}</h2></div>
@@ -63,17 +63,17 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
                 const query = taskSearchQuery.trim().toLowerCase();
                 const visible = taskView === "later"
                   ? trackerTasks.filter(task => !task.archived_at && !taskIsScheduledForDate(task, selectedProgressDate || period.date) && (task.one_time_date > (selectedProgressDate || period.date) || Array.from({length:7}, (_, index) => offsetDate(selectedProgressDate || period.date, index + 1)).some(date => taskIsScheduledForDate(task, date)))).map(task => ({ key: task.task_key, label: task.task, sourceTask: task, later: true }))
-                  : rows.filter(row => row && (taskView !== "habits" || (row.habitType || row.sourceTask?.habit_type || "regular") !== "regular"));
+                  : rows.filter(row => row && (taskView !== "habits" || habitTypeForRow(row) !== "regular"));
                 const matching = visible.filter(row => String(row.label || "").toLowerCase().includes(query));
                 const incompleteToday = taskView === "today" && !query ? matching.filter(row => !viewDone[row.key]) : matching;
                 const displayRows = taskView === "today" && !query && !showAllToday ? incompleteToday.slice(0, 5) : matching;
                 const hiddenCount = taskView === "today" && !query ? Math.max(0, matching.length - displayRows.length) : 0;
                 if (!displayRows.length) return <p className="pl-design-empty">{query ? "No tasks match that search." : taskView === "today" && matching.length ? "You’re caught up for now ✨" : taskView === "today" ? "Your list has room to breathe. Add your first little task below." : "Nothing here yet. A small start is enough."}</p>;
                 return <>
-                  {displayRows.map(row => <div className="pl-design-task" key={row.key}>
+                  {displayRows.map(row => <div className="pl-design-task" key={row.key} data-habit-kind={habitTypeForRow(row)}>
                     <button type="button" className="pl-task-toggle" aria-label={row.later ? `Edit ${row.label || "Untitled task"}` : `${viewDone[row.key] ? "Undo" : "Complete"} ${row.label || "Untitled task"}`} aria-pressed={row.later ? undefined : !!viewDone[row.key]} onClick={() => { if (row.later) { startEditingTask(row.sourceTask); return; } if (!viewDone[row.key]) cheer(); unifiedToggle(row.key); }}>
                       <span className={`pl-task-box ${!row.later && viewDone[row.key] ? "is-done" : ""}`} aria-hidden="true">{!row.later && viewDone[row.key] ? "✓" : ""}</span>
-                      <span><strong>{row.label || "Untitled task"}</strong><HabitGoalCaption taskKey={row.key}/><small>{row.later ? scheduleLabelForTask(row.sourceTask) : row.sourceTask?.estimated_minutes ? `${row.sourceTask.estimated_minutes} minutes · At your pace` : "One little step"}</small></span>
+                      <span><HabitTypeIcon task={row.sourceTask || row} habitType={habitTypeForRow(row)}/><strong>{row.label || "Untitled task"}</strong><HabitGoalCaption taskKey={row.key} fallbackGoal={row.goal}/><small>{row.later ? scheduleLabelForTask(row.sourceTask) : row.sourceTask?.estimated_minutes ? `${row.sourceTask.estimated_minutes} minutes · At your pace` : "One little step"}</small></span>
                     </button>
                     {row.sourceTask && (
                       <details style={{ position: "relative", flex: "0 0 auto" }}>

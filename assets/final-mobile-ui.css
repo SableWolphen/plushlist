@@ -1732,3 +1732,33 @@ body>[role="dialog"]>div{
     bottom:auto!important;
   }
 }
+
+/* Habit identity survives every list, including Home's short preview. */
+#main-content#main-content[data-pl-world] .pl-habit-tag{
+  display:inline-flex;align-items:center;gap:5px;max-width:100%;
+  padding:3px 7px;margin:2px 6px 4px 0;border-radius:8px;
+  border:1px solid color-mix(in srgb,var(--pl-theme-accent) 40%,var(--pl-theme-line));
+  background:color-mix(in srgb,var(--pl-theme-accent) 14%,var(--pl-theme-surface));
+  color:var(--pl-theme-ink)!important;font:800 11px/1.4 Nunito,system-ui;
+  white-space:normal;text-decoration:none;
+}
+#main-content#main-content[data-pl-world] .pl-habit-tag[data-habit-kind="reduce"]{
+  border-style:dashed;
+  background:color-mix(in srgb,#d6ac6c 14%,var(--pl-theme-surface));
+}
+#main-content#main-content[data-pl-world] :is(.pl-storybook-list li,.pl-design-task)[data-habit-kind="build"],
+#main-content#main-content[data-pl-world] :is(.pl-storybook-list li,.pl-design-task)[data-habit-kind="reduce"]{
+  border-left:3px solid var(--pl-theme-accent)!important;
+  padding-left:8px!important;margin-top:6px;margin-bottom:6px;
+  background:color-mix(in srgb,var(--pl-theme-accent) 5%,var(--pl-theme-surface));
+  border-radius:10px!important;
+}
+#main-content#main-content[data-pl-world] .pl-storybook-task-copy>span:not(.pl-habit-tag){display:block}
+#main-content#main-content[data-pl-world] .pl-storybook-task-copy .pl-goal-caption{font-weight:500;font-size:12px;color:var(--pl-theme-muted)!important;margin-bottom:5px}
+#main-content#main-content[data-pl-world] .pl-storybook-habits-link{
+  display:flex;align-items:center;gap:6px;width:100%;min-height:44px;
+  margin:8px 0 0;padding:6px 10px;border:1px solid var(--pl-theme-line);
+  border-radius:11px;background:var(--pl-theme-surface-2);color:var(--pl-theme-ink);
+  font-size:12px;font-weight:800;cursor:pointer;text-align:left;
+}
+#main-content#main-content[data-pl-world] .pl-storybook-habits-link>span:last-child{margin-left:auto}

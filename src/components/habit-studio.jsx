@@ -22,9 +22,13 @@ export function HabitStudio({initialTab='plan',compact=false}) {
   if(compact&&!open)return <button type="button" className="pl-studio-door" onClick={()=>setOpen(true)}><span>🌱 My Habit Studio</span><small>Small goals, weekly reviews & routines</small><span aria-hidden="true">›</span></button>;
   return <React.Suspense fallback={<div role="status" className="pl-studio-loading">Opening your little routines…</div>}><Core initialTab={initialTab}/></React.Suspense>;
 }
-export function HabitGoalCaption({taskKey}) {
+export function HabitGoalCaption({taskKey,fallbackGoal}) {
   const studio=React.useContext(HabitStudioContext);const goal=studio?.state.goals[taskKey];
-  if(!goal)return null;
+  if(!goal){
+    if(!fallbackGoal || fallbackGoal.target == null || !Number.isFinite(Number(fallbackGoal.target)))return null;
+    return <small className="pl-goal-caption">Goal: {fallbackGoal.target} {fallbackGoal.unit}{fallbackGoal.value != null && Number.isFinite(Number(fallbackGoal.value)) ? ` · Progress: ${fallbackGoal.value}` : ''}</small>;
+  }
   const anchor=studio.tasks.find(task=>task.task_key===goal.afterTask)?.task;
-  return <small className="pl-goal-caption">{goal.direction==='at_most'?'Up to':'Minimum'} {goal.minimum} {goal.unit} · Stretch {goal.stretch}{goal.cue?` · ${goal.cue}`:anchor?` · After ${anchor}`:''}</small>;
+  const log=studio.editableDay !== false ? studio.state.logs[studio.date]?.[taskKey] : null;
+  return <small className="pl-goal-caption">{goal.direction==='at_most'?'Limit':'Goal'}: {goal.minimum} {goal.unit}{log?.amount != null && Number.isFinite(Number(log.amount)) ? ` · Logged: ${log.amount}` : ''}{goal.cue?` · ${goal.cue}`:anchor?` · After ${anchor}`:''}</small>;
 }

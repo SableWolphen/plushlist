@@ -207,13 +207,19 @@ export function ToolPanel({ title, displayTitle, onClose, children, inline = fal
   );
 }
 
-export const HabitTypeIcon = React.memo(function HabitTypeIcon({ task }) {
-  const { habitTypeForTask } = window.PlushLifeSchedule;
-  const habitType = habitTypeForTask(task);
+export function habitTypeForRow(row) {
+  if (["build", "reduce"].includes(row?.habitType)) return row.habitType;
+  const type=window.PlushLifeSchedule?.habitTypeForTask?.(row?.sourceTask || row);
+  return ["build", "reduce"].includes(type) ? type : "regular";
+}
+
+export const HabitTypeIcon = React.memo(function HabitTypeIcon({ task, habitType: explicitType }) {
+  const habitType = explicitType || habitTypeForRow(task);
   if (habitType === "regular") return null;
   return (
-    <span aria-hidden="true" title={habitType === "build" ? "Building this habit" : "Reducing this habit"} style={{ marginRight: 5 }}>
-      {habitType === "build" ? "🌱" : "🍂"}
+    <span className="pl-habit-tag" data-habit-kind={habitType}>
+      <span aria-hidden="true">{habitType === "build" ? "🌱" : "🍂"}</span>
+      {habitType === "build" ? "Build habit" : "Reduce habit"}
     </span>
   );
 });

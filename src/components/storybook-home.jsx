@@ -1,6 +1,8 @@
 import { ThemeScene, ThemeWorldContext } from "./theme-world.jsx";
 import { buildCozyDayPlan } from "../cozy-day-plan.mjs";
 import { themeAtmosphere } from "../theme-atmosphere.js";
+import { HabitTypeIcon, habitTypeForRow } from "./shared.jsx";
+import { HabitGoalCaption } from "./habit-studio.jsx";
 
 export const STORYBOOK_MOODS = [
   ["happy","Happy","🥰"],["calm","Calm","😌"],["okay","Okay","🙂"],["tired","Tired","😴"],["stressed","Stressed","🥺"]
@@ -24,7 +26,7 @@ export function storybookRows(rows=[],viewDone={},limit=3) {
   const active = rows.filter(row=>row && row.key && row.label && !row.isBonus && !row.sourceTask?.archived_at);
   const pending = active.filter(row=>!viewDone[row.key]);
   return (pending.length ? pending : active)
-    .slice(0,limit).map(row=>({key:row.key,label:String(row.label),done:!!viewDone[row.key]}));
+    .slice(0,limit).map(row=>({key:row.key,label:String(row.label),done:!!viewDone[row.key],habitType:habitTypeForRow(row),sourceTask:row.sourceTask,goal:row.goal}));
 }
 export function storybookGreeting(hour = new Date().getHours()) {
   return hour < 12 ? "Good morning, Cozy!" : hour < 18 ? "Good afternoon, Cozy!" : "Good evening, Cozy!";
@@ -39,6 +41,7 @@ export function StorybookHome({world="soft",rows=[],viewDone={},period,pct=0,tog
   const completed=rows.filter(row=>row && row.key && row.label && !row.isBonus && !row.sourceTask?.archived_at && viewDone[row.key]).length;
   const total=rows.filter(row=>row && row.key && row.label && !row.isBonus && !row.sourceTask?.archived_at).length;
   const progress=total?Math.round(completed/total*100):0;
+  const habitCount=rows.filter(row=>row && row.key && row.label && !row.isBonus && !row.sourceTask?.archived_at && habitTypeForRow(row)!=="regular").length;
   const dayLabel=period?.date && /^\d{4}-\d{2}-\d{2}$/.test(period.date)
     ? new Date(period.date+"T12:00:00").toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})
     : "Today";
@@ -59,7 +62,8 @@ export function StorybookHome({world="soft",rows=[],viewDone={},period,pct=0,tog
       <div className="pl-storybook-intro"><div><h2>{completed === total && total ? "Your little wins" : atmosphere.heading}</h2><p>{total ? atmosphere.hint : "Your page is ready. Start with one little thing."}</p></div></div>
       <div className="pl-storybook-progress-label"><strong>{completed} / {total} completed</strong><span>{total ? progress+"%" : "Fresh start"}</span></div>
       <div className="pl-storybook-progress" role="progressbar" aria-label="Today's tasks completed" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}><div style={{width:progress+"%"}} /></div>
-      {visible.length ? <ul className="pl-storybook-list">{visible.map(row=><li key={row.key}><button className="pl-storybook-check" type="button" aria-label={(row.done?"Undo ":"Complete ")+row.label} aria-pressed={row.done} onClick={()=>toggle?.(row.key)}><span aria-hidden="true">{row.done?"✓":""}</span></button><span className={row.done?"pl-storybook-complete":""}>{row.label}</span><button type="button" className="pl-storybook-detail" aria-label={"Edit "+row.label} onClick={()=>openTaskManager?.(period?.date)}>›</button></li>)}</ul> : <div className="pl-storybook-empty"><p>A fresh page, just for you. 🌷</p><button type="button" onClick={()=>openTaskManager?.(period?.date)}>＋ Add your first little task</button></div>}
+      {habitCount>0 && <button type="button" className="pl-storybook-habits-link" aria-label={`View ${habitCount} habits for today`} onClick={()=>openTaskManager?.(period?.date,"habits")}><span aria-hidden="true">🌱</span> {habitCount} {habitCount===1 ? "habit" : "habits"} in today’s list <span aria-hidden="true">›</span></button>}
+      {visible.length ? <ul className="pl-storybook-list">{visible.map(row=><li key={row.key} data-habit-kind={row.habitType}><button className="pl-storybook-check" type="button" aria-label={(row.done?"Undo ":"Complete ")+row.label} aria-pressed={row.done} onClick={()=>toggle?.(row.key)}><span aria-hidden="true">{row.done?"✓":""}</span></button><span className="pl-storybook-task-copy"><HabitTypeIcon task={row.sourceTask} habitType={row.habitType}/><span className={row.done?"pl-storybook-complete":""}>{row.label}</span>{row.habitType!=="regular" && <HabitGoalCaption taskKey={row.key} fallbackGoal={row.goal}/>}</span><button type="button" className="pl-storybook-detail" aria-label={"Edit "+row.label} onClick={()=>openTaskManager?.(period?.date)}>›</button></li>)}</ul> : <div className="pl-storybook-empty"><p>A fresh page, just for you. 🌷</p><button type="button" onClick={()=>openTaskManager?.(period?.date)}>＋ Add your first little task</button></div>}
       {total>visible.length&&<button type="button" className="pl-storybook-more" onClick={()=>openTaskManager?.(period?.date)}>View all {total} {atmosphere.noun} ›</button>}
     </section>
     <nav className="pl-storybook-doors" aria-label="Your cozy shortcuts">
