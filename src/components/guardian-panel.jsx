@@ -93,7 +93,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 <button type="button" onClick={()=>mode === "person" ? onOpenTasks?.() : openPlushGuardian("start")}><span>✅</span> Tasks</button>
                 <button type="button" onClick={()=>mode === "person" ? setGuardianArea("together") : openPlushGuardian("routines")}><span>📅</span> Routines</button>
                 <button type="button" onClick={()=>mode === "person" ? setGuardianArea("support") : openPlushGuardian("guardian")}><span>💌</span> Encouragement</button>
-                <button type="button" onClick={()=>mode === "person" ? setGuardianArea("support") : openPlushGuardian("rewards")}><span>🎁</span> Rewards</button>
+                <button type="button" onClick={()=>mode === "person" ? (setGuardianArea("support"), window.setTimeout(()=>document.querySelector(".pl-human-guardian-rewards")?.scrollIntoView({behavior:"smooth",block:"start"}),80)) : openPlushGuardian("rewards")}><span>🎁</span> Rewards</button>
               </nav>}
               {mode === "automatic" && <button type="button" onClick={()=>openPlushGuardian("settings")} style={{marginTop:10,minHeight:40,width:"100%",border:"1px solid var(--pl-theme-line)",borderRadius:11,background:"var(--pl-theme-surface)",color:"var(--pl-theme-ink)",fontWeight:800}}>Guardian name & reminders ›</button>}
             </>}
@@ -444,7 +444,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
 
             {supportMessage && <div style={{ marginTop: 10, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>{supportMessage}</div>}
 
-            <div style={{ marginTop: 16, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>🎁 REWARDS</div>
+            <div className="pl-human-guardian-rewards" style={{ marginTop: 16, scrollMarginTop: 80, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>🎁 REWARDS</div>
             {supportRewards.length === 0 ? <div style={{ marginTop: 7, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>No rewards added yet.</div> :
               supportRewards.map((reward) => {
                 const rewardUsesWeeklyProgress = !!reward.week_start;
