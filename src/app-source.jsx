@@ -1361,7 +1361,7 @@ function GlowUpTracker() {
         if (cachedTheme?.pending) {
           // Retry a selection made just before Android closed, or while
           // offline. Uses the existing app_preferences fields and write path.
-          savePreferences({ ...preferences, ...effective, reminder_times: Array.isArray(data.reminder_times) ? data.reminder_times : preferences.reminder_times }).catch(() => {});
+          savePreferences({ ...preferences, ...effective, reminder_times: Array.isArray(data.reminder_times) ? data.reminder_times : preferences.reminder_times }, cachedTheme.revision).catch(() => {});
         }
       }
       // A failed fetch also leaves `data` null, same as a genuinely new
@@ -3928,11 +3928,11 @@ function GlowUpTracker() {
 
   const preferenceSaveChainRef = React.useRef(Promise.resolve());
   const preferenceSaveVersionRef = React.useRef(0);
-  const savePreferences = async (nextPreferences = preferences) => {
+  const savePreferences = async (nextPreferences = preferences, themeRevision = null) => {
     if (!user) return false;
     const ownerId = user.id;
     const version = ++preferenceSaveVersionRef.current;
-    const savedThemeRevision = readThemeSelection(window.localStorage, ownerId)?.revision;
+    const savedThemeRevision = themeRevision;
     setSettingsMessage("Saving your settings…");
     const row = {
       user_id: user.id,
@@ -4040,12 +4040,12 @@ function GlowUpTracker() {
   };
 
   const updatePreference = (patch) => {
-    if (user?.id && hasThemePreferenceChange(patch)) {
-      rememberThemeSelection(window.localStorage, user.id, patch);
-    }
+    const themeSnapshot = user?.id && hasThemePreferenceChange(patch)
+      ? rememberThemeSelection(window.localStorage, user.id, patch)
+      : null;
     setPreferences((current) => {
       const next = { ...current, ...patch };
-      savePreferences(next);
+      savePreferences(next, themeSnapshot?.revision);
       return next;
     });
   };
