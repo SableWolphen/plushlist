@@ -13,7 +13,7 @@ Home, Progress, Care, Calendar, Add / Edit Task, Plush / Rewards, Tasks, Habits,
 - Script-like PlushLife wordmark with pink heart.
 - Compact mobile-first hierarchy and dense-but-breathable card spacing.
 - Soft rounded cards, pale translucent surfaces, low-contrast borders, warm shadows.
-- Theme-aware rounded bottom navigation: **Home · Tasks · Care · Progress · Plush**. The header date opens Calendar and the gear opens Settings. Task creation lives in Tasks and contextual Add actions; do not introduce a duplicate fixed Add button.
+- Theme-aware rounded bottom navigation: **Home · Tasks · Care · Progress · Guardian**. The header date opens Calendar and the gear opens Settings. The original Plush / Rewards collection is one tap from the prominent **My Plush & Rewards** button on Progress. Task creation lives in Tasks and contextual Add actions; do not introduce a duplicate fixed Add button.
 - Date pill and circular settings control in the header.
 - Illustrated/cozy hero treatment before utility content.
 - Pastel gradients, tiny hearts/stars/plants, plush imagery, and friendly iconography.
