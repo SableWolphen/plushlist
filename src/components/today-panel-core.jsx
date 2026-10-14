@@ -13,6 +13,7 @@ import { startFocusTimer } from "./focus-timer.jsx";
 import { DayRescue } from "./everyday-upgrades.jsx";
 import { CozyDayHome } from "./cozy-day-experience.jsx";
 import { StorybookHome } from "./storybook-home.jsx";
+import { openPlushGuardian } from "./plush-guardian.jsx";
 
 /*
  * Reference-home compatibility markers kept deliberately:
@@ -586,27 +587,41 @@ export function TodayPanel({
       <div data-plushlife-home-stack className="pl-home-shell">
         {(isHistoricalView || isFutureView) ? <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} /> : null}
         {!isHistoricalView && !isFutureView && <StorybookHome world={babyMode ? (preferences?.dark_mode ? "baby-night" : "baby") : dinoTheme ? "dino" : appearanceTheme} dayType={dailyCheckIn?.day_type || "full"} rows={rows} viewDone={viewDone} period={period} pct={pct} toggle={unifiedToggle} openTaskManager={openTaskManager} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} selectedOutfit={selectedOutfit} darkMode={preferences?.dark_mode} userId={userId} syncStatus={syncStatus} online={online} tomorrowPreviewRows={tomorrowPreviewRows} tomorrowDateString={tomorrowDateString} weeklyHistory={weeklyHistory} dailyCheckInHistory={dailyCheckInHistory} />}
-        {!isHistoricalView && !isFutureView && <details className="pl-storybook-planning"><summary>♡ Make today easier · Plan & focus</summary><CozyDayHome userId={userId} rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} onComfort={()=>setCalmQuickOpen?.(true)} period={period} pct={pct} mode={dailyCheckIn?.day_type || "full"} babyMode={babyMode} />{!isHistoricalView && !isFutureView && <DayRescue currentMode={dailyCheckIn?.day_type || "full"} onSelect={selectDayType} openTaskManager={()=>openTaskManager?.(period?.date)} />}</details>}
-
         {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }
         <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
-          <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>More for today</summary>
-          <div style={{display:'grid',gap:12,paddingTop:8}}>
-            {!isHistoricalView && !isFutureView && <details className="pl-storybook-plush-drawer"><summary>🧸 Visit your Plush · Say hi</summary><Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} /></details>}
-            <DayAgenda tasks={homeSections.tasks} schedule={homeSections.schedule} selectedSchedule={selectedSchedule} exceptions={selectedScheduleExceptionEntries} date={selectedProgressDate || period?.date} timezone={preferences?.timezone} taskLabel={babyMode ? "Little Jobs" : dinoTheme ? "Dino Missions" : "Tasks"}/>
-            {homeSections.habits}
-            {homeSections.tiny}
-            <CompletedToday rows={rows} viewDone={viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} expanded={completedTodayExpanded} setExpanded={setCompletedTodayExpanded} />
-            <button type="button" onClick={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard?.('care');}} style={{minHeight:44,border:'1px solid var(--pl-theme-line)',borderRadius:14,padding:10,background:'var(--pl-theme-surface-2)',color:'var(--pl-theme-ink)',font:'inherit'}}>My Cozy Space · add a comfort when you like</button>
-            {cozyDaily}
-            {homeLayout.order.filter(id => !homeLayout.hidden.includes(id) && ['shortcuts','noticed'].includes(id)).map(id => <React.Fragment key={id}>{homeSections[id]}</React.Fragment>)}
-            {optionalTools}
-            <button type="button" onClick={()=>window.dispatchEvent(new Event('plushlife:weekly-reflection-request'))} style={{minHeight:44,border:'1px solid var(--pl-theme-line)',borderRadius:14,padding:10,background:'var(--pl-theme-surface-2)',color:'var(--pl-theme-ink)',font:'inherit'}}>Reflect on my week · optional</button>
-            <button type="button" onClick={()=>goToDashboard?.('settings')} style={{minHeight:44,border:'1px solid var(--pl-theme-line)',borderRadius:14,padding:10,background:'var(--pl-theme-surface-2)',color:'var(--pl-theme-ink)',font:'inherit'}}>Reminder choices · optional</button>
-            <TomorrowNote tomorrowTasksCount={tomorrowTasksCount} />
+          <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>More for today · Explore tools</summary>
+          <div className="pl-home-extras-content">
+            <p className="pl-home-extras-intro">Need something else? Everything is still here. Start with one place.</p>
+            <nav className="pl-home-tool-links" aria-label="More PlushLife tools">
+              <button type="button" onClick={()=>goToDashboard?.("week")}>📅 <span>Calendar</span></button>
+              <button type="button" onClick={()=>openTaskManager?.(period?.date,"habits")}>🌱 <span>Habits</span></button>
+              <button type="button" onClick={()=>openPlushGuardian("routines")}>🧸 <span>Routines</span></button>
+              <button type="button" onClick={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard?.("care");}}>💜 <span>Cozy Space</span></button>
+              <button type="button" onClick={()=>setCalmQuickOpen?.(true)}>🌿 <span>Calm</span></button>
+              <button type="button" onClick={()=>setSettingsOpen?.(true)}>⚙ <span>Settings</span></button>
+            </nav>
+            {!isHistoricalView && !isFutureView && <details className="pl-storybook-planning">
+              <summary>♡ Make today easier · Plan & focus</summary>
+              <CozyDayHome userId={userId} rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} onComfort={()=>setCalmQuickOpen?.(true)} period={period} pct={pct} mode={dailyCheckIn?.day_type || "full"} babyMode={babyMode} />
+              <DayRescue currentMode={dailyCheckIn?.day_type || "full"} onSelect={selectDayType} openTaskManager={()=>openTaskManager?.(period?.date)} />
+            </details>}
+            <details className="pl-home-advanced">
+              <summary>More options · Schedule, completed tasks & extras</summary>
+              <div className="pl-home-advanced-content">
+                {!isHistoricalView && !isFutureView && <details className="pl-storybook-plush-drawer"><summary>🧸 Visit your Plush · Say hi</summary><Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} /></details>}
+                <DayAgenda tasks={homeSections.tasks} schedule={homeSections.schedule} selectedSchedule={selectedSchedule} exceptions={selectedScheduleExceptionEntries} date={selectedProgressDate || period?.date} timezone={preferences?.timezone} taskLabel={babyMode ? "Little Jobs" : dinoTheme ? "Dino Missions" : "Tasks"}/>
+                {homeSections.habits}
+                {homeSections.tiny}
+                <CompletedToday rows={rows} viewDone={viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} expanded={completedTodayExpanded} setExpanded={setCompletedTodayExpanded} />
+                {cozyDaily}
+                {homeLayout.order.filter(id => !homeLayout.hidden.includes(id) && ['shortcuts','noticed'].includes(id)).map(id => <React.Fragment key={id}>{homeSections[id]}</React.Fragment>)}
+                {optionalTools}
+                <button type="button" className="pl-home-extra-link" onClick={()=>window.dispatchEvent(new Event('plushlife:weekly-reflection-request'))}>Reflect on my week · optional</button>
+                <TomorrowNote tomorrowTasksCount={tomorrowTasksCount} />
+              </div>
+            </details>
           </div>
         </details>
-
 
       </div>
 
