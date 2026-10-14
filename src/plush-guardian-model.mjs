@@ -137,8 +137,8 @@ export function normalizeGuardianState(value) {
   next.prefs.careMode = next.prefs.careMode === true;
   next.prefs.littleMode = next.prefs.littleMode === true;
   next.prefs.careReminders = next.prefs.careReminders === true;
-  for (const key of ["careMorningTime","careBedtimeTime"]) if (!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(next.prefs[key])) next.prefs[key] = d.prefs[key];
-  next.careStickers = Array.isArray(value.careStickers) ? [...new Set(value.careStickers.filter(x=>typeof x==="string" && /^\\d{4}-\\d{2}-\\d{2}:(wake|midday|nap|night)$/.test(x)))].slice(-90) : [];
+  for (const key of ["careMorningTime","careBedtimeTime"]) if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(next.prefs[key])) next.prefs[key] = d.prefs[key];
+  next.careStickers = Array.isArray(value.careStickers) ? [...new Set(value.careStickers.filter(x=>typeof x==="string" && /^\d{4}-\d{2}-\d{2}:(wake|midday|nap|night)$/.test(x)))].slice(-90) : [];
   next.prefs.careStyle = ["gentle","baby","structured"].includes(next.prefs.careStyle) ? next.prefs.careStyle : "gentle";
   next.prefs.petName = typeof next.prefs.petName === "string" ? next.prefs.petName.slice(0,40) : "";
   next.careChecks = value.careChecks && typeof value.careChecks.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.careChecks.date) && value.careChecks.items && typeof value.careChecks.items === "object" && !Array.isArray(value.careChecks.items)
@@ -148,7 +148,7 @@ export function normalizeGuardianState(value) {
   next.prefs.routineNudges = next.prefs.routineNudges === true;
   next.prefs.tomorrowNudges = next.prefs.tomorrowNudges === true;
   for (const key of ["routineReminderTime", "tomorrowReminderTime"]) {
-    if (!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(next.prefs[key])) next.prefs[key] = d.prefs[key];
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(next.prefs[key])) next.prefs[key] = d.prefs[key];
   }
   for (const key of [
     "inbox",
