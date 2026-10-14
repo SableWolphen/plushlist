@@ -1,0 +1,27 @@
+/* Opt-in readability mode, scoped to a signed-in Cozy. Existing theme palettes remain in control. */
+html.pl-global-little-mode main button,
+html.pl-global-little-mode [role="dialog"] button,
+html.pl-global-little-mode nav button,
+html.pl-global-little-mode .pl-guardian-content button {
+  min-height: 48px;
+  border-radius: 16px;
+  line-height: 1.35;
+}
+html.pl-global-little-mode main input,
+html.pl-global-little-mode main select,
+html.pl-global-little-mode main textarea,
+html.pl-global-little-mode [role="dialog"] input,
+html.pl-global-little-mode [role="dialog"] select {
+  min-height: 44px;
+  font-size: max(16px, 1em);
+}
+html.pl-global-little-mode .pl-guardian-companion,
+html.pl-global-little-mode .pl-guardian-content {
+  line-height: 1.6;
+}
+@media (max-width: 420px) {
+  html.pl-global-little-mode .pl-companion-grid,
+  html.pl-global-little-mode .pl-companion-choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
