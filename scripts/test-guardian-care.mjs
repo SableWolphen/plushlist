@@ -49,10 +49,13 @@ assert.deepEqual(normalizeGuardianState({automaticGiftLedger:["2026-10-14:25","2
 
 const activities = {...config,giftCategories:[...config.giftCategories,"activities"]};
 assert.equal(autoGuardianGifts([], [{key:"a"},{key:"b"},{key:"c"},{key:"d"}], {a:true,b:true,c:true}, "2026-10-14", activities).unlocked.some(g=>g.category==="activities"),true);
-const babyConfig = {...config,giftCategories:["babyDays"]};
+const babyConfig = {...config,giftCategories:["babyDays"],careMode:true,littleMode:true};
 const freeDay = autoGuardianGifts([],[],{},"2026-10-17",babyConfig);
 assert.equal(freeDay.unlocked.length,1);
 assert.match(freeDay.unlocked[0].name,/baby day/);
 assert.equal(autoGuardianGifts(freeDay.ledger,[],{},"2026-10-17",babyConfig).unlocked.length,0);
-assert.equal(autoGuardianGifts([],[],{},"2026-10-18",babyConfig).unlocked.length,0);
+assert.equal(autoGuardianGifts([],[],{},"2026-10-18",babyConfig).unlocked.length,1);
 assert.equal(autoGuardianGifts([],[],{},"2026-10-17",{...babyConfig,giftCategories:[]}).unlocked.length,0);
+
+assert.equal(autoGuardianGifts([],[],{},"2026-10-17",{...babyConfig,littleMode:false}).unlocked.length,0);
+assert.equal(autoGuardianGifts([],[],{},"2026-10-17",{...babyConfig,careMode:false}).unlocked.length,0);
