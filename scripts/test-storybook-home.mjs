@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { buildSync } from "esbuild";
+import React from "react";
 const source=fs.readFileSync("src/components/storybook-home.jsx","utf8");
 const page=fs.readFileSync("src/components/today-panel-core.jsx","utf8");
 const css=fs.readFileSync("assets/storybook-themes.css","utf8");
@@ -29,4 +30,15 @@ assert.ok(sync.includes("BOOT_RECOVERY_SCRIPT"),"App shell must not freeze with 
 assert.ok(sync.includes('id="plush-boot-retry"')||sync.includes('retry.id = "plush-boot-retry"'),"Retry should be available to the user");
 assert.ok(app.includes('authWait = window.setTimeout'),"Session startup needs a bounded wait");
 assert.ok(app.includes('setSyncStatus(status => status === "loading" ? "signed-out" : status)'));
+globalThis.React = React;
+globalThis.window = { PlushLifeThemeCopy: { worlds: {} } };
+const { storybookRows, storybookGreeting } = await import('data:text/javascript;base64,' + Buffer.from(build.outputFiles[0].text).toString('base64'));
+const tasks = Array.from({length:16}, (_,i)=>({key:'task-'+i,label:'Task '+i}));
+assert.equal(storybookRows(tasks).length, 3, 'Home keeps a manageable three-task preview');
+assert.deepEqual(storybookRows(tasks, {'task-0':true}).map(row=>row.key), ['task-1','task-2','task-3'], 'Completing a task brings the next unfinished task into Home');
+assert.ok(storybookRows(tasks, Object.fromEntries(tasks.map(row=>[row.key,true]))).every(row=>row.done), 'An entirely completed day still shows real completed state');
+assert.deepEqual(storybookRows([{key:'bonus',label:'Bonus',isBonus:true},{key:'old',label:'Old',sourceTask:{archived_at:'2026-10-13'}},{key:'next',label:'Next'}]).map(row=>row.key), ['next']);
+assert.equal(storybookGreeting(8), 'Good morning, Cozy!');
+assert.equal(storybookGreeting(15), 'Good afternoon, Cozy!');
+assert.equal(storybookGreeting(23), 'Good evening, Cozy!');
 console.log("Teddy Storybook Home and startup-recovery regressions passed.");

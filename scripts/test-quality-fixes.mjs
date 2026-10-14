@@ -86,9 +86,11 @@ const companionCore = fs.readFileSync('src/components/daily-companion-core.jsx',
 assert.ok(companionCore.includes('privateKey(HISTORY_KEY)'), 'Local companion history must stay account-scoped');
 
 const mobileCss = fs.readFileSync('assets/final-mobile-ui.css', 'utf8');
-const terminalMobileRule = mobileCss.slice(mobileCss.lastIndexOf('/* One scrolling container owns'));
-assert.ok(terminalMobileRule.includes('padding-bottom:calc(120px + env(safe-area-inset-bottom))!important'),
-  'The outer app scroll area must clear the fixed bottom navigation and safe area');
+const terminalMobileRule = mobileCss.slice(mobileCss.lastIndexOf('/* Capacitor supplies custom properties'));
+assert.ok(terminalMobileRule.includes('height:calc(100dvh - var(--pl-nav-space))!important') && terminalMobileRule.includes('overflow-y:auto!important'),
+  'The mobile scroll viewport must end above the navigation lane');
+assert.ok(terminalMobileRule.includes('var(--safe-area-inset-bottom,0px)') && terminalMobileRule.includes('var(--safe-area-inset-top,0px)'),
+  'Use Capacitor safe areas when Android WebView env() returns zero');
 assert.equal((terminalMobileRule.match(/padding-bottom:12px!important/g) || []).length, 2,
   'Nested mobile shells add only small visual spacing, not duplicate navigation clearances');
 assert.ok(!terminalMobileRule.includes('176px'),

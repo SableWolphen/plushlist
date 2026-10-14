@@ -8,5 +8,13 @@ export function useAppearanceMode(darkMode) {
     document.documentElement.style.colorScheme = mode;
     const themeMeta = document.querySelector('meta[name="theme-color"]');
     if (themeMeta) themeMeta.setAttribute("content", mode === "dark" ? "#21182c" : "#b75acb");
+    // Both system bars need contrasting icons on Android's transparent chrome.
+    // StatusBar DARK means a dark background with light icons, not dark icons.
+    try {
+      const plugins = window.Capacitor?.Plugins;
+      const style = darkMode ? "DARK" : "LIGHT";
+      if (plugins?.SystemBars?.setStyle) plugins.SystemBars.setStyle({ style }).catch(() => {});
+      if (plugins?.StatusBar?.setStyle) plugins.StatusBar.setStyle({ style }).catch(() => {});
+    } catch (_error) {}
   }, [darkMode]);
 }

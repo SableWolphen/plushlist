@@ -1655,42 +1655,80 @@ body>[role="dialog"]>div{
   box-sizing:border-box!important;
 }
 
-/* One scrolling container owns the mobile nav and bottom safe-area clearance.
-   Nested page shells add breathing room, not a second screen-height spacer. */
-@media(max-width:520px){
-  #main-content#main-content{
-    padding-top:max(24px,env(safe-area-inset-top))!important;
-    padding-left:max(8px,env(safe-area-inset-left))!important;
-    padding-right:max(8px,env(safe-area-inset-right))!important;
-    padding-bottom:calc(120px + env(safe-area-inset-bottom))!important;
+/* Capacitor supplies custom properties on WebViews where env() returns zero.
+   The page ends above a separate nav lane; cards never scroll behind it. */
+:root{
+  --pl-safe-top:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));
+  --pl-safe-bottom:max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px));
+  --pl-safe-left:max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px));
+  --pl-safe-right:max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px));
+  --pl-nav-space:calc(80px + var(--pl-safe-bottom));
+}
+@media(max-width:759px){
+  html:has(#main-content),body:has(#main-content){overflow:hidden}
+  #main-content#main-content[data-pl-world]{
+    position:fixed!important;
+    inset:0 0 auto!important;
+    height:calc(100dvh - var(--pl-nav-space))!important;
+    min-height:0!important;
+    max-height:calc(100dvh - var(--pl-nav-space))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior-y:contain;
+    scroll-padding-bottom:16px!important;
+    padding-top:calc(12px + var(--pl-safe-top))!important;
+    padding-left:max(8px,var(--pl-safe-left))!important;
+    padding-right:max(8px,var(--pl-safe-right))!important;
+    padding-bottom:16px!important;
+    scrollbar-width:none;
   }
+  #main-content#main-content[data-pl-world]::-webkit-scrollbar{display:none}
+  body:has(#main-content){background:var(--pl-app-chrome,#f6f0fa)}
+  html[data-plushlife-color-mode="dark"] body:has(#main-content){--pl-app-chrome:#21182c}
 
-  #main-content#main-content .plushlife-app-column{
+  #main-content#main-content[data-pl-world] .plushlife-app-column{
     width:100%!important;
     max-width:390px!important;
     margin-inline:auto!important;
     padding-left:8px!important;
     padding-right:8px!important;
     padding-bottom:12px!important;
+    background:transparent!important;
+    border:0!important;
+    box-shadow:none!important;
+    border-radius:0!important;
   }
 
-  #main-content#main-content :is(.pl-home-shell,.pl-unified-page-shell,.pl-task-page,.pl-care-shell,.pl-growth-shell,.pl-calendar-cozy,.pl-guardian-content,.pl-closet-shell,.pl-inline-tool){
+  #main-content#main-content[data-pl-world] :is(.pl-home-shell,.pl-unified-page-shell,.pl-task-page,.pl-care-shell,.pl-growth-shell,.pl-calendar-cozy,.pl-guardian-content,.pl-closet-shell,.pl-inline-tool){
     padding-bottom:12px!important;
   }
 
-  #main-content#main-content .pl-app-bottom-nav{
+  #main-content#main-content[data-pl-world] .pl-app-bottom-nav{
     width:min(390px,calc(100% - 20px))!important;
-    height:72px!important;
-    min-height:72px!important;
-    max-height:72px!important;
-    bottom:max(8px,env(safe-area-inset-bottom))!important;
-    padding:6px 5px!important;
+    position:fixed!important;
+    height:64px!important;
+    min-height:64px!important;
+    max-height:64px!important;
+    bottom:calc(8px + var(--pl-safe-bottom))!important;
+    padding:5px!important;
+    border-radius:20px!important;
+    background:var(--pl-theme-surface)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
   }
 
-  #main-content#main-content .pl-app-nav-btn{
+  #main-content#main-content[data-pl-world] .pl-app-nav-btn{
     min-width:0!important;
-    height:58px!important;
-    min-height:58px!important;
-    max-height:58px!important;
+    height:52px!important;
+    min-height:52px!important;
+    max-height:52px!important;
+  }
+  #main-content#main-content[data-pl-world] .pl-app-nav-btn .pl-design-icon{width:22px!important;height:22px!important}
+  #main-content .pl-delete-toast,#plushlife-mascot-reaction,#plushlife-growth-toast{
+    bottom:calc(var(--pl-nav-space) + 8px)!important;
+  }
+  #main-content .pl-badge-toast{
+    top:calc(var(--pl-safe-top) + 10px)!important;
+    bottom:auto!important;
   }
 }
