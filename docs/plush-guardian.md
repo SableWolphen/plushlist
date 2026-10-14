@@ -32,3 +32,13 @@ The separate, **default-off** `automaticReminders` setting makes the Virtual Gua
 When on, the chosen neutral/Mommy/Daddy/playful voice changes scheduled reminder wording. When app notifications are off, the feature does not independently notify. Switching Guardian preferences reschedules the existing daily reminders. Signing out cancels scheduled task reminders on that device, and completing a repeating task today no longer mutes tomorrow's reminder.
 
 This phase does not yet support remote synchronization of active together-routines, guaranteed Android delivery despite OS restrictions, unattended task edits, or cloud restoration of Guardian device-only photos/reflections.
+
+## Opt-in proactive reminders and portable backup
+
+- Virtual Guardian now has two independently enabled reminders: one for an **unfinished, unpaused routine** and one for tomorrow preparation if tasks are scheduled. Neither uses AI chat, creates a new notification channel, or sends data to a third party. Both use the existing Android local scheduler, quiet hours, rest-day suppression, discreet wording, and time-window deduplication. These rules schedule only today's relevant nudge during normal app scheduling; a background service is **not** installed.
+- A signed-in Cozy can export a versioned, SHA-256-verified portable JSON backup containing their device-only companion state. It includes private memories, photos, and any saved chat, and is **not encrypted**. Keep the file in private storage.
+- Restoring requires the same authenticated owner account, verifies integrity, checks size, presents a summary, and requires explicit replace confirmation. AI access, personal context sharing, and automatic reminders remain off after restore. Legacy unauthenticated backup copies cannot be imported automatically because ownership cannot be proven.
+- Android widget visual themes now include their own backgrounds for Mint, Peach, Strawberry, Cloud, and Garden. The original mascot art is unchanged.
+
+### Unchanged security and product boundaries
+No Supabase schema or cloud-sync payload edits, billing changes, new analytics SDK, third-party flows, new Android permissions, or `daily_progress`/task-history semantics have been changed. Multi-device Guardian routine collaboration and Cloud backup are not part of this change. Follow #346/#347 and the project checkpoints before undertaking those changes.
