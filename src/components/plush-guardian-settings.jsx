@@ -66,7 +66,9 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
         <p>Choose how nurturing your Guardian feels. Care routines are optional and stay on this device. No chat or automatic personal-care tracking.</p>
         {check("careMode", "Enable nurturing caretaker routines")}
         {prefs.careMode && <>
-          {check("littleMode", "Little Mode: simple choices and larger controls")}
+          {check("littleMode", "Little Mode: simple choices and larger controls throughout the app")} 
+          {check("careReminders", "Optional morning and bedtime caretaker notifications")} 
+          {prefs.careReminders && <><label>Morning care time <input type="time" value={prefs.careMorningTime} onChange={e=>preference("careMorningTime",e.target.value)}/></label><label>Bedtime care time <input type="time" value={prefs.careBedtimeTime} onChange={e=>preference("careBedtimeTime",e.target.value)}/></label></>}
           <label>Caretaker personality
             <select aria-label="Caretaker personality" value={prefs.careStyle || "gentle"} onChange={event => preference("careStyle",event.target.value)}>
               <option value="gentle">Gentle and nurturing</option>
