@@ -27,7 +27,7 @@ export function autoGuardianGifts(ledger = [], rows = [], done = {}, date = "", 
   const categories = Array.isArray(prefs.giftCategories) ? prefs.giftCategories : ["stickers","celebrations","trophies","activities"];
   // A baby day is an optional free-time idea, never conditional on completing self-care.
   const weekday = new Date(date+"T12:00:00").getDay();
-  const babyDay = categories.includes("babyDays") && weekday === 6 && !existing.includes(date+":baby-day")
+  const babyDay = categories.includes("babyDays") && prefs.littleMode === true && prefs.careMode === true && !existing.includes(date+":baby-day")
     ? [{threshold:"baby-day",category:"babyDays",name:"🍼 Your cozy baby day — enjoy your favorite comforting activities whenever you'd like"}] : [];
   if (resting) return { ledger:[...existing,...babyDay.map(()=>date+":baby-day")].slice(-180), unlocked:babyDay };
   const eligible = (Array.isArray(rows) ? rows : []).filter(r=>r?.key && !r.isBonus && !r.sourceTask?.archived_at);
