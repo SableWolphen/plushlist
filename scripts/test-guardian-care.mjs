@@ -1,0 +1,18 @@
+import assert from "node:assert/strict";
+import { CARE_ROUTINES, careWords, careChecksForToday } from "../src/guardian-care.mjs";
+import { freshGuardianState, normalizeGuardianState } from "../src/plush-guardian-model.mjs";
+const initial = freshGuardianState();
+assert.equal(initial.prefs.careMode, false);
+assert.equal(initial.prefs.littleMode, false);
+assert.equal(CARE_ROUTINES.length, 4);
+assert(CARE_ROUTINES.every(r=>r.steps.length > 0));
+assert.match(careWords({ careStyle:"baby", petName:"Pup" }),/Pup/);
+assert.match(careWords({ careStyle:"structured" },"done"),/complete/);
+const normalized = normalizeGuardianState({ prefs:{ careMode:true, littleMode:true, careStyle:"baby", petName:"Pup" }, careChecks:{ date:"2026-10-14", items:{"wake:0":true,"night:3":true,"not allowed":true} } });
+assert.equal(normalized.prefs.careMode,true);
+assert.equal(normalized.prefs.littleMode,true);
+assert.equal(normalized.prefs.petName,"Pup");
+assert.deepEqual(careChecksForToday(normalized,"2026-10-14"),{"wake:0":true,"night:3":true});
+assert.deepEqual(careChecksForToday(normalized,"2026-10-15"),{});
+assert.equal(normalizeGuardianState({prefs:{careStyle:"invalid"}}).prefs.careStyle,"gentle");
+console.log("Guardian caretaker preferences, wording, local daily checkmarks and privacy defaults passed.");
