@@ -19,7 +19,7 @@ assert(home.indexOf('className="pl-storybook-doors"') < home.indexOf('className=
 for(const [label,action] of [
   ["Check in", "openDailyCheckIn?.()"],
   ["Journal", "openTodayJournal?.()"],
-  ["Guardian", "openPlushGuardian()"],
+  ["Guardian", 'goToDashboard?.("guardian")'],
   ["Focus", "onClick={focus}"],
 ]){
   assert(home.includes('<strong>'+label+'</strong>'), "Daily action missing: "+label);
@@ -28,15 +28,15 @@ for(const [label,action] of [
 assert(home.includes('onClick={()=>openTaskManager?.(period?.date)}>＋ Add a task'), "Home must offer direct task creation");
 assert(home.includes('toggle?.(row.key)'), "Checklist must still edit the real saved task state");
 assert(home.includes("habitTypeForRow(row)"), "Habit identity must remain visible");
-assert(home.includes("pl-storybook-support") && home.includes("<CompanionHomeCard userId={userId}/>"), "Guardian and custom Home tools stay available");
-assert(home.includes('openPlushGuardian("settings")'), "Original Home customization must remain reachable");
+assert(home.includes("pl-storybook-support") && home.includes("<CompanionHomeCard userId={userId} onOpenGuardian="), "Guardian and custom Home tools stay available");
+assert(home.includes('>Open my Guardian</button>'), "Home Guardian tools must open the unified Guardian page");
 assert(home.includes("pl-storybook-lookahead") && home.includes("weekStory.line"), "Existing weekly recap and tomorrow plan remain available");
 assert.equal((today.match(/className="pl-home-extras"/g)||[]).length,1,"Only one all-tools hub should remain");
 assert.equal((today.match(/className="pl-storybook-planning"/g)||[]).length,1,"Only one planning drawer should remain");
 for(const [name,handler] of [
   ["Calendar",'goToDashboard?.("week")'],
   ["Habits",'openTaskManager?.(period?.date,"habits")'],
-  ["Routines",'openPlushGuardian("routines")'],
+  ["Routines",'goToDashboard?.("guardian")'],
   ["Cozy Space",'window.__plushlifeOpenCozySpace=true'],
   ["Calm",'setCalmQuickOpen?.(true)'],
   ["Settings",'setSettingsOpen?.(true)'],
