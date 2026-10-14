@@ -46,6 +46,10 @@ const prioritized = [
 assert.deepEqual(storybookRows(prioritized,{},3,12*60).map(row=>row.key),["essential","urgent","small"],"Home highlights essentials, nearby reminders and smaller wins");
 assert.ok(homeTaskPriority(prioritized[3]) > homeTaskPriority(prioritized[0]));
 assert.ok(source.includes("pl-storybook-world-win"), "Completed days celebrate in the chosen theme");
+assert.ok(source.includes("weeklyCozyStory"), "Weekly story must use existing saved activity instead of a new tracker");
+assert.ok(source.includes("hasWeeklyStory"), "Weekly story should stay hidden until someone has caring days");
+assert.ok(page.includes("weeklyHistory={weeklyHistory}"), "Real Home must receive saved activity history");
+assert.ok(app.includes("dailyCheckInHistory={dailyCheckInHistory}"), "Weekly story must only use the signed-in Cozy check-ins");
 assert.ok(source.includes('dayType === "rest" ? 0'), "Rest days must show no pressured task list");
 assert.ok(source.includes('dayType === "tiny" ? 1'), "Tiny days must show just one suggested task");
 assert.ok(source.includes('["soft","recovery"].includes(dayType) ? 2'), "Soft days need at most two suggestions");

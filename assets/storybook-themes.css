@@ -166,3 +166,12 @@ html:has(#main-content[data-pl-world]),body:has(#main-content[data-pl-world]){ba
 #main-content .pl-storybook-tomorrow ul{padding-left:19px;margin:1px 0 10px;font:700 12px/1.7 Nunito,system-ui}
 #main-content .pl-storybook-tomorrow button{min-height:44px;margin-bottom:8px;border:1px solid var(--sb-border);border-radius:12px;background:var(--sb-soft);color:var(--sb-ink);font:800 12px Nunito,system-ui}
 #main-content .pl-storybook-bedtime{width:100%;min-height:46px;border:1px solid var(--sb-border);border-radius:16px;background:var(--sb-soft);color:var(--sb-ink);font:850 13px Nunito,system-ui;display:flex;align-items:center;justify-content:space-between;padding:0 13px}
+
+/* Existing progress data, rendered as an optional story rather than another tracker. */
+#main-content .pl-storybook-week{border:1px solid var(--sb-border);border-radius:17px;background:var(--sb-card);padding:0 12px;color:var(--sb-ink);min-width:0}
+#main-content .pl-storybook-week>summary{min-height:46px;display:flex;align-items:center;gap:9px;cursor:pointer;font:850 13px Nunito,system-ui}
+#main-content .pl-storybook-week>summary span{margin-left:auto;color:var(--sb-muted);font:700 11px Nunito,system-ui}
+#main-content .pl-storybook-week-body{border-top:1px solid var(--sb-border);padding:10px 2px 12px}
+#main-content .pl-storybook-week-body strong{font:900 13px Quicksand,Nunito,sans-serif}
+#main-content .pl-storybook-week-body p{margin:7px 0;color:var(--sb-muted);font:600 12px/1.5 Nunito,system-ui}
+#main-content .pl-storybook-week-body button{min-height:44px;border-radius:12px;padding:8px 11px;background:var(--sb-soft);color:var(--sb-ink);border:1px solid var(--sb-border);font:850 12px Nunito,system-ui}

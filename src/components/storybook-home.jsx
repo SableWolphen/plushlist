@@ -1,6 +1,6 @@
 import { CompanionHomeCard,useGuardianState,openPlushGuardian } from "./plush-guardian.jsx";
 import { ThemeScene, ThemeWorldContext } from "./theme-world.jsx";
-import { buildCozyDayPlan } from "../cozy-day-plan.mjs";
+import { buildCozyDayPlan, weeklyCozyStory } from "../cozy-day-plan.mjs";
 import { themeAtmosphere } from "../theme-atmosphere.js";
 import { HabitTypeIcon, habitTypeForRow } from "./shared.jsx";
 import { HabitGoalCaption } from "./habit-studio.jsx";
@@ -48,7 +48,7 @@ export function storybookRows(rows=[],viewDone={},limit=3,nowMinutes = 12*60) {
 export function storybookGreeting(hour = new Date().getHours()) {
   return hour < 12 ? "Good morning, Cozy!" : hour < 18 ? "Good afternoon, Cozy!" : "Good evening, Cozy!";
 }
-export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false,syncStatus,online,tomorrowPreviewRows=[],tomorrowDateString="",dayType="full"}) {
+export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false,syncStatus,online,tomorrowPreviewRows=[],tomorrowDateString="",dayType="full",weeklyHistory=[],dailyCheckInHistory=[]}) {
   const companion=useGuardianState(userId);
   const cardStyle=id=>({order:companion.home.order.indexOf(id)+1,display:companion.home.hidden.includes(id)?"none":undefined});
   const context=React.useContext(ThemeWorldContext);
@@ -59,6 +59,8 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
   const now=new Date();
   const previewSize = dayType === "rest" ? 0 : dayType === "tiny" ? 1 : ["soft","recovery"].includes(dayType) ? 2 : 3;
   const visible=storybookRows(rows,viewDone,previewSize,now.getHours()*60+now.getMinutes());
+  const weekStory=weeklyCozyStory({history:weeklyHistory,checkIns:dailyCheckInHistory,today:period?.date || ""});
+  const hasWeeklyStory=weekStory && (weekStory.stepCount > 0 || weekStory.checkIns > 0);
   const completed=rows.filter(row=>row && row.key && row.label && !row.isBonus && !row.sourceTask?.archived_at && viewDone[row.key]).length;
   const total=rows.filter(row=>row && row.key && row.label && !row.isBonus && !row.sourceTask?.archived_at).length;
   const progress=total?Math.round(completed/total*100):0;
@@ -101,6 +103,15 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
       <summary>🌤 Tomorrow’s little plan <span>Preview</span></summary>
       <ul>{tomorrowPreviewRows.map(row=><li key={row.key}>{row.label}</li>)}</ul>
       <button type="button" onClick={()=>openTaskManager?.(tomorrowDateString)}>View tomorrow’s tasks ›</button>
+    </details>}
+    {hasWeeklyStory && <details className="pl-storybook-week">
+      <summary>📖 Our little week <span>{weekStory.caringDays} caring {weekStory.caringDays===1?"day":"days"}</span></summary>
+      <div className="pl-storybook-week-body">
+        <strong>{weekStory.heading}</strong>
+        <p>{weekStory.line}</p>
+        <p>Every check-in and every little step belongs to your story.</p>
+        <button type="button" onClick={()=>goToDashboard?.("progress")}>See my progress & little wins ›</button>
+      </div>
     </details>}
     <details style={cardStyle("moods")} className="pl-storybook-moods"><summary>How are you feeling?</summary><div className="pl-storybook-mood-head"><div><p>A little room to check in.</p></div><button type="button" onClick={()=>goToDashboard?.("care")}>My Care ›</button></div>
       <div className="pl-storybook-mood-grid">{STORYBOOK_MOODS.map(([id,label,emoji])=><button type="button" key={id} onClick={()=>openDailyCheckIn?.()} aria-label={"Check in feeling "+label}><span className="pl-storybook-face" aria-hidden="true">{emoji}</span><span>{label}</span></button>)}</div>
