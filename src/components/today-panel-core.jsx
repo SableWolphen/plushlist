@@ -12,6 +12,7 @@ import { CompletedTaskArea, useCompletedTaskFlow } from "./completed-task-flow.j
 import { startFocusTimer } from "./focus-timer.jsx";
 import { DayRescue } from "./everyday-upgrades.jsx";
 import { CozyDayHome } from "./cozy-day-experience.jsx";
+import { SmartCareSchedule } from "./smart-care-schedule.jsx";
 import { StorybookHome } from "./storybook-home.jsx";
 import { openPlushGuardian } from "./plush-guardian.jsx";
 
@@ -398,7 +399,7 @@ export function TodayPanel({
   reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen, setSettingsOpen,
   completedTodayExpanded, setCompletedTodayExpanded, tomorrowTasksCount, tomorrowPreviewRows, tomorrowDateString, weeklyHistory, dailyCheckInHistory, preferences,
   activityDaysTotal, selectedOutfit, appearanceTheme, dinoTheme, babyMode, cozyDaily, optionalTools, rewardMoment, onWearReward, onDismissReward, returnGapDays, returnBannerDismissed, setReturnBannerDismissed, selectDayType, isHistoricalView, isFutureView,
-  pct, doneCount, openTodayJournal, openDailyCheckIn, dailyCheckIn, userId, syncStatus, online
+  pct, doneCount, openTodayJournal, openDailyCheckIn, dailyCheckIn, userId, syncStatus, online, selectedTaskViewIsRest, restDatesSet
 }) {
   // Wraps the app toggle with the shared completion flow: newly completed
   // tasks linger briefly for undo, and every completion dispatches
@@ -587,6 +588,7 @@ export function TodayPanel({
       <div data-plushlife-home-stack className="pl-home-shell">
         {(isHistoricalView || isFutureView) ? <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} /> : null}
         {!isHistoricalView && !isFutureView && <StorybookHome world={babyMode ? (preferences?.dark_mode ? "baby-night" : "baby") : dinoTheme ? "dino" : appearanceTheme} dayType={dailyCheckIn?.day_type || "full"} rows={rows} viewDone={viewDone} period={period} pct={pct} toggle={unifiedToggle} openTaskManager={openTaskManager} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} selectedOutfit={selectedOutfit} darkMode={preferences?.dark_mode} userId={userId} syncStatus={syncStatus} online={online} tomorrowPreviewRows={tomorrowPreviewRows} tomorrowDateString={tomorrowDateString} weeklyHistory={weeklyHistory} dailyCheckInHistory={dailyCheckInHistory} />}
+        {!isHistoricalView && !isFutureView && <SmartCareSchedule rows={rows} viewDone={viewDone} entries={scheduleEntries(selectedSchedule, selectedScheduleExceptionEntries)} dailyCheckIn={dailyCheckIn} restDay={selectedTaskViewIsRest || restDatesSet?.has(period?.date) || dailyCheckIn?.day_type === "rest"} date={selectedProgressDate || period?.date} timezone={preferences?.timezone} babyMode={babyMode} />}
         {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }
         <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
           <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>More for today · Explore tools</summary>
