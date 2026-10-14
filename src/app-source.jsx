@@ -758,11 +758,19 @@ function GlowUpTracker() {
         }
       } catch (_error) {}
     }
-    if (saved?.values) {
-      setPreferences(current => ({ ...current, ...saved.values }));
-      const selected = saved.values.appearance_theme;
-      if (selected === "none" || APPEARANCE_THEMES.some(theme => theme.id === selected)) setAppearanceTheme(selected);
-    }
+    // Reset only theme-owned fields when the account changes; don't carry
+    // another Cozy's Dino/Nursery setting into this account during loading.
+    setPreferences(current => ({
+      ...current,
+      appearance_theme: null,
+      nickname_style: "warm",
+      dino_theme: false,
+      baby_voice: "motherly",
+      dark_mode: false,
+      ...(saved?.values || {}),
+    }));
+    const selected = saved?.values?.appearance_theme;
+    if (selected === "none" || APPEARANCE_THEMES.some(theme => theme.id === selected)) setAppearanceTheme(selected);
   }, [user?.id]);
   const [weeklyHistory, setWeeklyHistory] = useState([]);
   const [longHistory, setLongHistory] = useState([]);
