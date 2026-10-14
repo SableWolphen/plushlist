@@ -14,6 +14,7 @@ import { GuardianTools } from "./plush-guardian-tools.jsx";
 import { GuardianSettings } from "./plush-guardian-settings.jsx";
 import { startFocusTimer } from "./focus-timer.jsx";
 import { botGuardianDailyPlan, activateBotMommy } from "../guardian-bot.mjs";
+import { CARE_ROUTINES, careWords, careChecksForToday } from "../guardian-care.mjs";
 import { guardianBotDisplayName, guardianSuggestedReward } from "../guardian-mode.mjs";
 export default function PlushGuardianCore(props) {
   const {
@@ -71,6 +72,13 @@ export default function PlushGuardianCore(props) {
   const steps = selected
     ? state.taskSteps[selected.key] || taskSteps(selected)
     : [];
+  const todayCare = careChecksForToday(state, localDate());
+  const markCare = (key, checked) => {
+    const items = { ...todayCare };
+    if (checked) items[key] = true;
+    else delete items[key];
+    update({ careChecks: { date: localDate(), items } });
+  };
   const botPlan = botGuardianDailyPlan(rows, viewDone, state.prefs.voice, dailyCheckIn?.day_type === "rest");
   const action = async (fn) => {
     if (busy) return;
@@ -104,7 +112,7 @@ export default function PlushGuardianCore(props) {
   return (
     <ToolPanel title="Plush Guardian" onClose={onClose}>
       <div
-        className="pl-guardian-companion"
+        className={"pl-guardian-companion" + (state.prefs.careMode && state.prefs.littleMode ? " pl-guardian-little" : "")}
         onKeyDown={(event) => {
           if (event.key !== "Tab") return;
           const panel = event.currentTarget.closest('[role="dialog"]');
@@ -179,6 +187,23 @@ export default function PlushGuardianCore(props) {
               </>}
               <p>Automatic notifications require PlushLife notification permission. Quiet hours, rest days and your privacy choices still apply.</p>
             </section>
+            {state.prefs.careMode && <section className="pl-virtual-guardian-options" aria-label="Caretaker routines">
+              <h3>🍼 My care time</h3>
+              <p>{careWords(state.prefs,"welcome")}</p>
+              {CARE_ROUTINES.map(routine => {
+                const count = routine.steps.filter((_,i) => todayCare[routine.id+":"+i]).length;
+                return <details key={routine.id} className="pl-companion-review">
+                  <summary>{routine.emoji} {routine.title} · {count}/{routine.steps.length}</summary>
+                  <p>Choose only what feels right. Each check stays private on this device.</p>
+                  {routine.steps.map((label,i) => <label className="pl-companion-check" key={routine.id+":"+i}>
+                    <input type="checkbox" checked={!!todayCare[routine.id+":"+i]} onChange={e=>markCare(routine.id+":"+i,e.target.checked)} />
+                    <span>{label}</span>
+                  </label>)}
+                  <p role="status">{count === routine.steps.length ? careWords(state.prefs,"done") : careWords(state.prefs,"pause")}</p>
+                </details>;
+              })}
+              <button type="button" onClick={() => navigate("settings")}>Change my care preferences ›</button>
+            </section>}
             <div className="pl-companion-choices">
               {[
                 ["Comfort", "comfort"],
