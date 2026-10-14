@@ -75,7 +75,7 @@ export const freshGuardianState = () => ({
     guidance: "gentle",
     careMode: false,
     automaticGifts: true,
-    giftCategories: ["stickers","celebrations","trophies"],
+    giftCategories: ["stickers","celebrations","trophies","activities"],
     careReminders: false,
     careMorningTime: "09:00",
     careBedtimeTime: "20:15",
@@ -138,8 +138,8 @@ export function normalizeGuardianState(value) {
   next.prefs.shareMemories = false;
   next.prefs.keepChat = false;
   next.prefs.automaticGifts = next.prefs.automaticGifts !== false;
-  next.prefs.giftCategories = Array.isArray(next.prefs.giftCategories) ? [...new Set(next.prefs.giftCategories.filter(x=>["stickers","celebrations","trophies"].includes(x)))] : [...d.prefs.giftCategories];
-  next.automaticGiftLedger = Array.isArray(value.automaticGiftLedger) ? [...new Set(value.automaticGiftLedger.filter(x=>typeof x==="string" && /^\d{4}-\d{2}-\d{2}:(25|50|100)$/.test(x)))].slice(-180) : [];
+  next.prefs.giftCategories = Array.isArray(next.prefs.giftCategories) ? [...new Set(next.prefs.giftCategories.filter(x=>["stickers","celebrations","trophies","activities","babyDays"].includes(x)))] : [...d.prefs.giftCategories];
+  next.automaticGiftLedger = Array.isArray(value.automaticGiftLedger) ? [...new Set(value.automaticGiftLedger.filter(x=>typeof x==="string" && /^\d{4}-\d{2}-\d{2}:(25|50|75|100|baby-day)$/.test(x)))].slice(-180) : [];
   next.prefs.careMode = next.prefs.careMode === true;
   next.prefs.littleMode = next.prefs.littleMode === true;
   next.prefs.careReminders = next.prefs.careReminders === true;
