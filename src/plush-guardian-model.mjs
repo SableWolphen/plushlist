@@ -133,6 +133,7 @@ export const freshGuardianState = () => ({
   surpriseLetterHistory: [],
   surpriseBoxHistory: [],
   automaticGiftLedger: [],
+  rewardProgress: null,
   taskSteps: {},
   partial: {},
   lastVisit: "",
@@ -153,6 +154,14 @@ export function normalizeGuardianState(value) {
   next.prefs.shareMood = false;
   next.prefs.shareMemories = false;
   next.prefs.keepChat = false;
+  const progress = value.rewardProgress;
+  next.rewardProgress = progress && /^\\d{4}-\\d{2}-\\d{2}$/.test(progress.date || "") &&
+    Array.isArray(progress.keys) && Array.isArray(progress.completedKeys)
+    ? { date: progress.date,
+        keys: [...new Set(progress.keys.filter(key=>typeof key==="string"))].slice(0,1000).sort(),
+        completedKeys: [...new Set(progress.completedKeys.filter(key=>typeof key==="string" && progress.keys.includes(key)))].slice(0,1000).sort(),
+        total: Math.max(0,Math.min(10000,Number(progress.total)||0)) }
+    : null;
   next.prefs.automaticGifts = next.prefs.automaticGifts !== false;
   next.prefs.giftCategories = Array.isArray(next.prefs.giftCategories) ? [...new Set(next.prefs.giftCategories.filter(x=>["stickers","celebrations","trophies","activities","babyDays"].includes(x)))] : [...d.prefs.giftCategories];
   next.automaticGiftLedger = Array.isArray(value.automaticGiftLedger) ? [...new Set(value.automaticGiftLedger.filter(x=>typeof x==="string" && /^\d{4}-\d{2}-\d{2}:(25|50|75|100|baby-day)$/.test(x)))].slice(-180) : [];
