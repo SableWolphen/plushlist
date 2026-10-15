@@ -13,7 +13,6 @@ The filenames of historical workflows are retained so existing run links remain 
 | `codeql.yml` | Configured pushes, PRs and schedule | Java/Kotlin, JavaScript/TypeScript and Actions security analysis. |
 | `premium-smart-check.yml` | Original personalization branch or dispatch | Historical feature validation; full tests also run in release/deploy workflows. |
 | `export-upload-cert.yml` | Dispatch | Export upload certificate for release administration. |
-| `zepp-balance2-build.yml` | Configured wearable changes or dispatch | Companion wearable validation/build. |
 
 Do not rerun a historical publishing workflow to repair a general app failure. Inspect the failed run and its publishing track first. Only `auto-play-release.yml` should own automatic Play publishing. Historical release files remain for auditability, but must stay manual-only so two pipelines cannot race the same Google Play release.
 
