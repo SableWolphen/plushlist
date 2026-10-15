@@ -444,7 +444,8 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
 
             {supportMessage && <div style={{ marginTop: 10, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>{supportMessage}</div>}
 
-            <div className="pl-human-guardian-rewards" style={{ marginTop: 16, scrollMarginTop: 80, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>🎁 REWARDS</div>
+            <div className="pl-human-guardian-rewards" style={{ marginTop: 16, scrollMarginTop: 80, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>🎁 MY GUARDIAN REWARDS</div>
+            <p style={{fontSize:13,color:"var(--pl-theme-muted)"}}>Earned rewards stay available until you use them. Once used, they leave this list.</p>
             {supportRewards.length === 0 ? <div style={{ marginTop: 7, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>No rewards added yet.</div> :
               supportRewards.map((reward) => {
                 const rewardUsesWeeklyProgress = !!reward.week_start;
@@ -454,12 +455,12 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 <div key={reward.id} style={{ marginTop: 7, padding: 11, borderRadius: 11, background: rewardUnlocked ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface-2)", border: rewardUnlocked ? "1px solid #A9E3BF" : "1px solid #F2DFB0" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
                     <span style={{ fontWeight: 800 }}>{reward.title}</span>
-                    <span style={{ fontSize: 14, fontWeight: 900, color: rewardUnlocked ? "#2A9D5B" : "#C28A19" }}>{rewardUnlocked ? "UNLOCKED ✨" : `AT ${reward.target_percent}% ${rewardUsesWeeklyProgress ? "WEEKLY" : "TODAY"}`}</span>
+                    <span style={{ fontSize: 14, fontWeight: 900, color: rewardUnlocked ? "#2A9D5B" : "#C28A19" }}>{rewardUnlocked ? "READY TO USE ✨" : `AT ${reward.target_percent}% ${rewardUsesWeeklyProgress ? "WEEKLY" : "TODAY"}`}</span>
                   </div>
                   {reward.details && <div style={{ marginTop: 4, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>{reward.details}</div>}
                   {reward.week_start && <div style={{ marginTop: 4, fontSize: 14, color: "var(--pl-theme-muted,#9A86A7)" }}>Goal week: {new Date(`${reward.week_start}T12:00:00`).toLocaleDateString()}</div>}
                   {isSupportAdult && reward.approval_required && !reward.approved_at && rewardUnlocked && <button onClick={() => updateRewardStatus(reward, "approve")} style={{ marginTop: 7, padding: "6px 9px", borderRadius: 8, border: 0, background: "var(--pl-theme-accent,#318C79)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800 }}>Approve reward</button>}
-                  {!isSupportAdult && rewardUnlocked && (!reward.approval_required || reward.approved_at) && <button onClick={() => updateRewardStatus(reward, "claim")} style={{ marginTop: 7, padding: "6px 9px", borderRadius: 8, border: 0, background: "var(--pl-theme-accent,#A65DC1)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800 }}>Mark reward claimed 🎁</button>}
+                  {!isSupportAdult && rewardUnlocked && (!reward.approval_required || reward.approved_at) && <button onClick={() => updateRewardStatus(reward, "claim")} style={{ marginTop: 7, padding: "6px 9px", borderRadius: 8, border: 0, background: "var(--pl-theme-accent,#A65DC1)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800 }}>Use reward 🎁</button>}
                   {!isSupportAdult && reward.approval_required && !reward.approved_at && rewardUnlocked && <div style={{ marginTop: 6, fontSize: 14, color: "var(--pl-theme-ink,#C28A19)", fontWeight: 800 }}>Goal reached · waiting for guardian approval</div>}
                 </div>
               )})
