@@ -634,7 +634,8 @@ export function GuardianTools({
   if (page === "rewards") {
     const todayTasks = rows.filter(r => r?.key && !r.isBonus && !r.sourceTask?.archived_at);
     const todayDone = todayTasks.filter(r => !!viewDone[r.key]).length;
-    const todayPercent = todayTasks.length ? Math.round(todayDone * 100 / todayTasks.length) : 0;
+    const baseTotal = state.rewardProgress?.date === localDate() ? Math.max(todayTasks.length, Number(state.rewardProgress.total) || 0) : todayTasks.length;
+    const todayPercent = baseTotal ? Math.round(todayDone * 100 / baseTotal) : 0;
     return (
       <section>
         <h2>Guardian rewards</h2>
@@ -699,7 +700,7 @@ export function GuardianTools({
             <h3>{x.name}</h3>
             <p>{x.text}</p>
             <progress value={x.mode === "progress" ? todayPercent : x.count} max={x.mode === "progress" ? 100 : x.goal} />
-            <p>{x.mode === "progress" ? `Today: ${todayDone}/${todayTasks.length} little jobs · ${todayPercent}% · Goal ${x.targetPercent}%` : `${x.count} / ${x.goal} steps`}</p>
+            <p>{x.mode === "progress" ? `Today: ${todayDone}/${baseTotal} little jobs · ${todayPercent}% · Goal ${x.targetPercent}%` : `${x.count} / ${x.goal} steps`}</p>
             {x.claimed ? <p role="status">🎁 {x.autoAwardedAt ? "Guardian unlocked this for you automatically!" : "Reward already enjoyed!"}</p> : x.mode !== "progress" && x.count < x.goal ? (
               <button
                 onClick={() =>
@@ -714,7 +715,7 @@ export function GuardianTools({
               </button>
             ) : (
               <button
-                disabled={x.claimed || (x.mode === "progress" && (todayTasks.length === 0 || todayPercent < (x.targetPercent || 100)))}
+                disabled={x.claimed || (x.mode === "progress" && (baseTotal === 0 || todayPercent < (x.targetPercent || 100)))}
                 onClick={() =>
                   update({
                     rewards: state.rewards.map((r) =>
