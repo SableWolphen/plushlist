@@ -14,7 +14,7 @@ import { GuardianTools } from "./plush-guardian-tools.jsx";
 import { GuardianSettings } from "./plush-guardian-settings.jsx";
 import { startFocusTimer } from "./focus-timer.jsx";
 import { botGuardianDailyPlan, activateBotMommy } from "../guardian-bot.mjs";
-import { smartCarePlan, surpriseLetter, nextSurpriseBox } from "../guardian-smart-care.mjs";
+import { smartCarePlan, surpriseLetter, nextSurpriseBox, guardianDayExtras } from "../guardian-smart-care.mjs";
 import { CARE_ROUTINES, careWords, careChecksForToday } from "../guardian-care.mjs";
 import { guardianBotDisplayName, guardianSuggestedReward } from "../guardian-mode.mjs";
 export default function PlushGuardianCore(props) {
@@ -221,8 +221,17 @@ export default function PlushGuardianCore(props) {
             </section>}
             <section className="pl-virtual-guardian-options" aria-label="Guardian plans and memories">
               <h3>🧸 Guardian planned today</h3>
+              {(() => { const extra=guardianDayExtras(localDate(),state.prefs,dailyCheckIn?.day_type==="rest"); return <>
+                <p>🌤️ {extra.morning}</p>
+                {extra.theme && <p>🧸 Today's Little Mode theme: {extra.theme}</p>}
+                {state.prefs.weekendSpecials && extra.weekend && <p>🎁 Weekend treat: choose one favorite activity, no chores needed.</p>}
+                <p>🌙 {extra.evening}</p>
+                <details><summary>💜 Comfort corner</summary><p>{extra.comfort}</p><button type="button" onClick={()=>update({prefs:{...state.prefs,badDayMode:!state.prefs.badDayMode}})}>{state.prefs.badDayMode?"Leave Rescue Mode":"Turn on Rescue Mode"}</button></details>
+                {state.prefs.storyTime && <details><summary>📖 Bedtime story: {extra.story.title}</summary><p>{extra.story.text}</p></details>}
+              </>; })()}
+              {state.prefs.badDayMode && <p role="status">💜 Rescue Mode: no task pressure, just rest or one small step.</p>}
               <p>Here is a gentle suggestion, not another list you must finish.</p>
-              {smartCarePlan(rows,viewDone,state.energy,dailyCheckIn?.day_type==="rest",new Date(),state.prefs.littleMode).map(item=><p key={item.label}>{item.icon} <strong>{item.label}:</strong> {item.detail}</p>)}
+              {smartCarePlan(state.prefs.badDayMode?[]:rows,viewDone,state.prefs.badDayMode?"low":state.energy,dailyCheckIn?.day_type==="rest"||state.prefs.badDayMode,new Date(),state.prefs.littleMode).map(item=><p key={item.label}>{item.icon} <strong>{item.label}:</strong> {item.detail}</p>)}
               <details><summary>🎁 Guardian's Surprise Box ({(state.surpriseBoxHistory||[]).length})</summary>
                 {(state.surpriseBoxHistory||[]).length ? (state.surpriseBoxHistory||[]).slice(-6).reverse().map(gift=><article key={gift.date}><small>{gift.date}</small><p>{gift.label} — a gift of time for yourself, no chores required.</p></article>) : <p>Guardian will choose from your favorites when Surprise Box is enabled.</p>}
               </details>
