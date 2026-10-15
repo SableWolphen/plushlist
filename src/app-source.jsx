@@ -3706,41 +3706,71 @@ function GlowUpTracker() {
     setScheduleMessage("Schedule saved ✨");
   };
 
-  const copyScheduleToAllDays = async () => {
-    if (!(await askConfirmation({ title: "Copy to all 7 days?", message: "Any existing schedule on other days will be replaced.", confirmLabel: "Copy schedule" }))) return;
-    setScheduleMessage("Copying to every day…");
-    const rows = DAYS.map((dayItem) => buildScheduleRow(dayItem.id, scheduleDraft.entries));
-    const { error } = await supabase.from("tracker_schedules").upsert(rows, { onConflict: "user_id,day_id" });
-    if (error) {
-      setScheduleMessage(`Couldn't copy to every day: ${error.message}`);
+  const scheduleCopyInFlightRef = React.useRef(false);
+  const copyScheduleToDays = async (selectedIds, allDays = false) => {
+    if (!user?.id || scheduleCopyInFlightRef.current) return;
+    const sourceDayId = scheduleEditingDayId;
+    const validDays = new Set(DAYS.map((item) => item.id));
+    if (!validDays.has(sourceDayId)) {
+      setScheduleMessage("Choose the schedule day you want to copy first.");
       return;
     }
-    setPersonalSchedules((items) => [...items.filter((item) => !DAYS.some((dayItem) => dayItem.id === item.day_id)), ...rows]);
-    setScheduleMessage("Copied this schedule to every day ✨");
+    const entries = scheduleDraft.entries
+      .filter((entry) => (entry.text || "").trim())
+      .map((entry) => ({ time: entry.time || "", text: (entry.text || "").trim() }));
+    if (!entries.length) {
+      setScheduleMessage("Add a schedule item with a description before copying. Nothing was changed.");
+      return;
+    }
+    const targetIds = [...new Set([sourceDayId, ...selectedIds])].filter(id => validDays.has(id));
+    if (targetIds.length <= 1 && !allDays) {
+      setScheduleMessage("Pick at least one other day to copy your schedule to.");
+      return;
+    }
+    const dayLabels = selectedIds.map((id) => DAYS.find((day) => day.id === id)?.label || id.toUpperCase()).join(", ");
+    const confirmed = await askConfirmation({
+      title: allDays ? "Use this schedule for all 7 days?" : "Copy schedule to selected days?",
+      message: allDays
+        ? "This will save the day you're editing and replace the schedules for the other six days. Your checklist tasks are not changed."
+        : `This saves the day you're editing and copies it to ${dayLabels}. Any existing plans for those days will be replaced. Checklist tasks are not changed.`,
+      confirmLabel: allDays ? "Copy to all 7 days" : "Copy to selected days",
+    });
+    if (!confirmed || scheduleCopyInFlightRef.current) return;
+    scheduleCopyInFlightRef.current = true;
+    setScheduleMessage(allDays ? "Saving your schedule to all seven days…" : "Copying your schedule…");
+    try {
+      // The source day must be saved too. Otherwise a copy of unsaved edits
+      // makes the original day appear unchanged and the draft gets reset.
+      const rowsToCopy = targetIds.map((dayId) => buildScheduleRow(dayId, entries));
+      const { data, error } = await supabase.from("tracker_schedules")
+        .upsert(rowsToCopy, { onConflict: "user_id,day_id" })
+        .select("day_id, entries");
+      if (error) {
+        setScheduleMessage(`Couldn't copy the schedule: ${error.message}. Your existing schedules were left as they were.`);
+        return;
+      }
+      const returned = new Set((data || []).map((item) => item.day_id));
+      if (rowsToCopy.some((row) => !returned.has(row.day_id))) {
+        setScheduleMessage("The server didn't confirm every day. Please reopen the editor and check your schedule before copying again.");
+        return;
+      }
+      setPersonalSchedules((items) => [
+        ...items.filter((item) => !targetIds.includes(item.day_id)),
+        ...rowsToCopy,
+      ]);
+      setCopyToDayIds([]);
+      setScheduleMessage(allDays ? "Saved! All 7 days now use this schedule. ✨" : `Saved! Copied to ${dayLabels} and kept the original day. ✨`);
+    } catch (error) {
+      setScheduleMessage(`Couldn't copy the schedule: ${error?.message || "connection problem"}. Please try again.`);
+    } finally {
+      scheduleCopyInFlightRef.current = false;
+    }
   };
-
+  const copyScheduleToAllDays = () => copyScheduleToDays(DAYS.map((day) => day.id), true);
   const toggleCopyToDay = (dayId) => {
     setCopyToDayIds((current) => current.includes(dayId) ? current.filter((id) => id !== dayId) : [...current, dayId]);
   };
-
-  const copyScheduleToSelectedDays = async () => {
-    if (copyToDayIds.length === 0) {
-      setScheduleMessage("Pick at least one day to copy to first.");
-      return;
-    }
-    const dayLabels = copyToDayIds.map((id) => DAYS.find((item) => item.id === id)?.label || id.toUpperCase()).join(", ");
-    if (!(await askConfirmation({ title: "Copy to selected days?", message: `Copy this schedule to ${dayLabels}? Any existing schedule on ${copyToDayIds.length === 1 ? "that day" : "those days"} will be replaced.`, confirmLabel: "Copy schedule" }))) return;
-    setScheduleMessage("Copying to selected days…");
-    const rows = copyToDayIds.map((dayId) => buildScheduleRow(dayId, scheduleDraft.entries));
-    const { error } = await supabase.from("tracker_schedules").upsert(rows, { onConflict: "user_id,day_id" });
-    if (error) {
-      setScheduleMessage(`Couldn't copy to those days: ${error.message}`);
-      return;
-    }
-    setPersonalSchedules((items) => [...items.filter((item) => !copyToDayIds.includes(item.day_id)), ...rows]);
-    setCopyToDayIds([]);
-    setScheduleMessage(`Copied this schedule to ${dayLabels} ✨`);
-  };
+  const copyScheduleToSelectedDays = () => copyScheduleToDays(copyToDayIds);
 
   const addScheduleEntry = () => {
     setScheduleDraft((draft) => ({ entries: [...draft.entries, { id: crypto.randomUUID(), time: "", text: "" }] }));
