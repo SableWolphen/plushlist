@@ -72,6 +72,10 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           <input type="checkbox" checked={(prefs.surpriseBoxChoices||[]).includes(item.id)} onChange={e=>preference("surpriseBoxChoices",e.target.checked?[...(prefs.surpriseBoxChoices||[]),item.id]:(prefs.surpriseBoxChoices||[]).filter(id=>id!==item.id))}/>
           {item.label}
         </label>)}
+        <h3>🛡️ Guardian boundaries</h3>
+        {check("guardianPaused","Pause automatic Guardian surprises and letters")}
+        {check("lowStimulation","Low-stimulation mode (quiet, simple presentation)")}
+        <label>Surprise frequency <select value={prefs.surpriseFrequencyDays||3} onChange={e=>preference("surpriseFrequencyDays",Number(e.target.value))}><option value={3}>Every 3 days at most</option><option value={7}>Weekly at most</option><option value={14}>Every 2 weeks at most</option></select></label>
         <h3>💜 Care preferences</h3>
         <label>Favorite activities <input maxLength={160} value={prefs.favoriteActivities||""} onChange={e=>preference("favoriteActivities",e.target.value)} placeholder="Cartoons, plushies, songs..."/></label>
         <label>Things to avoid <input maxLength={160} value={prefs.avoidActivities||""} onChange={e=>preference("avoidActivities",e.target.value)} placeholder="Activities I dislike"/></label>
