@@ -3686,15 +3686,35 @@ function GlowUpTracker() {
     };
   };
 
+  const scheduleSaveInFlightRef = React.useRef(false);
   const savePersonalSchedule = async () => {
-    const row = buildScheduleRow(scheduleEditingDayId, scheduleDraft.entries);
-    setScheduleMessage("Saving schedule…");
-    const { error } = await supabase.from("tracker_schedules").upsert(row, { onConflict: "user_id,day_id" });
-    if (error) {
-      setScheduleMessage(`Couldn't save that schedule: ${error.message}`);
+    if (!user?.id || scheduleSaveInFlightRef.current || scheduleCopyInFlightRef.current) return;
+    const dayId = scheduleEditingDayId;
+    if (!DAYS.some((day) => day.id === dayId)) {
+      setScheduleMessage("Choose a day before saving.");
       return;
     }
-    setPersonalSchedules((items) => [...items.filter((item) => item.day_id !== scheduleEditingDayId), row]);
+    const row = buildScheduleRow(dayId, scheduleDraft.entries);
+    scheduleSaveInFlightRef.current = true;
+    setScheduleMessage("Saving schedule…");
+    try {
+      const { data, error } = await supabase.from("tracker_schedules")
+        .upsert(row, { onConflict: "user_id,day_id" })
+        .select("user_id, day_id, label, wake, morning, work, workout, home, entries, updated_at")
+        .single();
+      if (error) throw error;
+      if (!data || data.user_id !== user.id || data.day_id !== dayId ||
+          JSON.stringify(data.entries || []) !== JSON.stringify(row.entries)) {
+        throw new Error("The saved schedule could not be verified. Please retry.");
+      }
+      setPersonalSchedules((items) => [...items.filter((item) => item.day_id !== dayId), data]);
+      setScheduleMessage(`${data.label} schedule saved ✨`);
+    } catch (error) {
+      setScheduleMessage(`Couldn't save that schedule: ${error?.message || "connection problem"}`);
+      return;
+    } finally {
+      scheduleSaveInFlightRef.current = false;
+    }
     if (!trackerProfile) {
       const displayName = (user.email || "My").split("@")[0];
       const { data } = await supabase.from("tracker_profiles").upsert({
@@ -3711,7 +3731,7 @@ function GlowUpTracker() {
 
   const scheduleCopyInFlightRef = React.useRef(false);
   const copyScheduleToDays = async (selectedIds, allDays = false) => {
-    if (!user?.id || scheduleCopyInFlightRef.current) return;
+    if (!user?.id || scheduleCopyInFlightRef.current || scheduleSaveInFlightRef.current) return;
     const sourceDayId = scheduleEditingDayId;
     const validDays = new Set(DAYS.map((item) => item.id));
     if (!validDays.has(sourceDayId)) {
@@ -3759,7 +3779,7 @@ function GlowUpTracker() {
       }
       setPersonalSchedules((items) => [
         ...items.filter((item) => !targetIds.includes(item.day_id)),
-        ...rowsToCopy,
+        ...(data || []).map((saved) => ({ ...rowsToCopy.find((row) => row.day_id === saved.day_id), ...saved })),
       ]);
       setCopyToDayIds([]);
       setScheduleMessage(allDays ? "Saved! All 7 days now use this schedule. ✨" : `Saved! Copied to ${dayLabels} and kept the original day. ✨`);
