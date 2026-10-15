@@ -232,6 +232,20 @@ export default function PlushGuardianCore(props) {
               {state.prefs.badDayMode && <p role="status">💜 Rescue Mode: no task pressure, just rest or one small step.</p>}
               <p>Here is a gentle suggestion, not another list you must finish.</p>
               {smartCarePlan(state.prefs.badDayMode?[]:rows,viewDone,state.prefs.badDayMode?"low":state.energy,dailyCheckIn?.day_type==="rest"||state.prefs.badDayMode,new Date(),state.prefs.littleMode).map(item=><p key={item.label}>{item.icon} <strong>{item.label}:</strong> {item.detail}</p>)}
+              <details><summary>💌 Mystery Mailbox ({(state.surpriseLetterHistory||[]).filter(x=>!x.opened).length} unopened)</summary>
+                {(state.surpriseLetterHistory||[]).slice(-12).reverse().map(letter=><article key={letter.date}>
+                  <p>{letter.opened ? "💌 A letter from Guardian" : "✉️ A sealed letter"} · {letter.date}</p>
+                  {letter.opened ? <p>{letter.text}</p> : <button type="button" onClick={()=>update({surpriseLetterHistory:state.surpriseLetterHistory.map(x=>x.date===letter.date?{...x,opened:true}:x)})}>Open my letter</button>}
+                </article>)}
+              </details>
+              <details><summary>📔 My cozy scrapbook</summary>
+                <p>Memories and surprises you've collected. There's no streak to lose.</p>
+                <div className="pl-companion-grid">
+                  {(state.careStickers||[]).slice(-8).reverse().map(id=><article key={id}>🌟 Care star · {id.slice(0,10)}</article>)}
+                  {(state.surpriseBoxHistory||[]).slice(-8).reverse().map(x=><article key={x.date}>🎁 {x.label} · {x.date}</article>)}
+                  {(state.automaticGiftLedger||[]).slice(-8).reverse().map(id=><article key={id}>🏆 Little victory · {id.slice(0,10)}</article>)}
+                </div>
+              </details>
               <details><summary>🎁 Guardian's Surprise Box ({(state.surpriseBoxHistory||[]).length})</summary>
                 {(state.surpriseBoxHistory||[]).length ? (state.surpriseBoxHistory||[]).slice(-6).reverse().map(gift=><article key={gift.date}><small>{gift.date}</small><p>{gift.label} — a gift of time for yourself, no chores required.</p></article>) : <p>Guardian will choose from your favorites when Surprise Box is enabled.</p>}
               </details>
