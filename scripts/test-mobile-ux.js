@@ -10,6 +10,9 @@ const app = read("src/app-source.jsx");
 const ui = read("assets/plushlife-ui.css");
 const finalMobile = read("assets/final-mobile-ui.css");
 const shared = read("src/components/shared.jsx");
+const scheduleEditor = read("src/components/schedule-editor-panel.jsx");
+const guardianTools = read("src/components/plush-guardian-tools.jsx");
+const guardianPanel = read("src/components/guardian-panel.jsx");
 const today = read("src/components/today-panel-core.jsx");
 const care = read("src/components/care-panel.jsx");
 const careExisting = read("src/components/care-panel-existing.jsx");
@@ -21,6 +24,12 @@ const settings = read("src/components/organized-settings.jsx");
 const taskPrivacy = read("supabase/migrations/20261002001500_tighten_task_privacy.sql");
 
 const checks = [
+  [shared.includes('zIndex: 4000') && shared.includes('plushlife-confirm-title'), "Schedule-copy confirmation appears above editor"],
+  [app.includes('const copyScheduleToDays = async') && app.includes('copyScheduleToDays(DAYS.map((day) => day.id), true)') && app.includes('.upsert(rowsToCopy') && app.includes('.select("day_id, entries")'), "Copy to all seven days saves the source day and verifies every copied day"],
+  [app.includes('sourceDayId, ...selectedIds') && app.includes('setCopyToDayIds([])') && app.includes('if (!entries.length)'), "Schedule copying preserves source day, clears selection, and blocks empty copy"],
+  [scheduleEditor.includes('📅 Copy to all 7 days') && scheduleEditor.includes('onClick={copyScheduleToSelectedDays}'), "Schedule editor makes both selected-day and all-day copy actions discoverable"],
+  [guardianTools.includes('Ready to enjoy') && guardianTools.includes('Use reward') && guardianTools.includes('usedGuardianGifts'), "Earned automatic Guardian rewards can be used exactly once"],
+  [guardianPanel.includes('MY GUARDIAN REWARDS') && guardianPanel.includes('Use reward 🎁'), "Human Guardian rewards have a clearly labeled Use reward action"],
   [app.includes('aria-label="Quick editing shortcuts"') && app.includes('✏️ Edit tasks') && app.includes('📅 Edit schedule'), "Home and Calendar show direct task and schedule editing shortcuts"],
   [app.includes('onOpenSchedule={() => setManageSchedule(true)}'), "Task page can open the existing schedule editor directly"],
   [tasks.includes('className="pl-task-edit-direct"') && tasks.includes('onClick={() => startEditingTask(row.sourceTask)}'), "Every displayed task has a directly accessible Edit button"],
