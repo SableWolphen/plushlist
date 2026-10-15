@@ -59,3 +59,20 @@ export function surpriseLetter(state={}, today="", resting=false) {
   const index=Math.floor(current/86400000)%messages.length;
   return {date:today,text:resting?"A little letter from Guardian: Rest is welcome today. You don't have to earn it.":messages[index]};
 }
+
+export const GUARDIAN_STORIES = [
+ {title:"The Little Star",text:"A little star learned that its glow mattered even when it rested. Tomorrow was another day."},
+ {title:"The Cozy Dinosaur",text:"A dinosaur made a nest of blankets, and all its friends came by for a quiet story."},
+ {title:"The Gentle Cloud",text:"The cloud moved slowly. No one asked it to hurry, and it found a beautiful sunset."}
+];
+export function guardianDayExtras(date,prefs={},rest=false) {
+ const n=Math.max(0,Math.floor(Date.parse(date+"T12:00:00")/86400000)||0);
+ const themes=["Plushie Picnic","Pajama Day","Dino Day","Art Day","Storybook Day"];
+ const story=GUARDIAN_STORIES[n%GUARDIAN_STORIES.length];
+ return {story,theme:prefs.careMode&&prefs.littleMode?themes[n%themes.length]:null,
+ morning:rest?"Rest is welcome today.":"Good morning! One little step at a time.",
+ evening:"You've done enough to deserve a peaceful evening.",
+ comfort:prefs.comfortPreference==="quiet"?"Take quiet space whenever you need.":prefs.comfortPreference==="practical"?"Choose one manageable step, or rest.":"You deserve warmth and kindness, always.",
+ weekend:[0,6].includes(new Date(date+"T12:00:00").getDay())
+ };
+}
