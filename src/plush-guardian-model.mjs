@@ -133,6 +133,7 @@ export const freshGuardianState = () => ({
   surpriseLetterHistory: [],
   surpriseBoxHistory: [],
   automaticGiftLedger: [],
+  usedGuardianGifts: [],
   rewardProgress: null,
   taskSteps: {},
   partial: {},
@@ -166,6 +167,9 @@ export function normalizeGuardianState(value) {
   next.prefs.automaticGifts = next.prefs.automaticGifts !== false;
   next.prefs.giftCategories = Array.isArray(next.prefs.giftCategories) ? [...new Set(next.prefs.giftCategories.filter(x=>["stickers","celebrations","trophies","activities","babyDays"].includes(x)))] : [...d.prefs.giftCategories];
   next.automaticGiftLedger = Array.isArray(value.automaticGiftLedger) ? [...new Set(value.automaticGiftLedger.filter(x=>typeof x==="string" && /^\d{4}-\d{2}-\d{2}:(25|50|75|100|baby-day)$/.test(x)))].slice(-180) : [];
+  next.usedGuardianGifts = Array.isArray(value.usedGuardianGifts)
+    ? [...new Set(value.usedGuardianGifts.filter(id=>next.automaticGiftLedger.includes(id)))].slice(-180)
+    : [];
   for (const key of ["favoriteActivities","avoidActivities"]) next.prefs[key]=typeof next.prefs[key]==="string"?next.prefs[key].slice(0,160):"";
   if (!["gentle","quiet","practical"].includes(next.prefs.comfortPreference)) next.prefs.comfortPreference="gentle";
   if (!["gentle","quiet","playful"].includes(next.prefs.celebrationStyle)) next.prefs.celebrationStyle="gentle";
