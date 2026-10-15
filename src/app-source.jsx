@@ -1,6 +1,6 @@
 import { guardianKey, readGuardian, saveGuardian, STATE_EVENT } from "./plush-guardian-model.mjs";
 import { guardianMode } from "./guardian-mode.mjs";
-import { awardEligibleRewards, autoGuardianGifts } from "./guardian-auto-rewards.mjs";
+import { awardEligibleRewards, autoGuardianGifts, trackRewardProgress } from "./guardian-auto-rewards.mjs";
 import { companionAccountKey } from "./companion-account-storage.mjs";
 import { hasThemePreferenceChange, readThemeSelection, rememberThemeSelection, acknowledgeThemeSelection, restoreThemePreferences } from "./theme-selection-storage.mjs";
 import { PlushGuardianHost } from "./components/plush-guardian.jsx";
@@ -5129,14 +5129,25 @@ function GlowUpTracker() {
   // Reward grants happen when task progress is saved, not when the Cozy visits the reward screen.
   // The saved claimed flag ensures a reward is never granted twice.
   useEffect(() => {
-    if (!user?.id || supportLinksLoadedFor !== user.id) return;
+    if (!user?.id || isHistoricalView || supportLinksLoadedFor !== user.id) return;
     const stored = readGuardian(deviceStorage(), user.id);
-    if (!stored.prefs.automaticReminders || guardianMode(supportLinks, user.id, supportLinksLoadedFor, true) !== "automatic") return;
-    const result = awardEligibleRewards(stored.rewards, rows, viewDone, period.date);
-    const gifts = autoGuardianGifts(stored.automaticGiftLedger, rows, viewDone, period.date, stored.prefs, false);
-    if (!result.unlocked.length && !gifts.unlocked.length) return;
-    if (!saveGuardian(deviceStorage(), user.id, { ...stored, rewards:result.rewards, automaticGiftLedger:gifts.ledger })) return;
+    const tracked = trackRewardProgress(stored.rewardProgress, rows, viewDone, period.date);
+    const enabled = stored.prefs.automaticReminders &&
+      guardianMode(supportLinks, user.id, supportLinksLoadedFor, true) === "automatic";
+    const progress = { ...tracked, total: tracked.snapshot.total };
+    const result = enabled
+      ? awardEligibleRewards(stored.rewards, rows, viewDone, period.date, progress)
+      : { rewards: stored.rewards, unlocked: [] };
+    const gifts = enabled
+      ? autoGuardianGifts(stored.automaticGiftLedger, rows, viewDone, period.date, stored.prefs, false, progress)
+      : { ledger: stored.automaticGiftLedger, unlocked: [] };
+    if (!tracked.changed && !result.unlocked.length && !gifts.unlocked.length) return;
+    if (!saveGuardian(deviceStorage(), user.id, {
+      ...stored, rewardProgress: tracked.snapshot,
+      rewards: result.rewards, automaticGiftLedger: gifts.ledger
+    })) return;
     window.dispatchEvent(new Event(STATE_EVENT));
+    if (!result.unlocked.length && !gifts.unlocked.length) return;
     // A single friendly, dismissible announcement for this batch of rewards.
     const old = document.getElementById("pl-guardian-unlock");
     old?.remove();
@@ -5155,7 +5166,7 @@ function GlowUpTracker() {
     close.addEventListener("click", () => notice.remove());
     notice.append(copy,close);
     document.body.appendChild(notice);
-  }, [user?.id, period.date, guardianReminderRevision, supportLinksLoadedFor, JSON.stringify(supportLinks.map(link=>[link.owner_user_id,link.active,link.accepted_at])), JSON.stringify(rows.map(row=>[row.key,row.isBonus,row.sourceTask?.archived_at])), JSON.stringify(viewDone)]);
+  }, [user?.id, period.date, isHistoricalView, guardianReminderRevision, supportLinksLoadedFor, JSON.stringify(supportLinks.map(link=>[link.owner_user_id,link.active,link.accepted_at])), JSON.stringify(rows.map(row=>[row.key,row.isBonus,row.sourceTask?.archived_at])), JSON.stringify(viewDone)]);
   const guardianLinksReady = !!user && supportLinksLoadedFor === user.id;
   const activeGuardianMode = guardianMode(supportLinks, user?.id, supportLinksLoadedFor, readGuardian(deviceStorage(), user?.id).prefs.automaticReminders);
   useEffect(() => {
@@ -5871,6 +5882,11 @@ function GlowUpTracker() {
     ? Math.round((todayRequiredDone / todayRequiredKeys.length) * 100)
     : 0;
   const todayIsComplete = todayRequiredKeys.length > 0 && todayRequiredDone === todayRequiredKeys.length;
+  // Reward celebrations must reflect completed work, not a shortened list.
+  const rewardProgress = user ? readGuardian(deviceStorage(), user.id).rewardProgress : null;
+  const actuallyEarnedFullDay = !!(rewardProgress?.date === period.date &&
+    rewardProgress.total > 0 && rewardProgress.completedKeys.length === rewardProgress.total);
+
   const mascotMood = todayIsComplete ? "excited" : (todayRequiredKeys.length > 0 && todayRequiredDone === 0) ? "tired" : "neutral";
 
   useEffect(() => {
@@ -6037,6 +6053,7 @@ function GlowUpTracker() {
       collectionLoadedFor !== user.id ||
       syncStatus !== "ready" ||
       !todayIsComplete ||
+      !actuallyEarnedFullDay ||
       mascotCollection.lastCelebratedDate === period.date
     ) return;
     const next = {
@@ -6053,6 +6070,7 @@ function GlowUpTracker() {
     collectionLoadedFor,
     syncStatus,
     todayIsComplete,
+    actuallyEarnedFullDay,
     period.date,
     currentCompleteStreak,
     mascotCollection.lastCelebratedDate,
