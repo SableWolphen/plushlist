@@ -5974,7 +5974,7 @@ function GlowUpTracker() {
   const mascotRequirementProgress = (outfit) => {
     // Removing unfinished tasks can alter percentages and reconstructed history.
     // Do not treat that change as newly earned task-based mascot progress.
-    if (taskListRemovalShouldNotEarn && ["first_step", "daily_core", "care_days", "activity_days"].includes(outfit.unlock.type)) {
+    if (typeof taskListRemovalShouldNotEarn !== "undefined" && taskListRemovalShouldNotEarn && ["first_step", "daily_core", "care_days", "activity_days"].includes(outfit.unlock.type)) {
       return Number.NEGATIVE_INFINITY;
     }
     switch (outfit.unlock.type) {
