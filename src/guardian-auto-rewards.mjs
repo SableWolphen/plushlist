@@ -59,3 +59,21 @@ export function autoGuardianGifts(ledger = [], rows = [], done = {}, date = "", 
   const unlocked = [...regular,...activity,...babyDay];
   return { ledger:[...existing,...unlocked.map(g=>date+":"+g.threshold)].slice(-180), unlocked };
 }
+
+export function availableGuardianGifts(ledger = [], used = []) {
+  const usedIds = new Set(Array.isArray(used) ? used : []);
+  const names = {
+    "25": "🌟 A little star sticker",
+    "50": "🧸 A cozy Guardian cheer",
+    "100": "🏆 Today's little victory trophy",
+    "baby-day": "🍼 A cozy Little Day",
+  };
+  const activities = ["🎬 Enjoy a movie night","📖 Pick a comforting bedtime story","🎮 Have a cozy game session","🧸 Make time for plushie cuddles","🖍️ Try a little coloring session"];
+  return (Array.isArray(ledger) ? ledger : []).filter(id =>
+    typeof id === "string" && /^\d{4}-\d{2}-\d{2}:(25|50|75|100|baby-day)$/.test(id) && !usedIds.has(id)
+  ).map(id => {
+    const date = id.slice(0,10), level=id.slice(11);
+    const day = Math.floor(Date.parse(date+"T12:00:00")/86400000);
+    return {id,date,name:level==="75"?activities[day%activities.length]:names[level]};
+  }).reverse();
+}
