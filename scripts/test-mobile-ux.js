@@ -25,6 +25,7 @@ const taskPrivacy = read("supabase/migrations/20261002001500_tighten_task_privac
 
 const checks = [
   [shared.includes('zIndex: 4000') && shared.includes('plushlife-confirm-title'), "Schedule-copy confirmation appears above editor"],
+  [app.includes('wake: "", morning: "", work: "", workout: "", home: ""'), "Copied custom schedule clears conflicting old-format day fields"],
   [app.includes('const copyScheduleToDays = async') && app.includes('copyScheduleToDays(DAYS.map((day) => day.id), true)') && app.includes('.upsert(rowsToCopy') && app.includes('.select("day_id, entries")'), "Copy to all seven days saves the source day and verifies every copied day"],
   [app.includes('sourceDayId, ...selectedIds') && app.includes('setCopyToDayIds([])') && app.includes('if (!entries.length)'), "Schedule copying preserves source day, clears selection, and blocks empty copy"],
   [scheduleEditor.includes('📅 Copy to all 7 days') && scheduleEditor.includes('onClick={copyScheduleToSelectedDays}'), "Schedule editor makes both selected-day and all-day copy actions discoverable"],
