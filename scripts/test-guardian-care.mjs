@@ -134,3 +134,23 @@ assert.equal(archived.removedTask,true);
 assert.equal(archived.snapshot.total,4);
 assert.equal(normalizeGuardianState({rewardProgress:afterDeleting.snapshot}).rewardProgress.lastAction,"removed");
 console.log("Deleting, archiving, restoring and relisting tasks cannot create earned progress.");
+
+import { availableGuardianGifts } from "../src/guardian-auto-rewards.mjs";
+const earnedGiftIds = ["2026-10-14:25", "2026-10-14:75", "2026-10-14:100"];
+const giftWallet = availableGuardianGifts(earnedGiftIds, []);
+assert.equal(giftWallet.length,3,"earned gifts remain available");
+assert(giftWallet.every(x=>x.name&&x.date==="2026-10-14"));
+const afterUsingOne = normalizeGuardianState({
+  automaticGiftLedger: earnedGiftIds, usedGuardianGifts:["2026-10-14:75"]
+});
+assert.equal(availableGuardianGifts(afterUsingOne.automaticGiftLedger,afterUsingOne.usedGuardianGifts).length,2,
+  "using one reward removes it from available inventory only");
+assert.equal(afterUsingOne.automaticGiftLedger.length,3,"reward history remains intact");
+assert.deepEqual(normalizeGuardianState({
+  automaticGiftLedger:earnedGiftIds,usedGuardianGifts:["2026-10-14:75","2026-10-14:75","invalid"]
+}).usedGuardianGifts,["2026-10-14:75"]);
+assert.equal(availableGuardianGifts(earnedGiftIds,earnedGiftIds).length,0,
+  "already used rewards never become available again after reload");
+assert.equal(availableGuardianGifts(earnedGiftIds,["2026-10-14:25"]).some(x=>x.id==="2026-10-14:25"),false);
+assert.equal(availableGuardianGifts(earnedGiftIds,[]).some(x=>x.id==="2026-10-14:100"),true);
+console.log("Earned Guardian rewards stay available until used and remain in history.");
