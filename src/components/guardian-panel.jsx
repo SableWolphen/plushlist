@@ -119,6 +119,16 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             {ownedSupportLinks.length ? <ul style={{paddingLeft:20,color:"var(--pl-theme-ink)",overflowWrap:"anywhere"}}>{ownedSupportLinks.map(link=><li key={link.id}>{link.caregiver_email} · {!link.accepted_at ? "Invitation pending" : link.active ? "Active" : "Paused"}</li>)}</ul> : <p style={{color:"var(--pl-theme-muted)"}}>Choose someone you trust when you’re ready.</p>}
             <button type="button" onClick={()=>setGuardianArea("support")} style={{minHeight:44,padding:"8px 12px",borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)",color:"var(--pl-theme-ink)",fontWeight:800}}>Manage sharing & invitations</button>
           </section>}
+          {guardianArea === "overview" && supportViewMode === "mine" && <section aria-label="Quick Guardian support" style={{padding:15,borderRadius:16,background:"var(--pl-theme-surface-2)",border:"1px solid var(--pl-theme-line)",display:"grid",gap:8}}>
+            <h2 style={{margin:0,fontSize:17}}>💛 Support your way</h2>
+            <p style={{margin:0,fontSize:13,color:"var(--pl-theme-muted)"}}>You decide whether to ask for care, send a note, or enjoy a suggestion. A Guardian never makes the decision for you.</p>
+            <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+              <button type="button" onClick={()=>mode === "person" ? setGuardianArea("support") : openPlushGuardian("guardian")} style={{minHeight:44,padding:"9px 13px",borderRadius:12}}>💗 I need care</button>
+              <button type="button" onClick={()=>mode === "person" ? setGuardianArea("together") : openPlushGuardian("routines")} style={{minHeight:44,padding:"9px 13px",borderRadius:12}}>🌱 Help me start</button>
+              <button type="button" onClick={()=>mode === "person" ? setGuardianArea("support") : openPlushGuardian("guardian")} style={{minHeight:44,padding:"9px 13px",borderRadius:12}}>💌 Notes & support</button>
+            </div>
+            <p style={{margin:0,fontSize:12,color:"var(--pl-theme-muted)"}}>{mode === "person" ? "Send a request from Sharing & privacy to a connected Guardian. Nothing is sent by opening this shortcut." : "Open your automatic Guardian tools. No human is contacted."}</p>
+          </section>}
           {guardianArea === "overview" && supportViewMode === "mine" && <CozyRewardWishlist userId={user?.id} />}
           {guardianArea === "overview" && supportViewMode === "mine" && <section className="pl-guardian-reward-wallet" style={{padding:15,borderRadius:16,background:"var(--pl-theme-surface)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
