@@ -72,6 +72,14 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           <input type="checkbox" checked={(prefs.surpriseBoxChoices||[]).includes(item.id)} onChange={e=>preference("surpriseBoxChoices",e.target.checked?[...(prefs.surpriseBoxChoices||[]),item.id]:(prefs.surpriseBoxChoices||[]).filter(id=>id!==item.id))}/>
           {item.label}
         </label>)}
+        <h3>💜 Care preferences</h3>
+        <label>Favorite activities <input maxLength={160} value={prefs.favoriteActivities||""} onChange={e=>preference("favoriteActivities",e.target.value)} placeholder="Cartoons, plushies, songs..."/></label>
+        <label>Things to avoid <input maxLength={160} value={prefs.avoidActivities||""} onChange={e=>preference("avoidActivities",e.target.value)} placeholder="Activities I dislike"/></label>
+        <label>Comfort style <select value={prefs.comfortPreference||"gentle"} onChange={e=>preference("comfortPreference",e.target.value)}><option value="gentle">Gentle reassurance</option><option value="quiet">Quiet space</option><option value="practical">One tiny step</option></select></label>
+        <label>Celebration style <select value={prefs.celebrationStyle||"gentle"} onChange={e=>preference("celebrationStyle",e.target.value)}><option value="gentle">Gentle</option><option value="quiet">Quiet</option><option value="playful">Playful</option></select></label>
+        {check("badDayMode","Bad Day Rescue Mode (simplify suggestions)")}
+        {check("storyTime","Guardian bedtime stories")}
+        {check("weekendSpecials","Optional weekend treats")}
         <h3>💌 Surprise Letters</h3>
         <p>Receive an occasional private, supportive letter when your automatic Guardian is active. No AI or messages to other people.</p>
         <label className="pl-companion-check"><input type="checkbox" checked={!!prefs.surpriseLetters} onChange={e=>update({prefs:{...prefs,surpriseLetters:e.target.checked,lettersEnabledOn:e.target.checked ? localDate() : ""}})} />Enable surprise letters</label>
