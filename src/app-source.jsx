@@ -957,11 +957,6 @@ function GlowUpTracker() {
   useAppearanceMode(preferences.dark_mode);
 
   const [settingsMessage, setSettingsMessage] = useState("");
-  const [watchPairingCode, setWatchPairingCode] = useState("");
-  const [watchPairingMessage, setWatchPairingMessage] = useState("");
-  const [watchPairingBusy, setWatchPairingBusy] = useState(false);
-  const [localWatchSyncBusy, setLocalWatchSyncBusy] = useState(false);
-  const [localWatchSyncMessage, setLocalWatchSyncMessage] = useState("");
   const [widgetSyncMsg, setWidgetSyncMsg] = useState("");
   const [nativeBuildInfo, setNativeBuildInfo] = useState(null);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -1338,15 +1333,6 @@ function GlowUpTracker() {
       subscription.unsubscribe();
     };
   }, []);
-
-  useEffect(() => {
-    // Lets the local watch-sync server (Android only, see
-    // android/.../watchsync/) know whether there's currently a signed-in
-    // account to attach a new watch pairing to. Never sends a password or
-    // token — just the account id, same "the watch never sees your
-    // credentials" guarantee the existing cloud pairing already makes.
-    window.Capacitor?.Plugins?.WatchSyncBridge?.setSignedInUser({ userId: user?.id || null }).catch(() => {});
-  }, [user?.id]);
 
   useEffect(() => {
     if (!user) return;
@@ -4045,59 +4031,6 @@ function GlowUpTracker() {
     return next;
   };
 
-  // Opt-in, Android-only companion to connectWatch() above. Unlike the cloud
-  // pairing flow, this needs no code: it opens a short window during which
-  // the watch's own next attempt to reach this exact phone (loopback only,
-  // never a real network) is trusted automatically, since only a watch
-  // already Bluetooth-paired to this specific device could possibly reach
-  // it at all. Cloud pairing above is untouched and keeps working the same
-  // way regardless of whether this is ever used.
-  const startLocalWatchSync = async () => {
-    const WatchSyncBridge = window.Capacitor?.Plugins?.WatchSyncBridge;
-    if (!WatchSyncBridge || !user || localWatchSyncBusy) return;
-    setLocalWatchSyncBusy(true);
-    setLocalWatchSyncMessage("Open PlushLife on your watch now — you have 2 minutes.");
-    try {
-      await WatchSyncBridge.startPairingMode();
-    } catch (_error) {
-      setLocalWatchSyncMessage("Couldn't enable instant local sync on this device.");
-    } finally {
-      setLocalWatchSyncBusy(false);
-    }
-  };
-
-  const connectWatch = async () => {
-    if (!user || watchPairingBusy) return;
-    const code = watchPairingCode.toUpperCase().replace(/[^A-Z0-9]/g, "");
-    if (code.length !== 8) {
-      setWatchPairingMessage("Enter the 8-character code shown on your watch.");
-      return;
-    }
-    setWatchPairingBusy(true);
-    setWatchPairingMessage("Connecting your watch…");
-    const { data: sessionData } = await supabase.auth.getSession();
-    let data = null;
-    let error = null;
-    try {
-      const response = await fetch("https://pvitdhixycegmcovapyh.supabase.co/functions/v1/watch-sync", {
-        method: "POST",
-        headers: { "content-type": "application/json", authorization: `Bearer ${sessionData.session?.access_token || ""}` },
-        body: JSON.stringify({ action: "claim", pairing_code: code }),
-      });
-      data = await response.json();
-      if (!response.ok) error = new Error(data?.error || "Pairing failed");
-    } catch (requestError) {
-      error = requestError;
-    }
-    setWatchPairingBusy(false);
-    if (error || !data?.connected) {
-      setWatchPairingMessage("That code is invalid or expired. Ask the watch for a new code and try again.");
-      return;
-    }
-    setWatchPairingCode("");
-    setWatchPairingMessage("Your watch is connected. Tap “I connected it” on the watch to load today’s tasks.");
-  };
-
   const updatePreference = (patch) => {
     const themeSnapshot = user?.id && hasThemePreferenceChange(patch)
       ? rememberThemeSelection(window.localStorage, user.id, patch)
@@ -5511,78 +5444,6 @@ function GlowUpTracker() {
       window.removeEventListener("pageshow", consume);
     };
   }, [user?.id, selectedProgressDate, period.date, JSON.stringify(viewDone), JSON.stringify(rows.map(row=>row.key))]);
-
-  // Applies one watch-originated task change to Supabase. Mirrors the exact
-  // upsert shape the existing cloud watch-sync Edge Function already uses
-  // (both daily_progress.completed_keys and tracker_progress), so this is
-  // additive to — not a divergence from — how a watch completion has always
-  // been written. Kept as a small standalone function rather than reusing
-  // the local toggle() closure, so a reconciliation triggered from a
-  // background/reconnect path can never race or conflict with it.
-  const applyWatchTaskUpdate = async (taskKey, completed, date) => {
-    if (!user) return;
-    const { data: existingRow } = await supabase
-      .from("daily_progress")
-      .select("completed_keys")
-      .eq("user_id", user.id)
-      .eq("progress_date", date)
-      .maybeSingle();
-    const completedKeys = new Set(existingRow?.completed_keys || []);
-    if (completed) completedKeys.add(taskKey); else completedKeys.delete(taskKey);
-    const updatedAt = new Date().toISOString();
-    await Promise.all([
-      supabase.from("daily_progress").upsert(
-        { user_id: user.id, progress_date: date, completed_keys: [...completedKeys], updated_at: updatedAt },
-        { onConflict: "user_id,progress_date" }),
-      supabase.from("tracker_progress").upsert(
-        { user_id: user.id, task_key: taskKey, completed, updated_at: updatedAt },
-        { onConflict: "user_id,task_key" }),
-    ]);
-  };
-
-  // Drains anything the watch recorded locally while this device's local
-  // sync server handled it directly (app closed, or briefly offline) up to
-  // Supabase, the moment the app is next open to do it. The local write
-  // already happened instantly and for free; this is only about keeping
-  // Supabase — the actual source of truth — eventually consistent with it.
-  useEffect(() => {
-    const WatchSyncBridge = window.Capacitor?.Plugins?.WatchSyncBridge;
-    if (!WatchSyncBridge || !user) return;
-    let active = true;
-    const reconcile = async () => {
-      try {
-        const { changes } = await WatchSyncBridge.getPendingChanges();
-        if (!active || !changes?.length) return;
-        for (const change of changes) {
-          await applyWatchTaskUpdate(change.taskKey, change.completed, change.date);
-        }
-        await WatchSyncBridge.markSynced({ ids: changes.map((change) => change.id) });
-        if (active && changes.some((change) => change.date === period.date)) syncNow();
-      } catch (_error) {
-        // Best-effort — the same unsynced rows are simply retried next time.
-      }
-    };
-    reconcile();
-    const onVisible = () => { if (document.visibilityState === "visible") reconcile(); };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => { active = false; document.removeEventListener("visibilitychange", onVisible); };
-  }, [user?.id]);
-
-  // Instant UI feedback for the case the app happens to already be open
-  // when the watch tap arrives — WatchSyncService (native) fires this the
-  // moment it accepts a /complete call, so there's no need to wait for the
-  // next visibilitychange reconciliation pass above.
-  useEffect(() => {
-    const WatchSyncBridge = window.Capacitor?.Plugins?.WatchSyncBridge;
-    if (!WatchSyncBridge || !user) return;
-    const listenerPromise = WatchSyncBridge.addListener("watchTaskUpdated", async (event) => {
-      try {
-        await applyWatchTaskUpdate(event.taskKey, event.completed, event.date);
-        if (event.date === period.date) syncNow();
-      } catch (_error) {}
-    });
-    return () => { listenerPromise.then((handle) => handle.remove()).catch(() => {}); };
-  }, [user?.id, period.date]);
 
   const previousWeekHistoryByDate = new Map(previousWeekHistory.map((entry) => [entry.progress_date, new Set(entry.completed_keys || [])]));
   let previousWeekDone = 0;
@@ -7768,7 +7629,7 @@ function GlowUpTracker() {
 
         <RewardsPanel inline={collectionOpen} open={collectionOpen} theme={activeWorld} onClose={() => setCollectionOpen(false)} FeatureTip={FeatureTip} selectedOutfit={selectedOutfit} mascotMood={mascotMood} activityDaysTotal={activityDaysTotal} preferences={preferences} mascotGrowth={mascotGrowth} careDaysTotal={careDaysTotal} unlockedOutfits={unlockedOutfits} earnedBadgeIdSet={earnedBadgeIdSet} BADGE_DEFS={BADGE_DEFS} unlockedIdSet={unlockedIdSet} mascotRequirementProgress={mascotRequirementProgress} saveMascotCollection={saveMascotCollection} mascotCollection={mascotCollection} savedBestStreak={savedBestStreak} collectionTab={collectionTab} setCollectionTab={setCollectionTab} winsJarEntries={winsJarEntries} saveMessage={mascotSaveMessage} />
 
-        <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} openDailyCheckIn={() => { setSettingsOpen(false); setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); }} watchPairingCode={watchPairingCode} setWatchPairingCode={setWatchPairingCode} connectWatch={connectWatch} watchPairingBusy={watchPairingBusy} watchPairingMessage={watchPairingMessage} localWatchSyncBusy={localWatchSyncBusy} startLocalWatchSync={startLocalWatchSync} localWatchSyncMessage={localWatchSyncMessage} dailyCheckIn={dailyCheckIn} pct={pct} rows={rows} viewDone={viewDone} weeklyOverallPct={weeklyOverallPct} widgetSyncMsg={widgetSyncMsg} setWidgetSyncMsg={setWidgetSyncMsg} displayNameDraft={displayNameDraft} setDisplayNameDraft={setDisplayNameDraft} saveDisplayName={saveDisplayName} comfortItemDraft={comfortItemDraft} setComfortItemDraft={setComfortItemDraft} saveComfortItem={saveComfortItem} preferences={preferences} appearanceTheme={appearanceTheme} selectAppearanceTheme={selectAppearanceTheme} dinoTheme={dinoTheme} updatePreference={updatePreference} enableNotifications={enableNotifications} smartReminderSuggestion={smartReminderSuggestion} restDatesSet={restDatesSet} toggleRestToday={toggleRestToday} period={period} restRangeDraft={restRangeDraft} setRestRangeDraft={setRestRangeDraft} saveRestRange={saveRestRange} restDates={restDates} savePreferences={savePreferences} feedbackText={feedbackText} setFeedbackText={setFeedbackText} submitFeedback={submitFeedback} feedbackMessage={feedbackMessage} exportMyData={exportMyData} restoreFileInputRef={restoreFileInputRef} restoreFromBackup={restoreFromBackup} deleteAllCheckIns={deleteAllCheckIns} deleteAllReflections={deleteAllReflections} user={user} online={online} syncStatus={syncStatus} lastSyncedAt={lastSyncedAt} syncNow={syncNow} emailChangeDraft={emailChangeDraft} setEmailChangeDraft={setEmailChangeDraft} requestEmailChange={requestEmailChange} signingOut={signingOut} handleSignOut={handleSignOut} signOutOtherDevices={signOutOtherDevices} deleteMyAccount={deleteMyAccount} deviceBackupStatus={deviceBackupStatus} refreshDeviceBackup={refreshDeviceBackup} deviceBackupBusy={deviceBackupBusy} verifyDeviceBackupNow={verifyDeviceBackupNow} deviceBackupVerifyBusy={deviceBackupVerifyBusy} settingsMessage={settingsMessage} />
+        <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} openDailyCheckIn={() => { setSettingsOpen(false); setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); }} dailyCheckIn={dailyCheckIn} pct={pct} rows={rows} viewDone={viewDone} weeklyOverallPct={weeklyOverallPct} widgetSyncMsg={widgetSyncMsg} setWidgetSyncMsg={setWidgetSyncMsg} displayNameDraft={displayNameDraft} setDisplayNameDraft={setDisplayNameDraft} saveDisplayName={saveDisplayName} comfortItemDraft={comfortItemDraft} setComfortItemDraft={setComfortItemDraft} saveComfortItem={saveComfortItem} preferences={preferences} appearanceTheme={appearanceTheme} selectAppearanceTheme={selectAppearanceTheme} dinoTheme={dinoTheme} updatePreference={updatePreference} enableNotifications={enableNotifications} smartReminderSuggestion={smartReminderSuggestion} restDatesSet={restDatesSet} toggleRestToday={toggleRestToday} period={period} restRangeDraft={restRangeDraft} setRestRangeDraft={setRestRangeDraft} saveRestRange={saveRestRange} restDates={restDates} savePreferences={savePreferences} feedbackText={feedbackText} setFeedbackText={setFeedbackText} submitFeedback={submitFeedback} feedbackMessage={feedbackMessage} exportMyData={exportMyData} restoreFileInputRef={restoreFileInputRef} restoreFromBackup={restoreFromBackup} deleteAllCheckIns={deleteAllCheckIns} deleteAllReflections={deleteAllReflections} user={user} online={online} syncStatus={syncStatus} lastSyncedAt={lastSyncedAt} syncNow={syncNow} emailChangeDraft={emailChangeDraft} setEmailChangeDraft={setEmailChangeDraft} requestEmailChange={requestEmailChange} signingOut={signingOut} handleSignOut={handleSignOut} signOutOtherDevices={signOutOtherDevices} deleteMyAccount={deleteMyAccount} deviceBackupStatus={deviceBackupStatus} refreshDeviceBackup={refreshDeviceBackup} deviceBackupBusy={deviceBackupBusy} verifyDeviceBackupNow={verifyDeviceBackupNow} deviceBackupVerifyBusy={deviceBackupVerifyBusy} settingsMessage={settingsMessage} />
 
         <AdminPanel open={isAdminUser && adminOpen} onClose={() => setAdminOpen(false)} loadAdminData={loadAdminData} adminMessage={adminMessage} adminStats={adminStats} adminOnline={adminOnline} adminFunnel={adminFunnel} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} supporterEmailDraft={supporterEmailDraft} setSupporterEmailDraft={setSupporterEmailDraft} setSupporterStatus={setSupporterStatus} supporterGrantMessage={supporterGrantMessage} reviewAccountRole={reviewAccountRole} setReviewAccountRole={setReviewAccountRole} reviewAccountEmail={reviewAccountEmail} setReviewAccountEmail={setReviewAccountEmail} reviewAccountPassword={reviewAccountPassword} setReviewAccountPassword={setReviewAccountPassword} createOrUpdateReviewAccount={createOrUpdateReviewAccount} reviewAccountMessage={reviewAccountMessage} adminFeedback={adminFeedback} resolveFeedback={resolveFeedback} adminErrors={adminErrors} clearAllErrors={clearAllErrors} devPreviewPlan={devPreviewPlan} setDevPreviewPlan={setDevPreviewPlan} />
 
