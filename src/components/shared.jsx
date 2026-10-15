@@ -257,7 +257,7 @@ export function useConfirmation() {
   }, [request, answer]);
 
   const dialog = request ? (
-    <div role="dialog" aria-modal="true" aria-labelledby="plushlife-confirm-title" aria-describedby="plushlife-confirm-message" onMouseDown={(event) => { if (event.target === event.currentTarget) answer(false); }} style={{ position: "fixed", inset: 0, zIndex: 70, display: "grid", placeItems: "center", padding: 18, background: "rgba(45,32,56,.45)", backdropFilter: "blur(4px)" }}>
+    <div role="dialog" aria-modal="true" aria-labelledby="plushlife-confirm-title" aria-describedby="plushlife-confirm-message" onMouseDown={(event) => { if (event.target === event.currentTarget) answer(false); }} style={{ position: "fixed", inset: 0, zIndex: 4000, display: "grid", placeItems: "center", padding: 18, background: "rgba(45,32,56,.45)", backdropFilter: "blur(4px)" }}>
       <div style={{ position: "relative", width: "min(100%, 390px)", padding: 20, borderRadius: 22, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line)", boxShadow: "0 24px 70px rgba(45,32,56,.25)" }}>
         <button type="button" aria-label="Close" onClick={() => answer(false)} style={{ position: "absolute", top: 10, right: 10, width: 44, height: 44, borderRadius: 999, border: "1px solid var(--pl-theme-line)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink)", fontSize: 20, fontWeight: 900, cursor: "pointer" }}>×</button>
         <div id="plushlife-confirm-title" style={{ paddingRight: 48, fontSize: 19, fontWeight: 900, color: "var(--pl-theme-ink)" }}>{request.title}</div>
