@@ -15,7 +15,7 @@ import { RoutineStarter } from "./cozy-day-experience.jsx";
 import { ThemeScene } from "./theme-world.jsx";
 import { useCompletedTaskFlow } from "./completed-task-flow.jsx";
 
-export function TasksPanel({ open, onClose, inline = false, initialView = "today", viewRequest = 0, rows = [], viewDone = {}, toggle, newTaskDay, setNewTaskDay, taskSectionsForDay, setNewTaskSection, setNewTaskCustomSection, starterPackId, setStarterPackId, trackerTasks, setStarterPackMessage, addStarterPack, starterPackMessage, importOpen, setImportOpen, newTaskSection, importText, setImportText, importTasksFromText, importMessage, newTaskNameInputRef, newTaskName, setNewTaskName, taskMessage, setTaskMessage, naturalScheduleText, setNaturalScheduleText, naturalSchedulePreview, setNaturalSchedulePreview, applyNaturalSchedule, newTaskSectionOptions, newTaskCustomSection, taskAdvancedOpen, setTaskAdvancedOpen, newTaskWhy, setNewTaskWhy, newTaskSoftLabel, setNewTaskSoftLabel, newTaskTinyLabel, setNewTaskTinyLabel, newTaskEstimatedMinutes, setNewTaskEstimatedMinutes, newTaskEssentialOnLow, setNewTaskEssentialOnLow, newTaskKind, setNewTaskKind, newTaskScheduleType, setNewTaskScheduleType, newTaskScheduleDays, setNewTaskScheduleDays, newTaskReminderTime, setNewTaskReminderTime, newTaskStartDate, setNewTaskStartDate, newTaskEndDate, setNewTaskEndDate, newTaskOneTimeDate, setNewTaskOneTimeDate, selectedProgressDate, addTrackerTask, SUPPORTER_FEATURES_ENABLED, isSupporterAccount, FREE_TASK_LIMIT_PER_DAY, taskSearchQuery, setTaskSearchQuery, isTaskPausedOnDate, period, startPointerTaskDrag, movePointerTaskDrag, endPointerTaskDrag, cancelPointerTaskDrag, moveTaskToSection, startEditingTask, resumeTrackerTask, pauseTrackerTask, archiveTrackerTask, setPendingTaskDelete, showArchivedTasks, setShowArchivedTasks, restoreArchivedTask, quickAddTrackerTask, quickAddMessage }) {
+export function TasksPanel({ open, onClose, inline = false, initialView = "today", viewRequest = 0, rows = [], viewDone = {}, toggle, newTaskDay, setNewTaskDay, taskSectionsForDay, setNewTaskSection, setNewTaskCustomSection, starterPackId, setStarterPackId, trackerTasks, setStarterPackMessage, addStarterPack, starterPackMessage, importOpen, setImportOpen, newTaskSection, importText, setImportText, importTasksFromText, importMessage, newTaskNameInputRef, newTaskName, setNewTaskName, taskMessage, setTaskMessage, naturalScheduleText, setNaturalScheduleText, naturalSchedulePreview, setNaturalSchedulePreview, applyNaturalSchedule, newTaskSectionOptions, newTaskCustomSection, taskAdvancedOpen, setTaskAdvancedOpen, newTaskWhy, setNewTaskWhy, newTaskSoftLabel, setNewTaskSoftLabel, newTaskTinyLabel, setNewTaskTinyLabel, newTaskEstimatedMinutes, setNewTaskEstimatedMinutes, newTaskEssentialOnLow, setNewTaskEssentialOnLow, newTaskKind, setNewTaskKind, newTaskScheduleType, setNewTaskScheduleType, newTaskScheduleDays, setNewTaskScheduleDays, newTaskReminderTime, setNewTaskReminderTime, newTaskStartDate, setNewTaskStartDate, newTaskEndDate, setNewTaskEndDate, newTaskOneTimeDate, setNewTaskOneTimeDate, selectedProgressDate, addTrackerTask, SUPPORTER_FEATURES_ENABLED, isSupporterAccount, FREE_TASK_LIMIT_PER_DAY, taskSearchQuery, setTaskSearchQuery, isTaskPausedOnDate, period, startPointerTaskDrag, movePointerTaskDrag, endPointerTaskDrag, cancelPointerTaskDrag, moveTaskToSection, startEditingTask, resumeTrackerTask, pauseTrackerTask, archiveTrackerTask, setPendingTaskDelete, showArchivedTasks, setShowArchivedTasks, restoreArchivedTask, quickAddTrackerTask, quickAddMessage, onOpenSchedule }) {
   const [taskView, setTaskView] = React.useState("today");
   const [composerOpen, setComposerOpen] = React.useState(false);
   const [taskAddMoreOpen, setTaskAddMoreOpen] = React.useState(false);
@@ -50,6 +50,11 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
   return (
           <ToolPanel title="🌷 Add & organize" displayTitle="Tasks" inline={inline} hideClose={inline} onClose={onClose}>
           <div className="pl-task-page">
+            <div className="pl-edit-shortcuts pl-edit-shortcuts-tasks" role="group" aria-label="Manage tasks and schedule">
+              <button type="button" onClick={() => { setTaskView("today"); setShowAllToday(true); }}>✏️ Show all tasks</button>
+              <button type="button" onClick={onOpenSchedule}>📅 Edit schedule</button>
+            </div>
+            <p className="pl-edit-hint">To change a task, tap <strong>Edit</strong> next to it. Your schedule is edited separately.</p>
             <div className="pl-design-tabs" role="tablist" aria-label="Task views">
               {[["today", "Today"], ["habits", "Habits"], ["later", "Later"]].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={taskView === id} onClick={() => setTaskView(id)}>{label}{id === "habits" ? ` (${rows.filter(row=>row && habitTypeForRow(row)!=="regular").length})` : ""}</button>)}
             </div>
@@ -77,14 +82,16 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
                       <span><HabitTypeIcon task={row.sourceTask || row} habitType={habitTypeForRow(row)}/><strong>{row.label || "Untitled task"}</strong><HabitGoalCaption taskKey={row.key} fallbackGoal={row.goal}/><small>{row.later ? scheduleLabelForTask(row.sourceTask) : row.sourceTask?.estimated_minutes ? `${row.sourceTask.estimated_minutes} minutes · At your pace` : "One little step"}</small></span>
                     </button>
                     {row.sourceTask && (
-                      <details style={{ position: "relative", flex: "0 0 auto" }}>
-                        <summary className="pl-task-edit" aria-label={`More options for ${row.label || "Untitled task"}`} style={{ listStyle: "none", cursor: "pointer", display: "grid", placeItems: "center" }}>Open</summary>
+                      <div className="pl-task-row-actions">
+                        <button type="button" className="pl-task-edit-direct" aria-label={`Edit ${row.label || "Untitled task"}`} onClick={() => startEditingTask(row.sourceTask)}>✏️ Edit</button>
+                        <details style={{ position: "relative", flex: "0 0 auto" }}>
+                        <summary className="pl-task-edit" aria-label={`More options for ${row.label || "Untitled task"}`} style={{ listStyle: "none", cursor: "pointer", display: "grid", placeItems: "center" }}>⋯</summary>
                         <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 20, minWidth: 132, padding: 6, borderRadius: 11, background: "var(--pl-theme-surface,#FFF)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 10px 26px rgba(74,45,94,.16)" }}>
                           <button type="button" onClick={() => openPlushGuardian("start",row.key)} style={{width:"100%",minHeight:44}}>Help me start</button>
-                          <button type="button" onClick={() => startEditingTask(row.sourceTask)} style={{ width: "100%", minHeight: 38, border: 0, borderRadius: 8, background: "transparent", textAlign: "left", color: "var(--pl-theme-ink,#5B4B6B)", fontWeight: 850, cursor: "pointer" }}>✏️ Edit</button>
                           <button type="button" onClick={() => setPendingTaskDelete({ key: row.sourceTask.task_key, label: row.sourceTask.task, section: row.sourceTask.section })} style={{ width: "100%", minHeight: 38, border: 0, borderRadius: 8, background: "transparent", textAlign: "left", color: "var(--pl-theme-muted,#C45D74)", fontWeight: 850, cursor: "pointer" }}>🗑️ Delete</button>
                         </div>
-                      </details>
+                        </details>
+                      </div>
                     )}
                   </div>)}
                   {taskView === "today" && !query && matching.length > 5 && (
