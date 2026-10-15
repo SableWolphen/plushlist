@@ -160,7 +160,8 @@ export function normalizeGuardianState(value) {
     ? { date: progress.date,
         keys: [...new Set(progress.keys.filter(key=>typeof key==="string"))].slice(0,1000).sort(),
         completedKeys: [...new Set(progress.completedKeys.filter(key=>typeof key==="string" && progress.keys.includes(key)))].slice(0,1000).sort(),
-        total: Math.max(0,Math.min(10000,Number(progress.total)||0)) }
+        total: Math.max(0,Math.min(10000,Number(progress.total)||0)),
+        lastAction: ["completed","removed","other"].includes(progress.lastAction) ? progress.lastAction : "other" }
     : null;
   next.prefs.automaticGifts = next.prefs.automaticGifts !== false;
   next.prefs.giftCategories = Array.isArray(next.prefs.giftCategories) ? [...new Set(next.prefs.giftCategories.filter(x=>["stickers","celebrations","trophies","activities","babyDays"].includes(x)))] : [...d.prefs.giftCategories];
