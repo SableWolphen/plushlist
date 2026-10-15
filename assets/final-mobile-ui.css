@@ -1793,3 +1793,76 @@ html[data-pl-companion-text=large] .pl-guardian-companion{font-size:18px}
 @media(max-width:360px){.pl-companion-hero img{width:64px;height:64px}.pl-guardian-companion h2{font-size:21px}.pl-companion-home{padding:12px}.pl-companion-home img{width:48px;height:48px}.pl-companion-grid{gap:6px}}
 .pl-companion-sync{position:relative;z-index:2;display:inline-block;margin:8px;font-size:11px;color:var(--pl-theme-ink)}
 .pl-companion-home-shortcuts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.pl-companion-home-shortcuts button{font-size:12px;background:var(--pl-theme-surface);color:var(--pl-theme-ink);border:1px solid var(--pl-theme-line)}
+
+/* Editing actions are discoverable without hunting in menus.
+   Keep them compact, theme-aware, and above the fixed bottom navigation. */
+#main-content .pl-edit-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 8px;
+}
+#main-content .pl-edit-shortcuts button {
+  min-width: 0;
+  min-height: 48px;
+  padding: 10px 8px;
+  border: 1px solid var(--pl-theme-line);
+  border-radius: 14px;
+  background: var(--pl-theme-surface-2, var(--pl-ref-card-soft));
+  color: var(--pl-theme-ink);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+  cursor: pointer;
+}
+#main-content .pl-edit-shortcuts button:focus-visible,
+#main-content .pl-task-edit-direct:focus-visible {
+  outline: 3px solid var(--pl-theme-accent);
+  outline-offset: 2px;
+}
+#main-content .pl-edit-hint {
+  margin: -8px 2px 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--pl-theme-muted);
+}
+#main-content .pl-task-row-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+#main-content .pl-task-edit-direct {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  min-height: 44px;
+  padding: 7px;
+  border: 1px solid var(--pl-theme-line);
+  border-radius: 11px;
+  background: var(--pl-theme-surface-2, var(--pl-ref-card-soft));
+  color: var(--pl-theme-ink);
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+#main-content .pl-task-row-actions .pl-task-edit {
+  min-width: 44px!important;
+  width: 44px!important;
+  min-height: 44px!important;
+  padding: 0!important;
+  font-size: 21px!important;
+}
+@media (max-width: 350px) {
+  #main-content .pl-task-row-actions .pl-task-edit-direct {
+    min-width: 54px;
+    padding: 5px;
+    font-size: 11px;
+  }
+  #main-content .pl-edit-shortcuts button { font-size: 12px; }
+}
