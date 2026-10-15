@@ -118,6 +118,25 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             {ownedSupportLinks.length ? <ul style={{paddingLeft:20,color:"var(--pl-theme-ink)",overflowWrap:"anywhere"}}>{ownedSupportLinks.map(link=><li key={link.id}>{link.caregiver_email} · {!link.accepted_at ? "Invitation pending" : link.active ? "Active" : "Paused"}</li>)}</ul> : <p style={{color:"var(--pl-theme-muted)"}}>Choose someone you trust when you’re ready.</p>}
             <button type="button" onClick={()=>setGuardianArea("support")} style={{minHeight:44,padding:"8px 12px",borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)",color:"var(--pl-theme-ink)",fontWeight:800}}>Manage sharing & invitations</button>
           </section>}
+          {guardianArea === "overview" && supportViewMode === "mine" && <section className="pl-guardian-reward-wallet" style={{padding:15,borderRadius:16,background:"var(--pl-theme-surface)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+              <h2 style={{margin:0,fontSize:17}}>🎁 My Guardian rewards</h2>
+              <button type="button" onClick={()=>loadSupportData(user)} style={{minHeight:40,borderRadius:10,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)",color:"var(--pl-theme-ink)",padding:"6px 10px"}}>↻ Refresh</button>
+            </div>
+            <p style={{fontSize:13,color:"var(--pl-theme-muted)"}}>Rewards your Guardian gives you appear here. Unlocked rewards stay until you use them.</p>
+            {!supportRewards.length && <p style={{fontSize:13}}>No Guardian rewards waiting yet.</p>}
+            {supportRewards.map((reward)=>{
+              const progress = reward.week_start ? supportWeeklyPercent : supportPercent;
+              const unlocked = progress >= Number(reward.target_percent || 100);
+              const approved = !reward.approval_required || !!reward.approved_at;
+              return <div key={reward.id} style={{padding:12,marginTop:9,borderRadius:12,background:"var(--pl-theme-surface-2)",border:"1px solid var(--pl-theme-line)"}}>
+                <div style={{fontWeight:850,overflowWrap:"anywhere"}}>{reward.title}</div>
+                {reward.details && <p style={{margin:"5px 0",fontSize:13}}>{reward.details}</p>}
+                <div style={{fontSize:12,color:"var(--pl-theme-muted)"}}>{!unlocked ? `Unlocks at ${reward.target_percent}% ${reward.week_start ? "weekly" : "daily"} progress` : !approved ? "Goal reached · waiting for Guardian approval" : "✨ Unlocked and ready!"}</div>
+                {unlocked && approved && <button type="button" onClick={()=>updateRewardStatus(reward,"claim")} style={{marginTop:9,minHeight:44,border:0,borderRadius:11,padding:"9px 16px",fontWeight:850,background:"var(--pl-theme-accent)",color:"var(--pl-theme-on-accent,#fff)"}}>Use reward 🎁</button>}
+              </div>;
+            })}
+          </section>}
           {guardianArea === "together" && <React.Suspense fallback={<div role="status" style={{padding:14,color:"var(--pl-theme-muted)"}}>Opening Together…</div>}><LazyTogetherCorner
             client={client}
             user={user}
