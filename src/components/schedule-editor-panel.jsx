@@ -119,7 +119,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
 
           <div className="schedule-toolbar">
             <button type="button" onClick={addScheduleEntry} className="schedule-btn add">＋ Add item</button>
-            <button onClick={savePersonalSchedule} className="schedule-btn primary">Save day ✨</button>
+            <button onClick={savePersonalSchedule} type="button" className="schedule-btn primary">Save day ✨</button>
             {hasCurrentSchedule && <button onClick={clearPersonalSchedule} className="schedule-btn danger">Erase day</button>}
           </div>
 
@@ -144,7 +144,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
               <button type="button" onClick={copyScheduleToSelectedDays} disabled={copyToDayIds.length === 0} className="schedule-copy-selected">
                 {copyToDayIds.length === 0 ? "Copy to selected" : `Copy to ${copyToDayIds.map((id) => DAYS.find((d) => d.id === id)?.label).join(", ")}`}
               </button>
-              <button type="button" onClick={copyScheduleToAllDays} className="schedule-copy-all">📅 Copy to all 7 days</button>
+              <button type="button" onClick={copyScheduleToAllDays} type="button" className="schedule-copy-all">📅 Copy to all 7 days</button>
             </div>
           </div>
 
