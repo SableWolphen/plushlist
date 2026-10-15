@@ -155,7 +155,7 @@ export function normalizeGuardianState(value) {
   next.prefs.shareMemories = false;
   next.prefs.keepChat = false;
   const progress = value.rewardProgress;
-  next.rewardProgress = progress && /^\\d{4}-\\d{2}-\\d{2}$/.test(progress.date || "") &&
+  next.rewardProgress = progress && /^\d{4}-\d{2}-\d{2}$/.test(progress.date || "") &&
     Array.isArray(progress.keys) && Array.isArray(progress.completedKeys)
     ? { date: progress.date,
         keys: [...new Set(progress.keys.filter(key=>typeof key==="string"))].slice(0,1000).sort(),
