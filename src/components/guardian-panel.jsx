@@ -93,14 +93,14 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 <button type="button" onClick={()=>mode === "person" ? onOpenTasks?.() : openPlushGuardian("start")}><span>✅</span> Tasks</button>
                 <button type="button" onClick={()=>mode === "person" ? setGuardianArea("together") : openPlushGuardian("routines")}><span>📅</span> Routines</button>
                 <button type="button" onClick={()=>mode === "person" ? setGuardianArea("support") : openPlushGuardian("guardian")}><span>💌</span> Encouragement</button>
-                <button type="button" onClick={()=>mode === "person" ? (setGuardianArea("support"), window.setTimeout(()=>document.querySelector(".pl-human-guardian-rewards")?.scrollIntoView({behavior:"smooth",block:"start"}),80)) : openPlushGuardian("rewards")}><span>🎁</span> Rewards</button>
+                <button type="button" onClick={()=>mode === "person" ? (setSupportViewMode("mine"), setGuardianArea("overview"), loadSupportOwner(user?.id)) : openPlushGuardian("rewards")}><span>🎁</span> Rewards</button>
               </nav>}
               {mode === "automatic" && <button type="button" onClick={()=>openPlushGuardian("settings")} style={{marginTop:10,minHeight:40,width:"100%",border:"1px solid var(--pl-theme-line)",borderRadius:11,background:"var(--pl-theme-surface)",color:"var(--pl-theme-ink)",fontWeight:800}}>Guardian name & reminders ›</button>}
             </>}
           </section>}
           {canUseCaretakerDashboard && (
             <div className="pl-guardian-person-switcher" role="group" aria-label="Guardian views">
-              <button type="button" aria-pressed={supportViewMode === "mine"} onClick={() => setSupportViewMode("mine")}>🧸 My Support</button>
+              <button type="button" aria-pressed={supportViewMode === "mine"} onClick={() => { setSupportViewMode("mine"); loadSupportOwner(user?.id); }}>🧸 My Support</button>
               <button type="button" aria-pressed={supportViewMode === "caretaker"} onClick={() => { setSupportViewMode("caretaker"); if (invitedSupportLinks[0]) loadSupportOwner(invitedSupportLinks[0].owner_user_id); }}>💛 People I Support</button>
             </div>
           )}
