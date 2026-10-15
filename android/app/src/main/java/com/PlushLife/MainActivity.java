@@ -48,9 +48,6 @@ public class MainActivity extends BridgeActivity {
         try { registerPlugin(WidgetBridgePlugin.class); } catch (Throwable ignored) {}
         try { registerPlugin(NotificationPermissionPlugin.class); } catch (Throwable ignored) {}
         try { registerPlugin(BuildInfoPlugin.class); } catch (Throwable ignored) {}
-        // Temporarily disabled along with the FOREGROUND_SERVICE_DATA_SYNC
-        // permission and <service> entry in AndroidManifest.xml.
-        // registerPlugin(WatchSyncBridgePlugin.class);
 
         super.onCreate(savedInstanceState);
 
