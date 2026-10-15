@@ -76,6 +76,9 @@ export const freshGuardianState = () => ({
     careMode: false,
     surpriseLetters: false,
     surpriseBox: false,
+    surpriseFrequencyDays: 3,
+    guardianPaused: false,
+    lowStimulation: false,
     favoriteActivities: "",
     avoidActivities: "",
     comfortPreference: "gentle",
@@ -157,6 +160,9 @@ export function normalizeGuardianState(value) {
   if (!["gentle","quiet","practical"].includes(next.prefs.comfortPreference)) next.prefs.comfortPreference="gentle";
   if (!["gentle","quiet","playful"].includes(next.prefs.celebrationStyle)) next.prefs.celebrationStyle="gentle";
   for (const key of ["badDayMode","weekendSpecials","storyTime"]) next.prefs[key]=next.prefs[key]===true;
+  next.prefs.guardianPaused = next.prefs.guardianPaused === true;
+  next.prefs.lowStimulation = next.prefs.lowStimulation === true;
+  next.prefs.surpriseFrequencyDays = [3,7,14].includes(Number(next.prefs.surpriseFrequencyDays)) ? Number(next.prefs.surpriseFrequencyDays) : 3;
   next.prefs.surpriseBox = next.prefs.surpriseBox === true;
   next.prefs.surpriseBoxChoices = Array.isArray(next.prefs.surpriseBoxChoices) ? [...new Set(next.prefs.surpriseBoxChoices.filter(id=>["movie","storybook","color","plush","game","music"].includes(id)))] : d.prefs.surpriseBoxChoices;
   next.surpriseBoxHistory = Array.isArray(value.surpriseBoxHistory) ? value.surpriseBoxHistory.filter(x=>x && /^\d{4}-\d{2}-\d{2}$/.test(x.date||"") && next.prefs.surpriseBoxChoices.includes(x.id) && typeof x.label==="string").slice(-40) : [];
