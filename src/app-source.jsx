@@ -6367,7 +6367,17 @@ function GlowUpTracker() {
     { id: "bonus_lover", badge: "🌈", name: "Bonus Lover", hint: "Complete 5 bonus items in one week.", check: () => weeklyBonusDone >= 5 },
     { id: "founding_cozy", badge: "🌟", name: "Founding Cozy", hint: "Join PlushLife during its early access period.", check: () => !!user?.created_at && new Date(user.created_at) < new Date("2026-09-01T00:00:00Z") },
   ];
-  const newlyEarnedBadgeIds = BADGE_DEFS.filter((item) => item.check()).map((item) => item.id);
+  // These badges rely on totals that could rise when an unfinished task is removed.
+  // Deleting or archiving work is never a badge-earning event.
+  const taskSensitiveBadges = new Set([
+    "first_step","one_week","two_weeks","one_month","two_months",
+    "hundred_days","two_hundred_days","one_year","getting_started",
+    "regular_visitor","devoted_visitor","sixty_visitor",
+    "hundred_visitor","perfect_week"
+  ]);
+  const newlyEarnedBadgeIds = BADGE_DEFS
+    .filter(item => (!taskListRemovalShouldNotEarn || !taskSensitiveBadges.has(item.id)) && item.check())
+    .map(item => item.id);
   const earnedBadgeIdSet = new Set([...(mascotCollection.earnedBadgeIds || []), ...newlyEarnedBadgeIds]);
 
   useEffect(() => {
