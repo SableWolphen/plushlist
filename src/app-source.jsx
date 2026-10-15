@@ -3678,6 +3678,9 @@ function GlowUpTracker() {
       user_id: user.id,
       day_id: dayId,
       label: fullLabel,
+      // New entries replace the old five-field schedule format. Clear those
+      // fields too, or copied days may show stale legacy items elsewhere.
+      wake: "", morning: "", work: "", workout: "", home: "",
       entries: cleanEntries,
       updated_at: new Date().toISOString(),
     };
