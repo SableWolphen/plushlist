@@ -1,3 +1,4 @@
+import { availableGuardianGifts } from "../guardian-auto-rewards.mjs";
 import {
   ROUTINES,
   localDate,
@@ -636,10 +637,32 @@ export function GuardianTools({
     const todayDone = todayTasks.filter(r => !!viewDone[r.key]).length;
     const baseTotal = state.rewardProgress?.date === localDate() ? Math.max(todayTasks.length, Number(state.rewardProgress.total) || 0) : todayTasks.length;
     const todayPercent = baseTotal ? Math.round(todayDone * 100 / baseTotal) : 0;
+    const availableGifts = availableGuardianGifts(state.automaticGiftLedger, state.usedGuardianGifts);
+    const availableCustom = state.rewards.filter(x=>x && x.claimed && x.autoAwardedAt && !x.usedAt);
+    const usedCustom = state.rewards.filter(x=>x && x.usedAt);
+    const availableCount = availableGifts.length + availableCustom.length;
     return (
       <section>
-        <h2>Guardian rewards</h2>
-        <p>Choose a little celebration. Your automatic Guardian can notice your real task progress, or you can count effort yourself. Basic needs never have to be earned.</p>
+        <h2>🎁 My Guardian Rewards</h2>
+        <div className="pl-companion-review" aria-label="Earned Guardian rewards">
+          <h3>Ready to enjoy ({availableCount})</h3>
+          <p>These are rewards you already earned. Tap Use reward when you enjoy one. It leaves this list and stays in your history.</p>
+          {availableCount === 0 && <p>No unused rewards right now. Your next little victory will show up here! 💜</p>}
+          {availableGifts.map(gift=><article key={gift.id} className="pl-guardian-earned-reward">
+            <div><strong>{gift.name}</strong><small> Earned {gift.date}</small></div>
+            <button type="button" onClick={()=>update({usedGuardianGifts:[...new Set([...(state.usedGuardianGifts||[]),gift.id])].slice(-180)})}>Use reward</button>
+          </article>)}
+          {availableCustom.map(reward=><article key={reward.id} className="pl-guardian-earned-reward">
+            <div><strong>🎁 {reward.name}</strong><small> From Guardian</small></div>
+            <button type="button" onClick={()=>update({rewards:state.rewards.map(x=>x.id===reward.id?{...x,usedAt:new Date().toISOString()}:x)})}>Use reward</button>
+          </article>)}
+          <details>
+            <summary>Used rewards ({(state.usedGuardianGifts||[]).length + usedCustom.length})</summary>
+            {(state.usedGuardianGifts||[]).slice(-12).reverse().map(id=><p key={id}>✓ {id.slice(0,10)} · Guardian gift enjoyed</p>)}
+            {usedCustom.slice(-12).reverse().map(x=><p key={x.id}>✓ {x.name}</p>)}
+          </details>
+        </div>
+        <p>Completed rewards appear above until you use them. You can also create your own. Basic needs never have to be earned.</p>
         <label>
           My reward
           <input
@@ -695,7 +718,7 @@ export function GuardianTools({
         >
           Create my reward
         </button>
-        {state.rewards.map((x) => (
+        {state.rewards.filter(x=>!x.claimed).map((x) => (
           <article key={x.id}>
             <h3>{x.name}</h3>
             <p>{x.text}</p>
@@ -719,7 +742,7 @@ export function GuardianTools({
                 onClick={() =>
                   update({
                     rewards: state.rewards.map((r) =>
-                      r.id === x.id ? { ...r, claimed: true } : r,
+                      r.id === x.id ? { ...r, claimed: true, usedAt: new Date().toISOString() } : r,
                     ),
                   })
                 }
