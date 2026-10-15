@@ -21,6 +21,11 @@ const settings = read("src/components/organized-settings.jsx");
 const taskPrivacy = read("supabase/migrations/20261002001500_tighten_task_privacy.sql");
 
 const checks = [
+  [app.includes('aria-label="Quick editing shortcuts"') && app.includes('✏️ Edit tasks') && app.includes('📅 Edit schedule'), "Home and Calendar show direct task and schedule editing shortcuts"],
+  [app.includes('onOpenSchedule={() => setManageSchedule(true)}'), "Task page can open the existing schedule editor directly"],
+  [tasks.includes('className="pl-task-edit-direct"') && tasks.includes('onClick={() => startEditingTask(row.sourceTask)}'), "Every displayed task has a directly accessible Edit button"],
+  [tasks.includes('✏️ Show all tasks') && tasks.includes('setShowAllToday(true)'), "Completed or hidden daily tasks are discoverable for editing"],
+  [finalMobile.includes('#main-content .pl-edit-shortcuts') && finalMobile.includes('#main-content .pl-task-row-actions'), "Mobile editing controls have dedicated responsive styles"],
   [care.includes('.pl-care-tabs.plushcare-library>div> :first-child') && !care.includes('.pl-care-tabs .plushcare-library'), "Care hides its legacy duplicate intro with a selector matching the library wrapper"],
   [careExisting.includes('className="pl-care-library-panel"') && care.includes('.plushcare-library .pl-care-library-panel'), "Care library styling targets its actual panels"],
   [!app.includes('.pl-unified-page-content section,') && !app.includes('.pl-unified-page-content details{'), "ambient themes do not paint structural grids and disclosures as white sheets"],
