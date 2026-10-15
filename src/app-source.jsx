@@ -7497,7 +7497,7 @@ function GlowUpTracker() {
           </div>
           {user && <div style={{ display: "flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
             <button type="button" className="pl-header-add-button" aria-label="Add a task" title="Add a task" onClick={() => { setCollectionOpen(false); openTaskManager(); }}>＋</button>
-            <button type="button" className={`pl-header-mascot-button ${headerMascotDancing ? "is-dancing" : ""}`} onClick={() => {
+            <button type="button" className={`pl-header-mascot-button ${headerMascotDancing ? "is-dancing" : ""}`} onClick={() => { setCollectionTab("mascot"); setCollectionOpen(true);
               setHeaderMascotDancing(false);
               window.requestAnimationFrame(() => {
                 setHeaderMascotDancing(true);
@@ -7674,7 +7674,6 @@ function GlowUpTracker() {
           <button type="button" aria-current={dashboard === "tasks" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); openTaskManager(period.date, "today"); }}><DesignIcon name="tasks" /><span>Tasks</span></button>
           <button type="button" aria-current={dashboard === "care" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("care"); }}><DesignIcon name="care" /><span>Care</span></button>
           <button type="button" aria-current={dashboard === "progress" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("progress"); }}><DesignIcon name="progress" /><span>Progress</span></button>
-          <button type="button" aria-current={collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionTab("mascot"); setCollectionOpen(true); }}><span aria-hidden="true">🧸</span><span>Plush</span></button>
           <button type="button" aria-current={dashboard === "guardian" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("guardian"); }}><DesignIcon name="guardian" /><span>Guardian</span></button>
         </nav>
 
