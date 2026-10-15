@@ -8,12 +8,12 @@ export const SURPRISE_BOX_CHOICES = [
 ];
 export function nextSurpriseBox(state={},date="") {
   const prefs=state.prefs||{}, history=Array.isArray(state.surpriseBoxHistory)?state.surpriseBoxHistory:[];
-  if (!prefs.surpriseBox || !prefs.automaticReminders || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  if (prefs.guardianPaused || !prefs.surpriseBox || !prefs.automaticReminders || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
   const selected=SURPRISE_BOX_CHOICES.filter(x=>(prefs.surpriseBoxChoices||[]).includes(x.id));
   if (!selected.length || history.some(x=>x.date===date)) return null;
   const day=Math.floor(Date.parse(date+"T12:00:00")/86400000);
   const latest=history.at(-1);
-  if (latest && day-Math.floor(Date.parse(latest.date+"T12:00:00")/86400000)<3) return null;
+  if (latest && day-Math.floor(Date.parse(latest.date+"T12:00:00")/86400000)<Number(prefs.surpriseFrequencyDays||3)) return null;
   const lastId=latest?.id;
   const pool=selected.filter(x=>x.id!==lastId);
   const possible=pool.length?pool:selected;
@@ -41,7 +41,7 @@ export function smartCarePlan(rows=[], done={}, energy="some", resting=false, no
 }
 export function surpriseLetter(state={}, today="", resting=false) {
   const prefs=state.prefs||{};
-  if (!prefs.surpriseLetters || !prefs.automaticReminders || !/^\d{4}-\d{2}-\d{2}$/.test(today)) return null;
+  if (prefs.guardianPaused || !prefs.surpriseLetters || !prefs.automaticReminders || !/^\d{4}-\d{2}-\d{2}$/.test(today)) return null;
   const existing=Array.isArray(state.surpriseLetterHistory)?state.surpriseLetterHistory:[];
   if (existing.some(l=>l.date===today)) return null;
   // At most one every three days, and none until at least three days after opt-in.
