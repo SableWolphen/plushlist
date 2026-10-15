@@ -93,3 +93,13 @@ const prefsTest=normalizeGuardianState({prefs:{favoriteActivities:"Cartoons",com
 assert.equal(prefsTest.prefs.favoriteActivities,"Cartoons");
 assert.equal(prefsTest.prefs.badDayMode,true);
 assert.equal(prefsTest.prefs.storyTime,true);
+
+const paused=normalizeGuardianState({prefs:{guardianPaused:true,lowStimulation:true,surpriseFrequencyDays:7}});
+assert.equal(paused.prefs.guardianPaused,true);
+assert.equal(paused.prefs.lowStimulation,true);
+assert.equal(paused.prefs.surpriseFrequencyDays,7);
+assert.equal(nextSurpriseBox({...bx,prefs:{...bx.prefs,guardianPaused:true}},"2026-10-14"),null);
+assert.equal(surpriseLetter({...letterState,prefs:{...letterState.prefs,guardianPaused:true}},"2026-10-14"),null);
+const weekly={...bx,prefs:{...bx.prefs,surpriseFrequencyDays:7},surpriseBoxHistory:[chosen]};
+assert.equal(nextSurpriseBox(weekly,"2026-10-18"),null);
+assert(nextSurpriseBox(weekly,"2026-10-21"));
