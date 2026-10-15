@@ -4864,9 +4864,13 @@ function GlowUpTracker() {
       ? editingSchedule.entries.map((entry, index) => ({ id: entry.id || `saved-${index}`, time: entry.time || "", text: entry.text || "" }))
       : legacyScheduleToEntries(editingSchedule);
     setScheduleDraft({ entries });
+  }, [scheduleEditingDayId, personalSchedules]);
+  // Server-saved copy confirmations should remain visible; changing days is
+  // the only time we clear the status and selected target days.
+  useEffect(() => {
     setScheduleMessage("");
     setCopyToDayIds([]);
-  }, [scheduleEditingDayId, personalSchedules]);
+  }, [scheduleEditingDayId]);
 
   const syncNow = async () => {
     if (!user) return;
