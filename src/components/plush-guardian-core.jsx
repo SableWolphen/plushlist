@@ -191,7 +191,7 @@ export default function PlushGuardianCore(props) {
                 <p>{botPlan.completed} of {botPlan.total} little jobs complete today. You can pause or change your Guardian anytime.</p>
                 {botPlan.next && <button onClick={() => { setTaskKey(botPlan.next.key); navigate("start"); }}>Help me do: {botPlan.next.label} ›</button>}
                 <button onClick={() => navigate("routines")}>Routines ›</button>
-                <button onClick={() => navigate("rewards")}>🎁 Rewards ›</button>
+                <button onClick={() => navigate("rewards")}>🎁 My earned rewards ({(state.automaticGiftLedger||[]).filter(id=>!(state.usedGuardianGifts||[]).includes(id)).length+(state.rewards||[]).filter(x=>x.claimed&&x.autoAwardedAt&&!x.usedAt).length}) ›</button>
                 {guardianSuggestedReward(botPlan.completed,botPlan.total,dailyCheckIn?.day_type === "rest") && <p>{guardianSuggestedReward(botPlan.completed,botPlan.total,dailyCheckIn?.day_type === "rest")}</p>}
                 <button onClick={() => navigate("settings")}>My reminders & Guardian voice ›</button>
               </> : <>
@@ -294,7 +294,7 @@ export default function PlushGuardianCore(props) {
                 ["Brain dump", "inbox"],
                 ["My routines", "routines"],
                 ["My reflections", "reflections"],
-                ["Personal rewards", "rewards"],
+                ["🎁 Earned rewards", "rewards"],
                 ["Habit experiments", "experiments"],
                 ["Letters to me", "letters"],
               ].map(([label, id]) => (
