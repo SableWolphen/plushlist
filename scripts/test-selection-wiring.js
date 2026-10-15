@@ -62,7 +62,7 @@ const checks = [
   [appearancePicker.includes('nickname_style: "baby", dino_theme: false'), "enabling Baby Mode disables Dino Theme"],
   [pickerBehaviorPassed, "Dino Theme selection leaves the shared layout and exits Baby wording mode"],
 
-  [settings.includes("onClick={openDailyCheckIn}") && settings.includes("openDailyCheckIn, watchPairingCode"), "Settings can reopen the unified daily check-in directly"],
+  [settings.includes("onClick={openDailyCheckIn}") && settings.includes("openDailyCheckIn, dailyCheckIn"), "Settings can reopen the unified daily check-in directly"],
   [growth.includes('document.getElementById("plushlife-checkin-trigger")') && growth.includes("openCapacityPicker: openDailyCheckIn"), "legacy capacity API routes into the unified daily check-in"],
   [app.includes('id="plushlife-checkin-trigger"') && app.includes("openDailyCheckIn={() => { setSettingsOpen(false);"), "the app exposes one canonical daily check-in trigger and wires Settings directly"],
   [app.includes("data-plushlife-day-type={value}") && app.includes("DAY_TYPES.map"), "all canonical day choices expose a stable selector"],
