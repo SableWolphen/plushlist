@@ -10,7 +10,7 @@ import {
   effort,
   taskSteps,
 } from "../plush-guardian-model.mjs";
-import { GuardianTools } from "./plush-guardian-tools.jsx";
+const GuardianTools = React.lazy(() => import("./plush-guardian-tools.jsx").then(module => ({ default: module.GuardianTools })));
 import { GuardianSettings } from "./plush-guardian-settings.jsx";
 import { startFocusTimer } from "./focus-timer.jsx";
 import { botGuardianDailyPlan, activateBotMommy } from "../guardian-bot.mjs";
@@ -514,14 +514,16 @@ export default function PlushGuardianCore(props) {
           "rewards",
           "experiments",
         ].includes(page) && (
-          <GuardianTools
-            {...props}
-            page={page}
-            state={state}
-            update={update}
-            setMessage={setMessage}
-            onClose={onClose}
-          />
+          <React.Suspense fallback={<p role="status">Opening Guardian tools…</p>}>
+            <GuardianTools
+              {...props}
+              page={page}
+              state={state}
+              update={update}
+              setMessage={setMessage}
+              onClose={onClose}
+            />
+          </React.Suspense>
         )}
         {page === "settings" && (
           <GuardianSettings
