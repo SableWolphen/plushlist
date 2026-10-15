@@ -24,7 +24,7 @@ export function awardEligibleRewards(rewards = [], rows = [], done = {}, date = 
   const next = rewards.map(reward=>{
     if (!reward || reward.claimed || reward.autoAwardedAt) return reward;
     const progressUnlocked = reward.mode === "progress" && progress.newlyCompleted !== false && denominator > 0 && percent >= Number(reward.targetPercent || 100);
-    const effort = reward.mode === "effort" && Number(reward.goal) > 0 && Number(reward.count) >= Number(reward.goal);
+    const effort = !progress.removedTask && reward.mode === "effort" && Number(reward.goal) > 0 && Number(reward.count) >= Number(reward.goal);
     if (!progressUnlocked && !effort) return reward;
     unlocked.push({ id:reward.id, name:String(reward.name || "A cozy reward").slice(0,100) });
     return { ...reward, claimed:true, autoAwardedAt: date };
