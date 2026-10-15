@@ -1,4 +1,5 @@
 import { CozySharing, SharedCozyCard } from "./cozy-space.jsx";
+import { CozyRewardWishlist } from "./cozy-reward-wishlist.jsx";
 const LazyTogetherCorner = React.lazy(() => import("./together-corner.jsx").then((module) => ({ default: module.TogetherCorner })));
 // The inline Guardian/support ToolPanel — module split phase 7,
 // eighth slice, last of the "big four" (see docs/module-split-plan.md).
@@ -118,6 +119,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             {ownedSupportLinks.length ? <ul style={{paddingLeft:20,color:"var(--pl-theme-ink)",overflowWrap:"anywhere"}}>{ownedSupportLinks.map(link=><li key={link.id}>{link.caregiver_email} · {!link.accepted_at ? "Invitation pending" : link.active ? "Active" : "Paused"}</li>)}</ul> : <p style={{color:"var(--pl-theme-muted)"}}>Choose someone you trust when you’re ready.</p>}
             <button type="button" onClick={()=>setGuardianArea("support")} style={{minHeight:44,padding:"8px 12px",borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)",color:"var(--pl-theme-ink)",fontWeight:800}}>Manage sharing & invitations</button>
           </section>}
+          {guardianArea === "overview" && supportViewMode === "mine" && <CozyRewardWishlist userId={user?.id} />}
           {guardianArea === "overview" && supportViewMode === "mine" && <section className="pl-guardian-reward-wallet" style={{padding:15,borderRadius:16,background:"var(--pl-theme-surface)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
               <h2 style={{margin:0,fontSize:17}}>🎁 My Guardian rewards</h2>
