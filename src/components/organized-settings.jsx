@@ -110,7 +110,7 @@ function formatSyncStatus(online, syncStatus, lastSyncedAt) {
   try { return `Synced ${new Date(lastSyncedAt).toLocaleString()}`; } catch (_error) { return "Synced"; }
 }
 
-export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCode, setWatchPairingCode, connectWatch, watchPairingBusy, watchPairingMessage, localWatchSyncBusy, startLocalWatchSync, localWatchSyncMessage, dailyCheckIn, pct, rows, viewDone, weeklyOverallPct, widgetSyncMsg, setWidgetSyncMsg, displayNameDraft, setDisplayNameDraft, saveDisplayName, comfortItemDraft, setComfortItemDraft, saveComfortItem, preferences, appearanceTheme, selectAppearanceTheme, dinoTheme, updatePreference, enableNotifications, smartReminderSuggestion, restDatesSet, toggleRestToday, period, restRangeDraft, setRestRangeDraft, saveRestRange, restDates, feedbackText, setFeedbackText, submitFeedback, feedbackMessage, exportMyData, restoreFileInputRef, restoreFromBackup, deleteAllCheckIns, deleteAllReflections, user, online, syncStatus, lastSyncedAt, syncNow, emailChangeDraft, setEmailChangeDraft, requestEmailChange, signingOut, handleSignOut, signOutOtherDevices, deleteMyAccount, deviceBackupStatus, refreshDeviceBackup, deviceBackupBusy, verifyDeviceBackupNow, deviceBackupVerifyBusy, settingsMessage }) {
+export function SettingsPanel({ open, onClose, openDailyCheckIn, dailyCheckIn, pct, rows, viewDone, weeklyOverallPct, widgetSyncMsg, setWidgetSyncMsg, displayNameDraft, setDisplayNameDraft, saveDisplayName, comfortItemDraft, setComfortItemDraft, saveComfortItem, preferences, appearanceTheme, selectAppearanceTheme, dinoTheme, updatePreference, enableNotifications, smartReminderSuggestion, restDatesSet, toggleRestToday, period, restRangeDraft, setRestRangeDraft, saveRestRange, restDates, feedbackText, setFeedbackText, submitFeedback, feedbackMessage, exportMyData, restoreFileInputRef, restoreFromBackup, deleteAllCheckIns, deleteAllReflections, user, online, syncStatus, lastSyncedAt, syncNow, emailChangeDraft, setEmailChangeDraft, requestEmailChange, signingOut, handleSignOut, signOutOtherDevices, deleteMyAccount, deviceBackupStatus, refreshDeviceBackup, deviceBackupBusy, verifyDeviceBackupNow, deviceBackupVerifyBusy, settingsMessage }) {
   const [section, setSection] = React.useState("home");
   const [search, setSearch] = React.useState("");
   const cozy = React.useContext(CozyComfortContext);
@@ -329,24 +329,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, watchPairingCod
   const devices = (
     <>
       <DetailHeader title="Devices" onBack={() => setSection("home")} />
-      <SectionTitle icon="⌚" title="Connected experiences" description="Watch pairing and the home-screen widget are kept together here." />
-      <Card>
-        <div style={{ fontSize: 13.5, fontWeight: 900, color: "var(--pl-theme-ink,#4D756B)" }}>⌚ Amazfit watch</div>
-        <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#7E8B87)" }}>Open PlushLife on your watch, choose <strong>My tasks</strong>, then enter its code below.</div>
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 8, marginTop: 10 }}>
-          <input type="text" value={watchPairingCode} onChange={(event) => setWatchPairingCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8))} onKeyDown={(event) => { if (event.key === "Enter") connectWatch(); }} maxLength={8} placeholder="8-character code" style={{ ...inputStyle, letterSpacing: ".12em", textTransform: "uppercase" }} />
-          <button type="button" disabled={watchPairingBusy} onClick={connectWatch} style={{ ...primaryButton, background: watchPairingBusy ? "#97B5AD" : "#388C79" }}>{watchPairingBusy ? "Connecting…" : "Connect"}</button>
-        </div>
-        {watchPairingMessage && <div role="status" style={{ marginTop: 8, fontSize: 11.5, color: "var(--pl-theme-ink,#47776B)", fontWeight: 700 }}>{watchPairingMessage}</div>}
-      </Card>
-      {window.Capacitor?.isNativePlatform?.() && window.Capacitor?.Plugins?.WatchSyncBridge && (
-        <Card>
-          <div style={{ fontSize: 13.5, fontWeight: 900, color: "var(--pl-theme-ink,#4D756B)" }}>⚡ Instant local sync</div>
-          <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#7E8B87)" }}>Optional Bluetooth sync while this phone app is running. Normal watch sync still works as a fallback.</div>
-          <button type="button" disabled={localWatchSyncBusy} onClick={startLocalWatchSync} style={{ ...secondaryButton, marginTop: 9, color: "var(--pl-theme-ink,#388C79)" }}>{localWatchSyncBusy ? "Waiting for watch…" : "Enable instant sync"}</button>
-          {localWatchSyncMessage && <div role="status" style={{ marginTop: 7, fontSize: 11.5, color: "var(--pl-theme-ink,#6F5C7C)" }}>{localWatchSyncMessage}</div>}
-        </Card>
-      )}
+      <SectionTitle icon="📱" title="Home-screen widget" description="Your phone widget settings live here." />
       <WidgetSettings rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} pct={pct} weeklyOverallPct={weeklyOverallPct} />
     </>
   );
