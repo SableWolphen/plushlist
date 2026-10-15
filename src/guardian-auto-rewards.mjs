@@ -9,7 +9,7 @@ export function trackRewardProgress(previous = null, rows = [], done = {}, date 
   const newlyCompleted = sameDay && completedKeys.some(key => known.has(key) && !priorDone.has(key));
   const removedTask = sameDay && previous.keys.some(key => !keys.includes(key));
   const total = Math.max(keys.length, sameDay ? Number(previous.total) || 0 : 0);
-  const snapshot = { date, keys, completedKeys, total };
+  const snapshot = { date, keys, completedKeys, total, lastAction: newlyCompleted ? "completed" : removedTask ? "removed" : "other" };
   const changed = !sameDay || total !== previous.total || keys.join("|") !== previous.keys.join("|") ||
     completedKeys.join("|") !== previous.completedKeys.join("|");
   return { snapshot, changed, newlyCompleted, removedTask, verifiedComplete: total > 0 && completedKeys.length === total };
