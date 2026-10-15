@@ -5885,7 +5885,9 @@ function GlowUpTracker() {
   // Reward celebrations must reflect completed work, not a shortened list.
   const rewardProgress = user ? readGuardian(deviceStorage(), user.id).rewardProgress : null;
   const actuallyEarnedFullDay = !!(rewardProgress?.date === period.date &&
+    rewardProgress.lastAction === "completed" &&
     rewardProgress.total > 0 && rewardProgress.completedKeys.length === rewardProgress.total);
+  const taskListRemovalShouldNotEarn = rewardProgress?.date === period.date && rewardProgress.lastAction === "removed";
 
   const mascotMood = todayIsComplete ? "excited" : (todayRequiredKeys.length > 0 && todayRequiredDone === 0) ? "tired" : "neutral";
 
@@ -5970,6 +5972,11 @@ function GlowUpTracker() {
     }));
   const mascotGrowth = mascotGrowthStageForDays(activityDaysTotal);
   const mascotRequirementProgress = (outfit) => {
+    // Removing unfinished tasks can alter percentages and reconstructed history.
+    // Do not treat that change as newly earned task-based mascot progress.
+    if (taskListRemovalShouldNotEarn && ["first_step", "daily_core", "care_days", "activity_days"].includes(outfit.unlock.type)) {
+      return Number.NEGATIVE_INFINITY;
+    }
     switch (outfit.unlock.type) {
       case "first_step": return habitHistory.some(entry=>(entry.completed_keys || []).length > 0) || Object.values(done).some(Boolean) ? 1 : 0;
       case "daily_core": return careDaysTotal >= 1 || todayDailyCoreIsComplete ? 1 : 0;
@@ -6021,6 +6028,7 @@ function GlowUpTracker() {
     const nextIds = [...unlockedIdSet];
     const currentIds = mascotCollection.unlockedIds || [];
     const unlocksChanged = nextIds.some((id) => !currentIds.includes(id));
+    if (taskListRemovalShouldNotEarn) return;
     if (currentUnlockProgress <= mascotCollection.bestStreak && !unlocksChanged) return;
     const reward = MASCOT_OUTFITS.find(o=>o.id!=="classic" && nextIds.includes(o.id) && !currentIds.includes(o.id));
     if(reward && ["ready","offline"].includes(syncStatus) && preferences.onboarding_complete) setRewardMoment(reward);
@@ -6033,6 +6041,7 @@ function GlowUpTracker() {
     user?.id,
     collectionLoadedFor,
     currentUnlockProgress,
+    taskListRemovalShouldNotEarn,
     mascotCollection.bestStreak,
     (mascotCollection.unlockedIds || []).join("|"),
     newlyEarnedIds.join("|"),
