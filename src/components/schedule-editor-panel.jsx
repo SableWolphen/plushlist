@@ -5,7 +5,7 @@
 // state and handlers.
 import { ToolPanel } from "./shared.jsx";
 
-export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setScheduleEditDayId, personalSchedules, scheduleDraft, updateScheduleEntry, removeScheduleEntry, addScheduleEntry, savePersonalSchedule, copyScheduleToAllDays, clearPersonalSchedule, copyToDayIds, toggleCopyToDay, copyScheduleToSelectedDays, scheduleMessage, scheduleExceptionDraft, setScheduleExceptionDraft, updateScheduleExceptionEntry, removeScheduleExceptionEntry, addScheduleExceptionEntry, saveScheduleException, scheduleExceptionMessage, scheduleExceptions, deleteScheduleException }) {
+export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setScheduleEditDayId, personalSchedules, scheduleDraft, updateScheduleEntry, removeScheduleEntry, addScheduleEntry, savePersonalSchedule, copyScheduleToAllDays, clearPersonalSchedule, copyToDayIds, toggleCopyToDay, copyScheduleToSelectedDays, scheduleMessage, scheduleExceptionDraft, setScheduleExceptionDraft, updateScheduleExceptionEntry, removeScheduleExceptionEntry, addScheduleExceptionEntry, saveScheduleException, scheduleExceptionMessage, scheduleExceptions, deleteScheduleException, onOpenTasks }) {
   if (!open) return null;
   const { DAYS } = window.PlushLifeContent;
   const currentDay = DAYS.find((item) => item.id === scheduleEditingDayId);
@@ -20,7 +20,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
   };
 
   return (
-    <ToolPanel title="Change my schedule" onClose={onClose}>
+    <ToolPanel title="Edit schedule" onClose={onClose}>
       <div className="schedule-panel">
         <style>{`
           .schedule-panel{--blue:#B85CC7;--blue-dark:#74417F;--ink:#66536E;--line:#E7D7EB;--rose:#C45D74;--green:#6E9C88;display:grid;gap:12px;padding-bottom:4px}
@@ -77,6 +77,12 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
             .schedule-btn{padding:6px 9px!important;font-size:10.25px!important}
           }
         `}</style>
+
+        <section className="schedule-card" aria-label="Schedule editing help">
+          <div className="schedule-eyebrow">Editing your day plan</div>
+          <p className="schedule-helper">Change your weekly routine here. To edit a task's name, repeat days, or reminders, use Tasks instead.</p>
+          <button type="button" className="schedule-btn add" onClick={onOpenTasks}>✏️ Edit tasks instead</button>
+        </section>
 
         <section className="schedule-card day-picker">
           <div className="schedule-eyebrow">Choose a day</div>
