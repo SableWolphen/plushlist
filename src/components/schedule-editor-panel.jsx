@@ -52,7 +52,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
           .schedule-copy-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:8px}
           .schedule-copy-selected{padding:7px 10px!important;border-radius:9px!important;border:1px solid #BFD5EF!important;background:#EEF6FF!important;color:var(--blue-dark)!important;font-size:10.5px!important;font-weight:900!important;cursor:pointer}
           .schedule-copy-selected:disabled{opacity:.48;cursor:not-allowed}
-          .schedule-copy-all{padding:4px 1px!important;border:0!important;background:transparent!important;color:#6E84A0!important;font-size:9.75px!important;font-weight:800!important;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+          .schedule-copy-all{padding:11px 13px!important;min-height:48px!important;border:0!important;border-radius:12px!important;background:var(--pl-theme-accent,#B85CC7)!important;color:var(--pl-theme-on-accent,#fff)!important;font-size:13px!important;font-weight:900!important;cursor:pointer}
           .schedule-status{margin-top:7px;font-size:10.75px;color:#8C6B9E;font-weight:700}
           .schedule-extras{background:linear-gradient(145deg,#F3FBF7,#F8FCFA);border-color:#B9E0D0}
           .schedule-extras .schedule-eyebrow{color:var(--green)}
@@ -101,7 +101,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
         </section>
 
         <section className="schedule-card">
-          <div className="schedule-eyebrow">{currentDay?.label || scheduleEditingDayId.toUpperCase()} schedule</div>
+          <div className="schedule-eyebrow">{currentDay?.label || (scheduleEditingDayId || "day").toUpperCase()} schedule</div>
           <div className="schedule-intro">Add only what matters for this day. Times are optional.</div>
 
           <div className="schedule-entry-list">
@@ -127,7 +127,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
             <div className="schedule-copy-title">
               <div>
                 <div className="schedule-eyebrow">Copy this schedule</div>
-                <div className="schedule-helper">Pick only the days that should match.</div>
+                <div className="schedule-helper">Copy the items above to other days. Your actual task list will not change.</div>
               </div>
             </div>
             <div className="schedule-copy-days">
@@ -144,11 +144,11 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
               <button type="button" onClick={copyScheduleToSelectedDays} disabled={copyToDayIds.length === 0} className="schedule-copy-selected">
                 {copyToDayIds.length === 0 ? "Copy to selected" : `Copy to ${copyToDayIds.map((id) => DAYS.find((d) => d.id === id)?.label).join(", ")}`}
               </button>
-              <button type="button" onClick={copyScheduleToAllDays} className="schedule-copy-all">Copy to all 7 instead…</button>
+              <button type="button" onClick={copyScheduleToAllDays} className="schedule-copy-all">📅 Copy to all 7 days</button>
             </div>
           </div>
 
-          {scheduleMessage && <div className="schedule-status">{scheduleMessage}</div>}
+          {scheduleMessage && <div className="schedule-status" role={scheduleMessage.startsWith("Couldn\u0027t") || scheduleMessage.includes("didn\u0027t confirm") ? "alert" : "status"} aria-live="polite">{scheduleMessage}</div>}
         </section>
 
         <section className="schedule-card schedule-extras">
