@@ -82,3 +82,14 @@ assert(nextSurpriseBox({...bx,surpriseBoxHistory:[chosen]},"2026-10-17"));
 assert.equal(nextSurpriseBox({...bx,prefs:{...bx.prefs,surpriseBox:false}},"2026-10-14"),null);
 assert.equal(nextSurpriseBox({...bx,prefs:{...bx.prefs,surpriseBoxChoices:[]}},"2026-10-14"),null);
 assert.match(smartCarePlan([{key:"timed",label:"Wash up",time:"19:00"}],{},"some",false,new Date("2026-10-14T18:30:00"))[0].detail,/19:00/);
+
+import { guardianDayExtras, GUARDIAN_STORIES } from "../src/guardian-smart-care.mjs";
+assert(GUARDIAN_STORIES.length>=3);
+assert.equal(guardianDayExtras("2026-10-14",{careMode:false,littleMode:false}).theme,null);
+assert(guardianDayExtras("2026-10-14",{careMode:true,littleMode:true}).theme);
+assert.match(guardianDayExtras("2026-10-14",{comfortPreference:"quiet"}).comfort,/quiet/);
+assert.match(guardianDayExtras("2026-10-14",{},true).morning,/Rest/);
+const prefsTest=normalizeGuardianState({prefs:{favoriteActivities:"Cartoons",comfortPreference:"quiet",badDayMode:true,storyTime:true}});
+assert.equal(prefsTest.prefs.favoriteActivities,"Cartoons");
+assert.equal(prefsTest.prefs.badDayMode,true);
+assert.equal(prefsTest.prefs.storyTime,true);
