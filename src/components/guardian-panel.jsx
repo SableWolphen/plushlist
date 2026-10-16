@@ -136,7 +136,10 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             </div>
             <p style={{fontSize:13,color:"var(--pl-theme-muted)"}}>Rewards your Guardian gives you appear here. Unlocked rewards stay until you use them.</p>
             {!supportRewards.length && <p style={{fontSize:13}}>No Guardian rewards waiting yet.</p>}
-            {supportRewards.map((reward)=>{
+            {supportRewards.filter(reward => {
+              const progress = reward.week_start ? supportWeeklyPercent : supportPercent;
+              return progress >= Number(reward.target_percent || 100) && (!reward.approval_required || !!reward.approved_at);
+            }).map((reward)=>{
               const progress = reward.week_start ? supportWeeklyPercent : supportPercent;
               const unlocked = progress >= Number(reward.target_percent || 100);
               const approved = !reward.approval_required || !!reward.approved_at;
@@ -147,6 +150,17 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 {unlocked && approved && <button type="button" onClick={()=>updateRewardStatus(reward,"claim")} style={{marginTop:9,minHeight:44,border:0,borderRadius:11,padding:"9px 16px",fontWeight:850,background:"var(--pl-theme-accent)",color:"var(--pl-theme-on-accent,#fff)"}}>Use reward 🎁</button>}
               </div>;
             })}
+            {supportRewards.some(reward => {
+              const progress = reward.week_start ? supportWeeklyPercent : supportPercent;
+              return progress < Number(reward.target_percent || 100) || (reward.approval_required && !reward.approved_at);
+            }) && <details style={{marginTop:12}}><summary style={{cursor:"pointer",minHeight:44,fontSize:13,fontWeight:800}}>Locked & pending rewards</summary>
+              {supportRewards.filter(reward => {
+                const progress = reward.week_start ? supportWeeklyPercent : supportPercent;
+                return progress < Number(reward.target_percent || 100) || (reward.approval_required && !reward.approved_at);
+              }).map(reward => <div key={reward.id} style={{padding:"8px 2px",borderBottom:"1px solid var(--pl-theme-line)",fontSize:13}}>
+                <strong>{reward.title}</strong> · {(reward.week_start ? supportWeeklyPercent : supportPercent) < Number(reward.target_percent || 100) ? `Unlocks at ${reward.target_percent}% progress` : "Awaiting Guardian approval"}
+              </div>)}
+            </details>}
           </section>}
           {guardianArea === "together" && <React.Suspense fallback={<div role="status" style={{padding:14,color:"var(--pl-theme-muted)"}}>Opening Together…</div>}><LazyTogetherCorner
             client={client}
