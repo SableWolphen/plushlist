@@ -117,6 +117,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
             ))}
           </div>
 
+          {scheduleMessage && <div className="schedule-status" role={scheduleMessage.startsWith("Couldn\u0027t") || scheduleMessage.includes("didn\u0027t confirm") ? "alert" : "status"} aria-live="polite">{scheduleMessage}</div>}
           <div className="schedule-toolbar">
             <button type="button" onClick={addScheduleEntry} className="schedule-btn add">＋ Add item</button>
             <button onClick={savePersonalSchedule} type="button" className="schedule-btn primary">Save day ✨</button>
@@ -148,7 +149,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
             </div>
           </div>
 
-          {scheduleMessage && <div className="schedule-status" role={scheduleMessage.startsWith("Couldn\u0027t") || scheduleMessage.includes("didn\u0027t confirm") ? "alert" : "status"} aria-live="polite">{scheduleMessage}</div>}
+
         </section>
 
         <details className="schedule-card schedule-extras"><summary style={{cursor:"pointer",minHeight:44,fontWeight:850}}>✨ Temporary extras · optional</summary>
