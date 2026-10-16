@@ -53,7 +53,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
           .schedule-copy-selected{padding:7px 10px!important;border-radius:9px!important;border:1px solid #BFD5EF!important;background:#EEF6FF!important;color:var(--blue-dark)!important;font-size:10.5px!important;font-weight:900!important;cursor:pointer}
           .schedule-copy-selected:disabled{opacity:.48;cursor:not-allowed}
           .schedule-copy-all{padding:11px 13px!important;min-height:48px!important;border:0!important;border-radius:12px!important;background:var(--pl-theme-accent,#B85CC7)!important;color:var(--pl-theme-on-accent,#fff)!important;font-size:13px!important;font-weight:900!important;cursor:pointer}
-          .schedule-status{margin-top:7px;font-size:10.75px;color:#8C6B9E;font-weight:700}
+          .schedule-status{margin-top:10px;padding:9px 11px;border-radius:10px;background:var(--pl-theme-surface-2);border:1px solid var(--pl-theme-line);font-size:13px;color:var(--pl-theme-ink);font-weight:700}
           .schedule-extras{background:linear-gradient(145deg,#F3FBF7,#F8FCFA);border-color:#B9E0D0}
           .schedule-extras .schedule-eyebrow{color:var(--green)}
           .schedule-date-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
@@ -144,14 +144,14 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
               <button type="button" onClick={copyScheduleToSelectedDays} disabled={copyToDayIds.length === 0} className="schedule-copy-selected">
                 {copyToDayIds.length === 0 ? "Copy to selected" : `Copy to ${copyToDayIds.map((id) => DAYS.find((d) => d.id === id)?.label).join(", ")}`}
               </button>
-              <button type="button" onClick={copyScheduleToAllDays} type="button" className="schedule-copy-all">📅 Copy to all 7 days</button>
+              <button type="button" onClick={copyScheduleToAllDays} className="schedule-copy-all">📅 Copy to all 7 days</button>
             </div>
           </div>
 
           {scheduleMessage && <div className="schedule-status" role={scheduleMessage.startsWith("Couldn\u0027t") || scheduleMessage.includes("didn\u0027t confirm") ? "alert" : "status"} aria-live="polite">{scheduleMessage}</div>}
         </section>
 
-        <section className="schedule-card schedule-extras">
+        <details className="schedule-card schedule-extras"><summary style={{cursor:"pointer",minHeight:44,fontWeight:850}}>✨ Temporary extras · optional</summary>
           <div className="schedule-eyebrow">✨ Temporary extras</div>
           <div className="schedule-helper">Add one-off plans without changing your normal weekly schedule.</div>
 
@@ -192,7 +192,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
               ))}
             </div>
           )}
-        </section>
+        </details>
       </div>
     </ToolPanel>
   );
