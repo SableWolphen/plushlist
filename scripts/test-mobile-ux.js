@@ -24,6 +24,8 @@ const settings = read("src/components/organized-settings.jsx");
 const taskPrivacy = read("supabase/migrations/20261002001500_tighten_task_privacy.sql");
 
 const checks = [
+  [app.includes("scheduleDraftDirtyRef.current = true") && app.includes("previous.source === source") && app.includes("scheduleDraftDirtyRef.current || previous.source === source"), "Schedule editor hydrates late server data without overwriting unsaved Cozy edits"],
+  [app.includes('setScheduleMessage(`${data.label} schedule saved ✨`)') && !app.includes('setScheduleMessage("Schedule saved ✨");'), "Schedule save confirmation reflects the verified write"],
   [shared.includes('zIndex: 4000') && shared.includes('plushlife-confirm-title'), "Schedule-copy confirmation appears above editor"],
   [app.includes('wake: "", morning: "", work: "", workout: "", home: ""'), "Copied custom schedule clears conflicting old-format day fields"],
   [app.includes('const copyScheduleToDays = async') && app.includes('copyScheduleToDays(DAYS.map((day) => day.id), true)') && app.includes('.upsert(rowsToCopy') && app.includes('.select("day_id, entries")'), "Copy to all seven days saves the source day and verifies every copied day"],
