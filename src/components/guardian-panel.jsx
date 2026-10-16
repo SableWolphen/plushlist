@@ -125,11 +125,10 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
               <button type="button" onClick={()=>mode === "person" ? setGuardianArea("support") : openPlushGuardian("guardian")} style={{minHeight:44,padding:"9px 13px",borderRadius:12}}>💗 I need care</button>
               <button type="button" onClick={()=>mode === "person" ? setGuardianArea("together") : openPlushGuardian("routines")} style={{minHeight:44,padding:"9px 13px",borderRadius:12}}>🌱 Help me start</button>
-              <button type="button" onClick={()=>mode === "person" ? setGuardianArea("support") : openPlushGuardian("guardian")} style={{minHeight:44,padding:"9px 13px",borderRadius:12}}>💌 Notes & support</button>
             </div>
             <p style={{margin:0,fontSize:12,color:"var(--pl-theme-muted)"}}>{mode === "person" ? "Send a request from Sharing & privacy to a connected Guardian. Nothing is sent by opening this shortcut." : "Open your automatic Guardian tools. No human is contacted."}</p>
           </section>}
-          {guardianArea === "overview" && supportViewMode === "mine" && <CozyRewardWishlist userId={user?.id} />}
+          {guardianArea === "overview" && supportViewMode === "mine" && <details className="pl-guardian-wishlist-details" style={{padding:12,border:"1px solid var(--pl-theme-line)",borderRadius:14}}><summary style={{cursor:"pointer",minHeight:44,fontWeight:800}}>💝 Reward wishlist & surprise ideas</summary><CozyRewardWishlist userId={user?.id} /></details>}
           {guardianArea === "overview" && supportViewMode === "mine" && <section className="pl-guardian-reward-wallet" style={{padding:15,borderRadius:16,background:"var(--pl-theme-surface)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
               <h2 style={{margin:0,fontSize:17}}>🎁 My Guardian rewards</h2>
