@@ -3673,6 +3673,7 @@ function GlowUpTracker() {
   };
 
   const scheduleSaveInFlightRef = React.useRef(false);
+  const scheduleDraftDirtyRef = React.useRef(false);
   const savePersonalSchedule = async () => {
     if (!user?.id || scheduleSaveInFlightRef.current || scheduleCopyInFlightRef.current) return;
     const dayId = scheduleEditingDayId;
@@ -3694,6 +3695,7 @@ function GlowUpTracker() {
         throw new Error("The saved schedule could not be verified. Please retry.");
       }
       setPersonalSchedules((items) => [...items.filter((item) => item.day_id !== dayId), data]);
+      scheduleDraftDirtyRef.current = false;
       setScheduleMessage(`${data.label} schedule saved ✨`);
     } catch (error) {
       setScheduleMessage(`Couldn't save that schedule: ${error?.message || "connection problem"}`);
@@ -3712,7 +3714,7 @@ function GlowUpTracker() {
       }).select("display_name, show_personal_schedule, account_type").single();
       if (data) setTrackerProfile(data);
     }
-    setScheduleMessage("Schedule saved ✨");
+    // Keep the verified result visible; profile setup is not the schedule save.
   };
 
   const scheduleCopyInFlightRef = React.useRef(false);
@@ -3767,6 +3769,7 @@ function GlowUpTracker() {
         ...items.filter((item) => !targetIds.includes(item.day_id)),
         ...(data || []).map((saved) => ({ ...rowsToCopy.find((row) => row.day_id === saved.day_id), ...saved })),
       ]);
+      scheduleDraftDirtyRef.current = false;
       setCopyToDayIds([]);
       setScheduleMessage(allDays ? "Saved! All 7 days now use this schedule. ✨" : `Saved! Copied to ${dayLabels} and kept the original day. ✨`);
     } catch (error) {
@@ -3782,12 +3785,15 @@ function GlowUpTracker() {
   const copyScheduleToSelectedDays = () => copyScheduleToDays(copyToDayIds);
 
   const addScheduleEntry = () => {
+    scheduleDraftDirtyRef.current = true;
     setScheduleDraft((draft) => ({ entries: [...draft.entries, { id: crypto.randomUUID(), time: "", text: "" }] }));
   };
   const updateScheduleEntry = (id, patch) => {
+    scheduleDraftDirtyRef.current = true;
     setScheduleDraft((draft) => ({ entries: draft.entries.map((entry) => entry.id === id ? { ...entry, ...patch } : entry) }));
   };
   const removeScheduleEntry = (id) => {
+    scheduleDraftDirtyRef.current = true;
     setScheduleDraft((draft) => ({ entries: draft.entries.filter((entry) => entry.id !== id) }));
   };
 
@@ -3830,6 +3836,7 @@ function GlowUpTracker() {
     }
     setPersonalSchedules((items) => items.filter((item) => item.day_id !== scheduleEditingDayId));
     setScheduleDraft({ entries: [] });
+    scheduleDraftDirtyRef.current = false;
     setScheduleMessage("Day schedule cleared.");
   };
 
@@ -4814,17 +4821,21 @@ function GlowUpTracker() {
     setScheduleExceptionMessage("");
   }, [manageSchedule]);
 
-  // Hydrate the editor when changing days or reopening it. Background refreshes
-  // must never overwrite unsaved typing in the currently open editor.
+  // Hydrate after remote schedules load; never replace a draft the Cozy edited.
   const editingScheduleForDay = personalSchedules.find((item) => item.day_id === scheduleEditingDayId) || null;
-  const scheduleDraftHydrationRef = React.useRef(null);
+  const scheduleDraftHydrationRef = React.useRef({ day: null, source: null });
   useEffect(() => {
     if (!manageSchedule) {
-      scheduleDraftHydrationRef.current = null;
+      scheduleDraftHydrationRef.current = { day: null, source: null };
+      scheduleDraftDirtyRef.current = false;
       return;
     }
-    if (scheduleDraftHydrationRef.current === scheduleEditingDayId) return;
-    scheduleDraftHydrationRef.current = scheduleEditingDayId;
+    const previous = scheduleDraftHydrationRef.current;
+    const switchedDay = previous.day !== scheduleEditingDayId;
+    const source = editingScheduleForDay ? JSON.stringify(editingScheduleForDay) : null;
+    if (!switchedDay && (scheduleDraftDirtyRef.current || previous.source === source)) return;
+    scheduleDraftHydrationRef.current = { day: scheduleEditingDayId, source };
+    scheduleDraftDirtyRef.current = false;
     const entries = editingScheduleForDay?.entries?.length
       ? editingScheduleForDay.entries.map((entry, index) => ({ id: entry.id || `saved-${index}`, time: entry.time || "", text: entry.text || "" }))
       : legacyScheduleToEntries(editingScheduleForDay);
