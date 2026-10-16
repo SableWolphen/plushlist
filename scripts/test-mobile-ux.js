@@ -24,6 +24,8 @@ const settings = read("src/components/organized-settings.jsx");
 const taskPrivacy = read("supabase/migrations/20261002001500_tighten_task_privacy.sql");
 
 const checks = [
+  [app.includes("plushlife:schedule-draft:") && app.includes("Recovered unsaved changes") && app.includes("removeScheduleDraftBackup(dayId)"), "Schedule drafts recover per account and day and clear on confirmed save"],
+  [app.includes("Unsaved changes · tap Save day") && app.includes("Draft backup unavailable"), "Schedule editor reports unsaved changes and backup failures"],
   [guardianPanel.includes("Locked & pending rewards") && guardianPanel.includes("supportRewards.filter(reward =>") && guardianPanel.includes("Use reward 🎁"), "Guardian wallet keeps usable rewards visible and locked gifts behind disclosure"],
   [scheduleEditor.indexOf('className="schedule-status"') < scheduleEditor.indexOf('className="schedule-toolbar"'), "Schedule save status is displayed before save controls"],
   [app.includes("scheduleDraftDirtyRef.current = true") && app.includes("previous.source === source") && app.includes("scheduleDraftDirtyRef.current || previous.source === source"), "Schedule editor hydrates late server data without overwriting unsaved Cozy edits"],
