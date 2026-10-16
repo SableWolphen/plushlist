@@ -24,6 +24,8 @@ const settings = read("src/components/organized-settings.jsx");
 const taskPrivacy = read("supabase/migrations/20261002001500_tighten_task_privacy.sql");
 
 const checks = [
+  [guardianPanel.includes("Locked & pending rewards") && guardianPanel.includes("supportRewards.filter(reward =>") && guardianPanel.includes("Use reward 🎁"), "Guardian wallet keeps usable rewards visible and locked gifts behind disclosure"],
+  [scheduleEditor.indexOf('className="schedule-status"') < scheduleEditor.indexOf('className="schedule-toolbar"'), "Schedule save status is displayed before save controls"],
   [app.includes("scheduleDraftDirtyRef.current = true") && app.includes("previous.source === source") && app.includes("scheduleDraftDirtyRef.current || previous.source === source"), "Schedule editor hydrates late server data without overwriting unsaved Cozy edits"],
   [app.includes('setScheduleMessage(`${data.label} schedule saved ✨`)') && !app.includes('setScheduleMessage("Schedule saved ✨");'), "Schedule save confirmation reflects the verified write"],
   [shared.includes('zIndex: 4000') && shared.includes('plushlife-confirm-title'), "Schedule-copy confirmation appears above editor"],
