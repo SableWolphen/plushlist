@@ -3674,6 +3674,16 @@ function GlowUpTracker() {
 
   const scheduleSaveInFlightRef = React.useRef(false);
   const scheduleDraftDirtyRef = React.useRef(false);
+  const scheduleDraftStorageKey = (dayId) => user?.id && dayId ? `plushlife:schedule-draft:${user.id}:${dayId}` : null;
+  const removeScheduleDraftBackup = (dayId) => {
+    const key = scheduleDraftStorageKey(dayId);
+    if (key) { try { window.localStorage.removeItem(key); } catch {} }
+  };
+  const markScheduleDirty = () => {
+    scheduleDraftDirtyRef.current = true;
+    setScheduleMessage("Unsaved changes · tap Save day");
+  };
+
   const savePersonalSchedule = async () => {
     if (!user?.id || scheduleSaveInFlightRef.current || scheduleCopyInFlightRef.current) return;
     const dayId = scheduleEditingDayId;
@@ -3696,6 +3706,7 @@ function GlowUpTracker() {
       }
       setPersonalSchedules((items) => [...items.filter((item) => item.day_id !== dayId), data]);
       scheduleDraftDirtyRef.current = false;
+      removeScheduleDraftBackup(dayId);
       setScheduleMessage(`${data.label} schedule saved ✨`);
     } catch (error) {
       setScheduleMessage(`Couldn't save that schedule: ${error?.message || "connection problem"}`);
@@ -3770,6 +3781,7 @@ function GlowUpTracker() {
         ...(data || []).map((saved) => ({ ...rowsToCopy.find((row) => row.day_id === saved.day_id), ...saved })),
       ]);
       scheduleDraftDirtyRef.current = false;
+      targetIds.forEach(removeScheduleDraftBackup);
       setCopyToDayIds([]);
       setScheduleMessage(allDays ? "Saved! All 7 days now use this schedule. ✨" : `Saved! Copied to ${dayLabels} and kept the original day. ✨`);
     } catch (error) {
@@ -3785,15 +3797,15 @@ function GlowUpTracker() {
   const copyScheduleToSelectedDays = () => copyScheduleToDays(copyToDayIds);
 
   const addScheduleEntry = () => {
-    scheduleDraftDirtyRef.current = true;
+    markScheduleDirty();
     setScheduleDraft((draft) => ({ entries: [...draft.entries, { id: crypto.randomUUID(), time: "", text: "" }] }));
   };
   const updateScheduleEntry = (id, patch) => {
-    scheduleDraftDirtyRef.current = true;
+    markScheduleDirty();
     setScheduleDraft((draft) => ({ entries: draft.entries.map((entry) => entry.id === id ? { ...entry, ...patch } : entry) }));
   };
   const removeScheduleEntry = (id) => {
-    scheduleDraftDirtyRef.current = true;
+    markScheduleDirty();
     setScheduleDraft((draft) => ({ entries: draft.entries.filter((entry) => entry.id !== id) }));
   };
 
@@ -3837,6 +3849,7 @@ function GlowUpTracker() {
     setPersonalSchedules((items) => items.filter((item) => item.day_id !== scheduleEditingDayId));
     setScheduleDraft({ entries: [] });
     scheduleDraftDirtyRef.current = false;
+    removeScheduleDraftBackup(scheduleEditingDayId);
     setScheduleMessage("Day schedule cleared.");
   };
 
@@ -4839,8 +4852,31 @@ function GlowUpTracker() {
     const entries = editingScheduleForDay?.entries?.length
       ? editingScheduleForDay.entries.map((entry, index) => ({ id: entry.id || `saved-${index}`, time: entry.time || "", text: entry.text || "" }))
       : legacyScheduleToEntries(editingScheduleForDay);
-    setScheduleDraft({ entries });
+    let restored = null;
+    try {
+      const key = scheduleDraftStorageKey(scheduleEditingDayId);
+      const stored = key ? JSON.parse(window.localStorage.getItem(key) || "null") : null;
+      if (stored && Array.isArray(stored.entries) && stored.entries.length <= 100 &&
+          stored.entries.every(entry => typeof entry?.text === "string" && typeof entry?.time === "string")) {
+        restored = stored.entries.map((entry, index) => ({ id: entry.id || `draft-${index}`, time: entry.time.slice(0, 12), text: entry.text.slice(0, 300) }));
+      }
+    } catch {}
+    setScheduleDraft({ entries: restored || entries });
+    if (restored) {
+      scheduleDraftDirtyRef.current = true;
+      setScheduleMessage("Recovered unsaved changes · tap Save day");
+    }
   }, [manageSchedule, scheduleEditingDayId, personalSchedules]);
+  useEffect(() => {
+    if (!manageSchedule || !scheduleDraftDirtyRef.current) return;
+    const key = scheduleDraftStorageKey(scheduleEditingDayId);
+    if (!key) return;
+    try {
+      window.localStorage.setItem(key, JSON.stringify({ entries: scheduleDraft.entries }));
+    } catch {
+      setScheduleMessage("Draft backup unavailable · save this day before closing.");
+    }
+  }, [scheduleDraft, manageSchedule, scheduleEditingDayId, user?.id]);
   // Server-saved copy confirmations should remain visible; changing days is
   // the only time we clear the status and selected target days.
   useEffect(() => {
