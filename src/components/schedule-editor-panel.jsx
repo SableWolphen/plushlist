@@ -124,7 +124,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
             {hasCurrentSchedule && <button onClick={clearPersonalSchedule} className="schedule-btn danger">Erase day</button>}
           </div>
 
-          <div className="schedule-copy">
+          <details className="schedule-copy"><summary style={{minHeight:44,cursor:"pointer",fontWeight:850}}>📅 Copy this day to other days</summary>
             <div className="schedule-copy-title">
               <div>
                 <div className="schedule-eyebrow">Copy this schedule</div>
@@ -147,7 +147,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
               </button>
               <button type="button" onClick={copyScheduleToAllDays} className="schedule-copy-all">📅 Copy to all 7 days</button>
             </div>
-          </div>
+          </details>
 
 
         </section>
