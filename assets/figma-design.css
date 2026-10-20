@@ -110,7 +110,7 @@ body:has(.auth-card) :is(.comfort-note,.legal,.mobile-mini-note){font-size:12px!
   #main-content#main-content[data-pl-world] .pl-desktop-navigation button{border:0;border-radius:14px;background:var(--pl-theme-surface-2);color:var(--pl-theme-ink);padding:12px;font-size:15px;font-weight:700;cursor:pointer;}
   #main-content#main-content[data-pl-world] .pl-desktop-navigation button[aria-current=page]{background:var(--pl-theme-accent);color:var(--pl-theme-on-accent);}
   #main-content#main-content[data-pl-world] .pl-app-bottom-nav{display:none!important;}
-  #main-content#main-content[data-pl-world] .pl-home-shell{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;max-width:1000px;}
+  #main-content#main-content[data-pl-world] .pl-home-shell{grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));align-items:start;max-width:1000px;}
   #main-content#main-content[data-pl-world] .pl-home-shell>.pl-page-heading{grid-column:1/-1;max-width:none;}
   #main-content#main-content[data-pl-world] :is(.pl-unified-page-shell,.pl-page-heading,.pl-inline-tool){max-width:1000px;}
 }

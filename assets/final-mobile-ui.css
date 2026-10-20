@@ -1511,6 +1511,14 @@ body>[role="dialog"]>div{
   margin-inline:auto!important;
 }
 
+/* The phone viewport guard must not constrain the desktop two-column Home. */
+@media(min-width:1100px){
+  #main-content#main-content .plushlife-app-column{
+    width:min(100%,1000px)!important;
+    max-width:1000px!important;
+  }
+}
+
 #main-content#main-content .pl-home-shell,
 #main-content#main-content .pl-reference-home-overview,
 #main-content#main-content .pl-reference-progress,
