@@ -105,12 +105,12 @@ dependencies {
 
 apply from: 'capacitor.build.gradle'
 
-try {
-    def servicesJSON = file('google-services.json')
-    if (servicesJSON.text) {
-        apply plugin: 'com.google.gms.google-services'
-        apply plugin: 'com.google.firebase.crashlytics'
-    }
-} catch(Exception e) {
+def servicesJSON = file('google-services.json')
+if (servicesJSON.exists() && servicesJSON.text.trim()) {
+    // Fail the build if a configured plugin is incompatible; do not silently
+    // ship without Firebase setup or crash-report deobfuscation.
+    apply plugin: 'com.google.gms.google-services'
+    apply plugin: 'com.google.firebase.crashlytics'
+} else {
     logger.info("google-services.json not found, google-services/crashlytics plugins not applied. Push Notifications won't work")
 }

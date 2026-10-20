@@ -23,6 +23,11 @@
 # Firebase, Google Play services and in-app updates supply consumer rules in
 # their AARs for reflected/manifest components. Keeping these entire SDKs here
 # prevented shrinking, optimization and obfuscation of most of the app.
+# AGP 9 strict mode does not implicitly keep default constructors. Firebase
+# discovers these registrars by name and constructs them reflectively.
+-keep class * implements com.google.firebase.components.ComponentRegistrar {
+    public <init>();
+}
 
 # Bridge calls and plugin callbacks are reached from JavaScript/reflection.
 -keepattributes RuntimeVisibleAnnotations,RuntimeInvisibleAnnotations,AnnotationDefault
