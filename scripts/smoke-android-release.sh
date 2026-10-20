@@ -21,3 +21,8 @@ if grep -q 'Registering plugin instance: StatusBar' <<< "$logs"; then
   exit 1
 fi
 echo 'Optimized Android launch and native bridge registration passed.'
+mkdir -p android/app/build/outputs/smoke
+adb shell uiautomator dump /sdcard/plushlife-release.xml
+adb pull /sdcard/plushlife-release.xml android/app/build/outputs/smoke/
+adb shell screencap -p /sdcard/plushlife-release.png
+adb pull /sdcard/plushlife-release.png android/app/build/outputs/smoke/

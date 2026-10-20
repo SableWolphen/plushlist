@@ -107,6 +107,12 @@ jobs:
           disable-animations: true
           script: bash scripts/smoke-android-release.sh
 
+      - name: Save optimized Android UI evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-smoke
+          path: android/app/build/outputs/smoke/
+
       - name: Analyze
         uses: github/codeql-action/analyze@v4
         with:

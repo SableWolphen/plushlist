@@ -1,12 +1,10 @@
 package com.PlushLife;
 
-import android.graphics.Color;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import androidx.activity.EdgeToEdge;
-import androidx.activity.SystemBarStyle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -52,10 +50,9 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
 
         try {
-            EdgeToEdge.enable(
-                this,
-                SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
-                SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT));
+            // AndroidX handles older Android versions; SystemBars then applies
+            // the app's light/dark icon style and WebView safe-area insets.
+            EdgeToEdge.enable(this);
         } catch (Throwable ignored) {}
 
         if (getSupportActionBar() != null) {
