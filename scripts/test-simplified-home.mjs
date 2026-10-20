@@ -25,7 +25,7 @@ for(const [label,action] of [
   assert(home.includes('<strong>'+label+'</strong>'), "Daily action missing: "+label);
   assert(home.includes(action), "Daily action handler missing: "+label);
 }
-assert(home.includes('onClick={()=>openTaskManager?.(period?.date)}>＋ Add a task'), "Home must offer direct task creation");
+assert(home.includes('<QuickCapture compact onQuickAdd={onQuickAdd}'), "Home must create tasks inline");
 assert(home.includes('toggle?.(row.key)'), "Checklist must still edit the real saved task state");
 assert(home.includes("habitTypeForRow(row)"), "Habit identity must remain visible");
 assert(!home.includes('className="pl-storybook-support"'), "Home should not duplicate Guardian settings");

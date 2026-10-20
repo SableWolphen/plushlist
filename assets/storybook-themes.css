@@ -222,3 +222,12 @@ html:has(#main-content[data-pl-world]),body:has(#main-content[data-pl-world]){ba
 @media(prefers-reduced-motion:reduce){
  #main-content .pl-storybook-add-task,#main-content .pl-storybook-door{transition:none}
 }
+
+/* Daily work stays in Today; advanced planning remains optional. */
+#main-content .pl-storybook-capture{margin-top:12px;border-top:1px solid var(--sb-border);padding-top:8px}
+#main-content .pl-storybook-capture>summary{min-height:44px;align-content:center;cursor:pointer;font-weight:850;color:var(--sb-accent)}
+#main-content .pl-quick-capture-compact{padding:0!important;margin:0!important;border:0!important;box-shadow:none!important;background:transparent!important}
+#main-content .pl-quick-capture-compact input{font-size:16px}
+#main-content .pl-storybook-schedule{border:1px solid var(--sb-border);border-radius:16px;padding:0 12px;background:var(--sb-card);color:var(--sb-ink)}
+#main-content .pl-storybook-schedule>summary{min-height:48px;align-content:center;cursor:pointer;font-weight:850;font-size:14px}
+#main-content .pl-storybook-schedule>[data-plushlife-home-schedule-preview]{border:0!important;box-shadow:none!important;padding:8px 0!important;margin:0!important}
