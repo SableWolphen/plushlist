@@ -94,7 +94,7 @@ const checks = [
   [settings.includes('placeholder="Search settings"') && settings.includes("Privacy & Data") && settings.includes("Experience") && settings.includes("Notifications & Reminders"), "Settings keeps high-complexity options organized and discoverable"],
   [care.includes('summary style={{ minHeight: 44') && care.includes('>🧸 My Cozy Space</summary>'), "Care keeps the secondary Cozy Space collapsed until requested"],
   [read("src/components/progress-panel-core.jsx").includes('display: progressDetailsOpen ? undefined : "none"') && read("src/components/progress-panel-core.jsx").includes("Show insights & monthly trends"), "Progress keeps charts and deeper insights behind one reveal"],
-  [settings.includes("primaryCategoryIds") && settings.includes("More settings ·"), "Settings shows common choices before advanced categories"],
+  [settings.includes("primaryCategoryIds") && settings.includes("pl-settings-related") && settings.includes('label="Settings sections"'), "Settings groups related options under four directly switchable categories"],
   [read("src/components/guardian-panel.jsx").includes("shared with you</summary>") && read("src/components/guardian-panel.jsx").includes('aria-label="Ways to help"'), "Guardian keeps private detail optional and support actions directly reachable"],
   [app.includes("function PopupCloseButton") && app.includes('label="Close delete task"') && app.includes('label="Close task editor"') && app.includes('label="Close weekly check-in"'), "app popups expose visible close buttons"],
   [(app.match(/MAIN_DESTINATIONS.map/g)||[]).length === 2 && read('src/navigation.mjs').includes('label: "Plan"'), "Desktop and bottom navigation share the same destinations"],

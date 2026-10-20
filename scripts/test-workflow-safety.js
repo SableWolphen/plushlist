@@ -28,6 +28,8 @@ check(pages.includes("branches: [main]") && codeql.includes("branches: [main]"),
 check(!cloudflare.includes("push:\n") && cloudflare.includes("workflow_dispatch:"), "redundant GitHub Cloudflare deployment must stay manual-only");
 check(codeql.includes("Run complete app tests") && codeql.includes("run: npm test"), "CodeQL must run the full app test gate before Android analysis");
 check(auto.includes("ready=false") && auto.includes("needs.gate.outputs.ready == 'true'"), "missing Play credentials must skip publishing instead of failing the release job");
+check(auto.indexOf("--bundle-only") < auto.indexOf("- name: Publish to Google Play"), "Android source revision must be verified before publishing");
+check(auto.includes("- name: Verify source revision and Google Play track"), "Play upload must verify the resulting track version");
 
 if (failures.length) {
   console.error("Workflow safety checks failed:\n- " + failures.join("\n- "));

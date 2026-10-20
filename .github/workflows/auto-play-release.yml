@@ -134,6 +134,9 @@ jobs:
             --xpath=/manifest/uses-sdk/@android:targetSdkVersion)" = "36"
           keytool -printcert -jarfile android/app/build/outputs/bundle/release/app-release.aab | grep 'Owner: CN=PlushLife Upload'
 
+      - name: Verify bundled source before publishing
+        run: python scripts/verify-play-release.py --bundle-only
+
       - name: Upload release artifact
         uses: actions/upload-artifact@v4
         with:
@@ -154,8 +157,13 @@ jobs:
         if: always()
         run: rm -f android/app/release.keystore
 
+      - name: Verify source revision and Google Play track
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: python scripts/verify-play-release.py
+
       - name: Release summary
         if: success()
         run: |
-          echo "Published PlushLife ${RELEASE_VERSION_NAME} (${RELEASE_VERSION_CODE}) to Google Play track '${PLAY_TRACK}'." >> "$GITHUB_STEP_SUMMARY"
+          echo "Uploaded and verified PlushLife ${RELEASE_VERSION_NAME} (${RELEASE_VERSION_CODE}) on Google Play track '${PLAY_TRACK}'. Google review and device rollout may still be pending." >> "$GITHUB_STEP_SUMMARY"
           echo "Source commit: ${RELEASE_SHA}" >> "$GITHUB_STEP_SUMMARY"

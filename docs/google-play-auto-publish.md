@@ -1,5 +1,27 @@
 # Auto-publishing Android releases to Google Play
 
+## Current release path
+
+Pushes to `main` run the complete app test suite, Android build and CodeQL.
+Only after all those jobs succeed does CodeQL call `auto-play-release.yml`.
+The automatic publisher uses the repository's `PLAY_AUTO_TRACK` value (or
+closed testing `alpha` when unset). A trusted merge commit containing
+`[play-production]` explicitly selects production for that release.
+Pull requests and the Cloudflare working-branch deployment do not publish Android.
+
+The publisher builds a fresh bundled web app, selects an unused Play version,
+signs and validates the AAB, uploads it, then checks that the AAB's
+`build-info.json` contains the expected source SHA and that Google Play lists
+the new version on the requested track. Its summary reports the version,
+track and source commit. Google review and delivery to installed devices can
+still be pending after this upload is verified; check Publishing overview and
+the production release in Play Console before calling a release available.
+
+Missing signing or Play secrets are reported by the publishing gate. A green
+web build or CodeQL run alone is not proof of an Android update.
+
+## Manual fallback and credential setup
+
 By default, the release workflow only builds a signed `.aab` and hands it to
 you as a downloadable artifact — you still upload it to Play Console
 yourself. Adding one GitHub secret turns on direct publishing, so a workflow

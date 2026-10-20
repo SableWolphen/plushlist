@@ -36,10 +36,10 @@ export function RewardsPanel({ saveMessage, open, onClose, inline = false, selec
         {saveMessage && <p role="status">{saveMessage}</p>}
         <p>{activityDaysTotal} caring days · {unlockedOutfits.length} outfits · {earnedBadgeIdSet.size} badges</p>
         <div role="tablist" aria-label="Your collection" className="pl-collection-tabs">
-          {[["mascot", "Closet"], ["badges", "Badges"], ["wins", "Jar"]].map(([id, label]) => <button type="button" key={id} role="tab" aria-selected={collectionTab === id} onClick={() => setCollectionTab(id)}>{label}</button>)}
+          {[["mascot", "Outfits"], ["badges", "Badges"], ["wins", "Memories"]].map(([id, label]) => <button type="button" key={id} role="tab" aria-selected={collectionTab === id} onClick={() => setCollectionTab(id)}>{label}</button>)}
         </div>
       </section>
-      <div role="tabpanel" aria-label={collectionTab === "mascot" ? "Closet" : collectionTab === "badges" ? "Badges" : "Kindness jar"}>
+      <div role="tabpanel" aria-label={collectionTab === "mascot" ? "Outfits" : collectionTab === "badges" ? "Badges" : "Kindness jar"}>
         {collectionTab === "mascot" && <>
           <section className="pl-design-card">
             <h2>Choose a look · {available.length}</h2><p className="pl-closet-help">Tap a plush to wear that look. One look at a time; every earned reward stays yours.</p>

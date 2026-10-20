@@ -1896,3 +1896,15 @@ html[data-pl-companion-text=large] .pl-guardian-companion{font-size:18px}
   #main-content#main-content:is(.dashboard-care,.dashboard-guardian) .plushlife-app-column{width:min(100%,760px)!important;max-width:760px!important}
   #main-content#main-content:is(.dashboard-care,.dashboard-guardian) :is(.pl-care-shell,.pl-inline-tool,.pl-guardian-content){width:100%!important;max-width:760px!important}
 }
+
+/* A consistent, single section selector across all workspaces. */
+.pl-workspace-navigation{display:flex;gap:5px;margin:0 0 12px;min-width:0}
+.pl-workspace-navigation button{flex:1;min-width:0;min-height:44px;padding:9px 5px;border:1px solid var(--pl-theme-line);border-radius:12px;background:var(--pl-theme-surface);color:var(--pl-theme-ink);font:inherit;font-size:13px;font-weight:800;overflow-wrap:anywhere;cursor:pointer}
+.pl-workspace-navigation button[aria-pressed="true"]{background:var(--pl-theme-surface-2);border:2px solid var(--pl-theme-accent)}
+.pl-settings-related{border:1px solid var(--pl-theme-line);border-radius:16px;padding:0 12px;margin:12px 0;background:var(--pl-theme-surface)}
+.pl-settings-related>summary{min-height:48px;align-content:center;cursor:pointer;font-weight:800;color:var(--pl-theme-ink)}
+.pl-progress-page>.pl-progress-plush-link{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;padding:10px 14px;margin:0 0 12px;border:1px solid var(--pl-theme-line);border-radius:16px;background:var(--pl-theme-surface-2);color:var(--pl-theme-ink);font:inherit;font-weight:800;cursor:pointer}
+@media(min-width:1100px){
+  #main-content#main-content .plushlife-app-column{width:min(100%,760px)!important;max-width:760px!important}
+  #main-content#main-content :is(.pl-progress-page,.pl-growth-shell,.pl-growth-deeper,.pl-closet-shell,.pl-inline-tool){width:100%!important;max-width:760px!important}
+}

@@ -129,7 +129,7 @@ function CompactGrowthOverview(props) {
         </div>
       )}
 
-      <ProgressTabs progressView={props.progressView} setProgressView={props.setProgressView} />
+      {!props.hideNavigation && <ProgressTabs progressView={props.progressView} setProgressView={props.setProgressView} />}
       </header>
 
       <section className="pl-growth-weekbar pl-growth-week-summary" aria-label="Weekly progress">
