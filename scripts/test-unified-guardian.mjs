@@ -50,7 +50,7 @@ assert(host.includes("props.humanGuardianConnected") && host.includes("!props.gu
 assert(main.includes('aria-label="Guardian support"') && main.includes('guardianTypeLabel(mode)') && main.includes("guardianDisplayName"),"One Guardian header with distinguished support type");
 for(const text of ["> Tasks</button>","> Routines</button>","> Encouragement</button>","> Rewards</button>"]) assert(main.includes(text), "Common Guardian action absent: "+text);
 assert(main.includes('openPlushGuardian("rewards")') && main.includes('className="pl-human-guardian-rewards"'),"Rewards must work in both modes");
-assert(main.includes('setGuardianArea("together")') && app.includes('openTaskManager(period.date, "today")'),"Tasks remain in Plan and shared routines remain in Together");
+assert(main.includes('["together","🤝","Together"]') && app.includes('openTaskManager(period.date, "today")'),"Tasks remain in Plan and shared routines remain in Together");
 assert(home.includes('goToDashboard?.("guardian")'),"Home should route to one Guardian interface");
 assert(settings.includes('aria-label="Guardian\'s name"'),"Automatic Guardian can have its own name");
 assert(core.includes('guardianBotDisplayName(state.prefs)'),"Automatic panel displays same chosen name");

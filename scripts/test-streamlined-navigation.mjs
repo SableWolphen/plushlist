@@ -11,7 +11,7 @@ assert.equal(adjacentDestination("week", 1), "care", "Calendar swipes continue f
 assert.equal(adjacentDestination("week", -1), "today");
 assert.equal(adjacentDestination("guardian", 1), "guardian", "Navigation stops at the last destination");
 assert.equal(guardianLanding("caretaker"), "support", "A Guardian should see progress immediately");
-assert.equal(guardianLanding("mine"), "overview");
+assert.equal(guardianLanding("mine"), "support");
 assert.equal(guardianLanding("mine", true), "support", "Pending invitations must be visible on arrival");
 
 // Render the real Plan component and exercise its user-facing controls.

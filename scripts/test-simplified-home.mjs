@@ -54,7 +54,7 @@ assert(styles.includes("var(--pl-theme-surface)"),"New UI must inherit the selec
 assert(styles.includes("@media(max-width:345px)"),"Small phones need a dedicated layout");
 
 assert(care.includes("pl-reference-care-launchers"), "Care needs a clear four-action entry point");
-assert(care.includes('<strong>Guardian</strong>'), "Guardian stays accessible from Care");
+assert(care.includes('onSupport={props.onOpenSupport}'), "Cozy Space retains access to the primary Guardian destination");
 assert(!care.includes('className="pl-companion-care-entry"'), "Care should not repeat a separate Guardian promotional card");
 assert(care.indexOf('className="pl-care-card"') < care.indexOf('>🧸 My Cozy Space</summary>'), "Care's actual help flow must precede advanced customization");
 assert(care.includes('<CareHistory {...props} />'), "Care history must remain private and reachable");

@@ -1443,7 +1443,7 @@ body>[role="dialog"]>div{
   min-height:44px;
 }
 
-/* Care shows the four high-confidence paths first; the rest reads as secondary. */
+/* Care keeps check-in and journal close; its single selector opens each tool group. */
 #main-content .pl-reference-care-launchers{
   margin-bottom:4px!important;
 }
@@ -1893,4 +1893,6 @@ html[data-pl-companion-text=large] .pl-guardian-companion{font-size:18px}
   #main-content#main-content:is(.dashboard-tasks,.dashboard-week) .plushlife-app-column{width:min(100%,760px)!important;max-width:760px!important}
   #main-content#main-content:is(.dashboard-tasks,.dashboard-week) :is(.pl-inline-tool,.pl-task-page,.pl-calendar-cozy){width:100%!important;max-width:760px!important}
   #main-content#main-content.dashboard-today .pl-home-shell{max-width:760px!important}
+  #main-content#main-content:is(.dashboard-care,.dashboard-guardian) .plushlife-app-column{width:min(100%,760px)!important;max-width:760px!important}
+  #main-content#main-content:is(.dashboard-care,.dashboard-guardian) :is(.pl-care-shell,.pl-inline-tool,.pl-guardian-content){width:100%!important;max-width:760px!important}
 }

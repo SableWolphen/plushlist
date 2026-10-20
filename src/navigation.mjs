@@ -18,5 +18,5 @@ export function adjacentDestination(dashboard, direction) {
 }
 
 export function guardianLanding(viewMode, hasInvitations = false) {
-  return viewMode === "caretaker" || hasInvitations ? "support" : "overview";
+  return "support";
 }

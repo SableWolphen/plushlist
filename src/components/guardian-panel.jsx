@@ -23,7 +23,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
   const [checkInDelay, setCheckInDelay] = React.useState("0");
   const [chosenGuardianArea, setGuardianArea] = React.useState(null);
   const guardianArea = chosenGuardianArea || guardianLanding(supportViewMode, pendingSupportInvites.length > 0);
-  React.useEffect(() => { setGuardianArea(null); }, [user?.id, supportViewMode]);
+  React.useEffect(() => { setGuardianArea(null); setCheckInDelay("0"); setSupportAction("note"); }, [user?.id, supportViewMode]);
   const [supportAction, setSupportAction] = React.useState("note");
   const botGuardian = useGuardianState(user?.id);
   const mode = guardianMode(ownedSupportLinks, user?.id, guardianLinksReady ? user?.id : null, botGuardian.prefs.automaticReminders);
@@ -67,6 +67,24 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
     ...(sharedSchedule?.entries?.length ? sharedSchedule.entries : (legacyScheduleToEntries?.(sharedSchedule) || [])),
     ...(supportScheduleExceptions || []).flatMap((item) => (item.entries || []).map((entry) => ({ ...entry, isException: true }))),
   ].sort((a, b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")));
+  const rewardReady = reward => (reward.week_start ? supportWeeklyPercent : supportPercent) >= Number(reward.target_percent || 100) && (!reward.approval_required || !!reward.approved_at);
+  const rewardCards = rewards => rewards.map((reward) => {
+                const rewardUsesWeeklyProgress = !!reward.week_start;
+                const rewardProgressPercent = rewardUsesWeeklyProgress ? supportWeeklyPercent : supportPercent;
+                const rewardUnlocked = rewardProgressPercent >= Number(reward.target_percent || 100);
+                return (
+                <div key={reward.id} style={{ marginTop: 7, padding: 11, borderRadius: 11, background: rewardUnlocked ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface-2)", border: rewardUnlocked ? "1px solid #A9E3BF" : "1px solid #F2DFB0" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                    <span style={{ fontWeight: 800 }}>{reward.title}</span>
+                    <span style={{ fontSize: 14, fontWeight: 900, color: rewardUnlocked ? "#2A9D5B" : "#C28A19" }}>{rewardUnlocked ? reward.approval_required && !reward.approved_at ? "AWAITING APPROVAL" : "READY TO USE ✨" : `AT ${reward.target_percent}% ${rewardUsesWeeklyProgress ? "WEEKLY" : "TODAY"}`}</span>
+                  </div>
+                  {reward.details && <div style={{ marginTop: 4, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>{reward.details}</div>}
+                  {reward.week_start && <div style={{ marginTop: 4, fontSize: 14, color: "var(--pl-theme-muted,#9A86A7)" }}>Goal week: {new Date(`${reward.week_start}T12:00:00`).toLocaleDateString()}</div>}
+                  {isSupportAdult && reward.approval_required && !reward.approved_at && rewardUnlocked && <button onClick={() => updateRewardStatus(reward, "approve")} style={{ marginTop: 7, padding: "6px 9px", borderRadius: 8, border: 0, background: "var(--pl-theme-accent,#318C79)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800 }}>Approve reward</button>}
+                  {!isSupportAdult && rewardUnlocked && (!reward.approval_required || reward.approved_at) && <button onClick={() => updateRewardStatus(reward, "claim")} style={{ marginTop: 7, padding: "6px 9px", borderRadius: 8, border: 0, background: "var(--pl-theme-accent,#A65DC1)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800 }}>Use reward 🎁</button>}
+                  {!isSupportAdult && reward.approval_required && !reward.approved_at && rewardUnlocked && <div style={{ marginTop: 6, fontSize: 14, color: "var(--pl-theme-ink,#C28A19)", fontWeight: 800 }}>Goal reached · waiting for guardian approval</div>}
+                </div>
+              )});
   return (
           <ToolPanel inline title="💛 PlushSupport" displayTitle="Guardians" onClose={onClose}>
           <div className="pl-guardian-content">
@@ -80,9 +98,8 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <span aria-hidden="true" style={{fontSize:27}}>{mode === "person" ? "💛" : "🧸"}</span>
                 <div style={{minWidth:0,flex:1}}>
-                  <h2 style={{margin:0,fontSize:19,color:"var(--pl-theme-ink)"}}>Guardian</h2>
+                  <h2 style={{margin:0,fontSize:19,color:"var(--pl-theme-ink)"}}>{mode === "choose" ? "Choose your Guardian" : guardianDisplayName}</h2>
                   <span style={{fontSize:12,fontWeight:850,color:"var(--pl-theme-muted)"}}>{guardianTypeLabel(mode)}</span>
-                  <p style={{margin:"5px 0 0",fontSize:14,fontWeight:850,overflowWrap:"anywhere"}}>{mode === "choose" ? "Choose your Guardian" : guardianDisplayName}</p>
                 </div>
               </div>
               <p style={{fontSize:12.5,lineHeight:1.5,color:"var(--pl-theme-muted)",margin:"10px 0"}}>{mode === "person"
@@ -92,7 +109,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                   : "Invite someone you trust or choose an automatic Guardian for now. You can change later."}</p>
               {mode === "choose" ? <div className="pl-guardian-unified-actions">
                 <button type="button" onClick={()=>openPlushGuardian()}><span>🧸</span> Set up Guardian</button>
-                <button type="button" onClick={()=>setGuardianArea("support")}><span>💛</span> Invite someone</button>
+                <button type="button" onClick={()=>setGuardianArea("overview")}><span>💛</span> Invite someone</button>
               </div> : mode === "automatic" ? <nav className="pl-guardian-unified-actions" aria-label="Guardian actions">
                 <button type="button" onClick={()=>openPlushGuardian("start")}><span>✅</span> Tasks</button>
                 <button type="button" onClick={()=>openPlushGuardian("routines")}><span>📅</span> Routines</button>
@@ -108,62 +125,116 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
               <button type="button" aria-pressed={supportViewMode === "caretaker"} onClick={() => { setSupportViewMode("caretaker"); if (invitedSupportLinks[0]) loadSupportOwner(invitedSupportLinks[0].owner_user_id); }}>💛 People I Support</button>
             </div>
           )}
+            {supportMessage && <div role="status" style={{ marginTop: 10, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>{supportMessage}</div>}
           <div className="pl-guardian-switcher" role="group" aria-label="Guardian sections">
-            {(supportViewMode === "caretaker" ? [["support","💛","Today"],["together","🤝","Together"],["overview","🧸","Cozy card"]] : [["overview","💛","My Guardian"],["together","🤝","Together"],["support","💌","Sharing & privacy"]]).map(([id,icon,label]) => (
+            {[["support","💛","Support"],["together","🤝","Together"],["overview","🔒","Sharing"]].map(([id,icon,label]) => (
               <button key={id} type="button" aria-pressed={guardianArea === id} onClick={() => setGuardianArea(id)}>
                 <span aria-hidden="true">{icon}</span><span>{label}</span>
               </button>
             ))}
           </div>
-          <p className="pl-guardian-intro" aria-live="polite">{guardianArea === "together" ? "Spend a little time together, at your pace." : guardianArea === "support" ? (supportViewMode === "mine" ? "Manage invitations, sharing permissions, and requests for support." : "Offer encouragement and practical help within the sharing they chose.") : (supportViewMode === "mine" ? "Your Cozy card and the people you choose to share it with." : "The Cozy card they have chosen to share with you.")}</p>
-          {guardianArea === "overview" && (supportViewMode === "mine" ? <CozySharing links={ownedSupportLinks} /> : <SharedCozyCard client={client} ownerId={supportOwnerId} userId={user?.id} />)}
-          {guardianArea === "overview" && supportViewMode === "mine" && <details style={{padding:14,borderRadius:16,background:"var(--pl-theme-surface)",border:"1px solid var(--pl-theme-line)"}}><summary style={{minHeight:44,cursor:"pointer",fontWeight:800}}>💛 Your Guardians & sharing</summary>
-            <h2 style={{margin:0,fontSize:16,color:"var(--pl-theme-ink)"}}>Your Guardians</h2><p style={{margin:"5px 0 0",fontSize:13,lineHeight:1.45,color:"var(--pl-theme-muted)"}}>Your Cozy space, your decisions. Your Guardian offers support and suggestions, never takes control. You choose what to share, accept or decline any suggested changes, and can pause access whenever you want.</p>
-            {ownedSupportLinks.length ? <ul style={{paddingLeft:20,color:"var(--pl-theme-ink)",overflowWrap:"anywhere"}}>{ownedSupportLinks.map(link=><li key={link.id}>{link.caregiver_email} · {!link.accepted_at ? "Invitation pending" : link.active ? "Active" : "Paused"}</li>)}</ul> : <p style={{color:"var(--pl-theme-muted)"}}>Choose someone you trust when you’re ready.</p>}
-            <button type="button" onClick={()=>setGuardianArea("support")} style={{minHeight:44,padding:"8px 12px",borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)",color:"var(--pl-theme-ink)",fontWeight:800}}>Manage sharing & invitations</button>
-          </details>}
-          {guardianArea === "overview" && supportViewMode === "mine" && <section aria-label="Quick Guardian support" style={{padding:15,borderRadius:16,background:"var(--pl-theme-surface-2)",border:"1px solid var(--pl-theme-line)",display:"grid",gap:8}}>
-            <h2 style={{margin:0,fontSize:17}}>💛 Support your way</h2>
-            <p style={{margin:0,fontSize:13,color:"var(--pl-theme-muted)"}}>You decide whether to ask for care, send a note, or enjoy a suggestion. A Guardian never makes the decision for you.</p>
-            <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
-              <button type="button" onClick={()=>mode === "person" ? setGuardianArea("support") : openPlushGuardian("guardian")} style={{minHeight:44,padding:"9px 13px",borderRadius:12}}>💗 I need care</button>
-              <button type="button" onClick={()=>mode === "person" ? setGuardianArea("together") : openPlushGuardian("routines")} style={{minHeight:44,padding:"9px 13px",borderRadius:12}}>🌱 Help me start</button>
-            </div>
-            <p style={{margin:0,fontSize:12,color:"var(--pl-theme-muted)"}}>{mode === "person" ? "Send a request from Sharing & privacy to a connected Guardian. Nothing is sent by opening this shortcut." : "Open your automatic Guardian tools. No human is contacted."}</p>
-          </section>}
-          {guardianArea === "overview" && supportViewMode === "mine" && <details className="pl-guardian-wishlist-details" style={{padding:12,border:"1px solid var(--pl-theme-line)",borderRadius:14}}><summary style={{cursor:"pointer",minHeight:44,fontWeight:800}}>💝 Reward wishlist & surprise ideas</summary><CozyRewardWishlist userId={user?.id} /></details>}
-          {guardianArea === "overview" && supportViewMode === "mine" && <section className="pl-guardian-reward-wallet" style={{padding:15,borderRadius:16,background:"var(--pl-theme-surface)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
-              <h2 style={{margin:0,fontSize:17}}>🎁 My Guardian rewards</h2>
-              <button type="button" onClick={()=>loadSupportData(user)} style={{minHeight:40,borderRadius:10,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)",color:"var(--pl-theme-ink)",padding:"6px 10px"}}>↻ Refresh</button>
-            </div>
-            <p style={{fontSize:13,color:"var(--pl-theme-muted)"}}>Rewards your Guardian gives you appear here. Unlocked rewards stay until you use them.</p>
-            {!supportRewards.length && <p style={{fontSize:13}}>No Guardian rewards waiting yet.</p>}
-            {supportRewards.filter(reward => {
-              const progress = reward.week_start ? supportWeeklyPercent : supportPercent;
-              return progress >= Number(reward.target_percent || 100) && (!reward.approval_required || !!reward.approved_at);
-            }).map((reward)=>{
-              const progress = reward.week_start ? supportWeeklyPercent : supportPercent;
-              const unlocked = progress >= Number(reward.target_percent || 100);
-              const approved = !reward.approval_required || !!reward.approved_at;
-              return <div key={reward.id} style={{padding:12,marginTop:9,borderRadius:12,background:"var(--pl-theme-surface-2)",border:"1px solid var(--pl-theme-line)"}}>
-                <div style={{fontWeight:850,overflowWrap:"anywhere"}}>{reward.title}</div>
-                {reward.details && <p style={{margin:"5px 0",fontSize:13}}>{reward.details}</p>}
-                <div style={{fontSize:12,color:"var(--pl-theme-muted)"}}>{!unlocked ? `Unlocks at ${reward.target_percent}% ${reward.week_start ? "weekly" : "daily"} progress` : !approved ? "Goal reached · waiting for Guardian approval" : "✨ Unlocked and ready!"}</div>
-                {unlocked && approved && <button type="button" onClick={()=>updateRewardStatus(reward,"claim")} style={{marginTop:9,minHeight:44,border:0,borderRadius:11,padding:"9px 16px",fontWeight:850,background:"var(--pl-theme-accent)",color:"var(--pl-theme-on-accent,#fff)"}}>Use reward 🎁</button>}
-              </div>;
-            })}
-            {supportRewards.some(reward => {
-              const progress = reward.week_start ? supportWeeklyPercent : supportPercent;
-              return progress < Number(reward.target_percent || 100) || (reward.approval_required && !reward.approved_at);
-            }) && <details style={{marginTop:12}}><summary style={{cursor:"pointer",minHeight:44,fontSize:13,fontWeight:800}}>Locked & pending rewards</summary>
-              {supportRewards.filter(reward => {
-                const progress = reward.week_start ? supportWeeklyPercent : supportPercent;
-                return progress < Number(reward.target_percent || 100) || (reward.approval_required && !reward.approved_at);
-              }).map(reward => <div key={reward.id} style={{padding:"8px 2px",borderBottom:"1px solid var(--pl-theme-line)",fontSize:13}}>
-                <strong>{reward.title}</strong> · {(reward.week_start ? supportWeeklyPercent : supportPercent) < Number(reward.target_percent || 100) ? `Unlocks at ${reward.target_percent}% progress` : "Awaiting Guardian approval"}
-              </div>)}
-            </details>}
+          <p className="pl-guardian-intro" aria-live="polite">{guardianArea === "together" ? "Spend a little time together, at your pace." : guardianArea === "overview" ? "Choose what you share and who can help." : supportViewMode === "mine" ? "Ask for help and find your suggestions, rewards and notes here." : "Their progress and ways to help, together in one place."}</p>
+          {guardianArea === "overview" && <section aria-label="Guardian sharing" className="pl-design-card">
+            {supportViewMode === "mine" ? <>
+                <p className="pl-guardian-intro">Invite someone you trust. You choose what they see, and can pause access anytime.</p>
+                <details open={ownedSupportLinks.length === 0} style={{padding:12,borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)"}}>
+                  <summary style={{minHeight:44,cursor:"pointer",fontWeight:800,color:"var(--pl-theme-ink)"}}>Invite a Guardian</summary>
+                <div className="pl-guardian-invite" style={{ display: "flex", gap: 7, marginTop: 10 }}>
+                  <input type="email" aria-label="Guardian email address" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="guardian@example.com" style={{ flex: 1, minWidth: 0, padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
+                  <button onClick={inviteSupportAdult} style={{ padding: "8px 11px", borderRadius: 10, border: 0, background: "var(--pl-theme-accent,#4C8FE8)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800, cursor: "pointer" }}>Invite guardian</button>
+                </div>
+                <div style={{ marginTop: 9 }}>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: "var(--pl-theme-muted,#4C8FE8)" }}>WHAT'S THEIR ROLE?</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(112px, 1fr))", gap: 6, marginTop: 6 }}>
+                    {GUARDIAN_ROLE_PRESETS.map((role) => (
+                      <button key={role.id} type="button" onClick={() => setGuardianRolePreset(role.id)} aria-pressed={guardianRolePreset === role.id} style={{ padding: "7px 4px", borderRadius: 10, border: guardianRolePreset === role.id ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: guardianRolePreset === role.id ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface)", textAlign: "center", cursor: "pointer" }}>
+                        <div style={{ fontSize: 14 }}>{role.icon}</div>
+                        <div style={{ marginTop: 2, fontSize: 14, fontWeight: 800, color: "var(--pl-theme-ink,#4C6E8E)", lineHeight: 1.2 }}>{role.label}</div>
+                      </button>
+                    ))}
+                  </div>
+                  {(() => {
+                    const selectedRole = GUARDIAN_ROLE_PRESETS.find((role) => role.id === guardianRolePreset);
+                    return selectedRole && <div style={{ marginTop: 6, fontSize: 14, lineHeight: 1.4, color: "var(--pl-theme-muted,#6B7E98)" }}>{selectedRole.description}</div>;
+                  })()}
+                  <div style={{ marginTop: 4, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>You can fine-tune each permission afterward too.</div>
+                </div>
+                </details>
+                <div style={{ marginTop: 12 }}>
+                  {ownedSupportLinks.length === 0 ? (
+                    <div style={{ padding: "12px 13px", borderRadius: 12, background: "var(--pl-theme-surface,#F5FAFF)", border: "1px solid var(--pl-theme-line,#E9DDF6)", color: "var(--pl-theme-ink,#4C6E8E)" }}>
+                      <div style={{ fontSize: 14, fontWeight: 900 }}>No Guardians added yet</div>
+                      <div style={{ marginTop: 4, fontSize: 14, lineHeight: 1.5 }}>Invite someone you trust with the email they use for PlushLife. Nothing is shared until they accept, and you choose every permission.</div>
+                    </div>
+                  ) : ownedSupportLinks.map((link) => {
+                    const pending = !link.accepted_at;
+                    const mutual = supportRelationships.find((rel) => rel.they_support_me_link_id === link.id && rel.i_support_them);
+                    const statusLabel = pending ? "WAITING TO ACCEPT" : link.active ? "ACTIVE" : "PAUSED";
+                    const statusColor = "var(--pl-theme-ink)";
+                    const statusBg = "var(--pl-theme-surface)";
+                    return (
+                    <div key={link.id} style={{ padding: "10px", marginTop: 6, borderRadius: 10, background: link.active ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface-2)", border: "1px solid var(--pl-theme-line)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, overflowWrap: "anywhere", minWidth: 0 }}>{link.caregiver_email}</span>
+                        <span style={{ padding: "3px 7px", borderRadius: 999, background: statusBg, color: statusColor, fontSize: 14, fontWeight: 900 }}>{statusLabel}</span>
+                      </div>
+                      {mutual && (
+                        <div style={{ marginTop: 6, padding: "7px 9px", borderRadius: 8, background: "var(--pl-theme-surface,#FFF9FD)", border: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 14, color: "var(--pl-theme-muted,#8D5CA5)" }}>
+                          💛 You're also {mutual.partner_display_name ? `${mutual.partner_display_name}'s` : "their"} Guardian.
+                          {mutual.i_support_them_accepted ? (
+                            <button type="button" onClick={() => { setSupportViewMode("caretaker"); loadSupportOwner(mutual.partner_user_id); }} style={{ marginLeft: 6, padding: "3px 7px", borderRadius: 7, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-muted,#8D5CA5)", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>View</button>
+                          ) : (
+                            <span style={{ marginLeft: 4, fontStyle: "italic" }}>Waiting on your acceptance of their invite.</span>
+                          )}
+                        </div>
+                      )}
+                      {pending && <div style={{ marginTop: 4, fontSize: 14, lineHeight: 1.45, color: "var(--pl-theme-muted,#8C6B9E)" }}>Sent {formatInviteAge(link.created_at)}. You can cancel this invitation and send a fresh one anytime.</div>}
+                      {!pending && <div style={{ marginTop: 5, fontSize: 14, fontWeight: 800, color: "var(--pl-theme-ink,#5B3D70)" }}>👀 Last checked in: {formatRelativeTime(link.last_viewed_at)}</div>}
+                      {!pending && onOpenSettings && <button type="button" onClick={onOpenSettings} style={{ marginTop: 4, padding: 0, border: 0, background: "transparent", color: "var(--pl-theme-muted,#4C8FE8)", fontSize: 14, fontWeight: 800, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 2 }}>Want quieter alerts? Settings → Notifications → Discreet lock-screen wording</button>}
+                      <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                        {!pending && <button onClick={() => setSupportAdultActive(link.id, !link.active)} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface,#F7FBFF)", color: "var(--pl-theme-muted,#4C8FE8)", fontWeight: 800, cursor: "pointer" }}>{link.active ? "Pause access" : "Resume access"}</button>}
+                        <button onClick={() => removeSupportAdult(link.id)} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface,#FFF7F9)", color: "var(--pl-theme-muted,#C45D74)", fontWeight: 800, cursor: "pointer" }}>{pending ? "Cancel invitation" : "End relationship"}</button>
+                      </div>
+                      <div style={{ marginTop: 8, padding: "8px 9px", borderRadius: 9, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
+                        <div style={{ fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#4C8FE8)", letterSpacing: ".08em" }}>SHARED ACCESS</div>
+                        <div style={{ marginTop: 5, display: "flex", gap: 5, flexWrap: "wrap" }}>
+                          {[["can_view_progress","Progress"],["can_view_tasks","Today's tasks"],["can_view_schedule","Schedule"],["can_view_mood","Mood summary"],["can_send_notes","Notes"],["can_add_rewards","Rewards"],["can_suggest_tasks","Task suggestions"],["can_use_together","Do It Together · Plus"]].filter(([key]) => link[key]).map(([key,label]) => <span key={key} style={{ padding: "3px 7px", borderRadius: 999, background: "var(--pl-theme-surface-2,#EEF7FF)", color: "var(--pl-theme-ink,#416D98)", fontSize: 14, fontWeight: 800 }}>{label}</span>)}
+                          {![["can_view_progress"],["can_view_tasks"],["can_view_schedule"],["can_view_mood"],["can_send_notes"],["can_add_rewards"],["can_suggest_tasks"],["can_use_together"]].some(([key]) => link[key]) && <span style={{ fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>Nothing shared right now.</span>}
+                        </div>
+                        {!pending && <div style={{ marginTop: 5, fontSize: 14, fontWeight: 800, color: "var(--pl-theme-ink,#5B3D70)" }}>Last Guardian view: {formatRelativeTime(link.last_viewed_at)} · Pause access anytime.</div>}
+                      </div>
+                      <details className="pl-guardian-permissions">
+                        <summary>Sharing & care agreement</summary>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 9, paddingTop: 8, borderTop: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
+                        {[
+                          ["can_view_progress", "View progress"],
+                          ["can_view_tasks", "See today's tasks"],
+                          ["can_view_schedule", "See schedule"],
+                          ["can_view_mood", "See mood summary"],
+                          ["can_send_notes", "Send notes"],
+                          ["can_add_rewards", "Add rewards"],
+                          ["can_suggest_tasks", "Suggest tasks"],
+                          ["can_use_together", "Do It Together · Plus"],
+                        ].map(([permission, label]) => (
+                          <label key={permission} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 700 }}>
+                            <input type="checkbox" checked={!!link[permission]} disabled={!link.active} onChange={(event) => updateCaretakerPermission(link, permission, event.target.checked)} />
+                            {label}
+                          </label>
+                        ))}
+                      </div>
+                      <label style={{ display: "grid", gap: 5, marginTop: 10, paddingTop: 9, borderTop: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#4C8FE8)" }}>
+                        CARE AGREEMENT · WHAT HELPS AND WHAT TO AVOID
+                        <textarea defaultValue={link.care_agreement || ""} disabled={!link.active} onBlur={(event) => updateCareAgreement(link, event.target.value)} maxLength={1000} placeholder="Example: If I say overwhelmed, send one supportive message and wait. Please offer practical help before advice." style={{ minHeight: 70, padding: 9, borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: link.active ? "var(--pl-theme-surface)" : "var(--pl-theme-surface-2)", color: "var(--pl-theme-ink,#5B4B6B)", resize: "vertical" }} />
+                        <span style={{ color: "var(--pl-theme-muted,#8C6B9E)", fontWeight: 600 }}>Saved when you leave this field. Only this Guardian relationship uses it.</span>
+                      </label>
+                      </details>
+                    </div>
+                    );
+                  })}
+                </div>
+
+              <details><summary style={{minHeight:44,cursor:"pointer",fontWeight:800}}>My shared Cozy card</summary><CozySharing links={ownedSupportLinks} /></details>
+            </> : <SharedCozyCard client={client} ownerId={supportOwnerId} userId={user?.id} />}
           </section>}
           {guardianArea === "together" && <React.Suspense fallback={<div role="status" style={{padding:14,color:"var(--pl-theme-muted)"}}>Opening Together…</div>}><LazyTogetherCorner
             client={client}
@@ -214,10 +285,10 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
               </div>
             )}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-              <div>
-                <div style={{ fontSize: 14, letterSpacing: "0.14em", color: "var(--pl-theme-muted,#4C8FE8)", fontWeight: 800 }}>{isSupportAdult ? "💛 YOUR SUPPORT SPACE" : "🧸 MY GUARDIANS"}</div>
-                <div style={{ marginTop: 4, fontSize: 18, fontWeight: 900 }}>{isSupportAdult ? `Supporting ${selectedSupportName}` : "My trusted guardians"}</div>
-              </div>
+              {isSupportAdult && <div>
+                <div style={{ fontSize: 14, letterSpacing: "0.14em", color: "var(--pl-theme-muted,#4C8FE8)", fontWeight: 800 }}>{isSupportAdult ? "💛 YOUR SUPPORT SPACE" : "💛 YOUR SUPPORT"}</div>
+                <div style={{ marginTop: 4, fontSize: 18, fontWeight: 900 }}>{isSupportAdult ? `Supporting ${selectedSupportName}` : "Requests & updates"}</div>
+              </div>}
               <button onClick={() => loadSupportData(user)} style={{ padding: "7px 9px", borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface,#F5FAFF)", color: "var(--pl-theme-muted,#4C8FE8)", fontWeight: 800, cursor: "pointer" }}>↻ Refresh</button>
             </div>
 
@@ -358,105 +429,9 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
               </div>
             ) : (
               <div>
-                <p className="pl-guardian-intro">Invite someone you trust. You choose what they see, and can pause access anytime.</p>
-                <details open={ownedSupportLinks.length === 0} style={{padding:12,borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)"}}>
-                  <summary style={{minHeight:44,cursor:"pointer",fontWeight:800,color:"var(--pl-theme-ink)"}}>Invite a Guardian</summary>
-                <div className="pl-guardian-invite" style={{ display: "flex", gap: 7, marginTop: 10 }}>
-                  <input type="email" aria-label="Guardian email address" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="guardian@example.com" style={{ flex: 1, minWidth: 0, padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
-                  <button onClick={inviteSupportAdult} style={{ padding: "8px 11px", borderRadius: 10, border: 0, background: "var(--pl-theme-accent,#4C8FE8)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800, cursor: "pointer" }}>Invite guardian</button>
-                </div>
-                <div style={{ marginTop: 9 }}>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: "var(--pl-theme-muted,#4C8FE8)" }}>WHAT'S THEIR ROLE?</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(112px, 1fr))", gap: 6, marginTop: 6 }}>
-                    {GUARDIAN_ROLE_PRESETS.map((role) => (
-                      <button key={role.id} type="button" onClick={() => setGuardianRolePreset(role.id)} aria-pressed={guardianRolePreset === role.id} style={{ padding: "7px 4px", borderRadius: 10, border: guardianRolePreset === role.id ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: guardianRolePreset === role.id ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface)", textAlign: "center", cursor: "pointer" }}>
-                        <div style={{ fontSize: 14 }}>{role.icon}</div>
-                        <div style={{ marginTop: 2, fontSize: 14, fontWeight: 800, color: "var(--pl-theme-ink,#4C6E8E)", lineHeight: 1.2 }}>{role.label}</div>
-                      </button>
-                    ))}
-                  </div>
-                  {(() => {
-                    const selectedRole = GUARDIAN_ROLE_PRESETS.find((role) => role.id === guardianRolePreset);
-                    return selectedRole && <div style={{ marginTop: 6, fontSize: 14, lineHeight: 1.4, color: "var(--pl-theme-muted,#6B7E98)" }}>{selectedRole.description}</div>;
-                  })()}
-                  <div style={{ marginTop: 4, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>You can fine-tune each permission afterward too.</div>
-                </div>
-                </details>
-                <div style={{ marginTop: 12 }}>
-                  {ownedSupportLinks.length === 0 ? (
-                    <div style={{ padding: "12px 13px", borderRadius: 12, background: "var(--pl-theme-surface,#F5FAFF)", border: "1px solid var(--pl-theme-line,#E9DDF6)", color: "var(--pl-theme-ink,#4C6E8E)" }}>
-                      <div style={{ fontSize: 14, fontWeight: 900 }}>No Guardians added yet</div>
-                      <div style={{ marginTop: 4, fontSize: 14, lineHeight: 1.5 }}>Invite someone you trust with the email they use for PlushLife. Nothing is shared until they accept, and you choose every permission.</div>
-                    </div>
-                  ) : ownedSupportLinks.map((link) => {
-                    const pending = !link.accepted_at;
-                    const mutual = supportRelationships.find((rel) => rel.they_support_me_link_id === link.id && rel.i_support_them);
-                    const statusLabel = pending ? "WAITING TO ACCEPT" : link.active ? "ACTIVE" : "PAUSED";
-                    const statusColor = "var(--pl-theme-ink)";
-                    const statusBg = "var(--pl-theme-surface)";
-                    return (
-                    <div key={link.id} style={{ padding: "10px", marginTop: 6, borderRadius: 10, background: link.active ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface-2)", border: "1px solid var(--pl-theme-line)" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                        <span style={{ fontSize: 14, fontWeight: 700, overflowWrap: "anywhere", minWidth: 0 }}>{link.caregiver_email}</span>
-                        <span style={{ padding: "3px 7px", borderRadius: 999, background: statusBg, color: statusColor, fontSize: 14, fontWeight: 900 }}>{statusLabel}</span>
-                      </div>
-                      {mutual && (
-                        <div style={{ marginTop: 6, padding: "7px 9px", borderRadius: 8, background: "var(--pl-theme-surface,#FFF9FD)", border: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 14, color: "var(--pl-theme-muted,#8D5CA5)" }}>
-                          💛 You're also {mutual.partner_display_name ? `${mutual.partner_display_name}'s` : "their"} Guardian.
-                          {mutual.i_support_them_accepted ? (
-                            <button type="button" onClick={() => { setSupportViewMode("caretaker"); loadSupportOwner(mutual.partner_user_id); }} style={{ marginLeft: 6, padding: "3px 7px", borderRadius: 7, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-muted,#8D5CA5)", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>View</button>
-                          ) : (
-                            <span style={{ marginLeft: 4, fontStyle: "italic" }}>Waiting on your acceptance of their invite.</span>
-                          )}
-                        </div>
-                      )}
-                      {pending && <div style={{ marginTop: 4, fontSize: 14, lineHeight: 1.45, color: "var(--pl-theme-muted,#8C6B9E)" }}>Sent {formatInviteAge(link.created_at)}. You can cancel this invitation and send a fresh one anytime.</div>}
-                      {!pending && <div style={{ marginTop: 5, fontSize: 14, fontWeight: 800, color: "var(--pl-theme-ink,#5B3D70)" }}>👀 Last checked in: {formatRelativeTime(link.last_viewed_at)}</div>}
-                      {!pending && onOpenSettings && <button type="button" onClick={onOpenSettings} style={{ marginTop: 4, padding: 0, border: 0, background: "transparent", color: "var(--pl-theme-muted,#4C8FE8)", fontSize: 14, fontWeight: 800, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 2 }}>Want quieter alerts? Settings → Notifications → Discreet lock-screen wording</button>}
-                      <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
-                        {!pending && <button onClick={() => setSupportAdultActive(link.id, !link.active)} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface,#F7FBFF)", color: "var(--pl-theme-muted,#4C8FE8)", fontWeight: 800, cursor: "pointer" }}>{link.active ? "Pause access" : "Resume access"}</button>}
-                        <button onClick={() => removeSupportAdult(link.id)} style={{ padding: "6px 9px", borderRadius: 8, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface,#FFF7F9)", color: "var(--pl-theme-muted,#C45D74)", fontWeight: 800, cursor: "pointer" }}>{pending ? "Cancel invitation" : "End relationship"}</button>
-                      </div>
-                      <div style={{ marginTop: 8, padding: "8px 9px", borderRadius: 9, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
-                        <div style={{ fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#4C8FE8)", letterSpacing: ".08em" }}>SHARED ACCESS</div>
-                        <div style={{ marginTop: 5, display: "flex", gap: 5, flexWrap: "wrap" }}>
-                          {[["can_view_progress","Progress"],["can_view_tasks","Today's tasks"],["can_view_schedule","Schedule"],["can_view_mood","Mood summary"],["can_send_notes","Notes"],["can_add_rewards","Rewards"],["can_suggest_tasks","Task suggestions"],["can_use_together","Do It Together · Plus"]].filter(([key]) => link[key]).map(([key,label]) => <span key={key} style={{ padding: "3px 7px", borderRadius: 999, background: "var(--pl-theme-surface-2,#EEF7FF)", color: "var(--pl-theme-ink,#416D98)", fontSize: 14, fontWeight: 800 }}>{label}</span>)}
-                          {![["can_view_progress"],["can_view_tasks"],["can_view_schedule"],["can_view_mood"],["can_send_notes"],["can_add_rewards"],["can_suggest_tasks"],["can_use_together"]].some(([key]) => link[key]) && <span style={{ fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>Nothing shared right now.</span>}
-                        </div>
-                        {!pending && <div style={{ marginTop: 5, fontSize: 14, fontWeight: 800, color: "var(--pl-theme-ink,#5B3D70)" }}>Last Guardian view: {formatRelativeTime(link.last_viewed_at)} · Pause access anytime.</div>}
-                      </div>
-                      <details className="pl-guardian-permissions">
-                        <summary>Sharing & care agreement</summary>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 9, paddingTop: 8, borderTop: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
-                        {[
-                          ["can_view_progress", "View progress"],
-                          ["can_view_tasks", "See today's tasks"],
-                          ["can_view_schedule", "See schedule"],
-                          ["can_view_mood", "See mood summary"],
-                          ["can_send_notes", "Send notes"],
-                          ["can_add_rewards", "Add rewards"],
-                          ["can_suggest_tasks", "Suggest tasks"],
-                          ["can_use_together", "Do It Together · Plus"],
-                        ].map(([permission, label]) => (
-                          <label key={permission} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 700 }}>
-                            <input type="checkbox" checked={!!link[permission]} disabled={!link.active} onChange={(event) => updateCaretakerPermission(link, permission, event.target.checked)} />
-                            {label}
-                          </label>
-                        ))}
-                      </div>
-                      <label style={{ display: "grid", gap: 5, marginTop: 10, paddingTop: 9, borderTop: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#4C8FE8)" }}>
-                        CARE AGREEMENT · WHAT HELPS AND WHAT TO AVOID
-                        <textarea defaultValue={link.care_agreement || ""} disabled={!link.active} onBlur={(event) => updateCareAgreement(link, event.target.value)} maxLength={1000} placeholder="Example: If I say overwhelmed, send one supportive message and wait. Please offer practical help before advice." style={{ minHeight: 70, padding: 9, borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: link.active ? "var(--pl-theme-surface)" : "var(--pl-theme-surface-2)", color: "var(--pl-theme-ink,#5B4B6B)", resize: "vertical" }} />
-                        <span style={{ color: "var(--pl-theme-muted,#8C6B9E)", fontWeight: 600 }}>Saved when you leave this field. Only this Guardian relationship uses it.</span>
-                      </label>
-                      </details>
-                    </div>
-                    );
-                  })}
-                </div>
                 {ownedSupportLinks.some((link) => link.active && link.accepted_at) && (
                   <div style={{ marginTop: 14, padding: 13, borderRadius: 13, background: "var(--pl-theme-surface,#FFF9FD)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
-                    <div style={{ fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>💛 WHAT I NEED RIGHT NOW</div>
+                    <div style={{ fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>💛 Ask for support</div>
                     <div style={{ marginTop: 4, fontSize: 14, lineHeight: 1.45, color: "var(--pl-theme-muted,#7B6888)" }}>Send a clear, consent-based request. This is not an emergency alert and never contacts anyone automatically.</div>
                     <select value={supportRequestGuardian || ownedSupportLinks.find((link) => link.active && link.accepted_at)?.caregiver_email || ""} onChange={(event) => setSupportRequestGuardian(event.target.value)} aria-label="Choose Guardian for support request" style={{ width: "100%", boxSizing: "border-box", marginTop: 8, padding: 8, borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)" }}>
                       {ownedSupportLinks.filter((link) => link.active && link.accepted_at).map((link) => <option key={link.id} value={link.caregiver_email}>{link.caregiver_email}</option>)}
@@ -464,9 +439,9 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
                       {[["encouragement","Encourage me"],["company","Stay with me"],["practical_help","Help me start"],["space","Give me space"],["call","Let’s talk"],["body_double","Quiet company"]].map(([value,label]) => <button key={value} type="button" onClick={() => setSupportRequestType(value)} aria-pressed={supportRequestType === value} style={{ padding: "6px 8px", borderRadius: 999, border: supportRequestType === value ? "2px solid #A65DC1" : "1px solid #E3C9EC", background: supportRequestType === value ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface)", color: "var(--pl-theme-ink,#76558A)", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>{label}</button>)}
                     </div>
-                    <label style={{display:"grid",gap:6,fontSize:14,marginTop:10}}>When would a check-in help?<select value={checkInDelay} onChange={event=>setCheckInDelay(event.target.value)} style={{minHeight:44,padding:9,borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface)",color:"var(--pl-theme-ink)"}}><option value="0">Now / whenever they can</option><option value="30">Ask them to check on me in 30 minutes</option><option value="60">Ask them to check on me in an hour</option></select></label><p style={{fontSize:13,color:"var(--pl-theme-muted)"}}>This sends your request now with your preferred time. It doesn’t create an automatic reminder.</p>
+                    <details style={{marginTop:8}}><summary style={{minHeight:44,cursor:"pointer",fontWeight:800}}>Add a note or check-in time</summary><label style={{display:"grid",gap:6,fontSize:14,marginTop:10}}>When would a check-in help?<select value={checkInDelay} onChange={event=>setCheckInDelay(event.target.value)} style={{minHeight:44,padding:9,borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface)",color:"var(--pl-theme-ink)"}}><option value="0">Now / whenever they can</option><option value="30">Ask them to check on me in 30 minutes</option><option value="60">Ask them to check on me in an hour</option></select></label><p style={{fontSize:13,color:"var(--pl-theme-muted)"}}>This sends your request now with your preferred time. It doesn’t create an automatic reminder.</p>
                     <textarea value={supportRequestText} onChange={(event) => setSupportRequestText(event.target.value)} maxLength={500} placeholder="Optional note — e.g. I'm safe, but I need quiet company instead of advice." aria-label="Support request note" style={{ width: "100%", boxSizing: "border-box", minHeight: 66, marginTop: 8, padding: 9, borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)", resize: "vertical" }} />
-                    <button type="button" onClick={() => sendGuardianSupportRequest({delayMinutes:Number(checkInDelay)})} style={{ marginTop: 8, padding: "8px 11px", borderRadius: 9, border: 0, background: "var(--pl-theme-accent,#A65DC1)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 900, fontSize: 14, cursor: "pointer" }}>Send support request</button>
+                    </details><button type="button" onClick={() => sendGuardianSupportRequest({delayMinutes:Number(checkInDelay)})} style={{ marginTop: 8, padding: "8px 11px", borderRadius: 9, border: 0, background: "var(--pl-theme-accent,#A65DC1)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 900, fontSize: 14, cursor: "pointer" }}>Send support request</button>
                   </div>
                 )}
                 {taskSuggestions.filter((item) => item.status === "pending").length > 0 && (
@@ -491,29 +466,14 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
               </div>
             )}
 
-            {supportMessage && <div style={{ marginTop: 10, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>{supportMessage}</div>}
+            {supportViewMode === "mine" && <details className="pl-guardian-wishlist-details"><summary style={{minHeight:44,cursor:"pointer",fontWeight:800}}>💝 Reward wishlist & surprise ideas</summary><CozyRewardWishlist userId={user?.id} /></details>}
+
 
             <div className="pl-human-guardian-rewards" style={{ marginTop: 16, scrollMarginTop: 80, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>🎁 MY GUARDIAN REWARDS</div>
             <p style={{fontSize:13,color:"var(--pl-theme-muted)"}}>Earned rewards stay available until you use them. Once used, they leave this list.</p>
-            {supportRewards.length === 0 ? <div style={{ marginTop: 7, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>No rewards added yet.</div> :
-              supportRewards.map((reward) => {
-                const rewardUsesWeeklyProgress = !!reward.week_start;
-                const rewardProgressPercent = rewardUsesWeeklyProgress ? supportWeeklyPercent : supportPercent;
-                const rewardUnlocked = rewardProgressPercent >= reward.target_percent;
-                return (
-                <div key={reward.id} style={{ marginTop: 7, padding: 11, borderRadius: 11, background: rewardUnlocked ? "var(--pl-theme-surface-2)" : "var(--pl-theme-surface-2)", border: rewardUnlocked ? "1px solid #A9E3BF" : "1px solid #F2DFB0" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                    <span style={{ fontWeight: 800 }}>{reward.title}</span>
-                    <span style={{ fontSize: 14, fontWeight: 900, color: rewardUnlocked ? "#2A9D5B" : "#C28A19" }}>{rewardUnlocked ? "READY TO USE ✨" : `AT ${reward.target_percent}% ${rewardUsesWeeklyProgress ? "WEEKLY" : "TODAY"}`}</span>
-                  </div>
-                  {reward.details && <div style={{ marginTop: 4, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>{reward.details}</div>}
-                  {reward.week_start && <div style={{ marginTop: 4, fontSize: 14, color: "var(--pl-theme-muted,#9A86A7)" }}>Goal week: {new Date(`${reward.week_start}T12:00:00`).toLocaleDateString()}</div>}
-                  {isSupportAdult && reward.approval_required && !reward.approved_at && rewardUnlocked && <button onClick={() => updateRewardStatus(reward, "approve")} style={{ marginTop: 7, padding: "6px 9px", borderRadius: 8, border: 0, background: "var(--pl-theme-accent,#318C79)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800 }}>Approve reward</button>}
-                  {!isSupportAdult && rewardUnlocked && (!reward.approval_required || reward.approved_at) && <button onClick={() => updateRewardStatus(reward, "claim")} style={{ marginTop: 7, padding: "6px 9px", borderRadius: 8, border: 0, background: "var(--pl-theme-accent,#A65DC1)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800 }}>Use reward 🎁</button>}
-                  {!isSupportAdult && reward.approval_required && !reward.approved_at && rewardUnlocked && <div style={{ marginTop: 6, fontSize: 14, color: "var(--pl-theme-ink,#C28A19)", fontWeight: 800 }}>Goal reached · waiting for guardian approval</div>}
-                </div>
-              )})
-            }
+            {supportRewards.length === 0 && <p>No rewards added yet.</p>}
+            {rewardCards(supportRewards.filter(rewardReady))}
+            {supportRewards.some(reward => !rewardReady(reward)) && <details><summary style={{minHeight:44,cursor:"pointer",fontWeight:800}}>Locked & pending rewards</summary>{rewardCards(supportRewards.filter(reward => !rewardReady(reward)))}</details>}
 
             <div style={{ marginTop: 16, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#4C8FE8)" }}>💌 NOTES</div>
             {supportNotes.filter((note) => !String(note.body || "").startsWith("[Together:")).length === 0 ? <div style={{ marginTop: 7, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>No notes yet.</div> :

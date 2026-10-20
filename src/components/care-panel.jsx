@@ -61,6 +61,8 @@ export function CarePanel(props) {
 
   const [selectedSituationId, setSelectedSituationId] = React.useState(null);
   const [libraryOpen, setLibraryOpen] = React.useState(false);
+  const [historyOpen, setHistoryOpen] = React.useState(false);
+  React.useEffect(() => { setSelectedSituationId(null); setLibraryOpen(false); setHistoryOpen(false); }, [userId]);
   const [pathFeedbackVersion, setPathFeedbackVersion] = React.useState(0);
   const [profileVersion, setProfileVersion] = React.useState(0);
 
@@ -115,15 +117,15 @@ export function CarePanel(props) {
     setPathFeedbackVersion((value) => value + 1);
   };
 
+  const library = <ExistingCarePanel {...props} open={true} libraryOnly={true} hideNavigation={true} openCareSession={startCare} setSleepToolOpen={startSleep} />;
   return (
     <div data-plushcare-redesign="true" className="pl-care-shell">
       <section className="pl-reference-care-launchers" aria-label="Care shortcuts">
         <button type="button" onClick={() => props.setCheckInPopupOpen?.(true)}><span aria-hidden="true">💗</span><span><strong>Daily check-in</strong><small>How are you feeling today?</small></span><span aria-hidden="true">›</span></button>
         <button type="button" onClick={() => props.openTodayJournal?.()}><span aria-hidden="true">📝</span><span><strong>Journal</strong><small>Write about your day.</small></span><span aria-hidden="true">›</span></button>
-        <button type="button" onClick={() => breathTool && startCare(breathTool.id)}><span aria-hidden="true">🌿</span><span><strong>Breathe</strong><small>Short calming exercises.</small></span><span aria-hidden="true">›</span></button>
-        <button type="button" onClick={() => props.onOpenSupport?.()}><span aria-hidden="true">🧸</span><span><strong>Guardian</strong><small>Routines, encouragement & reminders.</small></span><span aria-hidden="true">›</span></button>
       </section>
       <style>{`
+        .pl-care-section-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:8px 0}.pl-care-section-nav button{min-height:44px;padding:8px 4px;border:1px solid var(--pl-theme-line);border-radius:12px;background:var(--pl-theme-surface);color:var(--pl-theme-ink);font-weight:800;font-size:13px;cursor:pointer}.pl-care-section-nav button[aria-pressed="true"]{background:var(--pl-theme-surface-2);border:2px solid var(--pl-theme-accent)}
         .pl-care-shell{display:grid;gap:6px;margin-bottom:8px;padding:2px 0 12px}
         .pl-care-card,.pl-care-memory{position:relative;overflow:hidden;border:1px solid rgba(222,190,232,.72);border-radius:26px;background:linear-gradient(145deg,rgba(255,250,253,.98),rgba(247,240,255,.95));box-shadow:0 12px 30px rgba(104,71,132,.09),inset 0 1px 0 rgba(255,255,255,.9);padding:15px}
         .pl-care-card:before,.pl-care-memory:before{content:"";position:absolute;width:110px;height:110px;border-radius:50%;right:-48px;top:-56px;background:radial-gradient(circle,rgba(243,183,229,.26),rgba(218,196,255,.12) 58%,transparent 70%);pointer-events:none}
@@ -154,7 +156,6 @@ export function CarePanel(props) {
         .pl-care-spaces{padding:4px 0 0;border-radius:0;border:0;background:transparent;box-shadow:none}
         .pl-care-tonight{margin:9px 0;padding:11px 12px;border-radius:20px;background:linear-gradient(145deg,#F4EEFF,#FFF4FB);border:1px solid #DDC8EA;color:#654D73;box-shadow:0 7px 18px rgba(107,74,134,.045)}
         .pl-care-tonight .moon{font-size:9px;letter-spacing:.13em;font-weight:950;color:#A657B9}
-        .pl-care-tabs.plushcare-library>div> :first-child{display:none!important}
         .plushcare-library>div{gap:8px!important;margin-bottom:0!important}
         .plushcare-library [role="tablist"]{margin-top:2px!important;background:rgba(255,248,253,.62)!important;border:1px solid #E5D3EA!important;border-radius:20px!important;padding:4px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)!important}
         .plushcare-library [role="tab"]{border-radius:16px!important;min-height:44px!important;color:#77547F!important;font-size:10px!important}
@@ -178,7 +179,11 @@ export function CarePanel(props) {
         }
       `}</style>
 
-      <section className="pl-care-card">
+      <div role="group" aria-label="Care sections" className="pl-care-section-nav">
+        {[["quick", "Calm"], ["sleep", "Sleep"], ["paths", "Guided steps"], ["history", "History"]].map(([id, label]) => <button key={id} type="button" aria-pressed={id === "history" ? historyOpen : !historyOpen && props.careSection === id} onClick={() => { setHistoryOpen(id === "history"); if (id !== "history") props.setCareSection(id); }}>{label}</button>)}
+      </div>
+      {historyOpen && <section aria-label="Care history"><CareHistory {...props} /></section>}
+      {!historyOpen && props.careSection === "quick" && <section className="pl-care-card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
           <div>
 
@@ -186,7 +191,8 @@ export function CarePanel(props) {
           </div>
 
         </div>
-        <div className="pl-care-copy">Choose how you feel. PlushLife will suggest one small next step.</div>
+        <div className="pl-care-copy">Choose a feeling for one small next step, or take a breathing break.</div>
+        {breathTool && <button type="button" className="pl-care-soft-btn" onClick={() => startCare(breathTool.id)} style={{marginTop:10}}>🌿 Breathe</button>}
 
         <div className="pl-care-feelings">
           {visibleOptions.map((option) => <SituationButton key={option.id} option={option} selected={selectedSituationId === option.id} onClick={() => chooseSituation(option)} />)}
@@ -205,24 +211,13 @@ export function CarePanel(props) {
             <div className="pl-care-copy">{selectedSituation.next}</div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
               <button type="button" className="pl-care-primary" onClick={() => startCare(selectedSituation.tool)}>Start now</button>
-              <button type="button" className="pl-care-soft-btn" onClick={() => { props.setCareSection("quick"); setLibraryOpen(true); }}>🌿 Open PlushCalm</button>
+              <button type="button" className="pl-care-soft-btn" onClick={() => { props.setCareSection("quick"); setLibraryOpen(true); }}>More calming tools</button>
             </div>
           </div>
         )}
-      </section>
+      </section>}
 
-      <details className="pl-design-card" style={{ marginBottom: 0 }}>
-        <summary style={{ minHeight: 44, display: "list-item", alignContent: "center", cursor: "pointer", fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>🧸 My Cozy Space</summary>
-        <div style={{ paddingTop: 8 }}>
-          <CozySpace comfortItem={props.comfortItem} rows={props.rows} viewDone={props.viewDone} onReset={props.onReset} onSupport={props.onOpenSupport} onSettings={props.onOpenSettings} onSound={props.toggleSoundscape} onReminderTime={props.onReminderTime} soundscapes={window.PlushLifeContent.SOUNDSCAPES} notes={props.supportNotes} />
-        </div>
-      </details>
-      <details className="pl-care-history-door pl-design-card">
-        <summary>Your history <span>Check-ins & journals →</span></summary>
-        <CareHistory {...props} />
-      </details>
-
-      {goldMemoryUnlocked && memory.tool && (
+      {!historyOpen && props.careSection === "quick" && goldMemoryUnlocked && memory.tool && (
         <section data-actionable-care-recommendation="true" className="pl-care-memory">
           <div className="pl-care-kicker">💗 SOMETHING THAT HELPED BEFORE</div>
           <div style={{ marginTop: 5, fontSize: 15, fontWeight: 950, color: "var(--pl-theme-ink,#553B61)" }}>{memory.tool.icon} {memory.tool.name}</div>
@@ -233,7 +228,7 @@ export function CarePanel(props) {
       )}
 
 
-      <section aria-label="PlushCare main spaces" className="pl-care-spaces">
+      {!historyOpen && <section aria-label="PlushCare main spaces" className="pl-care-spaces">
 
 
         {goldMemoryUnlocked && props.careSection === "paths" && activePath && (
@@ -260,14 +255,16 @@ export function CarePanel(props) {
           </div>
         )}
 
-        <button type="button" className="pl-care-soft-btn" onClick={props.onOpenSupport}>My support circle →</button>
-        <details className="pl-care-library-door pl-design-card" open={libraryOpen} onToggle={event => setLibraryOpen(event.currentTarget.open)}>
-          <summary>Calm, paths & sleep <span>Browse care tools →</span></summary>
-        <div className="plushcare-library pl-care-tabs">
-          <ExistingCarePanel {...props} open={true} libraryOnly={true} openCareSession={startCare} setSleepToolOpen={startSleep} />
+        <div className="plushcare-library">
+          {props.careSection === "quick" ? <details className="pl-care-library-door pl-design-card" open={libraryOpen} onToggle={event => setLibraryOpen(event.currentTarget.open)}><summary>More calming tools</summary>{library}</details> : library}
         </div>
-        </details>
-      </section>
+      </section>}
+      <details className="pl-design-card" style={{ marginBottom: 0 }}>
+        <summary style={{ minHeight: 44, display: "list-item", alignContent: "center", cursor: "pointer", fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>🧸 My Cozy Space</summary>
+        <div style={{ paddingTop: 8 }}>
+          <CozySpace comfortItem={props.comfortItem} rows={props.rows} viewDone={props.viewDone} onReset={props.onReset} onSupport={props.onOpenSupport} onSettings={props.onOpenSettings} onSound={props.toggleSoundscape} onReminderTime={props.onReminderTime} soundscapes={window.PlushLifeContent.SOUNDSCAPES} notes={props.supportNotes} />
+        </div>
+      </details>
     </div>
   );
 }
