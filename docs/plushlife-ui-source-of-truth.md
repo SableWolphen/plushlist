@@ -13,7 +13,7 @@ Home, Progress, Care, Calendar, Add / Edit Task, Plush / Rewards, Tasks, Habits,
 - Script-like PlushLife wordmark with pink heart.
 - Compact mobile-first hierarchy and dense-but-breathable card spacing.
 - Soft rounded cards, pale translucent surfaces, low-contrast borders, warm shadows.
-- Theme-aware rounded bottom navigation: **Home · Tasks · Care · Progress · Guardian**. The header date opens Calendar and the gear opens Settings. The original Plush / Rewards collection is one tap from the prominent **My Plush & Rewards** button on Progress. Task creation lives in Tasks and contextual Add actions; do not introduce a duplicate fixed Add button.
+- Theme-aware rounded bottom navigation: **Today · Plan · Care · Progress · Guardian**. The header date opens Calendar and the gear opens Settings. The original Plush / Rewards collection is one tap from the prominent **My Plush & Rewards** button on Progress. Task creation lives in Tasks and contextual Add actions; do not introduce a duplicate fixed Add button.
 - Date pill and circular settings control in the header.
 - Illustrated/cozy hero treatment before utility content.
 - Pastel gradients, tiny hearts/stars/plants, plush imagery, and friendly iconography.
@@ -46,3 +46,8 @@ PlushSupport uses the same rounded cards, header treatment, tabs, soft buttons, 
 ## Non-negotiables
 
 Do not redesign or reorder the approved hierarchy without an explicit product request. Do not make utility screens look clinical, corporate, or like a separate admin app. Do not make cards or menus oversized. Do not hide existing functionality to achieve the visual treatment. Keep behavior stable while upgrading presentation.
+
+
+## Streamlined navigation
+
+Desktop and mobile use the same five destinations: Today, Plan, Care, Progress and Guardian. Plan contains Today’s tasks, Habits, Later and Calendar, with one Edit schedule action. Search lives in Plan instead of a repeated footer. Today starts with the checklist and four daily actions; the Smart Care Schedule and secondary tools live in More for today without another nested More options drawer. Guardian opens progress immediately when supporting someone; invitations open Sharing & privacy. Shared details remain consent-gated and optional. Personal appearance, reminders and account controls remain in Settings.

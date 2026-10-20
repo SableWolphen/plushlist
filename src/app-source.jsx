@@ -18,6 +18,8 @@ import { CozyGuideSuggestions } from "./components/cozy-daily.jsx";
 import { normalizeCozyProfile, cozyReminderCopy } from "./cozy-profile.js";
 import { CozyComfortContext, useCozyComfort } from "./components/cozy-space.jsx";
 import { widgetSnapshot } from "./widget-model.js";
+import { MAIN_DESTINATIONS, mainDestination } from "./navigation.mjs";
+import { PlanNavigation } from "./components/plan-navigation.jsx";
 import { EverydayActions } from "./components/everyday-upgrades.jsx";
 import { loadHistoryRows } from "./care-history-data.js";
 import { normalizeHomeLayout } from "./home-layout.js";
@@ -2829,7 +2831,7 @@ function GlowUpTracker() {
     const selectedDay = /^\d{4}-\d{2}-\d{2}$/.test(dayId) ? dayIdForDate(dayId) : dayId;
     setSelectedProgressDate(/^\d{4}-\d{2}-\d{2}$/.test(dayId) ? dayId : period.date);
     setActive(selectedDay === "daily" ? dayIdForDate(period.date) : selectedDay);
-    setTaskManagerView(view === "habits" ? "habits" : "today");
+    setTaskManagerView(["habits", "later"].includes(view) ? view : "today");
     setTaskManagerRequest(value => value + 1);
     setTaskSearchQuery("");
     const nextSections = taskSectionsForDay(selectedDay);
@@ -6576,7 +6578,11 @@ function GlowUpTracker() {
       <div className="pl-ambient-theme-layer" aria-hidden="true" />
       <aside className="pl-desktop-navigation" aria-label="Desktop navigation">
         <h2>PlushLife</h2>
-        {[["today", "Today"], ["tasks", "Tasks"], ["week", "Calendar"], ["care", "Care"], ["progress", "Progress"], ["plush", "Plush Corner"], ["guardian", "Support"], ["settings", "Settings"]].map(([id, label]) => <button type="button" key={id} aria-current={dashboard === id && !collectionOpen ? "page" : undefined} onClick={() => { if (id === "plush") setCollectionOpen(true); else if (id === "settings") setSettingsOpen(true); else { setCollectionOpen(false); if (id === "tasks") openTaskManager(); else goToDashboard(id); } }}>{label}</button>)}
+        {MAIN_DESTINATIONS.map(({id, label}) => <button type="button" key={id} aria-current={mainDestination(dashboard) === id && !collectionOpen ? "page" : undefined} onClick={() => { setCollectionOpen(false); if (id === "tasks") openTaskManager(period.date, "today"); else goToDashboard(id); }}>{label}</button>)}
+        <div className="pl-navigation-personal" aria-label="Personal settings">
+          <button type="button" onClick={() => setCollectionOpen(true)}>My Plush</button>
+          <button type="button" onClick={() => setSettingsOpen(true)}>Settings</button>
+        </div>
       </aside>
 
       <style>{`
@@ -7571,7 +7577,7 @@ function GlowUpTracker() {
             {signInMessage && <div style={{ marginTop: 8, fontSize: 12, color: "#8C6B9E" }}>{signInMessage}</div>}
           </div>
         )}
-        {!compactAppShell && <div className="plushlife-app-header" style={{ marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 9 }}>
+        {!compactAppShell && dashboard !== "today" && <div className="plushlife-app-header" style={{ marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 9 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 9.5, letterSpacing: "0.16em", color: "#B08AC7", fontWeight: 800 }}>{dinoTheme ? "ONE LITTLE STEP AT A TIME 🦕✨" : "ONE LITTLE STEP AT A TIME ✨"}</div>
             <h1 className="app-title" style={{ fontSize: 24, margin: "3px 0 0", fontWeight: 850, letterSpacing: "-0.02em", lineHeight: 1.05 }}>
@@ -7668,12 +7674,7 @@ function GlowUpTracker() {
           </>
         )}
 
-        {(dashboard === "today" || dashboard === "week") && (
-          <div className="pl-edit-shortcuts pl-edit-shortcuts-home" role="group" aria-label="Quick editing shortcuts">
-            <button type="button" onClick={() => openTaskManager(period.date, "today")}>✏️ Edit tasks</button>
-            <button type="button" onClick={() => setManageSchedule(true)}>📅 Edit schedule</button>
-          </div>
-        )}
+
 
         <style>{`
           .pl-unified-page-shell{display:grid;gap:8px;margin:0 auto;max-width:760px;color:#62506D;padding-bottom:calc(104px + env(safe-area-inset-bottom))}
@@ -7727,6 +7728,19 @@ function GlowUpTracker() {
 
         <JournalReflectionViewer reflectionViewerDate={reflectionViewerDate} onClose={() => setReflectionViewerDate(null)} reflectionViewerPrompt={reflectionViewerPrompt} reflectionViewerLoading={reflectionViewerLoading} reflectionViewerNote={reflectionViewerNote} />
 
+        {(dashboard === "tasks" || dashboard === "week") && <PlanNavigation view={dashboard === "week" ? "calendar" : taskManagerView} onSelect={view => view === "calendar" ? goToDashboard("week") : openTaskManager(period.date, view)} onEditSchedule={() => setManageSchedule(true)} />}
+        {(dashboard === "tasks" || dashboard === "week") && (<div className="pl-plan-search">
+        <EverydayActions showQuickAdd={false} userId={user.id} client={supabase}
+          tasks={trackerTasks} schedules={personalSchedules}
+          onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage}
+          onMoreOptions={draft => { openTaskManager(); if (draft?.trim()) { setNewTaskName(draft.trim()); setNaturalScheduleText(draft.trim()); setTaskAdvancedOpen(true); } }}
+          onReviewScheduledTask={draft => { openTaskManager(); setNewTaskName(draft.trim()); setNaturalScheduleText(draft.trim()); setTaskAdvancedOpen(true); setTaskMessage("Review the repeating date or reminder time before saving."); }}
+          onOpenTask={task => { openTaskManager(); setTaskSearchQuery(task?.task || ""); }}
+          onOpenSchedule={() => goToDashboard("week")}
+          onOpenNote={note => { setJournalQuickOpenDate(note.note_date); setPrivateNote(note.body || ""); setPrivateNoteDraft(note.body || ""); setPrivateNotePrompt(note.prompt || ""); setPrivateNoteMessage(""); setPrivateNoteEditing(false); setJournalQuickOpen(true); }}
+          onOpenProgress={() => goToDashboard("progress")}
+          onOpenGuardian={() => goToDashboard("guardian")} />
+        </div>)}
         <TasksPanel initialView={taskManagerView} viewRequest={taskManagerRequest} open={manageTasks || dashboard === "tasks"} inline={dashboard === "tasks"} rows={rows} viewDone={viewDone} toggle={toggle} onClose={() => { setManageTasks(false); if (dashboard === "tasks") goToDashboard("today"); }} newTaskDay={newTaskDay} setNewTaskDay={setNewTaskDay} taskSectionsForDay={taskSectionsForDay} setNewTaskSection={setNewTaskSection} setNewTaskCustomSection={setNewTaskCustomSection} starterPackId={starterPackId} setStarterPackId={setStarterPackId} trackerTasks={trackerTasks} setStarterPackMessage={setStarterPackMessage} addStarterPack={addStarterPack} starterPackMessage={starterPackMessage} importOpen={importOpen} setImportOpen={setImportOpen} newTaskSection={newTaskSection} importText={importText} setImportText={setImportText} importTasksFromText={importTasksFromText} importMessage={importMessage} newTaskNameInputRef={newTaskNameInputRef} newTaskName={newTaskName} setNewTaskName={setNewTaskName} taskMessage={taskMessage} setTaskMessage={setTaskMessage} naturalScheduleText={naturalScheduleText} setNaturalScheduleText={setNaturalScheduleText} naturalSchedulePreview={naturalSchedulePreview} setNaturalSchedulePreview={setNaturalSchedulePreview} applyNaturalSchedule={applyNaturalSchedule} newTaskSectionOptions={newTaskSectionOptions} newTaskCustomSection={newTaskCustomSection} taskAdvancedOpen={taskAdvancedOpen} setTaskAdvancedOpen={setTaskAdvancedOpen} newTaskWhy={newTaskWhy} setNewTaskWhy={setNewTaskWhy} newTaskSoftLabel={newTaskSoftLabel} setNewTaskSoftLabel={setNewTaskSoftLabel} newTaskTinyLabel={newTaskTinyLabel} setNewTaskTinyLabel={setNewTaskTinyLabel} newTaskEstimatedMinutes={newTaskEstimatedMinutes} setNewTaskEstimatedMinutes={setNewTaskEstimatedMinutes} newTaskEssentialOnLow={newTaskEssentialOnLow} setNewTaskEssentialOnLow={setNewTaskEssentialOnLow} newTaskKind={newTaskKind} setNewTaskKind={setNewTaskKind} newTaskScheduleType={newTaskScheduleType} setNewTaskScheduleType={setNewTaskScheduleType} newTaskScheduleDays={newTaskScheduleDays} setNewTaskScheduleDays={setNewTaskScheduleDays} newTaskReminderTime={newTaskReminderTime} setNewTaskReminderTime={setNewTaskReminderTime} newTaskStartDate={newTaskStartDate} setNewTaskStartDate={setNewTaskStartDate} newTaskEndDate={newTaskEndDate} setNewTaskEndDate={setNewTaskEndDate} newTaskOneTimeDate={newTaskOneTimeDate} setNewTaskOneTimeDate={setNewTaskOneTimeDate} selectedProgressDate={selectedProgressDate} addTrackerTask={addTrackerTask} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} isSupporterAccount={isSupporterAccount} FREE_TASK_LIMIT_PER_DAY={FREE_TASK_LIMIT_PER_DAY} taskSearchQuery={taskSearchQuery} setTaskSearchQuery={setTaskSearchQuery} isTaskPausedOnDate={isTaskPausedOnDate} period={period} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToSection={moveTaskToSection} startEditingTask={startEditingTask} resumeTrackerTask={resumeTrackerTask} pauseTrackerTask={pauseTrackerTask} archiveTrackerTask={archiveTrackerTask} setPendingTaskDelete={setPendingTaskDelete} showArchivedTasks={showArchivedTasks} setShowArchivedTasks={setShowArchivedTasks} restoreArchivedTask={restoreArchivedTask} quickAddTrackerTask={quickAddTrackerTask} quickAddMessage={quickAddMessage} onOpenSchedule={() => setManageSchedule(true)} />
 
         <ScheduleEditorPanel open={manageSchedule} onClose={() => setManageSchedule(false)} scheduleEditingDayId={scheduleEditingDayId} setScheduleEditDayId={setScheduleEditDayId} personalSchedules={personalSchedules} scheduleDraft={scheduleDraft} updateScheduleEntry={updateScheduleEntry} removeScheduleEntry={removeScheduleEntry} addScheduleEntry={addScheduleEntry} savePersonalSchedule={savePersonalSchedule} copyScheduleToAllDays={copyScheduleToAllDays} clearPersonalSchedule={clearPersonalSchedule} copyToDayIds={copyToDayIds} toggleCopyToDay={toggleCopyToDay} copyScheduleToSelectedDays={copyScheduleToSelectedDays} scheduleMessage={scheduleMessage} scheduleExceptionDraft={scheduleExceptionDraft} setScheduleExceptionDraft={setScheduleExceptionDraft} updateScheduleExceptionEntry={updateScheduleExceptionEntry} removeScheduleExceptionEntry={removeScheduleExceptionEntry} addScheduleExceptionEntry={addScheduleExceptionEntry} saveScheduleException={saveScheduleException} scheduleExceptionMessage={scheduleExceptionMessage} scheduleExceptions={scheduleExceptions} deleteScheduleException={deleteScheduleException} onOpenTasks={() => { setManageSchedule(false); openTaskManager(period.date, "today"); }} />
@@ -7740,24 +7754,9 @@ function GlowUpTracker() {
         {dashboard === "week" && <div className="pl-unified-page-content"><WeekPanel open={dashboard === "week"} openTodayJournal={openTodayJournal} weekCardIndex={weekCardIndex} setWeekCardIndex={setWeekCardIndex} weekSwipeStartX={weekSwipeStartX} weekSwipeStartY={weekSwipeStartY} reflectionCalendarMonth={reflectionCalendarMonth} setReflectionCalendarMonth={setReflectionCalendarMonth} reflectionMonthDate={reflectionMonthDate} reflectionMonthStart={reflectionMonthStart} reflectionMonthDays={reflectionMonthDays} reflectionDateSet={reflectionDateSet} dailyCheckInHistory={dailyCheckInHistory} restDatesSet={restDatesSet} selectedProgressDate={selectedProgressDate} setSelectedProgressDate={setSelectedProgressDate} dayCompletionPct={dayCompletionPct} setDayViewDate={setDayViewDate} setActive={setActive} setReflectionViewerDate={setReflectionViewerDate} setCheckInViewerDate={setCheckInViewerDate} reflectionHistory={reflectionHistory} journalHistoryExpanded={journalHistoryExpanded} setJournalHistoryExpanded={setJournalHistoryExpanded} weeklyIntentionHistory={weeklyIntentionHistory} weeklyIntentionHistoryExpanded={weeklyIntentionHistoryExpanded} setWeeklyIntentionHistoryExpanded={setWeeklyIntentionHistoryExpanded} period={period} calendarWeekOffset={calendarWeekOffset} setCalendarWeekOffset={setCalendarWeekOffset} calendarWeekPreviewDate={calendarWeekPreviewDate} setCalendarWeekPreviewDate={setCalendarWeekPreviewDate} trackerTasks={trackerTasks} dayViewDate={dayViewDate} dayViewExpanded={dayViewExpanded} setDayViewExpanded={setDayViewExpanded} longHistoryByDate={longHistoryByDate} isTaskPausedOnDate={isTaskPausedOnDate} markPastTasksDone={markPastTasksDone} done={done} toggle={toggle} isHistoricalView={isHistoricalView} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} CHECKIN_MOODS={CHECKIN_MOODS} /></div>}
 
         {dashboard === "progress" && <div className="pl-unified-page-content"><ProgressPanel open={dashboard === "progress"} user={user} progressView={progressView} setProgressView={setProgressView} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} hasWeeklyActivity={hasWeeklyActivity} goToDashboard={goToDashboard} onOpenPlush={() => setCollectionOpen(true)} weeklyOverallPct={weeklyOverallPct} weekOverWeekDelta={weekOverWeekDelta} preferences={preferences} weeklyEssentialPct={weeklyEssentialPct} weeklyOverallDone={weeklyOverallDone} weeklyOverallPossible={weeklyOverallPossible} weeklyBonusDone={weeklyBonusDone} caringDays={caringDays} weeklyEssentialDone={weeklyEssentialDone} careStory={careStory} careAreas={careAreas} openTaskManager={openTaskManager} patternInsightCards={patternInsightCards} insightCardIndex={insightCardIndex} setInsightCardIndex={setInsightCardIndex} weeklyHighlights={weeklyHighlights} period={period} goWriteWeeklyIntention={goWriteWeeklyIntention} setShareCardOpen={setShareCardOpen} progressDetailsOpen={progressDetailsOpen} setProgressDetailsOpen={setProgressDetailsOpen} TREND_WEEKS={TREND_WEEKS} TREND_MONTHS={TREND_MONTHS} currentMonthKey={currentMonthKey} monthlyOverallPct={monthlyOverallPct} monthOverMonthDelta={monthOverMonthDelta} monthlyTrendPoints={monthlyTrendPoints} tappedTrendMonth={tappedTrendMonth} setTappedTrendMonth={setTappedTrendMonth} monthlyMostConsistent={monthlyMostConsistent} currentMonthDates={currentMonthDates} weeklyTrendPoints={weeklyTrendPoints} tappedTrendWeek={tappedTrendWeek} setTappedTrendWeek={setTappedTrendWeek} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} littleWinHistory={habitHistory} littleWinCheckIns={dailyCheckInHistory} /></div>}
-        <details className="pl-home-quick-tools"><summary>Add or find something</summary>
-        <EverydayActions userId={user.id} client={supabase}
-          tasks={trackerTasks} schedules={personalSchedules}
-          onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage}
-          onMoreOptions={draft => { openTaskManager(); if (draft?.trim()) { setNewTaskName(draft.trim()); setNaturalScheduleText(draft.trim()); setTaskAdvancedOpen(true); } }}
-          onReviewScheduledTask={draft => { openTaskManager(); setNewTaskName(draft.trim()); setNaturalScheduleText(draft.trim()); setTaskAdvancedOpen(true); setTaskMessage("Review the repeating date or reminder time before saving."); }}
-          onOpenTask={task => { openTaskManager(); setTaskSearchQuery(task?.task || ""); }}
-          onOpenSchedule={() => goToDashboard("week")}
-          onOpenNote={note => { setJournalQuickOpenDate(note.note_date); setPrivateNote(note.body || ""); setPrivateNoteDraft(note.body || ""); setPrivateNotePrompt(note.prompt || ""); setPrivateNoteMessage(""); setPrivateNoteEditing(false); setJournalQuickOpen(true); }}
-          onOpenProgress={() => goToDashboard("progress")}
-          onOpenGuardian={() => goToDashboard("guardian")} />
-        </details>
+
         <nav className="pl-app-bottom-nav" aria-label="Main navigation">
-          <button type="button" aria-current={dashboard === "today" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("today"); }}><DesignIcon name="home" /><span>Home</span></button>
-          <button type="button" aria-current={dashboard === "tasks" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); openTaskManager(period.date, "today"); }}><DesignIcon name="tasks" /><span>Tasks</span></button>
-          <button type="button" aria-current={dashboard === "care" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("care"); }}><DesignIcon name="care" /><span>Care</span></button>
-          <button type="button" aria-current={dashboard === "progress" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("progress"); }}><DesignIcon name="progress" /><span>Progress</span></button>
-          <button type="button" aria-current={dashboard === "guardian" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("guardian"); }}><DesignIcon name="guardian" /><span>Guardian</span></button>
+          {MAIN_DESTINATIONS.map(({id, label, icon}) => <button key={id} type="button" aria-current={mainDestination(dashboard) === id && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); if (id === "tasks") openTaskManager(period.date, "today"); else goToDashboard(id); }}><DesignIcon name={icon} /><span>{label}</span></button>)}
         </nav>
 
         </>

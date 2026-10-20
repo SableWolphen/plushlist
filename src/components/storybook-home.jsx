@@ -1,4 +1,4 @@
-import { CompanionHomeCard,useGuardianState } from "./plush-guardian.jsx";
+import { useGuardianState } from "./plush-guardian.jsx";
 import { ThemeScene, ThemeWorldContext } from "./theme-world.jsx";
 import { buildCozyDayPlan, weeklyCozyStory } from "../cozy-day-plan.mjs";
 import { themeAtmosphere } from "../theme-atmosphere.js";
@@ -115,15 +115,7 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
         </div>
       </section>}
     </details>}
-    <details className="pl-storybook-support">
-      <summary>♡ My comfort & Guardian settings <span>Personalize</span></summary>
-      <div className="pl-companion-home-card" style={cardStyle("companion")}><CompanionHomeCard userId={userId} onOpenGuardian={()=>goToDashboard?.("guardian")}/></div>
-      <button type="button" className="pl-companion-home-customize" onClick={()=>goToDashboard?.("guardian")}>Open my Guardian</button>
-      <div style={cardStyle("moods")} className="pl-storybook-mood-choices">
-        <strong>How am I feeling?</strong>
-        <div className="pl-storybook-mood-grid">{STORYBOOK_MOODS.map(([id,label,emoji])=><button type="button" key={id} onClick={()=>openDailyCheckIn?.()} aria-label={"Check in feeling "+label}><span className="pl-storybook-face" aria-hidden="true">{emoji}</span><span>{label}</span></button>)}</div>
-      </div>
-    </details>
+
     <p style={cardStyle("kindness")} className="pl-storybook-kind-note">{copy.ending} ♡</p>
   </div>;
 }

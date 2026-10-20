@@ -1,3 +1,4 @@
+import { guardianLanding } from "../navigation.mjs";
 import { CozySharing, SharedCozyCard } from "./cozy-space.jsx";
 import { CozyRewardWishlist } from "./cozy-reward-wishlist.jsx";
 const LazyTogetherCorner = React.lazy(() => import("./together-corner.jsx").then((module) => ({ default: module.TogetherCorner })));
@@ -20,7 +21,9 @@ import { guardianMode, guardianTypeLabel, guardianPersonName, guardianBotDisplay
 
 export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwnGuardian, supportViewMode, setSupportViewMode, isSupportAdult, selectedSupportName, guardianSupportRequests, supportOwnerId, updateGuardianSupportRequest, pendingSupportInvites, supportPeople, acceptSupportInvitation, declineSupportInvitation, canUseCaretakerDashboard, invitedSupportLinks, loadSupportOwner, loadSupportData, user, supportAchievements, period, ownerIsRestingToday, restDatesSet, todayRequiredDone, supportProgress, activeSupportLink, canViewSupportProgress, canViewSupportTasks, canViewSupportSchedule, canViewSupportMood, supportTrackerTasks = [], supportSchedules = [], supportScheduleExceptions = [], supportMoodSummary, supportProgressView, setSupportProgressView, supportTodayDayLabel, supportProgressReady = true, supportDailyEssentialCount, supportScheduledTodayCount, displayedSupportPercent, displayedSupportCompleted, displayedSupportPossible, supportDailyEssentialCompleted, supportDailyEssentialKeys, supportScheduledTodayCompleted, supportScheduledTodayKeys, canSendSupportNotes, newNote, setNewNote, addSupportNote, suggestComfortTool, canAddSupportRewards, rewardTitle, setRewardTitle, rewardDetails, setRewardDetails, rewardTarget, setRewardTarget, rewardTargetPeriod, setRewardTargetPeriod, rewardApprovalRequired, setRewardApprovalRequired, addSupportReward, suggestedTask, setSuggestedTask, suggestedTaskDay, setSuggestedTaskDay, submitTaskSuggestion, inviteEmail, setInviteEmail, inviteSupportAdult, GUARDIAN_ROLE_PRESETS, guardianRolePreset, setGuardianRolePreset, ownedSupportLinks, supportRelationships, setSupportAdultActive, removeSupportAdult, updateCaretakerPermission, updateCareAgreement, supportRequestGuardian, setSupportRequestGuardian, supportRequestType, setSupportRequestType, supportRequestText, setSupportRequestText, sendGuardianSupportRequest, taskSuggestions, suggestionSectionsById, setSuggestionSectionsById, taskSectionsForDay, decideTaskSuggestion, supportMessage, supportRewards, supportWeeklyPercent, supportPercent, updateRewardStatus, supportNotes, setComfortToolOpen, deleteSupportNote, onOpenSettings, guardianLinksReady = false, onRetryGuardian, onOpenTasks }) {
   const [checkInDelay, setCheckInDelay] = React.useState("0");
-  const [guardianArea, setGuardianArea] = React.useState("overview");
+  const [chosenGuardianArea, setGuardianArea] = React.useState(null);
+  const guardianArea = chosenGuardianArea || guardianLanding(supportViewMode, pendingSupportInvites.length > 0);
+  React.useEffect(() => { setGuardianArea(null); }, [user?.id, supportViewMode]);
   const [supportAction, setSupportAction] = React.useState("note");
   const botGuardian = useGuardianState(user?.id);
   const mode = guardianMode(ownedSupportLinks, user?.id, guardianLinksReady ? user?.id : null, botGuardian.prefs.automaticReminders);
@@ -67,7 +70,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
   return (
           <ToolPanel inline title="💛 PlushSupport" displayTitle="Guardians" onClose={onClose}>
           <div className="pl-guardian-content">
-          <CozyScene title="My Guardian" subtitle="One place for support, little jobs, routines, encouragement and rewards." />
+          <CozyScene title="Guardian" subtitle={supportViewMode === "caretaker" ? "Their progress and ways to help, together in one place." : "Your support, requests and rewards."} />
           {supportViewMode === "mine" && <section className="pl-bot-guardian-entry" aria-label="Guardian support" style={{padding:15,borderRadius:17,background:"var(--pl-theme-surface-2)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
             {mode === "checking" ? <>
               <strong>Checking Guardian connection…</strong>
@@ -90,12 +93,12 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
               {mode === "choose" ? <div className="pl-guardian-unified-actions">
                 <button type="button" onClick={()=>openPlushGuardian()}><span>🧸</span> Set up Guardian</button>
                 <button type="button" onClick={()=>setGuardianArea("support")}><span>💛</span> Invite someone</button>
-              </div> : <nav className="pl-guardian-unified-actions" aria-label="Guardian actions">
-                <button type="button" onClick={()=>mode === "person" ? onOpenTasks?.() : openPlushGuardian("start")}><span>✅</span> Tasks</button>
-                <button type="button" onClick={()=>mode === "person" ? setGuardianArea("together") : openPlushGuardian("routines")}><span>📅</span> Routines</button>
-                <button type="button" onClick={()=>mode === "person" ? setGuardianArea("support") : openPlushGuardian("guardian")}><span>💌</span> Encouragement</button>
-                <button type="button" onClick={()=>mode === "person" ? (setSupportViewMode("mine"), setGuardianArea("overview"), loadSupportOwner(user?.id)) : openPlushGuardian("rewards")}><span>🎁</span> Rewards</button>
-              </nav>}
+              </div> : mode === "automatic" ? <nav className="pl-guardian-unified-actions" aria-label="Guardian actions">
+                <button type="button" onClick={()=>openPlushGuardian("start")}><span>✅</span> Tasks</button>
+                <button type="button" onClick={()=>openPlushGuardian("routines")}><span>📅</span> Routines</button>
+                <button type="button" onClick={()=>openPlushGuardian("guardian")}><span>💌</span> Encouragement</button>
+                <button type="button" onClick={()=>openPlushGuardian("rewards")}><span>🎁</span> Rewards</button>
+              </nav> : null}
               {mode === "automatic" && <button type="button" onClick={()=>openPlushGuardian("settings")} style={{marginTop:10,minHeight:40,width:"100%",border:"1px solid var(--pl-theme-line)",borderRadius:11,background:"var(--pl-theme-surface)",color:"var(--pl-theme-ink)",fontWeight:800}}>Guardian name & reminders ›</button>}
             </>}
           </section>}
@@ -106,7 +109,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             </div>
           )}
           <div className="pl-guardian-switcher" role="group" aria-label="Guardian sections">
-            {[["overview","💛",supportViewMode === "mine" ? "My Guardian" : "My Cozy"],["together","🤝","Together"],["support","💌",supportViewMode === "mine" ? "Sharing & privacy" : "Support"]].map(([id,icon,label]) => (
+            {(supportViewMode === "caretaker" ? [["support","💛","Today"],["together","🤝","Together"],["overview","🧸","Cozy card"]] : [["overview","💛","My Guardian"],["together","🤝","Together"],["support","💌","Sharing & privacy"]]).map(([id,icon,label]) => (
               <button key={id} type="button" aria-pressed={guardianArea === id} onClick={() => setGuardianArea(id)}>
                 <span aria-hidden="true">{icon}</span><span>{label}</span>
               </button>
@@ -294,8 +297,8 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 </div> : <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: "var(--pl-theme-surface-2,#F6F3F8)", color: "var(--pl-theme-muted,#75677D)", fontSize: 14 }}>Progress sharing is turned off by {selectedSupportName}.</div>}
 
                 {(canSendSupportNotes || canAddSupportRewards || !!activeSupportLink?.can_suggest_tasks) && (
-                  <details style={{ marginTop: 14, borderTop: "1px solid var(--pl-theme-line,#E9DDF6)", paddingTop: 10 }}>
-                    <summary style={{ cursor: "pointer", fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#7B6888)" }}>More ways to support</summary>
+                  <section aria-label="Ways to help" style={{ marginTop: 14, borderTop: "1px solid var(--pl-theme-line,#E9DDF6)", paddingTop: 10 }}>
+                    <h3 style={{ fontSize: 16, margin: "0 0 8px" }}>How would you like to help?</h3>
                     <div style={{ paddingTop: 8 }}>
                       <div className="pl-guardian-action-switcher" role="group" aria-label="Support actions">
                         {availableSupportActions.map(([id, icon, label]) => (
@@ -308,7 +311,8 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 <div style={{ marginTop: 14, fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#4C8FE8)" }}>SEND AN ENCOURAGING NOTE</div>
                 <textarea value={newNote} onChange={(event) => setNewNote(event.target.value)} maxLength={1000} placeholder="How are you doing? I'm proud of your progress…" style={{ width: "100%", boxSizing: "border-box", minHeight: 74, marginTop: 7, padding: 10, borderRadius: 11, border: "1px solid var(--pl-theme-line,#E9DDF6)", color: "var(--pl-theme-ink,#5B4B6B)", resize: "vertical" }} />
                 <button onClick={addSupportNote} style={{ marginTop: 7, padding: "8px 12px", borderRadius: 10, border: 0, background: "var(--pl-theme-accent,#4C8FE8)", color: "var(--pl-theme-on-accent,#FFFFFF)", fontWeight: 800, cursor: "pointer" }}>Send note 💛</button>
-                <div style={{ marginTop: 12, fontSize: 14, fontWeight: 800, color: "var(--pl-theme-muted,#4C8FE8)" }}>OR SUGGEST A COMFORT TOOL</div>
+                <details style={{ marginTop: 12 }}>
+                <summary style={{ minHeight: 44, cursor: "pointer", fontSize: 14, fontWeight: 800 }}>Suggest a calming activity</summary>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginTop: 7 }}>
                   {COMFORT_TOOLS.map((tool) => (
                     <button key={tool.id} type="button" onClick={() => suggestComfortTool(tool.id)} style={{ padding: "8px 4px", borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", textAlign: "center", cursor: "pointer" }}>
@@ -317,6 +321,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                     </button>
                   ))}
                 </div>
+                </details>
                 </>}
 
                 {visibleSupportAction === "reward" && canAddSupportRewards && <>
@@ -348,7 +353,7 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                 </>}
 
                     </div>
-                  </details>
+                  </section>
                 )}
               </div>
             ) : (

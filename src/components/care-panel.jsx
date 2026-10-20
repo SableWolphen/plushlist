@@ -122,7 +122,7 @@ export function CarePanel(props) {
         <button type="button" onClick={() => props.setCheckInPopupOpen?.(true)}><span aria-hidden="true">💗</span><span><strong>Daily check-in</strong><small>How are you feeling today?</small></span><span aria-hidden="true">›</span></button>
         <button type="button" onClick={() => props.openTodayJournal?.()}><span aria-hidden="true">📝</span><span><strong>Journal</strong><small>Write about your day.</small></span><span aria-hidden="true">›</span></button>
         <button type="button" onClick={() => breathTool && startCare(breathTool.id)}><span aria-hidden="true">🌿</span><span><strong>Breathe</strong><small>Short calming exercises.</small></span><span aria-hidden="true">›</span></button>
-        <button type="button" onClick={() => openPlushGuardian()}><span aria-hidden="true">🧸</span><span><strong>Guardian</strong><small>Routines, encouragement & reminders.</small></span><span aria-hidden="true">›</span></button>
+        <button type="button" onClick={() => props.onOpenSupport?.()}><span aria-hidden="true">🧸</span><span><strong>Guardian</strong><small>Routines, encouragement & reminders.</small></span><span aria-hidden="true">›</span></button>
       </section>
       <style>{`
         .pl-care-shell{display:grid;gap:6px;margin-bottom:8px;padding:2px 0 12px}
