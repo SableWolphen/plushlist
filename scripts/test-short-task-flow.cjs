@@ -57,5 +57,11 @@ const button=(tree,label)=>tree.root.findAllByType('button').find(b=>b.children.
  const pkg=JSON.parse(fs.readFileSync('package.json'));assert(!pkg.dependencies['@capacitor/status-bar']);
  const config=JSON.parse(fs.readFileSync('capacitor.config.json'));assert.equal(config.plugins.SystemBars.insetsHandling,'css');assert(!config.plugins.Keyboard.resizeOnFullScreen);
  const gradle=fs.readFileSync('android/app/build.gradle','utf8');assert(gradle.includes('minifyEnabled true'));assert(gradle.includes('shrinkResources true'));
+ assert(fs.readFileSync('android/build.gradle','utf8').includes('com.android.tools.build:gradle:9.0.1'));
+ assert(fs.readFileSync('android/gradle/wrapper/gradle-wrapper.properties','utf8').includes('gradle-9.1.0-all.zip'));
+ assert(fs.readFileSync('android/gradle.properties','utf8').includes('android.r8.optimizedResourceShrinking=true'));
+ const rules=fs.readFileSync('android/app/proguard-rules.pro','utf8');
+ assert(rules.includes('implements com.google.firebase.components.ComponentRegistrar') && rules.includes('public <init>();'),'Firebase reflective constructors must survive strict R8 mode');
+ for(const sdk of ['com.google.firebase.**','com.google.android.gms.**','com.google.android.play.core.**'])assert(!rules.includes('-keep class '+sdk),'Do not disable optimization for entire Google SDKs');
  console.log('Short task flow passed: one-field task/habit creation, optional schedules, retry, real save payloads and account-switch guard.');
 })().catch(error=>{console.error(error);process.exitCode=1;});
