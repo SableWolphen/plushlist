@@ -55,7 +55,7 @@ const requiredRegressionMarkers = [
   'const invitation = supportLinks.find((link) => link.id === linkId);',
   'const isGuardianAccount = !!user && trackerProfile?.account_type === "caretaker";',
   'Sharing & care agreement',
-  '{ id: "guardian", label: "Guardian", icon: "💛", accent: "#318C79" }',
+  'adjacentDestination(dashboard, direction)',
   '🧸 My Support',
   '💛 People I Support',
   'Nothing is shared until they accept, and you choose every permission.',

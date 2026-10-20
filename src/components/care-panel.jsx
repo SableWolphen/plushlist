@@ -1,4 +1,3 @@
-import { openPlushGuardian } from "./plush-guardian.jsx";
 import { CozySpace } from "./cozy-space.jsx";
 import { CareHistory } from "./care-history.jsx";
 /*
