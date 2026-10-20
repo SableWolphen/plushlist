@@ -2,6 +2,19 @@
    Keep this file last so older theme-specific experiments cannot reintroduce
    duplicated headers, giant cards, or bottom-nav overlap. */
 
+/* One set of destinations on every screen; Plan owns tasks and calendar. */
+#main-content .pl-navigation-personal{display:grid;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--pl-theme-line)}
+#main-content .pl-plan-navigation{padding:12px 4px;color:var(--pl-theme-ink)}
+#main-content .pl-plan-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+#main-content .pl-plan-heading h1{margin:0;font-size:26px}
+#main-content .pl-plan-heading p{margin:5px 0 0;font-size:14px;color:var(--pl-theme-muted)}
+#main-content .pl-plan-navigation button{min-height:44px;padding:9px 12px;border-radius:12px;border:1px solid var(--pl-theme-line);background:var(--pl-theme-surface);color:var(--pl-theme-ink);font:800 14px Nunito,system-ui;cursor:pointer}
+#main-content .pl-plan-navigation nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+#main-content .pl-plan-navigation button[aria-pressed="true"]{background:var(--pl-theme-accent);color:var(--pl-theme-on-accent,#fff);border-color:var(--pl-theme-accent)}
+#main-content .pl-home-shell{grid-template-columns:minmax(0,1fr)!important;max-width:760px;margin-inline:auto}
+#main-content .pl-home-extras-content h3{font-size:17px;margin:18px 0 10px;color:var(--pl-theme-ink)}
+@media(max-width:350px){#main-content .pl-plan-heading{align-items:start}#main-content .pl-plan-navigation nav button{font-size:12px;padding:8px 4px}}
+
 #main-content{
   font-family:"Nunito","Segoe UI",system-ui,sans-serif;
 }
@@ -1430,7 +1443,7 @@ body>[role="dialog"]>div{
   min-height:44px;
 }
 
-/* Care shows the four high-confidence paths first; the rest reads as secondary. */
+/* Care keeps check-in and journal close; its single selector opens each tool group. */
 #main-content .pl-reference-care-launchers{
   margin-bottom:4px!important;
 }
@@ -1509,6 +1522,14 @@ body>[role="dialog"]>div{
   width:min(100%,390px)!important;
   max-width:390px!important;
   margin-inline:auto!important;
+}
+
+/* The phone viewport guard must not constrain the desktop two-column Home. */
+@media(min-width:1100px){
+  #main-content#main-content .plushlife-app-column{
+    width:min(100%,1000px)!important;
+    max-width:1000px!important;
+  }
 }
 
 #main-content#main-content .pl-home-shell,
@@ -1865,4 +1886,25 @@ html[data-pl-companion-text=large] .pl-guardian-companion{font-size:18px}
     font-size: 11px;
   }
   #main-content .pl-edit-shortcuts button { font-size: 12px; }
+}
+
+/* Align desktop Plan views with their controls rather than a phone-width island. */
+@media(min-width:1100px){
+  #main-content#main-content:is(.dashboard-tasks,.dashboard-week) .plushlife-app-column{width:min(100%,760px)!important;max-width:760px!important}
+  #main-content#main-content:is(.dashboard-tasks,.dashboard-week) :is(.pl-inline-tool,.pl-task-page,.pl-calendar-cozy){width:100%!important;max-width:760px!important}
+  #main-content#main-content.dashboard-today .pl-home-shell{max-width:760px!important}
+  #main-content#main-content:is(.dashboard-care,.dashboard-guardian) .plushlife-app-column{width:min(100%,760px)!important;max-width:760px!important}
+  #main-content#main-content:is(.dashboard-care,.dashboard-guardian) :is(.pl-care-shell,.pl-inline-tool,.pl-guardian-content){width:100%!important;max-width:760px!important}
+}
+
+/* A consistent, single section selector across all workspaces. */
+.pl-workspace-navigation{display:flex;gap:5px;margin:0 0 12px;min-width:0}
+.pl-workspace-navigation button{flex:1;min-width:0;min-height:44px;padding:9px 5px;border:1px solid var(--pl-theme-line);border-radius:12px;background:var(--pl-theme-surface);color:var(--pl-theme-ink);font:inherit;font-size:13px;font-weight:800;overflow-wrap:anywhere;cursor:pointer}
+.pl-workspace-navigation button[aria-pressed="true"]{background:var(--pl-theme-surface-2);border:2px solid var(--pl-theme-accent)}
+.pl-settings-related{border:1px solid var(--pl-theme-line);border-radius:16px;padding:0 12px;margin:12px 0;background:var(--pl-theme-surface)}
+.pl-settings-related>summary{min-height:48px;align-content:center;cursor:pointer;font-weight:800;color:var(--pl-theme-ink)}
+.pl-progress-page>.pl-progress-plush-link{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;padding:10px 14px;margin:0 0 12px;border:1px solid var(--pl-theme-line);border-radius:16px;background:var(--pl-theme-surface-2);color:var(--pl-theme-ink);font:inherit;font-weight:800;cursor:pointer}
+@media(min-width:1100px){
+  #main-content#main-content .plushlife-app-column{width:min(100%,760px)!important;max-width:760px!important}
+  #main-content#main-content :is(.pl-progress-page,.pl-growth-shell,.pl-growth-deeper,.pl-closet-shell,.pl-inline-tool){width:100%!important;max-width:760px!important}
 }

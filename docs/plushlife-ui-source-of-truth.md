@@ -13,7 +13,7 @@ Home, Progress, Care, Calendar, Add / Edit Task, Plush / Rewards, Tasks, Habits,
 - Script-like PlushLife wordmark with pink heart.
 - Compact mobile-first hierarchy and dense-but-breathable card spacing.
 - Soft rounded cards, pale translucent surfaces, low-contrast borders, warm shadows.
-- Theme-aware rounded bottom navigation: **Home · Tasks · Care · Progress · Guardian**. The header date opens Calendar and the gear opens Settings. The original Plush / Rewards collection is one tap from the prominent **My Plush & Rewards** button on Progress. Task creation lives in Tasks and contextual Add actions; do not introduce a duplicate fixed Add button.
+- Theme-aware rounded bottom navigation: **Today · Plan · Care · Progress · Guardian**. The header date opens Calendar and the gear opens Settings. The original Plush / Rewards collection is one tap from the prominent **My Plush & Rewards** button on Progress. Task creation lives in Tasks and contextual Add actions; do not introduce a duplicate fixed Add button.
 - Date pill and circular settings control in the header.
 - Illustrated/cozy hero treatment before utility content.
 - Pastel gradients, tiny hearts/stars/plants, plush imagery, and friendly iconography.
@@ -46,3 +46,17 @@ PlushSupport uses the same rounded cards, header treatment, tabs, soft buttons, 
 ## Non-negotiables
 
 Do not redesign or reorder the approved hierarchy without an explicit product request. Do not make utility screens look clinical, corporate, or like a separate admin app. Do not make cards or menus oversized. Do not hide existing functionality to achieve the visual treatment. Keep behavior stable while upgrading presentation.
+
+
+## Streamlined navigation
+
+Desktop and mobile use the same five destinations: Today, Plan, Care, Progress and Guardian. Plan contains Today’s tasks, Habits, Later and Calendar, with one Edit schedule action. Search lives in Plan instead of a repeated footer. Today starts with the checklist and four daily actions; the Smart Care Schedule and secondary tools live in More for today without another nested More options drawer. Guardian opens Support immediately, including pending invitations and shared progress when supporting someone. Outgoing invitations and relationship management live in Sharing. Shared details remain consent-gated and optional. Personal appearance, reminders and account controls remain in Settings.
+
+Today is the daily workspace: expand the checklist in place (completed tasks remain visible), add a one-time task with one field, edit a task in a dialog, and read or edit today’s schedule without switching dashboards. Keep the short default preview and respect Tiny/Rest modes. Repeating tasks, imports, habit experiments and the broader calendar remain in Plan. Successful create/edit operations invalidate the warm-start cache so a reload does not briefly show old task data.
+
+
+Care uses one section selector: Calm, Sleep, Guided steps, History. Check-in and Journal stay directly accessible. Calm starts with a feeling or Breathe; its full tool library is optional. Sleep and guided paths open directly, with no second navigation row. Cozy Space is an optional drawer at the bottom.
+
+Guardian uses Support, Together, Sharing in both roles. Support is the landing view for requests, task suggestions, rewards and notes; caregivers see shared progress and help actions there. Sharing contains invitations, relationship permissions, pause/revocation, care agreements and the Cozy card. Reward lists appear once, and opening a view sends nothing or changes no consent.
+
+Progress keeps one selector (Overview, My story, Care areas) and the Plush shortcut in place in every view. Experiments are optional. Settings starts with four searchable groups and allows direct switching between them: Personalize includes text/accessibility and the phone widget; Reminders includes rest/vacation; Privacy includes suggestion boundaries; Account includes Help and the Plus preview. Names and advanced Today customization are optional drawers. The Plush collection uses Outfits, Badges and Memories. The automatic Guardian keeps one Support/Tasks/Routines/Rewards selector, one mailbox and one keepsake history; other tools are optional. Onboarding shows a name and a first task, with the product explanation optional. Schedule editing retains its direct Save day action, verified save feedback, draft recovery and optional copy/temporary-extra tools.

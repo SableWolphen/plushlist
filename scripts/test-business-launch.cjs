@@ -1,0 +1,4 @@
+const assert = require("node:assert/strict");const fs=require("node:fs");const path=require("node:path");const root=path.resolve(__dirname,"..");
+const marketing=fs.readFileSync(path.join(root,"business.html"),"utf8");const preview=fs.readFileSync(path.join(root,"plans-preview.html"),"utf8");const plan=fs.readFileSync(path.join(root,"BUSINESS_LAUNCH.md"),"utf8");
+for(const [name,html] of [["business",marketing],["preview",preview]]){assert.match(html,/<meta name="viewport"/);assert.match(html,/PlushLife/);assert.match(html,/4\.99/);assert.match(html,/8\.99/);assert.match(html,/(no paid checkout|not available yet|not available for purchase)/i);assert.doesNotMatch(html,/<form[^>]*action=["']https:\/\/checkout\.stripe\.com/i);}
+assert.match(marketing,/guardian/i);assert.match(marketing,/account-deletion\.html/);assert.match(plan,/server-verified subscriptions/i);console.log("PlushLife business launch smoke checks passed");

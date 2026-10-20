@@ -1,3 +1,4 @@
+import { WorkspaceNavigation } from "./workspace-navigation.jsx";
 import { ToolPanel } from "./shared.jsx";
 import {
   STATE_EVENT,
@@ -159,7 +160,8 @@ export default function PlushGuardianCore(props) {
             ⚙
           </button>
         </div>
-        {page !== "guardian" && (
+        <WorkspaceNavigation label="Automatic Guardian sections" items={[["guardian","Support"],["start","Tasks"],["routines","Routines"],["rewards","Rewards"]]} value={page} onChange={navigate} />
+        {!["guardian","start","routines","rewards"].includes(page) && (
           <button
             className="pl-companion-back"
             onClick={() => navigate("guardian")}
@@ -190,8 +192,6 @@ export default function PlushGuardianCore(props) {
                 <p role="status">{botPlan.encouragement}</p>
                 <p>{botPlan.completed} of {botPlan.total} little jobs complete today. You can pause or change your Guardian anytime.</p>
                 {botPlan.next && <button onClick={() => { setTaskKey(botPlan.next.key); navigate("start"); }}>Help me do: {botPlan.next.label} ›</button>}
-                <button onClick={() => navigate("routines")}>Routines ›</button>
-                <button onClick={() => navigate("rewards")}>🎁 My earned rewards ({(state.automaticGiftLedger||[]).filter(id=>!(state.usedGuardianGifts||[]).includes(id)).length+(state.rewards||[]).filter(x=>x.claimed&&x.autoAwardedAt&&!x.usedAt).length}) ›</button>
                 {guardianSuggestedReward(botPlan.completed,botPlan.total,dailyCheckIn?.day_type === "rest") && <p>{guardianSuggestedReward(botPlan.completed,botPlan.total,dailyCheckIn?.day_type === "rest")}</p>}
                 <button onClick={() => navigate("settings")}>My reminders & Guardian voice ›</button>
               </> : <>
@@ -219,8 +219,8 @@ export default function PlushGuardianCore(props) {
               })}
               <button type="button" onClick={() => navigate("settings")}>Change my care preferences ›</button>
             </section>}
-            <section className="pl-virtual-guardian-options" aria-label="Guardian plans and memories">
-              <h3>🧸 Guardian planned today</h3>
+            <details className="pl-virtual-guardian-options" aria-label="Guardian plans and memories">
+              <summary style={{minHeight:44,cursor:"pointer",fontWeight:800}}>Today’s plan & keepsakes</summary>
               {(() => { const extra=guardianDayExtras(localDate(),state.prefs,dailyCheckIn?.day_type==="rest"); return <>
                 <p>🌤️ {extra.morning}</p>
                 {extra.theme && <p>🧸 Today's Little Mode theme: {extra.theme}</p>}
@@ -249,26 +249,13 @@ export default function PlushGuardianCore(props) {
               <details><summary>🎁 Guardian's Surprise Box ({(state.surpriseBoxHistory||[]).length})</summary>
                 {(state.surpriseBoxHistory||[]).length ? (state.surpriseBoxHistory||[]).slice(-6).reverse().map(gift=><article key={gift.date}><small>{gift.date}</small><p>{gift.label} — a gift of time for yourself, no chores required.</p></article>) : <p>Guardian will choose from your favorites when Surprise Box is enabled.</p>}
               </details>
-              <details><summary>💌 Surprise Letters ({(state.surpriseLetterHistory||[]).length})</summary>
-                {(state.surpriseLetterHistory||[]).length ? (state.surpriseLetterHistory||[]).slice(-8).reverse().map(letter=><article key={letter.date}><small>{letter.date}</small><p>{letter.text}</p></article>) : <p>Guardian will leave a gentle note occasionally when letters are enabled.</p>}
-              </details>
+
               {state.prefs.careMode && state.prefs.littleMode && <p>🍼 Little Mode idea: {["Plushie picnic","Cartoons and cozy pajamas","Coloring with stickers","Storybook blanket fort","Stuffie tea party","Soft music time","Favorite toy play"][Math.floor(Date.parse(localDate()+"T12:00:00")/86400000)%7]}.</p>}
-              <details>
-                <summary>📖 Guardian Memory Book</summary>
-                <p>Your private history of little victories and surprises on this device.</p>
-                {(state.automaticGiftLedger || []).length === 0 && (state.careStickers || []).length === 0
-                  ? <p>New memories will appear after your first celebration.</p>
-                  : <>
-                    {(state.automaticGiftLedger || []).slice(-12).reverse().map(id=><p key={id}>🎁 {id.slice(0,10)} · Guardian surprise {id.slice(11)}</p>)}
-                    {(state.careStickers || []).slice(-12).reverse().map(id=><p key={id}>🌟 {id.slice(0,10)} · {id.slice(11)} routine</p>)}
-                  </>}
-              </details>
-            </section>
+
+            </details>
             <div className="pl-companion-choices" style={state.prefs.careMode && state.prefs.littleMode ? {display:"grid",gridTemplateColumns:"1fr",gap:12} : undefined}>
               {[
                 ["Comfort", "comfort"],
-                ["Help me start", "start"],
-                ["Plan my day", "plan"],
                 ["Keep me company", "company"],
                 ["I’m overwhelmed", "overwhelmed"],
               ].map(([label, id]) => (
@@ -289,12 +276,11 @@ export default function PlushGuardianCore(props) {
                 </button>
               ))}
             </div>
-            <div className="pl-companion-grid">
+            <details className="pl-companion-review"><summary style={{minHeight:44,cursor:"pointer",fontWeight:800}}>More tools</summary><div className="pl-companion-grid">
               {[
+                ["Plan my day", "plan"],
                 ["Brain dump", "inbox"],
-                ["My routines", "routines"],
                 ["My reflections", "reflections"],
-                ["🎁 Earned rewards", "rewards"],
                 ["Habit experiments", "experiments"],
                 ["Letters to me", "letters"],
               ].map(([label, id]) => (
@@ -302,7 +288,7 @@ export default function PlushGuardianCore(props) {
                   {label}
                 </button>
               ))}
-            </div>
+            </div></details>
             <button
               onClick={() => {
                 onClose();

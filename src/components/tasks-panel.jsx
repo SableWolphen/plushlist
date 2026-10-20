@@ -50,14 +50,13 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
   return (
           <ToolPanel title="🌷 Add & organize" displayTitle="Tasks" inline={inline} hideClose={inline} onClose={onClose}>
           <div className="pl-task-page">
-            <div className="pl-edit-shortcuts pl-edit-shortcuts-tasks" role="group" aria-label="Manage tasks and schedule">
+            {!inline && <div className="pl-edit-shortcuts pl-edit-shortcuts-tasks" role="group" aria-label="Manage tasks and schedule">
               <button type="button" onClick={() => { setTaskView("today"); setShowAllToday(true); }}>✏️ Show all tasks</button>
               <button type="button" onClick={onOpenSchedule}>📅 Edit schedule</button>
-            </div>
-            <p className="pl-edit-hint">To change a task, tap <strong>Edit</strong> next to it. Your schedule is edited separately.</p>
-            <div className="pl-design-tabs" role="tablist" aria-label="Task views">
+            </div>}
+            {!inline && <div className="pl-design-tabs" role="tablist" aria-label="Task views">
               {[["today", "Today"], ["habits", "Habits"], ["later", "Later"]].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={taskView === id} onClick={() => setTaskView(id)}>{label}{id === "habits" ? ` (${rows.filter(row=>row && habitTypeForRow(row)!=="regular").length})` : ""}</button>)}
-            </div>
+            </div>}
             <section className="pl-design-card" aria-label="Your task list">
               <div className="pl-task-title"><button type="button" className={`pl-mascot-pat ${plushHappy ? "pl-mascot-happy-hop" : ""}`} onClick={cheer} aria-label="Say hi to your plush"><ThemeScene focus decorative mood={plushHappy ? "happy" : "neutral"} /></button><h2>{taskView === "habits" ? "Habits" : taskView === "later" ? "Later" : "Tasks for the day"}</h2></div>
               <p className="pl-design-caption">{taskView === "today" ? "Check things off, open details, or move them when the day changes." : "No need to do everything. Moving a task is allowed."}</p>
@@ -103,9 +102,9 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
               })()}
             </section>
             {taskView === "habits" && <HabitStudio/>}
-            <button type="button" className="pl-design-primary" aria-expanded={composerOpen} onClick={() => setComposerOpen(value => !value)}>Add a task</button>
             <details className="pl-task-composer" open={composerOpen} onToggle={event => setComposerOpen(event.currentTarget.open)}>
-              <summary>Quick add · Just give it a name</summary>
+              <summary>＋ Add a task</summary>
+              <p className="pl-design-caption">Quick add · Just give it a name</p>
           <QuickCapture onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage} onMoreOptions={scrollToFullForm} />
           <details open={taskAddMoreOpen} onToggle={(event) => setTaskAddMoreOpen(event.currentTarget.open)} style={{ marginTop: 10 }}>
             <summary style={{ minHeight: 44, display: "list-item", alignContent: "center", cursor: "pointer", fontSize: 13, fontWeight: 900, color: "var(--pl-theme-muted,#7B6888)" }}>Templates, imports & custom schedules</summary>

@@ -172,9 +172,9 @@ function PlushLab({ props }) {
 }
 
 export function GoldStoryExperience(props) {
-  return <><GoldStoryView {...props} /><PlushLab props={props} /></>;
+  return <><GoldStoryView {...props} /><details className="pl-design-card"><summary style={{minHeight:44,cursor:"pointer",fontWeight:800}}>Try a small change</summary><PlushLab props={props} /></details></>;
 }
 
 export function GoldSpacesExperience(props) {
-  return <><GoldSpacesView {...props} /><PlushLab props={props} /></>;
+  return <><GoldSpacesView {...props} /><details className="pl-design-card"><summary style={{minHeight:44,cursor:"pointer",fontWeight:800}}>Try a small change</summary><PlushLab props={props} /></details></>;
 }

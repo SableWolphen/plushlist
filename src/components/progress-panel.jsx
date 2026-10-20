@@ -1,3 +1,4 @@
+import { WorkspaceNavigation } from "./workspace-navigation.jsx";
 import { HabitStudio } from "./habit-studio.jsx";
 import { hasGoldFeature } from "../plush-gold.js";
 
@@ -15,12 +16,15 @@ function GrowthFallback() {
 export function ProgressPanel(props) {
   if (!props.open) return null;
   const goldInsights = hasGoldFeature("advanced_growth_insights");
-  if (goldInsights && props.progressView === "story") return <React.Suspense fallback={<GrowthFallback />}><LazyGoldStoryView {...props} /></React.Suspense>;
-  if (goldInsights && props.progressView === "areas") return <React.Suspense fallback={<GrowthFallback />}><LazyGoldSpacesView {...props} /></React.Suspense>;
+  const content = goldInsights && props.progressView === "story" ? <LazyGoldStoryView {...props} hideNavigation />
+    : goldInsights && props.progressView === "areas" ? <LazyGoldSpacesView {...props} hideNavigation />
+    : <LazyExistingProgressPanel {...props} hideNavigation />;
   return <div className="pl-progress-page">
-    <React.Suspense fallback={<GrowthFallback />}><LazyExistingProgressPanel {...props} /></React.Suspense>
+    <WorkspaceNavigation label="Progress sections" items={[["overview","Overview"],["story","My story"],["areas","Care areas"]]} value={props.progressView} onChange={props.setProgressView} />
+    <button type="button" className="pl-progress-plush-link" onClick={() => props.onOpenPlush?.()}>🧸 My Plush & Rewards <span aria-hidden="true">›</span></button>
+    <React.Suspense fallback={<GrowthFallback />}>{content}</React.Suspense>
     {props.progressView === "overview" && <details className="pl-progress-extras">
-      <summary>More progress tools <span>Habits & keepsakes →</span></summary>
+      <summary>Habits & memories</summary>
       <div className="pl-progress-extras-body">
         <HabitStudio compact initialTab="week"/>
         <React.Suspense fallback={null}><LazyGrowthMoments user={props.user} /></React.Suspense>

@@ -53,5 +53,5 @@ assert.ok(progress.includes("<CozyWeeklyStory userId={user?.id}"),"Progress shou
 assert.ok(tasks.includes("<RoutineStarter onChoose="),"Templates must be wired to safe task import");
 assert.ok(onboarding.includes("onFirstTask"),"Onboarding must allow a first choice");
 assert.ok(app.includes("task:onboardingFirstTask.trim()"),"First task must be persisted on onboarding");
-assert.ok(app.includes("<span>Home</span>")&&app.includes("<span>Guardian</span>"),"Keep five clear bottom navigation destinations, including Guardian");
+assert.ok((app.match(/MAIN_DESTINATIONS.map/g)||[]).length === 2,"Keep five clear bottom navigation destinations, including Guardian");
 console.log("Cozy day experience tests passed: adaptive daily plan, focus wiring, privacy-safe story, routine preview and first-use onboarding.");

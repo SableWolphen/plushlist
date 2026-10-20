@@ -10,7 +10,7 @@ const QUICK_WHEN_OPTIONS = [
   { id: "someday", label: "Someday", emoji: "🌙" },
 ];
 
-export function QuickCapture({ onQuickAdd, quickAddMessage, onMoreOptions }) {
+export function QuickCapture({ compact = false, onQuickAdd, quickAddMessage, onMoreOptions }) {
   const [text, setText] = React.useState("");
   const [when, setWhen] = React.useState("today");
   const [busy, setBusy] = React.useState(false);
@@ -33,9 +33,9 @@ export function QuickCapture({ onQuickAdd, quickAddMessage, onMoreOptions }) {
   };
 
   return (
-    <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 8px 22px rgba(103,65,122,.06)" }}>
-      <div style={{ fontSize: 13, fontWeight: 900, color: "var(--pl-theme-ink,#8A6A21)" }}>⚡ QUICK ADD</div>
-      <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#7B6888)" }}>Got a thought buzzing? Park it here in seconds — no forms, no decisions.</div>
+    <div className={compact ? "pl-quick-capture-compact" : undefined} style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 8px 22px rgba(103,65,122,.06)" }}>
+      {!compact && <div style={{ fontSize: 13, fontWeight: 900, color: "var(--pl-theme-ink,#8A6A21)" }}>⚡ QUICK ADD</div>}
+      {!compact && <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#7B6888)" }}>Got a thought buzzing? Park it here in seconds — no forms, no decisions.</div>}
       <div style={{ display: "flex", gap: 7, marginTop: 10 }}>
         <input
           value={text}
@@ -50,7 +50,7 @@ export function QuickCapture({ onQuickAdd, quickAddMessage, onMoreOptions }) {
           {busy ? "…" : "Add ✨"}
         </button>
       </div>
-      <div style={{ display: "flex", gap: 7, marginTop: 9, flexWrap: "wrap" }} role="group" aria-label="When should this happen">
+      {!compact && <div style={{ display: "flex", gap: 7, marginTop: 9, flexWrap: "wrap" }} role="group" aria-label="When should this happen">
         {QUICK_WHEN_OPTIONS.map((option) => {
           const selected = when === option.id;
           return (
@@ -69,6 +69,7 @@ export function QuickCapture({ onQuickAdd, quickAddMessage, onMoreOptions }) {
           More options ↓
         </button>
       </div>
+      }
       {when === "someday" && (
         <div style={{ marginTop: 8, fontSize: 11.5, color: "var(--pl-theme-ink,#8A6A21)", lineHeight: 1.45 }}>🌙 Someday tasks rest quietly in your list — paused until you&rsquo;re ready. Resume one anytime from below.</div>
       )}

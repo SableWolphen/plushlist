@@ -44,7 +44,7 @@ export function DayRescue({ currentMode = "full", onSelect, openTaskManager }) {
   </section>;
 }
 
-export function EverydayActions({ userId, client, tasks = [], schedules = [], onQuickAdd, quickAddMessage,
+export function EverydayActions({ showQuickAdd = true, userId, client, tasks = [], schedules = [], onQuickAdd, quickAddMessage,
   onMoreOptions, onOpenTask, onOpenSchedule, onOpenNote, onOpenProgress, onOpenGuardian, onReviewScheduledTask }) {
   const [panel, setPanel] = React.useState("");
   const [query, setQuery] = React.useState("");
@@ -77,7 +77,7 @@ export function EverydayActions({ userId, client, tasks = [], schedules = [], on
   };
   return <div style={{ margin: "2px 0 12px", minWidth: 0 }}>
     <div role="group" aria-label="Find or add quickly" style={{display:"flex",gap:8}}>
-      <button type="button" aria-expanded={panel === "quick"} onClick={()=>setPanel(v=>v==="quick"?"":"quick")} style={{...button, flex:1}}>＋ Quick add</button>
+      {showQuickAdd && <button type="button" aria-expanded={panel === "quick"} onClick={()=>setPanel(v=>v==="quick"?"":"quick")} style={{...button, flex:1}}>＋ Quick add</button>}
       <button type="button" aria-expanded={panel === "search"} onClick={()=>setPanel(v=>v==="search"?"":"search")} style={{...button, flex:1}}>⌕ Find anything</button>
     </div>
     {panel === "quick" && <div style={{ marginTop: 9 }}>

@@ -19,6 +19,8 @@ const SITE_FILES = [
   "legal.html",
   "support.html",
   "account-deletion.html",
+  "business.html",
+  "plans-preview.html",
   "service-worker.js",
   "manifest.webmanifest",
   "icon.svg",

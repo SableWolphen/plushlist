@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { buildSync } from "esbuild";
 import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { createRequire } from "node:module";
 const source=fs.readFileSync("src/components/storybook-home.jsx","utf8");
 const page=fs.readFileSync("src/components/today-panel-core.jsx","utf8");
@@ -34,7 +35,7 @@ assert.ok(app.includes('setSyncStatus(status => status === "loading" ? "signed-o
 globalThis.React = React;
 globalThis.window = { PlushLifeThemeCopy: { worlds: {} } };
 window.PlushLifeSchedule=createRequire(import.meta.url)('../assets/plush-schedule.js');
-const { storybookRows, storybookGreeting, homeTaskPriority } = await import('data:text/javascript;base64,' + Buffer.from(build.outputFiles[0].text).toString('base64'));
+const { StorybookHome, storybookRows, storybookGreeting, homeTaskPriority } = await import('data:text/javascript;base64,' + Buffer.from(build.outputFiles[0].text).toString('base64'));
 const tasks = Array.from({length:16}, (_,i)=>({key:'task-'+i,label:'Task '+i}));
 assert.equal(storybookRows(tasks).length, 3, 'Home keeps a manageable three-task preview');
 const prioritized = [
@@ -79,3 +80,17 @@ for(const [world,atmosphere] of scenes){
   assert.ok(DARK_THEME_PALETTES[world]?.surface,world+' needs its own dark palette');
 }
 console.log("Teddy Storybook Home and startup-recovery regressions passed.");
+
+const expanded = storybookRows(tasks, {'task-0':true,'task-4':true}, tasks.length, 720, true);
+assert.equal(expanded.length,tasks.length,'Expanded Today includes the whole list, without leaving the page');
+assert(expanded.slice(-2).every(row=>row.done),'Completed tasks stay visible at the end of the expanded list');
+assert.equal(storybookRows([{key:'bonus',label:'Bonus',isBonus:true},{key:'old',label:'Old',sourceTask:{archived_at:'2026-10-13'}}],{},100,720,true).length,0);
+window.PlushLifeThemeCopy.worlds.soft = {asset:"soft"};
+let dailyMarkup;
+try { dailyMarkup = renderToStaticMarkup(React.createElement(StorybookHome,{userId:'home-test',rows:tasks,period:{date:'2026-10-20'},schedulePreview:React.createElement('p',null,'09:00 Test schedule')})); } catch(error) { throw new Error('Today render failed: '+error.message); }
+assert(dailyMarkup.includes('Show all 16 tasks here'),'Today offers inline expansion');
+assert(dailyMarkup.includes('Quickly add a task'),'The real task input is present in Today');
+assert(dailyMarkup.includes('09:00 Test schedule'),'The schedule can be read in Today');
+assert(!dailyMarkup.includes('When should this happen'),'Today capture avoids timing choices');
+assert(!dailyMarkup.includes('More options ↓'),'Today capture avoids another setup menu');
+console.log('Today hub passed: inline task list, retained completions, compact capture and schedule.');

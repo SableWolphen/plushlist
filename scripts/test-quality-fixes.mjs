@@ -41,10 +41,8 @@ assert.deepEqual(JSON.parse(values.get('wind-down:test')), { win: 'A tiny step' 
 
 const navDoc = fs.readFileSync('docs/plushlife-ui-source-of-truth.md', 'utf8');
 const app = fs.readFileSync('src/app-source.jsx', 'utf8');
-assert.ok(navDoc.includes('Home · Tasks · Care · Progress · Guardian'));
-for (const tab of ['Home', 'Tasks', 'Care', 'Progress', 'Guardian']) {
-  assert.ok(app.includes(`<span>${tab}</span>`), `Live navigation is missing ${tab}`);
-}
+assert.ok(navDoc.includes('Today · Plan · Care · Progress · Guardian'));
+assert.equal((app.match(/MAIN_DESTINATIONS.map/g)||[]).length,2, 'Desktop and mobile must render the same destination list');
 
 const alice = 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
 const bob = 'bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb';

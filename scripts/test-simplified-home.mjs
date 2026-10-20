@@ -15,7 +15,7 @@ buildSync({ entryPoints: ["src/components/today-panel-core.jsx", "src/components
 
 assert(home.includes('aria-label="Today\'s checklist"'), "The actual Home checklist remains primary");
 assert(home.indexOf('className="pl-storybook-today"') < home.indexOf('className="pl-storybook-doors"'), "Show tasks before actions");
-assert(home.indexOf('className="pl-storybook-doors"') < home.indexOf('className="pl-storybook-support"'), "Support customization must not push daily actions below the fold");
+assert(home.indexOf('className="pl-storybook-doors"') < home.indexOf('className="pl-storybook-lookahead"'), "Optional previews must not push daily actions below the fold");
 for(const [label,action] of [
   ["Check in", "openDailyCheckIn?.()"],
   ["Journal", "openTodayJournal?.()"],
@@ -25,25 +25,20 @@ for(const [label,action] of [
   assert(home.includes('<strong>'+label+'</strong>'), "Daily action missing: "+label);
   assert(home.includes(action), "Daily action handler missing: "+label);
 }
-assert(home.includes('onClick={()=>openTaskManager?.(period?.date)}>＋ Add a task'), "Home must offer direct task creation");
+assert(home.includes('<QuickCapture compact onQuickAdd={onQuickAdd}'), "Home must create tasks inline");
 assert(home.includes('toggle?.(row.key)'), "Checklist must still edit the real saved task state");
 assert(home.includes("habitTypeForRow(row)"), "Habit identity must remain visible");
-assert(home.includes("pl-storybook-support") && home.includes("<CompanionHomeCard userId={userId} onOpenGuardian="), "Guardian and custom Home tools stay available");
-assert(home.includes('>Open my Guardian</button>'), "Home Guardian tools must open the unified Guardian page");
+assert(!home.includes('className="pl-storybook-support"'), "Home should not duplicate Guardian settings");
+assert(home.includes('goToDashboard?.("guardian")'), "Home offers the unified Guardian entry");
 assert(home.includes("pl-storybook-lookahead") && home.includes("weekStory.line"), "Existing weekly recap and tomorrow plan remain available");
 assert.equal((today.match(/className="pl-home-extras"/g)||[]).length,1,"Only one all-tools hub should remain");
 assert.equal((today.match(/className="pl-storybook-planning"/g)||[]).length,1,"Only one planning drawer should remain");
-for(const [name,handler] of [
-  ["Calendar",'goToDashboard?.("week")'],
-  ["Habits",'openTaskManager?.(period?.date,"habits")'],
-  ["Routines",'goToDashboard?.("guardian")'],
-  ["Cozy Space",'window.__plushlifeOpenCozySpace=true'],
-  ["Calm",'setCalmQuickOpen?.(true)'],
-  ["Settings",'setSettingsOpen?.(true)'],
-]){
-  assert(today.includes(">"+name+"</span>"),"Missing Explore navigation: "+name);
-  assert(today.includes(handler),"Missing Explore handler: "+name);
-}
+assert(app.includes('<PlanNavigation view='), "Tasks and Calendar share Plan navigation");
+assert(home.includes('setSettingsOpen?.(true)'), "Settings stay available directly from Home");
+assert(today.includes('setCalmQuickOpen?.(true)'), "Calm stays available through daily support");
+assert(care.includes('<CozySpace '), "Cozy Space remains available in Care");
+assert(!today.includes('<details className="pl-home-advanced">'), "Do not nest a second More options drawer");
+
 for(const feature of ["<DayAgenda tasks=","<CompletedToday rows=","{homeSections.habits}","{optionalTools}","<CozyDayHome userId=","<DayRescue currentMode="]) {
   assert(today.includes(feature), "Secondary feature was deleted rather than organized: "+feature);
 }
@@ -59,7 +54,7 @@ assert(styles.includes("var(--pl-theme-surface)"),"New UI must inherit the selec
 assert(styles.includes("@media(max-width:345px)"),"Small phones need a dedicated layout");
 
 assert(care.includes("pl-reference-care-launchers"), "Care needs a clear four-action entry point");
-assert(care.includes('<strong>Guardian</strong>'), "Guardian stays accessible from Care");
+assert(care.includes('onSupport={props.onOpenSupport}'), "Cozy Space retains access to the primary Guardian destination");
 assert(!care.includes('className="pl-companion-care-entry"'), "Care should not repeat a separate Guardian promotional card");
 assert(care.indexOf('className="pl-care-card"') < care.indexOf('>🧸 My Cozy Space</summary>'), "Care's actual help flow must precede advanced customization");
 assert(care.includes('<CareHistory {...props} />'), "Care history must remain private and reachable");
