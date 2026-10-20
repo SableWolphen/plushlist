@@ -99,7 +99,7 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
       <button type="button" className="pl-storybook-door pl-door-focus" onClick={focus}><span className="pl-storybook-door-emoji" aria-hidden="true">⏱</span><strong>Focus</strong></button>
     </nav>
     {world === "baby-night" && <button type="button" className="pl-storybook-bedtime" onClick={()=>goToDashboard?.("guardian")}>🌙 Ready for my bedtime routine? <span aria-hidden="true">›</span></button>}
-    {(tomorrowPreviewRows.length > 0 || hasWeeklyStory) && <details className="pl-storybook-lookahead">
+    {(tomorrowPreviewRows.length > 0 || hasWeeklyStory) && <details className="pl-storybook-lookahead" style={{order:companion.home.order.length + 1}}>
       <summary>📅 Looking ahead <span>Tomorrow & my week</span></summary>
       {tomorrowPreviewRows.length > 0 && <section className="pl-storybook-tomorrow">
         <h3>Tomorrow's little plan</h3>
