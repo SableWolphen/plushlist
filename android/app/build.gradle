@@ -46,25 +46,19 @@ android {
     }
     buildTypes {
         release {
-            // Resource shrinking was temporarily disabled as a diagnostic
-            // while "Couldn't add widget" was under investigation — it
-            // stayed off even after that diagnostic build confirmed
-            // shrinking wasn't the cause (the real fix was a missing
-            // previewLayout on the widget's provider XML, unrelated to
-            // shrinking). Back on for the smaller release size; keep.xml
-            // still protects the widget's resources as defense in depth.
-            // Stability build: temporarily disable R8/resource shrinking so
-            // release-only stripping cannot remove classes/resources needed
-            // during startup on real devices. Re-enable after the crash is
-            // confirmed resolved.
-            minifyEnabled false
-            shrinkResources false
+            // Preserve reflected bridge entry points and widget resources using
+            // proguard-rules.pro and res/raw/keep.xml; CI builds this variant.
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             ndk {
                 debugSymbolLevel 'FULL'
             }
             if (hasReleaseSigning) {
                 signingConfig signingConfigs.release
+            } else if (project.hasProperty('plushlifeSmokeTest')) {
+                // CI installs the optimized variant without production credentials.
+                signingConfig signingConfigs.debug
             }
         }
     }

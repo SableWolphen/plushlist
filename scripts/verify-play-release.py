@@ -9,6 +9,13 @@ from zipfile import ZipFile
 def verify_bundle(bundle, sha):
     with ZipFile(bundle) as archive:
         build = json.loads(archive.read("base/assets/public/build-info.json"))
+        mapping = "BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map"
+        if mapping not in archive.namelist() or not archive.read(mapping).strip():
+            raise ValueError("Android bundle is missing its R8 mapping")
+        for name in archive.namelist():
+            if name.startswith("base/dex/") and name.endswith(".dex"):
+                if b"com/capacitorjs/plugins/statusbar/" in archive.read(name):
+                    raise ValueError("Android bundle still contains the legacy StatusBar plugin")
     if not sha or build.get("gitSha") != sha:
         raise ValueError("Android bundle does not contain the expected source revision")
 

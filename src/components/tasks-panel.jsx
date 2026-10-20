@@ -15,10 +15,8 @@ import { RoutineStarter } from "./cozy-day-experience.jsx";
 import { ThemeScene } from "./theme-world.jsx";
 import { useCompletedTaskFlow } from "./completed-task-flow.jsx";
 
-export function TasksPanel({ open, onClose, inline = false, initialView = "today", viewRequest = 0, rows = [], viewDone = {}, toggle, newTaskDay, setNewTaskDay, taskSectionsForDay, setNewTaskSection, setNewTaskCustomSection, starterPackId, setStarterPackId, trackerTasks, setStarterPackMessage, addStarterPack, starterPackMessage, importOpen, setImportOpen, newTaskSection, importText, setImportText, importTasksFromText, importMessage, newTaskNameInputRef, newTaskName, setNewTaskName, taskMessage, setTaskMessage, naturalScheduleText, setNaturalScheduleText, naturalSchedulePreview, setNaturalSchedulePreview, applyNaturalSchedule, newTaskSectionOptions, newTaskCustomSection, taskAdvancedOpen, setTaskAdvancedOpen, newTaskWhy, setNewTaskWhy, newTaskSoftLabel, setNewTaskSoftLabel, newTaskTinyLabel, setNewTaskTinyLabel, newTaskEstimatedMinutes, setNewTaskEstimatedMinutes, newTaskEssentialOnLow, setNewTaskEssentialOnLow, newTaskKind, setNewTaskKind, newTaskScheduleType, setNewTaskScheduleType, newTaskScheduleDays, setNewTaskScheduleDays, newTaskReminderTime, setNewTaskReminderTime, newTaskStartDate, setNewTaskStartDate, newTaskEndDate, setNewTaskEndDate, newTaskOneTimeDate, setNewTaskOneTimeDate, selectedProgressDate, addTrackerTask, SUPPORTER_FEATURES_ENABLED, isSupporterAccount, FREE_TASK_LIMIT_PER_DAY, taskSearchQuery, setTaskSearchQuery, isTaskPausedOnDate, period, startPointerTaskDrag, movePointerTaskDrag, endPointerTaskDrag, cancelPointerTaskDrag, moveTaskToSection, startEditingTask, resumeTrackerTask, pauseTrackerTask, archiveTrackerTask, setPendingTaskDelete, showArchivedTasks, setShowArchivedTasks, restoreArchivedTask, quickAddTrackerTask, quickAddMessage, onOpenSchedule }) {
+export function TasksPanel({ open, onClose, inline = false, initialView = "today", viewRequest = 0, rows = [], viewDone = {}, toggle, newTaskDay, setNewTaskDay, taskSectionsForDay, setNewTaskSection, setNewTaskCustomSection, starterPackId, setStarterPackId, trackerTasks, setStarterPackMessage, addStarterPack, starterPackMessage, importOpen, setImportOpen, newTaskSection, importText, setImportText, importTasksFromText, importMessage, selectedProgressDate, taskSearchQuery, setTaskSearchQuery, isTaskPausedOnDate, period, startPointerTaskDrag, movePointerTaskDrag, endPointerTaskDrag, cancelPointerTaskDrag, moveTaskToSection, startEditingTask, resumeTrackerTask, pauseTrackerTask, archiveTrackerTask, setPendingTaskDelete, showArchivedTasks, setShowArchivedTasks, restoreArchivedTask, quickAddTrackerTask, quickAddMessage, onOpenSchedule }) {
   const [taskView, setTaskView] = React.useState("today");
-  const [composerOpen, setComposerOpen] = React.useState(false);
-  const [taskAddMoreOpen, setTaskAddMoreOpen] = React.useState(false);
   const [showAllToday, setShowAllToday] = React.useState(false);
   const [plushHappy, setPlushHappy] = React.useState(false);
   const plushTimer = React.useRef(null);
@@ -29,12 +27,11 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
     plushTimer.current = window.setTimeout(() => setPlushHappy(false), 2200);
   };
   React.useEffect(() => () => { if (plushTimer.current) window.clearTimeout(plushTimer.current); }, []);
-  React.useEffect(() => { if (open) { setTaskView(initialView); setComposerOpen(!inline); setTaskAddMoreOpen(false); setShowAllToday(false); } }, [open, inline, initialView, viewRequest]);
+  React.useEffect(() => { if (open) { setTaskView(initialView); setShowAllToday(false); } }, [open, inline, initialView, viewRequest]);
   React.useEffect(() => {
     if (!open) return undefined;
     const showCapture = () => {
-      setComposerOpen(true);
-      window.requestAnimationFrame(() => document.querySelector('input[aria-label="Quickly add a task"]')?.focus?.());
+      window.requestAnimationFrame(() => document.querySelector('input[aria-label^="Quickly add a"]')?.focus?.());
     };
     window.addEventListener("plushlife:open-quick-add", showCapture);
     return () => window.removeEventListener("plushlife:open-quick-add", showCapture);
@@ -42,11 +39,6 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
   if (!open) return null;
   const { DAYS, TEMPLATE_PACKS } = window.PlushLifeContent;
   const { WEEKDAY_PRESET_IDS, WEEKEND_PRESET_IDS, scheduleLabelForTask, taskIsScheduledForDate, offsetDate } = window.PlushLifeSchedule;
-  const scrollToFullForm = () => {
-    setComposerOpen(true);
-    setTaskAddMoreOpen(true);
-    window.requestAnimationFrame(() => document.getElementById("plushlife-full-task-form")?.scrollIntoView?.({ behavior: "auto", block: "start" }));
-  };
   return (
           <ToolPanel title="🌷 Add & organize" displayTitle="Tasks" inline={inline} hideClose={inline} onClose={onClose}>
           <div className="pl-task-page">
@@ -55,11 +47,15 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
               <button type="button" onClick={onOpenSchedule}>📅 Edit schedule</button>
             </div>}
             {!inline && <div className="pl-design-tabs" role="tablist" aria-label="Task views">
-              {[["today", "Today"], ["habits", "Habits"], ["later", "Later"]].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={taskView === id} onClick={() => setTaskView(id)}>{label}{id === "habits" ? ` (${rows.filter(row=>row && habitTypeForRow(row)!=="regular").length})` : ""}</button>)}
+              {[["today", "Today"], ["habits", "Habits"], ["later", "Later"]].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={taskView === id} onClick={() => setTaskView(id)}>{label}{id === "habits" ? ` (${trackerTasks.filter(task=>!task.archived_at && habitTypeForRow(task)!=="regular").length})` : ""}</button>)}
             </div>}
+            <section className="pl-task-composer" aria-label={taskView === "habits" ? "Add a habit" : "Add a task"}>
+              <h3>{taskView === "habits" ? "Add a habit" : "Add a task"}</h3>
+              <QuickCapture key={taskView === "habits" ? "habit" : "task"} habit={taskView === "habits"} onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage} />
+            </section>
             <section className="pl-design-card" aria-label="Your task list">
               <div className="pl-task-title"><button type="button" className={`pl-mascot-pat ${plushHappy ? "pl-mascot-happy-hop" : ""}`} onClick={cheer} aria-label="Say hi to your plush"><ThemeScene focus decorative mood={plushHappy ? "happy" : "neutral"} /></button><h2>{taskView === "habits" ? "Habits" : taskView === "later" ? "Later" : "Tasks for the day"}</h2></div>
-              <p className="pl-design-caption">{taskView === "today" ? "Check things off, open details, or move them when the day changes." : "No need to do everything. Moving a task is allowed."}</p>
+              <p className="pl-design-caption">{taskView === "habits" ? "Check off today’s habits. Other days stay here for when you need them." : taskView === "today" ? "Check things off, open details, or move them when the day changes." : "No need to do everything. Moving a task is allowed."}</p>
               <details style={{ marginTop: 8 }}>
                 <summary style={{ cursor: "pointer", fontSize: 12, fontWeight: 800, color: "var(--pl-theme-muted,#806B8D)" }}>Find a task</summary>
                 <input style={{ marginTop: 7 }} value={taskSearchQuery} onChange={(event) => setTaskSearchQuery(event.target.value)} placeholder="Search your little list" aria-label="Search today's tasks" />
@@ -68,7 +64,9 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
                 const query = taskSearchQuery.trim().toLowerCase();
                 const visible = taskView === "later"
                   ? trackerTasks.filter(task => !task.archived_at && !taskIsScheduledForDate(task, selectedProgressDate || period.date) && (task.one_time_date > (selectedProgressDate || period.date) || Array.from({length:7}, (_, index) => offsetDate(selectedProgressDate || period.date, index + 1)).some(date => taskIsScheduledForDate(task, date)))).map(task => ({ key: task.task_key, label: task.task, sourceTask: task, later: true }))
-                  : rows.filter(row => row && (taskView !== "habits" || habitTypeForRow(row) !== "regular"));
+                  : taskView === "habits"
+                    ? trackerTasks.filter(task => !task.archived_at && habitTypeForRow(task) !== "regular").map(task => ({ key: task.task_key, label: task.task, sourceTask: task, later: !rows.some(row => row.key === task.task_key) }))
+                    : rows.filter(Boolean);
                 const matching = visible.filter(row => String(row.label || "").toLowerCase().includes(query));
                 const incompleteToday = taskView === "today" && !query ? matching.filter(row => !viewDone[row.key]) : matching;
                 const displayRows = taskView === "today" && !query && !showAllToday ? incompleteToday.slice(0, 5) : matching;
@@ -78,7 +76,7 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
                   {displayRows.map(row => <div className="pl-design-task" key={row.key} data-habit-kind={habitTypeForRow(row)}>
                     <button type="button" className="pl-task-toggle" aria-label={row.later ? `Edit ${row.label || "Untitled task"}` : `${viewDone[row.key] ? "Undo" : "Complete"} ${row.label || "Untitled task"}`} aria-pressed={row.later ? undefined : !!viewDone[row.key]} onClick={() => { if (row.later) { startEditingTask(row.sourceTask); return; } if (!viewDone[row.key]) cheer(); unifiedToggle(row.key); }}>
                       <span className={`pl-task-box ${!row.later && viewDone[row.key] ? "is-done" : ""}`} aria-hidden="true">{!row.later && viewDone[row.key] ? "✓" : ""}</span>
-                      <span><HabitTypeIcon task={row.sourceTask || row} habitType={habitTypeForRow(row)}/><strong>{row.label || "Untitled task"}</strong><HabitGoalCaption taskKey={row.key} fallbackGoal={row.goal}/><small>{row.later ? scheduleLabelForTask(row.sourceTask) : row.sourceTask?.estimated_minutes ? `${row.sourceTask.estimated_minutes} minutes · At your pace` : "One little step"}</small></span>
+                      <span><HabitTypeIcon task={row.sourceTask || row} habitType={habitTypeForRow(row)}/><strong>{row.label || "Untitled task"}</strong><HabitGoalCaption taskKey={row.key} fallbackGoal={row.goal}/><small>{row.later ? `Not due today · ${scheduleLabelForTask(row.sourceTask)}` : row.sourceTask?.estimated_minutes ? `${row.sourceTask.estimated_minutes} minutes · At your pace` : "One little step"}</small></span>
                     </button>
                     {row.sourceTask && (
                       <div className="pl-task-row-actions">
@@ -101,14 +99,8 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
                 </>;
               })()}
             </section>
-            {taskView === "habits" && <HabitStudio/>}
-            <details className="pl-task-composer" open={composerOpen} onToggle={event => setComposerOpen(event.currentTarget.open)}>
-              <summary>＋ Add a task</summary>
-              <p className="pl-design-caption">Quick add · Just give it a name</p>
-          <QuickCapture onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage} onMoreOptions={scrollToFullForm} />
-          <details open={taskAddMoreOpen} onToggle={(event) => setTaskAddMoreOpen(event.currentTarget.open)} style={{ marginTop: 10 }}>
-            <summary style={{ minHeight: 44, display: "list-item", alignContent: "center", cursor: "pointer", fontSize: 13, fontWeight: 900, color: "var(--pl-theme-muted,#7B6888)" }}>Templates, imports & custom schedules</summary>
-            <div style={{ paddingTop: 8 }}>
+            {taskView === "habits" && <details className="pl-habit-tools"><summary>Goals, weekly review & routines · optional</summary><HabitStudio/></details>}
+          <details className="pl-task-templates"><summary>Starter packs & import a list</summary>
           <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 8px 22px rgba(103,65,122,.06), inset 0 1px 0 rgba(255,255,255,.9)" }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: "var(--pl-theme-ink,#76558A)" }}>PICK A COZY SPOT</div>
             <div style={{ marginTop: 5, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#7B6888)" }}>Choose where this belongs. PlushLife will keep the rest tidy for you.</div>
@@ -173,124 +165,7 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
               </div>
             )}
           </div>
-          <div id="plushlife-full-task-form" style={{ marginBottom: 18, padding: 16, borderRadius: 16, background: "rgba(255,255,255,0.72)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
-            <div style={{ fontSize: 13, fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>ADD ONE LITTLE THING</div>
-            <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 10.5, fontWeight: 900, color: "var(--pl-theme-muted,#7D668C)" }}>
-              TASK NAME
-              <input ref={newTaskNameInputRef} value={newTaskName} onChange={(event) => { setNewTaskName(event.target.value); if (taskMessage === "Give the task a name first.") setTaskMessage(""); }} maxLength={240} placeholder="Example: Brush my teeth" aria-label="New task name" aria-invalid={taskMessage === "Give the task a name first."} aria-describedby={taskMessage ? "task-form-message" : undefined} style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: taskMessage === "Give the task a name first." ? "2px solid #C45D74" : "1px solid #E3C9EC" }} />
-            </label>
-            <div style={{ marginTop: 8, padding: 10, borderRadius: 12, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
-              <label style={{ display: "grid", gap: 4, fontSize: 10.5, fontWeight: 900, color: "var(--pl-theme-muted,#7B5D89)" }}>
-                SAY WHEN IT SHOULD HAPPEN · OPTIONAL
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  <input value={naturalScheduleText} onChange={(event) => { setNaturalScheduleText(event.target.value); setNaturalSchedulePreview(null); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); applyNaturalSchedule(); } }} placeholder="Weekdays at 8 PM" aria-label="Schedule in everyday language" style={{ flex: "1 1 190px", minWidth: 0, padding: 9, borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
-                  <button type="button" onClick={applyNaturalSchedule} style={{ padding: "8px 11px", borderRadius: 9, border: 0, background: "var(--pl-theme-accent)", color: "white", fontWeight: 900, cursor: "pointer" }}>Read it</button>
-                </div>
-              </label>
-              {naturalSchedulePreview && (
-                <div role="status" aria-live="polite" style={{ marginTop: 7, fontSize: 11.5, lineHeight: 1.45, color: naturalSchedulePreview.recognized ? "#2D6BB5" : "#9A6673" }}>
-                  {naturalSchedulePreview.recognized ? `✓ I understood: ${naturalSchedulePreview.summary}` : naturalSchedulePreview.summary}
-                </div>
-              )}
-              <div style={{ marginTop: 5, fontSize: 10.5, color: "var(--pl-theme-muted,#6B7C99)" }}>Try “every day at 8 AM,” “Tuesday and Friday,” “weekdays,” or “tomorrow at 6 PM.” You always review it before saving.</div>
-            </div>
-            <label style={{ display: "grid", gap: 4, marginTop: 7, fontSize: 10.5, fontWeight: 900, color: "var(--pl-theme-muted,#7D668C)" }}>
-              GROUP
-              <select value={newTaskSection} onChange={(event) => setNewTaskSection(event.target.value)} aria-label="Choose section" style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white" }}>
-                {newTaskSectionOptions.map((section) => <option key={section} value={section}>{section}</option>)}
-                {newTaskSectionOptions.length === 0 && <option value="My tasks">My tasks</option>}
-                <option value="__custom__">＋ Create a custom section…</option>
-              </select>
-            </label>
-            {newTaskSection === "__custom__" && <input value={newTaskCustomSection} onChange={(event) => setNewTaskCustomSection(event.target.value)} maxLength={120} aria-label="New section name" placeholder="Name your new section" style={{ width: "100%", boxSizing: "border-box", marginTop: 7, padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />}
-            <div style={{ marginTop: 7, padding: "8px 10px", borderRadius: 9, background: "var(--pl-theme-surface-2,#EEF9F6)", border: "1px solid var(--pl-theme-line,#E9DDF6)", color: "var(--pl-theme-ink,#318C79)", fontSize: 11.5, fontWeight: 900 }}>
-              ✓ Goes to: {(newTaskDay === "daily" ? "Every day" : DAYS.find((item) => item.id === newTaskDay)?.label) || newTaskDay.toUpperCase()} → {newTaskSection === "__custom__" ? (newTaskCustomSection.trim() || "your new section") : (newTaskSection || "My tasks")}
-            </div>
-
-            <button type="button" onClick={() => setTaskAdvancedOpen((open) => !open)} aria-expanded={taskAdvancedOpen} style={{ marginTop: 10, padding: "6px 10px", borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: taskAdvancedOpen ? "#F8EFFB" : "white", color: "var(--pl-theme-muted,#7D668C)", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>
-              ⚙️ More options — habit type, repeat schedule, why it matters {taskAdvancedOpen ? "▾" : "▸"}
-            </button>
-            {taskAdvancedOpen && (
-              <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
-                <label style={{ display: "grid", gap: 4, fontSize: 10.5, fontWeight: 900, color: "var(--pl-theme-muted,#7D668C)" }}>
-                  WHY DOES THIS MATTER TO YOU? · OPTIONAL
-                  <input value={newTaskWhy} onChange={(event) => setNewTaskWhy(event.target.value)} maxLength={300} placeholder="e.g. So I have energy for the people I love" aria-label="Why this task matters" style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
-                </label>
-                <div style={{ padding: 11, borderRadius: 12, background: "var(--pl-theme-surface-2,#F4FBF8)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
-                  <div style={{ fontSize: 10.5, fontWeight: 900, color: "var(--pl-theme-ink,#318C79)" }}>VERSIONS FOR DIFFERENT KINDS OF DAYS · OPTIONAL</div>
-                  <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#6B7F78)" }}>Keep the main name as the Full version. Add smaller versions so PlushLife can adapt without erasing the goal.</div>
-                  <input value={newTaskSoftLabel} onChange={(event) => setNewTaskSoftLabel(event.target.value)} maxLength={240} placeholder="Soft version — e.g. Take a quick shower" aria-label="Soft task version" style={{ width: "100%", boxSizing: "border-box", marginTop: 8, padding: 9, borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
-                  <input value={newTaskTinyLabel} onChange={(event) => setNewTaskTinyLabel(event.target.value)} maxLength={240} placeholder="Tiny version — e.g. Wash my face" aria-label="Tiny task version" style={{ width: "100%", boxSizing: "border-box", marginTop: 7, padding: 9, borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
-                  <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1.5fr)", gap: 7, marginTop: 7, alignItems: "center" }}>
-                    <input type="number" min="1" max="1440" value={newTaskEstimatedMinutes} onChange={(event) => setNewTaskEstimatedMinutes(event.target.value)} placeholder="Minutes" aria-label="Estimated minutes" style={{ minWidth: 0, padding: 9, borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
-                    <label style={{ display: "flex", gap: 7, alignItems: "center", fontSize: 11.5, color: "var(--pl-theme-ink,#5E766F)" }}><input type="checkbox" checked={newTaskEssentialOnLow} onChange={(event) => setNewTaskEssentialOnLow(event.target.checked)} /> Keep on Tiny and Recovery days</label>
-                  </div>
-                </div>
-                <label style={{ display: "grid", gap: 4, fontSize: 10.5, fontWeight: 900, color: "var(--pl-theme-muted,#7D668C)" }}>
-                  WHAT KIND OF TASK IS THIS?
-                  <select value={newTaskKind} onChange={(event) => setNewTaskKind(event.target.value)} aria-label="Choose task kind" style={{ width: "100%", padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white" }}>
-                    <option value="regular">Regular task</option>
-                    <option value="build">🌱 Build a habit</option>
-                    <option value="reduce">🍂 Reduce a habit</option>
-                  </select>
-                </label>
-                {newTaskKind !== "regular" && (
-                  <div style={{ padding: "8px 10px", borderRadius: 9, background: "var(--pl-theme-surface-2,#FFF9E9)", border: "1px solid var(--pl-theme-line,#E9DDF6)", color: "var(--pl-theme-ink,#8A6A21)", fontSize: 11.5, lineHeight: 1.45 }}>
-                    Each successful check-in adds to your lifetime progress and unlocks habit badges at 1, 3, 7, 14, and 30 total check-ins. Missing a day never sets that progress back.
-                  </div>
-                )}
-                <label style={{ display: "grid", gap: 4, fontSize: 10.5, fontWeight: 900, color: "var(--pl-theme-muted,#7D668C)" }}>
-                  HOW OFTEN SHOULD IT COME BACK?
-                  <select value={newTaskScheduleType} onChange={(event) => setNewTaskScheduleType(event.target.value)} aria-label="Choose repeating schedule" style={{ width: "100%", padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "white" }}>
-                    <option value="weekly">Every week</option>
-                    <option value="range">Only between two dates</option>
-                    <option value="once">Only one time</option>
-                  </select>
-                </label>
-                {newTaskScheduleType === "weekly" && (
-                  <div style={{ padding: 9, borderRadius: 10, background: "var(--pl-theme-surface,#FAF7FC)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
-                    <div style={{ fontSize: 10.5, fontWeight: 900, color: "var(--pl-theme-muted,#7D668C)" }}>SPECIFIC DAYS · OPTIONAL</div>
-                    <div style={{ display: "flex", gap: 5, marginTop: 7 }}>
-                      {[["Weekdays", WEEKDAY_PRESET_IDS], ["Weekend", WEEKEND_PRESET_IDS]].map(([presetLabel, presetDays]) => {
-                        const active = presetDays.length === newTaskScheduleDays.length && presetDays.every((id) => newTaskScheduleDays.includes(id));
-                        return <button key={presetLabel} type="button" aria-pressed={active} onClick={() => setNewTaskScheduleDays(active ? [] : presetDays)} style={{ flex: 1, padding: "6px 4px", borderRadius: 8, border: active ? "2px solid #A65DC1" : "1px solid #DCC9E8", background: active ? "#F2DEFA" : "white", color: active ? "#7E3D99" : "#6B5A7D", fontWeight: 900, fontSize: 10.5, cursor: "pointer" }}>{presetLabel}</button>;
-                      })}
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(7,minmax(0,1fr))", gap: 5, marginTop: 7 }}>
-                      {DAYS.map((item) => {
-                        const selected = newTaskScheduleDays.includes(item.id);
-                        return <button key={item.id} type="button" aria-pressed={selected} onClick={() => setNewTaskScheduleDays((days) => selected ? days.filter((id) => id !== item.id) : [...days, item.id])} style={{ minWidth: 0, padding: "7px 2px", borderRadius: 8, border: selected ? "2px solid #A65DC1" : "1px solid #DCC9E8", background: selected ? "#F2DEFA" : "white", color: selected ? "#7E3D99" : "#6B5A7D", fontWeight: 900, fontSize: 10, cursor: "pointer" }}>{item.label.slice(0, 3)}</button>;
-                      })}
-                    </div>
-                    <div style={{ marginTop: 5, fontSize: 10.5, color: "var(--pl-theme-muted,#8C6B9E)" }}>{newTaskScheduleDays.length ? "Only appears on the selected days." : "No days selected: uses the list chosen in Step 1."}</div>
-                  </div>
-                )}
-                <label style={{ display: "grid", gap: 4, fontSize: 10.5, fontWeight: 900, color: "var(--pl-theme-muted,#7D668C)" }}>
-                  TASK REMINDER TIME · OPTIONAL
-                  <input type="time" value={newTaskReminderTime} onChange={(event) => setNewTaskReminderTime(event.target.value)} aria-label="Task reminder time" style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} />
-                </label>
-                {newTaskScheduleType === "range" && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7 }}>
-                    <label style={{ fontSize: 11.5, fontWeight: 800 }}>Starts<input type="date" value={newTaskStartDate} onChange={(event) => setNewTaskStartDate(event.target.value)} style={{ width: "100%", boxSizing: "border-box", marginTop: 4, padding: 8, borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} /></label>
-                    <label style={{ fontSize: 11.5, fontWeight: 800 }}>Ends<input type="date" value={newTaskEndDate} onChange={(event) => setNewTaskEndDate(event.target.value)} style={{ width: "100%", boxSizing: "border-box", marginTop: 4, padding: 8, borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} /></label>
-                  </div>
-                )}
-                {newTaskScheduleType === "once" && (
-                  <label style={{ display: "block", fontSize: 11.5, fontWeight: 800 }}>Task date<input type="date" value={newTaskOneTimeDate || selectedProgressDate} onChange={(event) => setNewTaskOneTimeDate(event.target.value)} style={{ width: "100%", boxSizing: "border-box", marginTop: 4, padding: 8, borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)" }} /></label>
-                )}
-              </div>
-            )}
-            <button onClick={addTrackerTask} style={{ marginTop: 10, padding: "9px 13px", borderRadius: 10, border: 0, background: "var(--pl-theme-accent,#A65DC1)", color: "white", fontWeight: 900, cursor: "pointer" }}>Add this task ✨</button>
-            {SUPPORTER_FEATURES_ENABLED && !isSupporterAccount && (
-              <div style={{ marginTop: 8, fontSize: 11, color: "var(--pl-theme-muted,#8C6B9E)" }}>
-                {trackerTasks.filter((item) => item.day_id === "daily" || item.day_id === newTaskDay).length}/{FREE_TASK_LIMIT_PER_DAY} tasks used for this day on the free plan · 🌟 Supporters get unlimited
-              </div>
-            )}
-            {taskMessage && <div id="task-form-message" role={taskMessage.includes("first") || taskMessage.includes("Couldn't") ? "alert" : "status"} aria-live="polite" style={{ marginTop: 8, fontSize: 12, color: taskMessage.includes("first") || taskMessage.includes("Couldn't") ? "#B24D65" : "#8C6B9E", fontWeight: taskMessage.includes("first") ? 800 : 600 }}>{taskMessage}</div>}
-          </div>
-            </div>
           </details>
-            </details>
             <details className="pl-task-management"><summary>Manage saved tasks & archives</summary>
           <div style={{ marginBottom: 18, padding: 16, borderRadius: 16, background: "rgba(255,255,255,0.82)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
             <div style={{ fontSize: 13, fontWeight: 900, color: "var(--pl-theme-ink,#318C79)" }}>MANAGE MY {(newTaskDay === "daily" ? "EVERY DAY" : DAYS.find((day) => day.id === newTaskDay)?.label || newTaskDay.toUpperCase())} TASKS</div>

@@ -903,6 +903,15 @@ html[data-plushlife-color-mode="dark"] #main-content .pl-home-hero{
 }
 
 /* CARE */
+#main-content .pl-quick-capture label,
+.pl-task-edit-group label{display:grid;gap:6px;margin-top:10px;font-size:13px;}
+#main-content .pl-quick-capture select,
+.pl-task-edit-group input:not([type="checkbox"]){box-sizing:border-box;max-width:100%;width:100%;min-height:44px;padding:9px;border-radius:10px;border:1px solid var(--pl-theme-line,#E9DDF6);background:var(--pl-theme-surface,#fff);color:var(--pl-theme-ink,#5B4B6B);font-size:16px;}
+.pl-task-edit-group{margin-top:10px;}
+.pl-task-edit-group>summary,
+#main-content :is(.pl-task-templates,.pl-habit-tools)>summary{min-height:44px;align-content:center;cursor:pointer;}
+
+/* CARE */
 #main-content .pl-care-shell{
   gap:12px!important;
   padding-bottom:112px!important;
