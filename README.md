@@ -8,6 +8,10 @@ PlushLife is independently owned and is currently in Google Play closed testing.
 
 All current care, routine, Guardian, accessibility, and personalization features remain free, with no feature paywalls.
 
+## Business launch preview
+
+A draft business landing page (`business.html`), plans preview (`plans-preview.html`) and launch checklist (`BUSINESS_LAUNCH.md`) are proposed in the business launch PR. All paid plans are hypothetical; existing beta features remain free and payments are not enabled. Run `node scripts/test-business-launch.cjs` to check messaging and basic page integrity.
+
 ## Hosting
 
 PlushLife currently keeps two web hosts available:
