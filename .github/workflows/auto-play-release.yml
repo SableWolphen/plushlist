@@ -69,7 +69,9 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
+        timeout-minutes: 10
         with:
+          cmdline-tools-version: "12266719"
           packages: platform-tools
 
       - name: Install Android API 36

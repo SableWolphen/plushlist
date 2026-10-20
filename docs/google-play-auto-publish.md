@@ -20,6 +20,10 @@ the production release in Play Console before calling a release available.
 Missing signing or Play secrets are reported by the publishing gate. A green
 web build or CodeQL run alone is not proof of an Android update.
 
+Validation and both release workflows pin command-line tools 16.0 (build
+12266719), with a ten-minute setup timeout. The unpinned 22.0 SDK manager
+encountered malformed remote repository metadata during the October 20 check.
+
 ## Manual fallback and credential setup
 
 By default, the release workflow only builds a signed `.aab` and hands it to

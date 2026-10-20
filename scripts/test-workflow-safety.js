@@ -30,6 +30,7 @@ check(codeql.includes("Run complete app tests") && codeql.includes("run: npm tes
 check(auto.includes("ready=false") && auto.includes("needs.gate.outputs.ready == 'true'"), "missing Play credentials must skip publishing instead of failing the release job");
 check(auto.indexOf("--bundle-only") < auto.indexOf("- name: Publish to Google Play"), "Android source revision must be verified before publishing");
 check(auto.includes("- name: Verify source revision and Google Play track"), "Play upload must verify the resulting track version");
+check([codeql, auto, manual].every(source => source.includes('cmdline-tools-version: "12266719"') && source.includes('timeout-minutes: 10')), "Android validation and both release workflows must use the same bounded SDK tools setup");
 
 if (failures.length) {
   console.error("Workflow safety checks failed:\n- " + failures.join("\n- "));
