@@ -88,7 +88,24 @@ jobs:
 
       - name: Build Android sources for analysis
         working-directory: android
-        run: ./gradlew --no-daemon clean assembleDebug
+        run: |
+          node -e "const fs=require('fs'),p='app/src/main/assets/capacitor.config.json',c=JSON.parse(fs.readFileSync(p));c.loggingBehavior='production';fs.writeFileSync(p,JSON.stringify(c))"
+          ./gradlew --no-daemon clean assembleDebug assembleRelease -PplushlifeSmokeTest
+
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Smoke test optimized Android startup
+        uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 15
+        with:
+          api-level: 35
+          arch: x86_64
+          disable-animations: true
+          script: bash scripts/smoke-android-release.sh
 
       - name: Analyze
         uses: github/codeql-action/analyze@v4

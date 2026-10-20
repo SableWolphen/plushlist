@@ -47,7 +47,7 @@ for(const id of ["experience","recommendations","devices","rest","support","gold
   assert(settings.includes('["'+id+'",'),"Advanced settings missing: "+id);
 }
 assert(app.includes('<nav className="pl-app-bottom-nav" aria-label="Main navigation">'),"The existing five-tab navigation remains unchanged");
-assert(tasks.includes("<QuickCapture onQuickAdd="), "Fast task creation remains available");
+assert(tasks.includes("<QuickCapture key="), "Fast task creation remains available");
 assert(styles.includes("grid-template-columns:repeat(4,minmax(0,1fr))"),"Daily actions must fit four across");
 assert(styles.includes("#main-content .pl-home-tool-links"),"Explore tools must be easy to tap");
 assert(styles.includes("var(--pl-theme-surface)"),"New UI must inherit the selected theme, including dark mode");
@@ -62,5 +62,5 @@ assert(care.includes('<ExistingCarePanel {...props}'), "Calm, paths and sleep st
 assert(progress.includes('label: "Overview"') && progress.includes('label: "My Story"') && progress.includes('label: "Care Areas"'), "Progress views should have plain-English labels");
 assert(progress.includes('className="pl-progress-highlights"') && progress.includes("<CozyWeeklyStory") && progress.includes("<LittleWins"), "Weekly win panels should be optional without losing entries");
 assert(tasks.includes('["today", "Today"]'), "The default Tasks tab must clearly mean today");
-assert(tasks.includes("Quick add · Just give it a name"), "Quick task creation should be labeled clearly");
+assert(tasks.includes("Add a task"), "Quick task creation should be labeled clearly");
 console.log("Simplified PlushLife passed: focused Home, Care, Tasks, Progress, Settings, safe routing and theme-aware mobile layout.");

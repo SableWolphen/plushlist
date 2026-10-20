@@ -36,3 +36,12 @@
 # Store for a newer version on launch and forces an update if one exists).
 -keep class com.google.android.play.core.** { *; }
 -dontwarn com.google.android.play.core.**
+
+# Bridge calls and plugin callbacks are reached from JavaScript/reflection.
+-keepattributes RuntimeVisibleAnnotations,RuntimeInvisibleAnnotations,AnnotationDefault
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+-keep public class * extends com.getcapacitor.Plugin { *; }
+# RemoteViews components are instantiated by Android outside our process.
+-keep class com.PlushLife.PlushLifeWidget* { *; }

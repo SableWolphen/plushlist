@@ -27,7 +27,7 @@ expect(polish.includes("input,select,textarea { font-size:16px !important; }"), 
 expect(!polish.includes("fetch("), "experience polish must not add a third-party or analytics data flow");
 expect(completionRuntime.includes("place-items:center") && !completionRuntime.includes("place-items:end center"), "PlushQA must use the same centered-modal pattern");
 expect(completionRuntime.includes('data-plushlife-qa-entry=\"true\"') || completionRuntime.includes("dataset.plushlifeQaEntry"), "admin QA entry must remain identifiable for quiet-mode styling");
-expect(tasks.includes("natural-language schedule parsing") && tasks.includes('aria-label=\"Schedule in everyday language\"'), "natural-language task scheduling must remain available");
+expect(fs.readFileSync("src/app-source.jsx", "utf8").includes('aria-label="Schedule in everyday language"'), "natural-language task scheduling must remain available in Edit");
 expect(completion.includes("navigator.vibrate") && completion.includes("Undo is available"), "completion feedback and undo must remain available");
 
 // Product choice: preserve the existing multi-action screen structure. These

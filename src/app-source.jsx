@@ -24,6 +24,7 @@ import { EverydayActions } from "./components/everyday-upgrades.jsx";
 import { loadHistoryRows } from "./care-history-data.js";
 import { normalizeHomeLayout } from "./home-layout.js";
 import { removeTrackerTask, restoreTrackerTask } from "./task-lifecycle.mjs";
+import { quickTaskSchedule } from "./quick-task-schedule.mjs";
 import { sameScheduleEntries } from "./schedule-persistence.mjs";
 import { summarizeGuardianProgress } from "./guardian-progress-summary.mjs";
 import { FIGMA_WORLDS, ThemeWorldContext, CozyScene, DesignIcon } from "./components/theme-world.jsx";
@@ -2886,12 +2887,8 @@ function GlowUpTracker() {
   const applyNaturalSchedule = () => {
     const parsed = previewNaturalSchedule();
     if (!parsed.recognized) return;
-    setNewTaskDay(parsed.day_id || "daily");
-    setNewTaskScheduleDays(parsed.schedule_days || []);
-    setNewTaskScheduleType(parsed.schedule_type || "weekly");
-    setNewTaskOneTimeDate(parsed.one_time_date || "");
-    setNewTaskReminderTime(parsed.reminder_time || "");
-    setTaskMessage(`Schedule ready: ${parsed.summary}. Review it, then add your task.`);
+    setEditTaskDraft(draft => draft ? ({ ...draft, day_id: parsed.day_id || "daily", schedule_days: parsed.schedule_days || [], schedule_type: parsed.schedule_type || "weekly", one_time_date: parsed.one_time_date || "", reminder_time: parsed.reminder_time || "" }) : draft);
+    setTaskMessage("Schedule ready. Review it, then save changes.");
   };
 
   const importTasksFromText = async () => {
@@ -3122,14 +3119,15 @@ function GlowUpTracker() {
   // Same insert semantics as addTrackerTask (dedup, supporter cap, order),
   // but with smart defaults so it never asks a question. "someday" creates
   // the task paused indefinitely — resumable from the list anytime.
-  const quickAddTrackerTask = async (name, when) => {
+  const quickAddTrackerTask = async (name, when, options = {}) => {
+    const quickSchedule = quickTaskSchedule(options);
     if (!user) {
       setQuickAddMessage("Sign in first, then your quick adds will save.");
       return false;
     }
     const task = String(name || "").trim();
     if (!task) return false;
-    const targetDayId = when === "tomorrow" ? dayIdForDate(offsetDate(period.date, 1)) : todayDayId;
+    const targetDayId = quickSchedule.recurring ? "daily" : when === "tomorrow" ? dayIdForDate(offsetDate(period.date, 1)) : todayDayId;
     const matchingTask = trackerTasks.find((item) =>
       !item.archived_at &&
       (item.day_id === targetDayId || (targetDayId !== "daily" && item.day_id === "daily")) &&
@@ -3146,7 +3144,7 @@ function GlowUpTracker() {
         return false;
       }
     }
-    const someday = when === "someday";
+    const someday = !quickSchedule.recurring && when === "someday";
     const quickDate = when === "tomorrow" ? offsetDate(period.date, 1) : period.date;
     const sections = taskSectionsForDay(targetDayId);
     const section = sections[0] || "My tasks";
@@ -3160,14 +3158,14 @@ function GlowUpTracker() {
       day_id: targetDayId,
       section,
       task,
-      detail: encodeTaskDetail("regular"),
+      detail: encodeTaskDetail(quickSchedule.kind),
       sort_order: dayTasks.length + 1,
       is_bonus: sectionIsOptional(targetDayId, section),
-      schedule_type: someday ? "weekly" : "once",
+      schedule_type: quickSchedule.recurring || someday ? "weekly" : "once",
       start_date: null,
       end_date: null,
-      one_time_date: someday ? null : quickDate,
-      schedule_days: [],
+      one_time_date: quickSchedule.recurring || someday ? null : quickDate,
+      schedule_days: quickSchedule.days,
       reminder_time: null,
       why_note: "",
       soft_label: null,
@@ -3574,6 +3572,8 @@ function GlowUpTracker() {
   };
 
   const startEditingTask = (task) => {
+    setNaturalScheduleText("");
+    setNaturalSchedulePreview(null);
     setEditingTaskKey(task.task_key);
     setEditTaskDraft({
       ...task,
@@ -7438,32 +7438,10 @@ function GlowUpTracker() {
               <input value={editTaskDraft.task} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, task: event.target.value }))} maxLength={240} aria-label="Task name" style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC" }} />
             </label>
 
-            <div style={{ marginTop: 10 }}>
-              <div style={{ fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>LIST</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 6, marginTop: 6 }}>
-                {[{ id: "daily", label: "Every day" }, ...DAYS].map((item) => {
-                  const selected = editTaskDraft.day_id === item.id;
-                  return (
-                    <button key={item.id} type="button" aria-pressed={selected} onClick={() => setEditTaskDraft((draft) => ({ ...draft, day_id: item.id, section: taskSectionsForDay(item.id)[0] || draft.section }))} style={{ minWidth: 0, padding: "7px 4px", borderRadius: 9, border: selected ? "2px solid #A65DC1" : "1px solid #DCC9E8", background: selected ? "#F2DEFA" : "white", color: selected ? "#7E3D99" : "#6B5A7D", fontWeight: 900, fontSize: item.id === "daily" ? 10 : 11, cursor: "pointer" }}>
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>
-              GROUP
-              <select value={editTaskDraft.section} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, section: event.target.value }))} aria-label="Choose section" style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC", background: "white" }}>
-                {editTaskSectionOptions.map((section) => <option key={section} value={section}>{section}</option>)}
-                {editTaskDraft.section !== "__custom__" && !editTaskSectionOptions.includes(editTaskDraft.section) && <option value={editTaskDraft.section}>{editTaskDraft.section}</option>}
-                <option value="__custom__">＋ Create a custom section…</option>
-              </select>
-            </label>
-            {editTaskDraft.section === "__custom__" && (
-              <input value={editTaskDraft.custom_section} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, custom_section: event.target.value }))} maxLength={120} aria-label="New section name" placeholder="Name your new section" style={{ width: "100%", boxSizing: "border-box", marginTop: 7, padding: 9, borderRadius: 10, border: "1px solid #E3C9EC" }} />
-            )}
-
+            <details className="pl-task-edit-group"><summary>Schedule & reminder</summary>
+              <label>Describe a schedule · optional<input value={naturalScheduleText} onChange={event => { setNaturalScheduleText(event.target.value); setNaturalSchedulePreview(null); }} aria-label="Schedule in everyday language" placeholder="e.g. Weekdays at 8 PM"/></label>
+              <button type="button" onClick={applyNaturalSchedule}>Preview schedule</button>
+              {naturalSchedulePreview && <p role="status">{naturalSchedulePreview.summary}</p>}
             <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>
               HOW OFTEN SHOULD IT COME BACK?
               <select value={editTaskDraft.schedule_type || "weekly"} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, schedule_type: event.target.value }))} aria-label="Choose repeating schedule" style={{ width: "100%", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC", background: "white" }}>
@@ -7508,6 +7486,36 @@ function GlowUpTracker() {
               <input type="time" value={editTaskDraft.reminder_time || ""} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, reminder_time: event.target.value }))} aria-label="Task reminder time" style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC" }} />
             </label>
 
+</details>
+            <details className="pl-task-edit-group"><summary>List & group</summary>
+            <div style={{ marginTop: 10 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>LIST</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 6, marginTop: 6 }}>
+                {[{ id: "daily", label: "Every day" }, ...DAYS].map((item) => {
+                  const selected = editTaskDraft.day_id === item.id;
+                  return (
+                    <button key={item.id} type="button" aria-pressed={selected} onClick={() => setEditTaskDraft((draft) => ({ ...draft, day_id: item.id, section: taskSectionsForDay(item.id)[0] || draft.section }))} style={{ minWidth: 0, padding: "7px 4px", borderRadius: 9, border: selected ? "2px solid #A65DC1" : "1px solid #DCC9E8", background: selected ? "#F2DEFA" : "white", color: selected ? "#7E3D99" : "#6B5A7D", fontWeight: 900, fontSize: item.id === "daily" ? 10 : 11, cursor: "pointer" }}>
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>
+              GROUP
+              <select value={editTaskDraft.section} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, section: event.target.value }))} aria-label="Choose section" style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC", background: "white" }}>
+                {editTaskSectionOptions.map((section) => <option key={section} value={section}>{section}</option>)}
+                {editTaskDraft.section !== "__custom__" && !editTaskSectionOptions.includes(editTaskDraft.section) && <option value={editTaskDraft.section}>{editTaskDraft.section}</option>}
+                <option value="__custom__">＋ Create a custom section…</option>
+              </select>
+            </label>
+            {editTaskDraft.section === "__custom__" && (
+              <input value={editTaskDraft.custom_section} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, custom_section: event.target.value }))} maxLength={120} aria-label="New section name" placeholder="Name your new section" style={{ width: "100%", boxSizing: "border-box", marginTop: 7, padding: 9, borderRadius: 10, border: "1px solid #E3C9EC" }} />
+            )}
+
+</details>
+            <details className="pl-task-edit-group"><summary>Habit type & smaller steps</summary>
             <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>
               WHAT KIND OF TASK IS THIS?
               <select value={editTaskDraft.habit_type || "regular"} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, habit_type: event.target.value }))} aria-label="Choose task kind" style={{ width: "100%", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC", background: "white" }}>
@@ -7526,6 +7534,12 @@ function GlowUpTracker() {
               <input value={editTaskDraft.why_note || ""} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, why_note: event.target.value }))} maxLength={300} aria-label="Why this task matters" style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC" }} />
             </label>
 
+
+              <label>Smaller version<input value={editTaskDraft.soft_label || ""} onChange={event => setEditTaskDraft(draft => ({ ...draft, soft_label: event.target.value }))} aria-label="Soft task version" maxLength={240}/></label>
+              <label>Tiny version<input value={editTaskDraft.tiny_label || ""} onChange={event => setEditTaskDraft(draft => ({ ...draft, tiny_label: event.target.value }))} aria-label="Tiny task version" maxLength={240}/></label>
+              <label>Minutes<input type="number" min="1" max="1440" value={editTaskDraft.estimated_minutes || ""} onChange={event => setEditTaskDraft(draft => ({ ...draft, estimated_minutes: event.target.value }))} aria-label="Estimated minutes"/></label>
+              <label><input type="checkbox" checked={!!editTaskDraft.essential_on_low_capacity} onChange={event => setEditTaskDraft(draft => ({ ...draft, essential_on_low_capacity: event.target.checked }))}/> Keep on Tiny and Recovery days</label>
+</details>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
               <button type="button" onClick={() => { setEditingTaskKey(null); setEditTaskDraft(null); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid #D8C8E2", background: "white", color: "#76558A", fontWeight: 900 }}>Cancel</button>
               <button type="button" onClick={saveEditedTask} style={{ padding: "8px 12px", borderRadius: 10, border: 0, background: "#A65DC1", color: "white", fontWeight: 900 }}>Save changes</button>
@@ -7740,7 +7754,7 @@ function GlowUpTracker() {
           onOpenProgress={() => goToDashboard("progress")}
           onOpenGuardian={() => goToDashboard("guardian")} />
         </div>)}
-        <TasksPanel initialView={taskManagerView} viewRequest={taskManagerRequest} open={manageTasks || dashboard === "tasks"} inline={dashboard === "tasks"} rows={rows} viewDone={viewDone} toggle={toggle} onClose={() => { setManageTasks(false); if (dashboard === "tasks") goToDashboard("today"); }} newTaskDay={newTaskDay} setNewTaskDay={setNewTaskDay} taskSectionsForDay={taskSectionsForDay} setNewTaskSection={setNewTaskSection} setNewTaskCustomSection={setNewTaskCustomSection} starterPackId={starterPackId} setStarterPackId={setStarterPackId} trackerTasks={trackerTasks} setStarterPackMessage={setStarterPackMessage} addStarterPack={addStarterPack} starterPackMessage={starterPackMessage} importOpen={importOpen} setImportOpen={setImportOpen} newTaskSection={newTaskSection} importText={importText} setImportText={setImportText} importTasksFromText={importTasksFromText} importMessage={importMessage} newTaskNameInputRef={newTaskNameInputRef} newTaskName={newTaskName} setNewTaskName={setNewTaskName} taskMessage={taskMessage} setTaskMessage={setTaskMessage} naturalScheduleText={naturalScheduleText} setNaturalScheduleText={setNaturalScheduleText} naturalSchedulePreview={naturalSchedulePreview} setNaturalSchedulePreview={setNaturalSchedulePreview} applyNaturalSchedule={applyNaturalSchedule} newTaskSectionOptions={newTaskSectionOptions} newTaskCustomSection={newTaskCustomSection} taskAdvancedOpen={taskAdvancedOpen} setTaskAdvancedOpen={setTaskAdvancedOpen} newTaskWhy={newTaskWhy} setNewTaskWhy={setNewTaskWhy} newTaskSoftLabel={newTaskSoftLabel} setNewTaskSoftLabel={setNewTaskSoftLabel} newTaskTinyLabel={newTaskTinyLabel} setNewTaskTinyLabel={setNewTaskTinyLabel} newTaskEstimatedMinutes={newTaskEstimatedMinutes} setNewTaskEstimatedMinutes={setNewTaskEstimatedMinutes} newTaskEssentialOnLow={newTaskEssentialOnLow} setNewTaskEssentialOnLow={setNewTaskEssentialOnLow} newTaskKind={newTaskKind} setNewTaskKind={setNewTaskKind} newTaskScheduleType={newTaskScheduleType} setNewTaskScheduleType={setNewTaskScheduleType} newTaskScheduleDays={newTaskScheduleDays} setNewTaskScheduleDays={setNewTaskScheduleDays} newTaskReminderTime={newTaskReminderTime} setNewTaskReminderTime={setNewTaskReminderTime} newTaskStartDate={newTaskStartDate} setNewTaskStartDate={setNewTaskStartDate} newTaskEndDate={newTaskEndDate} setNewTaskEndDate={setNewTaskEndDate} newTaskOneTimeDate={newTaskOneTimeDate} setNewTaskOneTimeDate={setNewTaskOneTimeDate} selectedProgressDate={selectedProgressDate} addTrackerTask={addTrackerTask} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} isSupporterAccount={isSupporterAccount} FREE_TASK_LIMIT_PER_DAY={FREE_TASK_LIMIT_PER_DAY} taskSearchQuery={taskSearchQuery} setTaskSearchQuery={setTaskSearchQuery} isTaskPausedOnDate={isTaskPausedOnDate} period={period} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToSection={moveTaskToSection} startEditingTask={startEditingTask} resumeTrackerTask={resumeTrackerTask} pauseTrackerTask={pauseTrackerTask} archiveTrackerTask={archiveTrackerTask} setPendingTaskDelete={setPendingTaskDelete} showArchivedTasks={showArchivedTasks} setShowArchivedTasks={setShowArchivedTasks} restoreArchivedTask={restoreArchivedTask} quickAddTrackerTask={quickAddTrackerTask} quickAddMessage={quickAddMessage} onOpenSchedule={() => setManageSchedule(true)} />
+        <TasksPanel initialView={taskManagerView} viewRequest={taskManagerRequest} open={manageTasks || dashboard === "tasks"} inline={dashboard === "tasks"} rows={rows} viewDone={viewDone} toggle={toggle} onClose={() => { setManageTasks(false); if (dashboard === "tasks") goToDashboard("today"); }} newTaskDay={newTaskDay} setNewTaskDay={setNewTaskDay} taskSectionsForDay={taskSectionsForDay} setNewTaskSection={setNewTaskSection} setNewTaskCustomSection={setNewTaskCustomSection} starterPackId={starterPackId} setStarterPackId={setStarterPackId} trackerTasks={trackerTasks} setStarterPackMessage={setStarterPackMessage} addStarterPack={addStarterPack} starterPackMessage={starterPackMessage} importOpen={importOpen} setImportOpen={setImportOpen} newTaskSection={newTaskSection} importText={importText} setImportText={setImportText} importTasksFromText={importTasksFromText} importMessage={importMessage} selectedProgressDate={selectedProgressDate} taskSearchQuery={taskSearchQuery} setTaskSearchQuery={setTaskSearchQuery} isTaskPausedOnDate={isTaskPausedOnDate} period={period} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToSection={moveTaskToSection} startEditingTask={startEditingTask} resumeTrackerTask={resumeTrackerTask} pauseTrackerTask={pauseTrackerTask} archiveTrackerTask={archiveTrackerTask} setPendingTaskDelete={setPendingTaskDelete} showArchivedTasks={showArchivedTasks} setShowArchivedTasks={setShowArchivedTasks} restoreArchivedTask={restoreArchivedTask} quickAddTrackerTask={quickAddTrackerTask} quickAddMessage={quickAddMessage} onOpenSchedule={() => setManageSchedule(true)} />
 
         <ScheduleEditorPanel open={manageSchedule} onClose={() => setManageSchedule(false)} scheduleEditingDayId={scheduleEditingDayId} setScheduleEditDayId={setScheduleEditDayId} personalSchedules={personalSchedules} scheduleDraft={scheduleDraft} updateScheduleEntry={updateScheduleEntry} removeScheduleEntry={removeScheduleEntry} addScheduleEntry={addScheduleEntry} savePersonalSchedule={savePersonalSchedule} copyScheduleToAllDays={copyScheduleToAllDays} clearPersonalSchedule={clearPersonalSchedule} copyToDayIds={copyToDayIds} toggleCopyToDay={toggleCopyToDay} copyScheduleToSelectedDays={copyScheduleToSelectedDays} scheduleMessage={scheduleMessage} scheduleExceptionDraft={scheduleExceptionDraft} setScheduleExceptionDraft={setScheduleExceptionDraft} updateScheduleExceptionEntry={updateScheduleExceptionEntry} removeScheduleExceptionEntry={removeScheduleExceptionEntry} addScheduleExceptionEntry={addScheduleExceptionEntry} saveScheduleException={saveScheduleException} scheduleExceptionMessage={scheduleExceptionMessage} scheduleExceptions={scheduleExceptions} deleteScheduleException={deleteScheduleException} onOpenTasks={() => { setManageSchedule(false); openTaskManager(period.date, "today"); }} />
 

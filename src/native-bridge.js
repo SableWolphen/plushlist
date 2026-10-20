@@ -29,7 +29,7 @@ import { virtualGuardianReminderCopy, guardianRoutineCopy, guardianTomorrowCopy,
   };
 
   initializeNativeFeature(function () {
-  if (Plugins.StatusBar) Plugins.StatusBar.setStyle({ style: "DARK" }).catch(function () {});
+  if (Plugins.SystemBars) Plugins.StatusBar.setStyle({ style: "LIGHT" }).catch(function () {});
   });
 
   initializeNativeFeature(function () {

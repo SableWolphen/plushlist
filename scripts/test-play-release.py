@@ -16,9 +16,22 @@ class PlayVerification(unittest.TestCase):
             bundle = Path(directory) / "app.aab"
             with ZipFile(bundle, "w") as archive:
                 archive.writestr("base/assets/public/build-info.json", json.dumps({"gitSha": "expected"}))
+                archive.writestr("BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map", "# R8 mapping")
             verify.verify_bundle(bundle, "expected")
             with self.assertRaises(ValueError):
                 verify.verify_bundle(bundle, "stale")
+
+    def test_native_optimization_and_legacy_plugin(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "app.aab"
+            for mapping, dex in ((None, b"modern"), ("# R8", b"Lcom/capacitorjs/plugins/statusbar/StatusBar;")):
+                with ZipFile(bundle, "w") as archive:
+                    archive.writestr("base/assets/public/build-info.json", json.dumps({"gitSha": "expected"}))
+                    archive.writestr("base/dex/classes.dex", dex)
+                    if mapping:
+                        archive.writestr("BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map", mapping)
+                with self.assertRaises(ValueError):
+                    verify.verify_bundle(bundle, "expected")
 
     def test_track_version_and_status(self):
         for status in ("completed", "inProgress"):

@@ -262,8 +262,8 @@
     if(guess?.parentElement) guess.parentElement.dataset.plushCheckinGuess="true";
 
     try{
-      const statusBar=window.Capacitor?.Plugins?.StatusBar;
-      statusBar?.setStyle?.({style:card.dataset.plushCheckinScheme==="dark"?"LIGHT":"DARK"}).catch?.(()=>{});
+      const statusBar=window.Capacitor?.Plugins?.SystemBars;
+      statusBar?.setStyle?.({style:card.dataset.plushCheckinScheme==="dark"?"DARK":"LIGHT"}).catch?.(()=>{});
     }catch(_){}
   }
 

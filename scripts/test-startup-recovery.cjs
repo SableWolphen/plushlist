@@ -48,10 +48,10 @@ assert.equal(create({createClient(){throw new Error('platform unavailable');}}),
 const bridge = fs.readFileSync('src/native-bridge.js','utf8').replace(/^import .*;$/gm,''); // VM simulates native setup without module imports
 let appStarted=0, pushStarted=0;
 const noop=()=>Promise.resolve({});
-const Plugins={StatusBar:{setStyle(){throw new Error('native unavailable');}}, App:{addListener(){appStarted++;return Promise.resolve({});}}, PushNotifications:{createChannel(){pushStarted++;return Promise.resolve();},addListener:noop}};
+const Plugins={SystemBars:{setStyle(){throw new Error('native unavailable');}}, App:{addListener(){appStarted++;return Promise.resolve({});}}, PushNotifications:{createChannel(){pushStarted++;return Promise.resolve();},addListener:noop}};
 vm.runInNewContext(bridge,{window:{Capacitor:{Plugins},addEventListener(){}},console:{error(){}}});
-assert.equal(appStarted,2,'A failing StatusBar must not prevent back/deep-link handlers');
-assert.equal(pushStarted,1,'A failing StatusBar must not prevent Guardian push setup');
+assert.equal(appStarted,2,'A failing SystemBars must not prevent back/deep-link handlers');
+assert.equal(pushStarted,1,'A failing SystemBars must not prevent Guardian push setup');
 
 const workerSetup = html.match(/<script>\s*\/\/ Packaged assets[\s\S]*?<\/script>/)[0].replace(/^<script>|<\/script>$/g,'');
 async function checkWorker(native, controlled) {
