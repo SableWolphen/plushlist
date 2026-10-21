@@ -243,9 +243,12 @@
     [role="dialog"][aria-modal="true"] > div:first-child,
     [data-plushlife-dialog-panel="true"] {
       box-sizing:border-box !important;
+      width:100% !important;
       width:min(var(--plush-modal-width),100%) !important;
+      max-width:var(--plush-modal-width) !important;
       max-width:min(var(--plush-modal-width),100%) !important;
       min-width:0 !important;
+      max-height:calc(100vh - 36px - var(--pl-safe-top,0px) - var(--pl-safe-bottom,0px)) !important;
       max-height:min(82dvh,760px) !important;
       margin:auto !important;
       border-radius:22px !important;

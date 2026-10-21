@@ -156,6 +156,7 @@ public class EdgeToEdgeInstrumentation extends Instrumentation {
             assertSafeLayout("landscape");
             evaluate("document.querySelector('.pl-tool-backdrop').style.display='grid'");
             SystemClock.sleep(300);
+            android.util.Log.i("PlushLifeEdgeTest", "dialog=" + evaluate("(() => {const r=document.querySelector('.pl-tool-panel').getBoundingClientRect();return {x:r.left,y:r.top,right:r.right,bottom:r.bottom,w:innerWidth,h:innerHeight};})()"));
             assertEquals("Dialog fits the padded backdrop in landscape", "true", evaluate("(() => {const p=document.querySelector('.pl-tool-panel').getBoundingClientRect(),b=document.querySelector('.pl-tool-backdrop'),s=getComputedStyle(b);return p.top>=parseFloat(s.paddingTop)-1&&p.left>=parseFloat(s.paddingLeft)-1&&p.right<=innerWidth-parseFloat(s.paddingRight)+1&&p.bottom<=innerHeight-parseFloat(s.paddingBottom)+1;})()"));
             evaluate("document.querySelector('.pl-tool-backdrop').style.display='none'");
             instrumentation.runOnMainSync(() -> activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
@@ -176,7 +177,7 @@ public class EdgeToEdgeInstrumentation extends Instrumentation {
             while (!keyboardVisible() && SystemClock.uptimeMillis() < deadline) SystemClock.sleep(150);
             assertTrue("Real keyboard visible", keyboardVisible());
             waitFor("innerHeight<" + (oldHeight - 50), "WebView resized above keyboard");
-            assertEquals("Navigation stays inside resized viewport", "true", evaluate("document.querySelector('.pl-app-bottom-nav').getBoundingClientRect().bottom<=innerHeight+1"));
+            assertEquals("Navigation stays inside resized viewport", "true", evaluate("innerHeight>100 && document.querySelector('#edge-input').getBoundingClientRect().bottom<=innerHeight+1 && document.querySelector('.pl-app-bottom-nav').getBoundingClientRect().top>=-1 && document.querySelector('.pl-app-bottom-nav').getBoundingClientRect().bottom<=innerHeight+1"));
             instrumentation.sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);
             waitFor("innerHeight>=" + (oldHeight - 2), "Viewport restored after keyboard closes");
             assertSafeLayout("keyboard dismissed");

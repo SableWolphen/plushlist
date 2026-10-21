@@ -1445,6 +1445,7 @@ html[data-plushlife-color-mode="dark"] #main-content .pl-home-hero{
 /* Keep modals/sheets usable above both Android and app navigation. */
 #main-content [role="dialog"]>div,
 body>[role="dialog"]>div{
+  max-height:calc(100vh - 32px - var(--pl-safe-top,0px) - var(--pl-safe-bottom,0px))!important;
   max-height:calc(100dvh - 32px - var(--pl-safe-top,0px) - var(--pl-safe-bottom,0px))!important;
   overscroll-behavior:contain!important;
 }
@@ -1933,14 +1934,20 @@ html[data-pl-companion-text=large] .pl-guardian-companion{font-size:18px}
 /* Edge-to-edge: tools and wide/landscape navigation share the same safe area.
    Native-padded older WebViews inject zero, so these do not double the inset. */
 .pl-tool-backdrop.pl-tool-backdrop{
+  grid-template-columns:minmax(0,1fr)!important;
+  grid-template-rows:minmax(0,1fr)!important;
   box-sizing:border-box!important;
   padding:12px!important;
   padding:max(12px,var(--pl-safe-top)) max(12px,var(--pl-safe-right)) max(12px,var(--pl-safe-bottom)) max(12px,var(--pl-safe-left))!important;
 }
-.pl-tool-backdrop.pl-tool-backdrop>.pl-tool-panel{
-  max-width:100%!important;
-  max-height:calc(100vh - 24px - var(--pl-safe-top) - var(--pl-safe-bottom))!important;
-  max-height:calc(100dvh - max(12px,var(--pl-safe-top)) - max(12px,var(--pl-safe-bottom)))!important;
+.pl-tool-backdrop.pl-tool-backdrop>.pl-tool-panel,
+#main-content .pl-tool-backdrop>.pl-tool-panel{
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:760px!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-height:100%!important;
 }
 #main-content#main-content[data-pl-world] .pl-app-bottom-nav{
   left:calc(50% + (var(--pl-safe-left) - var(--pl-safe-right)) / 2)!important;
