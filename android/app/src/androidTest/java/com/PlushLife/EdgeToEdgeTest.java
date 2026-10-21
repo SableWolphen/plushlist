@@ -105,6 +105,8 @@ public class EdgeToEdgeTest {
         try {
             instrumentation.runOnMainSync(() -> web = findWebView(activity.getWindow().getDecorView()));
             assertNotNull("Capacitor WebView created", web);
+            android.content.pm.PackageInfo webPackage = WebView.getCurrentWebViewPackage();
+            android.util.Log.i("PlushLifeEdgeTest", "API=" + Build.VERSION.SDK_INT + " WebView=" + (webPackage == null ? "unknown" : webPackage.versionName));
             String css = "";
             for (String asset : new String[]{"figma-design.css", "final-mobile-ui.css"}) {
                 try (java.io.InputStream stream = activity.getAssets().open("public/assets/" + asset)) {

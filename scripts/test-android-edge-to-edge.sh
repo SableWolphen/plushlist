@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# The optimized app and its test APK share only CI's debug signing key.
-# Real system overlays exercise navigation modes and display-cutout insets.
+# The optimized app and test APK share only CI's debug signing key.
+adb install -r android/app/build/outputs/apk/release/app-release.apk
+adb install -r android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk
 adb shell settings put secure show_ime_with_hard_keyboard 1
 for mode in gestural threebutton; do
+  evidence="android/app/build/outputs/smoke/api-$1-$mode"
+  mkdir -p "$evidence"
+  adb logcat -c
   adb shell cmd overlay enable-exclusive --category "com.android.internal.systemui.navbar.$mode"
-  if ! adb shell cmd overlay list | grep -F "[x] com.android.internal.systemui.navbar.$mode"; then
-    echo "Navigation overlay was not applied: $mode"
-    exit 1
-  fi
+  overlays=$(adb shell cmd overlay list)
+  grep -F "[x] com.android.internal.systemui.navbar.$mode" <<< "$overlays"
   adb shell cmd overlay enable-exclusive --category com.android.internal.display.cutout.emulation.tall
-  adb shell cmd overlay list | grep -F '[x] com.android.internal.display.cutout.emulation.tall'
-  (cd android && ./gradlew --no-daemon :app:connectedReleaseAndroidTest -PplushlifeSmokeTest -Pandroid.testInstrumentationRunnerArguments.class=com.PlushLife.EdgeToEdgeTest --rerun)
-  mkdir -p "android/app/build/outputs/smoke/api-$1-$mode"
-  cp -R android/app/build/outputs/androidTest-results/connected/. "android/app/build/outputs/smoke/api-$1-$mode/"
-  adb logcat -d -s PlushLifeEdgeTest:I '*:S' > "android/app/build/outputs/smoke/api-$1-$mode/layout.txt"
+  overlays=$(adb shell cmd overlay list)
+  grep -F '[x] com.android.internal.display.cutout.emulation.tall' <<< "$overlays"
+  adb shell am instrument -w -e class com.PlushLife.EdgeToEdgeTest com.PlushLife.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.txt"
+  adb logcat -d -s PlushLifeEdgeTest:I AndroidRuntime:E '*:S' | tee "$evidence/layout.txt"
+  grep -F 'OK (1 test)' "$evidence/instrumentation.txt"
 done

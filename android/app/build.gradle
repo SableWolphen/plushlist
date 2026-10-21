@@ -62,6 +62,9 @@ android {
             } else if (project.hasProperty('plushlifeSmokeTest')) {
                 // CI installs the optimized variant without production credentials.
                 signingConfig signingConfigs.debug
+                // The test APK excludes dependencies shared with the app; retain
+                // its tracing entry points only in the CI-tested APK.
+                proguardFile 'proguard-smoke-test.pro'
             }
         }
     }
