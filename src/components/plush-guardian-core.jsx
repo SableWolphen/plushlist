@@ -123,7 +123,7 @@ export default function PlushGuardianCore(props) {
     setMessage(replies[kind]);
   };
   return (
-    <ToolPanel title="Plush Guardian" onClose={onClose}>
+    <ToolPanel title="PlushLife Support" onClose={onClose}>
       <div
         className={"pl-guardian-companion" + (state.prefs.careMode && state.prefs.littleMode ? " pl-guardian-little" : "")}
         style={state.prefs.careMode && state.prefs.littleMode ? { fontSize:"1.1rem", lineHeight:1.6 } : undefined}
@@ -148,12 +148,12 @@ export default function PlushGuardianCore(props) {
       >
         <div className="pl-companion-top">
           <div>
-            <span className="pl-companion-badge">Guardian · Automatic</span>
+            <span className="pl-companion-badge">PlushLife · Everyday support</span>
             <strong>{guardianBotDisplayName(state.prefs)}</strong>
-            <p>Automatic, rule-based help · No AI chat or conversations</p>
+            <p>Helpful suggestions and rewards · No AI chat</p>
           </div>
           <button
-            aria-label="Guardian settings"
+            aria-label="PlushLife support preferences"
             onClick={() => navigate("settings")}
           >
             ⚙
@@ -164,14 +164,14 @@ export default function PlushGuardianCore(props) {
             className="pl-companion-back"
             onClick={() => navigate("guardian")}
           >
-            ‹ Back to my Guardian
+            ‹ Back to my support
           </button>
         )}
         {page === "guardian" && (
           <>
             <section className="pl-companion-hero">
               <div>
-                <h2>Guardian</h2>
+                <h2>Your plush is here to help</h2>
                 <p>
                   {state.prefs.phrases ||
                     "Gentle reminders, routines, check-ins and encouragement — even without a human Guardian."}
@@ -184,7 +184,7 @@ export default function PlushGuardianCore(props) {
                 alt="Your Plush"
               />
             </section>
-            <section className="pl-virtual-guardian-options" aria-label="Automatic Guardian">
+            <section className="pl-virtual-guardian-options" aria-label="PlushLife automatic support">
               <h3>{guardianBotDisplayName(state.prefs)}</h3>
               {state.prefs.automaticReminders ? <>
                 <p role="status">{botPlan.encouragement}</p>
