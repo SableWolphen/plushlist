@@ -87,10 +87,11 @@ jobs:
           dependency-caching: true
 
       - name: Build Android sources for analysis
+        id: android_build
         working-directory: android
         run: |
           node -e "const fs=require('fs'),p='app/src/main/assets/capacitor.config.json',c=JSON.parse(fs.readFileSync(p));c.loggingBehavior='production';fs.writeFileSync(p,JSON.stringify(c))"
-          ./gradlew --no-daemon clean assembleDebug assembleRelease -PplushlifeSmokeTest
+          ./gradlew --no-daemon clean assembleDebug assembleRelease assembleReleaseAndroidTest -PplushlifeSmokeTest
 
       - name: Enable emulator acceleration
         run: |
@@ -98,16 +99,39 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Smoke test optimized Android startup
+      - name: Verify Android API 35 startup and edge-to-edge
         uses: reactivecircus/android-emulator-runner@v2
         timeout-minutes: 15
         with:
           api-level: 35
           arch: x86_64
           disable-animations: true
-          script: bash scripts/smoke-android-release.sh
+          script: |
+            bash scripts/smoke-android-release.sh
+            bash scripts/test-android-edge-to-edge.sh 35
+
+      - name: Verify edge-to-edge on Android API 29
+        if: ${{ !cancelled() && steps.android_build.conclusion == 'success' }}
+        uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 20
+        with:
+          api-level: 29
+          arch: x86_64
+          disable-animations: true
+          script: bash scripts/test-android-edge-to-edge.sh 29
+
+      - name: Verify edge-to-edge on Android API 36
+        if: ${{ !cancelled() && steps.android_build.conclusion == 'success' }}
+        uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 20
+        with:
+          api-level: 36
+          arch: x86_64
+          disable-animations: true
+          script: bash scripts/test-android-edge-to-edge.sh 36
 
       - name: Save optimized Android UI evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: android-release-smoke

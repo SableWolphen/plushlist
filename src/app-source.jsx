@@ -5231,7 +5231,7 @@ function GlowUpTracker() {
     const notice = document.createElement("div");
     notice.id = "pl-guardian-unlock";
     notice.setAttribute("role", "status");
-    notice.style.cssText = "position:fixed;bottom:calc(env(safe-area-inset-bottom, 0px) + 95px);left:16px;right:16px;max-width:430px;margin:0 auto;z-index:2147483000;padding:14px 16px;border-radius:20px;background:var(--pl-theme-surface,#352944);color:var(--pl-theme-ink,#fff);border:2px solid var(--pl-theme-line,#bc9ecb);box-shadow:0 10px 32px #0004;font-size:15px;";
+    notice.style.cssText = "position:fixed;bottom:calc(var(--pl-safe-bottom,0px) + 95px);left:16px;right:16px;max-width:430px;margin:0 auto;z-index:2147483000;padding:14px 16px;border-radius:20px;background:var(--pl-theme-surface,#352944);color:var(--pl-theme-ink,#fff);border:2px solid var(--pl-theme-line,#bc9ecb);box-shadow:0 10px 32px #0004;font-size:15px;";
     const copy = document.createElement("span");
     const allGifts = [...result.unlocked, ...gifts.unlocked];
     copy.textContent = allGifts.length === 1 ? "🎁 Guardian surprised you with " + allGifts[0].name + "! I'm proud of you!" : "🎁 Guardian has " + allGifts.length + " sweet surprises for you! You're doing lovely!";
@@ -6553,7 +6553,7 @@ function GlowUpTracker() {
       fontFamily: babyMode ? "'Comic Sans MS','Nunito','Segoe UI',sans-serif" : dinoTheme ? "'Baloo 2','Nunito','Avenir Next','Segoe UI',system-ui,sans-serif" : "'Avenir Next','Segoe UI',system-ui,sans-serif",
       color: preferences.high_contrast ? (preferences.dark_mode ? "#FFF8FF" : "#2D2038") : (activeThemePalette.ink || "#5B4B6B"),
       fontSize: babyMode ? "104%" : "100%",
-      padding: "max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))",
+      padding: "max(24px, var(--pl-safe-top,0px)) max(16px, var(--pl-safe-right,0px)) max(48px, var(--pl-safe-bottom,0px)) max(16px, var(--pl-safe-left,0px))",
       position: "relative",
       isolation: "isolate",
       "--pl-theme-on-accent": ["twilight", "baby-night"].includes(paletteWorld) ? "#29223E" : "#FFFFFF",
@@ -6589,10 +6589,10 @@ function GlowUpTracker() {
         /* compact-phone-shell */
         @media(max-width:520px){
           #main-content{
-            padding-top:max(12px,env(safe-area-inset-top))!important;
-            padding-left:env(safe-area-inset-left)!important;
-            padding-right:env(safe-area-inset-right)!important;
-            padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;
+            padding-top:max(12px,var(--pl-safe-top,0px))!important;
+            padding-left:var(--pl-safe-left,0px)!important;
+            padding-right:var(--pl-safe-right,0px)!important;
+            padding-bottom:calc(104px + var(--pl-safe-bottom,0px))!important;
           }
           .pl-unified-page-hero,.pl-unified-page-content{margin-left:8px!important;margin-right:8px!important}
           .pl-unified-page-content{--pl-card-radius:16px!important}
@@ -6719,7 +6719,7 @@ function GlowUpTracker() {
         .mamas-corner-kicker { font-size: 9.5px; letter-spacing: .12em; font-weight: 900; color: #A057B5; }
         .mamas-corner-title { margin-top: 2px; font-size: 14px; font-weight: 900; color: #68446F; }
         .mamas-corner-summary { padding: 0 12px 11px; color: #856B8B; font-size: 11px; line-height: 1.4; }
-        .mamas-private-window { position: fixed; inset: 0; z-index: 120; display: flex; align-items: stretch; justify-content: center; padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); background: rgba(48,35,57,.58); backdrop-filter: blur(8px); }
+        .mamas-private-window { position: fixed; inset: 0; z-index: 120; display: flex; align-items: stretch; justify-content: center; padding: max(10px, var(--pl-safe-top,0px)) max(10px, var(--pl-safe-right,0px)) max(10px, var(--pl-safe-bottom,0px)) max(10px, var(--pl-safe-left,0px)); background: rgba(48,35,57,.58); backdrop-filter: blur(8px); }
         .mamas-private-card { display: flex; width: min(620px, 100%); min-height: 0; flex-direction: column; overflow: hidden; border: 1px solid #D8B8E3; border-radius: 22px; background: linear-gradient(160deg,#FFF9FD,#F4EEFF 62%,#EDF9FF); box-shadow: 0 24px 70px rgba(43,25,53,.35); }
         .mamas-private-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 14px; border-bottom: 1px solid #E7D3EC; background: rgba(255,255,255,.72); }
         .mamas-private-header button { min-height: 36px; padding: 7px 12px; border: 1px solid #D9B8E8; border-radius: 11px; background: white; color: #80548E; font-weight: 900; cursor: pointer; }
@@ -6840,7 +6840,7 @@ function GlowUpTracker() {
             radial-gradient(circle at 76% 72%,#FFDCEB 0 15%,transparent 34%),
             linear-gradient(145deg,#FFF5FA,#F6EEFF 58%,#FFF1E8)!important;
         }
-        .dino-theme .pl-app-bottom-nav,.baby-mode .pl-app-bottom-nav{left:12px!important;right:12px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;border-radius:28px!important;border:2px solid #F3DDF2!important;box-shadow:0 12px 30px rgba(190,120,200,.20)!important}
+        .dino-theme .pl-app-bottom-nav,.baby-mode .pl-app-bottom-nav{left:12px!important;right:12px!important;bottom:calc(10px + var(--pl-safe-bottom,0px))!important;border-radius:28px!important;border:2px solid #F3DDF2!important;box-shadow:0 12px 30px rgba(190,120,200,.20)!important}
         .simple-mode .pl-home-hero{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(250,246,252,.9))!important}
         .simple-mode .pl-home-plush{display:block!important}
         .simple-mode .pl-home-logo,.simple-mode .pl-home-copy h1,.simple-mode .pl-home-copy p{text-shadow:none}
@@ -6938,7 +6938,7 @@ function GlowUpTracker() {
 
         /* Keep page content clear of the floating nav instead of letting cards slide underneath it. */
         #main-content .pl-unified-page-shell{
-          padding-bottom:calc(108px + env(safe-area-inset-bottom))!important;
+          padding-bottom:calc(108px + var(--pl-safe-bottom,0px))!important;
         }
         #main-content.dashboard-care .pl-care-shell,
         #main-content.dashboard-progress .pl-growth-shell,
@@ -6951,7 +6951,7 @@ function GlowUpTracker() {
         #main-content.dino-theme .pl-app-bottom-nav,
         #main-content.baby-mode .pl-app-bottom-nav{
           left:12px!important;right:12px!important;
-          bottom:max(8px,env(safe-area-inset-bottom))!important;
+          bottom:max(8px,var(--pl-safe-bottom,0px))!important;
           height:64px!important;min-height:64px!important;max-height:64px!important;
           padding:4px 8px!important;
           border-radius:24px!important;
@@ -6988,8 +6988,8 @@ function GlowUpTracker() {
         /* Plush should read as an app screen, not a desktop modal dropped over the tracker. */
         @media(max-width:520px){
           #main-content.rewards-open [data-plush-panel="🧸 Plush & Keepsakes"].pl-tool-backdrop{
-            inset:0 0 calc(64px + env(safe-area-inset-bottom)) 0!important;
-            padding:max(8px,env(safe-area-inset-top)) 8px 0!important;
+            inset:0 0 calc(64px + var(--pl-safe-bottom,0px)) 0!important;
+            padding:max(8px,var(--pl-safe-top,0px)) 8px 0!important;
             background:linear-gradient(180deg,#F9F4FC,#FFF9FC)!important;
             backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
           }
@@ -7049,7 +7049,7 @@ function GlowUpTracker() {
       `}</style>
       {preferences.reduced_motion && <style>{`*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}`}</style>}
       {swUpdateReady && !swUpdateDismissed && autoPopupToShow === null && (
-        <div role="status" style={{ position: "fixed", top: "max(10px, env(safe-area-inset-top))", left: "50%", transform: "translateX(-50%)", zIndex: 150, display: "flex", alignItems: "center", gap: 10, width: "max-content", maxWidth: "min(92vw, 430px)", padding: "10px 12px 10px 14px", borderRadius: 16, background: "rgba(255,253,255,.97)", border: "1px solid #E4CFF0", boxShadow: "0 12px 32px rgba(73,43,90,.18)", backdropFilter: "blur(10px)" }}>
+        <div role="status" style={{ position: "fixed", top: "max(10px, var(--pl-safe-top,0px))", left: "50%", transform: "translateX(-50%)", zIndex: 150, display: "flex", alignItems: "center", gap: 10, width: "max-content", maxWidth: "min(92vw, 430px)", padding: "10px 12px 10px 14px", borderRadius: 16, background: "rgba(255,253,255,.97)", border: "1px solid #E4CFF0", boxShadow: "0 12px 32px rgba(73,43,90,.18)", backdropFilter: "blur(10px)" }}>
           <span style={{ flex: "1 1 auto", minWidth: 0, fontSize: 13, fontWeight: 700, color: "#5B4B6B", lineHeight: 1.4 }}>✨ A fresher PlushLife is ready</span>
           <button type="button" onClick={() => window.location.reload()} style={{ flexShrink: 0, padding: "8px 14px", borderRadius: 12, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, fontSize: 12.5, cursor: "pointer" }}>Refresh</button>
           <button type="button" onClick={() => setSwUpdateDismissed(true)} aria-label="Dismiss update notice" style={{ flexShrink: 0, padding: "8px 10px", borderRadius: 12, border: "1px solid #E4CFF0", background: "white", color: "#8C6B9E", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>Later</button>
@@ -7690,7 +7690,7 @@ function GlowUpTracker() {
 
 
         <style>{`
-          .pl-unified-page-shell{display:grid;gap:8px;margin:0 auto;max-width:760px;color:#62506D;padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+          .pl-unified-page-shell{display:grid;gap:8px;margin:0 auto;max-width:760px;color:#62506D;padding-bottom:calc(104px + var(--pl-safe-bottom,0px))}
           .pl-unified-page-hero{position:relative;overflow:visible;margin:0;padding:5px 4px 7px;min-height:0;border-radius:0;background:transparent;border:0;box-shadow:none}
           .pl-unified-page-hero:before{display:none}
           .pl-unified-page-hero:after{display:none}
@@ -7706,11 +7706,11 @@ function GlowUpTracker() {
           .pl-unified-page-content button{transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
           .pl-unified-page-content button:active{transform:scale(.985)}
           .pl-unified-page-content input,.pl-unified-page-content textarea,.pl-unified-page-content select{border-color:#E4CEE9!important;border-radius:15px!important;background:#FFFDFE!important;box-shadow:inset 0 1px 2px rgba(92,58,109,.035)}
-          .pl-app-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:80;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;min-height:50px;padding:3px 8px max(3px,env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(255,253,254,.97),rgba(252,246,255,.97));border-top:1px solid #EEDFF1;box-shadow:0 -5px 18px rgba(73,43,90,.07);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+          .pl-app-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:80;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;min-height:50px;padding:3px 8px max(3px,var(--pl-safe-bottom,0px));background:linear-gradient(180deg,rgba(255,253,254,.97),rgba(252,246,255,.97));border-top:1px solid #EEDFF1;box-shadow:0 -5px 18px rgba(73,43,90,.07);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
           .pl-app-nav-btn{appearance:none;border:0;background:transparent;min-height:36px;padding:0 2px;color:#907895;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:7.8px;font-weight:900;cursor:pointer}.pl-app-nav-btn.active{color:#9C3EAC;background:linear-gradient(145deg,rgba(251,239,255,.82),rgba(255,246,251,.68))}.pl-app-nav-btn.active .ico{background:#F7E8FA;box-shadow:0 0 0 5px #F7E8FA;border-radius:10px;transform:translateY(-1px)}.pl-app-nav-btn .ico{font-size:16px;line-height:1;filter:saturate(.88);transition:transform .16s ease}
           .pl-app-nav-add{width:38px;height:38px;min-height:38px;margin-top:-10px;border-radius:50%;background:linear-gradient(145deg,#C85DDD,#E57BC8);color:white;box-shadow:0 7px 16px rgba(178,71,199,.2),0 0 0 3px rgba(255,250,253,.92);font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center}
           @media(min-width:760px){.pl-app-bottom-nav{left:50%;right:auto;width:760px;transform:translateX(-50%);border-left:1px solid #F0E1F1;border-right:1px solid #F0E1F1;border-radius:24px 24px 0 0}}
-          @media(max-width:520px){.pl-unified-page-shell{padding-bottom:calc(104px + env(safe-area-inset-bottom));gap:5px}.pl-app-bottom-nav{min-height:48px;padding-top:2px}.pl-app-nav-btn{min-height:44px;font-size:9px}.pl-app-nav-btn .ico{font-size:16px}.pl-app-nav-add{width:36px;height:36px;min-height:36px;font-size:19px;margin-top:-9px}.pl-unified-page-hero{min-height:0;padding:4px 2px 5px;border-radius:0}.pl-unified-wordmark{font-size:20px;letter-spacing:-.7px}.pl-unified-date{font-size:9px;padding:5px 7px}.pl-unified-gear{width:44px;height:44px;font-size:16px}.pl-unified-page-title{margin-top:4px;max-width:100%}.pl-unified-kicker{font-size:7.8px}.pl-unified-page-title h2{font-size:15px}.pl-unified-page-title p{display:none}.pl-unified-page-hero:after,.pl-unified-page-hero:before{display:none}}
+          @media(max-width:520px){.pl-unified-page-shell{padding-bottom:calc(104px + var(--pl-safe-bottom,0px));gap:5px}.pl-app-bottom-nav{min-height:48px;padding-top:2px}.pl-app-nav-btn{min-height:44px;font-size:9px}.pl-app-nav-btn .ico{font-size:16px}.pl-app-nav-add{width:36px;height:36px;min-height:36px;font-size:19px;margin-top:-9px}.pl-unified-page-hero{min-height:0;padding:4px 2px 5px;border-radius:0}.pl-unified-wordmark{font-size:20px;letter-spacing:-.7px}.pl-unified-date{font-size:9px;padding:5px 7px}.pl-unified-gear{width:44px;height:44px;font-size:16px}.pl-unified-page-title{margin-top:4px;max-width:100%}.pl-unified-kicker{font-size:7.8px}.pl-unified-page-title h2{font-size:15px}.pl-unified-page-title p{display:none}.pl-unified-page-hero:after,.pl-unified-page-hero:before{display:none}}
         `}</style>
 
         {false && dashboard !== "today" && <header className="pl-page-heading">
@@ -7792,13 +7792,13 @@ function GlowUpTracker() {
       </div>
       </div>
       {recentlyDeletedTask && (
-        <div className="pl-delete-toast" style={{ position: "fixed", left: "50%", bottom: "calc(68px + env(safe-area-inset-bottom))", transform: "translateX(-50%)", zIndex: 100, display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "#3B2E46", color: "white", boxShadow: "0 10px 30px rgba(0,0,0,0.25)", maxWidth: "92vw" }}>
+        <div className="pl-delete-toast" style={{ position: "fixed", left: "50%", bottom: "calc(68px + var(--pl-safe-bottom,0px))", transform: "translateX(-50%)", zIndex: 100, display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "#3B2E46", color: "white", boxShadow: "0 10px 30px rgba(0,0,0,0.25)", maxWidth: "92vw" }}>
           <span style={{ fontSize: 12.5 }}>🗑️ "{recentlyDeletedTask.label}" removed</span>
           <button type="button" onClick={undoDeleteTask} style={{ padding: "5px 10px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.4)", background: "transparent", color: "#F2D9FF", fontWeight: 900, cursor: "pointer", fontSize: 12.5, whiteSpace: "nowrap" }}>Undo</button>
         </div>
       )}
       {badgeCelebration && (
-        <div className="pl-badge-toast" role="status" style={{ position: "fixed", left: "50%", bottom: "calc(68px + env(safe-area-inset-bottom))", transform: "translateX(-50%)", zIndex: 101, display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "#3B2E46", color: "white", boxShadow: "0 10px 30px rgba(0,0,0,0.25)", maxWidth: "92vw" }}>
+        <div className="pl-badge-toast" role="status" style={{ position: "fixed", left: "50%", bottom: "calc(68px + var(--pl-safe-bottom,0px))", transform: "translateX(-50%)", zIndex: 101, display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "#3B2E46", color: "white", boxShadow: "0 10px 30px rgba(0,0,0,0.25)", maxWidth: "92vw" }}>
           <span style={{ fontSize: 12.5 }}>
             {badgeCelebration.intro} {badgeCelebration.badges.map((item) => `${item.badge} ${item.name}`).join(", ")}
           </span>

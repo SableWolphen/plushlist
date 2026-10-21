@@ -24,7 +24,7 @@ checks.push(
   [helpers.includes("plushlife-nursery-appearance"), "Nursery keeps its own visual theme without requiring dark mode"],
   [helpers.includes('section[aria-label="Weekly intention"]') && helpers.includes('section[aria-label="Little jobs"]'), "Nursery styling preserves and targets the existing content structure"],
   [entitlements.includes('./assets/nursery-theme.js'), "Nursery visual polish loads with the normal app runtime"],
-  [nurseryTheme.includes("padding-top:max(34px") && nurseryTheme.includes("safe-area-inset-top"), "Nursery stays below Android system chrome"],
+  [nurseryTheme.includes("padding-top:max(34px") && nurseryTheme.includes("--pl-safe-top"), "Nursery stays below Android system chrome"],
   [nurseryTheme.includes("MutationObserver"), "Nursery theme polish still follows the shared app surfaces"],
   [nurseryTheme.includes('[role=\"tablist\"]') && nurseryTheme.includes('button[aria-selected=\"true\"]'), "Nursery tabs use one consistent selected-state treatment"],
 );

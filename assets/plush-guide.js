@@ -67,7 +67,7 @@
   style.textContent = `
     #${ENTRY_ID}{width:100%;margin:10px 0 2px;border:1px solid #dec5e8;border-radius:16px;background:linear-gradient(135deg,#fff8fc,#f2edff);padding:13px 14px;text-align:left;color:#5b4b6b;font:800 14px system-ui,sans-serif;cursor:pointer}
     #${ENTRY_ID} small{display:block;margin-top:4px;font-weight:500;line-height:1.35;opacity:.78}
-    #${GUIDE_ID}{position:fixed;inset:0;z-index:2147483200;background:#32243b99;display:grid;place-items:end center;padding:16px 14px calc(16px + env(safe-area-inset-bottom));font-family:system-ui,sans-serif}
+    #${GUIDE_ID}{position:fixed;inset:0;z-index:2147483200;background:#32243b99;display:grid;place-items:end center;padding:16px 14px calc(16px + var(--pl-safe-bottom,0px));font-family:system-ui,sans-serif}
     #${GUIDE_ID} .pg-card{width:min(540px,100%);max-height:86vh;overflow:auto;border-radius:24px;background:#fff8fc;border:1px solid #ead7ef;box-shadow:0 20px 70px #26152f66;padding:18px;color:#5b4b6b}
     #${GUIDE_ID} .pg-head{display:flex;gap:12px;align-items:flex-start} #${GUIDE_ID} .pg-head>div{flex:1}
     #${GUIDE_ID} h2{margin:4px 0 5px;font-size:22px} #${GUIDE_ID} p{margin:0;line-height:1.45}
@@ -86,8 +86,8 @@
     #${TOUR_ID} .pgt-backdrop{position:absolute;inset:0;background:#271b3066;pointer-events:auto}
     #${TOUR_ID} .pgt-backdrop.has-spotlight{background:transparent}
     #${TOUR_ID} .pgt-spotlight{position:fixed;display:none;pointer-events:none;border:3px solid #f0b7ef;border-radius:14px;box-shadow:0 0 0 9999px #271b3066}
-    #${TOUR_ID} .pgt-tip{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(420px,calc(100% - 28px));border-radius:18px;background:#fff8fc;border:1px solid #dfc8e8;box-shadow:0 18px 55px #24152d66;padding:14px;color:#5b4b6b;pointer-events:auto}
-    #${TOUR_ID} .pgt-tip[data-position="top"]{top:calc(18px + env(safe-area-inset-top));bottom:auto}
+    #${TOUR_ID} .pgt-tip{position:fixed;left:50%;bottom:calc(18px + var(--pl-safe-bottom,0px));transform:translateX(-50%);width:min(420px,calc(100% - 28px));border-radius:18px;background:#fff8fc;border:1px solid #dfc8e8;box-shadow:0 18px 55px #24152d66;padding:14px;color:#5b4b6b;pointer-events:auto}
+    #${TOUR_ID} .pgt-tip[data-position="top"]{top:calc(18px + var(--pl-safe-top,0px));bottom:auto}
     #${TOUR_ID} .pgt-eyebrow{font-size:11px;font-weight:900;letter-spacing:.08em;color:#9b69aa;margin-bottom:4px}
     #${TOUR_ID} .pgt-title{font-size:17px;font-weight:900;margin-bottom:5px} #${TOUR_ID} .pgt-text{font-size:13px;line-height:1.45;color:#6f6278}
     #${TOUR_ID} .pgt-arrow{font-size:22px;text-align:center;height:24px;color:#9b69aa;line-height:24px;visibility:hidden}
