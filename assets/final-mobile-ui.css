@@ -1944,7 +1944,7 @@ html[data-pl-companion-text=large] .pl-guardian-companion{font-size:18px}
 #main-content .pl-tool-backdrop>.pl-tool-panel{
   box-sizing:border-box!important;
   width:100%!important;
-  max-width:760px!important;
+  max-width:var(--plush-modal-width,760px)!important;
   min-width:0!important;
   min-height:0!important;
   max-height:100%!important;
