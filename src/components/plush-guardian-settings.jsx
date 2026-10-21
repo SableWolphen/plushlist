@@ -6,6 +6,7 @@ import { guardianBotDisplayName } from "../guardian-mode.mjs";
 export function GuardianSettings({ userId, state, update, onForget, onDeleteChat }) {
   const [memory, setMemory] = React.useState("");
   const [confirm, setConfirm] = React.useState(false);
+  const [area, setArea] = React.useState("home");
   const prefs = state.prefs;
   const preference = (key, value) =>
     update({
@@ -32,8 +33,28 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
     update({ home: { ...state.home, order } });
   };
   return (
-    <section>
-      <h2>Make Guardian yours</h2>
+    <section className="pl-guardian-settings-hub">
+      {area !== "home" && <button type="button" className="pl-guardian-back" onClick={() => setArea("home")}>← Back to Guardian settings</button>}
+      {area === "home" && <>
+        <h2>My Guardian 🧸</h2>
+        <p>Choose what you want to change. Your preferences save as you go.</p>
+        <label className="pl-companion-check">
+          <input type="checkbox" checked={!prefs.guardianPaused} onChange={event => preference("guardianPaused", !event.target.checked)}/>
+          Guardian surprises on
+        </label>
+        <nav className="pl-guardian-settings-tiles" aria-label="Guardian settings categories">
+          {[
+            ["care","🍼","Care & Little Mode","Comfort and routines"],
+            ["rewards","🎁","Rewards","Surprises and treats"],
+            ["letters","💌","Letters & Support","Kind words and boundaries"],
+            ["reminders","🔔","Reminders","When Guardian checks in"],
+            ["personalize","⚙️","Personalize Guardian","Names, style and preferences"],
+          ].map(([id,icon,title,description]) => <button key={id} type="button" onClick={() => setArea(id)}><span aria-hidden="true">{icon}</span><strong>{title}</strong><small>{description}</small></button>)}
+        </nav>
+        <p className="pl-guardian-settings-note">Human Guardian sharing permissions are managed separately in My Guardian.</p>
+      </>}
+      {area === "personalize" && <>
+      <h2>Personalize Guardian</h2>
       <p>Start with a name and style. Everything else is optional.</p>
       <label>
         Guardian style
@@ -59,8 +80,11 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           placeholder={guardianBotDisplayName({voice:prefs.voice})}
         />
       </label>
-      <details className="pl-virtual-guardian-options pl-guardian-advanced" aria-label="Optional Guardian care and surprises">
-        <summary>🍼 Care, surprises & boundaries</summary>
+      </>}
+      {area === "care" && <>
+      <h2>Care & Little Mode</h2>
+      <div className="pl-virtual-guardian-options" aria-label="Optional Guardian care and surprises">
+
         <p>Optional routines and treats. You choose what fits.</p>
         <h3>🎁 Activity surprises</h3>
         <p>Choose your favorite activities once. Guardian occasionally picks one as a free surprise, without requiring chores or manual claiming.</p>
@@ -111,8 +135,10 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           </label>
           <p>You control every step. Changing, potty and bath checks are suggestions only; skip anything that doesn't fit. No points are deducted for resting.</p>
         </>}
-      </details>
-      <details className="pl-guardian-advanced"><summary>💜 More ways to personalize Guardian</summary>
+      </div>
+      </>}
+      {area === "personalize" && <>
+      <h3>More preferences</h3>
       <label>
         Guidance
         <select
@@ -149,8 +175,10 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           onChange={(e) => preference("phrases", e.target.value)}
         />
       </label>
-      </details>
-      <details className="pl-virtual-guardian-options pl-guardian-advanced" aria-label="Virtual Guardian reminders"><summary>🔔 Automatic reminders</summary>
+      </>}
+      {area === "reminders" && <>
+      <h2>Reminders</h2>
+      <div className="pl-virtual-guardian-options" aria-label="Virtual Guardian reminders">
         <h3>Guardian reminders</h3>
         <p>Automatic reminders follow your real tasks and routines when no person is connected. No AI or sharing is needed.</p>
         {!prefs.automaticReminders && <button type="button" className="pl-companion-primary" onClick={() => update({prefs:activateBotMommy(prefs)})}>Enable automatic Guardian 🧸</button>}
@@ -162,7 +190,10 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           {prefs.tomorrowNudges && <label>Tomorrow preview time <input type="time" value={prefs.tomorrowReminderTime} onChange={event => preference("tomorrowReminderTime", event.target.value)} /></label>}
         </>}
         <p>To receive reminders while the app is closed, enable notifications under Settings → Notifications & Reminders. PlushLife respects quiet hours, rest days and discreet lock-screen text. You can turn this off anytime. Without notification permission, your bot still helps when you open the app.</p>
-      </details>
+      </div>
+      </>}
+      {area === "letters" && <>
+      <h2>Letters & Support</h2>
       {state.chat.length > 0 && <details>
         <summary>Old saved chat history</summary>
         <p>PlushLife no longer offers AI chat in the Guardian. These older messages stay on this device until you choose to delete them.</p>
@@ -244,6 +275,8 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           </div>
         )}
       </details>
+      </>}
+      {area === "personalize" && <>
       <details>
         <summary>Make Home mine</summary>
         <p>
@@ -324,6 +357,15 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           />
         </label>
       </details>
+      </>}
+      {area === "rewards" && <>
+        <h2>Rewards & Surprises</h2>
+        <p>Choose your automatic Guardian rewards and surprise preferences.</p>
+        {check("automaticGifts", "Automatic little rewards")}
+        {check("surpriseBox", "Activity surprise box")}
+        {check("weekendSpecials", "Weekend treats")}
+        <p>Your earned rewards stay in My Guardian. These are virtual treats, never purchases.</p>
+      </>}
     </section>
   );
 }
