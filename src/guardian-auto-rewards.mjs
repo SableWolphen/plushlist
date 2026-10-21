@@ -53,8 +53,8 @@ export function autoGuardianGifts(ledger = [], rows = [], done = {}, date = "", 
   const denominator = Math.max(eligible.length, Number(progress.total) || 0);
   const percent = denominator ? eligible.filter(r=>!!done[r.key]).length * 100 / denominator : 0;
   const choices = ["🎬 Choose a movie and enjoy a cozy movie night","📖 Pick a story and plan a peaceful reading break","🎮 Set aside time for a favorite game","🧸 Plan some cozy plushie-and-music time","🖍️ Choose a fun coloring or creative activity","🌳 Pick a relaxing outdoor activity if you feel up to it","🛁 Plan a warm, relaxing self-care evening"];
-  const regular = DEFAULT_GUARDIAN_GIFTS.filter(g=>progress.newlyCompleted !== false && categories.includes(g.category) && percent >= g.threshold && !existing.includes(date+":"+g.threshold));
-  const activity = progress.newlyCompleted !== false && categories.includes("activities") && percent >= 75 && !existing.includes(date+":75")
+  const regular = DEFAULT_GUARDIAN_GIFTS.filter(g=>!progress.removedTask && progress.newlyCompleted !== false && categories.includes(g.category) && percent >= g.threshold && !existing.includes(date+":"+g.threshold));
+  const activity = !progress.removedTask && progress.newlyCompleted !== false && categories.includes("activities") && percent >= 75 && !existing.includes(date+":75")
     ? [{threshold:75,category:"activities",name:choices[Math.floor(Date.parse(date+"T12:00:00")/86400000)%choices.length]}] : [];
   const unlocked = [...regular,...activity,...babyDay];
   return { ledger:[...existing,...unlocked.map(g=>date+":"+g.threshold)].slice(-180), unlocked };
