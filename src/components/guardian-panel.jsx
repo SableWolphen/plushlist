@@ -68,6 +68,20 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
           <ToolPanel inline title="💛 PlushSupport" displayTitle="Guardians" onClose={onClose}>
           <div className="pl-guardian-content">
           <CozyScene title="My Guardian" subtitle="One place for support, little jobs, routines, encouragement and rewards." />
+          {supportViewMode === "mine" && mode === "automatic" && <section className="pl-guardian-smart-brief" aria-label="Guardian's gentle suggestion">
+            <div className="pl-guardian-smart-eyebrow">✨ A little help for right now</div>
+            <h2>{ownerIsRestingToday ? "Rest is part of your plan" : displayedSupportPercent >= 100 ? "You've done plenty today" : "One step at a time"}</h2>
+            <p>{ownerIsRestingToday
+              ? "You can rest without earning it. Would you like some comfort?"
+              : displayedSupportPercent >= 100
+                ? "Your effort counts. You could enjoy one of your saved rewards or take a break."
+                : "I can help you find a manageable next step. You always decide what to do."}</p>
+            <div className="pl-guardian-smart-actions">
+              <button type="button" onClick={() => ownerIsRestingToday ? openPlushGuardian("guardian") : openPlushGuardian("start")}>{ownerIsRestingToday ? "💗 Comfort ideas" : "🌱 Help me start"}</button>
+              <button type="button" onClick={() => openPlushGuardian("rewards")}>🎁 My rewards</button>
+            </div>
+            <small>Suggestions use your current app settings and progress, not an AI chat. Nothing is sent to an AI service.</small>
+          </section>}
           {supportViewMode === "mine" && <section className="pl-bot-guardian-entry" aria-label="Guardian support" style={{padding:15,borderRadius:17,background:"var(--pl-theme-surface-2)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
             {mode === "checking" ? <>
               <strong>Checking Guardian connection…</strong>
