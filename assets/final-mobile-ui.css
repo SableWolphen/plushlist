@@ -1709,6 +1709,10 @@ body>[role="dialog"]>div{
   html:has(#main-content),body:has(#main-content){overflow:hidden}
   #main-content#main-content[data-pl-world]{
     position:fixed!important;
+    top:0!important;
+    right:0!important;
+    bottom:auto!important;
+    left:0!important;
     inset:0 0 auto!important;
     height:calc(100vh - var(--pl-nav-space))!important;
     height:calc(100dvh - var(--pl-nav-space))!important;
@@ -1934,6 +1938,7 @@ html[data-pl-companion-text=large] .pl-guardian-companion{font-size:18px}
 /* Edge-to-edge: tools and wide/landscape navigation share the same safe area.
    Native-padded older WebViews inject zero, so these do not double the inset. */
 .pl-tool-backdrop.pl-tool-backdrop{
+  top:0;right:0;bottom:0;left:0;
   grid-template-columns:minmax(0,1fr)!important;
   grid-template-rows:minmax(0,1fr)!important;
   box-sizing:border-box!important;
@@ -1963,4 +1968,10 @@ html[data-pl-companion-text=large] .pl-guardian-companion{font-size:18px}
     padding-right:max(16px,var(--pl-safe-right))!important;
     padding-bottom:calc(112px + var(--pl-safe-bottom))!important;
   }
+}
+
+/* Longhands work on WebViews that predate the inset shorthand. Inline
+   positioning still takes precedence for intentionally anchored dialogs. */
+[role="dialog"][aria-modal="true"],.mamas-private-window{
+  top:0;right:0;bottom:0;left:0;
 }
