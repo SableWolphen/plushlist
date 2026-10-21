@@ -49,3 +49,41 @@
 #main-content[data-pl-world] .pl-storybook-banner :is(button,a,summary){position:relative;z-index:5}
 @media(max-width:520px){#main-content#main-content[data-pl-world]{background-attachment:scroll!important}}
 @media(prefers-reduced-motion:reduce){#main-content .pl-storybook-banner{animation:none!important}}
+
+/* Distinct, subtle landscape layers for every theme, shared across home banners. */
+#main-content[data-pl-world="soft"] .pl-storybook-banner{
+  background-image:radial-gradient(circle at 18% 20%,#ffffff99 0 13px,transparent 15px),radial-gradient(ellipse 76% 40% at 55% 110%,#d7c8f1 0 64%,transparent 66%),linear-gradient(150deg,#eee4ff,var(--sb-sky2))!important;
+}
+#main-content[data-pl-world="dino"] .pl-storybook-banner{
+  background-image:radial-gradient(circle at 19% 24%,#f7e6a6 0 13px,transparent 15px),radial-gradient(ellipse 86% 42% at 50% 110%,#80bc89 0 64%,transparent 66%),linear-gradient(150deg,#d5f0b7,var(--sb-sky2))!important;
+}
+#main-content[data-pl-world="baby"] .pl-storybook-banner{
+  background-image:radial-gradient(circle at 21% 19%,#fff8dc 0 13px,transparent 15px),radial-gradient(ellipse 77% 41% at 50% 115%,#d8c7ee 0 64%,transparent 66%),linear-gradient(150deg,#ffe7f5,var(--sb-sky2))!important;
+}
+#main-content[data-pl-world="pink"] .pl-storybook-banner{
+  background-image:radial-gradient(circle at 22% 23%,#fff9fb 0 13px,transparent 15px),radial-gradient(ellipse 77% 42% at 55% 110%,#f7aecd 0 64%,transparent 66%),linear-gradient(150deg,#ffe3ef,var(--sb-sky2))!important;
+}
+#main-content[data-pl-world="meadow"] .pl-storybook-banner{
+  background-image:radial-gradient(circle at 18% 18%,#f8f3ce 0 13px,transparent 15px),radial-gradient(ellipse 85% 44% at 50% 110%,#92ccaa 0 64%,transparent 66%),linear-gradient(150deg,#d7f6e6,var(--sb-sky2))!important;
+}
+#main-content[data-pl-world="peach"] .pl-storybook-banner{
+  background-image:radial-gradient(circle at 81% 18%,#fff3da 0 13px,transparent 15px),radial-gradient(ellipse 80% 44% at 50% 110%,#ffb58f 0 64%,transparent 66%),linear-gradient(150deg,#ffe0c3,var(--sb-sky2))!important;
+}
+#main-content[data-pl-world="twilight"] .pl-storybook-banner{
+  background-image:radial-gradient(circle at 80% 20%,#f8e2ac 0 13px,transparent 15px),radial-gradient(ellipse 80% 43% at 50% 110%,#66548d 0 64%,transparent 66%),linear-gradient(150deg,#322e55,var(--sb-sky2))!important;
+}
+#main-content[data-pl-world="strawberry"] .pl-storybook-banner{
+  background-image:radial-gradient(circle at 19% 21%,#fff4d7 0 13px,transparent 15px),radial-gradient(ellipse 79% 44% at 50% 110%,#eda1b1 0 64%,transparent 66%),linear-gradient(150deg,#ffe3df,var(--sb-sky2))!important;
+}
+#main-content[data-pl-world="soft-light"] .pl-storybook-banner{
+  background-image:radial-gradient(circle at 76% 20%,#fffdf2 0 13px,transparent 15px),radial-gradient(ellipse 75% 42% at 50% 110%,#a9cdf2 0 64%,transparent 66%),linear-gradient(150deg,#e0f4ff,var(--sb-sky2))!important;
+}
+#main-content[data-pl-world="baby-night"] .pl-storybook-banner{
+  background-image:radial-gradient(circle at 79% 18%,#f9e1bb 0 13px,transparent 15px),radial-gradient(ellipse 80% 40% at 50% 110%,#79608f 0 64%,transparent 66%),linear-gradient(150deg,#302c50,var(--sb-sky2))!important;
+}
+#main-content[data-pl-world="garden"] .pl-storybook-banner{
+  background-image:radial-gradient(circle at 18% 20%,#fffbe0 0 13px,transparent 15px),radial-gradient(ellipse 82% 45% at 50% 110%,#b4cc99 0 64%,transparent 66%),linear-gradient(150deg,#f2edca,var(--sb-sky2))!important;
+}
+
+/* Maintain foreground contrast and let the artwork stay purely decorative. */
+#main-content[data-pl-world] .pl-storybook-banner :is(.pl-storybook-brand,.pl-storybook-greeting,.pl-storybook-mascot){z-index:2}
