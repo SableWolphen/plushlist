@@ -5194,7 +5194,7 @@ function GlowUpTracker() {
     })) return;
     window.dispatchEvent(new Event(STATE_EVENT));
     if (!result.unlocked.length && !gifts.unlocked.length) return;
-    // A single friendly, dismissible announcement for this batch of rewards.
+    // Store earned rewards, but never interrupt an open settings or Guardian dialog.\n    if (document.querySelector(".pl-tool-panel, .pl-companion-modal, [role=\"dialog\"][aria-modal=\"true\"]")) return;\n    // A single friendly, dismissible announcement for this batch of rewards.
     const old = document.getElementById("pl-guardian-unlock");
     old?.remove();
     const notice = document.createElement("div");
