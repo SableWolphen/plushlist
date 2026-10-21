@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import {autoGuardianGifts, availableGuardianGifts} from "../src/guardian-auto-rewards.mjs";
+import {autoGuardianGifts, availableGuardianGifts, awardEligibleRewards} from "../src/guardian-auto-rewards.mjs";
 const src=fs.readFileSync("src/components/plush-guardian-settings.jsx","utf8");
 const html=fs.readFileSync("index.html","utf8");
 for(const area of ["home","care","rewards","letters","reminders","personalize"]){assert.ok(src.includes('area === "'+area+'"'),"Missing "+area+" screen");}
@@ -18,4 +18,10 @@ const available=availableGuardianGifts(first.ledger,[]);
 assert.equal(available.length,1);
 assert.equal(availableGuardianGifts(first.ledger,[available[0].id]).length,0);
 assert.equal(autoGuardianGifts([],rows,done,date,prefs,false,{removedTask:true}).unlocked.length,0);
+const progressReward=[{id:"progress",mode:"progress",targetPercent:50,name:"Milestone"}];
+const removed=awardEligibleRewards(progressReward,[{key:"a"},{key:"b"}],{a:true,b:true},date,{removedTask:true,newlyCompleted:false});
+assert.equal(removed.unlocked.length,0,"Removing tasks must not grant progress rewards");
+assert.equal(removed.rewards[0].claimed,undefined);
+const completed=awardEligibleRewards(progressReward,[{key:"a"},{key:"b"}],{a:true,b:true},date,{newlyCompleted:true});
+assert.equal(completed.unlocked.length,1,"Actual completion can unlock a progress reward");
 console.log("Guardian settings hub and useful automatic reward tests passed.");
