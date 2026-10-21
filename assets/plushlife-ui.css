@@ -586,7 +586,7 @@
 /* Theme-aware bottom bar matches the approved references. */
 #main-content .pl-app-bottom-nav{
   min-height:64px!important;
-  padding:5px 8px max(5px,env(safe-area-inset-bottom))!important;
+  padding:5px 8px max(5px,var(--pl-safe-bottom,0px))!important;
   border-radius:24px 24px 0 0!important;
   box-shadow:0 -8px 24px color-mix(in srgb,var(--pl-theme-accent) 10%,transparent)!important;
 }
@@ -815,12 +815,12 @@
 #main-content.dino-theme .pl-app-bottom-nav,
 #main-content.baby-mode .pl-app-bottom-nav{
   left:10px!important;right:10px!important;
-  bottom:max(7px,env(safe-area-inset-bottom))!important;
+  bottom:max(7px,var(--pl-safe-bottom,0px))!important;
   width:auto!important;
   height:66px!important;
   min-height:66px!important;
   max-height:82px!important;
-  padding:4px 8px min(12px,max(4px,env(safe-area-inset-bottom)))!important;
+  padding:4px 8px min(12px,max(4px,var(--pl-safe-bottom,0px)))!important;
   box-sizing:border-box!important;
   align-items:center!important;
   border:1px solid color-mix(in srgb,var(--pl-theme-line) 86%,white)!important;
@@ -845,7 +845,7 @@
   #main-content.rewards-open [data-plush-panel="🧸 Plush & Keepsakes"].pl-tool-backdrop{
     z-index:70!important;
     inset:0 0 78px 0!important;
-    padding:max(10px,env(safe-area-inset-top)) 8px 0!important;
+    padding:max(10px,var(--pl-safe-top,0px)) 8px 0!important;
     place-items:stretch center!important;
     background:#F8F3FC!important;
     backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
@@ -1194,7 +1194,7 @@
 }
 @media(max-width:520px){
   #main-content.appearance-soft:not(.dino-theme):not(.baby-mode){
-    padding-bottom:calc(18px + env(safe-area-inset-bottom))!important;
+    padding-bottom:calc(18px + var(--pl-safe-bottom,0px))!important;
   }
   #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .baby-shell{
     max-width:none!important;
@@ -1236,7 +1236,7 @@
   position:fixed!important;
   left:12px!important;
   right:12px!important;
-  bottom:max(8px,env(safe-area-inset-bottom))!important;
+  bottom:max(8px,var(--pl-safe-bottom,0px))!important;
   width:auto!important;
   height:72px!important;
   min-height:72px!important;
@@ -1289,7 +1289,7 @@
 #main-content .pl-app-add-float{
   position:fixed!important;
   left:50%!important;
-  bottom:calc(86px + env(safe-area-inset-bottom))!important;
+  bottom:calc(86px + var(--pl-safe-bottom,0px))!important;
   transform:translateX(-50%)!important;
   z-index:92!important;
   width:60px!important;
@@ -1324,15 +1324,15 @@
 }
 #main-content,
 #main-content.appearance-soft:not(.dino-theme):not(.baby-mode){
-  padding-bottom:calc(150px + env(safe-area-inset-bottom))!important;
+  padding-bottom:calc(150px + var(--pl-safe-bottom,0px))!important;
 }
 #main-content .pl-unified-page-shell,
 #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-unified-page-shell{
-  padding-bottom:calc(150px + env(safe-area-inset-bottom))!important;
+  padding-bottom:calc(150px + var(--pl-safe-bottom,0px))!important;
 }
 #main-content .pl-home-shell,
 #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-home-shell{
-  padding-bottom:calc(150px + env(safe-area-inset-bottom))!important;
+  padding-bottom:calc(150px + var(--pl-safe-bottom,0px))!important;
 }
 @media(min-width:760px){
   #main-content .pl-app-bottom-nav,
@@ -1358,7 +1358,7 @@
     padding:6px!important;
   }
   #main-content .pl-app-add-float{
-    bottom:calc(82px + env(safe-area-inset-bottom))!important;
+    bottom:calc(82px + var(--pl-safe-bottom,0px))!important;
     width:58px!important;
     min-width:58px!important;
     height:58px!important;
@@ -1426,7 +1426,7 @@
   min-width:48px!important;
   height:48px!important;
   min-height:48px!important;
-  bottom:calc(80px + env(safe-area-inset-bottom))!important;
+  bottom:calc(80px + var(--pl-safe-bottom,0px))!important;
   border-width:3px!important;
   box-shadow:0 8px 18px color-mix(in srgb,var(--pl-theme-accent,#A65DC1) 24%,transparent)!important;
 }
@@ -1445,7 +1445,7 @@
     min-width:46px!important;
     height:46px!important;
     min-height:46px!important;
-    bottom:calc(78px + env(safe-area-inset-bottom))!important;
+    bottom:calc(78px + var(--pl-safe-bottom,0px))!important;
   }
 }
 
@@ -1629,7 +1629,7 @@
 #main-content .pl-app-bottom-nav{
   left:12px!important;
   right:12px!important;
-  bottom:max(10px,env(safe-area-inset-bottom))!important;
+  bottom:max(10px,var(--pl-safe-bottom,0px))!important;
   height:68px!important;
   min-height:68px!important;
   max-height:68px!important;

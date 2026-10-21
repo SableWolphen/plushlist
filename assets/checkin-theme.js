@@ -12,7 +12,7 @@
     background:rgba(24,13,39,.64)!important;
     backdrop-filter:blur(15px) saturate(.9)!important;
     -webkit-backdrop-filter:blur(15px) saturate(.9)!important;
-    padding:max(18px,env(safe-area-inset-top)) 14px max(18px,env(safe-area-inset-bottom))!important;
+    padding:max(18px,var(--pl-safe-top,0px)) 14px max(18px,var(--pl-safe-bottom,0px))!important;
     align-items:center!important;
   }
   [data-plush-checkin-card="true"]{
@@ -262,8 +262,8 @@
     if(guess?.parentElement) guess.parentElement.dataset.plushCheckinGuess="true";
 
     try{
-      const statusBar=window.Capacitor?.Plugins?.StatusBar;
-      statusBar?.setStyle?.({style:card.dataset.plushCheckinScheme==="dark"?"LIGHT":"DARK"}).catch?.(()=>{});
+      const statusBar=window.Capacitor?.Plugins?.SystemBars;
+      statusBar?.setStyle?.({style:card.dataset.plushCheckinScheme==="dark"?"DARK":"LIGHT"}).catch?.(()=>{});
     }catch(_){}
   }
 

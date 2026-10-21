@@ -13,19 +13,23 @@
       "androidScaleType": "CENTER_CROP",
       "showSpinner": false
     },
-    "StatusBar": {
-      "style": "DARK",
-      "backgroundColor": "#fff0fa"
-    },
     "Keyboard": {
-      "resize": "native",
-      "resizeOnFullScreen": true
+      "resize": "native"
     },
     "LocalNotifications": {
       "smallIcon": "ic_notification_mascot"
     },
     "PushNotifications": {
-      "presentationOptions": ["badge", "sound", "alert"]
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
+    },
+    "SystemBars": {
+      "style": "LIGHT",
+      "insetsHandling": "css",
+      "initialViewportFitValueHint": "cover"
     }
   }
 }

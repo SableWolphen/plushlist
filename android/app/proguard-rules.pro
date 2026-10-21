@@ -20,19 +20,20 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# Firebase Cloud Messaging (used by @capacitor/push-notifications) discovers
-# some of its startup components via reflection/manifest metadata rather than
-# normal class references, so R8 can't always see that they're still needed
-# and may strip or rename them — which surfaces as a crash on real devices
-# the moment a push-notifications call touches Firebase, even though nothing
-# looks wrong in a debug build. Keeping these wholesale is the standard,
-# low-risk fix (it only prevents removal/renaming, it can't hide real bugs).
--keep class com.google.firebase.** { *; }
--keep class com.google.android.gms.** { *; }
--dontwarn com.google.firebase.**
--dontwarn com.google.android.gms.**
+# Firebase, Google Play services and in-app updates supply consumer rules in
+# their AARs for reflected/manifest components. Keeping these entire SDKs here
+# prevented shrinking, optimization and obfuscation of most of the app.
+# AGP 9 strict mode does not implicitly keep default constructors. Firebase
+# discovers these registrars by name and constructs them reflectively.
+-keep class * implements com.google.firebase.components.ComponentRegistrar {
+    public <init>();
+}
 
-# Same reasoning as above, for the Play in-app update library (checks Play
-# Store for a newer version on launch and forces an update if one exists).
--keep class com.google.android.play.core.** { *; }
--dontwarn com.google.android.play.core.**
+# Bridge calls and plugin callbacks are reached from JavaScript/reflection.
+-keepattributes RuntimeVisibleAnnotations,RuntimeInvisibleAnnotations,AnnotationDefault
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+-keep public class * extends com.getcapacitor.Plugin { *; }
+# RemoteViews components are instantiated by Android outside our process.
+-keep class com.PlushLife.PlushLifeWidget* { *; }

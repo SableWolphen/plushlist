@@ -59,7 +59,7 @@ export function GoldStoryView(props) {
   const highlights = props.weeklyHighlights || {};
   const story = Array.isArray(props.careStory) ? props.careStory : [];
   return <>
-    <GrowthTabs progressView={props.progressView} setProgressView={props.setProgressView} />
+    {!props.hideNavigation && <GrowthTabs progressView={props.progressView} setProgressView={props.setProgressView} />}
 
     <section style={{ ...goldCard, padding: "13px 14px", background: "linear-gradient(145deg,#F5FBF8,#FFFDF7)", borderColor: "#D6E7D9" }}>
       <div style={{ fontSize: 10.3, letterSpacing: ".13em", fontWeight: 900, color: "#318C79" }}>📖 THIS WEEK IN ONE GLANCE</div>
@@ -111,7 +111,7 @@ export function GoldSpacesView(props) {
   const visibleAreas = showAll ? areas : areas.slice(0, 4);
 
   return <>
-    <GrowthTabs progressView={props.progressView} setProgressView={props.setProgressView} />
+    {!props.hideNavigation && <GrowthTabs progressView={props.progressView} setProgressView={props.setProgressView} />}
     <section style={{ ...goldCard, padding: "12px 13px", background: "linear-gradient(145deg,#F7F9FF,#FBFCFF)", borderColor: "#D9E6F6" }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
         <div style={{ minWidth: 0 }}><div style={{ fontSize: 10.3, letterSpacing: ".13em", fontWeight: 900, color: "#4C78A8" }}>🪴 CARE AREAS</div><div style={{ marginTop: 3, fontSize: 10.4, lineHeight: 1.35, color: "#6B7C99" }}>Your rhythm by part of the day. Tap a row for one useful adjustment.</div></div>

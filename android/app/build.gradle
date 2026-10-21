@@ -9,7 +9,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.PlushLife.EdgeToEdgeInstrumentation"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
@@ -23,6 +23,9 @@ android {
         // to the web content for an About screen. Falls back to "unknown"
         // for a local `./gradlew assembleDebug` where it's never set.
         buildConfigField "String", "GIT_SHA", "\"${System.getenv('PLUSHLIFE_GIT_SHA') ?: 'unknown'}\""
+    }
+    if (project.hasProperty('plushlifeSmokeTest')) {
+        testBuildType "release"
     }
     buildFeatures {
         buildConfig true
@@ -46,25 +49,19 @@ android {
     }
     buildTypes {
         release {
-            // Resource shrinking was temporarily disabled as a diagnostic
-            // while "Couldn't add widget" was under investigation — it
-            // stayed off even after that diagnostic build confirmed
-            // shrinking wasn't the cause (the real fix was a missing
-            // previewLayout on the widget's provider XML, unrelated to
-            // shrinking). Back on for the smaller release size; keep.xml
-            // still protects the widget's resources as defense in depth.
-            // Stability build: temporarily disable R8/resource shrinking so
-            // release-only stripping cannot remove classes/resources needed
-            // during startup on real devices. Re-enable after the crash is
-            // confirmed resolved.
-            minifyEnabled false
-            shrinkResources false
+            // Preserve reflected bridge entry points and widget resources using
+            // proguard-rules.pro and res/raw/keep.xml; CI builds this variant.
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             ndk {
                 debugSymbolLevel 'FULL'
             }
             if (hasReleaseSigning) {
                 signingConfig signingConfigs.release
+            } else if (project.hasProperty('plushlifeSmokeTest')) {
+                // CI installs the optimized variant without production credentials.
+                signingConfig signingConfigs.debug
             }
         }
     }
@@ -89,11 +86,11 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     implementation "androidx.activity:activity:$androidxActivityVersion"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    // Use the same Core API as Capacitor at compile time, not AppCompat's older API dependency.
+    implementation "androidx.core:core:$androidxCoreVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
     // Crashlytics reports real native crashes (with stack traces) to the
     // Firebase console within minutes, unlike Play Console's own crash
@@ -111,12 +108,12 @@ dependencies {
 
 apply from: 'capacitor.build.gradle'
 
-try {
-    def servicesJSON = file('google-services.json')
-    if (servicesJSON.text) {
-        apply plugin: 'com.google.gms.google-services'
-        apply plugin: 'com.google.firebase.crashlytics'
-    }
-} catch(Exception e) {
+def servicesJSON = file('google-services.json')
+if (servicesJSON.exists() && servicesJSON.text.trim()) {
+    // Fail the build if a configured plugin is incompatible; do not silently
+    // ship without Firebase setup or crash-report deobfuscation.
+    apply plugin: 'com.google.gms.google-services'
+    apply plugin: 'com.google.firebase.crashlytics'
+} else {
     logger.info("google-services.json not found, google-services/crashlytics plugins not applied. Push Notifications won't work")
 }

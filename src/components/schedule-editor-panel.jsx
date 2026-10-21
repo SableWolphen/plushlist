@@ -78,11 +78,12 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
           }
         `}</style>
 
-        <section className="schedule-card" aria-label="Schedule editing help">
+        <details className="schedule-card" aria-label="Schedule editing help">
+          <summary style={{minHeight:44,cursor:"pointer",fontWeight:800}}>About schedules</summary>
           <div className="schedule-eyebrow">Editing your day plan</div>
-          <p className="schedule-helper">Change your weekly routine here. To edit a task's name, repeat days, or reminders, use Tasks instead.</p>
-          <button type="button" className="schedule-btn add" onClick={onOpenTasks}>✏️ Edit tasks instead</button>
-        </section>
+          <p className="schedule-helper">Change your weekly routine here. To edit a task's name, repeat days, or reminders, open the task list in Plan.</p>
+          <button type="button" className="schedule-btn add" onClick={onOpenTasks}>✏️ Back to tasks</button>
+        </details>
 
         <section className="schedule-card day-picker">
           <div className="schedule-eyebrow">Choose a day</div>

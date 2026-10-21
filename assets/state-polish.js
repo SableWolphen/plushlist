@@ -18,7 +18,7 @@
       input,textarea,select{max-width:100%;box-sizing:border-box}
     }
     @media(max-width:340px){
-      [role="status"],[role="alert"]{padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right))}
+      [role="status"],[role="alert"]{padding-left:max(8px,var(--pl-safe-left,0px));padding-right:max(8px,var(--pl-safe-right,0px))}
       button,[role="button"],summary{white-space:normal}
     }
     @media(max-height:520px) and (orientation:landscape){

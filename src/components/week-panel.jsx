@@ -10,7 +10,7 @@ export function WeekPanel(props) {
   return (
     <div className="pl-calendar-cozy">
       <style>{`
-        .pl-calendar-cozy{display:grid;gap:8px;padding-bottom:calc(116px + env(safe-area-inset-bottom))}
+        .pl-calendar-cozy{display:grid;gap:8px;padding-bottom:calc(116px + var(--pl-safe-bottom,0px))}
         .pl-calendar-cozy>button{min-height:44px!important;border-radius:14px!important;border:1px solid var(--pl-theme-line)!important;background:var(--pl-theme-surface)!important;color:var(--pl-theme-ink)!important;box-shadow:none!important}
         .pl-calendar-cozy [role="tablist"]{background:var(--pl-theme-surface-2)!important;border:1px solid var(--pl-theme-line)!important;border-radius:13px!important;padding:3px!important}
         .pl-calendar-cozy [role="tab"]{border-radius:10px!important;min-height:44px!important;color:var(--pl-theme-ink)!important}

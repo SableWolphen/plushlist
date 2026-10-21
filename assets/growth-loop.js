@@ -27,7 +27,7 @@
   const style = document.createElement("style");
   style.id = "plushlife-growth-loop-styles";
   style.textContent = `
-    #plushlife-growth-checkin{position:fixed;inset:0;z-index:130;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));background:rgba(31,20,42,.55);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);font-family:system-ui,sans-serif}
+    #plushlife-growth-checkin{position:fixed;inset:0;z-index:130;display:grid;place-items:center;padding:max(18px,var(--pl-safe-top,0px)) 16px max(18px,var(--pl-safe-bottom,0px));background:rgba(31,20,42,.55);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);font-family:system-ui,sans-serif}
     #plushlife-growth-checkin .plushlife-growth-checkin-card{position:relative;width:min(100%,440px);padding:18px;border-radius:22px;border:1px solid var(--plush-border,#ddcdea);background:var(--plush-surface,#fff9fd);box-shadow:0 24px 70px rgba(40,24,52,.34);color:var(--plush-text,#5b4b6b)}
     #plushlife-growth-checkin .plushlife-growth-checkin-close{position:absolute!important;top:10px!important;right:10px!important;width:40px!important;min-width:40px!important;max-width:40px!important;height:40px!important;min-height:40px!important;max-height:40px!important;padding:0!important;margin:0!important;display:grid!important;place-items:center!important;border:1px solid var(--plush-border-soft,#e6d8eb)!important;border-radius:12px!important;background:var(--plush-surface-2,#fff)!important;color:var(--plush-text,#5b4b6b)!important;box-shadow:none!important;font:700 23px/1 system-ui,sans-serif!important;transform:none!important}
     #plushlife-growth-checkin strong{display:block;padding-right:46px;font-size:19px;line-height:1.22}
@@ -38,7 +38,7 @@
     .plushlife-growth-choice span{display:block;font-size:24px;margin-bottom:4px}
     .plushlife-growth-choice small{font-size:9.7px;font-weight:700;opacity:.78}
     #plushlife-next-step-reason{margin:8px 0 0;padding:7px 9px;border-radius:10px;background:rgba(166,93,193,.08);color:#745c82;font:700 10.5px/1.4 system-ui,sans-serif}
-    #plushlife-growth-toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2147482900;width:min(430px,calc(100% - 24px));padding:13px;border-radius:17px;background:#fff9fd;border:1px solid #decce7;box-shadow:0 18px 55px rgba(54,34,65,.28);font-family:system-ui,sans-serif;color:#5b4b6b}
+    #plushlife-growth-toast{position:fixed;left:50%;bottom:calc(18px + var(--pl-safe-bottom,0px));transform:translateX(-50%);z-index:2147482900;width:min(430px,calc(100% - 24px));padding:13px;border-radius:17px;background:#fff9fd;border:1px solid #decce7;box-shadow:0 18px 55px rgba(54,34,65,.28);font-family:system-ui,sans-serif;color:#5b4b6b}
     #plushlife-growth-toast .title{font-weight:900;font-size:13px}
     #plushlife-growth-toast .body{margin-top:3px;font-size:11.5px;line-height:1.4;color:#7b6888}
     #plushlife-growth-toast .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}

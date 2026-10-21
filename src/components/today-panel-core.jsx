@@ -399,7 +399,7 @@ export function TodayPanel({
   reshuffle, setCareSection, goToDashboard, setTodayCardIndex, setProfileOpen, setSettingsOpen,
   completedTodayExpanded, setCompletedTodayExpanded, tomorrowTasksCount, tomorrowPreviewRows, tomorrowDateString, weeklyHistory, dailyCheckInHistory, preferences,
   activityDaysTotal, selectedOutfit, appearanceTheme, dinoTheme, babyMode, cozyDaily, optionalTools, rewardMoment, onWearReward, onDismissReward, returnGapDays, returnBannerDismissed, setReturnBannerDismissed, selectDayType, isHistoricalView, isFutureView,
-  pct, doneCount, openTodayJournal, openDailyCheckIn, dailyCheckIn, userId, syncStatus, online, selectedTaskViewIsRest, restDatesSet
+  quickAddTrackerTask, quickAddMessage, onEditTask, pct, doneCount, openTodayJournal, openDailyCheckIn, dailyCheckIn, userId, syncStatus, online, selectedTaskViewIsRest, restDatesSet
 }) {
   // Wraps the app toggle with the shared completion flow: newly completed
   // tasks linger briefly for undo, and every completion dispatches
@@ -587,28 +587,22 @@ export function TodayPanel({
 
       <div data-plushlife-home-stack className="pl-home-shell">
         {(isHistoricalView || isFutureView) ? <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} /> : null}
-        {!isHistoricalView && !isFutureView && <StorybookHome world={babyMode ? (preferences?.dark_mode ? "baby-night" : "baby") : dinoTheme ? "dino" : appearanceTheme} dayType={dailyCheckIn?.day_type || "full"} rows={rows} viewDone={viewDone} period={period} pct={pct} toggle={unifiedToggle} openTaskManager={openTaskManager} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} selectedOutfit={selectedOutfit} darkMode={preferences?.dark_mode} userId={userId} syncStatus={syncStatus} online={online} tomorrowPreviewRows={tomorrowPreviewRows} tomorrowDateString={tomorrowDateString} weeklyHistory={weeklyHistory} dailyCheckInHistory={dailyCheckInHistory} />}
-        {!isHistoricalView && !isFutureView && <SmartCareSchedule rows={rows} viewDone={viewDone} entries={scheduleEntries(selectedSchedule, selectedScheduleExceptionEntries)} dailyCheckIn={dailyCheckIn} restDay={selectedTaskViewIsRest || restDatesSet?.has(period?.date) || dailyCheckIn?.day_type === "rest"} date={selectedProgressDate || period?.date} timezone={preferences?.timezone} babyMode={babyMode} />}
+        {!isHistoricalView && !isFutureView && <StorybookHome world={babyMode ? (preferences?.dark_mode ? "baby-night" : "baby") : dinoTheme ? "dino" : appearanceTheme} dayType={dailyCheckIn?.day_type || "full"} rows={rows} viewDone={viewDone} period={period} pct={pct} toggle={unifiedToggle} openTaskManager={openTaskManager} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} selectedOutfit={selectedOutfit} darkMode={preferences?.dark_mode} userId={userId} syncStatus={syncStatus} online={online} tomorrowPreviewRows={tomorrowPreviewRows} tomorrowDateString={tomorrowDateString} weeklyHistory={weeklyHistory} dailyCheckInHistory={dailyCheckInHistory} onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage} onEditTask={onEditTask} schedulePreview={homeSections.schedule} />}
+
         {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }
         <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
           <summary style={{minHeight:44,display:'list-item',alignContent:'center',fontWeight:800,fontSize:14,cursor:'pointer'}}>More for today · Explore tools</summary>
           <div className="pl-home-extras-content">
-            <p className="pl-home-extras-intro">Need something else? Everything is still here. Start with one place.</p>
-            <nav className="pl-home-tool-links" aria-label="More PlushLife tools">
-              <button type="button" onClick={()=>goToDashboard?.("week")}>📅 <span>Calendar</span></button>
-              <button type="button" onClick={()=>openTaskManager?.(period?.date,"habits")}>🌱 <span>Habits</span></button>
-              <button type="button" onClick={()=>goToDashboard?.("guardian")}>🧸 <span>Routines</span></button>
-              <button type="button" onClick={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard?.("care");}}>💜 <span>Cozy Space</span></button>
-              <button type="button" onClick={()=>setCalmQuickOpen?.(true)}>🌿 <span>Calm</span></button>
-              <button type="button" onClick={()=>setSettingsOpen?.(true)}>⚙ <span>Settings</span></button>
-            </nav>
-            {!isHistoricalView && !isFutureView && <details className="pl-storybook-planning">
-              <summary>♡ Make today easier · Plan & focus</summary>
+            <p className="pl-home-extras-intro">Adjust your day or look back at what you finished.</p>
+
+            {!isHistoricalView && !isFutureView && <section className="pl-storybook-planning">
+              <h3>Make today easier</h3>
               <CozyDayHome userId={userId} rows={rows} viewDone={viewDone} toggle={unifiedToggle} openTaskManager={openTaskManager} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} onComfort={()=>setCalmQuickOpen?.(true)} period={period} pct={pct} mode={dailyCheckIn?.day_type || "full"} babyMode={babyMode} />
               <DayRescue currentMode={dailyCheckIn?.day_type || "full"} onSelect={selectDayType} openTaskManager={()=>openTaskManager?.(period?.date)} />
-            </details>}
-            <details className="pl-home-advanced">
-              <summary>More options · Schedule, completed tasks & extras</summary>
+            </section>}
+            <section className="pl-home-advanced">
+              <h3>Today’s schedule & completed tasks</h3>
+        {!isHistoricalView && !isFutureView && <SmartCareSchedule rows={rows} viewDone={viewDone} entries={scheduleEntries(selectedSchedule, selectedScheduleExceptionEntries)} dailyCheckIn={dailyCheckIn} restDay={selectedTaskViewIsRest || restDatesSet?.has(period?.date) || dailyCheckIn?.day_type === "rest"} date={selectedProgressDate || period?.date} timezone={preferences?.timezone} babyMode={babyMode} />}
               <div className="pl-home-advanced-content">
                 {!isHistoricalView && !isFutureView && <details className="pl-storybook-plush-drawer"><summary>🧸 Visit your Plush · Say hi</summary><Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} /></details>}
                 <DayAgenda tasks={homeSections.tasks} schedule={homeSections.schedule} selectedSchedule={selectedSchedule} exceptions={selectedScheduleExceptionEntries} date={selectedProgressDate || period?.date} timezone={preferences?.timezone} taskLabel={babyMode ? "Little Jobs" : dinoTheme ? "Dino Missions" : "Tasks"}/>
@@ -621,7 +615,7 @@ export function TodayPanel({
                 <button type="button" className="pl-home-extra-link" onClick={()=>window.dispatchEvent(new Event('plushlife:weekly-reflection-request'))}>Reflect on my week · optional</button>
                 <TomorrowNote tomorrowTasksCount={tomorrowTasksCount} />
               </div>
-            </details>
+            </section>
           </div>
         </details>
 

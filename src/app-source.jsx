@@ -18,9 +18,15 @@ import { CozyGuideSuggestions } from "./components/cozy-daily.jsx";
 import { normalizeCozyProfile, cozyReminderCopy } from "./cozy-profile.js";
 import { CozyComfortContext, useCozyComfort } from "./components/cozy-space.jsx";
 import { widgetSnapshot } from "./widget-model.js";
+import { MAIN_DESTINATIONS, mainDestination, adjacentDestination } from "./navigation.mjs";
+import { PlanNavigation } from "./components/plan-navigation.jsx";
 import { EverydayActions } from "./components/everyday-upgrades.jsx";
 import { loadHistoryRows } from "./care-history-data.js";
 import { normalizeHomeLayout } from "./home-layout.js";
+import { removeTrackerTask, restoreTrackerTask } from "./task-lifecycle.mjs";
+import { quickTaskSchedule } from "./quick-task-schedule.mjs";
+import { sameScheduleEntries } from "./schedule-persistence.mjs";
+import { summarizeGuardianProgress } from "./guardian-progress-summary.mjs";
 import { FIGMA_WORLDS, ThemeWorldContext, CozyScene, DesignIcon } from "./components/theme-world.jsx";
 // Native bridge (Capacitor back-button, splash, push channels, notification
 // scheduler) must execute before the app bundle so its handlers and
@@ -139,7 +145,6 @@ const {
   MASCOT_GROWTH_STAGES,
   DAYS,
   TEMPLATE_PACKS,
-  DASHBOARDS,
   PLUSH_PATHS,
   SLEEP_TOOLS,
   SOUNDSCAPES,
@@ -799,6 +804,9 @@ function GlowUpTracker() {
   }, [user?.id]);
   const [supportRewards, setSupportRewards] = useState([]);
   const [supportProgress, setSupportProgress] = useState([]);
+  const [supportProgressSummary, setSupportProgressSummary] = useState(null);
+  const currentAccountIdRef = React.useRef(user?.id);
+  currentAccountIdRef.current = user?.id;
   const [supportWeeklyHistory, setSupportWeeklyHistory] = useState([]);
   const [supportOwnerId, setSupportOwnerId] = useState(null);
   const [supportPeople, setSupportPeople] = useState([]);
@@ -1675,7 +1683,9 @@ function GlowUpTracker() {
   const [ownerIsRestingToday, setOwnerIsRestingToday] = useState(false);
 
   const loadSupportOwner = async (targetOwnerId) => {
-    latestSupportOwnerRequestRef.current = targetOwnerId;
+    const request = { ownerId: targetOwnerId, accountId: user?.id };
+    latestSupportOwnerRequestRef.current = request;
+    setSupportProgressSummary(null);
     if (!targetOwnerId) {
       setSupportOwnerId(null);
       setSupportNotes([]);
@@ -1690,7 +1700,7 @@ function GlowUpTracker() {
       return;
     }
     setSupportOwnerId(targetOwnerId);
-    const [notesResult, rewardsResult, progressResult, historyResult, tasksResult, schedulesResult, exceptionsResult, moodResult, suggestionsResult, achievementsResult, restResult] = await Promise.all([
+    const [notesResult, rewardsResult, progressResult, historyResult, tasksResult, schedulesResult, exceptionsResult, moodResult, suggestionsResult, achievementsResult, restResult, summaryResult] = await Promise.all([
       supabase.from("support_notes").select("id, caregiver_name, body, is_read, suggested_tool_id, created_at").eq("owner_user_id", targetOwnerId).order("created_at", { ascending: false }),
       supabase.from("support_rewards").select("id, title, details, target_percent, active, week_start, earned_at, claimed_at, approval_required, approved_at, caregiver_user_id, created_at").eq("owner_user_id", targetOwnerId).eq("active", true).order("created_at", { ascending: false }),
       supabase.from("daily_progress").select("completed_keys").eq("user_id", targetOwnerId).eq("progress_date", period.date).maybeSingle(),
@@ -1702,8 +1712,12 @@ function GlowUpTracker() {
       supabase.from("task_suggestions").select("id, owner_user_id, caregiver_user_id, caregiver_name, task, suggested_day_id, status, created_at").eq("owner_user_id", targetOwnerId).order("created_at", { ascending: false }),
       supabase.from("user_achievements").select("visit_streak, best_visit_streak, best_care_streak, last_celebrated_date").eq("user_id", targetOwnerId).maybeSingle(),
       supabase.from("rest_days").select("rest_date").eq("user_id", targetOwnerId).eq("rest_date", period.date).maybeSingle(),
+      targetOwnerId !== user?.id
+        ? supabase.rpc("guardian_progress_summary", { p_owner_user_id: targetOwnerId, p_from_date: period.weekStart, p_to_date: period.date })
+        : Promise.resolve({ data: [], error: null }),
     ]);
-    if (latestSupportOwnerRequestRef.current !== targetOwnerId) return; // superseded by a newer request
+    if (latestSupportOwnerRequestRef.current !== request || currentAccountIdRef.current !== request.accountId) return;
+    setSupportProgressSummary({ ownerId: targetOwnerId, rows: summaryResult.error ? [] : (summaryResult.data || []) });
     setSupportNotes(notesResult.data || []);
     setSupportRewards(rewardsResult.data || []);
     setSupportProgress((progressResult.data?.completed_keys || []).map((taskKey) => ({ task_key: taskKey, completed: true })));
@@ -1718,7 +1732,7 @@ function GlowUpTracker() {
     if (isSupportAdult && targetOwnerId !== user?.id && user?.email) {
       supabase.rpc("touch_caregiver_link_viewed", { p_owner_user_id: targetOwnerId }).then(() => {});
     }
-    if (notesResult.error || rewardsResult.error || progressResult.error || historyResult.error || tasksResult.error || schedulesResult.error || exceptionsResult.error || moodResult.error || suggestionsResult.error) {
+    if (notesResult.error || rewardsResult.error || progressResult.error || historyResult.error || tasksResult.error || schedulesResult.error || exceptionsResult.error || moodResult.error || suggestionsResult.error || summaryResult.error) {
       setSupportMessage("Some guardian information couldn't be refreshed.");
     }
   };
@@ -1728,7 +1742,7 @@ function GlowUpTracker() {
     setSupportMessage("");
     const { data: links, error: linksError } = await supabase
       .from("caregiver_links")
-      .select("id, owner_user_id, caregiver_email, label, active, can_view_progress, can_send_notes, can_add_rewards, can_suggest_tasks, care_agreement, created_at, last_viewed_at, accepted_at")
+      .select("id, owner_user_id, caregiver_email, label, active, can_view_progress, can_view_tasks, can_view_schedule, can_view_mood, can_use_together, can_send_notes, can_add_rewards, can_suggest_tasks, care_agreement, created_at, last_viewed_at, accepted_at")
       .order("created_at", { ascending: false });
     if (linksError) {
       setSupportLinksLoadedFor(null); // Unknown is not equivalent to no Guardian.
@@ -2817,7 +2831,7 @@ function GlowUpTracker() {
     const selectedDay = /^\d{4}-\d{2}-\d{2}$/.test(dayId) ? dayIdForDate(dayId) : dayId;
     setSelectedProgressDate(/^\d{4}-\d{2}-\d{2}$/.test(dayId) ? dayId : period.date);
     setActive(selectedDay === "daily" ? dayIdForDate(period.date) : selectedDay);
-    setTaskManagerView(view === "habits" ? "habits" : "today");
+    setTaskManagerView(["habits", "later"].includes(view) ? view : "today");
     setTaskManagerRequest(value => value + 1);
     setTaskSearchQuery("");
     const nextSections = taskSectionsForDay(selectedDay);
@@ -2873,12 +2887,8 @@ function GlowUpTracker() {
   const applyNaturalSchedule = () => {
     const parsed = previewNaturalSchedule();
     if (!parsed.recognized) return;
-    setNewTaskDay(parsed.day_id || "daily");
-    setNewTaskScheduleDays(parsed.schedule_days || []);
-    setNewTaskScheduleType(parsed.schedule_type || "weekly");
-    setNewTaskOneTimeDate(parsed.one_time_date || "");
-    setNewTaskReminderTime(parsed.reminder_time || "");
-    setTaskMessage(`Schedule ready: ${parsed.summary}. Review it, then add your task.`);
+    setEditTaskDraft(draft => draft ? ({ ...draft, day_id: parsed.day_id || "daily", schedule_days: parsed.schedule_days || [], schedule_type: parsed.schedule_type || "weekly", one_time_date: parsed.one_time_date || "", reminder_time: parsed.reminder_time || "" }) : draft);
+    setTaskMessage("Schedule ready. Review it, then save changes.");
   };
 
   const importTasksFromText = async () => {
@@ -3109,14 +3119,15 @@ function GlowUpTracker() {
   // Same insert semantics as addTrackerTask (dedup, supporter cap, order),
   // but with smart defaults so it never asks a question. "someday" creates
   // the task paused indefinitely — resumable from the list anytime.
-  const quickAddTrackerTask = async (name, when) => {
+  const quickAddTrackerTask = async (name, when, options = {}) => {
+    const quickSchedule = quickTaskSchedule(options);
     if (!user) {
       setQuickAddMessage("Sign in first, then your quick adds will save.");
       return false;
     }
     const task = String(name || "").trim();
     if (!task) return false;
-    const targetDayId = when === "tomorrow" ? dayIdForDate(offsetDate(period.date, 1)) : todayDayId;
+    const targetDayId = quickSchedule.recurring ? "daily" : when === "tomorrow" ? dayIdForDate(offsetDate(period.date, 1)) : todayDayId;
     const matchingTask = trackerTasks.find((item) =>
       !item.archived_at &&
       (item.day_id === targetDayId || (targetDayId !== "daily" && item.day_id === "daily")) &&
@@ -3133,7 +3144,7 @@ function GlowUpTracker() {
         return false;
       }
     }
-    const someday = when === "someday";
+    const someday = !quickSchedule.recurring && when === "someday";
     const quickDate = when === "tomorrow" ? offsetDate(period.date, 1) : period.date;
     const sections = taskSectionsForDay(targetDayId);
     const section = sections[0] || "My tasks";
@@ -3147,14 +3158,14 @@ function GlowUpTracker() {
       day_id: targetDayId,
       section,
       task,
-      detail: encodeTaskDetail("regular"),
+      detail: encodeTaskDetail(quickSchedule.kind),
       sort_order: dayTasks.length + 1,
       is_bonus: sectionIsOptional(targetDayId, section),
-      schedule_type: someday ? "weekly" : "once",
+      schedule_type: quickSchedule.recurring || someday ? "weekly" : "once",
       start_date: null,
       end_date: null,
-      one_time_date: someday ? null : quickDate,
-      schedule_days: [],
+      one_time_date: quickSchedule.recurring || someday ? null : quickDate,
+      schedule_days: quickSchedule.days,
       reminder_time: null,
       why_note: "",
       soft_label: null,
@@ -3165,10 +3176,12 @@ function GlowUpTracker() {
       paused_until: someday ? "2099-12-31" : null,
     };
     const { error } = await supabase.from("tracker_tasks").insert(row);
+    if (currentAccountIdRef.current !== user.id) return false;
     if (error) {
       setQuickAddMessage("Couldn't save that just now — try again?");
       return false;
     }
+    try { window.localStorage.removeItem(warmStartCacheKey(user.id, period.date)); } catch (_error) {}
     setTrackerTasks((tasks) => [...tasks.filter((item) => item.day_id !== targetDayId), ...dayTasks, row]);
     setQuickAddMessage("");
     return true;
@@ -3176,53 +3189,67 @@ function GlowUpTracker() {
 
   const [recentlyDeletedTask, setRecentlyDeletedTask] = useState(null);
   const undoDeleteTimer = React.useRef(null);
-  const pendingDeleteKey = React.useRef(null);
-
-  const finalizeDeleteTask = async (taskKey, taskRow) => {
-    if (!taskKey || !user) return;
-    const { error: tasksError } = await supabase.from("tracker_tasks").delete().eq("user_id", user.id).eq("task_key", taskKey);
-    const { error: progressError } = await supabase.from("tracker_progress").delete().eq("user_id", user.id).eq("task_key", taskKey);
-    if ((tasksError || progressError) && taskRow) {
-      // The delete never actually happened server-side (network blip, RLS
-      // reject, etc.) — restore it rather than leaving the task silently
-      // gone from the UI while it still exists in the database.
-      setTrackerTasks((tasks) => tasks.some((task) => task.task_key === taskKey) ? tasks : [...tasks, taskRow]);
-      setTaskMessage(`"${taskRow.task}" couldn't be deleted yet, so it's back on your list.`);
-    }
-  };
+  const taskDeleteInFlight = React.useRef(false);
+  const [taskDeleteBusy, setTaskDeleteBusy] = useState(false);
+  useEffect(() => {
+    setRecentlyDeletedTask(null);
+    setPendingTaskDelete(null);
+    setTaskDeleteBusy(false);
+    taskDeleteInFlight.current = false;
+    return () => { if (undoDeleteTimer.current) window.clearTimeout(undoDeleteTimer.current); };
+  }, [user?.id]);
 
   const deleteTrackerTask = async (taskKey, taskLabel) => {
-    const taskRow = trackerTasks.find((task) => task.task_key === taskKey);
-    setTrackerTasks((tasks) => tasks.filter((task) => task.task_key !== taskKey));
-    setDone((current) => {
-      const next = { ...current };
-      delete next[taskKey];
-      return next;
-    });
-    setPendingTaskDelete(null);
-    setTaskMessage("");
-    if (undoDeleteTimer.current) {
-      window.clearTimeout(undoDeleteTimer.current);
-      // A previous delete was still waiting to be undone — since we're replacing
-      // its toast now, finalize that one for real instead of silently dropping it.
-      finalizeDeleteTask(pendingDeleteKey.current, recentlyDeletedTask);
+    const ownerId = user?.id;
+    const taskRow = trackerTasks.find(task => task.task_key === taskKey);
+    if (!taskRow || taskDeleteInFlight.current) return;
+    taskDeleteInFlight.current = true;
+    setTaskDeleteBusy(true);
+    setTaskMessage("Deleting task…");
+    try {
+      await removeTrackerTask(supabase, ownerId, taskKey);
+      if (currentAccountIdRef.current !== ownerId) return;
+      // A reload during Undo must not paint a stale pre-deletion task list.
+      try { window.localStorage.removeItem(warmStartCacheKey(ownerId, period.date)); } catch (_error) {}
+      setTrackerTasks(tasks => tasks.filter(task => task.task_key !== taskKey));
+      const wasCompleted = !!done[taskKey];
+      // Keep completed keys in history; task lists already filter absent tasks.
+      // Removing the key here would erase it on the next completion save.
+      setPendingTaskDelete(null);
+      setTaskMessage("");
+      if (undoDeleteTimer.current) window.clearTimeout(undoDeleteTimer.current);
+      setRecentlyDeletedTask({ ...taskRow, label: taskLabel, wasCompleted });
+      // Only the Undo offer expires; the deletion is already durable.
+      undoDeleteTimer.current = window.setTimeout(() => setRecentlyDeletedTask(null), 6000);
+    } catch (error) {
+      if (currentAccountIdRef.current === ownerId) setTaskMessage("Couldn't delete that task. Please retry.");
+    } finally {
+      if (currentAccountIdRef.current === ownerId) {
+        taskDeleteInFlight.current = false;
+        setTaskDeleteBusy(false);
+      }
     }
-    pendingDeleteKey.current = taskKey;
-    setRecentlyDeletedTask(taskRow ? { ...taskRow, label: taskLabel } : null);
-    undoDeleteTimer.current = window.setTimeout(() => {
-      setRecentlyDeletedTask(null);
-      finalizeDeleteTask(taskKey, taskRow);
-      pendingDeleteKey.current = null;
-    }, 6000);
   };
 
-  const undoDeleteTask = () => {
-    if (!recentlyDeletedTask) return;
+  const undoDeleteTask = async () => {
+    const snapshot = recentlyDeletedTask;
+    const ownerId = user?.id;
+    if (!snapshot || taskDeleteInFlight.current) return;
+    taskDeleteInFlight.current = true;
     if (undoDeleteTimer.current) window.clearTimeout(undoDeleteTimer.current);
-    pendingDeleteKey.current = null;
-    setTrackerTasks((tasks) => [...tasks, recentlyDeletedTask]);
-    setRecentlyDeletedTask(null);
-    setTaskMessage("Task restored ✨");
+    try {
+      const row = await restoreTrackerTask(supabase, ownerId, snapshot);
+      if (currentAccountIdRef.current !== ownerId) return;
+      try { window.localStorage.removeItem(warmStartCacheKey(ownerId, period.date)); } catch (_error) {}
+      setTrackerTasks(tasks => [...tasks.filter(task => task.task_key !== row.task_key), row]);
+      if (snapshot.wasCompleted) setDone(current => ({ ...current, [row.task_key]: true }));
+      setRecentlyDeletedTask(null);
+      setTaskMessage("Task restored ✨");
+    } catch (error) {
+      if (currentAccountIdRef.current === ownerId) setTaskMessage("Couldn't restore that task. Please retry Undo.");
+    } finally {
+      if (currentAccountIdRef.current === ownerId) taskDeleteInFlight.current = false;
+    }
   };
 
   const moveTrackerTask = async (taskKey, direction) => {
@@ -3545,6 +3572,8 @@ function GlowUpTracker() {
   };
 
   const startEditingTask = (task) => {
+    setNaturalScheduleText("");
+    setNaturalSchedulePreview(null);
     setEditingTaskKey(task.task_key);
     setEditTaskDraft({
       ...task,
@@ -3591,7 +3620,9 @@ function GlowUpTracker() {
     };
     setTaskMessage("Saving task changes…");
     const { error } = await supabase.from("tracker_tasks").update(changes).eq("user_id", user.id).eq("task_key", editingTaskKey);
+    if (currentAccountIdRef.current !== user.id) return;
     if (error) { setTaskMessage("Couldn't save that task."); return; }
+    try { window.localStorage.removeItem(warmStartCacheKey(user.id, period.date)); } catch (_error) {}
     try {
       const stateKey = "plushlife:habit-coach:v1";
       const coach = JSON.parse(localStorage.getItem(stateKey) || "{}") || {};
@@ -3701,7 +3732,7 @@ function GlowUpTracker() {
         .single();
       if (error) throw error;
       if (!data || data.user_id !== user.id || data.day_id !== dayId ||
-          JSON.stringify(data.entries || []) !== JSON.stringify(row.entries)) {
+          !sameScheduleEntries(data.entries, row.entries)) {
         throw new Error("The saved schedule could not be verified. Please retry.");
       }
       setPersonalSchedules((items) => [...items.filter((item) => item.day_id !== dayId), data]);
@@ -5202,7 +5233,7 @@ function GlowUpTracker() {
     const notice = document.createElement("div");
     notice.id = "pl-guardian-unlock";
     notice.setAttribute("role", "status");
-    notice.style.cssText = "position:fixed;bottom:calc(env(safe-area-inset-bottom, 0px) + 95px);left:16px;right:16px;max-width:430px;margin:0 auto;z-index:2147483000;padding:14px 16px;border-radius:20px;background:var(--pl-theme-surface,#352944);color:var(--pl-theme-ink,#fff);border:2px solid var(--pl-theme-line,#bc9ecb);box-shadow:0 10px 32px #0004;font-size:15px;";
+    notice.style.cssText = "position:fixed;bottom:calc(var(--pl-safe-bottom,0px) + 95px);left:16px;right:16px;max-width:430px;margin:0 auto;z-index:2147483000;padding:14px 16px;border-radius:20px;background:var(--pl-theme-surface,#352944);color:var(--pl-theme-ink,#fff);border:2px solid var(--pl-theme-line,#bc9ecb);box-shadow:0 10px 32px #0004;font-size:15px;";
     const copy = document.createElement("span");
     const allGifts = [...result.unlocked, ...gifts.unlocked];
     copy.textContent = allGifts.length === 1 ? "🎁 Guardian surprised you with " + allGifts[0].name + "! I'm proud of you!" : "🎁 Guardian has " + allGifts.length + " sweet surprises for you! You're doing lovely!";
@@ -6073,9 +6104,7 @@ function GlowUpTracker() {
   const ownedSupportLinks = supportLinks.filter((link) => link.owner_user_id === user?.id);
   const hasOwnGuardian = ownedSupportLinks.some((link) => link.active && link.accepted_at);
   const isGuardianAccount = !!user && trackerProfile?.account_type === "caretaker";
-  const dashboardItems = isGuardianAccount
-    ? [...DASHBOARDS, { id: "guardian", label: "Guardian", icon: "💛", accent: "#318C79" }]
-    : DASHBOARDS;
+
 
   useEffect(() => {
     if (!user) {
@@ -6113,14 +6142,11 @@ function GlowUpTracker() {
     document.getElementById("main-content")?.scrollTo({ top: 0 });
   }, [dashboard, collectionOpen]);
   const startCozyReset = async (profile) => { const available = rows.filter(row => !row.isBonus).map(row => row.key); const essentials = profile.essentials.filter(key => available.includes(key)); const okay = await saveDailyCheckIn({day_type:"tiny",soft_day:true,custom_essentials:essentials.length ? essentials : available.slice(0,3)}); if (okay && restDates.includes(period.date)) { const {error} = await supabase.from("rest_days").delete().eq("user_id",user.id).eq("rest_date",period.date); if(error) return false; setRestDates(dates=>dates.filter(date=>date!==period.date)); } if (okay && profile.reset_sound && soundscapePlaying !== profile.reset_sound) toggleSoundscape(profile.reset_sound); return okay; };
-  const dashboardIndex = dashboardItems.findIndex((item) => item.id === dashboard);
   const stepDashboard = (direction) => {
-    const currentIndex = dashboardIndex === -1 ? 0 : dashboardIndex;
-    const nextItem = dashboardItems[Math.max(0, Math.min(dashboardItems.length - 1, currentIndex + direction))];
-    if (nextItem && nextItem.id !== dashboard) {
-      goToDashboard(nextItem.id);
-      document.getElementById(`dashboard-tab-${nextItem.id}`)?.focus();
-    }
+    const nextId = adjacentDestination(dashboard, direction);
+    if (nextId === mainDestination(dashboard)) return;
+    if (nextId === "tasks") openTaskManager(period.date, "today");
+    else goToDashboard(nextId);
   };
   const isAdminUser = ["johnston.alexander.k@gmail.com", "johnston.alexander.k+plushlisttest@gmail.com"].includes((user?.email || "").toLowerCase());
   const isSupporterAccount = !!preferences.is_supporter || isAdminUser;
@@ -6137,6 +6163,10 @@ function GlowUpTracker() {
   const canAddSupportRewards = !isSupportAdult || !!activeSupportLink?.can_add_rewards;
   const selectedSupportName = supportPeople.find((person) => person.user_id === supportOwnerId)?.display_name || "your Cozy";
   const supportTaskSource = isSupportAdult ? supportTrackerTasks : trackerTasks;
+  const sharedProgress = supportProgressSummary?.ownerId === supportOwnerId
+    ? summarizeGuardianProgress(supportProgressSummary.rows, period.date) : null;
+  const supportProgressReady = !isSupportAdult || !!sharedProgress;
+  const supportProgressLoading = isSupportAdult && supportProgressSummary?.ownerId !== supportOwnerId;
   const supportTodayDayId = dayIdForDate(period.date);
   const supportTodayDayLabel = DAYS.find((item) => item.id === supportTodayDayId)?.label || supportTodayDayId.toUpperCase();
   const supportDailyEssentialKeys = supportTaskSource
@@ -6159,9 +6189,11 @@ function GlowUpTracker() {
   const supportTodayKeys = [...new Set([...supportDailyEssentialKeys, ...supportScheduledTodayKeys])];
   const supportDoneKeys = new Set(supportProgress.filter((row) => row.completed).map((row) => row.task_key));
   const supportCompletedCount = supportTodayKeys.filter((key) => supportDoneKeys.has(key)).length;
-  const supportDailyEssentialCompleted = supportDailyEssentialKeys.filter((key) => supportDoneKeys.has(key)).length;
-  const supportScheduledTodayCompleted = supportScheduledTodayKeys.filter((key) => supportDoneKeys.has(key)).length;
-  const supportPercent = supportTodayKeys.length ? Math.round((supportCompletedCount / supportTodayKeys.length) * 100) : 0;
+  const supportDailyEssentialCompleted = isSupportAdult ? (sharedProgress?.today.daily_completed ?? 0) : supportDailyEssentialKeys.filter((key) => supportDoneKeys.has(key)).length;
+  const supportScheduledTodayCompleted = isSupportAdult ? (sharedProgress?.today.scheduled_completed ?? 0) : supportScheduledTodayKeys.filter((key) => supportDoneKeys.has(key)).length;
+  const supportDailyEssentialCount = isSupportAdult ? (sharedProgress?.today.daily_count ?? 0) : supportDailyEssentialKeys.length;
+  const supportScheduledTodayCount = isSupportAdult ? (sharedProgress?.today.scheduled_count ?? 0) : supportScheduledTodayKeys.length;
+  const supportPercent = isSupportAdult ? (sharedProgress?.today.percent ?? 0) : supportTodayKeys.length ? Math.round((supportCompletedCount / supportTodayKeys.length) * 100) : 0;
   const supportHistoryByDate = new Map(
     supportWeeklyHistory.map((entry) => [entry.progress_date, new Set(entry.completed_keys || [])])
   );
@@ -6181,12 +6213,16 @@ function GlowUpTracker() {
     supportWeeklyCompletedCount += applicableKeys.filter((key) => completed.has(key)).length;
     supportWeeklyPossibleCount += applicableKeys.length;
   });
-  const supportWeeklyPercent = supportWeeklyPossibleCount
+  const supportWeeklyPercent = isSupportAdult ? (sharedProgress?.weekly.percent ?? 0) : supportWeeklyPossibleCount
     ? Math.round((supportWeeklyCompletedCount / supportWeeklyPossibleCount) * 100)
     : 0;
   const displayedSupportPercent = supportProgressView === "weekly" ? supportWeeklyPercent : supportPercent;
-  const displayedSupportCompleted = supportProgressView === "weekly" ? supportWeeklyCompletedCount : supportCompletedCount;
-  const displayedSupportPossible = supportProgressView === "weekly" ? supportWeeklyPossibleCount : supportTodayKeys.length;
+  const displayedSupportCompleted = isSupportAdult
+    ? (sharedProgress?.[supportProgressView === "weekly" ? "weekly" : "today"].completed_count ?? 0)
+    : supportProgressView === "weekly" ? supportWeeklyCompletedCount : supportCompletedCount;
+  const displayedSupportPossible = isSupportAdult
+    ? (sharedProgress?.[supportProgressView === "weekly" ? "weekly" : "today"].total_count ?? 0)
+    : supportProgressView === "weekly" ? supportWeeklyPossibleCount : supportTodayKeys.length;
 
   useEffect(() => {
     if (!user) return;
@@ -6519,7 +6555,7 @@ function GlowUpTracker() {
       fontFamily: babyMode ? "'Comic Sans MS','Nunito','Segoe UI',sans-serif" : dinoTheme ? "'Baloo 2','Nunito','Avenir Next','Segoe UI',system-ui,sans-serif" : "'Avenir Next','Segoe UI',system-ui,sans-serif",
       color: preferences.high_contrast ? (preferences.dark_mode ? "#FFF8FF" : "#2D2038") : (activeThemePalette.ink || "#5B4B6B"),
       fontSize: babyMode ? "104%" : "100%",
-      padding: "max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))",
+      padding: "max(24px, var(--pl-safe-top,0px)) max(16px, var(--pl-safe-right,0px)) max(48px, var(--pl-safe-bottom,0px)) max(16px, var(--pl-safe-left,0px))",
       position: "relative",
       isolation: "isolate",
       "--pl-theme-on-accent": ["twilight", "baby-night"].includes(paletteWorld) ? "#29223E" : "#FFFFFF",
@@ -6543,7 +6579,11 @@ function GlowUpTracker() {
       <div className="pl-ambient-theme-layer" aria-hidden="true" />
       <aside className="pl-desktop-navigation" aria-label="Desktop navigation">
         <h2>PlushLife</h2>
-        {[["today", "Today"], ["tasks", "Tasks"], ["week", "Calendar"], ["care", "Care"], ["progress", "Progress"], ["plush", "Plush Corner"], ["guardian", "Support"], ["settings", "Settings"]].map(([id, label]) => <button type="button" key={id} aria-current={dashboard === id && !collectionOpen ? "page" : undefined} onClick={() => { if (id === "plush") setCollectionOpen(true); else if (id === "settings") setSettingsOpen(true); else { setCollectionOpen(false); if (id === "tasks") openTaskManager(); else goToDashboard(id); } }}>{label}</button>)}
+        {MAIN_DESTINATIONS.map(({id, label}) => <button type="button" key={id} aria-current={mainDestination(dashboard) === id && !collectionOpen ? "page" : undefined} onClick={() => { setCollectionOpen(false); if (id === "tasks") openTaskManager(period.date, "today"); else goToDashboard(id); }}>{label}</button>)}
+        <div className="pl-navigation-personal" aria-label="Personal settings">
+          <button type="button" onClick={() => setCollectionOpen(true)}>My Plush</button>
+          <button type="button" onClick={() => setSettingsOpen(true)}>Settings</button>
+        </div>
       </aside>
 
       <style>{`
@@ -6551,10 +6591,10 @@ function GlowUpTracker() {
         /* compact-phone-shell */
         @media(max-width:520px){
           #main-content{
-            padding-top:max(12px,env(safe-area-inset-top))!important;
-            padding-left:env(safe-area-inset-left)!important;
-            padding-right:env(safe-area-inset-right)!important;
-            padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;
+            padding-top:max(12px,var(--pl-safe-top,0px))!important;
+            padding-left:var(--pl-safe-left,0px)!important;
+            padding-right:var(--pl-safe-right,0px)!important;
+            padding-bottom:calc(104px + var(--pl-safe-bottom,0px))!important;
           }
           .pl-unified-page-hero,.pl-unified-page-content{margin-left:8px!important;margin-right:8px!important}
           .pl-unified-page-content{--pl-card-radius:16px!important}
@@ -6681,7 +6721,7 @@ function GlowUpTracker() {
         .mamas-corner-kicker { font-size: 9.5px; letter-spacing: .12em; font-weight: 900; color: #A057B5; }
         .mamas-corner-title { margin-top: 2px; font-size: 14px; font-weight: 900; color: #68446F; }
         .mamas-corner-summary { padding: 0 12px 11px; color: #856B8B; font-size: 11px; line-height: 1.4; }
-        .mamas-private-window { position: fixed; inset: 0; z-index: 120; display: flex; align-items: stretch; justify-content: center; padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); background: rgba(48,35,57,.58); backdrop-filter: blur(8px); }
+        .mamas-private-window { position: fixed; inset: 0; z-index: 120; display: flex; align-items: stretch; justify-content: center; padding: max(10px, var(--pl-safe-top,0px)) max(10px, var(--pl-safe-right,0px)) max(10px, var(--pl-safe-bottom,0px)) max(10px, var(--pl-safe-left,0px)); background: rgba(48,35,57,.58); backdrop-filter: blur(8px); }
         .mamas-private-card { display: flex; width: min(620px, 100%); min-height: 0; flex-direction: column; overflow: hidden; border: 1px solid #D8B8E3; border-radius: 22px; background: linear-gradient(160deg,#FFF9FD,#F4EEFF 62%,#EDF9FF); box-shadow: 0 24px 70px rgba(43,25,53,.35); }
         .mamas-private-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 14px; border-bottom: 1px solid #E7D3EC; background: rgba(255,255,255,.72); }
         .mamas-private-header button { min-height: 36px; padding: 7px 12px; border: 1px solid #D9B8E8; border-radius: 11px; background: white; color: #80548E; font-weight: 900; cursor: pointer; }
@@ -6802,7 +6842,7 @@ function GlowUpTracker() {
             radial-gradient(circle at 76% 72%,#FFDCEB 0 15%,transparent 34%),
             linear-gradient(145deg,#FFF5FA,#F6EEFF 58%,#FFF1E8)!important;
         }
-        .dino-theme .pl-app-bottom-nav,.baby-mode .pl-app-bottom-nav{left:12px!important;right:12px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;border-radius:28px!important;border:2px solid #F3DDF2!important;box-shadow:0 12px 30px rgba(190,120,200,.20)!important}
+        .dino-theme .pl-app-bottom-nav,.baby-mode .pl-app-bottom-nav{left:12px!important;right:12px!important;bottom:calc(10px + var(--pl-safe-bottom,0px))!important;border-radius:28px!important;border:2px solid #F3DDF2!important;box-shadow:0 12px 30px rgba(190,120,200,.20)!important}
         .simple-mode .pl-home-hero{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(250,246,252,.9))!important}
         .simple-mode .pl-home-plush{display:block!important}
         .simple-mode .pl-home-logo,.simple-mode .pl-home-copy h1,.simple-mode .pl-home-copy p{text-shadow:none}
@@ -6900,7 +6940,7 @@ function GlowUpTracker() {
 
         /* Keep page content clear of the floating nav instead of letting cards slide underneath it. */
         #main-content .pl-unified-page-shell{
-          padding-bottom:calc(108px + env(safe-area-inset-bottom))!important;
+          padding-bottom:calc(108px + var(--pl-safe-bottom,0px))!important;
         }
         #main-content.dashboard-care .pl-care-shell,
         #main-content.dashboard-progress .pl-growth-shell,
@@ -6913,7 +6953,7 @@ function GlowUpTracker() {
         #main-content.dino-theme .pl-app-bottom-nav,
         #main-content.baby-mode .pl-app-bottom-nav{
           left:12px!important;right:12px!important;
-          bottom:max(8px,env(safe-area-inset-bottom))!important;
+          bottom:max(8px,var(--pl-safe-bottom,0px))!important;
           height:64px!important;min-height:64px!important;max-height:64px!important;
           padding:4px 8px!important;
           border-radius:24px!important;
@@ -6950,8 +6990,8 @@ function GlowUpTracker() {
         /* Plush should read as an app screen, not a desktop modal dropped over the tracker. */
         @media(max-width:520px){
           #main-content.rewards-open [data-plush-panel="🧸 Plush & Keepsakes"].pl-tool-backdrop{
-            inset:0 0 calc(64px + env(safe-area-inset-bottom)) 0!important;
-            padding:max(8px,env(safe-area-inset-top)) 8px 0!important;
+            inset:0 0 calc(64px + var(--pl-safe-bottom,0px)) 0!important;
+            padding:max(8px,var(--pl-safe-top,0px)) 8px 0!important;
             background:linear-gradient(180deg,#F9F4FC,#FFF9FC)!important;
             backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
           }
@@ -7011,7 +7051,7 @@ function GlowUpTracker() {
       `}</style>
       {preferences.reduced_motion && <style>{`*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}`}</style>}
       {swUpdateReady && !swUpdateDismissed && autoPopupToShow === null && (
-        <div role="status" style={{ position: "fixed", top: "max(10px, env(safe-area-inset-top))", left: "50%", transform: "translateX(-50%)", zIndex: 150, display: "flex", alignItems: "center", gap: 10, width: "max-content", maxWidth: "min(92vw, 430px)", padding: "10px 12px 10px 14px", borderRadius: 16, background: "rgba(255,253,255,.97)", border: "1px solid #E4CFF0", boxShadow: "0 12px 32px rgba(73,43,90,.18)", backdropFilter: "blur(10px)" }}>
+        <div role="status" style={{ position: "fixed", top: "max(10px, var(--pl-safe-top,0px))", left: "50%", transform: "translateX(-50%)", zIndex: 150, display: "flex", alignItems: "center", gap: 10, width: "max-content", maxWidth: "min(92vw, 430px)", padding: "10px 12px 10px 14px", borderRadius: 16, background: "rgba(255,253,255,.97)", border: "1px solid #E4CFF0", boxShadow: "0 12px 32px rgba(73,43,90,.18)", backdropFilter: "blur(10px)" }}>
           <span style={{ flex: "1 1 auto", minWidth: 0, fontSize: 13, fontWeight: 700, color: "#5B4B6B", lineHeight: 1.4 }}>✨ A fresher PlushLife is ready</span>
           <button type="button" onClick={() => window.location.reload()} style={{ flexShrink: 0, padding: "8px 14px", borderRadius: 12, border: 0, background: "#A65DC1", color: "white", fontWeight: 900, fontSize: 12.5, cursor: "pointer" }}>Refresh</button>
           <button type="button" onClick={() => setSwUpdateDismissed(true)} aria-label="Dismiss update notice" style={{ flexShrink: 0, padding: "8px 10px", borderRadius: 12, border: "1px solid #E4CFF0", background: "white", color: "#8C6B9E", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>Later</button>
@@ -7379,11 +7419,12 @@ function GlowUpTracker() {
             <PopupCloseButton label="Close delete task" onClick={() => setPendingTaskDelete(null)} />
             <div id="delete-task-title" style={{ fontSize: 19, fontWeight: 900, color: "#7A4051" }}>Delete this task?</div>
             <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.5, color: "#6B5A7D" }}>
+              {taskMessage && <div role="status">{taskMessage}</div>}
               <strong>{pendingTaskDelete.label}</strong> will be removed from <strong>{pendingTaskDelete.section}</strong>. Other tasks in that group will stay.
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
   <button type="button" onClick={() => setPendingTaskDelete(null)} style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid #D8C8E2", background: "white", color: "#76558A", fontWeight: 900 }}>Keep task</button>
-              <button type="button" onClick={() => deleteTrackerTask(pendingTaskDelete.key, pendingTaskDelete.label)} style={{ padding: "8px 12px", borderRadius: 10, border: 0, background: "#C45D74", color: "white", fontWeight: 900 }}>Delete task</button>
+              <button type="button" disabled={taskDeleteBusy} onClick={() => deleteTrackerTask(pendingTaskDelete.key, pendingTaskDelete.label)} style={{ padding: "8px 12px", borderRadius: 10, border: 0, background: "#C45D74", color: "white", fontWeight: 900 }}>{taskDeleteBusy ? "Deleting…" : "Delete task"}</button>
             </div>
           </div>
         </div>
@@ -7399,32 +7440,10 @@ function GlowUpTracker() {
               <input value={editTaskDraft.task} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, task: event.target.value }))} maxLength={240} aria-label="Task name" style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC" }} />
             </label>
 
-            <div style={{ marginTop: 10 }}>
-              <div style={{ fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>LIST</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 6, marginTop: 6 }}>
-                {[{ id: "daily", label: "Every day" }, ...DAYS].map((item) => {
-                  const selected = editTaskDraft.day_id === item.id;
-                  return (
-                    <button key={item.id} type="button" aria-pressed={selected} onClick={() => setEditTaskDraft((draft) => ({ ...draft, day_id: item.id, section: taskSectionsForDay(item.id)[0] || draft.section }))} style={{ minWidth: 0, padding: "7px 4px", borderRadius: 9, border: selected ? "2px solid #A65DC1" : "1px solid #DCC9E8", background: selected ? "#F2DEFA" : "white", color: selected ? "#7E3D99" : "#6B5A7D", fontWeight: 900, fontSize: item.id === "daily" ? 10 : 11, cursor: "pointer" }}>
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>
-              GROUP
-              <select value={editTaskDraft.section} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, section: event.target.value }))} aria-label="Choose section" style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC", background: "white" }}>
-                {editTaskSectionOptions.map((section) => <option key={section} value={section}>{section}</option>)}
-                {editTaskDraft.section !== "__custom__" && !editTaskSectionOptions.includes(editTaskDraft.section) && <option value={editTaskDraft.section}>{editTaskDraft.section}</option>}
-                <option value="__custom__">＋ Create a custom section…</option>
-              </select>
-            </label>
-            {editTaskDraft.section === "__custom__" && (
-              <input value={editTaskDraft.custom_section} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, custom_section: event.target.value }))} maxLength={120} aria-label="New section name" placeholder="Name your new section" style={{ width: "100%", boxSizing: "border-box", marginTop: 7, padding: 9, borderRadius: 10, border: "1px solid #E3C9EC" }} />
-            )}
-
+            <details className="pl-task-edit-group"><summary>Schedule & reminder</summary>
+              <label>Describe a schedule · optional<input value={naturalScheduleText} onChange={event => { setNaturalScheduleText(event.target.value); setNaturalSchedulePreview(null); }} aria-label="Schedule in everyday language" placeholder="e.g. Weekdays at 8 PM"/></label>
+              <button type="button" onClick={applyNaturalSchedule}>Preview schedule</button>
+              {naturalSchedulePreview && <p role="status">{naturalSchedulePreview.summary}</p>}
             <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>
               HOW OFTEN SHOULD IT COME BACK?
               <select value={editTaskDraft.schedule_type || "weekly"} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, schedule_type: event.target.value }))} aria-label="Choose repeating schedule" style={{ width: "100%", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC", background: "white" }}>
@@ -7469,6 +7488,36 @@ function GlowUpTracker() {
               <input type="time" value={editTaskDraft.reminder_time || ""} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, reminder_time: event.target.value }))} aria-label="Task reminder time" style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC" }} />
             </label>
 
+</details>
+            <details className="pl-task-edit-group"><summary>List & group</summary>
+            <div style={{ marginTop: 10 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>LIST</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 6, marginTop: 6 }}>
+                {[{ id: "daily", label: "Every day" }, ...DAYS].map((item) => {
+                  const selected = editTaskDraft.day_id === item.id;
+                  return (
+                    <button key={item.id} type="button" aria-pressed={selected} onClick={() => setEditTaskDraft((draft) => ({ ...draft, day_id: item.id, section: taskSectionsForDay(item.id)[0] || draft.section }))} style={{ minWidth: 0, padding: "7px 4px", borderRadius: 9, border: selected ? "2px solid #A65DC1" : "1px solid #DCC9E8", background: selected ? "#F2DEFA" : "white", color: selected ? "#7E3D99" : "#6B5A7D", fontWeight: 900, fontSize: item.id === "daily" ? 10 : 11, cursor: "pointer" }}>
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>
+              GROUP
+              <select value={editTaskDraft.section} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, section: event.target.value }))} aria-label="Choose section" style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC", background: "white" }}>
+                {editTaskSectionOptions.map((section) => <option key={section} value={section}>{section}</option>)}
+                {editTaskDraft.section !== "__custom__" && !editTaskSectionOptions.includes(editTaskDraft.section) && <option value={editTaskDraft.section}>{editTaskDraft.section}</option>}
+                <option value="__custom__">＋ Create a custom section…</option>
+              </select>
+            </label>
+            {editTaskDraft.section === "__custom__" && (
+              <input value={editTaskDraft.custom_section} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, custom_section: event.target.value }))} maxLength={120} aria-label="New section name" placeholder="Name your new section" style={{ width: "100%", boxSizing: "border-box", marginTop: 7, padding: 9, borderRadius: 10, border: "1px solid #E3C9EC" }} />
+            )}
+
+</details>
+            <details className="pl-task-edit-group"><summary>Habit type & smaller steps</summary>
             <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 10.5, fontWeight: 900, color: "#7D668C" }}>
               WHAT KIND OF TASK IS THIS?
               <select value={editTaskDraft.habit_type || "regular"} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, habit_type: event.target.value }))} aria-label="Choose task kind" style={{ width: "100%", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC", background: "white" }}>
@@ -7487,6 +7536,12 @@ function GlowUpTracker() {
               <input value={editTaskDraft.why_note || ""} onChange={(event) => setEditTaskDraft((draft) => ({ ...draft, why_note: event.target.value }))} maxLength={300} aria-label="Why this task matters" style={{ width: "100%", boxSizing: "border-box", padding: 9, borderRadius: 10, border: "1px solid #E3C9EC" }} />
             </label>
 
+
+              <label>Smaller version<input value={editTaskDraft.soft_label || ""} onChange={event => setEditTaskDraft(draft => ({ ...draft, soft_label: event.target.value }))} aria-label="Soft task version" maxLength={240}/></label>
+              <label>Tiny version<input value={editTaskDraft.tiny_label || ""} onChange={event => setEditTaskDraft(draft => ({ ...draft, tiny_label: event.target.value }))} aria-label="Tiny task version" maxLength={240}/></label>
+              <label>Minutes<input type="number" min="1" max="1440" value={editTaskDraft.estimated_minutes || ""} onChange={event => setEditTaskDraft(draft => ({ ...draft, estimated_minutes: event.target.value }))} aria-label="Estimated minutes"/></label>
+              <label><input type="checkbox" checked={!!editTaskDraft.essential_on_low_capacity} onChange={event => setEditTaskDraft(draft => ({ ...draft, essential_on_low_capacity: event.target.checked }))}/> Keep on Tiny and Recovery days</label>
+</details>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
               <button type="button" onClick={() => { setEditingTaskKey(null); setEditTaskDraft(null); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid #D8C8E2", background: "white", color: "#76558A", fontWeight: 900 }}>Cancel</button>
               <button type="button" onClick={saveEditedTask} style={{ padding: "8px 12px", borderRadius: 10, border: 0, background: "#A65DC1", color: "white", fontWeight: 900 }}>Save changes</button>
@@ -7537,7 +7592,7 @@ function GlowUpTracker() {
             {signInMessage && <div style={{ marginTop: 8, fontSize: 12, color: "#8C6B9E" }}>{signInMessage}</div>}
           </div>
         )}
-        {!compactAppShell && <div className="plushlife-app-header" style={{ marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 9 }}>
+        {!compactAppShell && dashboard !== "today" && <div className="plushlife-app-header" style={{ marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 9 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 9.5, letterSpacing: "0.16em", color: "#B08AC7", fontWeight: 800 }}>{dinoTheme ? "ONE LITTLE STEP AT A TIME 🦕✨" : "ONE LITTLE STEP AT A TIME ✨"}</div>
             <h1 className="app-title" style={{ fontSize: 24, margin: "3px 0 0", fontWeight: 850, letterSpacing: "-0.02em", lineHeight: 1.05 }}>
@@ -7634,15 +7689,10 @@ function GlowUpTracker() {
           </>
         )}
 
-        {(dashboard === "today" || dashboard === "week") && (
-          <div className="pl-edit-shortcuts pl-edit-shortcuts-home" role="group" aria-label="Quick editing shortcuts">
-            <button type="button" onClick={() => openTaskManager(period.date, "today")}>✏️ Edit tasks</button>
-            <button type="button" onClick={() => setManageSchedule(true)}>📅 Edit schedule</button>
-          </div>
-        )}
+
 
         <style>{`
-          .pl-unified-page-shell{display:grid;gap:8px;margin:0 auto;max-width:760px;color:#62506D;padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+          .pl-unified-page-shell{display:grid;gap:8px;margin:0 auto;max-width:760px;color:#62506D;padding-bottom:calc(104px + var(--pl-safe-bottom,0px))}
           .pl-unified-page-hero{position:relative;overflow:visible;margin:0;padding:5px 4px 7px;min-height:0;border-radius:0;background:transparent;border:0;box-shadow:none}
           .pl-unified-page-hero:before{display:none}
           .pl-unified-page-hero:after{display:none}
@@ -7658,11 +7708,11 @@ function GlowUpTracker() {
           .pl-unified-page-content button{transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
           .pl-unified-page-content button:active{transform:scale(.985)}
           .pl-unified-page-content input,.pl-unified-page-content textarea,.pl-unified-page-content select{border-color:#E4CEE9!important;border-radius:15px!important;background:#FFFDFE!important;box-shadow:inset 0 1px 2px rgba(92,58,109,.035)}
-          .pl-app-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:80;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;min-height:50px;padding:3px 8px max(3px,env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(255,253,254,.97),rgba(252,246,255,.97));border-top:1px solid #EEDFF1;box-shadow:0 -5px 18px rgba(73,43,90,.07);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+          .pl-app-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:80;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;min-height:50px;padding:3px 8px max(3px,var(--pl-safe-bottom,0px));background:linear-gradient(180deg,rgba(255,253,254,.97),rgba(252,246,255,.97));border-top:1px solid #EEDFF1;box-shadow:0 -5px 18px rgba(73,43,90,.07);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
           .pl-app-nav-btn{appearance:none;border:0;background:transparent;min-height:36px;padding:0 2px;color:#907895;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:7.8px;font-weight:900;cursor:pointer}.pl-app-nav-btn.active{color:#9C3EAC;background:linear-gradient(145deg,rgba(251,239,255,.82),rgba(255,246,251,.68))}.pl-app-nav-btn.active .ico{background:#F7E8FA;box-shadow:0 0 0 5px #F7E8FA;border-radius:10px;transform:translateY(-1px)}.pl-app-nav-btn .ico{font-size:16px;line-height:1;filter:saturate(.88);transition:transform .16s ease}
           .pl-app-nav-add{width:38px;height:38px;min-height:38px;margin-top:-10px;border-radius:50%;background:linear-gradient(145deg,#C85DDD,#E57BC8);color:white;box-shadow:0 7px 16px rgba(178,71,199,.2),0 0 0 3px rgba(255,250,253,.92);font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center}
           @media(min-width:760px){.pl-app-bottom-nav{left:50%;right:auto;width:760px;transform:translateX(-50%);border-left:1px solid #F0E1F1;border-right:1px solid #F0E1F1;border-radius:24px 24px 0 0}}
-          @media(max-width:520px){.pl-unified-page-shell{padding-bottom:calc(104px + env(safe-area-inset-bottom));gap:5px}.pl-app-bottom-nav{min-height:48px;padding-top:2px}.pl-app-nav-btn{min-height:44px;font-size:9px}.pl-app-nav-btn .ico{font-size:16px}.pl-app-nav-add{width:36px;height:36px;min-height:36px;font-size:19px;margin-top:-9px}.pl-unified-page-hero{min-height:0;padding:4px 2px 5px;border-radius:0}.pl-unified-wordmark{font-size:20px;letter-spacing:-.7px}.pl-unified-date{font-size:9px;padding:5px 7px}.pl-unified-gear{width:44px;height:44px;font-size:16px}.pl-unified-page-title{margin-top:4px;max-width:100%}.pl-unified-kicker{font-size:7.8px}.pl-unified-page-title h2{font-size:15px}.pl-unified-page-title p{display:none}.pl-unified-page-hero:after,.pl-unified-page-hero:before{display:none}}
+          @media(max-width:520px){.pl-unified-page-shell{padding-bottom:calc(104px + var(--pl-safe-bottom,0px));gap:5px}.pl-app-bottom-nav{min-height:48px;padding-top:2px}.pl-app-nav-btn{min-height:44px;font-size:9px}.pl-app-nav-btn .ico{font-size:16px}.pl-app-nav-add{width:36px;height:36px;min-height:36px;font-size:19px;margin-top:-9px}.pl-unified-page-hero{min-height:0;padding:4px 2px 5px;border-radius:0}.pl-unified-wordmark{font-size:20px;letter-spacing:-.7px}.pl-unified-date{font-size:9px;padding:5px 7px}.pl-unified-gear{width:44px;height:44px;font-size:16px}.pl-unified-page-title{margin-top:4px;max-width:100%}.pl-unified-kicker{font-size:7.8px}.pl-unified-page-title h2{font-size:15px}.pl-unified-page-title p{display:none}.pl-unified-page-hero:after,.pl-unified-page-hero:before{display:none}}
         `}</style>
 
         {false && dashboard !== "today" && <header className="pl-page-heading">
@@ -7693,21 +7743,9 @@ function GlowUpTracker() {
 
         <JournalReflectionViewer reflectionViewerDate={reflectionViewerDate} onClose={() => setReflectionViewerDate(null)} reflectionViewerPrompt={reflectionViewerPrompt} reflectionViewerLoading={reflectionViewerLoading} reflectionViewerNote={reflectionViewerNote} />
 
-        <TasksPanel initialView={taskManagerView} viewRequest={taskManagerRequest} open={manageTasks || dashboard === "tasks"} inline={dashboard === "tasks"} rows={rows} viewDone={viewDone} toggle={toggle} onClose={() => { setManageTasks(false); if (dashboard === "tasks") goToDashboard("today"); }} newTaskDay={newTaskDay} setNewTaskDay={setNewTaskDay} taskSectionsForDay={taskSectionsForDay} setNewTaskSection={setNewTaskSection} setNewTaskCustomSection={setNewTaskCustomSection} starterPackId={starterPackId} setStarterPackId={setStarterPackId} trackerTasks={trackerTasks} setStarterPackMessage={setStarterPackMessage} addStarterPack={addStarterPack} starterPackMessage={starterPackMessage} importOpen={importOpen} setImportOpen={setImportOpen} newTaskSection={newTaskSection} importText={importText} setImportText={setImportText} importTasksFromText={importTasksFromText} importMessage={importMessage} newTaskNameInputRef={newTaskNameInputRef} newTaskName={newTaskName} setNewTaskName={setNewTaskName} taskMessage={taskMessage} setTaskMessage={setTaskMessage} naturalScheduleText={naturalScheduleText} setNaturalScheduleText={setNaturalScheduleText} naturalSchedulePreview={naturalSchedulePreview} setNaturalSchedulePreview={setNaturalSchedulePreview} applyNaturalSchedule={applyNaturalSchedule} newTaskSectionOptions={newTaskSectionOptions} newTaskCustomSection={newTaskCustomSection} taskAdvancedOpen={taskAdvancedOpen} setTaskAdvancedOpen={setTaskAdvancedOpen} newTaskWhy={newTaskWhy} setNewTaskWhy={setNewTaskWhy} newTaskSoftLabel={newTaskSoftLabel} setNewTaskSoftLabel={setNewTaskSoftLabel} newTaskTinyLabel={newTaskTinyLabel} setNewTaskTinyLabel={setNewTaskTinyLabel} newTaskEstimatedMinutes={newTaskEstimatedMinutes} setNewTaskEstimatedMinutes={setNewTaskEstimatedMinutes} newTaskEssentialOnLow={newTaskEssentialOnLow} setNewTaskEssentialOnLow={setNewTaskEssentialOnLow} newTaskKind={newTaskKind} setNewTaskKind={setNewTaskKind} newTaskScheduleType={newTaskScheduleType} setNewTaskScheduleType={setNewTaskScheduleType} newTaskScheduleDays={newTaskScheduleDays} setNewTaskScheduleDays={setNewTaskScheduleDays} newTaskReminderTime={newTaskReminderTime} setNewTaskReminderTime={setNewTaskReminderTime} newTaskStartDate={newTaskStartDate} setNewTaskStartDate={setNewTaskStartDate} newTaskEndDate={newTaskEndDate} setNewTaskEndDate={setNewTaskEndDate} newTaskOneTimeDate={newTaskOneTimeDate} setNewTaskOneTimeDate={setNewTaskOneTimeDate} selectedProgressDate={selectedProgressDate} addTrackerTask={addTrackerTask} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} isSupporterAccount={isSupporterAccount} FREE_TASK_LIMIT_PER_DAY={FREE_TASK_LIMIT_PER_DAY} taskSearchQuery={taskSearchQuery} setTaskSearchQuery={setTaskSearchQuery} isTaskPausedOnDate={isTaskPausedOnDate} period={period} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToSection={moveTaskToSection} startEditingTask={startEditingTask} resumeTrackerTask={resumeTrackerTask} pauseTrackerTask={pauseTrackerTask} archiveTrackerTask={archiveTrackerTask} setPendingTaskDelete={setPendingTaskDelete} showArchivedTasks={showArchivedTasks} setShowArchivedTasks={setShowArchivedTasks} restoreArchivedTask={restoreArchivedTask} quickAddTrackerTask={quickAddTrackerTask} quickAddMessage={quickAddMessage} onOpenSchedule={() => setManageSchedule(true)} />
-
-        <ScheduleEditorPanel open={manageSchedule} onClose={() => setManageSchedule(false)} scheduleEditingDayId={scheduleEditingDayId} setScheduleEditDayId={setScheduleEditDayId} personalSchedules={personalSchedules} scheduleDraft={scheduleDraft} updateScheduleEntry={updateScheduleEntry} removeScheduleEntry={removeScheduleEntry} addScheduleEntry={addScheduleEntry} savePersonalSchedule={savePersonalSchedule} copyScheduleToAllDays={copyScheduleToAllDays} clearPersonalSchedule={clearPersonalSchedule} copyToDayIds={copyToDayIds} toggleCopyToDay={toggleCopyToDay} copyScheduleToSelectedDays={copyScheduleToSelectedDays} scheduleMessage={scheduleMessage} scheduleExceptionDraft={scheduleExceptionDraft} setScheduleExceptionDraft={setScheduleExceptionDraft} updateScheduleExceptionEntry={updateScheduleExceptionEntry} removeScheduleExceptionEntry={removeScheduleExceptionEntry} addScheduleExceptionEntry={addScheduleExceptionEntry} saveScheduleException={saveScheduleException} scheduleExceptionMessage={scheduleExceptionMessage} scheduleExceptions={scheduleExceptions} deleteScheduleException={deleteScheduleException} onOpenTasks={() => { setManageSchedule(false); openTaskManager(period.date, "today"); }} />
-
-        <GuardianPanel client={supabase} guardianLinksReady={guardianLinksReady} onRetryGuardian={() => loadSupportData(user)} onOpenTasks={() => openTaskManager(period.date,"today")} open={user && dashboard === "guardian"} onClose={() => setDashboard("today")} isGuardianAccount={isGuardianAccount} hasOwnGuardian={hasOwnGuardian} supportViewMode={supportViewMode} setSupportViewMode={setSupportViewMode} isSupportAdult={isSupportAdult} selectedSupportName={selectedSupportName} guardianSupportRequests={guardianSupportRequests} supportOwnerId={supportOwnerId} updateGuardianSupportRequest={updateGuardianSupportRequest} pendingSupportInvites={pendingSupportInvites} supportPeople={supportPeople} acceptSupportInvitation={acceptSupportInvitation} declineSupportInvitation={declineSupportInvitation} canUseCaretakerDashboard={canUseCaretakerDashboard} invitedSupportLinks={invitedSupportLinks} loadSupportOwner={loadSupportOwner} loadSupportData={loadSupportData} user={user} supportAchievements={supportAchievements} period={period} ownerIsRestingToday={ownerIsRestingToday} restDatesSet={restDatesSet} todayRequiredDone={todayRequiredDone} supportProgress={supportProgress} activeSupportLink={activeSupportLink} canViewSupportProgress={canViewSupportProgress} canViewSupportTasks={canViewSupportTasks} canViewSupportSchedule={canViewSupportSchedule} canViewSupportMood={canViewSupportMood} supportTrackerTasks={supportTrackerTasks} supportSchedules={supportSchedules} supportScheduleExceptions={supportScheduleExceptions} supportMoodSummary={supportMoodSummary} supportProgressView={supportProgressView} setSupportProgressView={setSupportProgressView} supportTodayDayLabel={supportTodayDayLabel} displayedSupportPercent={displayedSupportPercent} displayedSupportCompleted={displayedSupportCompleted} displayedSupportPossible={displayedSupportPossible} supportDailyEssentialCompleted={supportDailyEssentialCompleted} supportDailyEssentialKeys={supportDailyEssentialKeys} supportScheduledTodayCompleted={supportScheduledTodayCompleted} supportScheduledTodayKeys={supportScheduledTodayKeys} canSendSupportNotes={canSendSupportNotes} newNote={newNote} setNewNote={setNewNote} addSupportNote={addSupportNote} suggestComfortTool={suggestComfortTool} canAddSupportRewards={canAddSupportRewards} rewardTitle={rewardTitle} setRewardTitle={setRewardTitle} rewardDetails={rewardDetails} setRewardDetails={setRewardDetails} rewardTarget={rewardTarget} setRewardTarget={setRewardTarget} rewardTargetPeriod={rewardTargetPeriod} setRewardTargetPeriod={setRewardTargetPeriod} rewardApprovalRequired={rewardApprovalRequired} setRewardApprovalRequired={setRewardApprovalRequired} addSupportReward={addSupportReward} suggestedTask={suggestedTask} setSuggestedTask={setSuggestedTask} suggestedTaskDay={suggestedTaskDay} setSuggestedTaskDay={setSuggestedTaskDay} submitTaskSuggestion={submitTaskSuggestion} inviteEmail={inviteEmail} setInviteEmail={setInviteEmail} inviteSupportAdult={inviteSupportAdult} GUARDIAN_ROLE_PRESETS={GUARDIAN_ROLE_PRESETS} guardianRolePreset={guardianRolePreset} setGuardianRolePreset={setGuardianRolePreset} ownedSupportLinks={ownedSupportLinks} supportRelationships={supportRelationships} setSupportAdultActive={setSupportAdultActive} removeSupportAdult={removeSupportAdult} updateCaretakerPermission={updateCaretakerPermission} updateCareAgreement={updateCareAgreement} supportRequestGuardian={supportRequestGuardian} setSupportRequestGuardian={setSupportRequestGuardian} supportRequestType={supportRequestType} setSupportRequestType={setSupportRequestType} supportRequestText={supportRequestText} setSupportRequestText={setSupportRequestText} sendGuardianSupportRequest={sendGuardianSupportRequest} taskSuggestions={taskSuggestions} suggestionSectionsById={suggestionSectionsById} setSuggestionSectionsById={setSuggestionSectionsById} taskSectionsForDay={taskSectionsForDay} decideTaskSuggestion={decideTaskSuggestion} supportMessage={supportMessage} supportRewards={supportRewards} supportWeeklyPercent={supportWeeklyPercent} supportPercent={supportPercent} updateRewardStatus={updateRewardStatus} supportNotes={supportNotes} setComfortToolOpen={setComfortToolOpen} deleteSupportNote={deleteSupportNote} onOpenSettings={() => setSettingsOpen(true)} />
-
-        <>
-        <DailyJournalPanel open={journalQuickOpen && (!dailyJournalPromptOpen || autoPopupToShow === "daily_journal")} onVisible={() => { if (!dailyJournalPromptOpen || !user?.id) return; try { window.localStorage.setItem(`plushlife:daily-journal-prompt:${user.id}:${period.date}`, "shown"); } catch (_error) {} }} onClose={() => { setJournalQuickOpen(false); setDailyJournalPromptOpen(false); setPrivateNoteEditing(false); }} dailyJournalPromptOpen={dailyJournalPromptOpen} journalQuickOpenDate={journalQuickOpenDate} journalDisplayedPrompt={journalDisplayedPrompt} privateNoteEditing={privateNoteEditing} setPrivateNoteEditing={setPrivateNoteEditing} privateNoteDraft={privateNoteDraft} setPrivateNoteDraft={setPrivateNoteDraft} savePrivateNote={savePrivateNote} privateNote={privateNote} privateNoteMessage={privateNoteMessage} />
-        <TodayPanel syncStatus={syncStatus} online={online} userId={user.id} rewardMoment={rewardMoment} onDismissReward={()=>setRewardMoment(null)} onWearReward={outfit=>{if(!unlockedIdSet.has(outfit.id))return;saveMascotCollection({...mascotCollection,unlockedIds:[...unlockedIdSet],selectedId:outfit.id});setRewardMoment(null);}} onCozyReset={startCozyReset} open={dashboard === "today"} returnGapDays={returnGapDays} returnBannerDismissed={returnBannerDismissed} setReturnBannerDismissed={setReturnBannerDismissed} voice={voice} setEssentialsPickerOpen={setEssentialsPickerOpen} selectDayType={selectDayType} wellbeingPatternInsight={wellbeingPatternInsight} todayDayId={todayDayId} hardDayBannerDismissed={hardDayBannerDismissed} setHardDayBannerDismissed={setHardDayBannerDismissed} dailyCheckIn={dailyCheckIn} restDatesSet={restDatesSet} period={period} toggleRestToday={toggleRestToday} nextStepTask={nextStepTask} FeatureTip={FeatureTip} day={day} babyMode={babyMode} nextStepHint={nextStepHint} toggle={toggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} weeklyIntentionMessage={weeklyIntentionMessage} todayCardIndex={todayCardIndex} setTodayCardIndex={setTodayCardIndex} taskWeekDates={taskWeekDates} selectedProgressDate={selectedProgressDate} selectTaskPreviewDate={selectTaskPreviewDate} isFutureView={isFutureView} selectedTaskDateLabel={selectedTaskDateLabel} todaySwipeStartX={todaySwipeStartX} todaySwipeStartY={todaySwipeStartY} selectedSchedule={homeSelectedSchedule} selectedScheduleExceptionEntries={homeScheduleExceptionEntries} scheduleDayId={scheduleDayId} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} active={active} rows={rows} viewDone={viewDone} openTaskManager={openTaskManager} todayRequiredDone={todayRequiredDone} todayRequiredKeys={todayRequiredKeys} activityDaysTotal={activityDaysTotal} careDaysTotal={careDaysTotal} babyCaregiverName={babyCaregiverName} trackerProfile={trackerProfile} openJournalForSelectedDate={openJournalForSelectedDate} isHistoricalView={isHistoricalView} focusHelperOpen={focusHelperOpen} setFocusHelperOpen={setFocusHelperOpen} pickRandomFocusTask={pickRandomFocusTask} setFocusSuggestionKey={setFocusSuggestionKey} focusedEssential={focusedEssential} focusChoices={focusChoices} selectedTaskViewIsRest={selectedTaskViewIsRest} pct={pct} requiredDoneCount={requiredDoneCount} requiredRows={requiredRows} preferences={preferences} doneCount={doneCount} focusModeShowAll={focusModeShowAll} setFocusModeShowAll={setFocusModeShowAll} isTaskPausedOnDate={isTaskPausedOnDate} openRow={openRow} setOpenRow={setOpenRow} celebrateKey={celebrateKey} pauseTrackerTask={pauseTrackerTask} resumeTrackerTask={resumeTrackerTask} taskListCollapsed={taskListCollapsed} setTaskListCollapsed={setTaskListCollapsed} recentlyCompletedKeys={recentlyCompletedKeys} moveTaskGroup={moveTaskGroup} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToTomorrow={moveTaskToTomorrow} completedTodayExpanded={completedTodayExpanded} setCompletedTodayExpanded={setCompletedTodayExpanded} tomorrowTasksCount={tomorrowTasksCount} weeklyHistory={weeklyHistory} dailyCheckInHistory={dailyCheckInHistory} tomorrowPreviewRows={tomorrowPreviewRows} tomorrowDateString={tomorrowDateString} selectedOutfit={selectedOutfit} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} calmQuickOpen={calmQuickOpen} setCalmQuickOpen={setCalmQuickOpen} currentCopingOption={currentCopingOption} reshuffle={reshuffle} setCareSection={setCareSection} goToDashboard={goToDashboard} setProfileOpen={setProfileOpen} setSettingsOpen={setSettingsOpen} openTodayJournal={openTodayJournal} openDailyCheckIn={() => setCheckInPopupOpen(true)} />
-
-        {dashboard === "week" && <div className="pl-unified-page-content"><WeekPanel open={dashboard === "week"} openTodayJournal={openTodayJournal} weekCardIndex={weekCardIndex} setWeekCardIndex={setWeekCardIndex} weekSwipeStartX={weekSwipeStartX} weekSwipeStartY={weekSwipeStartY} reflectionCalendarMonth={reflectionCalendarMonth} setReflectionCalendarMonth={setReflectionCalendarMonth} reflectionMonthDate={reflectionMonthDate} reflectionMonthStart={reflectionMonthStart} reflectionMonthDays={reflectionMonthDays} reflectionDateSet={reflectionDateSet} dailyCheckInHistory={dailyCheckInHistory} restDatesSet={restDatesSet} selectedProgressDate={selectedProgressDate} setSelectedProgressDate={setSelectedProgressDate} dayCompletionPct={dayCompletionPct} setDayViewDate={setDayViewDate} setActive={setActive} setReflectionViewerDate={setReflectionViewerDate} setCheckInViewerDate={setCheckInViewerDate} reflectionHistory={reflectionHistory} journalHistoryExpanded={journalHistoryExpanded} setJournalHistoryExpanded={setJournalHistoryExpanded} weeklyIntentionHistory={weeklyIntentionHistory} weeklyIntentionHistoryExpanded={weeklyIntentionHistoryExpanded} setWeeklyIntentionHistoryExpanded={setWeeklyIntentionHistoryExpanded} period={period} calendarWeekOffset={calendarWeekOffset} setCalendarWeekOffset={setCalendarWeekOffset} calendarWeekPreviewDate={calendarWeekPreviewDate} setCalendarWeekPreviewDate={setCalendarWeekPreviewDate} trackerTasks={trackerTasks} dayViewDate={dayViewDate} dayViewExpanded={dayViewExpanded} setDayViewExpanded={setDayViewExpanded} longHistoryByDate={longHistoryByDate} isTaskPausedOnDate={isTaskPausedOnDate} markPastTasksDone={markPastTasksDone} done={done} toggle={toggle} isHistoricalView={isHistoricalView} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} CHECKIN_MOODS={CHECKIN_MOODS} /></div>}
-
-        {dashboard === "progress" && <div className="pl-unified-page-content"><ProgressPanel open={dashboard === "progress"} user={user} progressView={progressView} setProgressView={setProgressView} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} hasWeeklyActivity={hasWeeklyActivity} goToDashboard={goToDashboard} onOpenPlush={() => setCollectionOpen(true)} weeklyOverallPct={weeklyOverallPct} weekOverWeekDelta={weekOverWeekDelta} preferences={preferences} weeklyEssentialPct={weeklyEssentialPct} weeklyOverallDone={weeklyOverallDone} weeklyOverallPossible={weeklyOverallPossible} weeklyBonusDone={weeklyBonusDone} caringDays={caringDays} weeklyEssentialDone={weeklyEssentialDone} careStory={careStory} careAreas={careAreas} openTaskManager={openTaskManager} patternInsightCards={patternInsightCards} insightCardIndex={insightCardIndex} setInsightCardIndex={setInsightCardIndex} weeklyHighlights={weeklyHighlights} period={period} goWriteWeeklyIntention={goWriteWeeklyIntention} setShareCardOpen={setShareCardOpen} progressDetailsOpen={progressDetailsOpen} setProgressDetailsOpen={setProgressDetailsOpen} TREND_WEEKS={TREND_WEEKS} TREND_MONTHS={TREND_MONTHS} currentMonthKey={currentMonthKey} monthlyOverallPct={monthlyOverallPct} monthOverMonthDelta={monthOverMonthDelta} monthlyTrendPoints={monthlyTrendPoints} tappedTrendMonth={tappedTrendMonth} setTappedTrendMonth={setTappedTrendMonth} monthlyMostConsistent={monthlyMostConsistent} currentMonthDates={currentMonthDates} weeklyTrendPoints={weeklyTrendPoints} tappedTrendWeek={tappedTrendWeek} setTappedTrendWeek={setTappedTrendWeek} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} littleWinHistory={habitHistory} littleWinCheckIns={dailyCheckInHistory} /></div>}
-        <details className="pl-home-quick-tools"><summary>Add or find something</summary>
-        <EverydayActions userId={user.id} client={supabase}
+        {(dashboard === "tasks" || dashboard === "week") && <PlanNavigation view={dashboard === "week" ? "calendar" : taskManagerView} onSelect={view => view === "calendar" ? goToDashboard("week") : openTaskManager(period.date, view)} onEditSchedule={() => setManageSchedule(true)} />}
+        {(dashboard === "tasks" || dashboard === "week") && (<div className="pl-plan-search">
+        <EverydayActions showQuickAdd={false} userId={user.id} client={supabase}
           tasks={trackerTasks} schedules={personalSchedules}
           onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage}
           onMoreOptions={draft => { openTaskManager(); if (draft?.trim()) { setNewTaskName(draft.trim()); setNaturalScheduleText(draft.trim()); setTaskAdvancedOpen(true); } }}
@@ -7717,13 +7755,23 @@ function GlowUpTracker() {
           onOpenNote={note => { setJournalQuickOpenDate(note.note_date); setPrivateNote(note.body || ""); setPrivateNoteDraft(note.body || ""); setPrivateNotePrompt(note.prompt || ""); setPrivateNoteMessage(""); setPrivateNoteEditing(false); setJournalQuickOpen(true); }}
           onOpenProgress={() => goToDashboard("progress")}
           onOpenGuardian={() => goToDashboard("guardian")} />
-        </details>
+        </div>)}
+        <TasksPanel initialView={taskManagerView} viewRequest={taskManagerRequest} open={manageTasks || dashboard === "tasks"} inline={dashboard === "tasks"} rows={rows} viewDone={viewDone} toggle={toggle} onClose={() => { setManageTasks(false); if (dashboard === "tasks") goToDashboard("today"); }} newTaskDay={newTaskDay} setNewTaskDay={setNewTaskDay} taskSectionsForDay={taskSectionsForDay} setNewTaskSection={setNewTaskSection} setNewTaskCustomSection={setNewTaskCustomSection} starterPackId={starterPackId} setStarterPackId={setStarterPackId} trackerTasks={trackerTasks} setStarterPackMessage={setStarterPackMessage} addStarterPack={addStarterPack} starterPackMessage={starterPackMessage} importOpen={importOpen} setImportOpen={setImportOpen} newTaskSection={newTaskSection} importText={importText} setImportText={setImportText} importTasksFromText={importTasksFromText} importMessage={importMessage} selectedProgressDate={selectedProgressDate} taskSearchQuery={taskSearchQuery} setTaskSearchQuery={setTaskSearchQuery} isTaskPausedOnDate={isTaskPausedOnDate} period={period} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToSection={moveTaskToSection} startEditingTask={startEditingTask} resumeTrackerTask={resumeTrackerTask} pauseTrackerTask={pauseTrackerTask} archiveTrackerTask={archiveTrackerTask} setPendingTaskDelete={setPendingTaskDelete} showArchivedTasks={showArchivedTasks} setShowArchivedTasks={setShowArchivedTasks} restoreArchivedTask={restoreArchivedTask} quickAddTrackerTask={quickAddTrackerTask} quickAddMessage={quickAddMessage} onOpenSchedule={() => setManageSchedule(true)} />
+
+        <ScheduleEditorPanel open={manageSchedule} onClose={() => setManageSchedule(false)} scheduleEditingDayId={scheduleEditingDayId} setScheduleEditDayId={setScheduleEditDayId} personalSchedules={personalSchedules} scheduleDraft={scheduleDraft} updateScheduleEntry={updateScheduleEntry} removeScheduleEntry={removeScheduleEntry} addScheduleEntry={addScheduleEntry} savePersonalSchedule={savePersonalSchedule} copyScheduleToAllDays={copyScheduleToAllDays} clearPersonalSchedule={clearPersonalSchedule} copyToDayIds={copyToDayIds} toggleCopyToDay={toggleCopyToDay} copyScheduleToSelectedDays={copyScheduleToSelectedDays} scheduleMessage={scheduleMessage} scheduleExceptionDraft={scheduleExceptionDraft} setScheduleExceptionDraft={setScheduleExceptionDraft} updateScheduleExceptionEntry={updateScheduleExceptionEntry} removeScheduleExceptionEntry={removeScheduleExceptionEntry} addScheduleExceptionEntry={addScheduleExceptionEntry} saveScheduleException={saveScheduleException} scheduleExceptionMessage={scheduleExceptionMessage} scheduleExceptions={scheduleExceptions} deleteScheduleException={deleteScheduleException} onOpenTasks={() => { setManageSchedule(false); openTaskManager(period.date, "today"); }} />
+
+        <GuardianPanel client={supabase} guardianLinksReady={guardianLinksReady} onRetryGuardian={() => loadSupportData(user)} onOpenTasks={() => openTaskManager(period.date,"today")} open={user && dashboard === "guardian"} onClose={() => setDashboard("today")} isGuardianAccount={isGuardianAccount} hasOwnGuardian={hasOwnGuardian} supportViewMode={supportViewMode} setSupportViewMode={setSupportViewMode} isSupportAdult={isSupportAdult} selectedSupportName={selectedSupportName} guardianSupportRequests={guardianSupportRequests} supportOwnerId={supportOwnerId} updateGuardianSupportRequest={updateGuardianSupportRequest} pendingSupportInvites={pendingSupportInvites} supportPeople={supportPeople} acceptSupportInvitation={acceptSupportInvitation} declineSupportInvitation={declineSupportInvitation} canUseCaretakerDashboard={canUseCaretakerDashboard} invitedSupportLinks={invitedSupportLinks} loadSupportOwner={loadSupportOwner} loadSupportData={loadSupportData} user={user} supportAchievements={supportAchievements} period={period} ownerIsRestingToday={ownerIsRestingToday} restDatesSet={restDatesSet} todayRequiredDone={todayRequiredDone} supportProgress={supportProgress} activeSupportLink={activeSupportLink} canViewSupportProgress={canViewSupportProgress} canViewSupportTasks={canViewSupportTasks} canViewSupportSchedule={canViewSupportSchedule} canViewSupportMood={canViewSupportMood} supportTrackerTasks={supportTrackerTasks} supportSchedules={supportSchedules} supportScheduleExceptions={supportScheduleExceptions} supportMoodSummary={supportMoodSummary} supportProgressView={supportProgressView} setSupportProgressView={setSupportProgressView} supportTodayDayLabel={supportTodayDayLabel} supportProgressReady={supportProgressReady} supportProgressLoading={supportProgressLoading} supportDailyEssentialCount={supportDailyEssentialCount} supportScheduledTodayCount={supportScheduledTodayCount} displayedSupportPercent={displayedSupportPercent} displayedSupportCompleted={displayedSupportCompleted} displayedSupportPossible={displayedSupportPossible} supportDailyEssentialCompleted={supportDailyEssentialCompleted} supportDailyEssentialKeys={supportDailyEssentialKeys} supportScheduledTodayCompleted={supportScheduledTodayCompleted} supportScheduledTodayKeys={supportScheduledTodayKeys} canSendSupportNotes={canSendSupportNotes} newNote={newNote} setNewNote={setNewNote} addSupportNote={addSupportNote} suggestComfortTool={suggestComfortTool} canAddSupportRewards={canAddSupportRewards} rewardTitle={rewardTitle} setRewardTitle={setRewardTitle} rewardDetails={rewardDetails} setRewardDetails={setRewardDetails} rewardTarget={rewardTarget} setRewardTarget={setRewardTarget} rewardTargetPeriod={rewardTargetPeriod} setRewardTargetPeriod={setRewardTargetPeriod} rewardApprovalRequired={rewardApprovalRequired} setRewardApprovalRequired={setRewardApprovalRequired} addSupportReward={addSupportReward} suggestedTask={suggestedTask} setSuggestedTask={setSuggestedTask} suggestedTaskDay={suggestedTaskDay} setSuggestedTaskDay={setSuggestedTaskDay} submitTaskSuggestion={submitTaskSuggestion} inviteEmail={inviteEmail} setInviteEmail={setInviteEmail} inviteSupportAdult={inviteSupportAdult} GUARDIAN_ROLE_PRESETS={GUARDIAN_ROLE_PRESETS} guardianRolePreset={guardianRolePreset} setGuardianRolePreset={setGuardianRolePreset} ownedSupportLinks={ownedSupportLinks} supportRelationships={supportRelationships} setSupportAdultActive={setSupportAdultActive} removeSupportAdult={removeSupportAdult} updateCaretakerPermission={updateCaretakerPermission} updateCareAgreement={updateCareAgreement} supportRequestGuardian={supportRequestGuardian} setSupportRequestGuardian={setSupportRequestGuardian} supportRequestType={supportRequestType} setSupportRequestType={setSupportRequestType} supportRequestText={supportRequestText} setSupportRequestText={setSupportRequestText} sendGuardianSupportRequest={sendGuardianSupportRequest} taskSuggestions={taskSuggestions} suggestionSectionsById={suggestionSectionsById} setSuggestionSectionsById={setSuggestionSectionsById} taskSectionsForDay={taskSectionsForDay} decideTaskSuggestion={decideTaskSuggestion} supportMessage={supportMessage} supportRewards={supportRewards} supportWeeklyPercent={supportWeeklyPercent} supportPercent={supportPercent} updateRewardStatus={updateRewardStatus} supportNotes={supportNotes} setComfortToolOpen={setComfortToolOpen} deleteSupportNote={deleteSupportNote} onOpenSettings={() => setSettingsOpen(true)} />
+
+        <>
+        <DailyJournalPanel open={journalQuickOpen && (!dailyJournalPromptOpen || autoPopupToShow === "daily_journal")} onVisible={() => { if (!dailyJournalPromptOpen || !user?.id) return; try { window.localStorage.setItem(`plushlife:daily-journal-prompt:${user.id}:${period.date}`, "shown"); } catch (_error) {} }} onClose={() => { setJournalQuickOpen(false); setDailyJournalPromptOpen(false); setPrivateNoteEditing(false); }} dailyJournalPromptOpen={dailyJournalPromptOpen} journalQuickOpenDate={journalQuickOpenDate} journalDisplayedPrompt={journalDisplayedPrompt} privateNoteEditing={privateNoteEditing} setPrivateNoteEditing={setPrivateNoteEditing} privateNoteDraft={privateNoteDraft} setPrivateNoteDraft={setPrivateNoteDraft} savePrivateNote={savePrivateNote} privateNote={privateNote} privateNoteMessage={privateNoteMessage} />
+        <TodayPanel quickAddTrackerTask={quickAddTrackerTask} quickAddMessage={quickAddMessage} onEditTask={startEditingTask} syncStatus={syncStatus} online={online} userId={user.id} rewardMoment={rewardMoment} onDismissReward={()=>setRewardMoment(null)} onWearReward={outfit=>{if(!unlockedIdSet.has(outfit.id))return;saveMascotCollection({...mascotCollection,unlockedIds:[...unlockedIdSet],selectedId:outfit.id});setRewardMoment(null);}} onCozyReset={startCozyReset} open={dashboard === "today"} returnGapDays={returnGapDays} returnBannerDismissed={returnBannerDismissed} setReturnBannerDismissed={setReturnBannerDismissed} voice={voice} setEssentialsPickerOpen={setEssentialsPickerOpen} selectDayType={selectDayType} wellbeingPatternInsight={wellbeingPatternInsight} todayDayId={todayDayId} hardDayBannerDismissed={hardDayBannerDismissed} setHardDayBannerDismissed={setHardDayBannerDismissed} dailyCheckIn={dailyCheckIn} restDatesSet={restDatesSet} period={period} toggleRestToday={toggleRestToday} nextStepTask={nextStepTask} FeatureTip={FeatureTip} day={day} babyMode={babyMode} nextStepHint={nextStepHint} toggle={toggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} weeklyIntentionMessage={weeklyIntentionMessage} todayCardIndex={todayCardIndex} setTodayCardIndex={setTodayCardIndex} taskWeekDates={taskWeekDates} selectedProgressDate={selectedProgressDate} selectTaskPreviewDate={selectTaskPreviewDate} isFutureView={isFutureView} selectedTaskDateLabel={selectedTaskDateLabel} todaySwipeStartX={todaySwipeStartX} todaySwipeStartY={todaySwipeStartY} selectedSchedule={homeSelectedSchedule} selectedScheduleExceptionEntries={homeScheduleExceptionEntries} scheduleDayId={scheduleDayId} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} active={active} rows={rows} viewDone={viewDone} openTaskManager={openTaskManager} todayRequiredDone={todayRequiredDone} todayRequiredKeys={todayRequiredKeys} activityDaysTotal={activityDaysTotal} careDaysTotal={careDaysTotal} babyCaregiverName={babyCaregiverName} trackerProfile={trackerProfile} openJournalForSelectedDate={openJournalForSelectedDate} isHistoricalView={isHistoricalView} focusHelperOpen={focusHelperOpen} setFocusHelperOpen={setFocusHelperOpen} pickRandomFocusTask={pickRandomFocusTask} setFocusSuggestionKey={setFocusSuggestionKey} focusedEssential={focusedEssential} focusChoices={focusChoices} selectedTaskViewIsRest={selectedTaskViewIsRest} pct={pct} requiredDoneCount={requiredDoneCount} requiredRows={requiredRows} preferences={preferences} doneCount={doneCount} focusModeShowAll={focusModeShowAll} setFocusModeShowAll={setFocusModeShowAll} isTaskPausedOnDate={isTaskPausedOnDate} openRow={openRow} setOpenRow={setOpenRow} celebrateKey={celebrateKey} pauseTrackerTask={pauseTrackerTask} resumeTrackerTask={resumeTrackerTask} taskListCollapsed={taskListCollapsed} setTaskListCollapsed={setTaskListCollapsed} recentlyCompletedKeys={recentlyCompletedKeys} moveTaskGroup={moveTaskGroup} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToTomorrow={moveTaskToTomorrow} completedTodayExpanded={completedTodayExpanded} setCompletedTodayExpanded={setCompletedTodayExpanded} tomorrowTasksCount={tomorrowTasksCount} weeklyHistory={weeklyHistory} dailyCheckInHistory={dailyCheckInHistory} tomorrowPreviewRows={tomorrowPreviewRows} tomorrowDateString={tomorrowDateString} selectedOutfit={selectedOutfit} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} calmQuickOpen={calmQuickOpen} setCalmQuickOpen={setCalmQuickOpen} currentCopingOption={currentCopingOption} reshuffle={reshuffle} setCareSection={setCareSection} goToDashboard={goToDashboard} setProfileOpen={setProfileOpen} setSettingsOpen={setSettingsOpen} openTodayJournal={openTodayJournal} openDailyCheckIn={() => setCheckInPopupOpen(true)} />
+
+        {dashboard === "week" && <div className="pl-unified-page-content"><WeekPanel open={dashboard === "week"} openTodayJournal={openTodayJournal} weekCardIndex={weekCardIndex} setWeekCardIndex={setWeekCardIndex} weekSwipeStartX={weekSwipeStartX} weekSwipeStartY={weekSwipeStartY} reflectionCalendarMonth={reflectionCalendarMonth} setReflectionCalendarMonth={setReflectionCalendarMonth} reflectionMonthDate={reflectionMonthDate} reflectionMonthStart={reflectionMonthStart} reflectionMonthDays={reflectionMonthDays} reflectionDateSet={reflectionDateSet} dailyCheckInHistory={dailyCheckInHistory} restDatesSet={restDatesSet} selectedProgressDate={selectedProgressDate} setSelectedProgressDate={setSelectedProgressDate} dayCompletionPct={dayCompletionPct} setDayViewDate={setDayViewDate} setActive={setActive} setReflectionViewerDate={setReflectionViewerDate} setCheckInViewerDate={setCheckInViewerDate} reflectionHistory={reflectionHistory} journalHistoryExpanded={journalHistoryExpanded} setJournalHistoryExpanded={setJournalHistoryExpanded} weeklyIntentionHistory={weeklyIntentionHistory} weeklyIntentionHistoryExpanded={weeklyIntentionHistoryExpanded} setWeeklyIntentionHistoryExpanded={setWeeklyIntentionHistoryExpanded} period={period} calendarWeekOffset={calendarWeekOffset} setCalendarWeekOffset={setCalendarWeekOffset} calendarWeekPreviewDate={calendarWeekPreviewDate} setCalendarWeekPreviewDate={setCalendarWeekPreviewDate} trackerTasks={trackerTasks} dayViewDate={dayViewDate} dayViewExpanded={dayViewExpanded} setDayViewExpanded={setDayViewExpanded} longHistoryByDate={longHistoryByDate} isTaskPausedOnDate={isTaskPausedOnDate} markPastTasksDone={markPastTasksDone} done={done} toggle={toggle} isHistoricalView={isHistoricalView} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} CHECKIN_MOODS={CHECKIN_MOODS} /></div>}
+
+        {dashboard === "progress" && <div className="pl-unified-page-content"><ProgressPanel open={dashboard === "progress"} user={user} progressView={progressView} setProgressView={setProgressView} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} hasWeeklyActivity={hasWeeklyActivity} goToDashboard={goToDashboard} onOpenPlush={() => setCollectionOpen(true)} weeklyOverallPct={weeklyOverallPct} weekOverWeekDelta={weekOverWeekDelta} preferences={preferences} weeklyEssentialPct={weeklyEssentialPct} weeklyOverallDone={weeklyOverallDone} weeklyOverallPossible={weeklyOverallPossible} weeklyBonusDone={weeklyBonusDone} caringDays={caringDays} weeklyEssentialDone={weeklyEssentialDone} careStory={careStory} careAreas={careAreas} openTaskManager={openTaskManager} patternInsightCards={patternInsightCards} insightCardIndex={insightCardIndex} setInsightCardIndex={setInsightCardIndex} weeklyHighlights={weeklyHighlights} period={period} goWriteWeeklyIntention={goWriteWeeklyIntention} setShareCardOpen={setShareCardOpen} progressDetailsOpen={progressDetailsOpen} setProgressDetailsOpen={setProgressDetailsOpen} TREND_WEEKS={TREND_WEEKS} TREND_MONTHS={TREND_MONTHS} currentMonthKey={currentMonthKey} monthlyOverallPct={monthlyOverallPct} monthOverMonthDelta={monthOverMonthDelta} monthlyTrendPoints={monthlyTrendPoints} tappedTrendMonth={tappedTrendMonth} setTappedTrendMonth={setTappedTrendMonth} monthlyMostConsistent={monthlyMostConsistent} currentMonthDates={currentMonthDates} weeklyTrendPoints={weeklyTrendPoints} tappedTrendWeek={tappedTrendWeek} setTappedTrendWeek={setTappedTrendWeek} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} littleWinHistory={habitHistory} littleWinCheckIns={dailyCheckInHistory} /></div>}
+
         <nav className="pl-app-bottom-nav" aria-label="Main navigation">
-          <button type="button" aria-current={dashboard === "today" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("today"); }}><DesignIcon name="home" /><span>Home</span></button>
-          <button type="button" aria-current={dashboard === "tasks" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); openTaskManager(period.date, "today"); }}><DesignIcon name="tasks" /><span>Tasks</span></button>
-          <button type="button" aria-current={dashboard === "care" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("care"); }}><DesignIcon name="care" /><span>Care</span></button>
-          <button type="button" aria-current={dashboard === "progress" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("progress"); }}><DesignIcon name="progress" /><span>Progress</span></button>
-          <button type="button" aria-current={dashboard === "guardian" && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); goToDashboard("guardian"); }}><DesignIcon name="guardian" /><span>Guardian</span></button>
+          {MAIN_DESTINATIONS.map(({id, label, icon}) => <button key={id} type="button" aria-current={mainDestination(dashboard) === id && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); if (id === "tasks") openTaskManager(period.date, "today"); else goToDashboard(id); }}><DesignIcon name={icon} /><span>{label}</span></button>)}
         </nav>
 
         </>
@@ -7746,13 +7794,13 @@ function GlowUpTracker() {
       </div>
       </div>
       {recentlyDeletedTask && (
-        <div className="pl-delete-toast" style={{ position: "fixed", left: "50%", bottom: "calc(68px + env(safe-area-inset-bottom))", transform: "translateX(-50%)", zIndex: 100, display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "#3B2E46", color: "white", boxShadow: "0 10px 30px rgba(0,0,0,0.25)", maxWidth: "92vw" }}>
+        <div className="pl-delete-toast" style={{ position: "fixed", left: "50%", bottom: "calc(68px + var(--pl-safe-bottom,0px))", transform: "translateX(-50%)", zIndex: 100, display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "#3B2E46", color: "white", boxShadow: "0 10px 30px rgba(0,0,0,0.25)", maxWidth: "92vw" }}>
           <span style={{ fontSize: 12.5 }}>🗑️ "{recentlyDeletedTask.label}" removed</span>
           <button type="button" onClick={undoDeleteTask} style={{ padding: "5px 10px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.4)", background: "transparent", color: "#F2D9FF", fontWeight: 900, cursor: "pointer", fontSize: 12.5, whiteSpace: "nowrap" }}>Undo</button>
         </div>
       )}
       {badgeCelebration && (
-        <div className="pl-badge-toast" role="status" style={{ position: "fixed", left: "50%", bottom: "calc(68px + env(safe-area-inset-bottom))", transform: "translateX(-50%)", zIndex: 101, display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "#3B2E46", color: "white", boxShadow: "0 10px 30px rgba(0,0,0,0.25)", maxWidth: "92vw" }}>
+        <div className="pl-badge-toast" role="status" style={{ position: "fixed", left: "50%", bottom: "calc(68px + var(--pl-safe-bottom,0px))", transform: "translateX(-50%)", zIndex: 101, display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "#3B2E46", color: "white", boxShadow: "0 10px 30px rgba(0,0,0,0.25)", maxWidth: "92vw" }}>
           <span style={{ fontSize: 12.5 }}>
             {badgeCelebration.intro} {badgeCelebration.badges.map((item) => `${item.badge} ${item.name}`).join(", ")}
           </span>

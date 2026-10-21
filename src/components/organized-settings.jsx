@@ -1,3 +1,5 @@
+import { WorkspaceNavigation } from "./workspace-navigation.jsx";
+const NestedSettings = React.createContext(false);
 import { CozyComfortContext } from "./cozy-space.jsx";
 import { WidgetSettings } from "./widget-settings.jsx";
 import { HomeLayoutEditor } from "./home-layout-editor.jsx";
@@ -94,6 +96,8 @@ function ToggleRow({ checked, onChange, title, description }) {
 }
 
 function DetailHeader({ title, onBack }) {
+  const nested = React.useContext(NestedSettings);
+  if (nested) return null;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
       <button type="button" onClick={onBack} aria-label="Back to settings" style={{ ...secondaryButton, padding: "7px 10px", minWidth: 44 }}>‹ Back</button>
@@ -150,31 +154,32 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, dailyCheckIn, p
     }
   }, [open]);
 
+  React.useEffect(() => { setSection("home"); setSearch(""); setDeleteDialogOpen(false); setDeleteConfirmation(""); }, [user?.id]);
+
   if (!open) return null;
 
   const categories = [
-    ["personalize", "🎨", "Personalize", "Themes, dark mode, your name & plush", "name profile theme dark baby mommy daddy nursery dino appearance comfort"],
-    ["notifications", "🔔", "Notifications & Reminders", "Reminder times, quiet hours, push notifications", "notifications reminders quiet push nurturing discreet"],
-    ["experience", "✨", "Experience", "Focus, accessibility, motion, contrast, PlushInsights", "focus accessibility text motion contrast simple insights colorblind consistency"],
+    ["personalize", "🎨", "Personalize", "Themes, text size, accessibility, your name & plush", "name profile theme dark baby mommy daddy nursery dino appearance comfort"],
+    ["notifications", "🔔", "Notifications & Reminders", "Reminder times, quiet hours, rest & vacation", "notifications reminders quiet push nurturing discreet"],
+    ["experience", "✨", "Text & accessibility", "Focus, accessibility, motion, contrast, PlushInsights", "focus accessibility text motion contrast simple insights colorblind consistency"],
     ["recommendations", "🧠", "Recommendations", "Suggestion boundaries and learned-pattern corrections", "recommendations learning profile boundaries forget correction"],
-    ["devices", "⌚", "Devices", "Amazfit watch, instant sync, and home-screen widget", "watch amazfit widget bluetooth devices sync"],
+    ["devices", "📱", "Phone widget", "Home-screen widget and phone controls", "widget phone devices"],
     ["rest", "🌴", "Rest & Vacation", "Pause tasks and reminders without losing progress", "rest vacation illness pause"],
-    ["privacy", "🔐", "Privacy & Data", "Backup, restore, and delete selected data", "privacy data backup restore export delete reflections check-ins"],
+    ["privacy", "🔐", "Privacy & Data", "Backup, restore, suggestion privacy & data controls", "privacy data backup restore export delete reflections check-ins"],
     ["support", "💬", "Help & Feedback", "Send feedback or report something that feels off", "feedback help support bug"],
     ["gold", "✨", "PlushLife Plus Preview", "Future premium intelligence · everything included free for now", "gold premium plus preview subscription intelligence"],
-    ["account", "🔑", "Account", "Email, sync status, sessions, and account controls", "account email sync sign out delete account"],
+    ["account", "🔑", "Account", "Email, sync, help & account controls", "account email sync sign out delete account"],
   ];
 
   const query = search.trim().toLowerCase();
   const visibleCategories = query ? categories.filter((item) => `${item[2]} ${item[3]} ${item[4]}`.toLowerCase().includes(query)) : categories;
   const primaryCategoryIds = new Set(["personalize", "notifications", "privacy", "account"]);
   const primaryCategories = visibleCategories.filter((item) => primaryCategoryIds.has(item[0]));
-  const moreCategories = visibleCategories.filter((item) => !primaryCategoryIds.has(item[0]));
 
   const home = (
     <>
       <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 13, color: "var(--pl-theme-muted,#8A7895)", lineHeight: 1.45 }}>Just four everyday settings. More advanced choices are below if you need them.</div>
+        <div style={{ fontSize: 13, color: "var(--pl-theme-muted,#8A7895)", lineHeight: 1.45 }}>Choose a setting, or search for anything. Changes save where you make them.</div>
         <div style={{ position: "relative", marginTop: 11 }}>
           <span aria-hidden="true" style={{ position: "absolute", left: 12, top: 11, color: "var(--pl-theme-muted,#A493AD)" }}>⌕</span>
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search settings" aria-label="Search settings" style={{ ...inputStyle, paddingLeft: 35, background: "var(--pl-theme-surface,#FFFCFE)" }} />
@@ -184,16 +189,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, dailyCheckIn, p
         {(query ? visibleCategories : primaryCategories).map(([id, icon, title, description]) => (
           <SettingsHomeRow key={id} icon={icon} title={title} description={description} onClick={() => setSection(id)} badge={id === "account" && (!online || syncStatus === "offline") ? "Offline" : null} />
         ))}
-        {!query && moreCategories.length > 0 && (
-          <details>
-            <summary style={{ minHeight: 48, padding: "0 14px", display: "list-item", alignContent: "center", cursor: "pointer", fontSize: 13, fontWeight: 900, color: "var(--pl-theme-muted,#7B6888)" }}>More settings · {moreCategories.length} optional areas</summary>
-            <div style={{ borderTop: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
-              {moreCategories.map(([id, icon, title, description]) => (
-                <SettingsHomeRow key={id} icon={icon} title={title} description={description} onClick={() => setSection(id)} badge={id === "account" && (!online || syncStatus === "offline") ? "Offline" : null} />
-              ))}
-            </div>
-          </details>
-        )}
+
         {visibleCategories.length === 0 && <div style={{ padding: 22, textAlign: "center", color: "var(--pl-theme-muted,#8A7895)", fontSize: 12.5 }}>No settings match “{search}”.</div>}
       </div>
       {settingsMessage && <div role="status" style={{ marginTop: 12, padding: "10px 12px", borderRadius: 11, background: "var(--pl-theme-surface-2,#F0FAF6)", color: "var(--pl-theme-ink,#347865)", fontSize: 12, fontWeight: 800 }}>{settingsMessage}</div>}
@@ -204,6 +200,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, dailyCheckIn, p
     <>
       <DetailHeader title="Personalize" onBack={() => setSection("home")} />
       <SectionTitle icon="👤" title="Make PlushLife yours" description="Your name, comfort wording, and visual style live here." />
+      <details className="pl-settings-related"><summary>Names & comfort item</summary>
       <Card>
         <div style={{marginBottom:12,padding:11,borderRadius:13,background:"var(--pl-theme-surface-2,#F7F1FB)",fontSize:12,lineHeight:1.45,color:"var(--pl-theme-muted,#8A7895)"}}>
           <strong style={{color:"var(--pl-theme-ink,#5B4B6B)"}}>Personal names</strong><br/>
@@ -241,7 +238,8 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, dailyCheckIn, p
           </div>
         </label>
       </Card>
-      <Card><HomeLayoutEditor value={preferences.home_layout} onSave={home_layout => updatePreference({ home_layout })} /></Card>
+      </details>
+      <details style={{marginBottom:12}}><summary style={{minHeight:44,cursor:"pointer",fontWeight:800}}>Customize Today</summary><Card><HomeLayoutEditor value={preferences.home_layout} onSave={home_layout => updatePreference({ home_layout })} /></Card></details>
       <Card>
         <React.Suspense fallback={<div style={{ minHeight: 120, display: "grid", placeItems: "center", color: "var(--pl-theme-muted,#8A7895)", fontSize: 12.5 }}>Loading themes…</div>}>
           <LazyAppearanceThemePicker
@@ -464,10 +462,17 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, dailyCheckIn, p
   );
 
   const pages = { home, personalize, notifications, experience, recommendations, devices, rest, privacy, support, gold, account };
+  const groups = {personalize:["experience","devices"], notifications:["rest"], privacy:["recommendations"], account:["support","gold"]};
+  const sectionOwner = Object.entries(groups).find(([,children]) => children.includes(section))?.[0] || section;
+
 
   return (
     <ToolPanel title="Settings" onClose={onClose}>
-      <div style={{ maxWidth: 620, margin: "0 auto" }}>{pages[section] || home}</div>
+      <div className="pl-settings-workspace" style={{ maxWidth: 620, margin: "0 auto" }}>
+        {section !== "home" && <WorkspaceNavigation label="Settings sections" items={categories.filter(item => primaryCategoryIds.has(item[0])).map(([id,,title]) => [id,title === "Notifications & Reminders" ? "Reminders" : title === "Privacy & Data" ? "Privacy" : title])} value={sectionOwner} onChange={setSection} />}
+        {pages[section] || home}
+        {groups[section]?.map(id => <details key={id} className="pl-settings-related"><summary>{categories.find(item => item[0] === id)?.[2]}</summary><NestedSettings.Provider value={true}>{pages[id]}</NestedSettings.Provider></details>)}
+      </div>
       {deleteDialogOpen && (
         <div role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !deletingAccount) setDeleteDialogOpen(false); }} style={{ position: "fixed", inset: 0, zIndex: 10040, display: "grid", placeItems: "center", padding: 18, background: "rgba(47,32,53,.48)" }}>
           <div role="dialog" aria-modal="true" aria-labelledby="delete-account-title" aria-describedby="delete-account-description" style={{ width: "min(440px,100%)", padding: 20, borderRadius: 20, background: "white", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 24px 70px rgba(47,32,53,.24)" }}>

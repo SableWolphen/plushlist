@@ -91,7 +91,7 @@ if (typeof document !== "undefined" && !document.getElementById("plushlife-mobil
     @keyframes plTinyFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
     .pl-tool-body button:focus-visible{outline:2px solid var(--pl-theme-accent)!important;outline-offset:2px}
     .pl-tool-body button[aria-pressed="true"],.pl-tool-body [role="tab"][aria-selected="true"]{animation:plSoftPop .2s ease-out}
-    @media(max-width:520px){.pl-tool-backdrop{padding:8px 7px max(8px,env(safe-area-inset-bottom))!important}.pl-tool-panel{border-radius:22px!important;max-height:calc(100dvh - 16px)!important}.pl-tool-header{padding:11px 12px!important}.pl-tool-body{padding:11px!important}}
+    @media(max-width:520px){.pl-tool-backdrop{padding:8px 7px max(8px,var(--pl-safe-bottom,0px))!important}.pl-tool-panel{border-radius:22px!important;max-height:calc(100dvh - 16px)!important}.pl-tool-header{padding:11px 12px!important}.pl-tool-body{padding:11px!important}}
   `;
   document.head.appendChild(style);
 }
@@ -173,7 +173,7 @@ export function ToolPanel({ title, displayTitle, onClose, children, inline = fal
       className={inline ? "pl-inline-tool" : "pl-tool-backdrop"}
       style={inline ? { margin: "0 0 18px" } : {
         position: "fixed", inset: 0, zIndex: 2000,
-        padding: "max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom))",
+        padding: "max(12px, var(--pl-safe-top,0px)) 12px max(12px, var(--pl-safe-bottom,0px))",
         display: "grid", placeItems: "center", background: "rgba(55,38,64,.48)", backdropFilter: "blur(5px)",
       }}
     >

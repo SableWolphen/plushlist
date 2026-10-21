@@ -1,5 +1,5 @@
 // Care tool library, with a short default path list and optional full browsing.
-export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverName, careSituationsExpanded, setCareSituationsExpanded, setCareMessage, openCareSession, careMessage, libraryOnly = false, user, preferences, rows, viewDone, toggle, supabase, careSection, setCareSection, careSessionHistory, HELP_ME_NOW_OPTIONS, pathProgress, setSelectedCarePath, period, setSleepToolOpen, soundscapePlaying, toggleSoundscape, soundscapeVolume, changeSoundscapeVolume, setSoundscapeSleepTimer, soundscapeTimerMinutes }) {
+export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverName, careSituationsExpanded, setCareSituationsExpanded, setCareMessage, openCareSession, careMessage, libraryOnly = false, hideNavigation = false, user, preferences, rows, viewDone, toggle, supabase, careSection, setCareSection, careSessionHistory, HELP_ME_NOW_OPTIONS, pathProgress, setSelectedCarePath, period, setSleepToolOpen, soundscapePlaying, toggleSoundscape, soundscapeVolume, changeSoundscapeVolume, setSoundscapeSleepTimer, soundscapeTimerMinutes }) {
   const [allPaths, setAllPaths] = React.useState(false);
   if (!open) return null;
   const { COMFORT_TOOLS, PLUSH_PATHS, SLEEP_TOOLS, SOUNDSCAPES, GENTLE_AFFIRMATIONS } = window.PlushLifeContent;
@@ -23,11 +23,11 @@ export function CarePanel({ open, babyMode, setCheckInPopupOpen, babyCaregiverNa
             </div>
             )}
 
-            <div role="tablist" aria-label="Care library" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 5, padding: 4, borderRadius: 13, background: "#FFFFFFB8", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
+            {!hideNavigation && <div role="tablist" aria-label="Care library" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 5, padding: 4, borderRadius: 13, background: "#FFFFFFB8", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
               {[["quick", "🌿", "PlushCalm"], ["paths", "🗺️", "PlushPaths"], ["sleep", "🌙", "PlushSleep"]].map(([value, icon, label]) => (
                 <button key={value} type="button" role="tab" aria-selected={careSection === value} onClick={() => setCareSection(value)} style={{ minWidth: 0, padding: "7px 5px", minHeight: 38, borderRadius: 10, border: careSection === value ? "2px solid #C983D4" : "1px solid transparent", background: careSection === value ? "#FFF7FD" : "transparent", color: careSection === value ? "#75428C" : "#7B6888", fontWeight: 900, fontSize: 10.2, cursor: "pointer" }}>{icon} {label}</button>
               ))}
-            </div>
+            </div>}
 
             {careSection === "quick" && <div className="pl-care-library-panel" style={{ padding: 11, borderRadius: 16, background: "#FFFFFFC7", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
               <div style={{ fontSize: 9.8, letterSpacing: ".12em", fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>🌿 QUICK CARE SESSIONS</div>

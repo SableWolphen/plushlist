@@ -86,9 +86,9 @@
       --nursery-shadow:0 10px 28px rgba(118,72,140,.10);
       min-height:100vh !important;
       box-sizing:border-box !important;
-      padding-top:max(34px,calc(env(safe-area-inset-top) + 12px)) !important;
-      padding-left:max(10px,env(safe-area-inset-left)) !important;
-      padding-right:max(10px,env(safe-area-inset-right)) !important;
+      padding-top:max(34px,calc(var(--pl-safe-top,0px) + 12px)) !important;
+      padding-left:max(10px,var(--pl-safe-left,0px)) !important;
+      padding-right:max(10px,var(--pl-safe-right,0px)) !important;
       background:
         radial-gradient(circle at 8% 5%,rgba(255,203,229,.55) 0%,transparent 28%),
         radial-gradient(circle at 92% 7%,rgba(202,234,255,.55) 0%,transparent 30%),
@@ -209,7 +209,7 @@
     .plushlife-app-column { width:100%; box-sizing:border-box; }
     .plushlife-dashboard-tabs { padding:4px; border:1px solid var(--nursery-border,#ead7ef); border-radius:17px; background:rgba(255,255,255,.5); }
     .plushlife-dashboard-tab { box-shadow:none !important; }
-    .plushlife-today-tabs { position:sticky; top:max(8px,env(safe-area-inset-top)); z-index:8; backdrop-filter:blur(12px); }
+    .plushlife-today-tabs { position:sticky; top:max(8px,var(--pl-safe-top,0px)); z-index:8; backdrop-filter:blur(12px); }
     .plushlife-task-row { transition:border-color .16s ease,background-color .16s ease,transform .16s ease; }
 
     html[data-plushlife-color-mode="dark"] .baby-mode .plushlife-dashboard-tabs,
@@ -243,7 +243,7 @@
       .plushlife-dashboard-tab { min-height:56px !important; }
     }
     @media(max-width:520px) {
-      .baby-mode { padding-left:max(8px,env(safe-area-inset-left)) !important; padding-right:max(8px,env(safe-area-inset-right)) !important; }
+      .baby-mode { padding-left:max(8px,var(--pl-safe-left,0px)) !important; padding-right:max(8px,var(--pl-safe-right,0px)) !important; }
       .baby-mode .baby-shell { padding:6px !important; border-radius:24px !important; }
       .plushlife-app-header { align-items:flex-start !important; }
       .plushlife-dashboard-tabs { gap:3px !important; padding:3px; }

@@ -19,7 +19,7 @@ expect(polish.includes('[role=\"dialog\"][aria-modal=\"true\"]'), "dialogs must 
 expect(polish.includes("place-items:center !important") && polish.includes("data-plushlife-dialog-panel"), "dialogs must stay centered instead of becoming bottom sheets");
 expect(!polish.includes("place-items:end center !important"), "dialogs must not regress to bottom-sheet alignment");
 expect(polish.includes("max-height:min(80dvh,700px)") && polish.includes("overscroll-behavior:contain"), "mobile dialogs must fit the viewport and scroll internally");
-expect(polish.includes("box-sizing:border-box !important") && polish.includes("calc(100vw - (var(--plush-mobile-gutter) * 2))"), "mobile dialog width must include padding and stay inside the viewport");
+expect(polish.includes("box-sizing:border-box !important") && polish.includes("width:100% !important") && polish.includes("max(var(--plush-mobile-gutter),var(--pl-safe-left,0px))"), "mobile dialog width must include padding and stay inside the viewport");
 expect(polish.includes("overflow-x:hidden !important") && polish.includes("min-width:0 !important"), "dialog panels must prevent horizontal overflow and fixed-width child clipping");
 expect(polish.includes("plushlife-modal-open") && polish.includes("visibility:hidden !important"), "QA control must get out of the way while a dialog is open");
 expect(polish.includes("overflow-x:auto !important") && polish.includes("scroll-snap-type:x proximity"), "mobile tab rows must remain usable without cramped wrapping");
@@ -27,7 +27,7 @@ expect(polish.includes("input,select,textarea { font-size:16px !important; }"), 
 expect(!polish.includes("fetch("), "experience polish must not add a third-party or analytics data flow");
 expect(completionRuntime.includes("place-items:center") && !completionRuntime.includes("place-items:end center"), "PlushQA must use the same centered-modal pattern");
 expect(completionRuntime.includes('data-plushlife-qa-entry=\"true\"') || completionRuntime.includes("dataset.plushlifeQaEntry"), "admin QA entry must remain identifiable for quiet-mode styling");
-expect(tasks.includes("natural-language schedule parsing") && tasks.includes('aria-label=\"Schedule in everyday language\"'), "natural-language task scheduling must remain available");
+expect(fs.readFileSync("src/app-source.jsx", "utf8").includes('aria-label="Schedule in everyday language"'), "natural-language task scheduling must remain available in Edit");
 expect(completion.includes("navigator.vibrate") && completion.includes("Undo is available"), "completion feedback and undo must remain available");
 
 // Product choice: preserve the existing multi-action screen structure. These

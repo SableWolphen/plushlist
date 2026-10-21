@@ -1,82 +1,49 @@
-// Quick capture — a lightweight brain-dump bar at the top of Add & organize.
-//
-// Tapping Add used to open the full task manager (sections, schedules,
-// reminders, labels) — a wall for an anxious user with one buzzing thought.
-// This is one text field + Today / Tomorrow / Someday chips with smart
-// defaults. "More options" scrolls to the full form below.
-const QUICK_WHEN_OPTIONS = [
-  { id: "today", label: "Today", emoji: "☀️" },
-  { id: "tomorrow", label: "Tomorrow", emoji: "🌤️" },
-  { id: "someday", label: "Someday", emoji: "🌙" },
-];
-
-export function QuickCapture({ onQuickAdd, quickAddMessage, onMoreOptions }) {
+// One required field; scheduling and habit direction are optional.
+export function QuickCapture({ compact = false, habit = false, onQuickAdd, quickAddMessage }) {
   const [text, setText] = React.useState("");
   const [when, setWhen] = React.useState("today");
+  const [repeat, setRepeat] = React.useState(habit ? "daily" : "once");
+  const [kind, setKind] = React.useState(habit ? "build" : "regular");
   const [busy, setBusy] = React.useState(false);
   const [justAdded, setJustAdded] = React.useState("");
-
+  const [error, setError] = React.useState("");
   const add = async () => {
     const name = text.trim();
     if (!name || busy) return;
     setBusy(true);
+    setError("");
     try {
-      const ok = await onQuickAdd?.(name, when);
-      if (ok) {
-        setText("");
-        setJustAdded(name);
-        window.setTimeout(() => setJustAdded(""), 4000);
-      }
-    } finally {
-      setBusy(false);
-    }
+      const ok = await onQuickAdd?.(name, repeat === "once" ? when : "today", { kind, repeat });
+      if (ok) { setText(""); setJustAdded(name); }
+    } catch (_error) { setJustAdded(""); setError("Couldn't save. Your name is still here; please try again."); }
+    finally { setBusy(false); }
   };
-
   return (
-    <div style={{ marginBottom: 14, padding: 16, borderRadius: 18, background: "var(--pl-theme-surface)", border: "1px solid var(--pl-theme-line,#E9DDF6)", boxShadow: "0 8px 22px rgba(103,65,122,.06)" }}>
-      <div style={{ fontSize: 13, fontWeight: 900, color: "var(--pl-theme-ink,#8A6A21)" }}>⚡ QUICK ADD</div>
-      <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "var(--pl-theme-muted,#7B6888)" }}>Got a thought buzzing? Park it here in seconds — no forms, no decisions.</div>
+    <div className={compact ? "pl-quick-capture-compact" : "pl-quick-capture"} style={{ marginBottom: 14 }}>
       <div style={{ display: "flex", gap: 7, marginTop: 10 }}>
-        <input
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); add(); } }}
-          maxLength={240}
-          placeholder="e.g. Remember the dentist"
-          aria-label="Quickly add a task"
-          style={{ flex: 1, minWidth: 0, padding: "11px 12px", borderRadius: 12, border: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 14 }}
-        />
-        <button type="button" onClick={add} disabled={busy || !text.trim()} style={{ padding: "0 18px", minHeight: 46, borderRadius: 12, border: 0, background: !text.trim() ? "#D9CBE2" : "linear-gradient(135deg,#B95DCA,#DB78BF)", color: "white", fontWeight: 900, fontSize: 14, cursor: !text.trim() ? "not-allowed" : "pointer", whiteSpace: "nowrap" }}>
-          {busy ? "…" : "Add ✨"}
+        <input value={text} onChange={event => { setText(event.target.value); setJustAdded(""); }}
+          onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); add(); } }}
+          maxLength={240} placeholder={habit ? "e.g. Drink a glass of water" : "What needs doing?"}
+          aria-label={habit ? "Quickly add a habit" : "Quickly add a task"}
+          style={{ flex: 1, minWidth: 0, padding: "11px 12px", borderRadius: 12, border: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 16 }} />
+        <button type="button" onClick={add} disabled={busy || !text.trim()} style={{ padding: "0 18px", minHeight: 46, borderRadius: 12, border: 0, background: "var(--pl-theme-accent,#A65DC1)", color: "white", fontWeight: 900, fontSize: 14 }}>
+          {busy ? "Saving…" : "Add"}
         </button>
       </div>
-      <div style={{ display: "flex", gap: 7, marginTop: 9, flexWrap: "wrap" }} role="group" aria-label="When should this happen">
-        {QUICK_WHEN_OPTIONS.map((option) => {
-          const selected = when === option.id;
-          return (
-            <button
-              key={option.id}
-              type="button"
-              aria-pressed={selected}
-              onClick={() => setWhen(option.id)}
-              style={{ padding: "8px 13px", minHeight: 40, borderRadius: 999, border: selected ? "2px solid #A65DC1" : "1px solid #E3C9EC", background: selected ? "#F2DEFA" : "white", color: selected ? "#7E3D99" : "#6B5A7D", fontWeight: 900, fontSize: 12.5, cursor: "pointer" }}
-            >
-              {option.emoji} {option.label}
-            </button>
-          );
-        })}
-        <button type="button" onClick={() => onMoreOptions?.(text)} style={{ marginLeft: "auto", padding: "8px 6px", minHeight: 40, border: 0, background: "transparent", color: "var(--pl-theme-muted,#9A57AC)", fontWeight: 800, fontSize: 12.5, cursor: "pointer" }}>
-          More options ↓
-        </button>
-      </div>
-      {when === "someday" && (
-        <div style={{ marginTop: 8, fontSize: 11.5, color: "var(--pl-theme-ink,#8A6A21)", lineHeight: 1.45 }}>🌙 Someday tasks rest quietly in your list — paused until you&rsquo;re ready. Resume one anytime from below.</div>
-      )}
-      {(justAdded || quickAddMessage) && (
-        <div role="status" aria-live="polite" style={{ marginTop: 8, fontSize: 12, fontWeight: 700, color: "var(--pl-theme-ink,#318C79)" }}>
-          {justAdded ? `Parked “${justAdded.length > 42 ? `${justAdded.slice(0, 42)}…` : justAdded}” ✓` : quickAddMessage}
-        </div>
-      )}
+      {!compact && <>
+        <details style={{ marginTop: 8 }}>
+          <summary style={{ minHeight: 44, cursor: "pointer", alignContent: "center", fontSize: 13 }}>{repeat === "daily" ? "Every day" : repeat === "weekdays" ? "Weekdays" : when === "tomorrow" ? "Tomorrow" : when === "someday" ? "Someday" : "Today"} · Change schedule{habit ? " or habit type" : ""}</summary>
+          <div style={{ display: "grid", gap: 10, padding: "8px 0" }}>
+            <label>Repeat <select aria-label="Quick add repeat" value={repeat} onChange={event => setRepeat(event.target.value)}>
+              {!habit && <option value="once">Just once</option>}<option value="daily">Every day</option><option value="weekdays">Weekdays</option>
+            </select></label>
+            {repeat === "once" && <label>When <select aria-label="Quick add day" value={when} onChange={event => setWhen(event.target.value)}><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="someday">Someday</option></select></label>}
+            {habit && <label>Habit type <select aria-label="Quick add habit type" value={kind} onChange={event => setKind(event.target.value)}><option value="build">Build a habit</option><option value="reduce">Cut back on a habit</option></select></label>}
+          </div>
+        </details>
+      </>}
+      {(justAdded || quickAddMessage) && <div role="status" aria-live="polite" style={{ marginTop: 8, fontSize: 13 }}>{justAdded ? `Added “${justAdded}” ✓` : quickAddMessage}</div>}
+      {error && <div role="alert">{error}</div>}
     </div>
   );
 }
