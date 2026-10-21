@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";import fs from "node:fs";
+const read=p=>fs.readFileSync(new URL("../"+p,import.meta.url),"utf8");
+const manifest=read("android/app/src/main/AndroidManifest.xml");
+const config=JSON.parse(read("capacitor.config.json"));
+const gradle=read("android/app/build.gradle");
+const workflow=read(".github/workflows/codeql.yml");
+assert.equal(config.appId,"com.PlushLife");
+assert.match(manifest,/android:allowBackup="false"/);
+assert.match(manifest,/android.permission.POST_NOTIFICATIONS/);
+assert.match(manifest,/android.appwidget.action.APPWIDGET_UPDATE/);
+assert.match(gradle,/bundleRelease|signingConfigs/);
+assert.match(workflow,/assembleDebug/);
+console.log("Android release configuration checks passed (not device tests).");
