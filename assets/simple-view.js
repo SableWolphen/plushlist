@@ -8,7 +8,7 @@
     const app=root();if(!app)return;
     app.classList.toggle("pl-simple-view",enabled);
     const toggle=document.getElementById("pl-simple-toggle");
-    if(toggle){toggle.setAttribute("aria-pressed",String(enabled));toggle.querySelector(".pl-simple-toggle-label").textContent=enabled?"Simple view on":"Simple view off";}
+    if(toggle){toggle.setAttribute("aria-pressed",String(enabled));const label=toggle.querySelector(".pl-simple-toggle-label");const next=enabled?"Simple view on":"Simple view off";if(label && label.textContent!==next)label.textContent=next;}
     const nav=app.querySelector(".pl-app-bottom-nav");
     if(nav)nav.setAttribute("aria-label","Main navigation");
   }
