@@ -160,6 +160,7 @@ public class EdgeToEdgeInstrumentation extends Instrumentation {
             evaluate("document.querySelector('.pl-tool-backdrop').style.display='none'");
             instrumentation.runOnMainSync(() -> activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
             waitFor("innerHeight>innerWidth", "Return to portrait");
+            assertSafeLayout("portrait restored");
             double oldHeight = Double.parseDouble(evaluate("innerHeight"));
             JSONObject input = new JSONObject(evaluate("(() => {const r=document.querySelector('#edge-input').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,w:innerWidth};})()"));
             AtomicReference<float[]> tap = new AtomicReference<>();

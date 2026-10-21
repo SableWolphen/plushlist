@@ -1688,19 +1688,31 @@ body>[role="dialog"]>div{
 /* Capacitor supplies custom properties on WebViews where env() returns zero.
    The page ends above a separate nav lane; cards never scroll behind it. */
 :root{
-  --pl-safe-top:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));
-  --pl-safe-bottom:max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px));
-  --pl-safe-left:max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px));
-  --pl-safe-right:max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px));
+  /* Custom properties accept unsupported functions as tokens. Guard max()
+     itself so older WebViews do not invalidate every consuming declaration. */
+  --pl-safe-top:var(--safe-area-inset-top,env(safe-area-inset-top,0px));
+  --pl-safe-bottom:var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px));
+  --pl-safe-left:var(--safe-area-inset-left,env(safe-area-inset-left,0px));
+  --pl-safe-right:var(--safe-area-inset-right,env(safe-area-inset-right,0px));
   --pl-nav-space:calc(80px + var(--pl-safe-bottom));
+}
+@supports(padding:max(0px,0px)){
+  :root{
+    --pl-safe-top:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));
+    --pl-safe-bottom:max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px));
+    --pl-safe-left:max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px));
+    --pl-safe-right:max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px));
+  }
 }
 @media(max-width:759px){
   html:has(#main-content),body:has(#main-content){overflow:hidden}
   #main-content#main-content[data-pl-world]{
     position:fixed!important;
     inset:0 0 auto!important;
+    height:calc(100vh - var(--pl-nav-space))!important;
     height:calc(100dvh - var(--pl-nav-space))!important;
     min-height:0!important;
+    max-height:calc(100vh - var(--pl-nav-space))!important;
     max-height:calc(100dvh - var(--pl-nav-space))!important;
     overflow-x:hidden!important;
     overflow-y:auto!important;
@@ -1922,15 +1934,19 @@ html[data-pl-companion-text=large] .pl-guardian-companion{font-size:18px}
    Native-padded older WebViews inject zero, so these do not double the inset. */
 .pl-tool-backdrop.pl-tool-backdrop{
   box-sizing:border-box!important;
+  padding:12px!important;
   padding:max(12px,var(--pl-safe-top)) max(12px,var(--pl-safe-right)) max(12px,var(--pl-safe-bottom)) max(12px,var(--pl-safe-left))!important;
 }
 .pl-tool-backdrop.pl-tool-backdrop>.pl-tool-panel{
   max-width:100%!important;
+  max-height:calc(100vh - 24px - var(--pl-safe-top) - var(--pl-safe-bottom))!important;
   max-height:calc(100dvh - max(12px,var(--pl-safe-top)) - max(12px,var(--pl-safe-bottom)))!important;
 }
 #main-content#main-content[data-pl-world] .pl-app-bottom-nav{
   left:calc(50% + (var(--pl-safe-left) - var(--pl-safe-right)) / 2)!important;
   right:auto!important;
+  width:calc(100% - 20px - var(--pl-safe-left) - var(--pl-safe-right))!important;
+  max-width:390px!important;
   width:min(390px,calc(100% - 20px - var(--pl-safe-left) - var(--pl-safe-right)))!important;
 }
 @media(min-width:760px){
