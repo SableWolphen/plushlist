@@ -1,0 +1,15 @@
+/* Simple View is an optional presentation preference, not a separate data mode. */
+#main-content .pl-simple-toggle{display:block;margin:0 auto 10px;width:min(100%,358px);min-height:44px;border:1px solid var(--pl-theme-line);background:var(--pl-theme-surface);color:var(--pl-theme-ink);border-radius:16px;font:800 14px Nunito,system-ui;cursor:pointer}
+#main-content .pl-simple-toggle[aria-pressed="true"]{border:2px solid var(--pl-theme-accent);background:var(--pl-theme-surface-2)}
+#main-content.pl-simple-view :is(button,[role="button"],summary){min-height:52px!important}
+#main-content.pl-simple-view :is(.pl-home-shell,.pl-unified-page-shell){gap:16px!important}
+#main-content.pl-simple-view :is(.pl-storybook-list li,.pl-list-row){min-height:64px!important;font-size:16px!important}
+#main-content.pl-simple-view :is(.pl-storybook-door,.pl-home-shortcuts>button){min-height:112px!important;padding:14px!important}
+#main-content.pl-simple-view :is(.pl-storybook-today,.pl-storybook-moods,.pl-design-card,.pl-care-card,.pl-growth-card){padding:18px!important;border-radius:22px!important}
+#main-content.pl-simple-view :is(.pl-app-nav-btn,.pl-storybook-door strong){font-size:14px!important}
+#main-content.pl-simple-view :is(input,select,textarea){min-height:52px!important;font-size:16px!important}
+#main-content.pl-simple-view .pl-storybook-mood-grid button{min-height:60px!important}
+#main-content.pl-simple-view .pl-storybook-mood-head p{font-size:13px!important}
+#main-content .pl-simple-toggle:focus-visible{outline:3px solid var(--pl-theme-accent);outline-offset:3px}
+@media(max-width:360px){#main-content.pl-simple-view .pl-storybook-doors{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){#main-content.pl-simple-view *{scroll-behavior:auto!important}}
