@@ -33,11 +33,8 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
   };
   return (
     <section>
-      <h2>Guardian settings</h2>
-      <p>
-        Give your automatic Guardian a name and choose how they encourage you.
-        The automatic option uses device rules, not conversations. A connected person always takes priority.
-      </p>
+      <h2>Make Guardian yours</h2>
+      <p>Start with a name and style. Everything else is optional.</p>
       <label>
         Guardian style
         <select
@@ -62,10 +59,10 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           placeholder={guardianBotDisplayName({voice:prefs.voice})}
         />
       </label>
-      <section className="pl-virtual-guardian-options" aria-label="Guardian caretaker options">
-        <h3>🍼 Guardian Care Mode</h3>
-        <p>Choose how nurturing your Guardian feels. Care routines are optional and stay on this device. No chat or automatic personal-care tracking.</p>
-        <h3>🎁 Guardian's Surprise Box</h3>
+      <details className="pl-virtual-guardian-options pl-guardian-advanced" aria-label="Optional Guardian care and surprises">
+        <summary>🍼 Care, surprises & boundaries</summary>
+        <p>Optional routines and treats. You choose what fits.</p>
+        <h3>🎁 Activity surprises</h3>
         <p>Choose your favorite activities once. Guardian occasionally picks one as a free surprise, without requiring chores or manual claiming.</p>
         {check("surpriseBox","Let Guardian offer occasional activity surprises")}
         {prefs.surpriseBox && SURPRISE_BOX_CHOICES.map(item=><label key={item.id} className="pl-companion-check">
@@ -87,7 +84,7 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
         <h3>💌 Surprise Letters</h3>
         <p>Receive an occasional private, supportive letter when your automatic Guardian is active. No AI or messages to other people.</p>
         <label className="pl-companion-check"><input type="checkbox" checked={!!prefs.surpriseLetters} onChange={e=>update({prefs:{...prefs,surpriseLetters:e.target.checked,lettersEnabledOn:e.target.checked ? localDate() : ""}})} />Enable surprise letters</label>
-        <h3>🎁 Guardian surprises</h3>
+        <h3>🎁 Earned rewards</h3>
         <p>Once your automatic Guardian is enabled, it picks and awards little surprises automatically. You never need to make a reward or claim one. These are virtual celebrations, not purchases or essential care.</p>
         {check("automaticGifts", "Let Guardian choose and unlock rewards automatically")}
         {prefs.automaticGifts && <div aria-label="Allowed Guardian surprise types">
@@ -114,7 +111,8 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           </label>
           <p>You control every step. Changing, potty and bath checks are suggestions only; skip anything that doesn't fit. No points are deducted for resting.</p>
         </>}
-      </section>
+      </details>
+      <details className="pl-guardian-advanced"><summary>💜 More ways to personalize Guardian</summary>
       <label>
         Guidance
         <select
@@ -151,7 +149,8 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           onChange={(e) => preference("phrases", e.target.value)}
         />
       </label>
-      <section className="pl-virtual-guardian-options" aria-label="Virtual Guardian reminders">
+      </details>
+      <details className="pl-virtual-guardian-options pl-guardian-advanced" aria-label="Virtual Guardian reminders"><summary>🔔 Automatic reminders</summary>
         <h3>Guardian reminders</h3>
         <p>Automatic reminders follow your real tasks and routines when no person is connected. No AI or sharing is needed.</p>
         {!prefs.automaticReminders && <button type="button" className="pl-companion-primary" onClick={() => update({prefs:activateBotMommy(prefs)})}>Enable automatic Guardian 🧸</button>}
@@ -163,7 +162,7 @@ export function GuardianSettings({ userId, state, update, onForget, onDeleteChat
           {prefs.tomorrowNudges && <label>Tomorrow preview time <input type="time" value={prefs.tomorrowReminderTime} onChange={event => preference("tomorrowReminderTime", event.target.value)} /></label>}
         </>}
         <p>To receive reminders while the app is closed, enable notifications under Settings → Notifications & Reminders. PlushLife respects quiet hours, rest days and discreet lock-screen text. You can turn this off anytime. Without notification permission, your bot still helps when you open the app.</p>
-      </section>
+      </details>
       {state.chat.length > 0 && <details>
         <summary>Old saved chat history</summary>
         <p>PlushLife no longer offers AI chat in the Guardian. These older messages stay on this device until you choose to delete them.</p>
