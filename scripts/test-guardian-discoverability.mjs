@@ -17,11 +17,11 @@ assert(nav.includes('setCollectionOpen(false)') && nav.includes('goToDashboard(i
 assert(fs.existsSync("assets/figma/icon-guardian.svg"), "Real Guardian tab icon must be included in the build");
 assert(fs.readFileSync("assets/figma/icon-guardian.svg", "utf8").includes("<svg"), "Guardian icon must have valid SVG content");
 
-assert(guardian.includes('aria-label="Guardian support"'), "Guardian needs a clear, unified support card");
-assert(guardian.includes("useGuardianState(user?.id)"), "Bot entry must reflect the chosen, account-scoped bot style");
-assert(guardian.includes('openPlushGuardian("rewards")'), "Automatic Guardian rewards remain reachable");
-assert(guardian.indexOf('aria-label="Guardian support"') < guardian.indexOf('aria-label="Guardian sections"'), "Guardian selection remains prominent above advanced sections");
-assert(guardian.includes('mode === "person"') && guardian.includes('mode === "automatic"'), "Guardian distinguishes connected person from automatic mode");
+assert(guardian.includes('aria-label="Optional human Guardian"'), "Guardian needs a clear, unified support card");
+assert(guardian.includes("useGuardianState(user?.id)"), "Legacy support engine keeps account-scoped preferences");
+assert(guardian.includes("You don\'t need a Guardian to use PlushLife"), "Daily support is provided without a human Guardian");
+assert(guardian.indexOf('aria-label="Guardian support"') < guardian.indexOf('aria-label="Guardian sections"'), "Optional human Guardian card remains prominent above advanced sections");
+assert(guardian.includes('mode === "person"') && guardian.includes('setGuardianArea("support")'), "Human Guardian invitation and permissions are accessible");
 assert(guardian.includes('guardianMode(ownedSupportLinks'), "Automatic mode must defer to an accepted human Guardian");
 assert(guardian.includes("<CozySharing links={ownedSupportLinks} />") && guardian.includes('guardianArea === "together"'), "Human Guardian and Together features stay intact");
 assert(guardian.includes('guardianArea === "support"'), "Existing sharing and invitations remain accessible");
