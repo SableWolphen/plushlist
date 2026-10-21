@@ -70,12 +70,8 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
           <CozyScene title="My Guardian" subtitle="One place for support, little jobs, routines, encouragement and rewards." />
           {supportViewMode === "mine" && mode === "automatic" && <section className="pl-guardian-smart-brief" aria-label="Guardian's gentle suggestion">
             <div className="pl-guardian-smart-eyebrow">✨ A little help for right now</div>
-            <h2>{ownerIsRestingToday ? "Rest is part of your plan" : displayedSupportPercent >= 100 ? "You've done plenty today" : "One step at a time"}</h2>
-            <p>{ownerIsRestingToday
-              ? "You can rest without earning it. Would you like some comfort?"
-              : displayedSupportPercent >= 100
-                ? "Your effort counts. You could enjoy one of your saved rewards or take a break."
-                : "I can help you find a manageable next step. You always decide what to do."}</p>
+            <h2>{ownerIsRestingToday ? "Rest is part of your plan" : "One step at a time"}</h2>
+            <p>{ownerIsRestingToday ? "You can rest without earning it. Would you like some comfort?" : "I can help you find a manageable next step. You always decide what to do."}</p>
             <div className="pl-guardian-smart-actions">
               <button type="button" onClick={() => ownerIsRestingToday ? openPlushGuardian("guardian") : openPlushGuardian("start")}>{ownerIsRestingToday ? "💗 Comfort ideas" : "🌱 Help me start"}</button>
               <button type="button" onClick={() => openPlushGuardian("rewards")}>🎁 My rewards</button>
