@@ -1,7 +1,5 @@
 package com.PlushLife;
 
-import static org.junit.Assert.*;
-
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Intent;
@@ -13,23 +11,35 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.WebView;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.platform.app.InstrumentationRegistry;
+import android.graphics.Insets;
+import android.view.WindowInsets;
+import android.os.Bundle;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /** Real optimized WebView + production CSS; no login, backend writes or test hooks in the app. */
-@RunWith(AndroidJUnit4.class)
-public class EdgeToEdgeTest {
-    private final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+public class EdgeToEdgeInstrumentation extends Instrumentation {
+    private final Instrumentation instrumentation = this;
+
+    @Override public void onCreate(Bundle arguments) { super.onCreate(arguments); start(); }
+    @Override public void onStart() {
+        Bundle result = new Bundle();
+        try {
+            portraitLandscapeDialogAndKeyboardRespectInsets();
+            result.putString("stream", "OK (1 test)");
+            finish(Activity.RESULT_OK, result);
+        } catch (Throwable error) {
+            result.putString("stream", android.util.Log.getStackTraceString(error));
+            finish(Activity.RESULT_CANCELED, result);
+        }
+    }
+    private static void assertTrue(String message, boolean value) { if (!value) throw new AssertionError(message); }
+    private static void assertNotNull(String message, Object value) { assertTrue(message, value != null); }
+    private static void assertEquals(String message, Object expected, Object actual) { assertTrue(message + ": expected=" + expected + " actual=" + actual, expected.equals(actual)); }
+    private static void fail(String message) { throw new AssertionError(message); }
     private Activity activity;
     private WebView web;
 
@@ -65,11 +75,27 @@ public class EdgeToEdgeTest {
         fail(message);
     }
 
-    private WindowInsetsCompat insets() {
-        AtomicReference<WindowInsetsCompat> value = new AtomicReference<>();
-        instrumentation.runOnMainSync(() -> value.set(ViewCompat.getRootWindowInsets(activity.getWindow().getDecorView())));
+    private WindowInsets insets() {
+        AtomicReference<WindowInsets> value = new AtomicReference<>();
+        instrumentation.runOnMainSync(() -> value.set(activity.getWindow().getDecorView().getRootWindowInsets()));
         assertNotNull("Window insets delivered", value.get());
         return value.get();
+    }
+
+    private Insets safeInsets() {
+        WindowInsets windowInsets = insets();
+        if (Build.VERSION.SDK_INT >= 30) return windowInsets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+        android.view.DisplayCutout cutout = windowInsets.getDisplayCutout();
+        return Insets.of(
+            Math.max(windowInsets.getStableInsetLeft(), cutout == null ? 0 : cutout.getSafeInsetLeft()),
+            Math.max(windowInsets.getStableInsetTop(), cutout == null ? 0 : cutout.getSafeInsetTop()),
+            Math.max(windowInsets.getStableInsetRight(), cutout == null ? 0 : cutout.getSafeInsetRight()),
+            Math.max(windowInsets.getStableInsetBottom(), cutout == null ? 0 : cutout.getSafeInsetBottom()));
+    }
+    private boolean keyboardVisible() {
+        WindowInsets windowInsets = insets();
+        return Build.VERSION.SDK_INT >= 30 ? windowInsets.isVisible(WindowInsets.Type.ime())
+            : windowInsets.getSystemWindowInsetBottom() > windowInsets.getStableInsetBottom() + 100;
     }
 
     private void assertSafeLayout(String label) throws Exception {
@@ -87,7 +113,7 @@ public class EdgeToEdgeTest {
         });
         int[] b = bounds.get();
         double scale = b[2] / rect.getDouble("w");
-        Insets safe = insets().getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+        Insets safe = safeInsets();
         assertTrue(label + " content below status bar/cutout: " + rect, b[1] + rect.getDouble("contentTop") * scale >= safe.top - 2);
         assertTrue(label + " content left safe", b[0] + rect.getDouble("contentLeft") * scale >= safe.left - 2);
         assertTrue(label + " content right safe", b[0] + (rect.getDouble("w") - rect.getDouble("contentRight")) * scale <= b[3] - safe.right + 2);
@@ -98,7 +124,6 @@ public class EdgeToEdgeTest {
         android.util.Log.i("PlushLifeEdgeTest", label + " safe=" + safe + " layout=" + rect);
     }
 
-    @Test
     public void portraitLandscapeDialogAndKeyboardRespectInsets() throws Exception {
         Intent intent = new Intent().setClassName("com.PlushLife", "com.PlushLife.MainActivity").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         activity = instrumentation.startActivitySync(intent);
@@ -147,8 +172,8 @@ public class EdgeToEdgeTest {
             instrumentation.sendPointerSync(MotionEvent.obtain(time,time,MotionEvent.ACTION_DOWN,tap.get()[0],tap.get()[1],0));
             instrumentation.sendPointerSync(MotionEvent.obtain(time,time+60,MotionEvent.ACTION_UP,tap.get()[0],tap.get()[1],0));
             long deadline = SystemClock.uptimeMillis() + 10000;
-            while (!insets().isVisible(WindowInsetsCompat.Type.ime()) && SystemClock.uptimeMillis() < deadline) SystemClock.sleep(150);
-            assertTrue("Real keyboard visible", insets().isVisible(WindowInsetsCompat.Type.ime()));
+            while (!keyboardVisible() && SystemClock.uptimeMillis() < deadline) SystemClock.sleep(150);
+            assertTrue("Real keyboard visible", keyboardVisible());
             waitFor("innerHeight<" + (oldHeight - 50), "WebView resized above keyboard");
             assertEquals("Navigation stays inside resized viewport", "true", evaluate("document.querySelector('.pl-app-bottom-nav').getBoundingClientRect().bottom<=innerHeight+1"));
             instrumentation.sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);

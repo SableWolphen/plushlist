@@ -9,7 +9,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.PlushLife.EdgeToEdgeInstrumentation"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
@@ -62,9 +62,6 @@ android {
             } else if (project.hasProperty('plushlifeSmokeTest')) {
                 // CI installs the optimized variant without production credentials.
                 signingConfig signingConfigs.debug
-                // The test APK excludes dependencies shared with the app; retain
-                // its tracing entry points only in the CI-tested APK.
-                proguardFile 'proguard-smoke-test.pro'
             }
         }
     }
@@ -94,8 +91,6 @@ dependencies {
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
     // Crashlytics reports real native crashes (with stack traces) to the
     // Firebase console within minutes, unlike Play Console's own crash
