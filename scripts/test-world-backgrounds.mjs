@@ -5,7 +5,7 @@ const html=fs.readFileSync("index.html","utf8");
 const sync=fs.readFileSync("scripts/sync-www.js","utf8");
 const themes=["soft","dino","baby","pink","meadow","peach","twilight","strawberry","soft-light","baby-night","garden"];
 for(const theme of themes)assert.ok(css.includes('[data-pl-world="'+theme+'"]'),"Missing atmosphere for "+theme);
-const bannerLayers=themes.map(theme=>{const match=css.match(new RegExp('\\\\[data-pl-world="'+theme+'"\\\\] \\\\.pl-storybook-banner\\\\{([^}]+)\\\\}'));assert.ok(match,"Missing theme-specific banner for "+theme);return match[1];});
+const bannerLayers=themes.map(theme=>{const marker='[data-pl-world="'+theme+'"] .pl-storybook-banner{';const start=css.indexOf(marker);assert.ok(start>=0,"Missing theme-specific banner for "+theme);return css.slice(start,css.indexOf("}",start));});
 assert.equal(new Set(bannerLayers).size,themes.length,"Theme scenery should be different for each world");
 assert.match(css,/prefers-reduced-motion/);
 assert.match(css,/background-color:var\(--pl-theme-surface\)/);
