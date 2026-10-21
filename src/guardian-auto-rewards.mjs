@@ -23,7 +23,7 @@ export function awardEligibleRewards(rewards = [], rows = [], done = {}, date = 
   const unlocked = [];
   const next = rewards.map(reward=>{
     if (!reward || reward.claimed || reward.autoAwardedAt) return reward;
-    const progressUnlocked = reward.mode === "progress" && progress.newlyCompleted !== false && denominator > 0 && percent >= Number(reward.targetPercent || 100);
+    const progressUnlocked = reward.mode === "progress" && !progress.removedTask && progress.newlyCompleted !== false && denominator > 0 && percent >= Number(reward.targetPercent || 100);
     const effort = !progress.removedTask && reward.mode === "effort" && Number(reward.goal) > 0 && Number(reward.count) >= Number(reward.goal);
     if (!progressUnlocked && !effort) return reward;
     unlocked.push({ id:reward.id, name:String(reward.name || "A cozy reward").slice(0,100) });
