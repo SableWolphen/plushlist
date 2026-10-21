@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";import fs from "node:fs";
+const main=fs.readFileSync("src/components/guardian-panel.jsx","utf8");
+const settings=fs.readFileSync("src/components/plush-guardian-settings.jsx","utf8");
+const html=fs.readFileSync("index.html","utf8");
+assert.match(main,/mode === "automatic" && <section className="pl-guardian-smart-brief"/);
+assert.match(main,/ownerIsRestingToday \? "Rest is part of your plan"/);
+assert.match(main,/openPlushGuardian\("start"\)/);
+assert.match(main,/openPlushGuardian\("rewards"\)/);
+assert.match(main,/Nothing is sent to an AI service/);
+assert.match(settings,/Guardian settings categories/);
+assert.match(html,/guardian-smart-home\.css/);
+console.log("Contextual Guardian Home and settings navigation contract passed.");
