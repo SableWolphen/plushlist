@@ -6,5 +6,5 @@ assert.match(growth,/event\.detail\?\.completed !== true/);
 assert.doesNotMatch(growth,/\/\^done\$\/i\.test\(text\)/);
 assert.doesNotMatch(growth,/input\[type="checkbox"\].*recordCompletionSignal/);
 assert.match(app,/Store earned rewards, but never interrupt an open settings or Guardian dialog/);
-assert.match(app,/document\.querySelector\("\.pl-tool-panel/);
+assert.match(app,/document\\.querySelector\\(['\"]\\.pl-tool-panel/);
 console.log("Settings interaction popup regression guards passed.");
