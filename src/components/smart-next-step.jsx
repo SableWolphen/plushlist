@@ -181,5 +181,5 @@ export function useSmartNextStep({ accountId, rows = [], viewDone = {}, period, 
       feedback: winner.feedback,
       capacityForecast,
     };
-  }, [rows, viewDone, period?.date, dailyCheckIn?.energy, dailyCheckIn?.capacity, dailyCheckIn?.mood, dailyCheckIn?.day_type, fallbackTask?.key, recentlyCompletedKeys, revision]);
+  }, [accountId, rows, viewDone, period?.date, dailyCheckIn?.energy, dailyCheckIn?.capacity, dailyCheckIn?.mood, dailyCheckIn?.day_type, fallbackTask?.key, recentlyCompletedKeys, revision]);
 }
