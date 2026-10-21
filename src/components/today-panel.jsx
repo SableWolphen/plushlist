@@ -143,7 +143,7 @@ export function TodayPanel(props) {
       </div>
       <nav className="pl-quick-paths" aria-label="Quickly find your tools">
         <button type="button" onClick={() => props.goToDashboard?.("tasks")}><span aria-hidden="true">✅</span><strong>Tasks & schedule</strong><small>Add or change a task</small></button>
-        <button type="button" onClick={() => props.goToDashboard?.("guardian")}><span aria-hidden="true">💌</span><strong>My Guardian</strong><small>Help & rewards</small></button>
+        <button type="button" onClick={() => props.goToDashboard?.("guardian")}><span aria-hidden="true">💌</span><strong>My Guardian</strong><small>Invite someone you trust</small></button>
         <button type="button" onClick={() => props.goToDashboard?.("care")}><span aria-hidden="true">💗</span><strong>Feel better</strong><small>Care right now</small></button>
         <button type="button" onClick={() => props.goToDashboard?.("progress")}><span aria-hidden="true">🌟</span><strong>My progress</strong><small>Little wins</small></button>
       </nav>
