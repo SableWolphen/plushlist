@@ -94,8 +94,19 @@ public class EdgeToEdgeInstrumentation extends Instrumentation {
     }
     private boolean keyboardVisible() {
         WindowInsets windowInsets = insets();
-        return Build.VERSION.SDK_INT >= 30 ? windowInsets.isVisible(WindowInsets.Type.ime())
-            : windowInsets.getSystemWindowInsetBottom() > windowInsets.getStableInsetBottom() + 100;
+        if (Build.VERSION.SDK_INT >= 30) return windowInsets.isVisible(WindowInsets.Type.ime());
+        if (windowInsets.getSystemWindowInsetBottom() > windowInsets.getStableInsetBottom() + 100) return true;
+        // Before Android 11, a full-window layout may report zero system-window
+        // IME insets. Check the actual occluded display frame as well.
+        AtomicReference<Boolean> occluded = new AtomicReference<>(false);
+        instrumentation.runOnMainSync(() -> {
+            View decor = activity.getWindow().getDecorView();
+            android.graphics.Rect frame = new android.graphics.Rect();
+            int[] location = new int[2]; decor.getLocationOnScreen(location);
+            decor.getWindowVisibleDisplayFrame(frame);
+            occluded.set(location[1] + decor.getHeight() - frame.bottom > Math.max(100, decor.getHeight() / 6));
+        });
+        return occluded.get();
     }
 
     private void assertSafeLayout(String label) throws Exception {
