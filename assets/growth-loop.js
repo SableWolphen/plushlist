@@ -291,17 +291,13 @@
     if (count <= 3) showToast(title, body, [{ label: "Share week", action: showShareCard }, { label: "Done", primary: true, action: removeToast }]);
   }
 
-  document.addEventListener("click", (event) => {
-    const button = event.target?.closest?.("button");
-    if (!button || button.closest("#plushlife-growth-checkin,#plushlife-growth-toast,#plushlife-share-win")) return;
-    const text = clean(button.textContent);
-    if (/^✓\s*done$/i.test(text) || /^done$/i.test(text)) window.setTimeout(recordCompletionSignal, 160);
-  }, true);
-
-  document.addEventListener("change", (event) => {
-    const input = event.target;
-    if (input?.matches?.('input[type="checkbox"]') && input.checked) window.setTimeout(recordCompletionSignal, 160);
-  }, true);
+  // Count actual task completions only. Guardian settings checkboxes and generic
+  // buttons such as "Done" must never create task celebration popups.
+  window.addEventListener("plushlife:task-completion-feedback", (event) => {
+    if (event.detail?.completed !== true) return;
+    if (document.querySelector('.pl-tool-panel, .pl-companion-modal, [role="dialog"][aria-modal="true"]')) return;
+    window.setTimeout(recordCompletionSignal, 160);
+  });
 
   let scheduled = false;
   const refresh = () => {

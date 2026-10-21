@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import { companionAccountKey } from "../src/companion-account-storage.mjs";
+const src = fs.readFileSync("src/components/companion-cloud-sync.jsx", "utf8");
+const key = "plushlife:habit-coach:v1";
+const alice = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+const bob = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
+assert.notEqual(companionAccountKey(key, alice), companionAccountKey(key, bob));
+assert.equal(companionAccountKey(key, null), null);
+assert.match(src, /habit_coach: plainObject\(storageJson\(companionAccountKey\(HABIT_STATE_KEY, userId\), \{\}\)\)/);
+assert.match(src, /storageSet\(companionAccountKey\(HABIT_STATE_KEY, userId\), state\.habit_coach\)/);
+assert.doesNotMatch(src, /storageJson\(HABIT_STATE_KEY, \{\}\)/);
+assert.doesNotMatch(src, /storageSet\(HABIT_STATE_KEY, state\.habit_coach\)/);
+console.log("Companion habit cloud sync account boundary passed.");

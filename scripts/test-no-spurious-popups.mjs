@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";import fs from "node:fs";
+const growth=fs.readFileSync("assets/growth-loop.js","utf8");
+const app=fs.readFileSync("src/app-source.jsx","utf8");
+assert.match(growth,/addEventListener\("plushlife:task-completion-feedback"/);
+assert.match(growth,/event\.detail\?\.completed !== true/);
+assert.doesNotMatch(growth,/\/\^done\$\/i\.test\(text\)/);
+assert.doesNotMatch(growth,/input\[type="checkbox"\].*recordCompletionSignal/);
+assert.match(app,/Store earned rewards, but never interrupt an open settings or Guardian dialog/);
+assert.ok(app.includes("document.querySelector(") && app.includes(".pl-tool-panel"),"Guardian popup must be suppressed while dialog is open");
+console.log("Settings interaction popup regression guards passed.");

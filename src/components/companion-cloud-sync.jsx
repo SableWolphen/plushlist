@@ -65,7 +65,8 @@ function localCompanionState(userId) {
     first_seen: storageJson(companionAccountKey(FIRST_SEEN_KEY, userId), "") || "",
     history: Array.isArray(storageJson(companionAccountKey(HISTORY_KEY, userId), [])) ? storageJson(companionAccountKey(HISTORY_KEY, userId), []).slice(0, SYNCED_DAYS) : [],
     days,
-    habit_coach: plainObject(storageJson(HABIT_STATE_KEY, {})),
+    // Never upload the shared legacy habit-coach key: its owner cannot be established.
+    habit_coach: plainObject(storageJson(companionAccountKey(HABIT_STATE_KEY, userId), {})),
     updated_at: new Date().toISOString(),
   };
 }
@@ -177,7 +178,7 @@ function hydrateLocal(state, userId) {
     if (day && Object.prototype.hasOwnProperty.call(day, "support_need")) storageSet(companionAccountKey(`plushlife:support-need:${date}`, userId), day.support_need || "");
   }
   if (state.habit_coach && typeof state.habit_coach === "object" && !Array.isArray(state.habit_coach)) {
-    storageSet(HABIT_STATE_KEY, state.habit_coach);
+    storageSet(companionAccountKey(HABIT_STATE_KEY, userId), state.habit_coach);
     try { window.dispatchEvent(new CustomEvent("plushlife:habit-coach-hydrated")); } catch (_error) {}
   }
 }
@@ -270,7 +271,7 @@ export function useCompanionCloudSync(active, accountId) {
     const onHabitChanged = () => scheduleSync(700);
     const onStorage = (event) => {
       const key = String(event?.key || "");
-      if (key === HABIT_STATE_KEY || (accountId && key?.startsWith(`plushlife:account:${accountId}:`))) scheduleSync(900);
+      if (accountId && key?.startsWith(`plushlife:account:${accountId}:`)) scheduleSync(900);
     };
 
     window.addEventListener("online", onOnline);

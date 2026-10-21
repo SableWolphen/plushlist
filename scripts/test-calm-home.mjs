@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";import fs from "node:fs";
+const home=fs.readFileSync("src/components/today-panel.jsx","utf8");
+const html=fs.readFileSync("index.html","utf8");
+const css=fs.readFileSync("assets/home-calm-layout.css","utf8");
+assert.match(home, /<details className="pl-home-extra-tools">/);
+assert.match(home, /<summary>🌷 More ways to care for your day<\/summary>/);
+assert.match(home, /<EveningGratitude\/><\/div><\/details>/);
+for(const name of ["My plan","Guardian","Care","Journey"])assert.ok(home.includes("<strong>"+name+"</strong>"));
+assert.match(html, /assets\/home-calm-layout\.css/);
+assert.match(css, /min-height: 52px/);
+console.log("Calm Home navigation and optional tools preserved.");

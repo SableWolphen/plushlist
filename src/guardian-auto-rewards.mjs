@@ -23,7 +23,7 @@ export function awardEligibleRewards(rewards = [], rows = [], done = {}, date = 
   const unlocked = [];
   const next = rewards.map(reward=>{
     if (!reward || reward.claimed || reward.autoAwardedAt) return reward;
-    const progressUnlocked = reward.mode === "progress" && progress.newlyCompleted !== false && denominator > 0 && percent >= Number(reward.targetPercent || 100);
+    const progressUnlocked = reward.mode === "progress" && !progress.removedTask && progress.newlyCompleted !== false && denominator > 0 && percent >= Number(reward.targetPercent || 100);
     const effort = !progress.removedTask && reward.mode === "effort" && Number(reward.goal) > 0 && Number(reward.count) >= Number(reward.goal);
     if (!progressUnlocked && !effort) return reward;
     unlocked.push({ id:reward.id, name:String(reward.name || "A cozy reward").slice(0,100) });
@@ -52,9 +52,9 @@ export function autoGuardianGifts(ledger = [], rows = [], done = {}, date = "", 
   if (!eligible.length) return { ledger:[...existing,...babyDay.map(()=>date+":baby-day")].slice(-180), unlocked:babyDay };
   const denominator = Math.max(eligible.length, Number(progress.total) || 0);
   const percent = denominator ? eligible.filter(r=>!!done[r.key]).length * 100 / denominator : 0;
-  const choices = ["🎬 Enjoy a movie night","📖 Pick a comforting bedtime story","🎮 Have a cozy game session","🧸 Make time for plushie cuddles","🖍️ Try a little coloring session"];
-  const regular = DEFAULT_GUARDIAN_GIFTS.filter(g=>progress.newlyCompleted !== false && categories.includes(g.category) && percent >= g.threshold && !existing.includes(date+":"+g.threshold));
-  const activity = progress.newlyCompleted !== false && categories.includes("activities") && percent >= 75 && !existing.includes(date+":75")
+  const choices = ["🎬 Choose a movie and enjoy a cozy movie night","📖 Pick a story and plan a peaceful reading break","🎮 Set aside time for a favorite game","🧸 Plan some cozy plushie-and-music time","🖍️ Choose a fun coloring or creative activity","🌳 Pick a relaxing outdoor activity if you feel up to it","🛁 Plan a warm, relaxing self-care evening"];
+  const regular = DEFAULT_GUARDIAN_GIFTS.filter(g=>!progress.removedTask && progress.newlyCompleted !== false && categories.includes(g.category) && percent >= g.threshold && !existing.includes(date+":"+g.threshold));
+  const activity = !progress.removedTask && progress.newlyCompleted !== false && categories.includes("activities") && percent >= 75 && !existing.includes(date+":75")
     ? [{threshold:75,category:"activities",name:choices[Math.floor(Date.parse(date+"T12:00:00")/86400000)%choices.length]}] : [];
   const unlocked = [...regular,...activity,...babyDay];
   return { ledger:[...existing,...unlocked.map(g=>date+":"+g.threshold)].slice(-180), unlocked };
@@ -68,7 +68,7 @@ export function availableGuardianGifts(ledger = [], used = []) {
     "100": "🏆 Today's little victory trophy",
     "baby-day": "🍼 A cozy Little Day",
   };
-  const activities = ["🎬 Enjoy a movie night","📖 Pick a comforting bedtime story","🎮 Have a cozy game session","🧸 Make time for plushie cuddles","🖍️ Try a little coloring session"];
+  const activities = ["🎬 Choose a movie and enjoy a cozy movie night","📖 Pick a story and plan a peaceful reading break","🎮 Set aside time for a favorite game","🧸 Plan some cozy plushie-and-music time","🖍️ Choose a fun coloring or creative activity","🌳 Pick a relaxing outdoor activity if you feel up to it","🛁 Plan a warm, relaxing self-care evening"];
   return (Array.isArray(ledger) ? ledger : []).filter(id =>
     typeof id === "string" && /^\d{4}-\d{2}-\d{2}:(25|50|75|100|baby-day)$/.test(id) && !usedIds.has(id)
   ).map(id => {

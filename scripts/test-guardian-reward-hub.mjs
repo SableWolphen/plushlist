@@ -1,0 +1,27 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import {autoGuardianGifts, availableGuardianGifts, awardEligibleRewards} from "../src/guardian-auto-rewards.mjs";
+const src=fs.readFileSync("src/components/plush-guardian-settings.jsx","utf8");
+const html=fs.readFileSync("index.html","utf8");
+for(const area of ["home","care","rewards","letters","reminders","personalize"]){assert.ok(src.includes('area === "'+area+'"'),"Missing "+area+" screen");}
+assert.match(src,/Guardian settings categories/);
+assert.match(src,/Back to Guardian settings/);
+assert.match(html,/assets\/guardian-settings-hub\.css/);
+const date="2026-10-20",prefs={automaticGifts:true,giftCategories:["activities"]};
+const rows=[{key:"a"},{key:"b"},{key:"c"},{key:"d"}],done={a:true,b:true,c:true};
+const first=autoGuardianGifts([],rows,done,date,prefs);
+assert.equal(first.unlocked.length,1);
+assert.equal(first.unlocked[0].category,"activities");
+assert.match(first.unlocked[0].name,/(Choose|Pick|Set aside|Plan)/);
+assert.equal(autoGuardianGifts(first.ledger,rows,done,date,prefs).unlocked.length,0);
+const available=availableGuardianGifts(first.ledger,[]);
+assert.equal(available.length,1);
+assert.equal(availableGuardianGifts(first.ledger,[available[0].id]).length,0);
+assert.equal(autoGuardianGifts([],rows,done,date,prefs,false,{removedTask:true}).unlocked.length,0);
+const progressReward=[{id:"progress",mode:"progress",targetPercent:50,name:"Milestone"}];
+const removed=awardEligibleRewards(progressReward,[{key:"a"},{key:"b"}],{a:true,b:true},date,{removedTask:true,newlyCompleted:false});
+assert.equal(removed.unlocked.length,0,"Removing tasks must not grant progress rewards");
+assert.equal(removed.rewards[0].claimed,undefined);
+const completed=awardEligibleRewards(progressReward,[{key:"a"},{key:"b"}],{a:true,b:true},date,{newlyCompleted:true});
+assert.equal(completed.unlocked.length,1,"Actual completion can unlock a progress reward");
+console.log("Guardian settings hub and useful automatic reward tests passed.");

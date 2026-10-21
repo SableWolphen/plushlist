@@ -1,11 +1,14 @@
+import { companionAccountKey } from "../companion-account-storage.mjs";
 import { hasGoldFeature } from "../plush-gold.js";
 import { buildEnergyBudget, buildSmartTaskProfile, rankSmartTask, taskAdaptiveLabel, taskId } from "../task-intelligence.mjs";
 import { buildRecommendationLearning } from "../recommendation-learning.mjs";
 
 const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 
-function readHabitState() {
-  try { return JSON.parse(localStorage.getItem(HABIT_STATE_KEY) || "{}") || {}; }
+function readHabitState(accountId) {
+  const key = companionAccountKey(HABIT_STATE_KEY, accountId);
+  if (!key) return {};
+  try { return JSON.parse(localStorage.getItem(key) || "{}") || {}; }
   catch (_error) { return {}; }
 }
 
@@ -69,7 +72,7 @@ function adaptationReason(dayType, lowCapacity, overwhelmed) {
   return "";
 }
 
-export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckIn = {}, fallbackTask = null, recentlyCompletedKeys = [] }) {
+export function useSmartNextStep({ accountId, rows = [], viewDone = {}, period, dailyCheckIn = {}, fallbackTask = null, recentlyCompletedKeys = [] }) {
   const [revision, setRevision] = React.useState(0);
 
   React.useEffect(() => {
@@ -84,7 +87,7 @@ export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckI
 
   return React.useMemo(() => {
     const goldSmart = hasGoldFeature("smart_next_step");
-    const state = readHabitState();
+    const state = readHabitState(accountId);
     const engine = goldSmart ? (state.meta?.__background_engine || {}) : {};
     const profiles = engine.habitProfiles || {};
     const smartProfiles = engine.smartTaskProfiles || {};
@@ -178,5 +181,5 @@ export function useSmartNextStep({ rows = [], viewDone = {}, period, dailyCheckI
       feedback: winner.feedback,
       capacityForecast,
     };
-  }, [rows, viewDone, period?.date, dailyCheckIn?.energy, dailyCheckIn?.capacity, dailyCheckIn?.mood, dailyCheckIn?.day_type, fallbackTask?.key, recentlyCompletedKeys, revision]);
+  }, [accountId, rows, viewDone, period?.date, dailyCheckIn?.energy, dailyCheckIn?.capacity, dailyCheckIn?.mood, dailyCheckIn?.day_type, fallbackTask?.key, recentlyCompletedKeys, revision]);
 }

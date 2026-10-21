@@ -88,36 +88,20 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
   return (
           <ToolPanel inline title="💛 PlushSupport" displayTitle="Guardians" onClose={onClose}>
           <div className="pl-guardian-content">
-          <CozyScene title="Guardian" subtitle={supportViewMode === "caretaker" ? "Their progress and ways to help, together in one place." : "Your support, requests and rewards."} />
-          {supportViewMode === "mine" && <section className="pl-bot-guardian-entry" aria-label="Guardian support" style={{padding:15,borderRadius:17,background:"var(--pl-theme-surface-2)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
-            {mode === "checking" ? <>
-              <strong>Checking Guardian connection…</strong>
-              <p style={{margin:"8px 0",fontSize:13}}>Your Guardian settings are loading. Automatic help stays paused until we know who is connected.</p>
-              <button type="button" onClick={()=>onRetryGuardian?.()} style={{minHeight:44,padding:"8px 12px",borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface)",color:"var(--pl-theme-ink)"}}>Retry Guardian connection</button>
-            </> : <>
-              <div style={{display:"flex",alignItems:"center",gap:10}}>
-                <span aria-hidden="true" style={{fontSize:27}}>{mode === "person" ? "💛" : "🧸"}</span>
-                <div style={{minWidth:0,flex:1}}>
-                  <h2 style={{margin:0,fontSize:19,color:"var(--pl-theme-ink)"}}>{mode === "choose" ? "Choose your Guardian" : guardianDisplayName}</h2>
-                  <span style={{fontSize:12,fontWeight:850,color:"var(--pl-theme-muted)"}}>{guardianTypeLabel(mode)}</span>
-                </div>
-              </div>
-              <p style={{fontSize:12.5,lineHeight:1.5,color:"var(--pl-theme-muted)",margin:"10px 0"}}>{mode === "person"
-                ? "Your connected Guardian can help with tasks, routines, encouragement and rewards. You control the sharing permissions."
-                : mode === "automatic"
-                  ? "Your Guardian uses gentle rules on this device, not chat. You choose all task changes and rewards."
-                  : "Invite someone you trust or choose an automatic Guardian for now. You can change later."}</p>
-              {mode === "choose" ? <div className="pl-guardian-unified-actions">
-                <button type="button" onClick={()=>openPlushGuardian()}><span>🧸</span> Set up Guardian</button>
-                <button type="button" onClick={()=>setGuardianArea("overview")}><span>💛</span> Invite someone</button>
-              </div> : mode === "automatic" ? <nav className="pl-guardian-unified-actions" aria-label="Guardian actions">
-                <button type="button" onClick={()=>openPlushGuardian("start")}><span>✅</span> Tasks</button>
-                <button type="button" onClick={()=>openPlushGuardian("routines")}><span>📅</span> Routines</button>
-                <button type="button" onClick={()=>openPlushGuardian("guardian")}><span>💌</span> Encouragement</button>
-                <button type="button" onClick={()=>openPlushGuardian("rewards")}><span>🎁</span> Rewards</button>
-              </nav> : null}
-              {mode === "automatic" && <button type="button" onClick={()=>openPlushGuardian("settings")} style={{marginTop:10,minHeight:40,width:"100%",border:"1px solid var(--pl-theme-line)",borderRadius:11,background:"var(--pl-theme-surface)",color:"var(--pl-theme-ink)",fontWeight:800}}>Guardian name & reminders ›</button>}
-            </>}
+          <CozyScene title="My Guardian" subtitle="Connect with someone you trust, if you want. PlushLife supports you either way." />
+          {supportViewMode === "mine" && <section className="pl-bot-guardian-entry" aria-label="Optional human Guardian" style={{padding:15,borderRadius:17,background:"var(--pl-theme-surface-2)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
+            <h2 style={{margin:"0 0 8px",fontSize:19}}>💛 Your trusted person</h2>
+            <p style={{fontSize:14,lineHeight:1.5,margin:"0 0 12px"}}>{mode === "checking"
+              ? "Checking your support connections…"
+              : mode === "person"
+                ? "Connected: " + guardianDisplayName + ". You control what they can see and do."
+                : "You don't need a Guardian to use PlushLife. Daily support, reminders, care and rewards are already part of the app."}</p>
+            {mode === "checking"
+              ? <button type="button" onClick={()=>onRetryGuardian?.()}>Retry connection</button>
+              : <div className="pl-guardian-unified-actions">
+                  <button type="button" onClick={()=>setGuardianArea("support")}><span>💌</span> {mode === "person" ? "Sharing & permissions" : "Invite someone"}</button>
+                  <button type="button" onClick={()=>setGuardianArea("together")}><span>🤝</span> Together</button>
+                </div>}
           </section>}
           {canUseCaretakerDashboard && (
             <div className="pl-guardian-person-switcher" role="group" aria-label="Guardian views">

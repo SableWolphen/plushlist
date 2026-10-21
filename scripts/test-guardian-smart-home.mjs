@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";import fs from "node:fs";
+const guardian=fs.readFileSync("src/components/guardian-panel.jsx","utf8");
+const support=fs.readFileSync("src/components/plush-guardian-core.jsx","utf8");
+const settings=fs.readFileSync("src/components/plush-guardian-settings.jsx","utf8");
+assert.match(guardian,/aria-label="Optional human Guardian"/);
+assert.match(guardian,/You don't need a Guardian to use PlushLife/);
+assert.match(guardian,/setGuardianArea\("support"\)/);
+assert.match(guardian,/Sharing & permissions/);
+assert.doesNotMatch(guardian,/className="pl-guardian-smart-brief"/);
+assert.match(support,/PlushLife · Everyday support/);
+assert.match(support,/PlushLife automatic support/);
+assert.match(settings,/Guardian settings categories/);
+console.log("Human Guardian and automatic PlushLife support boundaries passed.");

@@ -1,0 +1,9 @@
+/* Secondary Home tools are available on demand, not stacked above the next task. */
+.pl-home-extra-tools { margin: 12px 0; border: 1px solid var(--pl-theme-line, #dacde4); border-radius: 18px; background: var(--pl-theme-surface, #fff); color: var(--pl-theme-ink, #3a2949); overflow: hidden; }
+.pl-home-extra-tools > summary { list-style: none; min-height: 52px; display: flex; align-items: center; padding: 12px 15px; font-weight: 800; cursor: pointer; gap: 8px; }
+.pl-home-extra-tools > summary::-webkit-details-marker { display: none; }
+.pl-home-extra-tools > summary::after { content: "⌄"; margin-left: auto; font-size: 22px; line-height: 1; color: var(--pl-theme-muted, #796887); }
+.pl-home-extra-tools[open] > summary::after { transform: rotate(180deg); }
+.pl-home-extra-tools > summary:focus-visible { outline: 3px solid var(--pl-theme-accent, #956aab); outline-offset: -3px; }
+.pl-home-extra-tools-body { padding: 0 12px 16px; display: grid; gap: 12px; }
+.pl-quick-paths button { min-height: 52px; }

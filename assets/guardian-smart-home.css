@@ -1,0 +1,10 @@
+#main-content .pl-guardian-smart-brief{padding:18px;border:1px solid var(--pl-theme-line);border-radius:22px;background:linear-gradient(150deg,var(--pl-theme-surface),var(--pl-theme-surface-2));color:var(--pl-theme-ink);display:grid;gap:9px;margin:8px 0 14px}
+#main-content .pl-guardian-smart-eyebrow{font-size:12px;font-weight:900;letter-spacing:.04em;color:var(--pl-theme-accent)}
+#main-content .pl-guardian-smart-brief h2{font-size:20px;margin:0;color:var(--pl-theme-ink)}
+#main-content .pl-guardian-smart-brief p{margin:0;font-size:14px;line-height:1.5;color:var(--pl-theme-ink)}
+#main-content .pl-guardian-smart-brief small{font-size:11px;line-height:1.5;color:var(--pl-theme-muted)}
+#main-content .pl-guardian-smart-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#main-content .pl-guardian-smart-actions button{min-height:52px;border-radius:15px;border:1px solid var(--pl-theme-line);background:var(--pl-theme-surface);color:var(--pl-theme-ink);font-weight:850;padding:10px}
+#main-content .pl-guardian-smart-actions button:first-child{background:var(--pl-theme-accent);color:var(--pl-theme-on-accent)}
+#main-content .pl-guardian-smart-actions button:focus-visible{outline:3px solid var(--pl-theme-accent);outline-offset:3px}
+@media(max-width:340px){#main-content .pl-guardian-smart-actions{grid-template-columns:1fr}}
