@@ -24,6 +24,9 @@ android {
         // for a local `./gradlew assembleDebug` where it's never set.
         buildConfigField "String", "GIT_SHA", "\"${System.getenv('PLUSHLIFE_GIT_SHA') ?: 'unknown'}\""
     }
+    if (project.hasProperty('plushlifeSmokeTest')) {
+        testBuildType "release"
+    }
     buildFeatures {
         buildConfig true
     }

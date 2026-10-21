@@ -23,9 +23,9 @@
 
   const style = document.createElement("style");
   style.textContent = `
-    #plushlife-context-feedback{position:fixed;left:12px;bottom:calc(62px + env(safe-area-inset-bottom));z-index:2147483000;max-width:min(86vw,360px);padding:10px 12px;border-radius:15px;background:#fff8fc;border:1px solid #e2cfe9;box-shadow:0 8px 28px #5a416544;font:700 11.5px/1.4 system-ui,sans-serif;color:#6d5b79;display:none}
+    #plushlife-context-feedback{position:fixed;left:12px;bottom:calc(62px + var(--pl-safe-bottom,0px));z-index:2147483000;max-width:min(86vw,360px);padding:10px 12px;border-radius:15px;background:#fff8fc;border:1px solid #e2cfe9;box-shadow:0 8px 28px #5a416544;font:700 11.5px/1.4 system-ui,sans-serif;color:#6d5b79;display:none}
     #plushlife-context-feedback button{margin:7px 6px 0 0;border:1px solid #dec5e8;border-radius:999px;background:#fff;padding:6px 9px;color:#6f5480;font-weight:800;cursor:pointer}
-    #plushlife-qa-panel{position:fixed;inset:0;z-index:2147483005;background:#32243b73;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) 14px max(18px,env(safe-area-inset-bottom));font-family:system-ui,sans-serif;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+    #plushlife-qa-panel{position:fixed;inset:0;z-index:2147483005;background:#32243b73;display:grid;place-items:center;padding:max(18px,var(--pl-safe-top,0px)) 14px max(18px,var(--pl-safe-bottom,0px));font-family:system-ui,sans-serif;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
     #plushlife-qa-card{width:min(560px,92vw);max-height:min(82dvh,760px);overflow:auto;border-radius:22px;background:#fff9fd;border:1px solid #ead7ef;padding:18px;color:#5b4b6b;box-shadow:0 24px 70px #26152f55;overscroll-behavior:contain}
     .plushlife-qa-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px}
     .plushlife-qa-grid button{border:1px solid #dec5e8;border-radius:14px;background:#fff;padding:11px;text-align:left;color:#5b4b6b;font-weight:800;cursor:pointer}
@@ -118,7 +118,7 @@
     button.dataset.plushlifeQaEntry = "true";
     button.textContent = "🧪";
     button.setAttribute("aria-label", "Open PlushQA admin tools");
-    button.style.cssText = "position:fixed;right:12px;bottom:calc(62px + env(safe-area-inset-bottom));z-index:2147483000;border:1px solid #e4ccd9;border-radius:999px;background:#fff8fc;padding:7px 9px;box-shadow:0 4px 14px #5a416526;cursor:pointer;font-size:13px";
+    button.style.cssText = "position:fixed;right:12px;bottom:calc(62px + var(--pl-safe-bottom,0px));z-index:2147483000;border:1px solid #e4ccd9;border-radius:999px;background:#fff8fc;padding:7px 9px;box-shadow:0 4px 14px #5a416526;cursor:pointer;font-size:13px";
     button.addEventListener("click", openQa);
     document.body.appendChild(button);
   }

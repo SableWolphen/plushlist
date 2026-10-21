@@ -105,14 +105,14 @@
 }
 
 @media(max-width:520px){
-  html{scroll-padding-bottom:calc(156px + env(safe-area-inset-bottom))}
+  html{scroll-padding-bottom:calc(156px + var(--pl-safe-bottom,0px))}
   body{overflow-wrap:anywhere}
-  #main-content{padding-bottom:env(safe-area-inset-bottom);scroll-padding-bottom:calc(156px + env(safe-area-inset-bottom))}
+  #main-content{padding-bottom:var(--pl-safe-bottom,0px);scroll-padding-bottom:calc(156px + var(--pl-safe-bottom,0px))}
   #main-content :is(input,select,textarea){font-size:16px!important}
   #main-content :is(button,summary,[role="button"],[role="tab"]){min-height:44px}
   #main-content :is(.pl-row-text,.pl-care-copy,.pl-growth-copy,.pl-guardian-content,.pl-unified-page-title p){overflow-wrap:anywhere;word-break:normal}
-  .pl-tool-panel{max-height:calc(100dvh - max(16px,env(safe-area-inset-top)) - max(16px,env(safe-area-inset-bottom)))!important;scroll-padding-bottom:96px}
-  .pl-tool-body{padding-bottom:max(28px,env(safe-area-inset-bottom))!important}
+  .pl-tool-panel{max-height:calc(100dvh - max(16px,var(--pl-safe-top,0px)) - max(16px,var(--pl-safe-bottom,0px)))!important;scroll-padding-bottom:96px}
+  .pl-tool-body{padding-bottom:max(28px,var(--pl-safe-bottom,0px))!important}
   .pl-tool-title{min-width:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .pl-tool-close{flex:0 0 auto}
 
@@ -295,8 +295,8 @@
     height:80px!important;
     min-height:80px!important;
     max-height:80px!important;
-    bottom:max(10px,env(safe-area-inset-bottom))!important;
-    padding:8px 4px max(8px,env(safe-area-inset-bottom))!important;
+    bottom:max(10px,var(--pl-safe-bottom,0px))!important;
+    padding:8px 4px max(8px,var(--pl-safe-bottom,0px))!important;
     border-radius:22px!important;
     background:var(--pl-theme-surface)!important;
     border:1px solid var(--pl-theme-line)!important;
@@ -420,7 +420,7 @@ html[data-plushlife-color-mode="dark"] #main-content :is(
     height:76px!important;
     min-height:76px!important;
     max-height:76px!important;
-    bottom:max(10px,env(safe-area-inset-bottom))!important;
+    bottom:max(10px,var(--pl-safe-bottom,0px))!important;
   }
   #main-content#main-content[data-pl-world] .pl-app-nav-btn{
     height:58px!important;
@@ -550,7 +550,7 @@ html[data-plushlife-color-mode="dark"] body{
   height:72px!important;
   min-height:72px!important;
   max-height:72px!important;
-  bottom:max(8px,env(safe-area-inset-bottom))!important;
+  bottom:max(8px,var(--pl-safe-bottom,0px))!important;
   padding:6px!important;
   border:1px solid var(--pl-theme-line)!important;
   border-radius:22px!important;
@@ -1176,10 +1176,10 @@ html[data-plushlife-color-mode="dark"] #main-content .pl-home-hero{
 
 /* Mobile-first accessibility and safe areas */
 @media(max-width:520px){
-  html{scroll-padding-bottom:calc(128px + env(safe-area-inset-bottom))!important}
-  #main-content{scroll-padding-bottom:calc(128px + env(safe-area-inset-bottom))!important}
+  html{scroll-padding-bottom:calc(128px + var(--pl-safe-bottom,0px))!important}
+  #main-content{scroll-padding-bottom:calc(128px + var(--pl-safe-bottom,0px))!important}
   #main-content :is(.pl-home-shell,.pl-unified-page-shell,.pl-inline-tool,.pl-care-shell,.pl-growth-shell,.pl-calendar-cozy,.pl-guardian-content){
-    padding-bottom:calc(112px + env(safe-area-inset-bottom))!important;
+    padding-bottom:calc(112px + var(--pl-safe-bottom,0px))!important;
   }
   #main-content :is(button,summary,[role="button"],[role="tab"]){
     min-height:44px;
@@ -1197,11 +1197,11 @@ html[data-plushlife-color-mode="dark"] #main-content .pl-home-hero{
    ================================================================ */
 
 #main-content .plushlife-app-column{
-  padding-bottom:calc(148px + env(safe-area-inset-bottom))!important;
+  padding-bottom:calc(148px + var(--pl-safe-bottom,0px))!important;
 }
 #main-content .pl-home-shell{
   gap:12px!important;
-  padding-bottom:calc(148px + env(safe-area-inset-bottom))!important;
+  padding-bottom:calc(148px + var(--pl-safe-bottom,0px))!important;
 }
 
 /* Home should read top-to-bottom once, not repeat the same state in three places. */
@@ -1420,7 +1420,7 @@ html[data-plushlife-color-mode="dark"] #main-content .pl-home-hero{
 
 /* App-wide mobile ergonomics discovered by the Figma audit. */
 #main-content :is(.pl-task-page,.pl-care-shell,.pl-growth-shell,.pl-calendar-cozy,.pl-guardian-content,.pl-closet-shell,.pl-inline-tool,.pl-unified-page-shell){
-  padding-bottom:calc(148px + env(safe-area-inset-bottom))!important;
+  padding-bottom:calc(148px + var(--pl-safe-bottom,0px))!important;
 }
 #main-content :is(button,summary,[role="button"],[role="tab"],input[type="checkbox"],input[type="radio"]){
   touch-action:manipulation;
@@ -1436,7 +1436,7 @@ html[data-plushlife-color-mode="dark"] #main-content .pl-home-hero{
   white-space:nowrap!important;
 }
 #main-content .pl-app-bottom-nav{
-  bottom:max(8px,env(safe-area-inset-bottom))!important;
+  bottom:max(8px,var(--pl-safe-bottom,0px))!important;
 }
 #main-content .pl-app-nav-btn{
   font-size:10px!important;
@@ -1445,7 +1445,7 @@ html[data-plushlife-color-mode="dark"] #main-content .pl-home-hero{
 /* Keep modals/sheets usable above both Android and app navigation. */
 #main-content [role="dialog"]>div,
 body>[role="dialog"]>div{
-  max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+  max-height:calc(100dvh - 32px - var(--pl-safe-top,0px) - var(--pl-safe-bottom,0px))!important;
   overscroll-behavior:contain!important;
 }
 #main-content [role="dialog"] :is(button,summary,[role="button"]){
@@ -1491,7 +1491,7 @@ body>[role="dialog"]>div{
   }
   #main-content .plushlife-app-column{
     padding-inline:12px!important;
-    padding-bottom:calc(152px + env(safe-area-inset-bottom))!important;
+    padding-bottom:calc(152px + var(--pl-safe-bottom,0px))!important;
   }
 }
 
@@ -1916,4 +1916,28 @@ html[data-pl-companion-text=large] .pl-guardian-companion{font-size:18px}
 @media(min-width:1100px){
   #main-content#main-content .plushlife-app-column{width:min(100%,760px)!important;max-width:760px!important}
   #main-content#main-content :is(.pl-progress-page,.pl-growth-shell,.pl-growth-deeper,.pl-closet-shell,.pl-inline-tool){width:100%!important;max-width:760px!important}
+}
+
+/* Edge-to-edge: tools and wide/landscape navigation share the same safe area.
+   Native-padded older WebViews inject zero, so these do not double the inset. */
+.pl-tool-backdrop.pl-tool-backdrop{
+  box-sizing:border-box!important;
+  padding:max(12px,var(--pl-safe-top)) max(12px,var(--pl-safe-right)) max(12px,var(--pl-safe-bottom)) max(12px,var(--pl-safe-left))!important;
+}
+.pl-tool-backdrop.pl-tool-backdrop>.pl-tool-panel{
+  max-width:100%!important;
+  max-height:calc(100dvh - max(12px,var(--pl-safe-top)) - max(12px,var(--pl-safe-bottom)))!important;
+}
+#main-content#main-content[data-pl-world] .pl-app-bottom-nav{
+  left:calc(50% + (var(--pl-safe-left) - var(--pl-safe-right)) / 2)!important;
+  right:auto!important;
+  width:min(390px,calc(100% - 20px - var(--pl-safe-left) - var(--pl-safe-right)))!important;
+}
+@media(min-width:760px){
+  #main-content#main-content[data-pl-world]{
+    padding-top:max(12px,var(--pl-safe-top))!important;
+    padding-left:max(16px,var(--pl-safe-left))!important;
+    padding-right:max(16px,var(--pl-safe-right))!important;
+    padding-bottom:calc(112px + var(--pl-safe-bottom))!important;
+  }
 }

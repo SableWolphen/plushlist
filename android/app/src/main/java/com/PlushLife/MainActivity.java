@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.activity.EdgeToEdge;
+import androidx.core.view.WindowCompat;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -41,19 +41,12 @@ public class MainActivity extends BridgeActivity {
         // before onCreate(), so trying to suppress it here during a Recents
         // restore is too late. PlushLife's web boot shell handles cold-start
         // loading instead, which avoids a fake purple relaunch on warm return.
-        // Keep native startup defensive. A nonessential plugin or edge-to-edge
-        // failure must never take down the whole app on launch.
+        // Keep optional plugin startup defensive.
         try { registerPlugin(WidgetBridgePlugin.class); } catch (Throwable ignored) {}
         try { registerPlugin(NotificationPermissionPlugin.class); } catch (Throwable ignored) {}
         try { registerPlugin(BuildInfoPlugin.class); } catch (Throwable ignored) {}
 
         super.onCreate(savedInstanceState);
-
-        try {
-            // AndroidX handles older Android versions; SystemBars then applies
-            // the app's light/dark icon style and WebView safe-area insets.
-            EdgeToEdge.enable(this);
-        } catch (Throwable ignored) {}
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
@@ -78,6 +71,15 @@ public class MainActivity extends BridgeActivity {
         // A delayed check runs from onResume after Capacitor/WebView startup
         // has had time to settle, preserving the launch-crash hardening.
         appUpdateManager = null;
+    }
+
+    @Override
+    protected void load() {
+        // Configure the window after Activity initialization but before Capacitor
+        // creates the WebView/plugins. SystemBars then owns icon style and insets,
+        // including keyboard changes; do not reset its style after it loads.
+        WindowCompat.enableEdgeToEdge(getWindow());
+        super.load();
     }
 
     private void checkForUpdate() {

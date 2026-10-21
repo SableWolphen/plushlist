@@ -199,7 +199,7 @@
     #plushlife-mascot-reaction {
       position:fixed;
       left:50%;
-      bottom:max(18px,calc(env(safe-area-inset-bottom) + 12px));
+      bottom:max(18px,calc(var(--pl-safe-bottom,0px) + 12px));
       z-index:5000;
       display:flex;
       align-items:center;
@@ -234,7 +234,7 @@
     [role="dialog"][aria-modal="true"] {
       place-items:center !important;
       box-sizing:border-box !important;
-      padding:max(18px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left)) !important;
+      padding:max(18px,var(--pl-safe-top,0px)) max(14px,var(--pl-safe-right,0px)) max(18px,var(--pl-safe-bottom,0px)) max(14px,var(--pl-safe-left,0px)) !important;
       background:rgba(42,28,52,.42) !important;
       backdrop-filter:blur(5px) saturate(.9);
       -webkit-backdrop-filter:blur(5px) saturate(.9);
@@ -243,8 +243,8 @@
     [role="dialog"][aria-modal="true"] > div:first-child,
     [data-plushlife-dialog-panel="true"] {
       box-sizing:border-box !important;
-      width:min(var(--plush-modal-width),calc(100vw - 28px)) !important;
-      max-width:min(var(--plush-modal-width),calc(100vw - 28px)) !important;
+      width:min(var(--plush-modal-width),100%) !important;
+      max-width:min(var(--plush-modal-width),100%) !important;
       min-width:0 !important;
       max-height:min(82dvh,760px) !important;
       margin:auto !important;
@@ -301,12 +301,12 @@
       details > summary { min-height:44px; }
       footer { margin-top:24px !important; }
       [role="dialog"][aria-modal="true"] {
-        padding:max(16px,env(safe-area-inset-top)) var(--plush-mobile-gutter) max(16px,env(safe-area-inset-bottom)) !important;
+        padding:max(16px,var(--pl-safe-top,0px)) max(var(--plush-mobile-gutter),var(--pl-safe-right,0px)) max(16px,var(--pl-safe-bottom,0px)) max(var(--plush-mobile-gutter),var(--pl-safe-left,0px)) !important;
       }
       [role="dialog"][aria-modal="true"] > div:first-child,
       [data-plushlife-dialog-panel="true"] {
-        width:calc(100vw - (var(--plush-mobile-gutter) * 2)) !important;
-        max-width:calc(100vw - (var(--plush-mobile-gutter) * 2)) !important;
+        width:100% !important;
+        max-width:100% !important;
         max-height:min(80dvh,700px) !important;
         border-radius:20px !important;
       }

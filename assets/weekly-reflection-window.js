@@ -197,7 +197,7 @@
   const style = document.createElement("style");
   style.id = "plushlife-weekly-reflection-style";
   style.textContent = `
-    #plushlife-weekly-reflection-ready {position:fixed;inset:0;z-index:2147482500;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));background:rgba(45,31,55,.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);box-sizing:border-box;}
+    #plushlife-weekly-reflection-ready {position:fixed;inset:0;z-index:2147482500;display:grid;place-items:center;padding:max(18px,var(--pl-safe-top,0px)) max(14px,var(--pl-safe-right,0px)) max(18px,var(--pl-safe-bottom,0px)) max(14px,var(--pl-safe-left,0px));background:rgba(45,31,55,.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);box-sizing:border-box;}
     .plushlife-weekly-reflection-card {position:relative;box-sizing:border-box;width:min(92vw,430px);max-height:min(80dvh,620px);overflow:auto;padding:24px 20px 18px;border:1px solid #e3caed;border-radius:22px;background:linear-gradient(150deg,#fffafd,#f8f2ff 72%,#f3fbf8);color:#594766;box-shadow:0 24px 70px rgba(35,20,45,.30);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-align:center;}
     .plushlife-weekly-reflection-card.is-nursery{background:linear-gradient(150deg,#fff9fc,#fff4f8 58%,#f4fbf8);border-color:#efd5e3;}
     .plushlife-weekly-reflection-close {position:absolute;right:10px;top:10px;width:44px;height:44px;border:1px solid #dfcbe8;border-radius:13px;background:#fff;color:#805296;font-size:27px;line-height:1;cursor:pointer;}
