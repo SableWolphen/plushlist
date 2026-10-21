@@ -1,3 +1,4 @@
+import { companionAccountKey } from "../companion-account-storage.mjs";
 import { TodayPanel as TodayPanelCore } from "./today-panel-core.jsx";
 import { ShapeMyDay } from "./shape-my-day.jsx";
 import { RestDayCard } from "./rest-day.jsx";
@@ -60,15 +61,16 @@ import { smallerStep } from '../gentle-day.js';
 
 const HABIT_STATE_KEY = "plushlife:habit-coach:v1";
 
-function recordNextStepChoice(row, action, date) {
+function recordNextStepChoice(row, action, date, accountId) {
   const taskId = String(row?.sourceTask?.id || row?.task_id || row?.id || row?.key || "");
-  if (!taskId || !action) return;
+  const storageKey = companionAccountKey(HABIT_STATE_KEY, accountId);
+  if (!taskId || !action || !storageKey) return;
   try {
-    const state = JSON.parse(window.localStorage.getItem(HABIT_STATE_KEY) || "{}") || {};
+    const state = JSON.parse(window.localStorage.getItem(storageKey) || "{}") || {};
     const engine = state.meta?.__background_engine || {};
     const feedback = Array.isArray(engine.nextStepFeedback) ? engine.nextStepFeedback.slice(-119) : [];
     feedback.push({ taskId, taskKey: String(row?.key || taskId), action, date: String(date || ""), at: new Date().toISOString() });
-    window.localStorage.setItem(HABIT_STATE_KEY, JSON.stringify({
+    window.localStorage.setItem(storageKey, JSON.stringify({
       ...state,
       meta: { ...(state.meta || {}), __background_engine: { ...engine, nextStepFeedback: feedback } }
     }));
@@ -83,6 +85,7 @@ export function TodayPanel(props) {
   const { unifiedToggle, lingerKeys, announcement } = useCompletedTaskFlow(props.toggle, props.viewDone, props.rows || []);
   const recentlyCompletedKeys = Array.from(new Set([...(props.recentlyCompletedKeys || []), ...lingerKeys]));
   const smartNextStep = useSmartNextStep({
+    accountId: props.userId,
     rows: props.rows || [],
     viewDone: props.viewDone || {},
     period: props.period,
@@ -102,14 +105,14 @@ export function TodayPanel(props) {
   const activeNextStep = dayType === "rest" ? null : (cozyStep || smartNextStep.task || props.nextStepTask);
 
   const setNextStepDismissedToday = (hidden) => {
-    if (hidden && activeNextStep) recordNextStepChoice(activeNextStep, "hide", props.period?.date);
+    if (hidden && activeNextStep) recordNextStepChoice(activeNextStep, "hide", props.period?.date, props.userId);
     props.setNextStepDismissedToday?.(hidden);
     setSmartNextStepHidden(Boolean(hidden));
   };
 
   const pickEasierSuggestion = (taskKey) => {
     const task = (props.rows || []).find((row) => row.key === taskKey);
-    if (task) recordNextStepChoice(task, "easier", props.period?.date);
+    if (task) recordNextStepChoice(task, "easier", props.period?.date, props.userId);
     const source = task?.sourceTask || {};
     const gentler = String(source.tiny_label || task?.tiny_label || source.soft_label || task?.soft_label || "").trim();
     if (gentler) {
@@ -124,13 +127,13 @@ export function TodayPanel(props) {
     const next = typeof updater === "function" ? updater(current) : updater;
     const addedKey = Array.isArray(next) ? next.find((key) => !current.includes(key)) : null;
     const task = addedKey ? (props.rows || []).find((row) => row.key === addedKey) : null;
-    if (task) recordNextStepChoice(task, "skip", props.period?.date);
+    if (task) recordNextStepChoice(task, "skip", props.period?.date, props.userId);
     props.setNextStepSkipped?.(updater);
   };
 
   const smartToggle = (key, ...args) => {
     if (activeNextStep?.key === key && !props.viewDone?.[key]) {
-      recordNextStepChoice(activeNextStep, "done", props.period?.date);
+      recordNextStepChoice(activeNextStep, "done", props.period?.date, props.userId);
     }
     unifiedToggle(key, ...args);
   };
