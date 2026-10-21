@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const css=fs.readFileSync("assets/world-backgrounds.css","utf8");
+const html=fs.readFileSync("index.html","utf8");
+const sync=fs.readFileSync("scripts/sync-www.js","utf8");
+const themes=["soft","dino","baby","pink","meadow","peach","twilight","strawberry","soft-light","baby-night","garden"];
+for(const theme of themes)assert.ok(css.includes('[data-pl-world="'+theme+'"]'),"Missing atmosphere for "+theme);
+assert.match(css,/prefers-reduced-motion/);
+assert.match(css,/background-color:var\(--pl-theme-surface\)/);
+assert.match(html,/assets\/world-backgrounds\.css/);
+assert.ok(html.indexOf("world-backgrounds.css")>html.indexOf("storybook-themes.css"));
+assert.match(sync,/SITE_DIRECTORIES = \["assets"\]/);
+assert.doesNotMatch(css,/@import|https:\/\/|url\(/);
+console.log("Background theme coverage and build inclusion checks passed");
