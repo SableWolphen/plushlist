@@ -1,0 +1,51 @@
+/* PlushLife illustrated atmosphere v1: background art, not replacement mascot art.
+   All patterns are CSS-only, offline, noninteractive, and reduced-motion safe. */
+#main-content#main-content[data-pl-world]{
+  --world-haze:color-mix(in srgb,var(--pl-theme-surface-2) 74%,transparent);
+  --world-spark:color-mix(in srgb,var(--pl-theme-accent) 15%,transparent);
+  background-color:var(--pl-theme-bg)!important;
+  background-image:
+    radial-gradient(ellipse 60% 32% at 12% 5%,var(--world-haze),transparent 90%),
+    radial-gradient(ellipse 72% 35% at 94% 36%,var(--world-spark),transparent 90%),
+    radial-gradient(ellipse 75% 30% at 12% 87%,var(--world-haze),transparent 90%)!important;
+  background-attachment:scroll!important;
+  min-height:100dvh;
+}
+#main-content#main-content[data-pl-world] .pl-ambient-theme-layer{display:none!important}
+/* Individual theme atmospheres; deliberately no repeating mascot or text glyphs. */
+#main-content[data-pl-world="dino"]{--world-haze:#cbe5b8;--world-spark:#8cba9366}
+#main-content[data-pl-world="meadow"]{--world-haze:#c5ebdc;--world-spark:#96c8ab66}
+#main-content[data-pl-world="garden"]{--world-haze:#e7e9b5;--world-spark:#bbca8b66}
+#main-content[data-pl-world="peach"]{--world-haze:#ffdfbd;--world-spark:#ffc9a566}
+#main-content[data-pl-world="pink"]{--world-haze:#fad4ea;--world-spark:#edb5d466}
+#main-content[data-pl-world="strawberry"]{--world-haze:#ffd6db;--world-spark:#e99ba666}
+#main-content[data-pl-world="soft"]{--world-haze:#e3d8ff;--world-spark:#c7b0ed66}
+#main-content[data-pl-world="soft-light"]{--world-haze:#d2eaff;--world-spark:#a9c8ee66}
+#main-content[data-pl-world="baby"]{--world-haze:#f6d8f1;--world-spark:#dac5f266}
+#main-content[data-pl-world="twilight"]{--world-haze:#363256;--world-spark:#61578c88}
+#main-content[data-pl-world="baby-night"]{--world-haze:#3b315a;--world-spark:#775f9388}
+/* Gentle illustrated scenery in existing banners; keep foreground unobstructed. */
+#main-content .pl-storybook-banner{
+  background-image:
+    radial-gradient(circle at 17% 22%,color-mix(in srgb,var(--sb-petal) 26%,transparent) 0 10px,transparent 11px),
+    radial-gradient(circle at 76% 18%,color-mix(in srgb,var(--sb-accent) 20%,transparent) 0 17px,transparent 18px),
+    radial-gradient(ellipse 68% 55% at 25% 112%,color-mix(in srgb,var(--sb-accent) 17%,transparent),transparent),
+    radial-gradient(ellipse 75% 42% at 92% 112%,color-mix(in srgb,var(--sb-petal) 22%,transparent),transparent),
+    linear-gradient(145deg,var(--sb-sky),var(--sb-sky2))!important;
+}
+#main-content[data-pl-world="twilight"] .pl-storybook-banner,
+#main-content[data-pl-world="baby-night"] .pl-storybook-banner{
+  background-image:
+    radial-gradient(circle at 81% 17%,#efe4b5 0 12px,transparent 13px),
+    radial-gradient(circle at 79% 15%,#393455 0 10px,transparent 11px),
+    radial-gradient(circle at 20% 22%,#ffffff77 0 2px,transparent 3px),
+    radial-gradient(circle at 63% 37%,#ffffff66 0 2px,transparent 3px),
+    linear-gradient(145deg,#393455,#292540)!important;
+}
+/* Card material retains strong opaque reading surfaces against atmosphere. */
+#main-content[data-pl-world] :is(.pl-storybook-today,.pl-storybook-moods,.pl-design-card,.pl-care-card,.pl-growth-card,.pl-tool-panel){
+  background-color:var(--pl-theme-surface)!important;
+}
+#main-content[data-pl-world] .pl-storybook-banner :is(button,a,summary){position:relative;z-index:5}
+@media(max-width:520px){#main-content#main-content[data-pl-world]{background-attachment:scroll!important}}
+@media(prefers-reduced-motion:reduce){#main-content .pl-storybook-banner{animation:none!important}}
