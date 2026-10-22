@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";import fs from "node:fs";
 const read=p=>fs.readFileSync(p,"utf8");
 const home=read("src/components/today-panel.jsx"),tasks=read("src/components/tasks-panel.jsx"),guardian=read("src/components/guardian-panel.jsx"),css=read("assets/kid-simple-navigation.css"),html=read("index.html");
-for(const route of ["tasks","guardian","care","progress"])assert.ok(home.includes('props.goToDashboard?.("'+route+'")'),"Missing Home shortcut for "+route);
-for(const label of ["My plan","Guardian","Care","Journey"])assert.ok(home.includes(label));
-assert.match(home,/aria-label="Quickly find your tools"/);
+assert.doesNotMatch(home, /className="pl-quick-paths"/, "No duplicate shortcut grid above Home");
+const app=read("src/app-source.jsx");
+for (const label of ["Today","Plan","Care","Progress","Guardian"]) assert.ok(app.includes(label), "Bottom navigation retains "+label);
+assert.ok(app.includes('className="pl-app-bottom-nav"'), "Bottom navigation remains available");
 assert.ok(tasks.includes('onClick={onOpenSchedule}'),"Schedule editing must remain reachable");
 assert.ok(tasks.includes('startEditingTask(row.sourceTask)'),"Task edit must remain reachable");
-assert.ok(home.includes("Progress & rewards"),"PlushLife rewards remain discoverable in Journey");
+assert.ok(app.includes("RewardsPanel"),"Plush rewards remain accessible through the app");
 assert.ok(guardian.includes('setGuardianArea("support")') && guardian.includes('Optional human Guardian'),"Human Guardian management must remain accessible");
 assert.match(css,/min-height:96px/);assert.match(css,/focus-visible/);
 assert.match(html,/kid-simple-navigation\.css/);

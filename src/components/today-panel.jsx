@@ -144,12 +144,6 @@ export function TodayPanel(props) {
       <div aria-live="polite" aria-atomic="true" role="status" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap" }}>
         {announcement}
       </div>
-      <nav className="pl-quick-paths" aria-label="Quickly find your tools">
-        <button type="button" onClick={() => props.goToDashboard?.("tasks")}><span aria-hidden="true">✅</span><strong>My plan</strong><small>Tasks & schedule</small></button>
-        <button type="button" onClick={() => props.goToDashboard?.("guardian")}><span aria-hidden="true">💌</span><strong>Guardian</strong><small>Optional human support</small></button>
-        <button type="button" onClick={() => props.goToDashboard?.("care")}><span aria-hidden="true">💗</span><strong>Care</strong><small>Help right now</small></button>
-        <button type="button" onClick={() => props.goToDashboard?.("progress")}><span aria-hidden="true">🌟</span><strong>Journey</strong><small>Progress & rewards</small></button>
-      </nav>
       <TodayPanelCore
       {...props}
       optionalTools={<><details className="pl-home-extra-tools"><summary>🌷 More ways to care for your day</summary><div className="pl-home-extra-tools-body"><HabitStudio compact/>{!props.isHistoricalView&&!props.isFutureView&&<GentleDayTools key={`${props.userId}:${props.period?.date}`} userId={props.userId} date={props.period?.date} rows={props.rows} viewDone={props.viewDone} dailyCheckIn={props.dailyCheckIn} onDayType={props.selectDayType} onReset={props.onCozyReset} onOpenComfort={()=>{window.__plushlifeOpenCozySpace=true;props.goToDashboard?.("care");}} onSupport={()=>props.goToDashboard?.("guardian")}/>}<OnboardingArc onboardingComplete={!!props.preferences?.onboarding_complete} goToDashboard={props.goToDashboard}/>{props.selectedTaskViewIsRest ? <RestDayCard careDaysTotal={props.careDaysTotal} goToDashboard={props.goToDashboard} period={props.period}/> : <ShapeMyDay rows={props.rows} viewDone={props.viewDone} toggle={smartToggle} dailyCheckIn={props.dailyCheckIn} period={props.period}/>}<EveningGratitude/></div></details></>}
