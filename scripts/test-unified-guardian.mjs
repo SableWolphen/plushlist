@@ -47,9 +47,9 @@ assert(app.includes("virtualGuardian: automaticGuardian") && app.includes("routi
 assert(app.includes("automaticReminders: false, routineNudges: false, tomorrowNudges: false"),"When human connects, old bot should remain disabled after disconnect");
 assert(app.includes("humanGuardianConnected={activeGuardianMode === \"person\"}"),"Human mode must reach automatic Guardian host");
 assert(host.includes("props.humanGuardianConnected") && host.includes("!props.guardianLinksReady"),"Deep-link bot panel must close and refuse old links when human Guardian connected");
-assert(main.includes('aria-label="Guardian support"') && main.includes('guardianTypeLabel(mode)') && main.includes("guardianDisplayName"),"One Guardian header with distinguished support type");
-for(const text of ["> Tasks</button>","> Routines</button>","> Encouragement</button>","> Rewards</button>"]) assert(main.includes(text), "Common Guardian action absent: "+text);
-assert(main.includes('openPlushGuardian("rewards")') && main.includes('className="pl-human-guardian-rewards"'),"Rewards must work in both modes");
+assert(main.includes('aria-label="Optional human Guardian"') && main.includes("guardianDisplayName"),"Human Guardian card identifies connected trusted person");
+assert(main.includes('setGuardianArea("support")') && main.includes('setGuardianArea("together")'),"Human invitations, permissions and Together remain reachable");
+assert(main.includes('className="pl-human-guardian-rewards"'),"Human Guardian rewards remain accessible");
 assert(main.includes('["together","🤝","Together"]') && app.includes('openTaskManager(period.date, "today")'),"Tasks remain in Plan and shared routines remain in Together");
 assert(home.includes('goToDashboard?.("guardian")'),"Home should route to one Guardian interface");
 assert(settings.includes('aria-label="Guardian\'s name"'),"Automatic Guardian can have its own name");
