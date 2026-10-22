@@ -85,5 +85,37 @@
   background-image:radial-gradient(circle at 18% 20%,#fffbe0 0 13px,transparent 15px),radial-gradient(ellipse 82% 45% at 50% 110%,#b4cc99 0 64%,transparent 66%),linear-gradient(150deg,#f2edca,var(--sb-sky2))!important;
 }
 
+/* v2: quiet world canvas — no checkerboard, grids, polka-dot wallpapers or tiled backgrounds.
+   Let each illustrated storybook banner provide the scenery; preserve legible task surfaces. */
+html:has(#main-content[data-pl-world]),
+body:has(#main-content[data-pl-world]){
+  background-image:none!important;
+  background-repeat:no-repeat!important;
+  background-color:var(--pl-theme-bg)!important;
+}
+#main-content#main-content[data-pl-world]{
+  background-image:linear-gradient(180deg,var(--pl-world-top,var(--pl-theme-bg)) 0%,var(--pl-world-bottom,var(--pl-theme-bg)) 76%)!important;
+  background-repeat:no-repeat!important;
+  background-size:100% 100%!important;
+}
+#main-content[data-pl-world="soft"]{--pl-world-top:#f0eaff;--pl-world-bottom:#fbf9ff}
+#main-content[data-pl-world="soft-light"]{--pl-world-top:#eaf5ff;--pl-world-bottom:#f9fcff}
+#main-content[data-pl-world="dino"]{--pl-world-top:#e1f0dc;--pl-world-bottom:#f7fbf4}
+#main-content[data-pl-world="meadow"]{--pl-world-top:#e4f4ea;--pl-world-bottom:#f8fcfa}
+#main-content[data-pl-world="garden"]{--pl-world-top:#f3f0dc;--pl-world-bottom:#fcfbf4}
+#main-content[data-pl-world="peach"]{--pl-world-top:#ffebdc;--pl-world-bottom:#fffaf6}
+#main-content[data-pl-world="pink"]{--pl-world-top:#fbe8f1;--pl-world-bottom:#fffafd}
+#main-content[data-pl-world="strawberry"]{--pl-world-top:#ffebec;--pl-world-bottom:#fff8f7}
+#main-content[data-pl-world="baby"]{--pl-world-top:#f9e8f4;--pl-world-bottom:#fffafd}
+#main-content[data-pl-world="twilight"]{--pl-world-top:#23203b;--pl-world-bottom:#312b49}
+#main-content[data-pl-world="baby-night"]{--pl-world-top:#302742;--pl-world-bottom:#3b3050}
+#main-content[data-pl-world] .pl-storybook-banner{
+  box-shadow:0 10px 24px color-mix(in srgb,var(--pl-theme-ink) 8%,transparent);
+}
+@media(prefers-reduced-motion:reduce){
+  #main-content[data-pl-world] .pl-storybook-banner,
+  #main-content[data-pl-world] .pl-storybook-sky{animation:none!important}
+}
+
 /* Maintain foreground contrast and let the artwork stay purely decorative. */
 #main-content[data-pl-world] .pl-storybook-banner :is(.pl-storybook-brand,.pl-storybook-greeting,.pl-storybook-mascot){z-index:2}
