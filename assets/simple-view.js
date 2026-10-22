@@ -21,13 +21,15 @@
       button.setAttribute("aria-pressed",String(enabled));
       button.innerHTML='<span aria-hidden="true">✨</span> <span class="pl-simple-toggle-label"></span>';
       button.addEventListener("click",()=>{enabled=!enabled;try{localStorage.setItem(KEY,enabled?"on":"off")}catch{};apply()});
-      app.prepend(button);
+      const secondaryTools=app.querySelector(".pl-home-extra-tools-body");
+      if(secondaryTools) secondaryTools.prepend(button);
+      else app.append(button);
     }
     apply();
   }
   function start(){
     mount();
-    observer=new MutationObserver(()=>{if(!root())return; if(!document.getElementById("pl-simple-toggle"))mount();else apply()});
+    observer=new MutationObserver(()=>{if(!root())return; if(!document.getElementById("pl-simple-toggle"))mount();else {const tools=root().querySelector(".pl-home-extra-tools-body");const toggle=document.getElementById("pl-simple-toggle");if(tools && toggle?.parentElement!==tools)tools.prepend(toggle);apply()}});
     observer.observe(document.getElementById("root")||document.body,{childList:true,subtree:true});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
