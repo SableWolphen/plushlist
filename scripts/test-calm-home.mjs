@@ -5,7 +5,7 @@ const css=fs.readFileSync("assets/home-calm-layout.css","utf8");
 assert.match(home, /<details className="pl-home-extra-tools">/);
 assert.match(home, /<summary>🌷 More ways to care for your day<\/summary>/);
 assert.match(home, /<EveningGratitude\/><\/div><\/details>/);
-for(const name of ["My plan","Guardian","Care","Journey"])assert.ok(home.includes("<strong>"+name+"</strong>"));
+assert.doesNotMatch(home, /className="pl-quick-paths"/, "Remove oversized duplicated navigation shortcuts");
 assert.match(html, /assets\/home-calm-layout\.css/);
 assert.match(css, /min-height: 52px/);
 console.log("Calm Home navigation and optional tools preserved.");
