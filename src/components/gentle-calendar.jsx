@@ -11,6 +11,7 @@ export function GentleCalendar() {
   const [items,setItems] = React.useState(load);
   const [date,setDate] = React.useState(() => isoDate(new Date()));
   const [title,setTitle] = React.useState("");
+  const [editingId,setEditingId] = React.useState(null);
   const [repeat,setRepeat] = React.useState("monthly");
   const [time,setTime] = React.useState("");
   const [view,setView] = React.useState("month");
@@ -33,10 +34,12 @@ export function GentleCalendar() {
   const move = n => setDate(view === "day" ? shift(date,n) : view === "week" ? shift(date,n*7) : isoDate(new Date(selected.getFullYear(),selected.getMonth()+n,Math.min(selected.getDate(),28))));
   const save = () => {
     if (!title.trim()) { setNotice("Add a name for your reminder."); return; }
-    const next = [...items,{ id: String(Date.now())+"-"+Math.random().toString(36).slice(2,7),title:title.trim().slice(0,120),date,repeat,time,category,important }];
-    try { localStorage.setItem(storeKey,JSON.stringify(next)); setItems(next); setTitle(""); setNotice("Saved on this device. No notification has been scheduled."); }
+    const entry = { id: editingId || String(Date.now())+"-"+Math.random().toString(36).slice(2,7),title:title.trim().slice(0,120),date,repeat,time,category,important };
+    const next = editingId ? items.map(item=>item.id===editingId?entry:item) : [...items,entry];
+    try { localStorage.setItem(storeKey,JSON.stringify(next)); setItems(next); setTitle(""); setEditingId(null); setNotice("Saved on this device. No notification has been scheduled."); }
     catch { setNotice("This device could not save the reminder."); }
   };
+  const edit = item => { setEditingId(item.id);setTitle(item.title);setDate(item.date);setRepeat(item.repeat);setTime(item.time||"");setCategory(item.category||"life");setImportant(Boolean(item.important));setNotice("Editing this series. Save to keep your changes."); };
   const toggleDone = (key,checked) => { const next={...done,[key]:checked}; try {localStorage.setItem(doneKey,JSON.stringify(next));setDone(next);} catch {setNotice("Could not save completion on this device.");} };
   const saveBatch = values => { if(!values.length)return;const next=[...items,...values.map((name,i)=>({id:String(Date.now())+"-"+i,title:name,date,repeat:"once",time:"",category:"life",important:false}))];try{localStorage.setItem(storeKey,JSON.stringify(next));setItems(next);setDump("");setNotice(`${values.length} gentle reminders added.`);}catch{setNotice("Could not save these reminders.");} };
   const remove = id => {
@@ -64,11 +67,12 @@ export function GentleCalendar() {
             <input type="checkbox" checked={Boolean(done[occurrenceKey(event)])} onChange={e=>toggleDone(occurrenceKey(event),e.target.checked)} />
             <span style={{flex:1}}>{event.occurrence} · {event.title}{event.time?" · "+event.time:""} <small>({event.repeat})</small></span>
           </label>
+          <button type="button" className="schedule-btn add" onClick={()=>edit(event)} aria-label={"Edit series "+event.title}>Edit series</button>
           <button type="button" className="schedule-remove-link" onClick={()=>remove(event.id)} aria-label={"Remove all occurrences of "+event.title}>Remove series</button>
         </li>)}
       </ul>}
     <div style={{borderTop:"1px solid var(--pl-theme-line,#ddd)",paddingTop:9,display:"grid",gap:7}}>
-      <strong style={{fontSize:12}}>Add a reminder</strong>
+      <strong style={{fontSize:12}}>{editingId?"Edit recurring reminder":"Add a reminder"}</strong>
       <input aria-label="Reminder name" maxLength={120} placeholder="e.g. Pay rent" value={title} onChange={e=>setTitle(e.target.value)} />
       <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
         <select aria-label="Repeat frequency" value={repeat} onChange={e=>setRepeat(e.target.value)} style={{flex:1,minHeight:44}}>
@@ -78,13 +82,14 @@ export function GentleCalendar() {
       </div>
       <select aria-label="Reminder category" value={category} onChange={e=>setCategory(e.target.value)} style={{minHeight:44}}><option value="life">Life</option><option value="bill">Bill or deadline</option><option value="home">Home</option><option value="care">Self care</option><option value="leaving">Leaving home</option></select>
       <label style={{fontSize:12}}><input type="checkbox" checked={important} onChange={e=>setImportant(e.target.checked)} /> Important deadline — keep visible</label>
-      <button type="button" className="schedule-btn primary" onClick={save}>Save calendar reminder</button>
+      <button type="button" className="schedule-btn primary" onClick={save}>{editingId?"Save series changes":"Save calendar reminder"}</button>
+      {editingId&&<button type="button" className="schedule-btn add" onClick={()=>{setEditingId(null);setTitle("");setNotice("Editing canceled.");}}>Cancel editing</button>}
       {notice&&<div role="status" className="schedule-helper">{notice}</div>}
       <div className="schedule-helper">Completion markers now persist on this device, but they do not verify a payment. Check with your bill provider. Dates on the 29th–31st repeat on the last day of shorter months.</div>
     </div>
     <details><summary style={{minHeight:44,cursor:"pointer",fontWeight:850}}>🧠 Brain dump — get it out of your head</summary>
       <p className="schedule-helper">Write one idea per line. Review before adding; no automatic changes.</p>
-      <textarea aria-label="Brain dump" rows={4} value={dump} onChange={e=>setDump(e.target.value)} placeholder="Call dentist&#10;Wash dishes&#10;Buy dog food" style={{width:"100%",padding:10,borderRadius:10}} />
+      <textarea aria-label="Brain dump" rows={4} value={dump} onChange={e=>setDump(e.target.value)} placeholder={"Call dentist\nWash dishes\nBuy dog food"} style={{width:"100%",padding:10,borderRadius:10}} />
       <div className="schedule-helper">{brainDumpLines(dump).length} items ready</div>
       <button type="button" className="schedule-btn primary" disabled={!brainDumpLines(dump).length} onClick={()=>saveBatch(brainDumpLines(dump))}>Add these to selected day</button>
     </details>
