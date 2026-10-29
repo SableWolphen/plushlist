@@ -21,6 +21,10 @@ export function GentleCalendar() {
   const [important,setImportant] = React.useState(false);
   const [focusMinutes,setFocusMinutes] = React.useState(5);
   const [focusActive,setFocusActive] = React.useState(false);
+  const [now,setNow] = React.useState(() => Date.now());
+  const [focusEnd,setFocusEnd] = React.useState(null);
+  React.useEffect(() => { if (!focusActive) return; const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, [focusActive]);
+  const secondsLeft = focusEnd === null ? 0 : Math.max(0,Math.ceil((focusEnd-now)/1000));
   const selected = new Date(date+"T12:00:00");
   const first = view === "day" ? date : view === "week" ? shift(date,-selected.getDay()) : isoDate(new Date(selected.getFullYear(),selected.getMonth(),1));
   const last = view === "day" ? date : view === "week" ? shift(first,6) : isoDate(new Date(selected.getFullYear(),selected.getMonth()+1,0));
@@ -88,10 +92,11 @@ export function GentleCalendar() {
       <div style={{display:"grid",gap:6}}>{GENTLE_TEMPLATES.map(template=><button key={template.title} type="button" className="schedule-btn add" onClick={()=>{const next=[...items,{...template,id:String(Date.now())+"-"+Math.random().toString(36).slice(2,6),date,time:""}];try{localStorage.setItem(storeKey,JSON.stringify(next));setItems(next);setNotice("Template added — edit or remove whenever you like.");}catch{setNotice("Could not save template.");}}}>＋ {template.title} · {template.repeat}</button>)}</div>
     </details>
     <details><summary style={{minHeight:44,cursor:"pointer",fontWeight:850}}>🧸 Focus buddy</summary>
-      <p className="schedule-helper">A quiet focus companion. It never tracks your productivity or starts a background service.</p>
+      <p className="schedule-helper">A quiet visual countdown that runs while this screen is open. It never tracks productivity or starts a background service.</p>
       <select aria-label="Focus duration" value={focusMinutes} onChange={e=>setFocusMinutes(Number(e.target.value))} disabled={focusActive}><option value={5}>5 minutes</option><option value={10}>10 minutes</option><option value={25}>25 minutes</option></select>
-      <button type="button" className="schedule-btn primary" onClick={()=>setFocusActive(!focusActive)}>{focusActive?"End focus session":"Start a gentle focus moment"}</button>
-      {focusActive&&<p role="status">Your plush is here with you. Try one small thing for a short while (suggested {focusMinutes} minutes). You can stop whenever you need. 💜</p>}
+      <button type="button" className="schedule-btn primary" onClick={()=>{if(focusActive){setFocusActive(false);setFocusEnd(null);}else{setNow(Date.now());setFocusEnd(Date.now()+focusMinutes*60000);setFocusActive(true);}}}>{focusActive?"End focus session":"Start a gentle focus moment"}</button>
+      {focusActive&&<p role="timer" aria-live="off" style={{fontWeight:800}}>🧸 {Math.floor(secondsLeft/60)}:{String(secondsLeft%60).padStart(2,"0")} remaining. You can stop whenever you need. 💜</p>}
+      {focusActive && secondsLeft===0 && <p role="status">Your focus moment is complete. Even trying counts!</p>}
     </details>
   </section>;
 }
