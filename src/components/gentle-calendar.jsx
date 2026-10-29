@@ -88,10 +88,10 @@ export function GentleCalendar() {
       <div style={{display:"grid",gap:6}}>{GENTLE_TEMPLATES.map(template=><button key={template.title} type="button" className="schedule-btn add" onClick={()=>{const next=[...items,{...template,id:String(Date.now())+"-"+Math.random().toString(36).slice(2,6),date,time:""}];try{localStorage.setItem(storeKey,JSON.stringify(next));setItems(next);setNotice("Template added — edit or remove whenever you like.");}catch{setNotice("Could not save template.");}}}>＋ {template.title} · {template.repeat}</button>)}</div>
     </details>
     <details><summary style={{minHeight:44,cursor:"pointer",fontWeight:850}}>🧸 Focus buddy</summary>
-      <p className="schedule-helper">A quiet visual timer. It never tracks your productivity or starts a background service.</p>
+      <p className="schedule-helper">A quiet focus companion. It never tracks your productivity or starts a background service.</p>
       <select aria-label="Focus duration" value={focusMinutes} onChange={e=>setFocusMinutes(Number(e.target.value))} disabled={focusActive}><option value={5}>5 minutes</option><option value={10}>10 minutes</option><option value={25}>25 minutes</option></select>
-      <button type="button" className="schedule-btn primary" onClick={()=>setFocusActive(!focusActive)}>{focusActive?"End focus session":"Start a gentle focus session"}</button>
-      {focusActive&&<p role="status">Your plush is here with you. Try one small thing for up to {focusMinutes} minutes. You can stop whenever you need. 💜</p>}
+      <button type="button" className="schedule-btn primary" onClick={()=>setFocusActive(!focusActive)}>{focusActive?"End focus session":"Start a gentle focus moment"}</button>
+      {focusActive&&<p role="status">Your plush is here with you. Try one small thing for a short while (suggested {focusMinutes} minutes). You can stop whenever you need. 💜</p>}
     </details>
   </section>;
 }
