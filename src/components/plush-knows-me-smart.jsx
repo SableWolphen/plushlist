@@ -1,5 +1,5 @@
 import { profileContext, recordRecommendationOutcome } from "../plush-profile.js";
-import { recordCompletionSequence, recordRecoverySnapshot, recoveryFingerprint, rescueRecipe, sequenceSuggestion } from "../plush-smart-adaptation.js";
+import { recordCompletionSequence, recordRecoverySnapshot, recoveryFingerprint, rescueRecipe, sequenceSuggestion, adaptiveDaySuggestion } from "../plush-smart-adaptation.js";
 import { hasGoldFeature } from "../plush-gold.js";
 
 const card = { borderRadius: 14, border: "1px solid #D8DCEB", background: "linear-gradient(145deg,#F9FAFF,#FFFFFF)", padding: "10px 11px", boxShadow: "0 3px 10px rgba(84,91,130,.05)" };
@@ -14,6 +14,8 @@ export function SmartAdaptationPanel(props) {
   const doneSignature = rows.filter((row) => !row?.isBonus && viewDone?.[row.key]).map((row) => row.key).join("|");
   const [version, setVersion] = React.useState(0);
   const [recipeFeedbackOpen, setRecipeFeedbackOpen] = React.useState(false);
+  const [chosenMode, setChosenMode] = React.useState(null);
+  const [dismissedKey, setDismissedKey] = React.useState(null);
   void version;
 
   React.useEffect(() => {
@@ -25,6 +27,7 @@ export function SmartAdaptationPanel(props) {
   const sequence = sequenceSuggestion(userId, rows, viewDone);
   const recovery = recoveryFingerprint(userId, context);
   const recipe = rescueRecipe(userId, context);
+  const adaptive = adaptiveDaySuggestion({ ...context, chosenMode }, rows.filter(row => row.key !== dismissedKey), viewDone);
 
   const applyRecipe = () => {
     try {
@@ -54,16 +57,30 @@ export function SmartAdaptationPanel(props) {
 
   if (props.quiet) return null;
 
-  if (!gold) return null;
   return <section data-smart-recommendations="true" aria-label="Suggestions you can use now" style={{ display: "grid", gap: 8, margin: "0 0 10px" }}>
-    {sequence && <div style={{ ...card, borderColor: "#CFE8E1", background: "linear-gradient(145deg,#F3FFFB,#FFFFFF)" }}>
+    <div style={{ ...card, borderColor: "#DCCCE9", background: "#FCF9FF" }} data-adaptive-day="true">
+      <div style={{ fontSize: 12, fontWeight: 900, color: "#604877" }}>💜 Your pace, your choice</div>
+      <div style={{ fontSize: 11, color: "#6B5879", marginTop: 4 }}>{adaptive.reason}</div>
+      <div role="group" aria-label="Choose today's pace" style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 9 }}>
+        {["tiny", "soft", "full", "rest"].map(mode => <button key={mode} type="button" aria-pressed={adaptive.mode === mode} onClick={() => setChosenMode(mode)} style={{ ...button, background: adaptive.mode === mode ? "#71518B" : "white", color: adaptive.mode === mode ? "white" : "#626A91" }}>{mode === "tiny" ? "🌱 Tiny" : mode === "soft" ? "🌤️ Soft" : mode === "full" ? "☀️ Full" : "🌙 Rest"}</button>)}
+      </div>
+      {adaptive.primary && <div style={{ marginTop: 9, fontSize: 11, color: "#55445F" }}>
+        <strong>One possible next step:</strong> {adaptive.primary.label}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 7 }}>
+          <button type="button" style={button} onClick={() => { const node = Array.from(document.querySelectorAll("[data-task-key]")).find(el => el.dataset.taskKey === adaptive.primary.key); node?.scrollIntoView?.({ behavior: "smooth", block: "center" }); node?.focus?.({ preventScroll: true }); }}>Show task</button>
+          <button type="button" style={button} onClick={() => setDismissedKey(adaptive.primary.key)}>Not right now</button>
+        </div>
+      </div>}
+      {adaptive.mode === "rest" && <div style={{ marginTop: 8, fontSize: 11, color: "#6B5879" }}>Rest is allowed. Your tasks remain unchanged.</div>}
+    </div>
+    {gold && sequence && <div style={{ ...card, borderColor: "#CFE8E1", background: "linear-gradient(145deg,#F3FFFB,#FFFFFF)" }}>
       <div style={{ fontSize: 11.2, fontWeight: 900, color: "#3E8878" }}>🔗 A useful next step</div>
       <div style={{ marginTop: 4, fontSize: 10.5, lineHeight: 1.45, color: "#617A73" }}>{sequence.text}</div>
       <button type="button" onClick={jumpToSequenceTask} style={{ ...button, marginTop: 7, borderColor: "#BFDCD3", color: "#397968" }}>Show me that next step</button>
       {sequence.count >= 2 && <details style={{ marginTop: 5 }}><summary style={{ minHeight: 44, display: "flex", alignItems: "center", cursor: "pointer", fontSize: 9.8, color: "#6F8D86", fontWeight: 800 }}>Why this?</summary><div style={{ fontSize: 9.5, lineHeight: 1.4, color: "#84958F" }}>You completed these steps in this order {sequence.count} times. It is a suggestion, not a rule.</div></details>}
     </div>}
 
-    {recovery && <div style={{ ...card, borderColor: "#DDD0E9", background: "linear-gradient(145deg,#FAF5FD,#FFFFFF)" }}>
+    {gold && recovery && <div style={{ ...card, borderColor: "#DDD0E9", background: "linear-gradient(145deg,#FAF5FD,#FFFFFF)" }}>
       <div style={{ padding: "8px 9px", borderRadius: 10, background: "white", border: "1px solid #E8DFEE" }}>
         <div style={{ marginTop: 1, fontSize: 11, fontWeight: 900, color: "#62536C" }}>{recipe.icon} Try {recipe.label}</div>
         <div style={{ marginTop: 3, fontSize: 10, lineHeight: 1.42, color: "#7E7086" }}>{recipe.description}</div>
