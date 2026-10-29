@@ -1,10 +1,11 @@
 // Pure calendar recurrence and gentle planning helpers.
+function realDate(value) { const d=new Date(value+"T12:00:00"); return !Number.isNaN(d.getTime()) && [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")===value; }
 export function calendarOccurrences(items, start, end) {
   const output = [];
   const valid = /^\d{4}-\d{2}-\d{2}$/;
-  if (!valid.test(start || "") || !valid.test(end || "") || start > end) return output;
+  if (!valid.test(start || "") || !valid.test(end || "") || start > end || !realDate(start) || !realDate(end)) return output;
   for (const item of items || []) {
-    if (!item || !valid.test(item.date || "") || !["once","daily","weekly","monthly"].includes(item.repeat)) continue;
+    if (!item || !valid.test(item.date || "") || !realDate(item.date) || !["once","daily","weekly","monthly"].includes(item.repeat)) continue;
     const seed = new Date(item.date + "T12:00:00");
     if (Number.isNaN(seed.getTime())) continue;
     let cursor = new Date(start + "T12:00:00");
