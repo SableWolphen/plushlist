@@ -1,3 +1,4 @@
+import { GentleCalendar } from "./gentle-calendar.jsx";
 // The "Change my schedule" ToolPanel — module split phase 7, third
 // slice (see docs/module-split-plan.md). Moderate size, no local
 // derived-state complications like the previous slice's viewers —
@@ -22,6 +23,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
   return (
     <ToolPanel title="Edit schedule" onClose={onClose}>
       <div className="schedule-panel">
+        <GentleCalendar />
         <style>{`
           .schedule-panel{--blue:#B85CC7;--blue-dark:#74417F;--ink:#66536E;--line:#E7D7EB;--rose:#C45D74;--green:#6E9C88;display:grid;gap:12px;padding-bottom:4px}
           .schedule-panel *{box-sizing:border-box}
