@@ -16,5 +16,5 @@ export function parseSpokenReminder(text) {
  const source=String(text||"").trim().slice(0,300);
  const m=source.match(/^(?:remind me to|remember to|add )\s*(.+?)(?:\s+every\s+(day|week|month))?(?:\s+on\s+the\s+(\d{1,2})(?:st|nd|rd|th)?)?$/i);
  if(!m)return {title:source,repeat:"once",dayOfMonth:null,needsReview:true};
- return {title:m[1].trim(),repeat:m[2]?({day:"daily",week:"weekly",month:"monthly"}[m[2].toLowerCase()]):"once",dayOfMonth:m[3]?Number(m[3]):null,needsReview:true};
+ return {title:m[1].trim(),repeat:m[2]?({day:"daily",week:"weekly",month:"monthly"}[m[2].toLowerCase()]):"once",dayOfMonth:m[3] && Number(m[3])>=1 && Number(m[3])<=31 ? Number(m[3]) : null,needsReview:true};
 }
