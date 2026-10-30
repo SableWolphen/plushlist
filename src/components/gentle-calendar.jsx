@@ -1,14 +1,16 @@
 import { calendarOccurrences, importantUpcoming, occurrenceKey, brainDumpLines, GENTLE_TEMPLATES } from "../gentle-calendar.mjs";
 
-const storeKey = "plushlife:device-calendar:v1";
-const doneKey = "plushlife:device-calendar-completion:v1";
-function loadDone() { try { const value=JSON.parse(localStorage.getItem(doneKey)||"{}"); return value && typeof value==="object" && !Array.isArray(value)?value:{}; } catch {return {};} }
-function load() { try { const value = JSON.parse(localStorage.getItem(storeKey) || "[]"); return Array.isArray(value) ? value : []; } catch { return []; } }
+// Per-account device storage. Legacy unscoped keys are deliberately not imported:
+ // their owner cannot be established safely on shared devices.
+const keyFor = (userId,part) => `plushlife:gentle-calendar:v2:${userId}:${part}`;
+function readScope(userId,part,fallback) { if (!userId) return fallback; try { const v=JSON.parse(localStorage.getItem(keyFor(userId,part))||"null"); return v!==null && typeof v==="object" && !Array.isArray(v) === !Array.isArray(fallback) ? v : fallback; } catch { return fallback; } }
+function writeScope(userId,part,value) { if (!userId) throw Error("Sign in before changing calendar data."); localStorage.setItem(keyFor(userId,part),JSON.stringify(value)); }
 const isoDate = date => [date.getFullYear(),String(date.getMonth()+1).padStart(2,"0"),String(date.getDate()).padStart(2,"0")].join("-");
 function shift(date, days) { const copy = new Date(date+"T12:00:00"); copy.setDate(copy.getDate()+days); return isoDate(copy); }
 
-export function GentleCalendar() {
-  const [items,setItems] = React.useState(load);
+export function GentleCalendar({ userId }) {
+  const [items,setItems] = React.useState(() => readScope(userId,"items",[]));
+  React.useEffect(()=>{setItems(readScope(userId,"items",[]));setDone(readScope(userId,"done",{}));setEditingId(null);setTitle("");setNotice("");},[userId]);
   const [date,setDate] = React.useState(() => isoDate(new Date()));
   const [title,setTitle] = React.useState("");
   const [editingId,setEditingId] = React.useState(null);
@@ -16,7 +18,7 @@ export function GentleCalendar() {
   const [time,setTime] = React.useState("");
   const [view,setView] = React.useState("month");
   const [notice,setNotice] = React.useState("");
-  const [done,setDone] = React.useState(loadDone);
+  const [done,setDone] = React.useState(() => readScope(userId,"done",{}));
   const [dump,setDump] = React.useState("");
   const [category,setCategory] = React.useState("life");
   const [important,setImportant] = React.useState(false);
@@ -36,20 +38,21 @@ export function GentleCalendar() {
     if (!title.trim()) { setNotice("Add a name for your reminder."); return; }
     const entry = { id: editingId || String(Date.now())+"-"+Math.random().toString(36).slice(2,7),title:title.trim().slice(0,120),date,repeat,time,category,important };
     const next = editingId ? items.map(item=>item.id===editingId?entry:item) : [...items,entry];
-    try { localStorage.setItem(storeKey,JSON.stringify(next)); setItems(next); setTitle(""); setEditingId(null); setNotice("Saved on this device. No notification has been scheduled."); }
+    try { writeScope(userId,"items",next); setItems(next); setTitle(""); setEditingId(null); setNotice("Saved on this device. No notification has been scheduled."); }
     catch { setNotice("This device could not save the reminder."); }
   };
   const edit = item => { setEditingId(item.id);setTitle(item.title);setDate(item.date);setRepeat(item.repeat);setTime(item.time||"");setCategory(item.category||"life");setImportant(Boolean(item.important));setNotice("Editing this series. Save to keep your changes."); };
-  const toggleDone = (key,checked) => { const next={...done,[key]:checked}; try {localStorage.setItem(doneKey,JSON.stringify(next));setDone(next);} catch {setNotice("Could not save completion on this device.");} };
-  const saveBatch = values => { if(!values.length)return;const next=[...items,...values.map((name,i)=>({id:String(Date.now())+"-"+i,title:name,date,repeat:"once",time:"",category:"life",important:false}))];try{localStorage.setItem(storeKey,JSON.stringify(next));setItems(next);setDump("");setNotice(`${values.length} gentle reminders added.`);}catch{setNotice("Could not save these reminders.");} };
+  const toggleDone = (key,checked) => { const next={...done,[key]:checked}; try {writeScope(userId,"done",next);setDone(next);} catch {setNotice("Could not save completion on this device.");} };
+  const saveBatch = values => { if(!values.length)return;const next=[...items,...values.map((name,i)=>({id:String(Date.now())+"-"+i,title:name,date,repeat:"once",time:"",category:"life",important:false}))];try{writeScope(userId,"items",next);setItems(next);setDump("");setNotice(`${values.length} gentle reminders added.`);}catch{setNotice("Could not save these reminders.");} };
   const remove = id => {
     const next=items.filter(item=>item.id!==id);
-    try { localStorage.setItem(storeKey,JSON.stringify(next)); setItems(next); setNotice("Reminder removed from this device."); }
+    try { writeScope(userId,"items",next); setItems(next); setNotice("Reminder removed from this device."); }
     catch { setNotice("Unable to remove reminder."); }
   };
+  if (!userId) return <section className="schedule-card">Sign in to use your private calendar.</section>;
   return <section className="schedule-card" aria-label="Gentle recurring calendar" style={{display:"grid",gap:9}}>
     <strong style={{fontSize:17}}>📅 Gentle calendar</strong>
-    <div className="schedule-helper">Keep track of bills, appointments and little routines. This version saves only on this device; it does not sync or send notifications.</div>
+    <div className="schedule-helper">Keep track of bills, appointments and little routines. Reminders are private to this signed-in account on this device. Cloud syncing and notifications are not enabled yet.</div>
     {upcoming.length>0 && <details><summary style={{cursor:"pointer",minHeight:44,fontWeight:800}}>📌 Important dates coming up ({upcoming.length})</summary><ul style={{fontSize:12}}>{upcoming.slice(0,8).map(event=><li key={occurrenceKey(event)}>{event.occurrence}: {event.title}</li>)}</ul></details>}
     <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
       {["day","week","month"].map(mode=><button className="schedule-btn add" type="button" key={mode} aria-pressed={view===mode} style={view===mode?{background:"#EFE0F6",borderColor:"#AE7AC6"}:{}} onClick={()=>setView(mode)}>{mode[0].toUpperCase()+mode.slice(1)}</button>)}
@@ -94,7 +97,7 @@ export function GentleCalendar() {
       <button type="button" className="schedule-btn primary" disabled={!brainDumpLines(dump).length} onClick={()=>saveBatch(brainDumpLines(dump))}>Add these to selected day</button>
     </details>
     <details><summary style={{minHeight:44,cursor:"pointer",fontWeight:850}}>✨ Quick routine templates</summary>
-      <div style={{display:"grid",gap:6}}>{GENTLE_TEMPLATES.map(template=><button key={template.title} type="button" className="schedule-btn add" onClick={()=>{const next=[...items,{...template,id:String(Date.now())+"-"+Math.random().toString(36).slice(2,6),date,time:""}];try{localStorage.setItem(storeKey,JSON.stringify(next));setItems(next);setNotice("Template added — edit or remove whenever you like.");}catch{setNotice("Could not save template.");}}}>＋ {template.title} · {template.repeat}</button>)}</div>
+      <div style={{display:"grid",gap:6}}>{GENTLE_TEMPLATES.map(template=><button key={template.title} type="button" className="schedule-btn add" onClick={()=>{const next=[...items,{...template,id:String(Date.now())+"-"+Math.random().toString(36).slice(2,6),date,time:""}];try{writeScope(userId,"items",next);setItems(next);setNotice("Template added — edit or remove whenever you like.");}catch{setNotice("Could not save template.");}}}>＋ {template.title} · {template.repeat}</button>)}</div>
     </details>
     <details><summary style={{minHeight:44,cursor:"pointer",fontWeight:850}}>🧸 Focus buddy</summary>
       <p className="schedule-helper">A quiet visual countdown that runs while this screen is open. It never tracks productivity or starts a background service.</p>
