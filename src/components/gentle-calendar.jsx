@@ -9,9 +9,47 @@ function writeScope(userId,part,value) { if (!userId) throw Error("Sign in befor
 const isoDate = date => [date.getFullYear(),String(date.getMonth()+1).padStart(2,"0"),String(date.getDate()).padStart(2,"0")].join("-");
 function shift(date, days) { const copy = new Date(date+"T12:00:00"); copy.setDate(copy.getDate()+days); return isoDate(copy); }
 
-export function GentleCalendar({ userId }) {
+export function GentleCalendar({ userId, client }) {
   const [items,setItems] = React.useState(() => readScope(userId,"items",[]));
-  React.useEffect(()=>{setItems(readScope(userId,"items",[]));setDone(readScope(userId,"done",{}));setEditingId(null);setTitle("");setNotice("");},[userId]);
+  const [cloudReady,setCloudReady] = React.useState(false);
+  const [cloudStatus,setCloudStatus] = React.useState("Loading private calendar…");
+  const itemsRef = React.useRef(items);
+  const doneRef = React.useRef(readScope(userId,"done",{}));
+  const syncQueue = React.useRef(Promise.resolve());
+  const syncState = (newItems, newDone) => {
+    if (!userId || !client || !cloudReady) return;
+    const payload = {user_id:userId,items:newItems,completed:newDone,updated_at:new Date().toISOString()};
+    syncQueue.current = syncQueue.current.catch(()=>{}).then(async () => {
+      const {error} = await client.from("gentle_calendar_state").upsert(payload,{onConflict:"user_id"});
+      if(error) throw error;
+      setCloudStatus("Synced to your account");
+    }).catch(() => {setCloudStatus("Saved on this device; account sync needs a retry.");});
+  };
+  React.useEffect(()=>{
+    let active=true;
+    const localItems=readScope(userId,"items",[]);
+    const localDone=readScope(userId,"done",{});
+    setItems(localItems);itemsRef.current=localItems;
+    setDone(localDone);doneRef.current=localDone;
+    setEditingId(null);setTitle("");setNotice("");
+    setCloudReady(false);setCloudStatus("Loading private calendar…");
+    if(!userId || !client){setCloudStatus("Sign in to sync reminders.");return ()=>{active=false;};}
+    (async()=>{
+      const {data,error}=await client.from("gentle_calendar_state").select("items,completed").eq("user_id",userId).maybeSingle();
+      if(!active)return;
+      if(error){setCloudStatus("Offline — using device copy.");setCloudReady(true);return;}
+      const remoteItems=Array.isArray(data?.items)?data.items:localItems;
+      const remoteDone=data?.completed && typeof data.completed==="object" && !Array.isArray(data.completed)?data.completed:localDone;
+      if(data){
+        setItems(remoteItems);itemsRef.current=remoteItems;
+        setDone(remoteDone);doneRef.current=remoteDone;
+        try{writeScope(userId,"items",remoteItems);writeScope(userId,"done",remoteDone);}catch{}
+      }
+      setCloudReady(true);
+      setCloudStatus(data?"Synced to your account":"Ready to sync when you save");
+    })();
+    return ()=>{active=false;};
+  },[userId,client]);
   const [date,setDate] = React.useState(() => isoDate(new Date()));
   const [title,setTitle] = React.useState("");
   const [editingId,setEditingId] = React.useState(null);
@@ -40,12 +78,12 @@ export function GentleCalendar({ userId }) {
     if (!title.trim()) { setNotice("Add a name for your reminder."); return; }
     const entry = { id: editingId || String(Date.now())+"-"+Math.random().toString(36).slice(2,7),title:title.trim().slice(0,120),date,repeat,time,category,important };
     const next = editingId ? items.map(item=>item.id===editingId?entry:item) : [...items,entry];
-    try { writeScope(userId,"items",next); setItems(next); setTitle(""); setEditingId(null); setNotice("Saved on this device. No notification has been scheduled."); }
+    try { writeScope(userId,"items",next); setItems(next);itemsRef.current=next; syncState(next,doneRef.current); setTitle(""); setEditingId(null); setNotice("Saved on this device. No notification has been scheduled."); }
     catch { setNotice("This device could not save the reminder."); }
   };
   const edit = item => { setEditingId(item.id);setTitle(item.title);setDate(item.date);setRepeat(item.repeat);setTime(item.time||"");setCategory(item.category||"life");setImportant(Boolean(item.important));setNotice("Editing this series. Save to keep your changes."); };
-  const toggleDone = (key,checked) => { const next={...done,[key]:checked}; try {writeScope(userId,"done",next);setDone(next);} catch {setNotice("Could not save completion on this device.");} };
-  const saveBatch = values => { if(!values.length)return;const next=[...items,...values.map((name,i)=>({id:String(Date.now())+"-"+i,title:name,date,repeat:"once",time:"",category:"life",important:false}))];try{writeScope(userId,"items",next);setItems(next);setDump("");setNotice(`${values.length} gentle reminders added.`);}catch{setNotice("Could not save these reminders.");} };
+  const toggleDone = (key,checked) => { const next={...done,[key]:checked}; try {writeScope(userId,"done",next);setDone(next);doneRef.current=next;syncState(itemsRef.current,next);} catch {setNotice("Could not save completion on this device.");} };
+  const saveBatch = values => { if(!values.length)return;const next=[...items,...values.map((name,i)=>({id:String(Date.now())+"-"+i,title:name,date,repeat:"once",time:"",category:"life",important:false}))];try{writeScope(userId,"items",next);setItems(next);itemsRef.current=next;syncState(next,doneRef.current);setDump("");setNotice(`${values.length} gentle reminders added.`);}catch{setNotice("Could not save these reminders.");} };
   const remove = id => {
     const next=items.filter(item=>item.id!==id);
     try { writeScope(userId,"items",next); setItems(next); setNotice("Reminder removed from this device."); }
@@ -54,7 +92,8 @@ export function GentleCalendar({ userId }) {
   if (!userId) return <section className="schedule-card">Sign in to use your private calendar.</section>;
   return <section className="schedule-card" aria-label="Gentle recurring calendar" style={{display:"grid",gap:9}}>
     <strong style={{fontSize:17}}>📅 Gentle calendar</strong>
-    <div className="schedule-helper">Keep track of bills, appointments and little routines. Reminders are private to this signed-in account on this device. Cloud syncing and notifications are not enabled yet.</div>
+    <div role="status" className="schedule-helper">{cloudStatus}</div>
+    <div className="schedule-helper">Keep track of bills, appointments and little routines. Reminders are kept private to your signed-in account. Device copies work offline; notifications are not yet enabled.</div>
     <div style={{borderRadius:12,padding:12,background:"var(--pl-theme-surface-2,#f7f0fa)",display:"grid",gap:6}} aria-label="Daily gentle briefing">
       <strong>{briefing.title} 🧸</strong>
       <div className="schedule-helper">{briefing.message}</div>
