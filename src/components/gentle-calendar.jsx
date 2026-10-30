@@ -3,7 +3,7 @@ import { calendarOccurrences, importantUpcoming, occurrenceKey, brainDumpLines, 
 // Per-account device storage. Legacy unscoped keys are deliberately not imported:
  // their owner cannot be established safely on shared devices.
 const keyFor = (userId,part) => `plushlife:gentle-calendar:v2:${userId}:${part}`;
-function readScope(userId,part,fallback) { if (!userId) return fallback; try { const v=JSON.parse(localStorage.getItem(keyFor(userId,part))||"null"); return v!==null && typeof v==="object" && !Array.isArray(v) === !Array.isArray(fallback) ? v : fallback; } catch { return fallback; } }
+function readScope(userId,part,fallback) { if (!userId) return fallback; try { const v=JSON.parse(localStorage.getItem(keyFor(userId,part))||"null"); return v!==null && typeof v==="object" && Array.isArray(v)===Array.isArray(fallback) ? v : fallback; } catch { return fallback; } }
 function writeScope(userId,part,value) { if (!userId) throw Error("Sign in before changing calendar data."); localStorage.setItem(keyFor(userId,part),JSON.stringify(value)); }
 const isoDate = date => [date.getFullYear(),String(date.getMonth()+1).padStart(2,"0"),String(date.getDate()).padStart(2,"0")].join("-");
 function shift(date, days) { const copy = new Date(date+"T12:00:00"); copy.setDate(copy.getDate()+days); return isoDate(copy); }
