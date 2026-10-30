@@ -10,3 +10,9 @@ assert.doesNotMatch(code,/localStorage\.setItem\(doneKey/);
 assert.match(release,/multiAccountIsolationTested/);
 assert.match(release,/androidSmokeTested/);
 console.log("Calendar account isolation source guards passed.");
+
+assert.match(code,/gentle_calendar_state/);
+assert.match(code,/user_id:userId/);
+assert.match(code,/Retry account sync/);
+const app=readFileSync(new URL("../src/app-source.jsx",import.meta.url),"utf8");
+assert.match(app,/<ScheduleEditorPanel client=\{supabase\} user=\{user\}/);
