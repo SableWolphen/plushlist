@@ -1,3 +1,4 @@
+import { gentleBriefing, parseSpokenReminder } from "../gentle-everyday-assistant.mjs";
 import { calendarOccurrences, importantUpcoming, occurrenceKey, brainDumpLines, GENTLE_TEMPLATES } from "../gentle-calendar.mjs";
 
 // Per-account device storage. Legacy unscoped keys are deliberately not imported:
@@ -33,6 +34,7 @@ export function GentleCalendar({ userId }) {
   const last = view === "day" ? date : view === "week" ? shift(first,6) : isoDate(new Date(selected.getFullYear(),selected.getMonth()+1,0));
   const events = calendarOccurrences(items,first,last);
   const upcoming = importantUpcoming(items,isoDate(new Date())).filter(item=>!done[occurrenceKey(item)]);
+  const briefing=gentleBriefing(items,done,isoDate(new Date()),new Date().getHours()>=18?"evening":"morning");
   const move = n => setDate(view === "day" ? shift(date,n) : view === "week" ? shift(date,n*7) : isoDate(new Date(selected.getFullYear(),selected.getMonth()+n,Math.min(selected.getDate(),28))));
   const save = () => {
     if (!title.trim()) { setNotice("Add a name for your reminder."); return; }
@@ -53,6 +55,12 @@ export function GentleCalendar({ userId }) {
   return <section className="schedule-card" aria-label="Gentle recurring calendar" style={{display:"grid",gap:9}}>
     <strong style={{fontSize:17}}>📅 Gentle calendar</strong>
     <div className="schedule-helper">Keep track of bills, appointments and little routines. Reminders are private to this signed-in account on this device. Cloud syncing and notifications are not enabled yet.</div>
+    <div style={{borderRadius:12,padding:12,background:"var(--pl-theme-surface-2,#f7f0fa)",display:"grid",gap:6}} aria-label="Daily gentle briefing">
+      <strong>{briefing.title} 🧸</strong>
+      <div className="schedule-helper">{briefing.message}</div>
+      {briefing.essential.map(item=><div key={occurrenceKey(item)} style={{fontSize:12}}>📌 {item.occurrence} — {item.title}</div>)}
+      {briefing.next&&<div style={{fontSize:12}}>🌱 One optional step: {briefing.next.title}</div>}
+    </div>
     {upcoming.length>0 && <details><summary style={{cursor:"pointer",minHeight:44,fontWeight:800}}>📌 Important dates coming up ({upcoming.length})</summary><ul style={{fontSize:12}}>{upcoming.slice(0,8).map(event=><li key={occurrenceKey(event)}>{event.occurrence}: {event.title}</li>)}</ul></details>}
     <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
       {["day","week","month"].map(mode=><button className="schedule-btn add" type="button" key={mode} aria-pressed={view===mode} style={view===mode?{background:"#EFE0F6",borderColor:"#AE7AC6"}:{}} onClick={()=>setView(mode)}>{mode[0].toUpperCase()+mode.slice(1)}</button>)}
@@ -75,6 +83,7 @@ export function GentleCalendar({ userId }) {
         </li>)}
       </ul>}
     <div style={{borderTop:"1px solid var(--pl-theme-line,#ddd)",paddingTop:9,display:"grid",gap:7}}>
+      <button type="button" className="schedule-btn add" onClick={()=>{const parsed=parseSpokenReminder(title);if(parsed.title){setTitle(parsed.title);setRepeat(parsed.repeat);if(parsed.dayOfMonth&&parsed.dayOfMonth<=31){const d=new Date(date+"T12:00:00");const target=new Date(d.getFullYear(),d.getMonth(),Math.min(parsed.dayOfMonth,new Date(d.getFullYear(),d.getMonth()+1,0).getDate()));setDate(isoDate(target));}setNotice("Please review the reminder and date before saving.");}}}>✨ Interpret reminder text</button>
       <strong style={{fontSize:12}}>{editingId?"Edit recurring reminder":"Add a reminder"}</strong>
       <input aria-label="Reminder name" maxLength={120} placeholder="e.g. Pay rent" value={title} onChange={e=>setTitle(e.target.value)} />
       <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
