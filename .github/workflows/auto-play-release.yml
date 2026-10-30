@@ -83,6 +83,9 @@ jobs:
       - name: Run complete app tests
         run: npm test
 
+      - name: Gate personal calendar release safety
+        run: node scripts/check-gentle-calendar-release.cjs
+
       - name: Build web and sync Android
         env:
           GITHUB_SHA: ${{ github.sha }}

@@ -112,3 +112,39 @@ export function rescueRecipe(userId, context = {}) {
   const confidence = best.fit.confidence === "strong" ? "strong" : best.fit.confidence === "growing" ? "growing" : "learning";
   return { ...best, confidence, reason: best.fit.total >= 2 ? `${best.label} has some evidence in situations like this.` : `PlushLife is choosing ${best.label} from today’s check-in and workload while it learns what fits you.` };
 }
+
+/**
+ * An optional, explainable day recommendation. It never modifies a task,
+ * completion, notification, streak or Guardian preference.
+ * Explicit user choice always wins over inferred capacity.
+ */
+export function adaptiveDaySuggestion(context = {}, rows = [], viewDone = {}) {
+  const allowed = new Set(["tiny", "soft", "full", "rest"]);
+  const selected = allowed.has(context.chosenMode) ? context.chosenMode : null;
+  const available = rows.filter(row => row && row.key && !row.isBonus && !viewDone[row.key] && !row.paused);
+  const highLoad = context.load === "high" || available.length >= 7;
+  const low = roughContext(context);
+  const mode = selected || (context.resting ? "rest" : low && highLoad ? "tiny" : low ? "soft" : "full");
+  const reason = selected ? "You chose this pace." : context.resting ? "You are taking a rest day." :
+    mode === "tiny" ? "Today looks busy or draining, so one small step may be easier." :
+    mode === "soft" ? "A gentler pace may fit today." : "Your usual plan is available.";
+  const step = mode === "rest" ? null : available[0] || null;
+  const label = step ? String(step.label || step.task || step.sourceTask?.task || "One small step") : null;
+  return {
+    mode, reason, inferred: !selected && !context.resting,
+    primary: step ? { key: step.key, label: mode === "tiny" ? smallerStepForAdaptive(step) : label, originalLabel: label } : null,
+    remainingCount: available.length,
+    canPause: true, canSkip: true,
+    noAutomaticTaskChanges: true,
+  };
+}
+
+function smallerStepForAdaptive(row) {
+  const custom = row?.sourceTask?.tiny_label || row?.tiny_label || row?.sourceTask?.soft_label || row?.soft_label;
+  if (typeof custom === "string" && custom.trim()) return custom.trim();
+  const label = String(row.label || row.task || row.sourceTask?.task || "this task");
+  if (/clean|tidy|organize|laundry/i.test(label)) return "Put away three things. You can stop there.";
+  if (/walk|run|exercise|workout|stretch/i.test(label)) return "Try two minutes. Stopping there counts.";
+  if (/study|read|write|work|email/i.test(label)) return "Open it and try one line or two minutes.";
+  return `Get one thing ready for “${label}”. Starting counts.`;
+}
