@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+const code=readFileSync(new URL("../src/components/gentle-calendar.jsx",import.meta.url),"utf8");
+const release=readFileSync(new URL("./check-gentle-calendar-release.cjs",import.meta.url),"utf8");
+assert.match(code,/userId/);
+assert.match(code,/keyFor\(userId/);
+assert.match(code,/writeScope\(userId/);
+assert.doesNotMatch(code,/localStorage\.setItem\(storeKey/);
+assert.doesNotMatch(code,/localStorage\.setItem\(doneKey/);
+assert.match(release,/multiAccountIsolationTested/);
+assert.match(release,/androidSmokeTested/);
+console.log("Calendar account isolation source guards passed.");
