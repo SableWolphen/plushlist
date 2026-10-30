@@ -94,6 +94,7 @@ export function GentleCalendar({ userId, client }) {
   return <section className="schedule-card" aria-label="Gentle recurring calendar" style={{display:"grid",gap:9}}>
     <strong style={{fontSize:17}}>📅 Gentle calendar</strong>
     <div role="status" className="schedule-helper">{cloudStatus}</div>
+    {cloudStatus.includes("retry") && <button type="button" className="schedule-btn add" onClick={()=>syncState(itemsRef.current,doneRef.current)}>Retry account sync</button>}
     <div className="schedule-helper">Keep track of bills, appointments and little routines. Reminders are kept private to your signed-in account. Device copies work offline; notifications are not yet enabled.</div>
     <div style={{borderRadius:12,padding:12,background:"var(--pl-theme-surface-2,#f7f0fa)",display:"grid",gap:6}} aria-label="Daily gentle briefing">
       <strong>{briefing.title} 🧸</strong>
