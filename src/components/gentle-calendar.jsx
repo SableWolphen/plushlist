@@ -90,6 +90,7 @@ export function GentleCalendar({ userId, client }) {
     catch { setNotice("Unable to remove reminder."); }
   };
   if (!userId) return <section className="schedule-card">Sign in to use your private calendar.</section>;
+  if (!cloudReady) return <section className="schedule-card" role="status">Loading your private calendar…</section>;
   return <section className="schedule-card" aria-label="Gentle recurring calendar" style={{display:"grid",gap:9}}>
     <strong style={{fontSize:17}}>📅 Gentle calendar</strong>
     <div role="status" className="schedule-helper">{cloudStatus}</div>
