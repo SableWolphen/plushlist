@@ -73,6 +73,9 @@ jobs:
       - name: Run app tests
         run: npm test
 
+      - name: Gate personal calendar release safety
+        run: node scripts/check-gentle-calendar-release.cjs
+
       - name: Build www/ and sync Android
         run: npm run android:sync
 
