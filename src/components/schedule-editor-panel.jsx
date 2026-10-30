@@ -6,7 +6,7 @@ import { GentleCalendar } from "./gentle-calendar.jsx";
 // state and handlers.
 import { ToolPanel } from "./shared.jsx";
 
-export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setScheduleEditDayId, personalSchedules, scheduleDraft, updateScheduleEntry, removeScheduleEntry, addScheduleEntry, savePersonalSchedule, copyScheduleToAllDays, clearPersonalSchedule, copyToDayIds, toggleCopyToDay, copyScheduleToSelectedDays, scheduleMessage, scheduleExceptionDraft, setScheduleExceptionDraft, updateScheduleExceptionEntry, removeScheduleExceptionEntry, addScheduleExceptionEntry, saveScheduleException, scheduleExceptionMessage, scheduleExceptions, deleteScheduleException, onOpenTasks, user }) {
+export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setScheduleEditDayId, personalSchedules, scheduleDraft, updateScheduleEntry, removeScheduleEntry, addScheduleEntry, savePersonalSchedule, copyScheduleToAllDays, clearPersonalSchedule, copyToDayIds, toggleCopyToDay, copyScheduleToSelectedDays, scheduleMessage, scheduleExceptionDraft, setScheduleExceptionDraft, updateScheduleExceptionEntry, removeScheduleExceptionEntry, addScheduleExceptionEntry, saveScheduleException, scheduleExceptionMessage, scheduleExceptions, deleteScheduleException, onOpenTasks, user, client }) {
   if (!open) return null;
   const { DAYS } = window.PlushLifeContent;
   const currentDay = DAYS.find((item) => item.id === scheduleEditingDayId);
@@ -23,7 +23,7 @@ export function ScheduleEditorPanel({ open, onClose, scheduleEditingDayId, setSc
   return (
     <ToolPanel title="Edit schedule" onClose={onClose}>
       <div className="schedule-panel">
-        <GentleCalendar key={user?.id || "signed-out"} userId={user?.id} />
+        <GentleCalendar key={user?.id || "signed-out"} userId={user?.id} client={client} />
         <style>{`
           .schedule-panel{--blue:#B85CC7;--blue-dark:#74417F;--ink:#66536E;--line:#E7D7EB;--rose:#C45D74;--green:#6E9C88;display:grid;gap:12px;padding-bottom:4px}
           .schedule-panel *{box-sizing:border-box}
