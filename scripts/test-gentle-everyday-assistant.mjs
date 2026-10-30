@@ -7,3 +7,6 @@ assert.equal(b.next.title,"Wash dishes");
 assert.equal(gentleBriefing(items,{"bill:2026-10-30":true},"2026-10-29").essential.length,0);
 assert.deepEqual(parseSpokenReminder("remind me to pay electricity every month on the 15th"),{title:"pay electricity",repeat:"monthly",dayOfMonth:15,needsReview:true});
 console.log("Gentle everyday assistant checks passed.");
+
+assert.equal(parseSpokenReminder("remind me to pay rent every month on the 45th").dayOfMonth,null);
+assert.equal(parseSpokenReminder("remind me to pay rent every month on the 0th").dayOfMonth,null);
