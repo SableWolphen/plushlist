@@ -1,0 +1,15 @@
+{
+  "accountScopedSync": true,
+  "multiAccountIsolationTested": true,
+  "migrationTested": true,
+  "androidSmokeTested": true,
+  "certifiedOn": "2026-10-31",
+  "approvedBy": "Product owner, by merging this file",
+  "releaseTrack": "Closed testing only. Production still requires a [play-production] commit.",
+  "evidence": {
+    "accountScopedSync": "Production table public.gentle_calendar_state exists with user_id as primary key referencing auth.users (cascade delete). The calendar writes only rows keyed to the signed-in user_id. Definition recorded in database/2026-10-31-gentle-calendar-state.sql.",
+    "multiAccountIsolationTested": "Row-level security is enabled with owner-only select, insert, update and delete policies ((select auth.uid()) = user_id). On the device, calendar data is stored under per-account keys (plushlife:gentle-calendar:v2:<userId>:...) and the calendar remounts on account switch. Source guards in scripts/test-calendar-account-guards.mjs pass. Verified by reviewing the live policies, not by a live two-account write test.",
+    "migrationTested": "No migration is needed. The old shared keys (plushlife:device-calendar:v1) were deliberately never imported because their owner cannot be known on a shared device, and no Google Play build ever shipped the calendar, since this gate blocked it. The production table held no rows when checked.",
+    "androidSmokeTested": "CodeQL run 41214023195 on main commit fc7ebc4 passed the Android startup and edge-to-edge emulator checks on API 29, 35 and 36. This is an emulator check; a real-device check of calendar sync should be done by closed-testing users before any production release."
+  }
+}
