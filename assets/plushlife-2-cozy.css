@@ -1,0 +1,98 @@
+/* PlushLife 2.0 — cozy concept visual layer.
+   Presentation only: no auth, task history, billing, or Guardian data changes.
+   Theme tokens keep every existing theme functional. */
+#main-content {
+  --pl2-lilac: color-mix(in srgb, var(--pl-theme-accent,#a777db) 12%, var(--pl-theme-surface,#fff));
+  --pl2-rose: color-mix(in srgb, #f5a4d7 18%, var(--pl-theme-surface,#fff));
+  --pl2-shadow: 0 10px 28px rgba(77,44,107,.09);
+  --pl2-radius: 22px;
+}
+#main-content .plushlife-app-column { width:min(100%,440px)!important;max-width:440px!important;padding-inline:18px!important; }
+#main-content .pl-home-shell { max-width:440px!important;gap:14px; }
+#main-content .pl-home-today-row { padding:14px 4px 6px!important;align-items:center;gap:10px; }
+#main-content .pl-home-greeting h1 { font-size:clamp(23px,5.6vw,30px)!important;line-height:1.2!important;font-weight:900!important;letter-spacing:-.035em; }
+#main-content .pl-home-greeting-date { color:var(--pl-theme-muted);font-weight:750;font-size:13px; }
+#main-content .pl-home-today-actions button { min-height:46px;border-radius:16px!important;box-shadow:none!important; }
+#main-content .pl-home-today-actions .pl-heading-gear { background:var(--pl2-lilac)!important; }
+#main-content .pl-home-today-actions .pl-heading-date { background:var(--pl-theme-surface)!important;border:1px solid var(--pl-theme-line)!important; }
+#main-content :is(.pl-home-hero,.pl-home-welcome,.pl-home-companion-card,.pl-home-next-step,.pl-home-summary,.pl-home-focus-card,.pl-next-step-card,.pl-design-card,.pl-guardian-smart-brief) {
+  border-radius:var(--pl2-radius)!important;
+  box-shadow:var(--pl2-shadow)!important;
+}
+#main-content :is(.pl-home-hero,.pl-home-welcome,.pl-home-companion-card) {
+  background:linear-gradient(135deg,var(--pl2-lilac),var(--pl2-rose))!important;
+  border:1px solid var(--pl-theme-line)!important;
+}
+#main-content .pl-quick-paths { gap:12px!important;max-width:440px!important;margin-bottom:16px!important; }
+#main-content .pl-quick-paths button {
+  border-radius:var(--pl2-radius)!important;
+  min-height:106px!important;
+  padding:16px!important;
+  box-shadow:var(--pl2-shadow)!important;
+  background:linear-gradient(145deg,var(--pl-theme-surface),var(--pl2-lilac))!important;
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+#main-content .pl-quick-paths button:nth-child(2n) { background:linear-gradient(145deg,var(--pl-theme-surface),var(--pl2-rose))!important; }
+#main-content .pl-quick-paths button:active { transform:scale(.98); }
+#main-content .pl-quick-paths button span { font-size:28px!important; }
+#main-content .pl-quick-paths button strong { font-size:15px!important;letter-spacing:-.01em; }
+#main-content .pl-quick-paths button small { font-size:12px!important;line-height:1.4; }
+#main-content :is(.pl-home-extra-tools,.pl-progress-extras,.pl-collection-details) { border-radius:19px!important;box-shadow:0 5px 18px rgba(77,44,107,.04)!important; }
+#main-content .pl-plan-navigation { padding:6px 0 16px!important; }
+#main-content .pl-plan-heading { padding:8px 4px; }
+#main-content .pl-plan-heading h1 { font-size:27px!important;font-weight:900; }
+#main-content .pl-plan-heading p { line-height:1.45;max-width:250px; }
+#main-content .pl-plan-navigation nav { background:var(--pl2-lilac);border:1px solid var(--pl-theme-line);border-radius:18px;padding:5px;gap:4px!important; }
+#main-content .pl-plan-navigation nav button { border:0!important;box-shadow:none!important;border-radius:13px!important;padding:9px 3px!important;font-size:13px!important;background:transparent; }
+#main-content .pl-plan-navigation nav button[aria-pressed="true"] { box-shadow:0 4px 12px rgba(77,44,107,.14)!important;background:var(--pl-theme-surface)!important;color:var(--pl-theme-ink)!important; }
+#main-content .pl-calendar-cozy { max-width:440px!important; }
+#main-content .pl-calendar-cozy>section,#main-content .pl-calendar-cozy details { border-radius:var(--pl2-radius)!important;box-shadow:var(--pl2-shadow)!important; }
+#main-content .pl-calendar-cozy [role="tablist"] { background:var(--pl2-lilac)!important;border-radius:17px!important;padding:5px!important; }
+#main-content .pl-calendar-cozy [role="tab"][aria-selected="true"] { border-radius:13px!important; }
+#main-content .pl-closet-shell { display:grid;gap:14px; }
+#main-content .pl-closet-summary { background:linear-gradient(145deg,var(--pl2-lilac),var(--pl-theme-surface))!important; }
+#main-content .pl-collection-tabs { padding:5px!important;border-radius:17px!important;background:var(--pl2-lilac)!important; }
+#main-content .pl-collection-tabs button { border-radius:12px!important;min-height:44px; }
+#main-content .pl-collection-grid { gap:12px!important; }
+#main-content .pl-collection-item { border-radius:18px!important;overflow:hidden;box-shadow:0 5px 15px rgba(77,44,107,.06); }
+#main-content .pl-guardian-smart-brief { background:linear-gradient(145deg,var(--pl2-lilac),var(--pl2-rose))!important;padding:19px!important; }
+#main-content .pl-guardian-smart-actions button { border-radius:16px!important; }
+#main-content :is(button,[role="tab"],summary) { -webkit-tap-highlight-color:transparent; }
+#main-content button:focus-visible,#main-content summary:focus-visible,#main-content [role="tab"]:focus-visible { outline:3px solid var(--pl-theme-accent)!important;outline-offset:3px!important; }
+@media(max-width:360px) {
+ #main-content .plushlife-app-column { padding-inline:12px!important; }
+ #main-content .pl-quick-paths { gap:8px!important; }
+ #main-content .pl-quick-paths button { padding:12px!important; }
+ #main-content .pl-plan-navigation nav button { font-size:12px!important; }
+}
+@media(prefers-reduced-motion:reduce){#main-content .pl-quick-paths button{transition:none!important;}}
+
+/* PlushLife 2.0 journeys and low-pressure one-thing view */
+#main-content .pl2-storybook { display:grid;gap:16px; }
+#main-content .pl2-storybook .pl-storybook-banner { border-radius:26px!important;overflow:hidden;box-shadow:var(--pl2-shadow)!important; }
+#main-content .pl2-storybook .pl-storybook-today { border-radius:24px!important;box-shadow:var(--pl2-shadow)!important; }
+#main-content .pl2-storybook .pl-storybook-list li { border-radius:16px!important;min-height:54px; }
+#main-content .pl2-storybook .pl-storybook-check { min-width:44px;min-height:44px;display:grid;place-items:center; }
+#main-content .pl2-storybook .pl-storybook-door { border-radius:20px!important;min-height:92px; }
+#main-content .pl2-storybook .pl-storybook-detail { min-width:44px;min-height:44px; }
+#main-content .pl2-storybook .pl2-day-tools { display:flex;gap:6px;padding:5px;margin:8px 0 14px;background:var(--pl2-lilac);border:1px solid var(--pl-theme-line);border-radius:18px; }
+#main-content .pl2-day-tools button { flex:1;min-height:44px;border:0;border-radius:13px;background:transparent;color:var(--pl-theme-ink);font:850 13px Nunito,system-ui;cursor:pointer; }
+#main-content .pl2-day-tools button[aria-pressed="true"] { background:var(--pl-theme-surface);box-shadow:0 3px 12px rgba(77,44,107,.12); }
+#main-content .pl2-journey-links { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px; }
+#main-content .pl2-journey-links button { display:flex;align-items:center;gap:9px;text-align:left;min-width:0;min-height:94px;padding:14px 11px;border:1px solid var(--pl-theme-line);border-radius:20px;background:linear-gradient(155deg,var(--pl-theme-surface),var(--pl2-rose));color:var(--pl-theme-ink);box-shadow:var(--pl2-shadow);font-size:21px;cursor:pointer; }
+#main-content .pl2-journey-links button:first-child { background:linear-gradient(155deg,var(--pl-theme-surface),var(--pl2-lilac)); }
+#main-content .pl2-journey-links button span:nth-child(1) { flex:1;min-width:0;display:grid;gap:5px; }
+#main-content .pl2-journey-links button strong { font:850 13px/1.2 Nunito,system-ui;display:block; }
+#main-content .pl2-journey-links button small { font:650 11px/1.35 Nunito,system-ui;color:var(--pl-theme-muted);display:block; }
+#main-content .pl2-journey-links button span:last-child { margin-left:auto; }
+@media(max-width:350px){#main-content .pl2-journey-links{grid-template-columns:1fr}#main-content .pl2-journey-links button{min-height:70px}}
+
+/* Cohesive calendar, planner and keepsake headings */
+#main-content .pl2-eyebrow { display:block;font:900 11px/1.4 Nunito,system-ui;letter-spacing:.085em;color:var(--pl-theme-accent);margin-bottom:7px; }
+#main-content .pl2-plan-helper { color:var(--pl-theme-muted);font-size:13px;line-height:1.5;margin:10px 6px 0; }
+#main-content .pl2-calendar-intro,#main-content .pl2-rewards-intro { padding:17px 18px 16px;border:1px solid var(--pl-theme-line);border-radius:24px;background:linear-gradient(140deg,var(--pl2-lilac),var(--pl2-rose));box-shadow:var(--pl2-shadow); }
+#main-content .pl2-calendar-intro h2,#main-content .pl2-rewards-intro h2 { color:var(--pl-theme-ink);font-size:23px!important;font-weight:900;line-height:1.25;margin:0 0 7px;letter-spacing:-.025em; }
+#main-content .pl2-calendar-intro p,#main-content .pl2-rewards-intro p { color:var(--pl-theme-muted);font-size:13px;line-height:1.55;margin:0; }
+#main-content .pl-closet-shell .pl2-rewards-intro { margin-bottom:1px; }
+#main-content .pl2-storybook .pl2-day-tools button:focus-visible,#main-content .pl2-journey-links button:focus-visible { outline:3px solid var(--pl-theme-accent)!important;outline-offset:3px; }
+@media(min-width:600px){#main-content .pl2-journey-links button{min-height:106px}}

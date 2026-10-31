@@ -9,6 +9,7 @@ export function WeekPanel(props) {
 
   return (
     <div className="pl-calendar-cozy">
+      <header className="pl2-calendar-intro"><span className="pl2-eyebrow">📅 YOUR LITTLE CALENDAR</span><h2>Your days, gently planned</h2><p>Look ahead, make room for rest, and return whenever you’re ready.</p></header>
       <style>{`
         .pl-calendar-cozy{display:grid;gap:8px;padding-bottom:calc(116px + var(--pl-safe-bottom,0px))}
         .pl-calendar-cozy>button{min-height:44px!important;border-radius:14px!important;border:1px solid var(--pl-theme-line)!important;background:var(--pl-theme-surface)!important;color:var(--pl-theme-ink)!important;box-shadow:none!important}
