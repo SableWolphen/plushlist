@@ -56,8 +56,11 @@
 if ("serviceWorker" in navigator && !window.Capacitor?.isNativePlatform?.()) {
   window.addEventListener("load", () => {
     let refreshing = false;
+    // Only reload when a new version replaces an older worker. On a first visit
+    // there is no previous worker, and reloading would download the app twice.
+    const hadController = Boolean(navigator.serviceWorker.controller);
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (refreshing) return;
+      if (refreshing || !hadController) return;
       refreshing = true;
       window.location.reload();
     });
