@@ -12,7 +12,8 @@ function GrowthFallback() {
 }
 
 // Product-quality contract lives in progress-panel-existing.jsx and remains active:
-// <GrowthNextMove /> · Why PlushLife thinks this: · LazyWeeklyHabitReview · insightsOpen
+// <GrowthNextMove /> · Why PlushLife thinks this: · insightsOpen
+// LazyWeeklyHabitReview was retired: Habit Studio › My week below is the one weekly review.
 export function ProgressPanel(props) {
   if (!props.open) return null;
   const goldInsights = hasGoldFeature("advanced_growth_insights");

@@ -39,7 +39,8 @@ assert(today.includes('setCalmQuickOpen?.(true)'), "Calm stays available through
 assert(care.includes('<CozySpace '), "Cozy Space remains available in Care");
 assert(!today.includes('<details className="pl-home-advanced">'), "Do not nest a second More options drawer");
 
-for(const feature of ["<DayAgenda tasks=","<CompletedToday rows=","{homeSections.habits}","{optionalTools}","<CozyDayHome userId=","<DayRescue currentMode="]) {
+assert(!today.includes("<DayAgenda"), "Home shows tasks and schedule once; no second agenda inside More for today");
+for(const feature of ["schedulePreview={homeSections.schedule}","<CompletedToday rows=","{homeSections.habits}","{optionalTools}","<CozyDayHome userId=","<DayRescue currentMode="]) {
   assert(today.includes(feature), "Secondary feature was deleted rather than organized: "+feature);
 }
 assert(settings.includes('new Set(["personalize", "notifications", "privacy", "account"])'), "Everyday Settings must lead with four relevant categories");

@@ -52,7 +52,7 @@ export function storybookGreeting(hour = new Date().getHours(), name = "") {
   const greeting = hour < 12 ? "Good morning, Cozy!" : hour < 18 ? "Good afternoon, Cozy!" : "Good evening, Cozy!";
   return greeting.replace("Cozy!", `${who}!`);
 }
-export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false,syncStatus,online,tomorrowPreviewRows=[],tomorrowDateString="",dayType="full",weeklyHistory=[],dailyCheckInHistory=[], onQuickAdd, quickAddMessage, onEditTask, schedulePreview, displayName=""}) {
+export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false,syncStatus,online,tomorrowPreviewRows=[],tomorrowDateString="",dayType="full",weeklyHistory=[],dailyCheckInHistory=[], onQuickAdd, quickAddMessage, onEditTask, schedulePreview, scheduleNext=null, displayName=""}) {
   const companion=useGuardianState(userId);
   const [expanded, setExpanded] = React.useState(false);
   const [oneThingMode, setOneThingMode] = React.useState(false);
@@ -100,7 +100,7 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
       {dayType !== "rest" && !oneThingMode && (expanded || total>visible.length) && <button type="button" className="pl-storybook-more" aria-expanded={expanded} onClick={()=>setExpanded(value=>!value)}>{expanded ? "Show fewer tasks" : `Show all ${total} tasks here`}</button>}
       <details className="pl-storybook-capture" key={`${userId}:${period?.date}`}><summary>＋ Add a task</summary><QuickCapture compact onQuickAdd={onQuickAdd} quickAddMessage={quickAddMessage} /></details>
     </section>
-    {schedulePreview && <details className="pl-storybook-schedule" style={{order:cardStyle("tasks").order + 0.5}}><summary>Today’s schedule</summary>{schedulePreview}</details>}
+    {schedulePreview && <details className="pl-storybook-schedule" style={{order:cardStyle("tasks").order + 0.5}}><summary>Today’s schedule{scheduleNext && <span className="pl-storybook-schedule-next"> · Next {window.PlushLifeSchedule?.formatTime12?.(scheduleNext.time) || scheduleNext.time} {scheduleNext.text}</span>}</summary>{schedulePreview}</details>}
     <nav style={cardStyle("shortcuts")} className="pl-storybook-doors" aria-label="Your everyday actions">
       <button type="button" className="pl-storybook-door pl-door-checkin" onClick={()=>openDailyCheckIn?.()}><span className="pl-storybook-door-emoji" aria-hidden="true">💗</span><strong>Check in</strong></button>
       <button type="button" className="pl-storybook-door pl-door-journal" onClick={()=>openTodayJournal?.()}><span className="pl-storybook-door-emoji" aria-hidden="true">📝</span><strong>Journal</strong></button>

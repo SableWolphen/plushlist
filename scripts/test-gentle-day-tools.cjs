@@ -30,8 +30,9 @@ const button = label=>tree.root.findAllByType('button').find(node=>node.children
   assert.equal(nextLocalDate('2026-12-31'),'2027-01-01');
   assert.equal(nextLocalDate('2026-03-08'),'2026-03-09');
   await act(async()=>{tree=create(React.createElement(GentleDayTools,props));});
-  await act(async()=>{await button('A little energy').props.onClick();});
-  assert.equal(type,'tiny');
+  assert.equal(button('A little energy'),undefined,'Day type is chosen in the Home day-mode picker, not a second picker here');
+  await act(async()=>{await button('Start fresh from now').props.onClick();});
+  assert.equal(type,'soft');
   await act(async()=>{button('I did some').props.onClick();});
   assert.equal(JSON.parse(entries.get(`plushlife:gentle-tools:cozy-a:${date}`)).progress.clean,'partial');
   assert.equal(button('I did some').props['aria-pressed'],true);

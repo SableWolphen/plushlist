@@ -107,7 +107,7 @@ const checks = [
   [background.includes("maintenanceDue") && background.includes("MAX_EVENTS") && background.includes("450"), "background engine prunes, maintains and throttles work"],
   [progress.includes("<GrowthNextMove />") && growthMove.includes("PLUSH COACH") && growthMove.includes("observed days"), "PlushGrowth puts one evidence-backed adjustment before deeper analytics"],
   [progress.includes("Why PlushLife thinks this:"), "habit insights explain their evidence"],
-  [progress.includes("LazyWeeklyHabitReview") && progress.includes("insightsOpen"), "deep PlushGrowth tools wait until Habit Insights is opened"],
+  [read("src/components/progress-panel-existing.jsx").includes("insightsOpen && <React.Suspense fallback={<InsightToolsFallback />}><LazyWhatWorksForMe"), "deep PlushGrowth tools wait until Habit Insights is opened"],
   [settings.includes("REMINDER LOAD") && settings.includes("This suggestion comes from your own recent check-in timing."), "reminders include quiet load guidance and evidence for timing suggestions"],
   [settings.includes("Reduce visual decisions, ambient theme effects, and extra decoration."), "Simple Layout explains its ambient-theme impact inline"],
   [companionSync.includes("FALLBACK_SYNC_MS = 120000") && companionSync.includes("plushlife:habit-coach-updated") && !companionSync.includes("12000)"), "companion sync is event-driven instead of frequent polling"],
