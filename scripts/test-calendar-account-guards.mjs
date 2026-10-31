@@ -16,3 +16,7 @@ assert.match(code,/user_id:userId/);
 assert.match(code,/Retry account sync/);
 const app=readFileSync(new URL("../src/app-source.jsx",import.meta.url),"utf8");
 assert.match(app,/<ScheduleEditorPanel client=\{supabase\} user=\{user\}/);
+
+assert.match(code,/const remove = id =>[\s\S]*?writeScope\(userId,"items",next\); setItems\(next\); itemsRef\.current=next; syncState\(next,doneRef\.current\)/, "Deleting a reminder must sync the updated list");
+assert.match(code,/Template added[\s\S]*?\}\}/, "Calendar templates must retain safe save handling");
+assert.match(code,/itemsRef\.current=next;syncState\(next,doneRef\.current\);setNotice\("Template added/, "Adding a calendar template must sync the updated list");
