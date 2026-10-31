@@ -49,7 +49,9 @@ const CDN_REPLACEMENTS = [
 const GENERATED_INDEX_PRELOADS = [
   '<link rel="preload" href="./vendor/react.production.min.js" as="script">',
   '<link rel="preload" href="./vendor/react-dom.production.min.js" as="script">',
-  '<link rel="preload" href="./vendor/supabase.min.js" as="script">',
+  // crossorigin + integrity must match the <script> tag exactly, or the
+  // browser throws the preload away and downloads the library a second time.
+  '<link rel="preload" href="./vendor/supabase.min.js" as="script" crossorigin="anonymous" integrity="__SUPABASE_INTEGRITY__">',
   '<link rel="preload" href="./assets/fast-start.js" as="script">',
   '<link rel="preload" href="./assets/plush-content.js" as="script">',
   '<link rel="preload" href="./assets/plush-helpers.js" as="script">',
@@ -323,7 +325,8 @@ function prepareHtml(file, source, buildSha) {
     // prevent the timer/error handlers themselves from being installed.
     if (!content.includes('id="plush-boot-recovery"')) content = content.replace(BOOT_SHELL_HTML + '</div>', BOOT_SHELL_HTML + '</div>\n' + BOOT_RECOVERY_SCRIPT);
 
-    for (const preload of GENERATED_INDEX_PRELOADS) {
+    for (const template of GENERATED_INDEX_PRELOADS) {
+      const preload = template.replace("__SUPABASE_INTEGRITY__", supabaseVendorIntegrity());
       if (!content.includes(preload)) content = content.replace("</head>", `  ${preload}\n</head>`);
     }
 
