@@ -86,7 +86,7 @@ export function GentleCalendar({ userId, client }) {
   const saveBatch = values => { if(!values.length)return;const next=[...items,...values.map((name,i)=>({id:String(Date.now())+"-"+i,title:name,date,repeat:"once",time:"",category:"life",important:false}))];try{writeScope(userId,"items",next);setItems(next);itemsRef.current=next;syncState(next,doneRef.current);setDump("");setNotice(`${values.length} gentle reminders added.`);}catch{setNotice("Could not save these reminders.");} };
   const remove = id => {
     const next=items.filter(item=>item.id!==id);
-    try { writeScope(userId,"items",next); setItems(next); setNotice("Reminder removed from this device."); }
+    try { writeScope(userId,"items",next); setItems(next); itemsRef.current=next; syncState(next,doneRef.current); setNotice("Reminder removed from this device."); }
     catch { setNotice("Unable to remove reminder."); }
   };
   if (!userId) return <section className="schedule-card">Sign in to use your private calendar.</section>;
@@ -147,7 +147,7 @@ export function GentleCalendar({ userId, client }) {
       <button type="button" className="schedule-btn primary" disabled={!brainDumpLines(dump).length} onClick={()=>saveBatch(brainDumpLines(dump))}>Add these to selected day</button>
     </details>
     <details><summary style={{minHeight:44,cursor:"pointer",fontWeight:850}}>✨ Quick routine templates</summary>
-      <div style={{display:"grid",gap:6}}>{GENTLE_TEMPLATES.map(template=><button key={template.title} type="button" className="schedule-btn add" onClick={()=>{const next=[...items,{...template,id:String(Date.now())+"-"+Math.random().toString(36).slice(2,6),date,time:""}];try{writeScope(userId,"items",next);setItems(next);setNotice("Template added — edit or remove whenever you like.");}catch{setNotice("Could not save template.");}}}>＋ {template.title} · {template.repeat}</button>)}</div>
+      <div style={{display:"grid",gap:6}}>{GENTLE_TEMPLATES.map(template=><button key={template.title} type="button" className="schedule-btn add" onClick={()=>{const next=[...items,{...template,id:String(Date.now())+"-"+Math.random().toString(36).slice(2,6),date,time:""}];try{writeScope(userId,"items",next);setItems(next);itemsRef.current=next;syncState(next,doneRef.current);setNotice("Template added — edit or remove whenever you like.");}catch{setNotice("Could not save template.");}}}>＋ {template.title} · {template.repeat}</button>)}</div>
     </details>
     <details><summary style={{minHeight:44,cursor:"pointer",fontWeight:850}}>🧸 Focus buddy</summary>
       <p className="schedule-helper">A quiet visual countdown that runs while this screen is open. It never tracks productivity or starts a background service.</p>
