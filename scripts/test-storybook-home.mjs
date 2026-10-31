@@ -95,4 +95,17 @@ assert(dailyMarkup.includes('Quickly add a task'),'The real task input is presen
 assert(dailyMarkup.includes('09:00 Test schedule'),'The schedule can be read in Today');
 assert(!dailyMarkup.includes('When should this happen'),'Today capture avoids timing choices');
 assert(!dailyMarkup.includes('More options ↓'),'Today capture avoids another setup menu');
-console.log('Today hub passed: inline task list, retained completions, compact capture and schedule.');
+// Simplified Today: energy picker, one "Next up" card, then the checklist.
+const pickProps={userId:'home-test',rows:tasks,period:{date:'2026-10-20'},dayType:'soft',selectDayType:()=>true,pickEasierSuggestion:()=>{},toggle:()=>{}};
+const pickMarkup=renderToStaticMarkup(React.createElement(StorybookHome,pickProps));
+assert(pickMarkup.includes('How much do you have today?'),'Home leads with the energy picker');
+for(const label of ['Tiny','Soft','Full','Rest']) assert(pickMarkup.includes('>'+label+'</button>'),'Energy option missing: '+label);
+assert(/aria-pressed="true"[^>]*>Soft</.test(pickMarkup),'The current day type is shown as selected');
+assert(pickMarkup.includes('NEXT UP') && pickMarkup.includes('Make it smaller'),'Home shows one Next up card with a way to shrink it');
+assert(pickMarkup.indexOf('NEXT UP') < pickMarkup.indexOf('class="pl-storybook-today"'),'Next up comes before the full checklist');
+const smallerMarkup=renderToStaticMarkup(React.createElement(StorybookHome,{...pickProps,nextStepTask:{key:'task-3',label:'Task 3'},nextStepHint:{key:'task-3',text:'Just open the app'}}));
+assert(smallerMarkup.includes('Just open the app') && smallerMarkup.includes('Try 2 minutes'),'A smaller step replaces the Next up suggestion');
+const restMarkup=renderToStaticMarkup(React.createElement(StorybookHome,{...pickProps,dayType:'rest'}));
+assert(!restMarkup.includes('NEXT UP'),'Rest days show no Next up nudge');
+assert(!dailyMarkup.includes('How much do you have today?'),'Without a way to save, the energy picker stays hidden');
+console.log('Today hub passed: energy picker, Next up, inline task list, retained completions, compact capture and schedule.');

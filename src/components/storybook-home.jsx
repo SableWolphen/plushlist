@@ -5,6 +5,7 @@ import { buildCozyDayPlan, weeklyCozyStory } from "../cozy-day-plan.mjs";
 import { themeAtmosphere } from "../theme-atmosphere.js";
 import { HabitTypeIcon, habitTypeForRow } from "./shared.jsx";
 import { HabitGoalCaption } from "./habit-studio.jsx";
+import { startFocusTimer } from "./focus-timer.jsx";
 
 export const STORYBOOK_MOODS = [
   ["happy","Happy","🥰"],["calm","Calm","😌"],["okay","Okay","🙂"],["tired","Tired","😴"],["stressed","Stressed","🥺"]
@@ -52,11 +53,13 @@ export function storybookGreeting(hour = new Date().getHours(), name = "") {
   const greeting = hour < 12 ? "Good morning, Cozy!" : hour < 18 ? "Good afternoon, Cozy!" : "Good evening, Cozy!";
   return greeting.replace("Cozy!", `${who}!`);
 }
-export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false,syncStatus,online,tomorrowPreviewRows=[],tomorrowDateString="",dayType="full",weeklyHistory=[],dailyCheckInHistory=[], onQuickAdd, quickAddMessage, onEditTask, schedulePreview, scheduleNext=null, displayName=""}) {
+export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false,syncStatus,online,tomorrowPreviewRows=[],tomorrowDateString="",dayType="full",weeklyHistory=[],dailyCheckInHistory=[], onQuickAdd, quickAddMessage, onEditTask, schedulePreview, scheduleNext=null, displayName="", selectDayType, nextStepTask=null, nextStepHint=null, pickEasierSuggestion}) {
   const companion=useGuardianState(userId);
   const [expanded, setExpanded] = React.useState(false);
-  const [oneThingMode, setOneThingMode] = React.useState(false);
-  React.useEffect(() => { setExpanded(false); setOneThingMode(false); }, [userId, period?.date, dayType]);
+  const [dayBusy, setDayBusy] = React.useState(false);
+  const [dayMessage, setDayMessage] = React.useState("");
+  const captureRef = React.useRef(null);
+  React.useEffect(() => { setExpanded(false); setDayMessage(""); }, [userId, period?.date, dayType]);
   const cardStyle=id=>({order:companion.home.order.indexOf(id)+1,display:companion.home.hidden.includes(id)?"none":undefined});
   const context=React.useContext(ThemeWorldContext);
   const nursery=world === "baby" || world === "baby-night";
@@ -65,7 +68,7 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
   const atmosphere=nursery ? {...themeAtmosphere(world),heading:`${caregiver}’s little plan`,hint:`We can do your little jobs together, ${caregiver === "Mommy" ? "sweetheart" : "kiddo"}.`} : themeAtmosphere(world);
   const now=new Date();
   const previewSize = dayType === "rest" ? 0 : dayType === "tiny" ? 1 : ["soft","recovery"].includes(dayType) ? 2 : 3;
-  const visible=storybookRows(rows,viewDone,dayType === "rest" ? 0 : oneThingMode ? 1 : expanded ? rows.length : previewSize,now.getHours()*60+now.getMinutes(),expanded && dayType !== "rest");
+  const visible=storybookRows(rows,viewDone,dayType === "rest" ? 0 : expanded ? rows.length : previewSize,now.getHours()*60+now.getMinutes(),expanded && dayType !== "rest");
   const weekStory=weeklyCozyStory({history:weeklyHistory,checkIns:dailyCheckInHistory,today:period?.date || ""});
   const hasWeeklyStory=weekStory && (weekStory.stepCount > 0 || weekStory.checkIns > 0);
   const completed=rows.filter(row=>row && row.key && row.label && !row.isBonus && !row.sourceTask?.archived_at && viewDone[row.key]).length;
@@ -79,26 +82,61 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
     try{sessionStorage.setItem("plushlife:focus-open:v1","1");}catch(_error){}
     window.dispatchEvent(new Event("plushlife:focus-one-step"));
   };
-  return <div className={darkMode ? "pl-storybook pl-storybook-dark pl2-storybook" : "pl-storybook pl2-storybook"} data-storybook-world={world}>
+  const longDate=period?.date && /^\d{4}-\d{2}-\d{2}$/.test(period.date)
+    ? new Date(period.date+"T12:00:00").toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"})
+    : "Today";
+  // "Next up" is the smart next step when it is still open, else the top unfinished task.
+  const pendingRows=storybookRows(rows,viewDone,1,now.getHours()*60+now.getMinutes());
+  const smartNext=nextStepTask && nextStepTask.key && !viewDone[nextStepTask.key] ? {key:nextStepTask.key,label:String(nextStepTask.label || "")} : null;
+  const next=dayType === "rest" ? null : smartNext || (pendingRows[0] && !pendingRows[0].done ? pendingRows[0] : null);
+  const smallerText=next && nextStepHint && nextStepHint.key === next.key ? nextStepHint.text : "";
+  const chooseDay=async(value)=>{
+    if (dayBusy || typeof selectDayType !== "function" || value === dayType) return;
+    setDayBusy(true); setDayMessage("");
+    try { const saved=await selectDayType(value); if (saved === false) setDayMessage("Couldn’t save that. Your day is unchanged."); }
+    catch(_error){ setDayMessage("Couldn’t save that. Your day is unchanged."); }
+    finally { setDayBusy(false); }
+  };
+  const openCapture=()=>{ const node=captureRef.current; if(!node) return; node.open=true; node.querySelector("input,textarea")?.focus?.(); };
+  return <div className={darkMode ? "pl-storybook pl-storybook-dark pl2-storybook pl3-home" : "pl-storybook pl2-storybook pl3-home"} data-storybook-world={world}>
     <header className="pl-storybook-banner">
-      <div className="pl-storybook-brand"><span>PlushLife</span></div>
-      <button type="button" className="pl-storybook-settings" aria-label="Open settings" onClick={()=>setSettingsOpen?.(true)}>⚙</button>
       {atmosphere.scene && <div className="pl-storybook-sky" aria-hidden="true"><img src={`./assets/worlds/${atmosphere.scene}.svg`} alt="" width="640" height="240" /></div>}
-      <div className="pl-storybook-greeting">{copy.tag && <p className={nursery ? "pl-storybook-small pl-nursery-mode-label" : "pl-storybook-small"}>{copy.symbol} {copy.tag}</p>}<h1>{nursery ? storybookGreeting().replace("Cozy!",caregiver === "Mommy" ? "sweetheart!" : "kiddo!") : storybookGreeting(undefined, displayName)}</h1><p>{copy.detail}</p></div>
       <div className="pl-storybook-mascot" aria-label="Your original PlushLife teddy bear"><ThemeScene decorative focus outfit={selectedOutfit} /></div>
+      <div className="pl-storybook-greeting"><p className={nursery ? "pl-storybook-small pl-nursery-mode-label" : "pl-storybook-small"}>{nursery ? `${copy.symbol} ${copy.tag}` : longDate}</p><h1>{nursery ? storybookGreeting().replace("Cozy!",caregiver === "Mommy" ? "sweetheart!" : "kiddo!") : storybookGreeting(undefined, displayName)}</h1></div>
+      <button type="button" className="pl-storybook-settings" aria-label="Open settings" onClick={()=>setSettingsOpen?.(true)}>⚙</button>
       {(online===false || syncStatus==="error" || syncStatus==="syncing") && <span className="pl-companion-sync" role="status">{online===false?"Offline · changes will sync later":syncStatus==="error"?"Sync needs attention":"Saving…"}</span>}
     </header>
+    {typeof selectDayType === "function" && <section className="pl3-energy" aria-label="How much do you have today?">
+      <p>How much do you have today?</p>
+      <div className="pl3-energy-options">{[["tiny","Tiny"],["soft","Soft"],["full","Full"],["rest","Rest"]].map(([value,label])=><button key={value} type="button" aria-pressed={(dayType === "recovery" ? "soft" : dayType) === value} disabled={dayBusy} onClick={()=>chooseDay(value)}>{label}</button>)}</div>
+      {dayMessage && <p className="pl3-energy-message" role="status">{dayMessage}</p>}
+    </section>}
+    {next && <section className="pl3-next" aria-label="Next up">
+      <p className="pl3-next-label">NEXT UP</p>
+      <h2>{next.label}</h2>
+      {smallerText ? <p className="pl3-next-smaller"><strong>Smaller step:</strong> {smallerText}</p> : <p>One little thing. Everything else can wait.</p>}
+      <div className="pl3-next-actions">
+        <button type="button" className="pl3-next-done" onClick={()=>toggle?.(next.key)}>✓ Done</button>
+        {typeof pickEasierSuggestion === "function" && !smallerText && <button type="button" className="pl3-next-smaller-button" onClick={()=>pickEasierSuggestion(next.key)}>Make it smaller</button>}
+        {smallerText && <button type="button" className="pl3-next-smaller-button" onClick={()=>startFocusTimer({minutes:2,taskLabel:next.label,step:smallerText})}>Try 2 minutes</button>}
+      </div>
+    </section>}
     <section style={cardStyle("tasks")} className="pl-storybook-today" aria-label="Today's checklist">
-      <div className="pl-storybook-topline"><span>TODAY</span><button type="button" onClick={()=>goToDashboard?.("week")} aria-label="Open calendar">{dayLabel} <span aria-hidden="true">▦</span></button></div>
-      <div className="pl2-day-tools" aria-label="Choose how much to see"><button type="button" aria-pressed={!oneThingMode} onClick={()=>setOneThingMode(false)}>My day</button><button type="button" aria-pressed={oneThingMode} onClick={()=>{setOneThingMode(true);setExpanded(false);}}>Just one thing</button></div>
-      <div className="pl-storybook-intro"><div><h2>{dayType === "rest" ? "Today is for rest" : completed === total && total ? "Your little wins" : atmosphere.heading}</h2><p>{dayType === "rest" ? "Your tasks are safe. You can come back when you are ready." : oneThingMode ? "Only your next step is showing. Everything else is still safe." : dayType === "tiny" ? "One small step is enough for today." : ["soft","recovery"].includes(dayType) ? "Just two gentle steps to focus on." : total ? atmosphere.hint : "Your page is ready. Start with one little thing."}</p></div></div>
-      <div className="pl-storybook-progress-label"><strong>{dayType === "rest" ? "Rest is a valid choice" : `${completed} / ${total} completed`}</strong><span>{dayType === "rest" ? "Rest Day" : total ? progress+"%" : "Fresh start"}</span></div>
+      <div className="pl3-list-head">
+        <h2>{dayType === "rest" ? "Today is for rest" : completed === total && total ? "Your little wins" : "Today"}</h2>
+        <div className="pl3-list-tools">
+          {dayType !== "rest" && total > 0 && <span className="pl3-count">{completed} of {total}</span>}
+          <button type="button" className="pl3-date-button" onClick={()=>goToDashboard?.("week")} aria-label={`Open calendar, ${dayLabel}`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></button>
+          <button type="button" className="pl3-add-button" aria-label="Add a task" onClick={openCapture}>＋</button>
+        </div>
+      </div>
+      {dayType === "rest" ? <p className="pl3-list-note">Your tasks are safe. You can come back when you are ready.</p> : dayType === "tiny" ? <p className="pl3-list-note">One small step is enough for today.</p> : ["soft","recovery"].includes(dayType) ? <p className="pl3-list-note">Just two gentle steps to focus on.</p> : null}
       {total > 0 && completed === total && <div className="pl-storybook-world-win" role="status"><span aria-hidden="true">{atmosphere.check}</span> {atmosphere.celebrate || "Your little wins are worth celebrating."}</div>}
-      {dayType !== "rest" && <div className="pl-storybook-progress" role="progressbar" aria-label="Today's tasks completed" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}><div style={{width:progress+"%"}} /></div>}
-      {habitCount>0 && <button type="button" className="pl-storybook-habits-link" aria-label={`Show today’s tasks including ${habitCount} ${habitCount === 1 ? "habit" : "habits"}`} onClick={()=>setExpanded(true)}><span aria-hidden="true">🌱</span> {habitCount} {habitCount===1 ? "habit" : "habits"} in today’s list <span aria-hidden="true">›</span></button>}
-      {visible.length ? <ul className="pl-storybook-list">{visible.map(row=><li key={row.key} data-habit-kind={row.habitType}><button className="pl-storybook-check" type="button" aria-label={(row.done?"Undo ":"Complete ")+row.label} aria-pressed={row.done} onClick={()=>toggle?.(row.key)}><span aria-hidden="true">{row.done?"✓":""}</span></button><span className="pl-storybook-task-copy"><HabitTypeIcon task={row.sourceTask} habitType={row.habitType}/><span className={row.done?"pl-storybook-complete":""}>{row.label}</span>{row.done && <span className="pl-storybook-world-motif" aria-hidden="true">{atmosphere.check}</span>}{row.habitType!=="regular" && <HabitGoalCaption taskKey={row.key} fallbackGoal={row.goal}/>}</span><button type="button" className="pl-storybook-detail" aria-label={"Edit "+row.label} onClick={()=>row.sourceTask && onEditTask ? onEditTask(row.sourceTask) : openTaskManager?.(period?.date)}>›</button></li>)}</ul> : dayType === "rest" ? <div className="pl-storybook-empty"><p>💜 Your little jobs can wait. Rest counts.</p></div> : <div className="pl-storybook-empty"><p>A fresh page, just for you. 🌷</p><p>Add a task below when you’re ready.</p></div>}
-      {dayType !== "rest" && !oneThingMode && (expanded || total>visible.length) && <button type="button" className="pl-storybook-more" aria-expanded={expanded} onClick={()=>setExpanded(value=>!value)}>{expanded ? "Show fewer tasks" : `Show all ${total} tasks here`}</button>}
-      <details className="pl-storybook-capture" key={`${userId}:${period?.date}`}><summary>＋ Add a task</summary><QuickCapture compact onQuickAdd={onQuickAdd} quickAddMessage={quickAddMessage} /></details>
+      {dayType !== "rest" && total > 0 && <div className="pl-storybook-progress" role="progressbar" aria-label="Today's tasks completed" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}><div style={{width:progress+"%"}} /></div>}
+      {habitCount>0 && !expanded && <button type="button" className="pl-storybook-habits-link" aria-label={`Show today’s tasks including ${habitCount} ${habitCount === 1 ? "habit" : "habits"}`} onClick={()=>setExpanded(true)}><span aria-hidden="true">🌱</span> {habitCount} {habitCount===1 ? "habit" : "habits"} in today’s list <span aria-hidden="true">›</span></button>}
+      {visible.length ? <ul className="pl-storybook-list">{visible.map(row=><li key={row.key} data-habit-kind={row.habitType}><button className="pl-storybook-check" type="button" aria-label={(row.done?"Undo ":"Complete ")+row.label} aria-pressed={row.done} onClick={()=>toggle?.(row.key)}><span aria-hidden="true">{row.done?"✓":""}</span></button><span className="pl-storybook-task-copy"><HabitTypeIcon task={row.sourceTask} habitType={row.habitType}/><span className={row.done?"pl-storybook-complete":""}>{row.label}</span>{row.done && <span className="pl-storybook-world-motif" aria-hidden="true">{atmosphere.check}</span>}{row.habitType!=="regular" && <HabitGoalCaption taskKey={row.key} fallbackGoal={row.goal}/>}</span><button type="button" className="pl-storybook-detail" aria-label={"Edit "+row.label} onClick={()=>row.sourceTask && onEditTask ? onEditTask(row.sourceTask) : openTaskManager?.(period?.date)}>›</button></li>)}</ul> : dayType === "rest" ? <div className="pl-storybook-empty"><p>💜 Your little jobs can wait. Rest counts.</p></div> : <div className="pl-storybook-empty"><p>A fresh page, just for you. 🌷</p><p>Tap ＋ to add your first little thing.</p></div>}
+      {dayType !== "rest" && (expanded || total>visible.length) && <button type="button" className="pl-storybook-more" aria-expanded={expanded} onClick={()=>setExpanded(value=>!value)}>{expanded ? "Show fewer tasks" : `Show all ${total} tasks here`}</button>}
+      <details ref={captureRef} className="pl-storybook-capture" key={`${userId}:${period?.date}`}><summary>＋ Add a task</summary><QuickCapture compact onQuickAdd={onQuickAdd} quickAddMessage={quickAddMessage} /></details>
     </section>
     {schedulePreview && <details className="pl-storybook-schedule" style={{order:cardStyle("tasks").order + 0.5}}><summary>Today’s schedule{scheduleNext && <span className="pl-storybook-schedule-next"> · Next {window.PlushLifeSchedule?.formatTime12?.(scheduleNext.time) || scheduleNext.time} {scheduleNext.text}</span>}</summary>{schedulePreview}</details>}
     <nav style={cardStyle("shortcuts")} className="pl-storybook-doors" aria-label="Your everyday actions">
@@ -107,7 +145,6 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
       <button type="button" className="pl-storybook-door pl-door-guardian" onClick={()=>goToDashboard?.("guardian")}><span className="pl-storybook-door-emoji" aria-hidden="true">🧸</span><strong>Guardian</strong></button>
       <button type="button" className="pl-storybook-door pl-door-focus" onClick={focus}><span className="pl-storybook-door-emoji" aria-hidden="true">⏱</span><strong>Focus</strong></button>
     </nav>
-    <div className="pl2-journey-links" aria-label="Explore your PlushLife"><button type="button" onClick={()=>goToDashboard?.("week")}>📆 <span><strong>My calendar</strong><small>See your week at a glance</small></span><span aria-hidden="true">›</span></button><button type="button" onClick={()=>goToDashboard?.("progress")}>🎁 <span><strong>My little wins</strong><small>Progress, rewards & memories</small></span><span aria-hidden="true">›</span></button></div>
     {world === "baby-night" && <button type="button" className="pl-storybook-bedtime" onClick={()=>goToDashboard?.("guardian")}>🌙 Ready for my bedtime routine? <span aria-hidden="true">›</span></button>}
     {(tomorrowPreviewRows.length > 0 || hasWeeklyStory) && <details className="pl-storybook-lookahead" style={{order:companion.home.order.length + 1}}>
       <summary>📅 Looking ahead <span>Tomorrow & my week</span></summary>
