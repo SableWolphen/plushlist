@@ -1,0 +1,68 @@
+/* PlushLife 2.0 — cozy concept visual layer.
+   Presentation only: no auth, task history, billing, or Guardian data changes.
+   Theme tokens keep every existing theme functional. */
+#main-content {
+  --pl2-lilac: color-mix(in srgb, var(--pl-theme-accent,#a777db) 12%, var(--pl-theme-surface,#fff));
+  --pl2-rose: color-mix(in srgb, #f5a4d7 18%, var(--pl-theme-surface,#fff));
+  --pl2-shadow: 0 10px 28px rgba(77,44,107,.09);
+  --pl2-radius: 22px;
+}
+#main-content .plushlife-app-column { width:min(100%,440px)!important;max-width:440px!important;padding-inline:18px!important; }
+#main-content .pl-home-shell { max-width:440px!important;gap:14px; }
+#main-content .pl-home-today-row { padding:14px 4px 6px!important;align-items:center;gap:10px; }
+#main-content .pl-home-greeting h1 { font-size:clamp(23px,5.6vw,30px)!important;line-height:1.2!important;font-weight:900!important;letter-spacing:-.035em; }
+#main-content .pl-home-greeting-date { color:var(--pl-theme-muted);font-weight:750;font-size:13px; }
+#main-content .pl-home-today-actions button { min-height:46px;border-radius:16px!important;box-shadow:none!important; }
+#main-content .pl-home-today-actions .pl-heading-gear { background:var(--pl2-lilac)!important; }
+#main-content .pl-home-today-actions .pl-heading-date { background:var(--pl-theme-surface)!important;border:1px solid var(--pl-theme-line)!important; }
+#main-content :is(.pl-home-hero,.pl-home-welcome,.pl-home-companion-card,.pl-home-next-step,.pl-home-summary,.pl-home-focus-card,.pl-next-step-card,.pl-design-card,.pl-guardian-smart-brief) {
+  border-radius:var(--pl2-radius)!important;
+  box-shadow:var(--pl2-shadow)!important;
+}
+#main-content :is(.pl-home-hero,.pl-home-welcome,.pl-home-companion-card) {
+  background:linear-gradient(135deg,var(--pl2-lilac),var(--pl2-rose))!important;
+  border:1px solid var(--pl-theme-line)!important;
+}
+#main-content .pl-quick-paths { gap:12px!important;max-width:440px!important;margin-bottom:16px!important; }
+#main-content .pl-quick-paths button {
+  border-radius:var(--pl2-radius)!important;
+  min-height:106px!important;
+  padding:16px!important;
+  box-shadow:var(--pl2-shadow)!important;
+  background:linear-gradient(145deg,var(--pl-theme-surface),var(--pl2-lilac))!important;
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+#main-content .pl-quick-paths button:nth-child(2n) { background:linear-gradient(145deg,var(--pl-theme-surface),var(--pl2-rose))!important; }
+#main-content .pl-quick-paths button:active { transform:scale(.98); }
+#main-content .pl-quick-paths button span { font-size:28px!important; }
+#main-content .pl-quick-paths button strong { font-size:15px!important;letter-spacing:-.01em; }
+#main-content .pl-quick-paths button small { font-size:12px!important;line-height:1.4; }
+#main-content :is(.pl-home-extra-tools,.pl-progress-extras,.pl-collection-details) { border-radius:19px!important;box-shadow:0 5px 18px rgba(77,44,107,.04)!important; }
+#main-content .pl-plan-navigation { padding:6px 0 16px!important; }
+#main-content .pl-plan-heading { padding:8px 4px; }
+#main-content .pl-plan-heading h1 { font-size:27px!important;font-weight:900; }
+#main-content .pl-plan-heading p { line-height:1.45;max-width:250px; }
+#main-content .pl-plan-navigation nav { background:var(--pl2-lilac);border:1px solid var(--pl-theme-line);border-radius:18px;padding:5px;gap:4px!important; }
+#main-content .pl-plan-navigation nav button { border:0!important;box-shadow:none!important;border-radius:13px!important;padding:9px 3px!important;font-size:13px!important;background:transparent; }
+#main-content .pl-plan-navigation nav button[aria-pressed="true"] { box-shadow:0 4px 12px rgba(77,44,107,.14)!important;background:var(--pl-theme-surface)!important;color:var(--pl-theme-ink)!important; }
+#main-content .pl-calendar-cozy { max-width:440px!important; }
+#main-content .pl-calendar-cozy>section,#main-content .pl-calendar-cozy details { border-radius:var(--pl2-radius)!important;box-shadow:var(--pl2-shadow)!important; }
+#main-content .pl-calendar-cozy [role="tablist"] { background:var(--pl2-lilac)!important;border-radius:17px!important;padding:5px!important; }
+#main-content .pl-calendar-cozy [role="tab"][aria-selected="true"] { border-radius:13px!important; }
+#main-content .pl-closet-shell { display:grid;gap:14px; }
+#main-content .pl-closet-summary { background:linear-gradient(145deg,var(--pl2-lilac),var(--pl-theme-surface))!important; }
+#main-content .pl-collection-tabs { padding:5px!important;border-radius:17px!important;background:var(--pl2-lilac)!important; }
+#main-content .pl-collection-tabs button { border-radius:12px!important;min-height:44px; }
+#main-content .pl-collection-grid { gap:12px!important; }
+#main-content .pl-collection-item { border-radius:18px!important;overflow:hidden;box-shadow:0 5px 15px rgba(77,44,107,.06); }
+#main-content .pl-guardian-smart-brief { background:linear-gradient(145deg,var(--pl2-lilac),var(--pl2-rose))!important;padding:19px!important; }
+#main-content .pl-guardian-smart-actions button { border-radius:16px!important; }
+#main-content :is(button,[role="tab"],summary) { -webkit-tap-highlight-color:transparent; }
+#main-content button:focus-visible,#main-content summary:focus-visible,#main-content [role="tab"]:focus-visible { outline:3px solid var(--pl-theme-accent)!important;outline-offset:3px!important; }
+@media(max-width:360px) {
+ #main-content .plushlife-app-column { padding-inline:12px!important; }
+ #main-content .pl-quick-paths { gap:8px!important; }
+ #main-content .pl-quick-paths button { padding:12px!important; }
+ #main-content .pl-plan-navigation nav button { font-size:12px!important; }
+}
+@media(prefers-reduced-motion:reduce){#main-content .pl-quick-paths button{transition:none!important;}}
