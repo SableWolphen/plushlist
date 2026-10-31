@@ -30,6 +30,7 @@ export function RewardsPanel({ saveMessage, open, onClose, inline = false, selec
   };
   return <ToolPanel title="🧸 Plush & Keepsakes" displayTitle="Plush" inline={inline} hideClose={inline} onClose={onClose}>
     <div className="pl-closet-shell">
+      <header className="pl2-rewards-intro"><span className="pl2-eyebrow">✨ LITTLE CELEBRATIONS</span><h2>Your cozy collection</h2><p>Every tiny win deserves a little sparkle. Your keepsakes stay yours.</p></header>
       <CozyScene title="Your Plush" subtitle={copy["Your story is bigger than a streak."] || "Keep going! Each completed task helps your plush feel happier."} outfit={selectedOutfit} focus />
       <section className="pl-design-card pl-closet-summary">
         <h2>Wearing · {selectedOutfit.name}</h2>
