@@ -56,10 +56,12 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
             <section className="pl-design-card" aria-label="Your task list">
               <div className="pl-task-title"><button type="button" className={`pl-mascot-pat ${plushHappy ? "pl-mascot-happy-hop" : ""}`} onClick={cheer} aria-label="Say hi to your plush"><ThemeScene focus decorative mood={plushHappy ? "happy" : "neutral"} /></button><h2>{taskView === "habits" ? "Habits" : taskView === "later" ? "Later" : "Tasks for the day"}</h2></div>
               <p className="pl-design-caption">{taskView === "habits" ? "Check off today’s habits. Other days stay here for when you need them." : taskView === "today" ? "Check things off, open details, or move them when the day changes." : "No need to do everything. Moving a task is allowed."}</p>
-              <details style={{ marginTop: 8 }}>
+              {/* On the Plan tab, "Find anything" above already searches tasks, so
+                  this list-only search is shown just when the task list opens as a popup. */}
+              {!inline && <details style={{ marginTop: 8 }}>
                 <summary style={{ cursor: "pointer", fontSize: 12, fontWeight: 800, color: "var(--pl-theme-muted,#806B8D)" }}>Find a task</summary>
                 <input style={{ marginTop: 7 }} value={taskSearchQuery} onChange={(event) => setTaskSearchQuery(event.target.value)} placeholder="Search your little list" aria-label="Search today's tasks" />
-              </details>
+              </details>}
               {(() => {
                 const query = taskSearchQuery.trim().toLowerCase();
                 const visible = taskView === "later"

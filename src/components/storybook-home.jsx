@@ -46,10 +46,13 @@ export function storybookRows(rows=[],viewDone={},limit=3,nowMinutes = 12*60, in
     .sort((a,b)=>(includeCompleted ? Number(!!viewDone[a.row.key])-Number(!!viewDone[b.row.key]) : 0) || b.score-a.score || a.index-b.index)
     .slice(0,limit).map(({row})=>({key:row.key,label:String(row.label),done:!!viewDone[row.key],habitType:habitTypeForRow(row),sourceTask:row.sourceTask,goal:row.goal}));
 }
-export function storybookGreeting(hour = new Date().getHours()) {
-  return hour < 12 ? "Good morning, Cozy!" : hour < 18 ? "Good afternoon, Cozy!" : "Good evening, Cozy!";
+export function storybookGreeting(hour = new Date().getHours(), name = "") {
+  // Greet people by the name they gave in onboarding; "Cozy" is only the fallback.
+  const who = String(name || "").trim().replace(/\s+/g, " ").slice(0, 40) || "Cozy";
+  const greeting = hour < 12 ? "Good morning, Cozy!" : hour < 18 ? "Good afternoon, Cozy!" : "Good evening, Cozy!";
+  return greeting.replace("Cozy!", `${who}!`);
 }
-export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false,syncStatus,online,tomorrowPreviewRows=[],tomorrowDateString="",dayType="full",weeklyHistory=[],dailyCheckInHistory=[], onQuickAdd, quickAddMessage, onEditTask, schedulePreview}) {
+export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false,syncStatus,online,tomorrowPreviewRows=[],tomorrowDateString="",dayType="full",weeklyHistory=[],dailyCheckInHistory=[], onQuickAdd, quickAddMessage, onEditTask, schedulePreview, displayName=""}) {
   const companion=useGuardianState(userId);
   const [expanded, setExpanded] = React.useState(false);
   const [oneThingMode, setOneThingMode] = React.useState(false);
@@ -81,7 +84,7 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
       <div className="pl-storybook-brand"><span>PlushLife</span></div>
       <button type="button" className="pl-storybook-settings" aria-label="Open settings" onClick={()=>setSettingsOpen?.(true)}>⚙</button>
       {atmosphere.scene && <div className="pl-storybook-sky" aria-hidden="true"><img src={`./assets/worlds/${atmosphere.scene}.svg`} alt="" width="640" height="240" /></div>}
-      <div className="pl-storybook-greeting">{copy.tag && <p className={nursery ? "pl-storybook-small pl-nursery-mode-label" : "pl-storybook-small"}>{copy.symbol} {copy.tag}</p>}<h1>{nursery ? storybookGreeting().replace("Cozy!",caregiver === "Mommy" ? "sweetheart!" : "kiddo!") : storybookGreeting()}</h1><p>{copy.detail}</p></div>
+      <div className="pl-storybook-greeting">{copy.tag && <p className={nursery ? "pl-storybook-small pl-nursery-mode-label" : "pl-storybook-small"}>{copy.symbol} {copy.tag}</p>}<h1>{nursery ? storybookGreeting().replace("Cozy!",caregiver === "Mommy" ? "sweetheart!" : "kiddo!") : storybookGreeting(undefined, displayName)}</h1><p>{copy.detail}</p></div>
       <div className="pl-storybook-mascot" aria-label="Your original PlushLife teddy bear"><ThemeScene decorative focus outfit={selectedOutfit} /></div>
       {(online===false || syncStatus==="error" || syncStatus==="syncing") && <span className="pl-companion-sync" role="status">{online===false?"Offline · changes will sync later":syncStatus==="error"?"Sync needs attention":"Saving…"}</span>}
     </header>

@@ -12,5 +12,9 @@
 #main-content .pl-edit-shortcuts button{min-height:50px;border-radius:14px;border:1px solid var(--pl-theme-line);background:var(--pl-theme-surface-2);color:var(--pl-theme-ink);font-size:14px;font-weight:850;padding:10px}
 #main-content .pl-edit-hint{font-size:13px!important;line-height:1.5!important;color:var(--pl-theme-muted)!important}
 #main-content .pl-guardian-unified-actions button{min-height:52px!important}
+/* Match the app's soft buttons instead of the browser's default outset style. */
+#main-content .pl-guardian-unified-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#main-content .pl-guardian-unified-actions button{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border-radius:14px;border:1px solid var(--pl-theme-line);background:var(--pl-theme-surface-2);color:var(--pl-theme-ink);font:800 14px/1.25 Nunito,system-ui,sans-serif;cursor:pointer}
+#main-content .pl-guardian-unified-actions button:focus-visible{outline:3px solid var(--pl-theme-accent);outline-offset:3px}
 #main-content .pl-task-row-actions button{min-height:44px}
 @media(max-width:320px){#main-content .pl-quick-paths{gap:7px}#main-content .pl-quick-paths button{padding:9px}}

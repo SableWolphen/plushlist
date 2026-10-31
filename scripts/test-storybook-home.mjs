@@ -69,6 +69,8 @@ assert.deepEqual(storybookRows([{key:'bonus',label:'Bonus',isBonus:true},{key:'o
 assert.equal(storybookGreeting(8), 'Good morning, Cozy!');
 assert.equal(storybookGreeting(15), 'Good afternoon, Cozy!');
 assert.equal(storybookGreeting(23), 'Good evening, Cozy!');
+assert.equal(storybookGreeting(9, 'Sable'), 'Good morning, Sable!', 'Home greets people by the name they chose');
+assert.equal(storybookGreeting(9, '   '), 'Good morning, Cozy!', 'A blank name falls back to Cozy');
 const atmosphereBuild=buildSync({entryPoints:['src/theme-atmosphere.js'],bundle:true,write:false,format:'esm'});
 const {THEME_ATMOSPHERES,themeAtmosphere,DARK_THEME_PALETTES}=await import('data:text/javascript;base64,'+Buffer.from(atmosphereBuild.outputFiles[0].text).toString('base64'));
 assert.equal(themeAtmosphere('none').scene,null);
