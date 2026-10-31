@@ -66,3 +66,23 @@
  #main-content .pl-plan-navigation nav button { font-size:12px!important; }
 }
 @media(prefers-reduced-motion:reduce){#main-content .pl-quick-paths button{transition:none!important;}}
+
+/* PlushLife 2.0 journeys and low-pressure one-thing view */
+#main-content .pl2-storybook { display:grid;gap:16px; }
+#main-content .pl2-storybook .pl-storybook-banner { border-radius:26px!important;overflow:hidden;box-shadow:var(--pl2-shadow)!important; }
+#main-content .pl2-storybook .pl-storybook-today { border-radius:24px!important;box-shadow:var(--pl2-shadow)!important; }
+#main-content .pl2-storybook .pl-storybook-list li { border-radius:16px!important;min-height:54px; }
+#main-content .pl2-storybook .pl-storybook-check { min-width:44px;min-height:44px;display:grid;place-items:center; }
+#main-content .pl2-storybook .pl-storybook-door { border-radius:20px!important;min-height:92px; }
+#main-content .pl2-storybook .pl-storybook-detail { min-width:44px;min-height:44px; }
+#main-content .pl2-storybook .pl2-day-tools { display:flex;gap:6px;padding:5px;margin:8px 0 14px;background:var(--pl2-lilac);border:1px solid var(--pl-theme-line);border-radius:18px; }
+#main-content .pl2-day-tools button { flex:1;min-height:44px;border:0;border-radius:13px;background:transparent;color:var(--pl-theme-ink);font:850 13px Nunito,system-ui;cursor:pointer; }
+#main-content .pl2-day-tools button[aria-pressed="true"] { background:var(--pl-theme-surface);box-shadow:0 3px 12px rgba(77,44,107,.12); }
+#main-content .pl2-journey-links { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px; }
+#main-content .pl2-journey-links button { display:flex;align-items:center;gap:9px;text-align:left;min-width:0;min-height:94px;padding:14px 11px;border:1px solid var(--pl-theme-line);border-radius:20px;background:linear-gradient(155deg,var(--pl-theme-surface),var(--pl2-rose));color:var(--pl-theme-ink);box-shadow:var(--pl2-shadow);font-size:21px;cursor:pointer; }
+#main-content .pl2-journey-links button:first-child { background:linear-gradient(155deg,var(--pl-theme-surface),var(--pl2-lilac)); }
+#main-content .pl2-journey-links button span:nth-child(1) { flex:1;min-width:0;display:grid;gap:5px; }
+#main-content .pl2-journey-links button strong { font:850 13px/1.2 Nunito,system-ui;display:block; }
+#main-content .pl2-journey-links button small { font:650 11px/1.35 Nunito,system-ui;color:var(--pl-theme-muted);display:block; }
+#main-content .pl2-journey-links button span:last-child { margin-left:auto; }
+@media(max-width:350px){#main-content .pl2-journey-links{grid-template-columns:1fr}#main-content .pl2-journey-links button{min-height:70px}}
