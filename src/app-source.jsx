@@ -34,7 +34,9 @@ import { FIGMA_WORLDS, ThemeWorldContext, CozyScene, DesignIcon } from "./compon
 import "./native-bridge.js";
 import { ToolPanel, HabitTypeIcon, useConfirmation } from "./components/shared.jsx";
 import { PlushMascot, AppLoadingScreen } from "./components/mascot.jsx";
-import { LandingPage } from "./components/landing.jsx";
+// The sign-in landing page is only shown to signed-out visitors, so signed-in
+// people (every normal app start) no longer download it with the startup bundle.
+const LazyLandingPage = React.lazy(() => import("./components/landing.jsx").then((module) => ({ default: module.LandingPage })));
 import { ProfilePanel, SafetyPanel, HelpPanel, CalmPanel } from "./components/info-panels.jsx";
 import { MoodViewer, CarePathViewer, SleepToolViewer, JournalReflectionViewer, DailyJournalPanel } from "./components/viewer-panels.jsx";
 import { ScheduleEditorPanel } from "./components/schedule-editor-panel.jsx";
@@ -6495,7 +6497,7 @@ function GlowUpTracker() {
   }
 
   if (!user) {
-    return <LandingPage email={email} setEmail={setEmail} otpCode={otpCode} setOtpCode={setOtpCode} showSignIn={showSignIn} setShowSignIn={setShowSignIn} sendSignInLink={sendSignInLink} verifySignInCode={verifySignInCode} signInMessage={signInMessage} codeCooldown={codeCooldown} password={password} setPassword={setPassword} showPasswordField={showPasswordField} setShowPasswordField={setShowPasswordField} signInWithPassword={signInWithPassword} />;
+    return <React.Suspense fallback={<AppLoadingScreen />}><LazyLandingPage email={email} setEmail={setEmail} otpCode={otpCode} setOtpCode={setOtpCode} showSignIn={showSignIn} setShowSignIn={setShowSignIn} sendSignInLink={sendSignInLink} verifySignInCode={verifySignInCode} signInMessage={signInMessage} codeCooldown={codeCooldown} password={password} setPassword={setPassword} showPasswordField={showPasswordField} setShowPasswordField={setShowPasswordField} signInWithPassword={signInWithPassword} /></React.Suspense>;
   }
 
   const themeKey = babyMode ? (preferences.baby_voice === "fatherly" ? "baby_fatherly" : "baby_motherly") : dinoTheme ? "dino" : "warm";
