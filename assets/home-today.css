@@ -1,0 +1,51 @@
+/*
+ * Today, simplified: a compact greeting, an energy picker, one "Next up" card,
+ * then the checklist. Loaded last so it can reshape the storybook Home layout;
+ * colours come from each theme's --sb-* variables so every world keeps its look.
+ */
+#main-content[data-pl-world] .pl3-home .pl-storybook-banner,
+#main-content .pl3-home .pl-storybook-banner{display:grid;grid-template-columns:64px minmax(0,1fr) 44px;align-items:center;gap:12px;min-height:0;padding:12px 12px 12px 12px;border-radius:22px}
+/* The compact header keeps each theme's sky colours and scenery, without the large banner's decorative dots. */
+#main-content[data-pl-world] .pl3-home .pl-storybook-banner,
+#main-content .pl3-home .pl-storybook-banner{background:linear-gradient(145deg,var(--sb-sky),var(--sb-sky2))}
+#main-content .pl3-home .pl-storybook-sky{opacity:.5}
+#main-content[data-pl-world] .pl3-home .pl-storybook-banner .pl-storybook-mascot,
+#main-content .pl3-home .pl-storybook-banner .pl-storybook-mascot{position:relative;inset:auto;z-index:2;width:64px;height:64px;border-radius:20px;background:var(--sb-soft);overflow:hidden;display:grid;place-items:center;pointer-events:none}
+#main-content .pl3-home .pl-storybook-mascot>*{transform:scale(.5);transform-origin:center;flex-shrink:0}
+#main-content[data-pl-world] .pl3-home .pl-storybook-banner .pl-storybook-greeting,
+#main-content .pl3-home .pl-storybook-banner .pl-storybook-greeting{position:relative;z-index:2;width:auto;min-width:0;padding:0}
+#main-content .pl3-home .pl-storybook-greeting .pl-storybook-small{margin:0 0 2px!important;font-size:13px!important;letter-spacing:0;text-transform:none;font-weight:700;color:var(--sb-muted)}
+#main-content .pl3-home .pl-storybook-greeting h1{margin:0!important;font-size:clamp(19px,5.6vw,24px)!important;line-height:1.15!important}
+#main-content[data-pl-world] .pl3-home .pl-storybook-banner .pl-storybook-settings,
+#main-content .pl3-home .pl-storybook-banner .pl-storybook-settings{position:relative;inset:auto;z-index:3;width:44px;height:44px;min-height:44px!important;border-radius:14px}
+#main-content .pl3-home .pl-companion-sync{grid-column:1/-1;position:relative;z-index:2}
+
+#main-content .pl3-energy{display:grid;gap:8px}
+#main-content .pl3-energy>p{margin:0;font:800 13px/1.3 Nunito,system-ui,sans-serif;color:var(--sb-muted)}
+#main-content .pl3-energy-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:4px;border-radius:16px;background:var(--sb-card);border:1px solid var(--sb-border)}
+#main-content .pl3-energy-options button{min-height:44px;border:0;border-radius:12px;background:transparent;color:var(--sb-muted);font:700 14px Nunito,system-ui,sans-serif;cursor:pointer}
+#main-content .pl3-energy-options button[aria-pressed="true"]{background:var(--sb-soft);color:var(--sb-ink);font-weight:900}
+#main-content .pl3-energy-options button:disabled{cursor:progress}
+#main-content .pl3-energy-options button:focus-visible{outline:3px solid var(--sb-accent);outline-offset:2px}
+#main-content .pl3-energy .pl3-energy-message{color:var(--sb-ink);font-weight:700}
+
+#main-content .pl3-next{border-radius:24px;padding:16px;background:color-mix(in srgb,var(--sb-accent) 14%,var(--sb-card));border:1px solid color-mix(in srgb,var(--sb-accent) 28%,var(--sb-card));color:var(--sb-ink)}
+#main-content .pl3-next .pl3-next-label{margin:0;font:900 12px/1 Nunito,system-ui,sans-serif;letter-spacing:.1em;color:var(--sb-ink);opacity:.8}
+#main-content .pl3-next h2{margin:6px 0 4px!important;font:800 24px/1.15 Quicksand,Nunito,sans-serif!important;letter-spacing:-.02em;color:var(--sb-ink)!important;overflow-wrap:anywhere}
+#main-content .pl3-next p{margin:0 0 12px;font-size:14px;line-height:1.4;color:var(--sb-ink)}
+#main-content .pl3-next-actions{display:flex;gap:8px;flex-wrap:wrap}
+#main-content .pl3-next-actions button{flex:1 1 130px;min-height:48px;border-radius:14px;font:900 15px Nunito,system-ui,sans-serif;cursor:pointer}
+#main-content .pl3-next-done{border:0;background:var(--sb-accent);color:var(--pl-theme-on-accent,#fff)}
+#main-content .pl3-next-smaller-button{border:1.5px solid color-mix(in srgb,var(--sb-accent) 45%,var(--sb-card));background:var(--sb-card);color:var(--sb-ink)}
+#main-content .pl3-next-actions button:focus-visible{outline:3px solid var(--sb-ink);outline-offset:2px}
+
+#main-content .pl3-home .pl-storybook-today{padding:16px}
+#main-content .pl3-list-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#main-content .pl3-list-head h2{margin:0!important;font:800 19px/1.2 Quicksand,Nunito,sans-serif!important;color:var(--sb-ink)!important}
+#main-content .pl3-list-tools{display:flex;align-items:center;gap:8px}
+#main-content .pl3-count{font:800 13px Nunito,system-ui,sans-serif;color:var(--sb-muted);white-space:nowrap}
+#main-content .pl3-list-tools button{width:40px;height:40px;min-height:40px!important;border:0;border-radius:12px;background:var(--sb-soft);color:var(--sb-ink);font:900 18px/1 Nunito,system-ui,sans-serif;display:grid;place-items:center;cursor:pointer;padding:0}
+#main-content .pl3-list-tools button:focus-visible{outline:3px solid var(--sb-accent);outline-offset:2px}
+#main-content .pl3-list-note{margin:6px 0 0;font-size:13px;color:var(--sb-muted)}
+#main-content .pl3-home .pl-storybook-today .pl-storybook-progress{margin:12px 0 4px}
+#main-content .pl3-home .pl-storybook-capture>summary{color:var(--sb-muted)}
