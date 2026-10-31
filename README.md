@@ -4,7 +4,7 @@ PlushLife is a gentle, private routine, habit, self-care, workout, and progress 
 
 ## Current status
 
-PlushLife is independently owned and is currently in Google Play closed testing. The current Android testing line has reached build 30. Version 31 is a stability release focused on dependable hosting, cache updates, static deployment checks, and safer release preparation.
+PlushLife is independently owned and is currently in Google Play closed testing. The web app version lives in `package.json`. Android version codes are not tracked here: `auto-play-release.yml` picks the next unused Play version code at release time, so check the Play Console for the current build.
 
 All current care, routine, Guardian, accessibility, and personalization features remain free, with no feature paywalls.
 
@@ -32,6 +32,15 @@ npm ci
 npm test
 npm run web:sync
 ```
+
+`npm test` runs every check in `scripts/run-tests.mjs`, keeps going after a failure, and ends with a pass/fail summary. Useful variations:
+
+- `npm test -- calendar guardian` runs only checks whose file name contains one of those words.
+- `npm test -- --bail` stops at the first failure.
+
+To add a check, create `scripts/test-<name>.(js|mjs|cjs|py)` and add it to the list in `scripts/run-tests.mjs`. The runner fails if a test file exists but isn't listed, so new checks can't be skipped by accident.
+
+Every pull request runs the same checks automatically through `.github/workflows/pr-tests.yml`.
 
 The generated deployment must contain the homepage, authentication pages, legal/support/account-deletion pages, manifest, service worker, icons, application assets, and locally vendored browser dependencies.
 
