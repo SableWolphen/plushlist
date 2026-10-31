@@ -86,3 +86,13 @@
 #main-content .pl2-journey-links button small { font:650 11px/1.35 Nunito,system-ui;color:var(--pl-theme-muted);display:block; }
 #main-content .pl2-journey-links button span:last-child { margin-left:auto; }
 @media(max-width:350px){#main-content .pl2-journey-links{grid-template-columns:1fr}#main-content .pl2-journey-links button{min-height:70px}}
+
+/* Cohesive calendar, planner and keepsake headings */
+#main-content .pl2-eyebrow { display:block;font:900 11px/1.4 Nunito,system-ui;letter-spacing:.085em;color:var(--pl-theme-accent);margin-bottom:7px; }
+#main-content .pl2-plan-helper { color:var(--pl-theme-muted);font-size:13px;line-height:1.5;margin:10px 6px 0; }
+#main-content .pl2-calendar-intro,#main-content .pl2-rewards-intro { padding:17px 18px 16px;border:1px solid var(--pl-theme-line);border-radius:24px;background:linear-gradient(140deg,var(--pl2-lilac),var(--pl2-rose));box-shadow:var(--pl2-shadow); }
+#main-content .pl2-calendar-intro h2,#main-content .pl2-rewards-intro h2 { color:var(--pl-theme-ink);font-size:23px!important;font-weight:900;line-height:1.25;margin:0 0 7px;letter-spacing:-.025em; }
+#main-content .pl2-calendar-intro p,#main-content .pl2-rewards-intro p { color:var(--pl-theme-muted);font-size:13px;line-height:1.55;margin:0; }
+#main-content .pl-closet-shell .pl2-rewards-intro { margin-bottom:1px; }
+#main-content .pl2-storybook .pl2-day-tools button:focus-visible,#main-content .pl2-journey-links button:focus-visible { outline:3px solid var(--pl-theme-accent)!important;outline-offset:3px; }
+@media(min-width:600px){#main-content .pl2-journey-links button{min-height:106px}}
