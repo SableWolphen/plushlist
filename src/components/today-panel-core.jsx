@@ -69,12 +69,12 @@ function greeting() {
   return "Good evening";
 }
 
-function Hero({ returning, onSofterDay, period, goToDashboard, setSettingsOpen, reducedMotion, selectedOutfit, activityDaysTotal, darkMode, appearanceTheme, dinoTheme, babyMode, rows = [], viewDone = {} }) {
+function Hero({ displayName = "", returning, onSofterDay, period, goToDashboard, setSettingsOpen, reducedMotion, selectedOutfit, activityDaysTotal, darkMode, appearanceTheme, dinoTheme, babyMode, rows = [], viewDone = {} }) {
   const copy = useThemeCopy();
   const companion = React.useContext(ThemeWorldContext);
   const cozy = React.useContext(CozyComfortContext);
   const petName = cozy?.profile?.pet_name || "Your plush";
-  const personName = String(cozy?.profile?.fields?.nickname || "").trim() || "Cozy";
+  const personName = String(cozy?.profile?.fields?.nickname || displayName || "").trim() || "Cozy";
   const comfort = cozy?.profile?.fields?.comfort_item;
   const evening = new Date().getHours() >= 20 || new Date().getHours() < 5;
   const taskRows = rows.filter((row) => row && !row.isBonus && !isHabitRow(row));
@@ -274,29 +274,6 @@ function TodaySchedule({ selectedSchedule, selectedScheduleExceptionEntries = []
       </div>
     </section>
   );
-}
-
-function DayAgenda({ tasks, schedule, selectedSchedule, exceptions, date, timezone, taskLabel = "Tasks" }) {
-  const [tab,setTab]=React.useState('tasks');
-  const [wide,setWide]=React.useState(()=>window.matchMedia?.('(min-width:720px)').matches || false);
-  const [now,setNow]=React.useState(()=>new Date());
-  const id=React.useId();
-  React.useEffect(()=>{
-    const media=window.matchMedia?.('(min-width:720px)');
-    const change=()=>setWide(Boolean(media?.matches));
-    change();media?.addEventListener?.('change',change);
-    const timer=setInterval(()=>setNow(new Date()),60000);
-    return ()=>{media?.removeEventListener?.('change',change);clearInterval(timer);};
-  },[]);
-  React.useEffect(()=>setTab('tasks'),[date]);
-  const next=upcomingSchedule(scheduleEntries(selectedSchedule,exceptions),date,now,timezone);
-  const select=(value,focus=false)=>{setTab(value);if(focus)document.getElementById(`${id}-${value}-tab`)?.focus?.();};
-  const key=(event)=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();select(event.key==='Home'?'tasks':event.key==='End'?'schedule':tab==='tasks'?'schedule':'tasks',true);};
-  return <section className="pl-home-day-card" aria-label="Today’s tasks and schedule">
-    {next && <button type="button" className="pl-agenda-next" onClick={()=>select('schedule')} aria-label={`Open schedule. Next up: ${next.text}`}><span>Next up · {window.PlushLifeSchedule?.formatTime12?.(next.time) || next.time}</span><strong>{next.text}</strong></button>}
-    {!wide && <div className="pl-agenda-tabs" role="tablist" aria-label="Today view">{['tasks','schedule'].map(value=><button type="button" key={value} role="tab" id={`${id}-${value}-tab`} aria-controls={`${id}-${value}-panel`} aria-selected={tab===value} tabIndex={tab===value?0:-1} onKeyDown={key} onClick={()=>select(value)}>{value==='tasks'?taskLabel:'Schedule'}</button>)}</div>}
-    <div className="pl-agenda-panels">{[['tasks',tasks],['schedule',schedule]].map(([value,content])=><div key={value} id={`${id}-${value}-panel`} role={wide?undefined:'tabpanel'} aria-labelledby={wide?undefined:`${id}-${value}-tab`} hidden={!wide && tab!==value}>{content}</div>)}</div>
-  </section>;
 }
 
 function TomorrowNote({ tomorrowTasksCount }) {
@@ -586,8 +563,8 @@ export function TodayPanel({
       `}</style>
 
       <div data-plushlife-home-stack className="pl-home-shell">
-        {(isHistoricalView || isFutureView) ? <Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} /> : null}
-        {!isHistoricalView && !isFutureView && <StorybookHome world={babyMode ? (preferences?.dark_mode ? "baby-night" : "baby") : dinoTheme ? "dino" : appearanceTheme} dayType={dailyCheckIn?.day_type || "full"} rows={rows} viewDone={viewDone} period={period} pct={pct} toggle={unifiedToggle} openTaskManager={openTaskManager} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} selectedOutfit={selectedOutfit} darkMode={preferences?.dark_mode} userId={userId} syncStatus={syncStatus} online={online} tomorrowPreviewRows={tomorrowPreviewRows} tomorrowDateString={tomorrowDateString} weeklyHistory={weeklyHistory} dailyCheckInHistory={dailyCheckInHistory} onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage} onEditTask={onEditTask} schedulePreview={homeSections.schedule} displayName={displayName} />}
+        {(isHistoricalView || isFutureView) ? <Hero displayName={displayName} returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} /> : null}
+        {!isHistoricalView && !isFutureView && <StorybookHome world={babyMode ? (preferences?.dark_mode ? "baby-night" : "baby") : dinoTheme ? "dino" : appearanceTheme} dayType={dailyCheckIn?.day_type || "full"} rows={rows} viewDone={viewDone} period={period} pct={pct} toggle={unifiedToggle} openTaskManager={openTaskManager} openTodayJournal={openTodayJournal} openDailyCheckIn={openDailyCheckIn} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} selectedOutfit={selectedOutfit} darkMode={preferences?.dark_mode} userId={userId} syncStatus={syncStatus} online={online} tomorrowPreviewRows={tomorrowPreviewRows} tomorrowDateString={tomorrowDateString} weeklyHistory={weeklyHistory} dailyCheckInHistory={dailyCheckInHistory} onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage} onEditTask={onEditTask} schedulePreview={homeSections.schedule} scheduleNext={upcomingSchedule(scheduleEntries(selectedSchedule, selectedScheduleExceptionEntries), selectedProgressDate || period?.date, new Date(), preferences?.timezone)} displayName={displayName} />}
 
         {!isHistoricalView && !isFutureView && <RewardMoment outfit={rewardMoment} onWear={onWearReward} onDismiss={onDismissReward}/> }
         <details className="pl-home-extras" style={{...card,padding:'10px 14px'}}>
@@ -604,8 +581,8 @@ export function TodayPanel({
               <h3>Today’s schedule & completed tasks</h3>
         {!isHistoricalView && !isFutureView && <SmartCareSchedule rows={rows} viewDone={viewDone} entries={scheduleEntries(selectedSchedule, selectedScheduleExceptionEntries)} dailyCheckIn={dailyCheckIn} restDay={selectedTaskViewIsRest || restDatesSet?.has(period?.date) || dailyCheckIn?.day_type === "rest"} date={selectedProgressDate || period?.date} timezone={preferences?.timezone} babyMode={babyMode} />}
               <div className="pl-home-advanced-content">
-                {!isHistoricalView && !isFutureView && <details className="pl-storybook-plush-drawer"><summary>🧸 Visit your Plush · Say hi</summary><Hero returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} /></details>}
-                <DayAgenda tasks={homeSections.tasks} schedule={homeSections.schedule} selectedSchedule={selectedSchedule} exceptions={selectedScheduleExceptionEntries} date={selectedProgressDate || period?.date} timezone={preferences?.timezone} taskLabel={babyMode ? "Little Jobs" : dinoTheme ? "Dino Missions" : "Tasks"}/>
+                {!isHistoricalView && !isFutureView && <details className="pl-storybook-plush-drawer"><summary>🧸 Visit your Plush · Say hi</summary><Hero displayName={displayName} returning={!isHistoricalView && !isFutureView && returnGapDays>=2 && !returnBannerDismissed} onSofterDay={()=>{selectDayType?.("tiny");setReturnBannerDismissed?.(true);}} period={period} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} reducedMotion={preferences?.reduced_motion} selectedOutfit={selectedOutfit} activityDaysTotal={activityDaysTotal} darkMode={preferences?.dark_mode} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} babyMode={babyMode} rows={rows} viewDone={viewDone} /></details>}
+                {/* The Home list and the “Today’s schedule” section above already show tasks and schedule, so no second agenda here. */}
                 {homeSections.habits}
                 {homeSections.tiny}
                 <CompletedToday rows={rows} viewDone={viewDone} lingerKeys={lingerKeys} toggle={unifiedToggle} expanded={completedTodayExpanded} setExpanded={setCompletedTodayExpanded} />

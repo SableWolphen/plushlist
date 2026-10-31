@@ -9,7 +9,7 @@ import { hasGoldFeature } from "../plush-gold.js";
 
 const GrowthNextMove = React.lazy(() => import("./growth-next-move.jsx").then((module) => ({ default: module.GrowthNextMove })));
 const HabitHealth = React.lazy(() => import("./habit-health.jsx").then((module) => ({ default: module.HabitHealth })));
-const LazyWeeklyHabitReview = React.lazy(() => import("./habit-intelligence.jsx").then((module) => ({ default: module.WeeklyHabitReview })));
+// The weekly habit review lives in Habit Studio › My week (under "Habits & memories"), so it is not repeated here.
 const LazyWhatWorksForMe = React.lazy(() => import("./habit-retention.jsx").then((module) => ({ default: module.WhatWorksForMe })));
 const LazyResilienceProgress = React.lazy(() => import("./habit-resilience.jsx").then((module) => ({ default: module.ResilienceProgress })));
 
@@ -232,7 +232,7 @@ function CompactGrowthOverview(props) {
                 <summary style={{ minHeight: 44, padding: "10px 12px", cursor: "pointer", color: "var(--pl-theme-ink,#7B5684)", fontWeight: 900, listStyle: "none", fontSize: 10.7 }}>✨ More things PlushLife noticed</summary>
                 <div style={{ padding: "0 10px 10px" }}>
                   <React.Suspense fallback={<InsightToolsFallback />}><HabitHealth weeklyOverallPct={props.weeklyOverallPct} weeklyEssentialPct={props.weeklyEssentialPct} caringDays={props.caringDays} weekOverWeekDelta={props.weekOverWeekDelta} preferences={props.preferences} goToDashboard={props.goToDashboard} openTaskManager={props.openTaskManager} /></React.Suspense>
-                  {insightsOpen && <React.Suspense fallback={<InsightToolsFallback />}><LazyWeeklyHabitReview open={props.open} openTaskManager={props.openTaskManager} goToDashboard={props.goToDashboard} /><LazyWhatWorksForMe open={props.open} openTaskManager={props.openTaskManager} /><LazyResilienceProgress open={props.open} /></React.Suspense>}
+                  {insightsOpen && <React.Suspense fallback={<InsightToolsFallback />}><LazyWhatWorksForMe open={props.open} openTaskManager={props.openTaskManager} /><LazyResilienceProgress open={props.open} /></React.Suspense>}
                 </div>
               </details>
             </div>
@@ -243,7 +243,7 @@ function CompactGrowthOverview(props) {
   );
 }
 
-// Product-quality contract: <GrowthNextMove /> · Why PlushLife thinks this: · LazyWeeklyHabitReview · insightsOpen
+// Product-quality contract: <GrowthNextMove /> · Why PlushLife thinks this: · LazyWhatWorksForMe · insightsOpen
 export function ProgressPanel(props) {
   if (!props.open) return null;
   if (props.progressView === "overview") return <CompactGrowthOverview {...props} />;

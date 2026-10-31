@@ -2,7 +2,6 @@ import { companionAccountKey } from "../companion-account-storage.mjs";
 import { TodayPanel as TodayPanelCore } from "./today-panel-core.jsx";
 import { ShapeMyDay } from "./shape-my-day.jsx";
 import { RestDayCard } from "./rest-day.jsx";
-import { HabitStudio } from "./habit-studio.jsx";
 import { OnboardingArc } from "./onboarding-arc.jsx";
 import { EveningGratitude } from "./evening-gratitude.jsx";
 import { useCompletedTaskFlow } from "./completed-task-flow.jsx";
@@ -78,6 +77,8 @@ function recordNextStepChoice(row, action, date, accountId) {
   } catch (_error) { /* silent: localStorage quota or parse failure — next-step feedback is best-effort enrichment */ }
 }
 
+// "More for today" is already a drawer, so its extra tools sit directly inside it
+// (no drawer-in-a-drawer). Habit Studio lives on Plan › Habits and Progress.
 export function TodayPanel(props) {
   const cozyStep=useCozyNextStep(props.rows,props.viewDone,props.dailyCheckIn?.day_type || 'full');
   const [smartNextStepHidden, setSmartNextStepHidden] = React.useState(false);
@@ -146,7 +147,7 @@ export function TodayPanel(props) {
       </div>
       <TodayPanelCore
       {...props}
-      optionalTools={<><details className="pl-home-extra-tools"><summary>🌷 More ways to care for your day</summary><div className="pl-home-extra-tools-body"><HabitStudio compact/>{!props.isHistoricalView&&!props.isFutureView&&<GentleDayTools key={`${props.userId}:${props.period?.date}`} userId={props.userId} date={props.period?.date} rows={props.rows} viewDone={props.viewDone} dailyCheckIn={props.dailyCheckIn} onDayType={props.selectDayType} onReset={props.onCozyReset} onOpenComfort={()=>{window.__plushlifeOpenCozySpace=true;props.goToDashboard?.("care");}} onSupport={()=>props.goToDashboard?.("guardian")}/>}<OnboardingArc onboardingComplete={!!props.preferences?.onboarding_complete} goToDashboard={props.goToDashboard}/>{props.selectedTaskViewIsRest ? <RestDayCard careDaysTotal={props.careDaysTotal} goToDashboard={props.goToDashboard} period={props.period}/> : <ShapeMyDay rows={props.rows} viewDone={props.viewDone} toggle={smartToggle} dailyCheckIn={props.dailyCheckIn} period={props.period}/>}<EveningGratitude/></div></details></>}
+      optionalTools={<><div className="pl-home-extra-tools-body">{!props.isHistoricalView&&!props.isFutureView&&<GentleDayTools key={`${props.userId}:${props.period?.date}`} userId={props.userId} date={props.period?.date} rows={props.rows} viewDone={props.viewDone} dailyCheckIn={props.dailyCheckIn} onDayType={props.selectDayType} onReset={props.onCozyReset} onOpenComfort={()=>{window.__plushlifeOpenCozySpace=true;props.goToDashboard?.("care");}} onSupport={()=>props.goToDashboard?.("guardian")}/>}<OnboardingArc onboardingComplete={!!props.preferences?.onboarding_complete} goToDashboard={props.goToDashboard}/>{props.selectedTaskViewIsRest ? <RestDayCard careDaysTotal={props.careDaysTotal} goToDashboard={props.goToDashboard} period={props.period}/> : <ShapeMyDay rows={props.rows} viewDone={props.viewDone} toggle={smartToggle} dailyCheckIn={props.dailyCheckIn} period={props.period}/>}<EveningGratitude/></div></>}
       cozyDaily={!props.isHistoricalView&&!props.isFutureView&&<CozyDaily rows={props.rows} viewDone={props.viewDone} dailyCheckIn={props.dailyCheckIn} returnGapDays={props.returnGapDays} returnBannerDismissed={props.returnBannerDismissed} onDismissReturn={props.setReturnBannerDismissed} onReset={props.onCozyReset} onUsual={()=>props.selectDayType?.('full')} onOpen={()=>{window.__plushlifeOpenCozySpace=true;props.goToDashboard?.('care');}}/>}
       toggle={smartToggle}
       recentlyCompletedKeys={recentlyCompletedKeys}
