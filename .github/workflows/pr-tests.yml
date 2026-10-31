@@ -1,0 +1,45 @@
+name: Tests
+
+# Fast feedback for every pull request. The full suite also runs inside
+# CodeQL's Android job, but that job waits on Android SDK setup and emulators,
+# so failures here show up in a couple of minutes instead of twenty.
+
+on:
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: App tests and web build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run complete app tests
+        run: npm test
+
+      - name: Build and validate the web bundle
+        run: npm run web:sync

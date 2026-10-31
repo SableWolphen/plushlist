@@ -10,6 +10,7 @@ The filenames of historical workflows are retained so existing run links remain 
 | `closed-testing.yml` | Manual dispatch only | Historical version 45 closed-testing retry. It never runs on ordinary main pushes. |
 | `deploy-pages.yml` | Main push or dispatch | Tests and builds the shared artifact, then publishes GitHub Pages. |
 | `deploy-cloudflare.yml` | Manual dispatch | Verification/fallback publisher for Cloudflare. The connected Cloudflare Git integration owns normal web production deploys. |
+| `pr-tests.yml` | Every pull request, or dispatch | Fast gate: full `npm test` plus `npm run web:sync`. Replaces the old path-filtered `gentle-life-checks.yml`. |
 | `codeql.yml` | Configured pushes, PRs and schedule | Java/Kotlin, JavaScript/TypeScript and Actions security analysis. |
 | `premium-smart-check.yml` | Original personalization branch or dispatch | Historical feature validation; full tests also run in release/deploy workflows. |
 | `export-upload-cert.yml` | Dispatch | Export upload certificate for release administration. |
