@@ -132,7 +132,8 @@ function CompactGrowthOverview(props) {
       {!props.hideNavigation && <ProgressTabs progressView={props.progressView} setProgressView={props.setProgressView} />}
       </header>
 
-      <section className="pl-growth-weekbar pl-growth-week-summary" aria-label="Weekly progress">
+      {/* When the week bars above are shown ("You showed up N of M days"), this older summary would repeat them. */}
+      {!Array.isArray(props.weekDays) && <section className="pl-growth-weekbar pl-growth-week-summary" aria-label="Weekly progress">
         <div className="pl-growth-weekbar-head">
           <span>🌷 This week</span>
           <span>{Math.max(0, Math.min(100, Number(props.weeklyOverallPct) || 0))}%</span>
@@ -144,7 +145,7 @@ function CompactGrowthOverview(props) {
           <span className="pl-growth-companion-art"><ThemeScene focus decorative /></span>
           <span className="pl-growth-companion-copy"><strong>Every return counts.</strong><span>Returning counts. Your care stays yours.</span></span>
         </div>
-      </section>
+      </section>}
 
       <section className="pl-growth-stats" aria-label="Weekly little wins">
         {[

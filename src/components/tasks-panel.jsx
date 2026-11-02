@@ -15,6 +15,18 @@ import { RoutineStarter } from "./cozy-day-experience.jsx";
 import { ThemeScene } from "./theme-world.jsx";
 import { useCompletedTaskFlow } from "./completed-task-flow.jsx";
 
+// Plan groups a day's list by when it happens, using each task's reminder time.
+const TIME_GROUPS = [["morning", "Morning"], ["afternoon", "Afternoon"], ["evening", "Evening"], ["anytime", "Anytime"]];
+export function timeOfDay(task) {
+  const match = /^([01]\d|2[0-3]):([0-5]\d)/.exec(String(task?.reminder_time || ""));
+  if (!match) return "anytime";
+  const hour = Number(match[1]);
+  return hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
+}
+export function groupByTimeOfDay(rows = []) {
+  return TIME_GROUPS.map(([id, label]) => ({ id, label, rows: rows.filter(row => timeOfDay(row?.sourceTask) === id) })).filter(group => group.rows.length);
+}
+
 export function TasksPanel({ open, onClose, inline = false, initialView = "today", viewRequest = 0, rows = [], viewDone = {}, toggle, newTaskDay, setNewTaskDay, taskSectionsForDay, setNewTaskSection, setNewTaskCustomSection, starterPackId, setStarterPackId, trackerTasks, setStarterPackMessage, addStarterPack, starterPackMessage, importOpen, setImportOpen, newTaskSection, importText, setImportText, importTasksFromText, importMessage, selectedProgressDate, taskSearchQuery, setTaskSearchQuery, isTaskPausedOnDate, period, startPointerTaskDrag, movePointerTaskDrag, endPointerTaskDrag, cancelPointerTaskDrag, moveTaskToSection, startEditingTask, resumeTrackerTask, pauseTrackerTask, archiveTrackerTask, setPendingTaskDelete, showArchivedTasks, setShowArchivedTasks, restoreArchivedTask, quickAddTrackerTask, quickAddMessage, onOpenSchedule }) {
   const [taskView, setTaskView] = React.useState("today");
   const [showAllToday, setShowAllToday] = React.useState(false);
@@ -74,11 +86,15 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
                 const displayRows = taskView === "today" && !query && !showAllToday ? incompleteToday.slice(0, 5) : matching;
                 const hiddenCount = taskView === "today" && !query ? Math.max(0, matching.length - displayRows.length) : 0;
                 if (!displayRows.length) return <p className="pl-design-empty">{query ? "No tasks match that search." : taskView === "today" && matching.length ? "You’re caught up for now ✨" : taskView === "today" ? "Your list has room to breathe. Add your first little task below." : "Nothing here yet. A small start is enough."}</p>;
+                const grouped = taskView === "today" && !query ? groupByTimeOfDay(displayRows) : [{ id: "all", label: "", rows: displayRows }];
+                const showGroupLabels = grouped.length > 1 || (grouped[0] && grouped[0].id !== "anytime" && grouped[0].id !== "all");
                 return <>
-                  {displayRows.map(row => <div className="pl-design-task" key={row.key} data-habit-kind={habitTypeForRow(row)}>
+                  {grouped.map(group => <React.Fragment key={group.id}>
+                  {showGroupLabels && <h4 className="pl3-time-group">{group.label}</h4>}
+                  {group.rows.map(row => <div className="pl-design-task" key={row.key} data-habit-kind={habitTypeForRow(row)}>
                     <button type="button" className="pl-task-toggle" aria-label={row.later ? `Edit ${row.label || "Untitled task"}` : `${viewDone[row.key] ? "Undo" : "Complete"} ${row.label || "Untitled task"}`} aria-pressed={row.later ? undefined : !!viewDone[row.key]} onClick={() => { if (row.later) { startEditingTask(row.sourceTask); return; } if (!viewDone[row.key]) cheer(); unifiedToggle(row.key); }}>
                       <span className={`pl-task-box ${!row.later && viewDone[row.key] ? "is-done" : ""}`} aria-hidden="true">{!row.later && viewDone[row.key] ? "✓" : ""}</span>
-                      <span><HabitTypeIcon task={row.sourceTask || row} habitType={habitTypeForRow(row)}/><strong>{row.label || "Untitled task"}</strong><HabitGoalCaption taskKey={row.key} fallbackGoal={row.goal}/><small>{row.later ? `Not due today · ${scheduleLabelForTask(row.sourceTask)}` : row.sourceTask?.estimated_minutes ? `${row.sourceTask.estimated_minutes} minutes · At your pace` : "One little step"}</small></span>
+                      <span><HabitTypeIcon task={row.sourceTask || row} habitType={habitTypeForRow(row)}/><strong>{row.label || "Untitled task"}</strong><HabitGoalCaption taskKey={row.key} fallbackGoal={row.goal}/><small>{row.later ? `Not due today · ${scheduleLabelForTask(row.sourceTask)}` : row.sourceTask?.reminder_time && window.PlushLifeSchedule?.formatTime12 ? `${window.PlushLifeSchedule.formatTime12(String(row.sourceTask.reminder_time).slice(0, 5))}${row.sourceTask?.estimated_minutes ? ` · ${row.sourceTask.estimated_minutes} minutes` : ""}` : row.sourceTask?.estimated_minutes ? `${row.sourceTask.estimated_minutes} minutes · At your pace` : "One little step"}</small></span>
                     </button>
                     {row.sourceTask && (
                       <div className="pl-task-row-actions">
@@ -93,6 +109,7 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
                       </div>
                     )}
                   </div>)}
+                  </React.Fragment>)}
                   {taskView === "today" && !query && matching.length > 5 && (
                     <button type="button" onClick={() => setShowAllToday(value => !value)} style={{ width: "100%", marginTop: 8, minHeight: 40, borderRadius: 12, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface-2,#F8F3FA)", color: "var(--pl-theme-ink,#5B4B6B)", fontWeight: 850, cursor: "pointer" }}>
                       {showAllToday ? "Show just 5" : `See the rest (${hiddenCount})`}
