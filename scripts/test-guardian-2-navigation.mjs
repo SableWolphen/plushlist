@@ -14,4 +14,6 @@ assert.match(screen,/supportViewMode === "caretaker"/,"Guardian home must distin
 assert.match(screen,/canSendSupportNotes/);
 assert.match(screen,/canAddSupportRewards/);
 assert.match(screen,/updateCaretakerPermission/);
+assert.match(screen,/setSupportAction\("note"\); setGuardianArea\("support"\)/,"Care shortcut opens notes");
+assert.match(screen,/setSupportAction\(canAddSupportRewards \? "reward" : "task"\)/,"Reward shortcut honors Guardian capabilities");
 console.log("Guardian 2.0 navigation, role-aware home and permission preservation guards passed.");
