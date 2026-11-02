@@ -62,6 +62,9 @@ export function CarePanel(props) {
   const [selectedSituationId, setSelectedSituationId] = React.useState(null);
   const [libraryOpen, setLibraryOpen] = React.useState(false);
   const [historyOpen, setHistoryOpen] = React.useState(false);
+  // "Visit your Cozy Space" buttons elsewhere set this flag before switching to Care,
+  // so open the drawer too (CozySpace itself reads and clears the flag).
+  const [cozyOpen, setCozyOpen] = React.useState(() => window.__plushlifeOpenCozySpace === true);
   React.useEffect(() => { setSelectedSituationId(null); setLibraryOpen(false); setHistoryOpen(false); }, [userId]);
   const [pathFeedbackVersion, setPathFeedbackVersion] = React.useState(0);
   const [profileVersion, setProfileVersion] = React.useState(0);
@@ -120,10 +123,10 @@ export function CarePanel(props) {
   const library = <ExistingCarePanel {...props} open={true} libraryOnly={true} hideNavigation={true} openCareSession={startCare} setSleepToolOpen={startSleep} />;
   return (
     <div data-plushcare-redesign="true" className="pl-care-shell">
-      <section className="pl-reference-care-launchers" aria-label="Care shortcuts">
-        <button type="button" onClick={() => props.setCheckInPopupOpen?.(true)}><span aria-hidden="true">💗</span><span><strong>Daily check-in</strong><small>How are you feeling today?</small></span><span aria-hidden="true">›</span></button>
-        <button type="button" onClick={() => props.openTodayJournal?.()}><span aria-hidden="true">📝</span><span><strong>Journal</strong><small>Write about your day.</small></span><span aria-hidden="true">›</span></button>
-      </section>
+      <header className="pl3-care-head">
+        <p>Care</p>
+        <h1>How are you, really?</h1>
+      </header>
       <style>{`
         .pl-care-section-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:8px 0}.pl-care-section-nav button{min-height:44px;padding:8px 4px;border:1px solid var(--pl-theme-line);border-radius:12px;background:var(--pl-theme-surface);color:var(--pl-theme-ink);font-weight:800;font-size:13px;cursor:pointer}.pl-care-section-nav button[aria-pressed="true"]{background:var(--pl-theme-surface-2);border:2px solid var(--pl-theme-accent)}
         .pl-care-shell{display:grid;gap:6px;margin-bottom:8px;padding:2px 0 12px}
@@ -259,7 +262,18 @@ export function CarePanel(props) {
           {props.careSection === "quick" ? <details className="pl-care-library-door pl-design-card" open={libraryOpen} onToggle={event => setLibraryOpen(event.currentTarget.open)}><summary>More calming tools</summary>{library}</details> : library}
         </div>
       </section>}
-      <details className="pl-design-card" style={{ marginBottom: 0 }}>
+      <section className="pl3-care-tools" aria-label="Care tools">
+        <button type="button" onClick={() => props.setCheckInPopupOpen?.(true)}><span className="pl3-care-tile pl3-tile-checkin" aria-hidden="true">💗</span><span><strong>Check in</strong><small>How are you feeling?</small></span></button>
+        <button type="button" onClick={() => props.openTodayJournal?.()}><span className="pl3-care-tile pl3-tile-journal" aria-hidden="true">📝</span><span><strong>Journal</strong><small>One line is enough</small></span></button>
+        <button type="button" onClick={() => { setCozyOpen(true); window.setTimeout(() => document.getElementById("pl-care-cozy-space")?.scrollIntoView?.({ behavior: "smooth", block: "start" }), 50); }}><span className="pl3-care-tile pl3-tile-cozy" aria-hidden="true">🧸</span><span><strong>Cozy Space</strong><small>Sit with your plush</small></span></button>
+        <button type="button" onClick={() => { setHistoryOpen(false); props.setCareSection("sleep"); window.scrollTo?.({ top: 0, behavior: "smooth" }); }}><span className="pl3-care-tile pl3-tile-sleep" aria-hidden="true">🌙</span><span><strong>Wind down</strong><small>For sleepy nights</small></span></button>
+      </section>
+      <section className="pl3-care-people" aria-label="Your people">
+        <span className="pl3-care-people-icon" aria-hidden="true">💛</span>
+        <span className="pl3-care-people-copy"><strong>Your trusted person</strong><small>Guardian · share gentle updates with someone you choose</small></span>
+        <button type="button" onClick={() => props.onOpenSupport?.()}>Open</button>
+      </section>
+      <details id="pl-care-cozy-space" className="pl-design-card" style={{ marginBottom: 0 }} open={cozyOpen} onToggle={event => setCozyOpen(event.currentTarget.open)}>
         <summary style={{ minHeight: 44, display: "list-item", alignContent: "center", cursor: "pointer", fontWeight: 900, color: "var(--pl-theme-ink,#5B4B6B)" }}>🧸 My Cozy Space</summary>
         <div style={{ paddingTop: 8 }}>
           <CozySpace comfortItem={props.comfortItem} rows={props.rows} viewDone={props.viewDone} onReset={props.onReset} onSupport={props.onOpenSupport} onSettings={props.onOpenSettings} onSound={props.toggleSoundscape} onReminderTime={props.onReminderTime} soundscapes={window.PlushLifeContent.SOUNDSCAPES} notes={props.supportNotes} />

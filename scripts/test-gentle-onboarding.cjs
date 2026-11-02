@@ -10,6 +10,7 @@ const start=source.indexOf('  const completeOnboarding = async () => {');
 const finish=source.indexOf('  const saveNativePushToken',start);
 const completeSource=source.slice(start,finish);
 assert.ok(source.includes('if (onboardedOnDateRef.current === period.date) return;'),'the automatic check-in popup must skip the day someone finishes onboarding');
+assert.equal((source.match(/if \(onboardedOnDateRef\.current === period\.date\) return;/g)||[]).length,2,'the evening journal popup must also skip the day someone finishes onboarding');
 function fixture({name='Cozy',mode='cozy',tasks=[],failPreferences=false,firstTask='Drink water'}={}){
   const state={writes:[],messages:[],steps:[],busy:[],preferences:{notifications_enabled:false},failPreferences};
   const context={user:{id:'test-owner'},displayNameDraft:name,onboardingMode:mode,onboardingReason:null,onboardingStep:1,comfortItemDraft:'',trackerTasks:tasks,onboardingFirstTask:firstTask,preferences:state.preferences,cozyComfort:{status:'error'},onboardingSaving:{current:false},onboardedOnDateRef:{current:null},period:{date:'2026-10-31'},CURRENT_CHANGELOG_VERSION:'test',Date,
