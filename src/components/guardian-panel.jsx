@@ -110,6 +110,17 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             </div>
           )}
             {supportMessage && <div role="status" style={{ marginTop: 10, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>{supportMessage}</div>}
+          <section className="pl2-guardian-welcome" aria-label="Guardian home">
+            <span className="pl2-guardian-kicker">💜 YOUR GUARDIAN SPACE</span>
+            <h2>{supportViewMode === "caretaker" ? "Care, made simple" : "You're cared for ♡"}</h2>
+            <p>{supportViewMode === "caretaker" ? "Choose a gentle way to support someone, with their permission." : mode === "person" ? "Your trusted connection is here. You decide what to share." : "A little support is always available, with or without a human Guardian."}</p>
+            <div className="pl2-guardian-action-grid" role="group" aria-label="Guardian quick actions">
+              <button type="button" onClick={() => setGuardianArea("support")} aria-pressed={guardianArea === "support"}><span aria-hidden="true">💌</span><strong>Care & messages</strong><small>Check in and offer support</small></button>
+              <button type="button" onClick={() => setGuardianArea("support")} aria-pressed={guardianArea === "support"}><span aria-hidden="true">🎁</span><strong>Rewards & tasks</strong><small>Celebrate gentle progress</small></button>
+              <button type="button" onClick={() => setGuardianArea("together")} aria-pressed={guardianArea === "together"}><span aria-hidden="true">🤝</span><strong>Together</strong><small>Spend time in your shared space</small></button>
+              <button type="button" onClick={() => setGuardianArea("overview")} aria-pressed={guardianArea === "overview"}><span aria-hidden="true">🔒</span><strong>Sharing</strong><small>Review access and permissions</small></button>
+            </div>
+          </section>
           <div className="pl-guardian-switcher" role="group" aria-label="Guardian sections">
             {[["support","💛","Support"],["together","🤝","Together"],["overview","🔒","Sharing"]].map(([id,icon,label]) => (
               <button key={id} type="button" aria-pressed={guardianArea === id} onClick={() => setGuardianArea(id)}>
