@@ -98,6 +98,7 @@ const TESTS = [
   "test-storybook-home.mjs",
   "test-plush-guardian.mjs",
   "test-guardian-next.mjs",
+  "test-guardian-2-navigation.mjs",
   "test-theme-persistence.mjs",
   "test-simplified-home.mjs",
   "test-bot-guardian.mjs",
