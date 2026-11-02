@@ -115,8 +115,8 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             <h2>{supportViewMode === "caretaker" ? "Care, made simple" : "You're cared for ♡"}</h2>
             <p>{supportViewMode === "caretaker" ? "Choose a gentle way to support someone, with their permission." : mode === "person" ? "Your trusted connection is here. You decide what to share." : "A little support is always available, with or without a human Guardian."}</p>
             <div className="pl2-guardian-action-grid" role="group" aria-label="Guardian quick actions">
-              <button type="button" onClick={() => setGuardianArea("support")} aria-pressed={guardianArea === "support"}><span aria-hidden="true">💌</span><strong>Care & messages</strong><small>Check in and offer support</small></button>
-              <button type="button" onClick={() => setGuardianArea("support")} aria-pressed={guardianArea === "support"}><span aria-hidden="true">🎁</span><strong>Rewards & tasks</strong><small>Celebrate gentle progress</small></button>
+              <button type="button" onClick={() => { setSupportAction("note"); setGuardianArea("support"); }} aria-pressed={guardianArea === "support" && visibleSupportAction === "note"}><span aria-hidden="true">💌</span><strong>Care & messages</strong><small>Check in and offer support</small></button>
+              <button type="button" onClick={() => { setSupportAction(canAddSupportRewards ? "reward" : "task"); setGuardianArea("support"); }} aria-pressed={guardianArea === "support" && visibleSupportAction === "reward"}><span aria-hidden="true">🎁</span><strong>Rewards & tasks</strong><small>Celebrate gentle progress</small></button>
               <button type="button" onClick={() => setGuardianArea("together")} aria-pressed={guardianArea === "together"}><span aria-hidden="true">🤝</span><strong>Together</strong><small>Spend time in your shared space</small></button>
               <button type="button" onClick={() => setGuardianArea("overview")} aria-pressed={guardianArea === "overview"}><span aria-hidden="true">🔒</span><strong>Sharing</strong><small>Review access and permissions</small></button>
             </div>
