@@ -7752,7 +7752,7 @@ function GlowUpTracker() {
 
         <JournalReflectionViewer reflectionViewerDate={reflectionViewerDate} onClose={() => setReflectionViewerDate(null)} reflectionViewerPrompt={reflectionViewerPrompt} reflectionViewerLoading={reflectionViewerLoading} reflectionViewerNote={reflectionViewerNote} />
 
-        {(dashboard === "tasks" || dashboard === "week") && <PlanNavigation view={dashboard === "week" ? "calendar" : taskManagerView} onSelect={view => view === "calendar" ? goToDashboard("week") : openTaskManager(period.date, view)} onEditSchedule={() => setManageSchedule(true)} />}
+        {(dashboard === "tasks" || dashboard === "week") && <PlanNavigation view={dashboard === "week" ? "calendar" : taskManagerView} onSelect={view => view === "calendar" ? goToDashboard("week") : openTaskManager(period.date, view)} onEditSchedule={() => setManageSchedule(true)} selectedDate={dashboard === "tasks" ? selectedProgressDate : period.date} today={period.date} onPickDate={date => openTaskManager(date, "today")} />}
         {(dashboard === "tasks" || dashboard === "week") && (<div className="pl-plan-search">
         <EverydayActions showQuickAdd={false} userId={user.id} client={supabase}
           tasks={trackerTasks} schedules={personalSchedules}

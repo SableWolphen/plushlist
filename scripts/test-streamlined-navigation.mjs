@@ -32,4 +32,17 @@ for (const view of ["today", "habits", "later", "calendar"]) {
 }
 nodes(render("today")).find(node => node.type === "button" && node.children.includes("Edit schedule")).props.onClick();
 assert.equal(edits, 1, "Schedule editing remains a direct action");
+// Plan week strip: Monday to Sunday around the chosen day, and picking a day opens it.
+const { planWeek } = scope.module.exports;
+const week = planWeek("2026-11-01", "2026-11-01");
+assert.equal(week.map(day => day.date).join(","), ["2026-10-26","2026-10-27","2026-10-28","2026-10-29","2026-10-30","2026-10-31","2026-11-01"].join(","), "A Sunday belongs to the week that started Monday");
+assert.equal(week.filter(day => day.selected).length, 1);
+assert.equal(planWeek("2026-11-04", "2026-11-01")[0].date, "2026-11-02", "Picking a future day shows that week");
+const picked = [];
+const withWeek = scope.module.exports.PlanNavigation({ view: "today", onSelect: () => {}, onEditSchedule: () => {}, selectedDate: "2026-10-28", today: "2026-11-01", onPickDate: date => picked.push(date) });
+const dayButtons = nodes(withWeek).filter(node => node.type === "button" && node.props["aria-current"] !== undefined || (node.type === "button" && /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) /.test(node.props["aria-label"] || "")));
+assert.equal(dayButtons.length, 7, "Plan shows a seven-day strip");
+assert.equal(nodes(withWeek).filter(node => node.type === "button" && node.props["aria-pressed"]).length, 1, "Day buttons do not count as Plan views");
+dayButtons.find(node => node.props["aria-label"].startsWith("Sun 1")).props.onClick();
+assert.deepEqual(picked, ["2026-11-01"], "Tapping a day opens that day");
 console.log("Streamlined navigation passed: Plan selection, routes, schedule editing, Guardian landing and invitations.");

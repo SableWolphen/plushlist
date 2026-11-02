@@ -34,6 +34,8 @@ assert(home.includes("pl-storybook-lookahead") && home.includes("weekStory.line"
 assert.equal((today.match(/className="pl-home-extras"/g)||[]).length,1,"Only one all-tools hub should remain");
 assert.equal((today.match(/className="pl-storybook-planning"/g)||[]).length,1,"Only one planning drawer should remain");
 assert(app.includes('<PlanNavigation view='), "Tasks and Calendar share Plan navigation");
+assert(tasks.includes("groupByTimeOfDay(displayRows)") && tasks.includes('className="pl3-time-group"'), "Plan groups the day into Morning, Afternoon, Evening and Anytime");
+assert(app.includes('onPickDate={date => openTaskManager(date, "today")}'), "Tapping a day in Plan's week strip opens that day");
 assert(home.includes('setSettingsOpen?.(true)'), "Settings stay available directly from Home");
 assert(today.includes('setCalmQuickOpen?.(true)'), "Calm stays available through daily support");
 assert(care.includes('<CozySpace '), "Cozy Space remains available in Care");
