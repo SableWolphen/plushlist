@@ -3,13 +3,14 @@ export const MAIN_DESTINATIONS = [
   { id: "tasks", label: "Plan", icon: "tasks" },
   { id: "care", label: "Care", icon: "care" },
   { id: "progress", label: "Progress", icon: "progress" },
+  { id: "guardian", label: "Guardian", icon: "guardian" },
 ];
 
 export const PLAN_VIEWS = [["today", "Today"], ["habits", "Habits"], ["later", "Later"], ["calendar", "Calendar"]];
 
-// Calendar lives under Plan, and Guardian (your trusted person) lives under Care.
+// Calendar lives under Plan; Guardian has a dedicated bottom navigation destination.
 export function mainDestination(dashboard) {
-  return dashboard === "week" ? "tasks" : dashboard === "guardian" ? "care" : dashboard;
+  return dashboard === "week" ? "tasks" : dashboard;
 }
 
 export function adjacentDestination(dashboard, direction) {
