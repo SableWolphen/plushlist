@@ -1,0 +1,17 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { MAIN_DESTINATIONS } from "../src/navigation.mjs";
+const get = name => readFileSync(new URL("../"+name, import.meta.url),"utf8");
+const guardian = MAIN_DESTINATIONS.filter(item => item.id === "guardian");
+assert.equal(guardian.length,1,"Guardian must have exactly one dedicated destination");
+assert.equal(MAIN_DESTINATIONS.at(-1).id,"guardian","Guardian remains available as a bottom nav item");
+const app=get("src/app-source.jsx");
+assert.match(app,/MAIN_DESTINATIONS\.map\(\(\{id, label, icon\}\)/,"Bottom nav must render each destination");
+assert.match(app,/dashboard === "guardian"/,"Guardian destination must open the actual panel");
+const screen=get("src/components/guardian-panel.jsx");
+for(const area of ["support","together","overview"]) assert.match(screen,new RegExp('setGuardianArea\\("'+area+'"\\)'),"Guardian home routes to "+area);
+assert.match(screen,/supportViewMode === "caretaker"/,"Guardian home must distinguish Guardian and Cozy roles");
+assert.match(screen,/canSendSupportNotes/);
+assert.match(screen,/canAddSupportRewards/);
+assert.match(screen,/updateCaretakerPermission/);
+console.log("Guardian 2.0 navigation, role-aware home and permission preservation guards passed.");
