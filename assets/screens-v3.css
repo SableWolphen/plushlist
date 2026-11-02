@@ -1,0 +1,36 @@
+/*
+ * Care, Plan and Progress in the simplified style that started with Today.
+ * Loaded last; colours come from the theme's --pl-theme-* variables.
+ */
+
+/* ---------- Care ---------- */
+#main-content .pl3-care-head{padding:4px 2px 2px}
+#main-content .pl3-care-head p{margin:0;font:700 13px/1.3 Nunito,system-ui,sans-serif;color:var(--pl-theme-muted,#6E5A7E)}
+#main-content .pl3-care-head h1{margin:2px 0 0;font:800 clamp(22px,6.6vw,26px)/1.15 Quicksand,Nunito,sans-serif;letter-spacing:-.02em;color:var(--pl-theme-ink,#3B2A4A)}
+#main-content .pl-care-shell .pl-care-title{font-size:19px!important;line-height:1.2!important}
+#main-content .pl-care-shell .pl-care-copy{font-size:13.5px!important;line-height:1.45!important}
+#main-content .pl-care-shell .pl-care-feeling{min-height:56px!important;font-size:14px!important;line-height:1.25!important}
+#main-content .pl-care-shell :is(.pl-care-soft-btn,.pl-care-primary,.pl-care-checkin){font-size:14px!important}
+
+#main-content .pl3-care-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#main-content .pl3-care-tools>button{min-height:96px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;gap:10px;padding:14px;border-radius:20px;border:1px solid var(--pl-theme-line,#E8DDF3);background:var(--pl-theme-surface,#fff);color:var(--pl-theme-ink,#3B2A4A);text-align:left;cursor:pointer;font-family:Nunito,system-ui,sans-serif}
+#main-content .pl3-care-tools>button>span:last-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+#main-content .pl3-care-tools strong{font-size:15px;font-weight:900}
+#main-content .pl3-care-tools small{font-size:12.5px;font-weight:700;color:var(--pl-theme-muted,#6E5A7E);line-height:1.3}
+#main-content .pl3-care-tile{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;font-size:19px;background:var(--pl-theme-surface-2,#EFE4F8)}
+#main-content .pl3-care-tools>button:focus-visible,#main-content .pl3-care-people button:focus-visible{outline:3px solid var(--pl-theme-accent,#6E4FA3);outline-offset:2px}
+
+#main-content .pl3-care-people{display:flex;align-items:center;gap:12px;padding:14px;border-radius:20px;border:1px solid var(--pl-theme-line,#E8DDF3);background:var(--pl-theme-surface,#fff);color:var(--pl-theme-ink,#3B2A4A)}
+#main-content .pl3-care-people-icon{width:44px;height:44px;border-radius:999px;display:grid;place-items:center;font-size:20px;background:var(--pl-theme-surface-2,#F6E3EE);flex-shrink:0}
+#main-content .pl3-care-people-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+#main-content .pl3-care-people-copy strong{font:900 15px Nunito,system-ui,sans-serif}
+#main-content .pl3-care-people-copy small{font:700 12.5px/1.35 Nunito,system-ui,sans-serif;color:var(--pl-theme-muted,#6E5A7E)}
+#main-content .pl3-care-people button{min-height:44px;padding:0 16px;border-radius:12px;border:0;background:var(--pl-theme-accent,#6E4FA3);color:var(--pl-theme-on-accent,#fff);font:900 14px Nunito,system-ui,sans-serif;cursor:pointer;flex-shrink:0}
+
+/* Guardian now lives under Care: a small way back. */
+#main-content .pl3-back-to-care{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:4px 0 6px;padding:0 14px;border-radius:12px;border:1px solid var(--pl-theme-line,#E8DDF3);background:var(--pl-theme-surface,#fff);color:var(--pl-theme-ink,#3B2A4A);font:800 14px Nunito,system-ui,sans-serif;cursor:pointer}
+#main-content .pl3-back-to-care:focus-visible{outline:3px solid var(--pl-theme-accent,#6E4FA3);outline-offset:2px}
+
+/* Older Care rules turn every button into a pill; the tiles and the people card stay rounded rectangles. */
+#main-content .pl-care-shell .pl3-care-tools>button{border-radius:20px!important;padding:14px!important;min-height:96px!important;box-shadow:none!important;background:var(--pl-theme-surface,#fff)!important}
+#main-content .pl-care-shell .pl3-care-people button{border-radius:12px!important}

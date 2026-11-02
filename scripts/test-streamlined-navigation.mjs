@@ -3,13 +3,14 @@ import vm from "node:vm";
 import { buildSync } from "esbuild";
 import { MAIN_DESTINATIONS, mainDestination, adjacentDestination, guardianLanding } from "../src/navigation.mjs";
 
-assert.equal(new Set(MAIN_DESTINATIONS.map(item => item.id)).size, 5);
+assert.equal(new Set(MAIN_DESTINATIONS.map(item => item.id)).size, 4);
 assert.equal(mainDestination("week"), "tasks", "Calendar must keep Plan selected");
-assert.equal(mainDestination("guardian"), "guardian");
+assert.equal(mainDestination("guardian"), "care", "Guardian lives under Care, so Care stays selected");
 assert.equal(adjacentDestination("today", 1), "tasks", "Swipes follow the visible navigation");
 assert.equal(adjacentDestination("week", 1), "care", "Calendar swipes continue from Plan");
 assert.equal(adjacentDestination("week", -1), "today");
-assert.equal(adjacentDestination("guardian", 1), "guardian", "Navigation stops at the last destination");
+assert.equal(adjacentDestination("progress", 1), "progress", "Navigation stops at the last destination");
+assert.equal(adjacentDestination("guardian", 1), "progress", "Swiping on from Guardian continues from Care");
 assert.equal(guardianLanding("caretaker"), "support", "A Guardian should see progress immediately");
 assert.equal(guardianLanding("mine"), "support");
 assert.equal(guardianLanding("mine", true), "support", "Pending invitations must be visible on arrival");

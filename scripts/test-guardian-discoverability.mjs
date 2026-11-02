@@ -10,7 +10,8 @@ const docs = fs.readFileSync("docs/plushlife-ui-source-of-truth.md", "utf8");
 const nav = app.split('<nav className="pl-app-bottom-nav" aria-label="Main navigation">')[1]?.split("</nav>")[0];
 assert(nav, "Guardian and other destinations must use the actual mobile bottom navigation");
 
-assert.deepEqual(MAIN_DESTINATIONS.map(item=>item.label), ["Today","Plan","Care","Progress","Guardian"], "Five consistent destinations on phone and desktop");
+assert.deepEqual(MAIN_DESTINATIONS.map(item=>item.label), ["Today","Plan","Care","Progress"], "Four consistent destinations on phone and desktop; Guardian lives in Care");
+assert(fs.readFileSync("src/components/care-panel.jsx","utf8").includes("props.onOpenSupport?.()"), "Care offers a clear way into Guardian");
 assert(nav.includes('MAIN_DESTINATIONS.map'), "Bottom navigation uses the shared destination list");
 assert(nav.includes('mainDestination(dashboard) === id'), "Calendar selects Plan and Guardian retains a selected state");
 assert(nav.includes('setCollectionOpen(false)') && nav.includes('goToDashboard(id)'), "Switching from a collection closes it and opens the destination");
