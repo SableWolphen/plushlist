@@ -53,6 +53,21 @@ const button=(tree,label)=>tree.root.findAllByType('button').find(b=>b.children.
   assert.equal(rejected.root.findAllByProps({role:'alert'}).length,0);
   act(()=>rejected.unmount());
  }
+ let resolvePending,submitCount=0;
+ const pendingSave=new Promise(resolve=>{resolvePending=resolve;});
+ let repeated;
+ act(()=>{repeated=create(React.createElement(QuickCapture,{onQuickAdd:async()=>{submitCount++;return pendingSave;}}));});
+ act(()=>byLabel(repeated,'Quickly add a task').props.onChange({target:{value:'Only one copy'}}));
+ await act(async()=>{
+  const first=button(repeated,'Add').props.onClick();
+  const second=button(repeated,'Add').props.onClick();
+  assert.equal(submitCount,1,'Double-tapping Add must never duplicate an in-flight save');
+  resolvePending(true);
+  await Promise.all([first,second]);
+ });
+ assert.equal(submitCount,1);
+ assert.equal(byLabel(repeated,'Quickly add a task').props.value,'');
+ act(()=>repeated.unmount());
  const {quickTaskSchedule}=await import('../src/quick-task-schedule.mjs');
  const source=fs.readFileSync('src/app-source.jsx','utf8');
  const body=source.slice(source.indexOf('const quickAddTrackerTask = async'),source.indexOf('  const [recentlyDeletedTask'));
