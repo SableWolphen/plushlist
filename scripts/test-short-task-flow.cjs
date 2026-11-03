@@ -34,6 +34,40 @@ const button=(tree,label)=>tree.root.findAllByType('button').find(b=>b.children.
  let failed;act(()=>{failed=create(React.createElement(QuickCapture,{onQuickAdd:async()=>{throw Error('offline');}}));});
  act(()=>byLabel(failed,'Quickly add a task').props.onChange({target:{value:'Retry me'}}));
  await act(async()=>button(failed,'Add').props.onClick());assert.equal(byLabel(failed,'Quickly add a task').props.value,'Retry me');assert(failed.root.findByProps({role:'alert'}));act(()=>failed.unmount());
+ // A backend can reject a save by returning false without throwing.
+ for(const rejectedResult of [false,undefined]) {
+  let rejected,attempts=0,saveSucceeds=false;
+  act(()=>{rejected=create(React.createElement(QuickCapture,{onQuickAdd:async()=>{attempts++;return saveSucceeds ? true : rejectedResult;}}));});
+  const input=()=>byLabel(rejected,'Quickly add a task');
+  act(()=>input().props.onChange({target:{value:'Keep my task'}}));
+  await act(async()=>button(rejected,'Add').props.onClick());
+  assert.equal(input().props.value,'Keep my task','Rejected save must preserve the draft');
+  assert.equal(attempts,1);
+  assert.match(rejected.root.findByProps({role:'alert'}).children.join(''),/try again/i);
+  act(()=>input().props.onChange({target:{value:'Keep my task updated'}}));
+  assert.equal(rejected.root.findAllByProps({role:'alert'}).length,0,'Editing clears stale errors');
+  saveSucceeds=true;
+  await act(async()=>button(rejected,'Add').props.onClick());
+  assert.equal(input().props.value,'','Successful retry clears input');
+  assert.equal(attempts,2);
+  assert.equal(rejected.root.findAllByProps({role:'alert'}).length,0);
+  act(()=>rejected.unmount());
+ }
+ let resolvePending,submitCount=0;
+ const pendingSave=new Promise(resolve=>{resolvePending=resolve;});
+ let repeated;
+ act(()=>{repeated=create(React.createElement(QuickCapture,{onQuickAdd:async()=>{submitCount++;return pendingSave;}}));});
+ act(()=>byLabel(repeated,'Quickly add a task').props.onChange({target:{value:'Only one copy'}}));
+ await act(async()=>{
+  const first=button(repeated,'Add').props.onClick();
+  const second=button(repeated,'Add').props.onClick();
+  assert.equal(submitCount,1,'Double-tapping Add must never duplicate an in-flight save');
+  resolvePending(true);
+  await Promise.all([first,second]);
+ });
+ assert.equal(submitCount,1);
+ assert.equal(byLabel(repeated,'Quickly add a task').props.value,'');
+ act(()=>repeated.unmount());
  const {quickTaskSchedule}=await import('../src/quick-task-schedule.mjs');
  const source=fs.readFileSync('src/app-source.jsx','utf8');
  const body=source.slice(source.indexOf('const quickAddTrackerTask = async'),source.indexOf('  const [recentlyDeletedTask'));
