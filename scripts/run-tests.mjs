@@ -38,6 +38,7 @@ const TESTS = [
   "test-e2e-regressions.mjs",
   "test-business-launch.cjs",
   "test-profit-model.cjs",
+  "test-business-kpi-report.cjs",
   "test-subscription-policy.mjs",
   "test-smart-care-schedule.mjs",
   "test-startup-recovery.cjs",
