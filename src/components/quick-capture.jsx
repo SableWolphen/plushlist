@@ -15,13 +15,14 @@ export function QuickCapture({ compact = false, habit = false, onQuickAdd, quick
     try {
       const ok = await onQuickAdd?.(name, repeat === "once" ? when : "today", { kind, repeat });
       if (ok) { setText(""); setJustAdded(name); }
+      else { setJustAdded(""); setError("Couldn’t save that yet. Your task is still here—please try again."); }
     } catch (_error) { setJustAdded(""); setError("Couldn't save. Your name is still here; please try again."); }
     finally { setBusy(false); }
   };
   return (
     <div className={compact ? "pl-quick-capture-compact" : "pl-quick-capture"} style={{ marginBottom: 14 }}>
       <div style={{ display: "flex", gap: 7, marginTop: 10 }}>
-        <input value={text} onChange={event => { setText(event.target.value); setJustAdded(""); }}
+        <input value={text} onChange={event => { setText(event.target.value); setJustAdded(""); setError(""); }}
           onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); add(); } }}
           maxLength={240} placeholder={habit ? "e.g. Drink a glass of water" : "What needs doing?"}
           aria-label={habit ? "Quickly add a habit" : "Quickly add a task"}
