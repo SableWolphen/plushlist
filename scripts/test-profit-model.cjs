@@ -1,0 +1,17 @@
+"use strict";
+const assert = require("node:assert/strict");
+const { calculateProfit, scenarioMatrix } = require("./profit-model.cjs");
+const base = calculateProfit();
+assert.equal(base.subscribers,3500);
+assert.ok(base.profitCents > 1_000_000 && base.profitCents < 1_020_000);
+assert.ok(base.targetSubscribers > 3400 && base.targetSubscribers < 3600);
+assert.equal(calculateProfit({subscribers:0}).monthlyGrossCents,0);
+assert.equal(calculateProfit({subscribers:0}).profitCents,-400000);
+assert.ok(calculateProfit({subscribers:5000}).profitCents>base.profitCents);
+assert.ok(calculateProfit({storeFeeRate:0.20}).profitCents<base.profitCents);
+assert.equal(calculateProfit({storeFeeRate:1}).targetSubscribers,null);
+assert.equal(scenarioMatrix().length,9);
+for(const value of [-1,NaN,Infinity,1.5]) assert.throws(()=>calculateProfit({subscribers:value}),RangeError);
+assert.throws(()=>calculateProfit({togetherShare:1.1}),RangeError);
+assert.throws(()=>calculateProfit({storeFeeRate:-0.1}),RangeError);
+console.log("Profit planning model scenarios and guards passed");
