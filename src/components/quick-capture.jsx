@@ -5,11 +5,13 @@ export function QuickCapture({ compact = false, habit = false, onQuickAdd, quick
   const [repeat, setRepeat] = React.useState(habit ? "daily" : "once");
   const [kind, setKind] = React.useState(habit ? "build" : "regular");
   const [busy, setBusy] = React.useState(false);
+  const savingRef = React.useRef(false);
   const [justAdded, setJustAdded] = React.useState("");
   const [error, setError] = React.useState("");
   const add = async () => {
     const name = text.trim();
-    if (!name || busy) return;
+    if (!name || savingRef.current) return;
+    savingRef.current = true;
     setBusy(true);
     setError("");
     try {
@@ -17,12 +19,12 @@ export function QuickCapture({ compact = false, habit = false, onQuickAdd, quick
       if (ok) { setText(""); setJustAdded(name); }
       else { setJustAdded(""); setError("Couldn’t save that yet. Your task is still here—please try again."); }
     } catch (_error) { setJustAdded(""); setError("Couldn't save. Your name is still here; please try again."); }
-    finally { setBusy(false); }
+    finally { savingRef.current = false; setBusy(false); }
   };
   return (
     <div className={compact ? "pl-quick-capture-compact" : "pl-quick-capture"} style={{ marginBottom: 14 }}>
       <div style={{ display: "flex", gap: 7, marginTop: 10 }}>
-        <input value={text} onChange={event => { setText(event.target.value); setJustAdded(""); setError(""); }}
+        <input value={text} disabled={busy} onChange={event => { setText(event.target.value); setJustAdded(""); setError(""); }}
           onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); add(); } }}
           maxLength={240} placeholder={habit ? "e.g. Drink a glass of water" : "What needs doing?"}
           aria-label={habit ? "Quickly add a habit" : "Quickly add a task"}
