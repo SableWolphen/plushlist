@@ -83,6 +83,7 @@ const TESTS = [
   "test-share-win.mjs",
   "test-backup-recovery.js",
   "test-release-readiness.js",
+  "test-release-quality-gate.cjs",
   "test-store-readiness.js",
   "test-auth-theme-readiness.js",
   "validate-app-source.js",
