@@ -10,7 +10,8 @@
     "web:sync": "node scripts/validate-static-deployment.js && node scripts/sync-www.js && node scripts/check-bundle-budget.js",
     "android:sync": "npm run web:sync && npx cap sync android",
     "android:open": "npx cap open android",
-    "test:gentle-life": "node scripts/run-tests.mjs calendar-account-guards gentle-everyday-assistant gentle-calendar adaptive-day"
+    "test:gentle-life": "node scripts/run-tests.mjs calendar-account-guards gentle-everyday-assistant gentle-calendar adaptive-day",
+    "qa:release": "node scripts/release-quality-gate.cjs"
   },
   "dependencies": {
     "@capacitor/android": "8.5.3",
