@@ -26,3 +26,32 @@
   #main-content .pl3-week button strong { font-size:13px; }
   #main-content .pl3-week button span { font-size:9px; }
 }
+
+/* Follow-up: readable, keyboard-safe layouts for all five destinations. */
+#main-content :is(.pl3-home,.pl3-plan,.pl-care-shell,.pl3-week-summary,.pl-guardian-content) {
+  width:100%; min-width:0; overflow-wrap:break-word;
+}
+#main-content :is(.pl3-next-actions,.pl3-list-tools,.pl3-care-people) > * {
+  min-width:0;
+}
+#main-content :is(button,[role="button"],input,select,textarea):focus-visible {
+  outline:3px solid var(--pl-theme-accent,#6E4FA3);
+  outline-offset:2px;
+}
+#main-content :is(.pl3-week,.pl3-energy-options,.pl3-week-bars) {
+  max-width:100%;
+}
+#main-content .pl3-next-actions button { white-space:normal; overflow-wrap:anywhere; }
+#main-content .pl3-care-people button { overflow-wrap:anywhere; }
+@media (max-width: 390px) {
+  #main-content .pl3-next-actions { flex-direction:column; }
+  #main-content .pl3-next-actions button { width:100%; flex:0 0 auto; }
+  #main-content .pl3-week-summary { padding:12px; }
+  #main-content .pl3-week-bars { gap:3px; }
+  #main-content .pl3-week-bar b { font-size:10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #main-content :is(.pl3-home,.pl3-plan,.pl-care-shell,.pl-guardian-content) * {
+    scroll-behavior:auto;
+  }
+}
