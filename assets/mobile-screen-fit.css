@@ -59,3 +59,14 @@
 /* One-step Today switch stays compact and accessible on small phones. */
 #main-content .pl-storybook-simplicity{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:8px 12px;border:1px solid var(--pl-theme-line,#e8ddf3);border-radius:16px;background:var(--pl-theme-surface,#fff);font-size:13px;font-weight:700}
 #main-content .pl-storybook-simplicity button{min-height:44px;padding:8px 12px;border-radius:12px;border:1px solid var(--pl-theme-line,#e8ddf3);background:var(--pl-theme-surface-2,#f6eaf8);color:var(--pl-theme-ink,#3b2a4a);font-weight:800}
+
+/* Optional gentle presentation across all five tabs: avoid visual overload without hiding functionality. */
+:root[data-plush-gentle="true"] #main-content :is(.pl3-home,.pl3-plan,.pl-care-shell,.pl-growth-deeper,.pl-guardian-content) {
+  scroll-behavior:auto;
+}
+:root[data-plush-gentle="true"] #main-content :is(.pl3-home,.pl3-plan,.pl-care-shell,.pl-growth-deeper,.pl-guardian-content) :is(button,summary) {
+  min-height:40px;
+}
+:root[data-plush-gentle="true"] #main-content :is(.pl3-home,.pl3-plan,.pl-care-shell,.pl-growth-deeper,.pl-guardian-content) :is(p,li) {
+  line-height:1.55;
+}
