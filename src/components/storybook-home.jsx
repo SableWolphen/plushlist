@@ -68,7 +68,7 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
   const copy=nursery ? {...storybookTheme(world),tag:caregiver+" Mode",detail:`${caregiver}’s here, ${caregiver === "Mommy" ? "sweetheart" : "kiddo"}. One little job at a time.`,ending:`${caregiver}’s proud of your little steps.`} : storybookTheme(world);
   const atmosphere=nursery ? {...themeAtmosphere(world),heading:`${caregiver}’s little plan`,hint:`We can do your little jobs together, ${caregiver === "Mommy" ? "sweetheart" : "kiddo"}.`} : themeAtmosphere(world);
   const now=new Date();
-  const previewSize = simpleToday && !expanded ? 1 : dayType === "rest" ? 0 : dayType === "tiny" ? 1 : ["soft","recovery"].includes(dayType) ? 2 : 3;
+  const previewSize = dayType === "rest" ? 0 : simpleToday && !expanded ? 1 : dayType === "tiny" ? 1 : ["soft","recovery"].includes(dayType) ? 2 : 3;
   const visible=storybookRows(rows,viewDone,dayType === "rest" ? 0 : expanded ? rows.length : previewSize,now.getHours()*60+now.getMinutes(),expanded && dayType !== "rest");
   const weekStory=weeklyCozyStory({history:weeklyHistory,checkIns:dailyCheckInHistory,today:period?.date || ""});
   const hasWeeklyStory=weekStory && (weekStory.stepCount > 0 || weekStory.checkIns > 0);
