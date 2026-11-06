@@ -1,0 +1,28 @@
+/* Narrow-screen layout guardrails. No navigation, data or theme changes. */
+#main-content, #main-content * { box-sizing: border-box; }
+#main-content { min-width: 0; max-width: 100%; }
+#main-content :is(.pl3-home,.pl3-plan,.pl-care-shell,.pl3-week-summary,.pl3-next,.pl-storybook-banner,.pl-storybook-today,.pl3-care-people) { min-width:0; max-width:100%; }
+#main-content :is(h1,h2,h3,p,small,strong,label) { overflow-wrap:break-word; }
+#main-content :is(input,select,textarea) { max-width:100%; }
+#main-content :is(.pl3-care-tools,.pl3-week,.pl3-week-bars,.pl3-energy-options) > * { min-width:0; }
+#main-content .pl3-care-tools strong,
+#main-content .pl3-care-tools small,
+#main-content .pl3-care-people-copy { overflow-wrap:anywhere; }
+@media (max-width: 390px) {
+  #main-content .pl3-care-people { flex-wrap:wrap; }
+  #main-content .pl3-care-people-copy { flex-basis:calc(100% - 60px); }
+  #main-content .pl3-care-people > button { margin-left:auto; max-width:100%; white-space:normal; }
+  #main-content .pl3-care-tools { gap:8px; }
+  #main-content .pl3-care-tools > button { padding:10px!important; }
+  #main-content .pl3-week { gap:2px; }
+  #main-content .pl3-week button { min-height:54px; border-radius:10px!important; }
+  #main-content .pl3-week button strong { font-size:15px; }
+  #main-content .pl3-week button span { font-size:10px; }
+  #main-content .pl3-list-head { flex-wrap:wrap; }
+  #main-content .pl3-energy-options button { font-size:12px; padding-inline:2px; white-space:normal; }
+}
+@media (max-width: 320px) {
+  #main-content .pl3-care-tools { grid-template-columns:minmax(0,1fr); }
+  #main-content .pl3-week button strong { font-size:13px; }
+  #main-content .pl3-week button span { font-size:9px; }
+}
