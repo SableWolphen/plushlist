@@ -23,11 +23,8 @@ on:
         description: "Google Play track to publish to (only used if PLAY_SERVICE_ACCOUNT_JSON is set)"
         required: true
         type: choice
-        default: internal
+        default: production
         options:
-          - internal
-          - alpha
-          - beta
           - production
 
 concurrency:
@@ -180,5 +177,5 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.PlushLife
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
-          track: ${{ inputs.track || 'production' }}
+          track: production
           status: completed
