@@ -41,5 +41,8 @@ jobs:
       - name: Run complete app tests
         run: npm test
 
+      - name: Critical journey release quality gate
+        run: npm run qa:release
+
       - name: Build and validate the web bundle
         run: npm run web:sync

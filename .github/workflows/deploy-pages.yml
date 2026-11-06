@@ -36,6 +36,9 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Critical journey release quality gate
+        run: npm run qa:release
+
       - name: Build site (same esbuild pipeline as Android/Cloudflare)
         run: npm run web:sync
 
