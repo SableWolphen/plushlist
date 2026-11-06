@@ -123,6 +123,14 @@ checks.push(
   [screenFit.includes("prefers-reduced-motion"), "Reduced-motion preference is respected"]
 );
 
+const storybookSource = read("src/components/storybook-home.jsx");
+checks.push(
+  [storybookSource.includes("const [simpleToday, setSimpleToday] = React.useState(() =>") && storybookSource.includes("aria-pressed={simpleToday}"), "Today offers a reversible simple one-step view"],
+  [storybookSource.includes("plushlife:today-simple:") && storybookSource.includes("window.localStorage.setItem"), "Today simplicity preference is saved per account"],
+  [storybookSource.includes('dayType === "rest" ? 0 : simpleToday && !expanded ? 1 :'), "Rest days remain free of tasks even in simple mode"],
+  [read("assets/mobile-screen-fit.css").includes(".pl-storybook-simplicity button"), "Today simplicity toggle has a phone-sized touch target"]
+);
+
 const failures = checks.filter(([ok]) => !ok).map(([, label]) => label);
 if (failures.length) {
   console.error("Mobile UX regression checks failed:\n- " + failures.join("\n- "));

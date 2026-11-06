@@ -56,6 +56,23 @@ export function storybookGreeting(hour = new Date().getHours(), name = "") {
 export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pct=0,toggle,openTaskManager,openDailyCheckIn,openTodayJournal,goToDashboard,setSettingsOpen,selectedOutfit,darkMode=false,syncStatus,online,tomorrowPreviewRows=[],tomorrowDateString="",dayType="full",weeklyHistory=[],dailyCheckInHistory=[], onQuickAdd, quickAddMessage, onEditTask, schedulePreview, scheduleNext=null, displayName="", selectDayType, nextStepTask=null, nextStepHint=null, pickEasierSuggestion}) {
   const companion=useGuardianState(userId);
   const [expanded, setExpanded] = React.useState(false);
+  const [simpleToday, setSimpleToday] = React.useState(() => {
+    try { return window.localStorage.getItem(`plushlife:today-simple:${userId || "guest"}`) !== "false"; }
+    catch (_error) { return true; }
+  });
+  React.useEffect(() => {
+    try { setSimpleToday(window.localStorage.getItem(`plushlife:today-simple:${userId || "guest"}`) !== "false"); }
+    catch (_error) { setSimpleToday(true); }
+  }, [userId]);
+  const toggleSimpleToday = () => {
+    setSimpleToday(value => {
+      const next = !value;
+      try { window.localStorage.setItem(`plushlife:today-simple:${userId || "guest"}`, String(next)); }
+      catch (_error) { /* The view remains usable when storage is blocked. */ }
+      return next;
+    });
+    setExpanded(false);
+  };
   const [dayBusy, setDayBusy] = React.useState(false);
   const [dayMessage, setDayMessage] = React.useState("");
   const captureRef = React.useRef(null);
@@ -67,7 +84,7 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
   const copy=nursery ? {...storybookTheme(world),tag:caregiver+" Mode",detail:`${caregiver}’s here, ${caregiver === "Mommy" ? "sweetheart" : "kiddo"}. One little job at a time.`,ending:`${caregiver}’s proud of your little steps.`} : storybookTheme(world);
   const atmosphere=nursery ? {...themeAtmosphere(world),heading:`${caregiver}’s little plan`,hint:`We can do your little jobs together, ${caregiver === "Mommy" ? "sweetheart" : "kiddo"}.`} : themeAtmosphere(world);
   const now=new Date();
-  const previewSize = dayType === "rest" ? 0 : dayType === "tiny" ? 1 : ["soft","recovery"].includes(dayType) ? 2 : 3;
+  const previewSize = dayType === "rest" ? 0 : simpleToday && !expanded ? 1 : dayType === "tiny" ? 1 : ["soft","recovery"].includes(dayType) ? 2 : 3;
   const visible=storybookRows(rows,viewDone,dayType === "rest" ? 0 : expanded ? rows.length : previewSize,now.getHours()*60+now.getMinutes(),expanded && dayType !== "rest");
   const weekStory=weeklyCozyStory({history:weeklyHistory,checkIns:dailyCheckInHistory,today:period?.date || ""});
   const hasWeeklyStory=weekStory && (weekStory.stepCount > 0 || weekStory.checkIns > 0);
@@ -99,6 +116,7 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
   };
   const openCapture=()=>{ const node=captureRef.current; if(!node) return; node.open=true; node.querySelector("input,textarea")?.focus?.(); };
   return <div className={darkMode ? "pl-storybook pl-storybook-dark pl2-storybook pl3-home" : "pl-storybook pl2-storybook pl3-home"} data-storybook-world={world}>
+    <div className="pl-storybook-simplicity"><span>One little step at a time</span><button type="button" aria-pressed={simpleToday} onClick={toggleSimpleToday}>{simpleToday ? "Show a little more" : "Keep it simple"}</button></div>
     <header className="pl-storybook-banner">
       {atmosphere.scene && <div className="pl-storybook-sky" aria-hidden="true"><img src={`./assets/worlds/${atmosphere.scene}.svg`} alt="" width="640" height="240" /></div>}
       <div className="pl-storybook-mascot" aria-label="Your original PlushLife teddy bear"><ThemeScene decorative focus outfit={selectedOutfit} /></div>
