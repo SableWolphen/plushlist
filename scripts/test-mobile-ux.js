@@ -114,6 +114,15 @@ const checks = [
   [read("src/components/rewards-panel.jsx").includes("React.useState(4)") && read("src/components/rewards-panel.jsx").includes(".slice(0, 4)"), "Rewards previews a smaller collection instead of a wall of items"],
 ];
 
+const screenFit = read("assets/mobile-screen-fit.css");
+checks.push(
+  [index.includes('href="./assets/mobile-screen-fit.css"'), "Responsive fit styles load in the app shell"],
+  [screenFit.includes("@media (max-width: 390px)") && screenFit.includes(".pl3-next-actions"), "Small-screen Today actions stack instead of clipping"],
+  [screenFit.includes(".pl3-week-bars") && screenFit.includes(".pl3-week-summary"), "Progress summary adapts to narrow screens"],
+  [screenFit.includes(".pl-guardian-content") && screenFit.includes("focus-visible"), "Guardian content and keyboard focus remain usable"],
+  [screenFit.includes("prefers-reduced-motion"), "Reduced-motion preference is respected"]
+);
+
 const failures = checks.filter(([ok]) => !ok).map(([, label]) => label);
 if (failures.length) {
   console.error("Mobile UX regression checks failed:\n- " + failures.join("\n- "));
