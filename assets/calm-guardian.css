@@ -1,4 +1,8 @@
 /* The calmer shared-space design uses existing theme tokens and local fonts. */
+/* Dark appearance uses the same geometry and its own reading surfaces in every world. */
+#main-content#main-content.pl-calm-shell[data-pl-dark=true]{--pl-world-top:var(--pl-theme-bg);--pl-world-bottom:var(--pl-theme-bg)}
+#main-content#main-content.pl-calm-shell[data-pl-dark=true] .pl-storybook-banner{background:var(--pl-theme-surface-2)!important}
+#main-content#main-content.pl-calm-shell[data-pl-dark=true] .pl-storybook-sky{opacity:.12!important}
 #main-content#main-content.pl-calm-shell.appearance-soft:not(.baby-mode):not(.dino-theme)[data-pl-dark=false]{--pl-theme-bg:#faf7f2!important;--pl-theme-surface:#fffdf9!important;--pl-theme-surface-2:#eee5f1!important;--pl-theme-ink:#352b3e!important;--pl-theme-muted:#716776!important;--pl-theme-line:#e7e0e8!important;--pl-theme-accent:#61446d!important;--pl-theme-on-accent:#fff9ff!important;background:var(--pl-theme-bg)!important}
 #main-content#main-content.pl-calm-shell{font-family:Nunito,"Segoe UI",sans-serif!important}
 #main-content#main-content.pl-calm-shell .plushlife-app-column{width:100%!important;max-width:920px!important;padding-inline:0!important}
