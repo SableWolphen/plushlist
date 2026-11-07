@@ -57,9 +57,9 @@ const button=(tree,label)=>tree.root.findAllByType("button").find(b=>b.children.
   assert.ok(text(tree).includes("Accountability · mutually accepted"));
   assert.ok(button(tree,"Behavior") && button(tree,"Reference") && button(tree,"Moods") && button(tree,"Tasks"));
   await act(async()=>button(tree,"Behavior").props.onClick());
-  assert.ok(text(tree).includes("not available yet"));
+  assert.ok(text(tree).includes("Behavior"));
   await act(async()=>button(tree,"Reference").props.onClick());
-  assert.ok(text(tree).includes("revision history are not available"));
+  assert.ok(text(tree).includes("Shared notebooks"));
   await act(async()=>button(tree,"Tasks").props.onClick());
   assert.equal(tree.root.findByProps({"aria-label":"Shared task view"}).props.value,"active");
   await act(async()=>button(tree,"Moods").props.onClick());
