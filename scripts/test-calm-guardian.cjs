@@ -30,19 +30,20 @@ const button=(tree,text)=>tree.root.findAllByType("button").find(n=>label(n)===t
   assert.equal(nav.findAllByType("button").filter(b=>b.props["aria-pressed"]).length,1);
   await act(async()=>button(tree,"Check-ins").props.onClick());
   await act(async()=>button(tree,"Sharing & permissions").props.onClick());
-  await act(async()=>button(tree,"Ask for a little support").props.onClick());
+  await act(async()=>button(tree,"Ask for support").props.onClick());
   assert.deepEqual(routes,["checkins","overview","support"],"navigation is explicit and keeps permissions separate");
   assert.equal(tree.root.findAllByProps({role:"dialog"}).length,0);
   await act(async()=>tree.unmount());
-  let frame, focused=0, restored=0, closes=0, dialogOpen=false, historyBack=0;
+  let frame, focused=0, restored=0, closes=0, dialogOpen=false, historyBack=0, pageScroll=0, windowScroll=0;
   const doc=new EventTarget();
   doc.activeElement={isConnected:true,closest:()=>null,focus:()=>restored++};
   doc.querySelectorAll=()=>[{getClientRects:()=>dialogOpen?[{}]:[]}];
   doc.querySelector=selector=>selector.includes('role="dialog"') ? (dialogOpen?{}:null) : {setAttribute(){},focus:()=>focused++,scrollIntoView(){}};
+  doc.getElementById=()=>({scrollTo:()=>pageScroll++});window.scrollTo=()=>windowScroll++;
   global.document=doc;window.requestAnimationFrame=fn=>{frame=fn;return 1;};window.cancelAnimationFrame=()=>{};
   function Probe({page}){useInlinePageFocus(page,()=>closes++);return null;}
   await act(async()=>{tree=create(React.createElement(Probe,{page:"updates"}));});
-  frame();assert.equal(focused,1,"opening a utility moves keyboard focus into the page");
+  frame();assert.equal(pageScroll,1,"utility scrolls its page to the shared header");assert.equal(windowScroll,1,"utility keeps the app masthead above the form");assert.equal(focused,1,"opening a utility moves keyboard focus into the page");
   const native=fs.readFileSync("src/native-bridge.js","utf8");
   const handler=native.match(/Plugins\.App\.addListener\("backButton", function \(state\) \{([\s\S]*?)\n    \}\);/)[1];
   const back=require("node:vm").runInNewContext('(function(state){'+handler+'})',{countOverlays:()=>0,document:doc,Event,window:{history:{back:()=>historyBack++}},exitArmed:false,armExit:()=>{throw Error("must not exit while an in-page utility is open");}});

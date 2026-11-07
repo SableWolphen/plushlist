@@ -30,15 +30,15 @@ export function PlanNavigation({ view, onSelect, onEditSchedule, selectedDate, t
   const anchor = isoDate(selectedDate) || isoDate(today);
   const month = anchor ? new Date(anchor + "T12:00:00").toLocaleDateString(undefined, { month: "long", year: "numeric" }) : "";
   return <section className="pl-plan-navigation pl3-plan" aria-label="Plan">
-    <div className="pl-plan-heading"><div>{month && <span className="pl3-plan-month">{month}</span>}<h1>Plan</h1></div>
+    <div className="pl-plan-heading pl-workspace-heading"><div>{month && <span className="pl3-plan-month">{month}</span>}<h1>Plan</h1></div>
       <button type="button" onClick={onEditSchedule}>Edit schedule</button>
     </div>
-    {week.length > 0 && <div className="pl3-week" role="group" aria-label="Pick a day">{week.map(day =>
+    {view !== "calendar" && week.length > 0 && <div className="pl3-week" role="group" aria-label="Pick a day">{week.map(day =>
       <button key={day.date} type="button" aria-current={day.selected ? "date" : undefined} aria-label={`${day.name} ${day.number}${day.today ? ", today" : ""}`} className={day.today ? "is-today" : undefined} onClick={() => onPickDate(day.date)}>
         <span>{day.name}</span><strong>{day.number}</strong>
       </button>
     )}</div>}
-    <nav aria-label="Plan views">{PLAN_VIEWS.map(([id, label]) =>
+    <nav className="pl-workspace-tabs" aria-label="Plan views">{PLAN_VIEWS.map(([id, label]) =>
       <button key={id} type="button" aria-pressed={view === id} onClick={() => onSelect(id)}>{label}</button>
     )}</nav>
   </section>;

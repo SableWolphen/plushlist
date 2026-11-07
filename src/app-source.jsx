@@ -6127,6 +6127,7 @@ function GlowUpTracker() {
   useEffect(() => {
     // The mobile page scrolls above the navigation, independently of the body.
     document.getElementById("main-content")?.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [dashboard, collectionOpen]);
   const startCozyReset = async (profile) => { const available = rows.filter(row => !row.isBonus).map(row => row.key); const essentials = profile.essentials.filter(key => available.includes(key)); const okay = await saveDailyCheckIn({day_type:"tiny",soft_day:true,custom_essentials:essentials.length ? essentials : available.slice(0,3)}); if (okay && restDates.includes(period.date)) { const {error} = await supabase.from("rest_days").delete().eq("user_id",user.id).eq("rest_date",period.date); if(error) return false; setRestDates(dates=>dates.filter(date=>date!==period.date)); } if (okay && profile.reset_sound && soundscapePlaying !== profile.reset_sound) toggleSoundscape(profile.reset_sound); return okay; };
   const stepDashboard = (direction) => {
@@ -7122,104 +7123,6 @@ function GlowUpTracker() {
           </div>
         </div>
       )}
-      {autoPopupToShow === "check_in" && (
-        <div role="region" className="pl-calm-inline-page" aria-labelledby="checkin-popup-title" tabIndex={-1}>
-          <div onClick={(event) => event.stopPropagation()} style={{ width: "min(100%, 520px)", maxHeight: "min(88vh,760px)", overflowY: "auto", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div>
-                <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>{babyMode ? `🍼 ${babyCaregiverName.toUpperCase()} CHECK-IN` : "🎯 TODAY'S CHECK-IN"}</div>
-                <div id="checkin-popup-title" style={{ marginTop: 4, fontSize: 19, fontWeight: 900, color: "#75428C" }}>{babyMode ? "How does my little self feel?" : "How are you today?"}</div>
-                {babyMode && <div style={{ marginTop: 5, color: "#8C6B9E", fontSize: 11.5, lineHeight: 1.45 }}>Pick one feeling. We’ll shape today.</div>}
-                {babyMode && trackerProfile?.comfort_item_name?.trim() && <div style={{ marginTop: 6, padding: "6px 8px", borderRadius: 9, background: "#FFF8E8", color: "#806536", fontSize: 10.5, fontWeight: 800 }}>🧸 Is {trackerProfile.comfort_item_name.trim()} nearby?</div>}
-              </div>
-              <button type="button" onClick={() => { setCheckInPopupOpen(false); setCheckInPopupDismissedToday(true); }} aria-label="Close" style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>✕</button>
-            </div>
-            <div style={{ marginTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-              <div style={{ fontSize: 10.5, letterSpacing: "0.12em", color: "#8E4EAA", fontWeight: 900 }}>{babyMode ? `TELL ${babyCaregiverName.toUpperCase()} YOUR FEELING` : "HOW DO YOU FEEL?"}</div>
-              <button type="button" onClick={() => setCheckInMoreMoodsOpen((open) => !open)} style={{ padding: "4px 8px", borderRadius: 999, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>{checkInMoreMoodsOpen ? "Fewer" : "More feelings"}</button>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginTop: 7 }}>
-              {CHECKIN_MOODS.filter(([value]) => checkInMoreMoodsOpen || PRIMARY_CHECKIN_MOODS.includes(value) || dailyCheckIn.mood === value).map(([value, emoji, label]) => (
-                <button key={value} type="button" onClick={() => selectCheckInMood(value)} aria-pressed={dailyCheckIn.mood === value} style={{ padding: "9px 4px", borderRadius: 11, border: dailyCheckIn.mood === value ? "2px solid #A65DC1" : "1px solid #E3C9EC", background: dailyCheckIn.mood === value ? "#F7ECFB" : "white", cursor: "pointer", textAlign: "center" }}>
-                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ marginTop: 2, fontSize: 10, fontWeight: 800, color: "#6B5A7D" }}>{label}</div>
-                </button>
-              ))}
-            </div>
-            {dailyCheckIn.mood && dailyCheckIn.capacity && (
-              <div style={{ marginTop: 9, padding: "8px 10px", borderRadius: 10, background: "#F7ECFB", color: "#6B5A7D", fontSize: 11.5, lineHeight: 1.4 }}>
-                {babyMode ? `${babyCaregiverName}'s gentle guess` : "PlushLife's gentle guess"}: <strong>{DAY_TYPES.find(([value]) => value === dailyCheckIn.day_type)?.[2] || "Full"} Day</strong> · {CAPACITY_LABELS[dailyCheckIn.capacity]} capacity · {ENERGY_LEVELS.find(([value]) => value === dailyCheckIn.energy)?.[2] || "Steady"} energy
-              </div>
-            )}
-            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#4C8FE8", fontWeight: 900 }}>CHOOSE TODAY'S PLAN</div>
-            <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#6B7C99" }}>Pick the day size that fits. Progress stays safe.</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(88px,1fr))", gap: 7, marginTop: 7 }}>
-              {DAY_TYPES.map(([value, emoji, label, description]) => (
-                <button key={value} type="button" data-plushlife-day-type={value} onClick={() => selectDayType(value)} aria-pressed={dailyCheckIn.day_type === value} title={description} style={{ padding: "8px 5px", borderRadius: 11, border: dailyCheckIn.day_type === value ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: dailyCheckIn.day_type === value ? "#EAF4FF" : "white", cursor: "pointer" }}>
-                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ fontSize: 10.5, fontWeight: 900, color: "#4C6F98" }}>{label}</div>
-                </button>
-              ))}
-            </div>
-            <button type="button" onClick={() => setCheckInCustomizeOpen((open) => !open)} aria-expanded={checkInCustomizeOpen} style={{ marginTop: 12, width: "100%", padding: "8px 11px", borderRadius: 11, border: "1px solid #D9B8E8", background: "rgba(255,255,255,.72)", color: "#75428C", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>
-              {checkInCustomizeOpen ? "Hide extra options" : "Customize today · optional"} {checkInCustomizeOpen ? "⌃" : "⌄"}
-            </button>
-            {checkInCustomizeOpen && <>
-            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#318C79", fontWeight: 900 }}>ENERGY · OPTIONAL</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 7, marginTop: 7 }}>
-              {ENERGY_LEVELS.map(([value, emoji, label]) => (
-                <button key={value} type="button" onClick={() => saveDailyCheckIn({ energy: value })} aria-pressed={dailyCheckIn.energy === value} style={{ padding: "8px 4px", borderRadius: 11, border: dailyCheckIn.energy === value ? "2px solid #318C79" : "1px solid #CFE8E1", background: dailyCheckIn.energy === value ? "#EAF8F4" : "white", cursor: "pointer" }}>
-                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ fontSize: 10, fontWeight: 800, color: "#5E766F" }}>{label}</div>
-                </button>
-              ))}
-            </div>
-            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#A56D14", fontWeight: 900 }}>WHAT WOULD HELP? · OPTIONAL</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 7 }}>
-              {SUPPORT_PREFERENCES.map(([value, emoji, label]) => (
-                <button key={value} type="button" onClick={() => saveDailyCheckIn({ support_preference: dailyCheckIn.support_preference === value ? null : value })} aria-pressed={dailyCheckIn.support_preference === value} style={{ padding: "7px 9px", borderRadius: 999, border: dailyCheckIn.support_preference === value ? "2px solid #D4A017" : "1px solid #F0D99E", background: dailyCheckIn.support_preference === value ? "#FFF4CF" : "white", color: "#7B641E", fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>{emoji} {label}</button>
-              ))}
-            </div>
-            {dailyCheckIn.support_preference && SUPPORT_GUIDANCE[dailyCheckIn.support_preference] && (
-              <div style={{ marginTop: 9, padding: "9px 11px", borderRadius: 11, background: "#FFF9E9", border: "1px solid #F0D99E", color: "#6B5A3D", fontSize: 11.5, lineHeight: 1.45 }}>
-                {SUPPORT_GUIDANCE[dailyCheckIn.support_preference].text}
-                {SUPPORT_GUIDANCE[dailyCheckIn.support_preference].action && (
-                  <button type="button" onClick={() => {
-                    if (dailyCheckIn.support_preference === "comfort") {
-                      setCheckInPopupOpen(false);
-                      openCareSession("comfort_item");
-                    } else if (dailyCheckIn.support_preference === "practical") {
-                      setEssentialsPickerOpen(true);
-                    } else if (dailyCheckIn.support_preference === "company") {
-                      setCheckInPopupOpen(false);
-                      setDashboard("guardian");
-                    }
-                  }} style={{ display: "block", marginTop: 7, padding: "6px 9px", borderRadius: 8, border: "1px solid #D4A017", background: "white", color: "#8A6A21", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>
-                    {SUPPORT_GUIDANCE[dailyCheckIn.support_preference].action}
-                  </button>
-                )}
-              </div>
-            )}
-            {dailyCheckIn.capacity === "very_low" && !dailyCheckIn.soft_day && (
-              <div style={{ marginTop: 12, padding: "9px 11px", borderRadius: 10, background: "#FFF9E9", fontSize: 12.5, color: "#6B5A3D" }}>
-                That's okay. Today can be smaller. <button type="button" onClick={() => selectDayType("soft")} style={{ marginLeft: 4, padding: "4px 9px", borderRadius: 7, border: "1px solid #F0D99E", background: "white", color: "#A56D14", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>Start a Soft Day</button>
-              </div>
-            )}
-            {(dailyCheckIn.capacity === "very_low" || dailyCheckIn.capacity === "low") && (
-              <div style={{ marginTop: 13, paddingTop: 13, borderTop: "1px solid #E6D4F2" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                  <div style={{ fontSize: 10.5, fontWeight: 800, color: "#8C6B9E" }}>WHAT COUNTS TODAY</div>
-                  <button type="button" onClick={() => setEssentialsPickerOpen(true)} style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>{dailyCheckIn.custom_essentials?.length ? "✏️ Change" : "＋ Choose"}</button>
-                </div>
-                {dailyCheckIn.custom_essentials?.length ? (
-                  <div style={{ marginTop: 8, fontSize: 12, color: "#6B5A7D" }}>Showing just these {dailyCheckIn.custom_essentials.length} picks on your Today list.</div>
-                ) : (
-                  <div style={{ marginTop: 6, fontSize: 12, color: "#8C6B9E" }}>Pick a small handful of today's tasks — your Today list will simplify to just those.</div>
-                )}
-              </div>
-            )}
-            </>}
-            <button type="button" disabled={!dailyCheckIn.mood} onClick={() => { setCheckInPopupOpen(false); setCheckInPopupDismissedToday(true); }} style={{ marginTop: 16, width: "100%", padding: "10px 14px", borderRadius: 12, border: 0, background: dailyCheckIn.mood ? "#A65DC1" : "#D8C8E2", color: "white", fontWeight: 900, cursor: dailyCheckIn.mood ? "pointer" : "not-allowed" }}>{dailyCheckIn.mood ? (babyMode ? "All done for now 🍼" : "Looks good") : "Choose the closest feeling"}</button>
-          </div>
-        </div>
-      )}
       {comfortToolOpen && (() => {
         const tool = COMFORT_TOOLS.find((t) => t.id === comfortToolOpen);
         if (!tool) return null;
@@ -7542,6 +7445,105 @@ function GlowUpTracker() {
         className="plushlife-app-column"
         style={{ maxWidth: 640, margin: "0 auto", touchAction: "pan-y" }}>
         <div className="pl-calm-mobile-top"><span>PlushLife</span><button type="button" onClick={() => { setSettingsOpen(false); setCheckInPopupOpen(false); setJournalQuickOpen(false); setCollectionOpen(false); setWhatsChangedOpen(true); }} aria-current={whatsChangedOpen ? "page" : undefined}>What changed{preferences.last_seen_changelog !== CURRENT_CHANGELOG_VERSION && <span className="pl-calm-unread-dot" aria-label="Unread updates"/>}</button></div>
+      {autoPopupToShow === "check_in" && (
+        <div role="region" className="pl-calm-inline-page" aria-labelledby="checkin-popup-title" tabIndex={-1}>
+          <div onClick={(event) => event.stopPropagation()} style={{ width: "min(100%, 520px)", maxHeight: "min(88vh,760px)", overflowY: "auto", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>{babyMode ? `🍼 ${babyCaregiverName.toUpperCase()} CHECK-IN` : "🎯 TODAY'S CHECK-IN"}</div>
+                <div id="checkin-popup-title" style={{ marginTop: 4, fontSize: 19, fontWeight: 900, color: "#75428C" }}>{babyMode ? "How does my little self feel?" : "How are you today?"}</div>
+                {babyMode && <div style={{ marginTop: 5, color: "#8C6B9E", fontSize: 11.5, lineHeight: 1.45 }}>Pick one feeling. We’ll shape today.</div>}
+                {babyMode && trackerProfile?.comfort_item_name?.trim() && <div style={{ marginTop: 6, padding: "6px 8px", borderRadius: 9, background: "#FFF8E8", color: "#806536", fontSize: 10.5, fontWeight: 800 }}>🧸 Is {trackerProfile.comfort_item_name.trim()} nearby?</div>}
+              </div>
+              <button type="button" onClick={() => { setCheckInPopupOpen(false); setCheckInPopupDismissedToday(true); }} aria-label="Close" style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>✕</button>
+            </div>
+            <div style={{ marginTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+              <div style={{ fontSize: 10.5, letterSpacing: "0.12em", color: "#8E4EAA", fontWeight: 900 }}>{babyMode ? `TELL ${babyCaregiverName.toUpperCase()} YOUR FEELING` : "HOW DO YOU FEEL?"}</div>
+              <button type="button" onClick={() => setCheckInMoreMoodsOpen((open) => !open)} style={{ padding: "4px 8px", borderRadius: 999, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>{checkInMoreMoodsOpen ? "Fewer" : "More feelings"}</button>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginTop: 7 }}>
+              {CHECKIN_MOODS.filter(([value]) => checkInMoreMoodsOpen || PRIMARY_CHECKIN_MOODS.includes(value) || dailyCheckIn.mood === value).map(([value, emoji, label]) => (
+                <button key={value} type="button" onClick={() => selectCheckInMood(value)} aria-pressed={dailyCheckIn.mood === value} style={{ padding: "9px 4px", borderRadius: 11, border: dailyCheckIn.mood === value ? "2px solid #A65DC1" : "1px solid #E3C9EC", background: dailyCheckIn.mood === value ? "#F7ECFB" : "white", cursor: "pointer", textAlign: "center" }}>
+                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ marginTop: 2, fontSize: 10, fontWeight: 800, color: "#6B5A7D" }}>{label}</div>
+                </button>
+              ))}
+            </div>
+            {dailyCheckIn.mood && dailyCheckIn.capacity && (
+              <div style={{ marginTop: 9, padding: "8px 10px", borderRadius: 10, background: "#F7ECFB", color: "#6B5A7D", fontSize: 11.5, lineHeight: 1.4 }}>
+                {babyMode ? `${babyCaregiverName}'s gentle guess` : "PlushLife's gentle guess"}: <strong>{DAY_TYPES.find(([value]) => value === dailyCheckIn.day_type)?.[2] || "Full"} Day</strong> · {CAPACITY_LABELS[dailyCheckIn.capacity]} capacity · {ENERGY_LEVELS.find(([value]) => value === dailyCheckIn.energy)?.[2] || "Steady"} energy
+              </div>
+            )}
+            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#4C8FE8", fontWeight: 900 }}>CHOOSE TODAY'S PLAN</div>
+            <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#6B7C99" }}>Pick the day size that fits. Progress stays safe.</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(88px,1fr))", gap: 7, marginTop: 7 }}>
+              {DAY_TYPES.map(([value, emoji, label, description]) => (
+                <button key={value} type="button" data-plushlife-day-type={value} onClick={() => selectDayType(value)} aria-pressed={dailyCheckIn.day_type === value} title={description} style={{ padding: "8px 5px", borderRadius: 11, border: dailyCheckIn.day_type === value ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: dailyCheckIn.day_type === value ? "#EAF4FF" : "white", cursor: "pointer" }}>
+                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ fontSize: 10.5, fontWeight: 900, color: "#4C6F98" }}>{label}</div>
+                </button>
+              ))}
+            </div>
+            <button type="button" onClick={() => setCheckInCustomizeOpen((open) => !open)} aria-expanded={checkInCustomizeOpen} style={{ marginTop: 12, width: "100%", padding: "8px 11px", borderRadius: 11, border: "1px solid #D9B8E8", background: "rgba(255,255,255,.72)", color: "#75428C", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>
+              {checkInCustomizeOpen ? "Hide extra options" : "Customize today · optional"} {checkInCustomizeOpen ? "⌃" : "⌄"}
+            </button>
+            {checkInCustomizeOpen && <>
+            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#318C79", fontWeight: 900 }}>ENERGY · OPTIONAL</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 7, marginTop: 7 }}>
+              {ENERGY_LEVELS.map(([value, emoji, label]) => (
+                <button key={value} type="button" onClick={() => saveDailyCheckIn({ energy: value })} aria-pressed={dailyCheckIn.energy === value} style={{ padding: "8px 4px", borderRadius: 11, border: dailyCheckIn.energy === value ? "2px solid #318C79" : "1px solid #CFE8E1", background: dailyCheckIn.energy === value ? "#EAF8F4" : "white", cursor: "pointer" }}>
+                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ fontSize: 10, fontWeight: 800, color: "#5E766F" }}>{label}</div>
+                </button>
+              ))}
+            </div>
+            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#A56D14", fontWeight: 900 }}>WHAT WOULD HELP? · OPTIONAL</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 7 }}>
+              {SUPPORT_PREFERENCES.map(([value, emoji, label]) => (
+                <button key={value} type="button" onClick={() => saveDailyCheckIn({ support_preference: dailyCheckIn.support_preference === value ? null : value })} aria-pressed={dailyCheckIn.support_preference === value} style={{ padding: "7px 9px", borderRadius: 999, border: dailyCheckIn.support_preference === value ? "2px solid #D4A017" : "1px solid #F0D99E", background: dailyCheckIn.support_preference === value ? "#FFF4CF" : "white", color: "#7B641E", fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>{emoji} {label}</button>
+              ))}
+            </div>
+            {dailyCheckIn.support_preference && SUPPORT_GUIDANCE[dailyCheckIn.support_preference] && (
+              <div style={{ marginTop: 9, padding: "9px 11px", borderRadius: 11, background: "#FFF9E9", border: "1px solid #F0D99E", color: "#6B5A3D", fontSize: 11.5, lineHeight: 1.45 }}>
+                {SUPPORT_GUIDANCE[dailyCheckIn.support_preference].text}
+                {SUPPORT_GUIDANCE[dailyCheckIn.support_preference].action && (
+                  <button type="button" onClick={() => {
+                    if (dailyCheckIn.support_preference === "comfort") {
+                      setCheckInPopupOpen(false);
+                      openCareSession("comfort_item");
+                    } else if (dailyCheckIn.support_preference === "practical") {
+                      setEssentialsPickerOpen(true);
+                    } else if (dailyCheckIn.support_preference === "company") {
+                      setCheckInPopupOpen(false);
+                      setDashboard("guardian");
+                    }
+                  }} style={{ display: "block", marginTop: 7, padding: "6px 9px", borderRadius: 8, border: "1px solid #D4A017", background: "white", color: "#8A6A21", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>
+                    {SUPPORT_GUIDANCE[dailyCheckIn.support_preference].action}
+                  </button>
+                )}
+              </div>
+            )}
+            {dailyCheckIn.capacity === "very_low" && !dailyCheckIn.soft_day && (
+              <div style={{ marginTop: 12, padding: "9px 11px", borderRadius: 10, background: "#FFF9E9", fontSize: 12.5, color: "#6B5A3D" }}>
+                That's okay. Today can be smaller. <button type="button" onClick={() => selectDayType("soft")} style={{ marginLeft: 4, padding: "4px 9px", borderRadius: 7, border: "1px solid #F0D99E", background: "white", color: "#A56D14", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>Start a Soft Day</button>
+              </div>
+            )}
+            {(dailyCheckIn.capacity === "very_low" || dailyCheckIn.capacity === "low") && (
+              <div style={{ marginTop: 13, paddingTop: 13, borderTop: "1px solid #E6D4F2" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 800, color: "#8C6B9E" }}>WHAT COUNTS TODAY</div>
+                  <button type="button" onClick={() => setEssentialsPickerOpen(true)} style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>{dailyCheckIn.custom_essentials?.length ? "✏️ Change" : "＋ Choose"}</button>
+                </div>
+                {dailyCheckIn.custom_essentials?.length ? (
+                  <div style={{ marginTop: 8, fontSize: 12, color: "#6B5A7D" }}>Showing just these {dailyCheckIn.custom_essentials.length} picks on your Today list.</div>
+                ) : (
+                  <div style={{ marginTop: 6, fontSize: 12, color: "#8C6B9E" }}>Pick a small handful of today's tasks — your Today list will simplify to just those.</div>
+                )}
+              </div>
+            )}
+            </>}
+            <button type="button" disabled={!dailyCheckIn.mood} onClick={() => { setCheckInPopupOpen(false); setCheckInPopupDismissedToday(true); }} style={{ marginTop: 16, width: "100%", padding: "10px 14px", borderRadius: 12, border: 0, background: dailyCheckIn.mood ? "#A65DC1" : "#D8C8E2", color: "white", fontWeight: 900, cursor: dailyCheckIn.mood ? "pointer" : "not-allowed" }}>{dailyCheckIn.mood ? (babyMode ? "All done for now 🍼" : "Looks good") : "Choose the closest feeling"}</button>
+          </div>
+        </div>
+      )}
+
         {/* Classic top sync strip from the original PlushList shell. */}
         {!compactAppShell && (user ? (
           <div className="classic-sync-strip" style={{ marginBottom: 7, display: "flex", justifyContent: "flex-end" }}>

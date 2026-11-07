@@ -52,7 +52,7 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
   const { DAYS, TEMPLATE_PACKS } = window.PlushLifeContent;
   const { WEEKDAY_PRESET_IDS, WEEKEND_PRESET_IDS, scheduleLabelForTask, taskIsScheduledForDate, offsetDate } = window.PlushLifeSchedule;
   return (
-          <ToolPanel title="🌷 Add & organize" displayTitle="Tasks" inline={inline} hideClose={inline} onClose={onClose}>
+          <ToolPanel title="🌷 Add & organize" displayTitle="Tasks" inline={inline} hideClose={inline} hideHeader={inline} onClose={onClose}>
           <div className="pl-task-page">
             {!inline && <div className="pl-edit-shortcuts pl-edit-shortcuts-tasks" role="group" aria-label="Manage tasks and schedule">
               <button type="button" onClick={() => { setTaskView("today"); setShowAllToday(true); }}>✏️ Show all tasks</button>
@@ -62,12 +62,11 @@ export function TasksPanel({ open, onClose, inline = false, initialView = "today
               {[["today", "Today"], ["habits", "Habits"], ["later", "Later"]].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={taskView === id} onClick={() => setTaskView(id)}>{label}{id === "habits" ? ` (${trackerTasks.filter(task=>!task.archived_at && habitTypeForRow(task)!=="regular").length})` : ""}</button>)}
             </div>}
             <section className="pl-task-composer" aria-label={taskView === "habits" ? "Add a habit" : "Add a task"}>
-              <h3>{taskView === "habits" ? "Add a habit" : "Add a task"}</h3>
               <QuickCapture key={taskView === "habits" ? "habit" : "task"} habit={taskView === "habits"} onQuickAdd={quickAddTrackerTask} quickAddMessage={quickAddMessage} />
             </section>
             <section className="pl-design-card" aria-label="Your task list">
               <div className="pl-task-title"><button type="button" className={`pl-mascot-pat ${plushHappy ? "pl-mascot-happy-hop" : ""}`} onClick={cheer} aria-label="Say hi to your plush"><ThemeScene focus decorative mood={plushHappy ? "happy" : "neutral"} /></button><h2>{taskView === "habits" ? "Habits" : taskView === "later" ? "Later" : "Tasks for the day"}</h2></div>
-              <p className="pl-design-caption">{taskView === "habits" ? "Check off today’s habits. Other days stay here for when you need them." : taskView === "today" ? "Check things off, open details, or move them when the day changes." : "No need to do everything. Moving a task is allowed."}</p>
+
               {/* On the Plan tab, "Find anything" above already searches tasks, so
                   this list-only search is shown just when the task list opens as a popup. */}
               {!inline && <details style={{ marginTop: 8 }}>

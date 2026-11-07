@@ -20,7 +20,7 @@ export function useInlinePageFocus(activePage, onClose) {
         : activePage === "settings" ? '[data-plush-panel="Settings"]'
         : '[data-plush-panel="PlushJournal"]';
       const panel = document.querySelector(selector);
-      if (panel) { panel.setAttribute("tabindex", "-1"); panel.focus({preventScroll:true}); panel.scrollIntoView({block:"start",behavior:"instant"}); }
+      if (panel) { panel.setAttribute("tabindex", "-1"); panel.focus({preventScroll:true}); document.getElementById?.("main-content")?.scrollTo?.({top:0}); window.scrollTo?.({top:0,left:0,behavior:"instant"}); }
     });
     return () => {
       window.cancelAnimationFrame(frame);

@@ -69,3 +69,9 @@ Guardian opens on Overview, with one row for Overview, Tasks, Check-ins, Referen
 What changed is an optional in-page destination on desktop and mobile. Its unread indicator is cleared only by an explicit, confirmed Mark as read action. Daily check-ins and journaling no longer auto-open at sign-in or in the evening; existing buttons open them in the content slot. Settings also opens in-page. Destructive confirmations remain dialogs.
 
 Local visual checks: run web:sync, then node scripts/preview-calm-guardian.cjs and serve www/. The calm-preview.html page uses synthetic data and real components without authenticating or contacting Supabase. It is not a live authorization test.
+
+## Shared mobile workspace presentation
+
+Today, Plan, Care, Progress, Guardian and the inline tools share the foundation in assets/calm-guardian.css. Theme worlds supply palette and scenery rather than alternate page structures. Section selectors use pl-workspace-tabs with wrapping, unbroken labels and 44px controls. Calendar owns its date navigation; the Plan week strip is omitted in Calendar view. Collection and task pages suppress the generic ToolPanel heading when they provide their own page heading. Check-in follows the global masthead. User-defined Today card ordering uses integer CSS order values.
+
+For a full-app local review, run web:sync, then node scripts/preview-mobile-app.cjs and serve www/. Open mobile-preview.html. This loads the actual app and lazy components with an in-memory sample SDK; its preview-only CSP blocks remote connections and workers. The helper does not alter the production index. This is visual/interaction evidence, not live authorization or physical-device verification. Preview preferences may persist locally under the sample account. New assets must remain in the service-worker shell list for offline use.

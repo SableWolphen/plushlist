@@ -16,9 +16,9 @@ export function WeekPanel({ open, openTodayJournal, weekCardIndex, setWeekCardIn
   const { offsetDate, dayIdForDate, reflectionPromptForDay, taskIsScheduledForDate, taskIsOptional } = window.PlushLifeSchedule;
   return (
   <>
-        <button type="button" onClick={openTodayJournal} style={{ width: "100%", marginBottom: 9, padding: "10px 12px", borderRadius: 12, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-muted,#8E4EAA)", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>📝 Open today's PlushJournal</button>
+
         <div style={{ display: "flex", gap: 6, marginBottom: 8, alignItems: "center" }}>
-          <div role="tablist" aria-label="Calendar view" style={{ flex: 1, display: "flex", gap: 4, padding: 4, borderRadius: 12, background: "var(--pl-theme-surface-2,#F0E4F7)" }}>
+          <div className="pl-workspace-tabs" role="tablist" aria-label="Calendar view" style={{ flex: 1, display: "flex", gap: 4, padding: 4, borderRadius: 12, background: "var(--pl-theme-surface-2,#F0E4F7)" }}>
             {[
               [0, "📅 Month"],
               [1, "🗓️ Week"],
@@ -367,6 +367,7 @@ export function WeekPanel({ open, openTodayJournal, weekCardIndex, setWeekCardIn
           </div>
         )}
 
+        <button className="pl-calendar-journal-link" type="button" onClick={openTodayJournal} style={{ width: "100%", marginBottom: 9, padding: "10px 12px", borderRadius: 12, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: "var(--pl-theme-surface)", color: "var(--pl-theme-muted,#8E4EAA)", fontWeight: 900, fontSize: 12, cursor: "pointer" }}>📝 Open today's PlushJournal</button>
   </>
   );
 }

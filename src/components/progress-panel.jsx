@@ -1,3 +1,4 @@
+import { DesignIcon } from "./design-icon.jsx";
 import { WorkspaceNavigation } from "./workspace-navigation.jsx";
 import { HabitStudio } from "./habit-studio.jsx";
 import { hasGoldFeature } from "../plush-gold.js";
@@ -51,7 +52,7 @@ function WeekSummary({ weekDays, joinedAt }) {
   if (!summary.bars.length) return null;
   return <section className="pl3-week-summary" aria-label="This week">
     <p className="pl3-week-summary-label">This week</p>
-    <h1>{summary.headline}</h1>
+    <h2>{summary.headline}</h2>
     <div className="pl3-week-bars" role="img" aria-label={summary.bars.filter((bar) => bar.kind !== "ahead").map((bar) => `${bar.date}: ${bar.kind === "rest" ? "rest day" : bar.kind === "done" ? `${bar.done} done` : "nothing yet"}`).join(", ")}>
       {summary.bars.map((bar) => <span key={bar.date} className={`pl3-week-bar is-${bar.kind}`}><i style={{ height: bar.height }} /><b>{bar.letter}</b></span>)}
     </div>
@@ -69,9 +70,10 @@ export function ProgressPanel(props) {
     : goldInsights && props.progressView === "areas" ? <LazyGoldSpacesView {...props} hideNavigation />
     : <LazyExistingProgressPanel {...props} hideNavigation />;
   return <div className="pl-progress-page">
-    {props.progressView === "overview" && <WeekSummary weekDays={props.weekDays} joinedAt={props.user?.created_at} />}
+    <header className="pl-workspace-heading"><p>Your story</p><h1>A little progress</h1><p>Every return counts. Rest belongs here, too.</p></header>
     <WorkspaceNavigation label="Progress sections" items={[["overview","Overview"],["story","My story"],["areas","Care areas"]]} value={props.progressView} onChange={props.setProgressView} />
-    <button type="button" className="pl-progress-plush-link" onClick={() => props.onOpenPlush?.()}>🧸 My Plush & Rewards <span aria-hidden="true">›</span></button>
+    {props.progressView === "overview" && <WeekSummary weekDays={props.weekDays} joinedAt={props.user?.created_at} />}
+    <button type="button" className="pl-progress-plush-link" onClick={() => props.onOpenPlush?.()} aria-label="My Plush & Rewards"><DesignIcon name="plush"/>My Plush & Rewards <span aria-hidden="true">›</span></button>
     <React.Suspense fallback={<GrowthFallback />}>{content}</React.Suspense>
     {props.progressView === "overview" && <details className="pl-progress-extras">
       <summary>Habits & memories</summary>
