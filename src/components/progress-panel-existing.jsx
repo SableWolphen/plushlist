@@ -1,3 +1,4 @@
+import { DesignIcon } from "./design-icon.jsx";
 import { ThemeScene } from "./theme-world.jsx";
 /*
  * Progress regression markers retained while the visible copy stays friendlier:
@@ -154,7 +155,7 @@ function CompactGrowthOverview(props) {
           ["bonus", "⭐", `${props.weeklyBonusDone || 0}`, "Extra sparkles"],
         ].map(([id, icon, value, label]) => (
           <button key={id} type="button" className="pl-growth-stat" aria-expanded={selectedMetric === id} onClick={() => setSelectedMetric((current) => current === id ? null : id)}>
-            <div className="emoji">{icon}</div>
+            <div className="emoji" aria-hidden="true"><DesignIcon name={({essentials:"care",core:"sprout",bonus:"progress"})[id]}/></div>
             <div className="value">{value}</div>
             <div className="label">{label}</div>
           </button>

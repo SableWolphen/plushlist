@@ -134,7 +134,7 @@ export function SafePanelRegion({ label, children }) {
   return <PanelErrorBoundary label={label}>{children}</PanelErrorBoundary>;
 }
 
-export function ToolPanel({ title, displayTitle, onClose, children, inline = false, hideClose = false }) {
+export function ToolPanel({ title, displayTitle, onClose, children, inline = false, hideClose = false, hideHeader = false }) {
   const onCloseRef = React.useRef(onClose);
   const panelRef = React.useRef(null);
   onCloseRef.current = onClose;
@@ -190,17 +190,17 @@ export function ToolPanel({ title, displayTitle, onClose, children, inline = fal
           boxShadow: "0 24px 70px rgba(62,35,75,.34)", overscrollBehavior: "contain",
         }}
       >
-        <div className="pl-tool-header" style={{
+        {!hideHeader && <div className="pl-tool-header" style={{
           position: "sticky", top: 0, zIndex: 2, display: "flex", justifyContent: "space-between", alignItems: "center",
           gap: 12, padding: "13px 15px", background: "var(--pl-theme-surface)", borderBottom: "1px solid var(--pl-theme-line)",
           backdropFilter: "blur(8px)",
         }}>
-          <div className="pl-tool-title" style={{ minWidth: 0, fontSize: 15, fontWeight: 900, color: "var(--pl-theme-ink)" }}>{displayTitle || title}</div>
+          <div className="pl-tool-title" role={inline ? "heading" : undefined} aria-level={inline ? 1 : undefined} style={{ minWidth: 0, fontSize: 15, fontWeight: 900, color: "var(--pl-theme-ink)" }}>{displayTitle || title}</div>
           {!hideClose && <button type="button" className="pl-tool-close" onClick={onClose} aria-label={`Close ${title}`} style={{
             minWidth: 58, minHeight: 44, padding: "7px 11px", borderRadius: 11, border: "1px solid var(--pl-theme-line)",
             background: "var(--pl-theme-surface)", color: "var(--pl-theme-ink)", fontWeight: 900, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, overflowWrap: "normal",
-          }}>{inline ? "Back to tracker" : "Close"}</button>}
-        </div>
+          }}>{inline ? "Back" : "Close"}</button>}
+        </div>}
         <div className="pl-tool-body" style={{ padding: "14px" }}><PanelErrorBoundary label={title}>{children}</PanelErrorBoundary></div>
       </div>
     </div>
