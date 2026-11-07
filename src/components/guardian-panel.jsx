@@ -2,6 +2,7 @@ import { guardianLanding } from "../navigation.mjs";
 import { CozySharing, SharedCozyCard } from "./cozy-space.jsx";
 import { CozyRewardWishlist } from "./cozy-reward-wishlist.jsx";
 const LazyTogetherCorner = React.lazy(() => import("./together-corner.jsx").then((module) => ({ default: module.TogetherCorner })));
+const LazyGuardianAgreements = React.lazy(() => import("./guardian-agreements.jsx").then((module) => ({ default: module.GuardianAgreements })));
 // The inline Guardian/support ToolPanel — module split phase 7,
 // eighth slice, last of the "big four" (see docs/module-split-plan.md).
 // Covers both roles of the Guardian relationship: managing Guardians
@@ -130,6 +131,9 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
           </div>
           <p className="pl-guardian-intro" aria-live="polite">{guardianArea === "together" ? "Spend a little time together, at your pace." : guardianArea === "overview" ? "Choose what you share and who can help." : supportViewMode === "mine" ? "Ask for help and find your suggestions, rewards and notes here." : "Their progress and ways to help, together in one place."}</p>
           {guardianArea === "overview" && <section aria-label="Guardian sharing" className="pl-design-card">
+            <React.Suspense fallback={<p role="status">Opening optional agreements…</p>}>
+              <LazyGuardianAgreements key={user?.id + ":" + supportViewMode + ":" + supportOwnerId} client={client} user={user} ready={guardianLinksReady} links={supportViewMode === "mine" ? ownedSupportLinks : activeSupportLink ? [activeSupportLink] : []}/>
+            </React.Suspense>
             {supportViewMode === "mine" ? <>
                 <p className="pl-guardian-intro">Invite someone you trust. You choose what they see, and can pause access anytime.</p>
                 <details open={ownedSupportLinks.length === 0} style={{padding:12,borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)"}}>
@@ -218,9 +222,9 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
                         ))}
                       </div>
                       <label style={{ display: "grid", gap: 5, marginTop: 10, paddingTop: 9, borderTop: "1px solid var(--pl-theme-line,#E9DDF6)", fontSize: 14, fontWeight: 900, color: "var(--pl-theme-muted,#4C8FE8)" }}>
-                        CARE AGREEMENT · WHAT HELPS AND WHAT TO AVOID
+                        SUPPORT NOTE · WHAT HELPS AND WHAT TO AVOID
                         <textarea defaultValue={link.care_agreement || ""} disabled={!link.active} onBlur={(event) => updateCareAgreement(link, event.target.value)} maxLength={1000} placeholder="Example: If I say overwhelmed, send one supportive message and wait. Please offer practical help before advice." style={{ minHeight: 70, padding: 9, borderRadius: 9, border: "1px solid var(--pl-theme-line,#E9DDF6)", background: link.active ? "var(--pl-theme-surface)" : "var(--pl-theme-surface-2)", color: "var(--pl-theme-ink,#5B4B6B)", resize: "vertical" }} />
-                        <span style={{ color: "var(--pl-theme-muted,#8C6B9E)", fontWeight: 600 }}>Saved when you leave this field. Only this Guardian relationship uses it.</span>
+                        <span style={{ color: "var(--pl-theme-muted,#8C6B9E)", fontWeight: 600 }}>Saved when you leave this field. Only this Guardian relationship uses it. This is your support note; mutual consent is managed in Optional Guardian Agreements.</span>
                       </label>
                       </details>
                     </div>
