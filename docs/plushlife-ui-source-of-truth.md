@@ -60,3 +60,12 @@ Care uses one section selector: Calm, Sleep, Guided steps, History. Check-in and
 Guardian uses Support, Together, Sharing in both roles. Support is the landing view for requests, task suggestions, rewards and notes; caregivers see shared progress and help actions there. Sharing contains invitations, relationship permissions, pause/revocation, care agreements and the Cozy card. Reward lists appear once, and opening a view sends nothing or changes no consent.
 
 Progress keeps one selector (Overview, My story, Care areas) and the Plush shortcut in place in every view. Experiments are optional. Settings starts with four searchable groups and allows direct switching between them: Personalize includes text/accessibility and the phone widget; Reminders includes rest/vacation; Privacy includes suggestion boundaries; Account includes Help and the Plus preview. Names and advanced Today customization are optional drawers. The Plush collection uses Outfits, Badges and Memories. The automatic Guardian keeps one Support/Tasks/Routines/Rewards selector, one mailbox and one keepsake history; other tools are optional. Onboarding shows a name and a first task, with the product explanation optional. Schedule editing retains its direct Save day action, verified save feedback, draft recovery and optional copy/temporary-extra tools.
+
+
+## Calmer Guardian workspace
+
+Guardian opens on Overview, with one row for Overview, Tasks, Check-ins, Reference and Agreement. Sharing & permissions remains a separate, explicit action in the relationship header; existing support requests, rewards and Together remain available from Overview. Relationship content is loaded through the existing consent-gated API. The overview shows only active tasks and deliberately shared entries in the selected agreement, never private check-ins.
+
+What changed is an optional in-page destination on desktop and mobile. Its unread indicator is cleared only by an explicit, confirmed Mark as read action. Daily check-ins and journaling no longer auto-open at sign-in or in the evening; existing buttons open them in the content slot. Settings also opens in-page. Destructive confirmations remain dialogs.
+
+Local visual checks: run web:sync, then node scripts/preview-calm-guardian.cjs and serve www/. The calm-preview.html page uses synthetic data and real components without authenticating or contacting Supabase. It is not a live authorization test.

@@ -31,7 +31,7 @@ const {CarePanel} = load('src/components/care-panel.jsx',[
 let care, started=[],selectedPaths=[];
 function Harness(){const [careSection,setCareSection]=React.useState('quick');return React.createElement(CarePanel,{open:true,user:{id:'cozy'},careSection,setCareSection,HELP_ME_NOW_OPTIONS:[],careSessionHistory:[],pathProgress:[],period:{weekStart:'2026-10-19'},openCareSession:id=>started.push(id),setSleepToolOpen:id=>started.push(id),setSelectedCarePath:id=>selectedPaths.push(id)});}
 const text = tree => JSON.stringify(tree.toJSON());
-const button = (tree,label) => tree.root.findAllByType('button').find(n=>n.children.join('')===label);
+const button = (tree,label) => tree.root.findAllByType('button').find(n=>n.children.filter(c=>typeof c==='string').join('')===label);
 act(()=>{care=create(React.createElement(Harness));});
 assert.equal(care.root.findAllByProps({'aria-label':'Care sections'}).length,1);
 assert.equal(care.root.findAllByProps({'aria-label':'Care library'}).length,0,'No nested section switcher');
@@ -49,11 +49,13 @@ assert(text(care).includes('Saved history'));
 assert(!text(care).includes('Small steps'),'History replaces tool browsing');
 act(()=>care.unmount());
 
+const headerSource=fs.readFileSync('src/components/guardian-space-header.jsx','utf8').replace(/import[^;]+;/,'const CozyScene=()=>null,DesignIcon=()=>null;').replaceAll('export ','');
 const {GuardianPanel}=load('src/components/guardian-panel.jsx',[
   [/import \{ CozySharing, SharedCozyCard \}[^;]+;/,'const CozySharing=()=>React.createElement("p",null,"Shared card"),SharedCozyCard=CozySharing;'],
   [/import \{ CozyRewardWishlist \}[^;]+;/,'const CozyRewardWishlist=()=>null;'],
   [/import \{ ToolPanel \}[^;]+;/,'const ToolPanel=({children})=>React.createElement("div",null,children);'],
-  [/import \{ CozyScene \}[^;]+;/,'const CozyScene=()=>null;'],
+  [/import \{ GuardianSpaceHeader \}[^;]+;/,headerSource],
+  [/const LazyGuardianAgreements[^;]+;/,'const LazyGuardianAgreements=()=>React.createElement("p",null,"Relationship workspace");'],
   [/import \{ openPlushGuardian, useGuardianState \}[^;]+;/,'const openPlushGuardian=()=>{},useGuardianState=()=>({prefs:{automaticReminders:true}});'],
 ],scope);
 let sent=0,permissionChanges=0,rewardsUsed=[];
@@ -62,18 +64,21 @@ const props={open:true,user:{id:'cozy'},guardianLinksReady:true,supportViewMode:
 for(const name of ['pendingSupportInvites','supportPeople','invitedSupportLinks','supportRelationships','guardianSupportRequests','supportAchievements','supportDailyEssentialKeys','supportScheduledTodayKeys','taskSuggestions','GUARDIAN_ROLE_PRESETS'])props[name]=[];
 let guardian;
 act(()=>{guardian=create(React.createElement(GuardianPanel,props));});
-assert(button(guardian,'Send support request'),'Request composer is on the default screen');
+assert(!button(guardian,'Send support request'),'Overview does not open a composer automatically');
+act(()=>button(guardian,'Ask for a little support').props.onClick());
+assert(button(guardian,'Send support request'),'Support composer is one intentional action away');
 assert.equal(guardian.root.findAllByProps({className:'pl-human-guardian-rewards'}).length,1);
 assert.equal(button(guardian,'Use reward 🎁')!==undefined,true);
 assert.equal(guardian.root.findAllByType('button').filter(n=>n.children.join('')==='Use reward 🎁').length,1,'Unapproved gift cannot be used');
 act(()=>button(guardian,'Use reward 🎁').props.onClick());
 assert.deepEqual(rewardsUsed,['ready']);
-const section = label => guardian.root.findByProps({'aria-label':'Guardian sections'}).findAllByType('button').find(n=>n.findAllByType('span').at(-1).children.join('')===label);
+const section = label => label==='Sharing' ? button(guardian,'Sharing & permissions') : {props:{onClick(){button(guardian,'Overview').props.onClick();button(guardian,'Ask for a little support').props.onClick();}}};
 act(()=>section('Sharing').props.onClick());
 assert(text(guardian).includes('Sharing & care agreement'));
 assert(!button(guardian,'Send support request'),'Sharing contains controls, not a second support composer');
 assert.equal(sent,0);assert.equal(permissionChanges,0,'Navigation never changes consent');
-act(()=>section('Support').props.onClick());
+act(()=>button(guardian,'Overview').props.onClick());
+act(()=>button(guardian,'Ask for a little support').props.onClick());
 act(()=>button(guardian,'Send support request').props.onClick());
 assert.equal(sent,1,'Only explicit submission sends a request');
 act(()=>guardian.update(React.createElement(GuardianPanel,{...props,user:{id:'other'},ownedSupportLinks:[],supportRewards:[]})));
@@ -81,7 +86,8 @@ assert(!text(guardian).includes('guardian@example.invalid'),'Account switch drop
 assert(!button(guardian,'Send support request'),'No request sent to a previous account’s Guardian');
 const caretaker={...props,user:{id:'guardian'},supportViewMode:'caretaker',isSupportAdult:true,canViewSupportProgress:true,canSendSupportNotes:true,canAddSupportRewards:true,activeSupportLink:{can_suggest_tasks:true},supportProgress:[],supportProgressView:'daily',selectedSupportName:'Cozy',displayedSupportPercent:25,displayedSupportCompleted:1,displayedSupportPossible:4,supportDailyEssentialCompleted:1,supportScheduledTodayCompleted:0,supportTodayDayLabel:'Tuesday'};
 act(()=>guardian.update(React.createElement(GuardianPanel,caretaker)));
-assert(text(guardian).includes('read-only access'),'Caregiver sees shared progress on landing');
+act(()=>button(guardian,'Offer a little support').props.onClick());
+assert(text(guardian).includes('read-only access'),'Caregiver can intentionally open shared progress');
 assert(button(guardian,'Send note 💛'),'One help composer opens by default');
 const action = label => guardian.root.findByProps({'aria-label':'Support actions'}).findAllByType('button').find(n=>n.findAllByType('span').at(-1).children.join('')===label);
 act(()=>action('Task').props.onClick());

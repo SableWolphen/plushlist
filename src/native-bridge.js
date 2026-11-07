@@ -99,6 +99,13 @@ import { virtualGuardianReminderCopy, guardianRoutineCopy, guardianTomorrowCopy,
         document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
         if (countOverlays() < overlaysBefore) return;
       }
+      // In-page utilities consume Back before browser navigation or app exit.
+      // Existing destructive dialogs retain precedence over the page beneath.
+      if (overlaysBefore === 0) {
+        var pageBack = new Event("plushlife:back-request", { cancelable: true });
+        document.dispatchEvent(pageBack);
+        if (pageBack.defaultPrevented) return;
+      }
       if (state && state.canGoBack) {
         window.history.back();
         return;
