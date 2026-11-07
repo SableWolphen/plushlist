@@ -60,15 +60,12 @@
     if (hide) closePanel();
   }
 
-  const taskRows = () => {
-    const rows = [];
-    document.querySelectorAll('input[type="checkbox"],[role="checkbox"],button[aria-pressed]').forEach((control) => {
-      if (!visible(control)) return;
-      const row = control.closest("li,article,[data-task-key],[class*='task-row'],[class*='task-card']") || control.parentElement;
-      if (row && !rows.includes(row) && !row.closest("#plushlife-gentle-panel")) rows.push(row);
-    });
-    return rows;
-  };
+  // Only actual task rows participate in Rescue. Theme choices, navigation and
+  // in-page settings also use aria-pressed; they are never task candidates.
+  const taskRows = () => [...document.querySelectorAll(
+    '#main-content [data-task-key],#main-content .pl-storybook-list > li,#main-content .pl-design-task,#main-content .pl-day-task-row'
+  )].filter((row) => visible(row) && !row.closest('[role="dialog"],#plushlife-gentle-panel') &&
+    row.querySelector('input[type="checkbox"],[role="checkbox"],button[aria-pressed]'));
 
   const taskLabel = (row) => cleanText(row && row.textContent).slice(0, 90);
   const tinyStepFor = (label) => {
@@ -215,35 +212,12 @@
       }
     });
 
-    document.querySelectorAll("button").forEach((button) => {
-      const text = cleanText(button.textContent);
-      if (/^(show|view|see) all( my)? tasks$/i.test(text) && visible(button) && !button.dataset.plushlifeAutoOpened) {
-        button.dataset.plushlifeAutoOpened = "true";
-        button.click();
-      }
-    });
-
-    const rows = taskRows().filter((row) => !row.closest('[role="dialog"],#plushlife-gentle-panel'));
-    const pageText = cleanText(document.body.innerText).toLowerCase();
-    const inTaskManager = /manage tasks|task list|add a task|import tasks/.test(pageText);
+    // React owns list previews and explicit expansion. The old document-wide
+    // six-row heuristic hid Settings' theme/light controls and could open lists
+    // without a user action. Clear stale presentation marks; never create them.
+    document.querySelectorAll('[data-plushlife-home-overflow="true"]').forEach((row) => delete row.dataset.plushlifeHomeOverflow);
     const existing = document.getElementById("plushlife-home-more");
-    if (inTaskManager || state.mode || rows.length <= 6) {
-      rows.forEach((row) => delete row.dataset.plushlifeHomeOverflow);
-      if (existing) existing.remove();
-      return;
-    }
-    rows.forEach((row, index) => { if (index >= 6) row.dataset.plushlifeHomeOverflow = "true"; else delete row.dataset.plushlifeHomeOverflow; });
-    if (!existing && rows[5] && rows[5].parentElement) {
-      const more = document.createElement("button");
-      more.id = "plushlife-home-more";
-      more.type = "button";
-      more.textContent = `Show ${rows.length - 6} more tasks`;
-      more.addEventListener("click", () => {
-        rows.forEach((row) => delete row.dataset.plushlifeHomeOverflow);
-        more.remove();
-      });
-      rows[5].insertAdjacentElement("afterend", more);
-    }
+    if (existing) existing.remove();
   }
 
   // Native reminder dates are created with Date#setHours in index.html, so a

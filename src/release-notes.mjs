@@ -1,5 +1,6 @@
-export const CURRENT_CHANGELOG_VERSION = "2026-11-07-shared-theme-layout";
+export const CURRENT_CHANGELOG_VERSION = "2026-11-07-control-visibility";
 export const CHANGELOG_ITEMS = [
+  "Theme and Light/Dark choices stay visible in Settings. Task simplification only affects tasks, and lists expand only when you ask.",
   "A calmer Guardian space with one navigation row, clearer tasks, and more room to breathe.",
   "Check-ins, your daily journal, and Settings open in the page. Routine prompts no longer interrupt you on sign-in.",
   "What changed stays available whenever you want it, with an unread indicator for new updates.",
