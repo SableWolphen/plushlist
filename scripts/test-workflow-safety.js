@@ -14,6 +14,7 @@ const cloudflare = read(".github/workflows/deploy-cloudflare.yml");
 const codeql = read(".github/workflows/codeql.yml");
 
 const failures = [];
+if (!manual.includes("track: production") || manual.includes("track: $" + "{{ inputs.track")) throw new Error("Manual publishing must hardcode the production track");
 function check(ok, label) { if (!ok) failures.push(label); }
 
 check(auto.includes("workflow_call:") && !auto.includes("workflow_run:"), "automatic Play release must be reusable and must not run from workflow_run");
