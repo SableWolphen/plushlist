@@ -1,4 +1,5 @@
 import { agreementMode, loadAgreements, agreementAction } from "../guardian-agreements.mjs";
+import { GUARDIAN_AREAS } from "../guardian-workspace-rules.mjs";
 
 const emptyTerms = () => ({ mode:"supportive", expectations:"", boundaries:"", rewards:"", consequences:"" });
 export function GuardianAgreements({client,user,links=[],ready=false}) {
@@ -27,6 +28,7 @@ export function AgreementWorkspace({client,user,link}) {
   const [moodBody,setMoodBody] = React.useState("");
   const [shareMood,setShareMood] = React.useState(false);
   const [assignee,setAssignee] = React.useState("me");
+  const [area,setArea] = React.useState("tasks");
   const live = React.useRef(false);
   const generation = React.useRef(0);
   const connected = !!(link.active && link.accepted_at);
@@ -90,7 +92,12 @@ export function AgreementWorkspace({client,user,link}) {
         <button type="button" disabled={!consent || !terms.expectations.trim() || !terms.boundaries.trim()} onClick={()=>run("agreement",{p_action:"propose",p_link_id:link.id,p_terms:terms},()=>{setTerms(emptyTerms());setConsent(false);})}>Propose for mutual acceptance</button>
       </fieldset>}
       {accepted && <>
-        <h3>Shared tasks</h3><p>Tasks start as suggestions. Only the person doing a task can accept, decline or mark it complete. Missed tasks never trigger consequences.</p>
+        <nav aria-label="Guardian workspace areas" style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:16}}>
+          {GUARDIAN_AREAS.map(item=><button key={item.id} type="button" aria-pressed={area===item.id} disabled={busy} onClick={()=>setArea(item.id)} style={{minHeight:44,fontWeight:area===item.id?800:400}}>{item.label}</button>)}
+        </nav>
+        {area==="behavior" && <section aria-label="Behavior"><h3>Behavior</h3><p>Behavior logging and evaluator-only scoring are not available yet. No scores or corrections are being recorded. Your agreement and privacy controls remain unchanged.</p></section>}
+        {area==="reference" && <section aria-label="Reference"><h3>Reference</h3><p>Shared notebooks with revision history are not available yet. Your accepted agreement terms above remain read-only; propose a new agreement to change them.</p></section>}
+        {area==="tasks" && <section aria-label="Tasks"><h3>Shared tasks</h3><p>Tasks start as suggestions. Only the person doing a task can accept, decline or mark it complete. Missed tasks never trigger consequences.</p>
         <fieldset disabled={busy}><legend>Suggest a shared task</legend>
           <label>Task <input aria-label="Agreement task" maxLength={500} value={taskBody} onChange={e=>setTaskBody(e.target.value)}/></label>
           <label>For <select aria-label="Task assignee" value={assignee} onChange={e=>setAssignee(e.target.value)}><option value="me">Me</option><option value="partner">The other person</option></select></label>
@@ -101,15 +108,16 @@ export function AgreementWorkspace({client,user,link}) {
           {t.assignee_user_id===user.id && (t.status==="proposed" ? ["accept","decline"] : t.status==="accepted" ? ["complete"] : []).map(action=><button key={action} type="button" disabled={busy} onClick={()=>run("task",{p_agreement_id:current.id,p_action:action,p_id:t.id})}>{action=== "complete" ? "Mark complete" : action=== "accept" ? "Accept task" : "Decline task"}</button>)}
           {t.proposed_by===user.id && ["proposed","accepted"].includes(t.status) && <button type="button" disabled={busy} onClick={()=>run("task",{p_agreement_id:current.id,p_action:"withdraw",p_id:t.id})}>Withdraw task</button>}
         </article>)}
-        <h3>Mood check-in</h3><p>Each new entry is private unless you choose to share it with this person. Your existing mood history stays separate.</p>
+        </section>}
+        {area==="moods" && <section aria-label="Moods"><h3>Mood check-in</h3><p>Each new entry is private unless you choose to share it with this person. Your existing mood history stays separate.</p>
         <fieldset disabled={busy}><legend>Write a check-in</legend>
           <textarea aria-label="Agreement mood check-in" maxLength={500} value={moodBody} onChange={e=>setMoodBody(e.target.value)}/>
           <label><input type="checkbox" checked={shareMood} onChange={e=>setShareMood(e.target.checked)}/> Share this entry with this person</label>
           <button type="button" disabled={!moodBody.trim()} onClick={()=>run("mood",{p_agreement_id:current.id,p_action:"create",p_body:moodBody.trim(),p_shared:shareMood},()=>{setMoodBody("");setShareMood(false);})}>{shareMood ? "Save and share entry" : "Save private entry"}</button>
-        </fieldset>
+        </fieldset></section>}
       </>}
-      {!!data.moods.length && <h3>Check-in entries</h3>}
-      {data.moods.map(m=><article key={m.id}>
+      {area==="moods" && !!data.moods.length && <h3>Check-in entries</h3>}
+      {area==="moods" && data.moods.map(m=><article key={m.id}>
         <p style={{overflowWrap:"anywhere"}}>{m.body} · {m.shared ? "Shared with this relationship" : "Private · only you"}</p>
         {m.author_user_id===user.id && <>
           {(m.shared || (accepted && m.agreement_id===current.id)) && <button type="button" disabled={busy} onClick={()=>run("mood",{p_agreement_id:m.agreement_id,p_action:m.shared ? "unshare" : "share",p_id:m.id})}>{m.shared ? "Make private" : "Share with this person"}</button>}
