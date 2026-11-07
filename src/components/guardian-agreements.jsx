@@ -33,6 +33,10 @@ export function AgreementWorkspace({client,user,link}) {
   const [workspaceError,setWorkspaceError] = React.useState("");
   const [eventBody,setEventBody] = React.useState("");
   const [reviewScores,setReviewScores] = React.useState({});
+  const [scheduleTask,setScheduleTask] = React.useState(null);
+  const [scheduleDue,setScheduleDue] = React.useState("");
+  const [scheduleRepeat,setScheduleRepeat] = React.useState("");
+  const [noteHistory,setNoteHistory] = React.useState({});
   const [noteTitle,setNoteTitle] = React.useState("");
   const [noteBody,setNoteBody] = React.useState("");
   const [editingNote,setEditingNote] = React.useState(null);
@@ -77,6 +81,22 @@ export function AgreementWorkspace({client,user,link}) {
     loadGuardianWorkspace(client,current.id).then(next=>{if(active)setWorkspace(next);}).catch(()=>{if(active)setWorkspaceError("This area is unavailable until its secure database update is installed. No changes were made.");});
     return ()=>{active=false;};
   },[client,current?.id,current?.status,connected,area]);
+  const saveSchedule=async(taskId)=>{
+    if(busy || !scheduleDue)return;
+    setBusy(true);
+    try{
+      const {error}=await client.rpc("guardian_task_schedule",{p_agreement_id:current.id,p_task_id:taskId,p_due_on:scheduleDue,p_recurrence:scheduleRepeat||null});
+      if(error)throw error;
+      setScheduleTask(null);setScheduleDue("");setScheduleRepeat("");
+      await reload();
+    }catch(_){setMessage("Task schedule was not saved. Check the database update and try again.");}
+    finally{if(live.current)setBusy(false);}
+  };
+  const showHistory=async(noteId)=>{
+    const {data,error}=await client.from("guardian_notebook_revisions").select("*").eq("notebook_id",noteId).order("version",{ascending:false}).limit(100);
+    if(error){setWorkspaceError("Revision history unavailable.");return;}
+    setNoteHistory(prev=>({...prev,[noteId]:data||[]}));
+  };
   const runWorkspace=async(kind,args,clear)=>{
     if(busy || !workspace)return;
     setBusy(true);setWorkspaceError("");
@@ -146,6 +166,8 @@ export function AgreementWorkspace({client,user,link}) {
               {editingNote?.id===n.id ? <><textarea aria-label={"Edit notebook "+n.id} maxLength={20000} value={editingNote.body} onChange={e=>setEditingNote({...editingNote,body:e.target.value})}/>
                 <button type="button" disabled={busy} onClick={()=>runWorkspace("notebook",{p_agreement_id:current.id,p_action:"edit",p_id:n.id,p_expected_version:editingNote.version,p_body:editingNote.body},()=>setEditingNote(null))}>Save new revision</button>
                 <button type="button" onClick={()=>setEditingNote(null)}>Cancel</button></> : <><p style={{whiteSpace:"pre-wrap",overflowWrap:"anywhere"}}>{n.body}</p><button type="button" disabled={busy} onClick={()=>setEditingNote({id:n.id,version:n.version,body:n.body})}>Edit notebook</button></>}
+              <button type="button" disabled={busy} onClick={()=>showHistory(n.id)}>Browse revision history</button>
+              {(noteHistory[n.id]||[]).map(rev=><div key={rev.version}><p>Revision {rev.version} · {new Date(rev.created_at).toLocaleString()}</p><pre style={{whiteSpace:"pre-wrap",overflowWrap:"anywhere"}}>{rev.body}</pre><button type="button" disabled={busy} onClick={()=>setEditingNote({id:n.id,version:n.version,body:rev.body})}>Restore as new revision</button></div>)}
             </article>)}</>}
         </section>}
         {area==="tasks" && <section aria-label="Tasks"><h3>Shared tasks</h3><p>Tasks start as suggestions. Only the person doing a task can accept, decline or mark it complete. Missed tasks never trigger consequences.</p>
@@ -158,6 +180,8 @@ export function AgreementWorkspace({client,user,link}) {
         {data.tasks.filter(t=>t.agreement_id===current.id && (taskView==="all" || (taskView==="history" ? ["completed","declined","withdrawn"].includes(t.status) : ["proposed","accepted"].includes(t.status)))).map(t=><article key={t.id}>
           <p style={{overflowWrap:"anywhere"}}>{t.body} · {t.status} · {t.assignee_user_id===user.id ? "for you" : "for the other person"}</p>
           {t.assignee_user_id===user.id && (t.status==="proposed" ? ["accept","decline"] : t.status==="accepted" ? ["complete"] : []).map(action=><button key={action} type="button" disabled={busy} onClick={()=>run("task",{p_agreement_id:current.id,p_action:action,p_id:t.id})}>{action=== "complete" ? "Mark complete" : action=== "accept" ? "Accept task" : "Decline task"}</button>)}
+          {t.due_on && <p>Due: {t.due_on}{t.recurrence ? " · repeats "+t.recurrence : ""}</p>}
+          {t.assignee_user_id===user.id && t.status==="accepted" && (scheduleTask===t.id ? <div><label>Due date <input aria-label="Task due date" type="date" value={scheduleDue} onChange={e=>setScheduleDue(e.target.value)}/></label><label>Repeat <select aria-label="Task repeat" value={scheduleRepeat} onChange={e=>setScheduleRepeat(e.target.value)}><option value="">Once</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></label><button type="button" disabled={busy||!scheduleDue} onClick={()=>saveSchedule(t.id)}>Save schedule</button><button type="button" onClick={()=>setScheduleTask(null)}>Cancel</button></div> : <button type="button" disabled={busy} onClick={()=>{setScheduleTask(t.id);setScheduleDue(t.due_on||"");setScheduleRepeat(t.recurrence||"");}}>Schedule task</button>)}
           {t.proposed_by===user.id && ["proposed","accepted"].includes(t.status) && <button type="button" disabled={busy} onClick={()=>run("task",{p_agreement_id:current.id,p_action:"withdraw",p_id:t.id})}>Withdraw task</button>}
         </article>)}
         </section>}
