@@ -1,0 +1,21 @@
+import assert from "node:assert/strict";
+import { GUARDIAN_AREAS, canEvaluateBehavior, behaviorScore, isTaskDueToday, isMoodVisibleToPartner, applyNotebookRevision } from "../src/guardian-workspace-rules.mjs";
+
+assert.deepEqual(GUARDIAN_AREAS.map(x=>x.id), ["behavior","reference","moods","tasks"]);
+const agreement = {id:"a",status:"accepted",mode:"accountability"};
+const link = {active:true,accepted_at:"2026-11-07"};
+assert.equal(canEvaluateBehavior({agreement,link,evaluatorId:"guardian",userId:"guardian"}),true);
+assert.equal(canEvaluateBehavior({agreement,link,evaluatorId:"guardian",userId:"cozy"}),false);
+assert.equal(canEvaluateBehavior({agreement:{...agreement,status:"revoked"},link,evaluatorId:"guardian",userId:"guardian"}),false);
+assert.equal(canEvaluateBehavior({agreement,link:{...link,active:false},evaluatorId:"guardian",userId:"guardian"}),false);
+assert.equal(behaviorScore({status:"pending",score:5}),null);
+assert.equal(behaviorScore({status:"evaluated",score:-2}),-2);
+assert.equal(isTaskDueToday({status:"accepted",due_date:"2026-11-07"},"2026-11-07"),true);
+assert.equal(isTaskDueToday({status:"proposed",due_date:"2026-11-07"},"2026-11-07"),false);
+assert.equal(isMoodVisibleToPartner({shared:true,agreement_id:"a"},agreement,link),true);
+assert.equal(isMoodVisibleToPartner({shared:false,agreement_id:"a"},agreement,link),false);
+assert.equal(isMoodVisibleToPartner({shared:true,agreement_id:"other"},agreement,link),false);
+assert.equal(isMoodVisibleToPartner({shared:true,agreement_id:"a"},agreement,{...link,active:false}),false);
+assert.deepEqual(applyNotebookRevision({currentVersion:2,submittedVersion:1,currentText:"A",nextText:"B"}),{ok:false,reason:"conflict"});
+assert.deepEqual(applyNotebookRevision({currentVersion:2,submittedVersion:2,currentText:"A",nextText:"B"}),{ok:true,version:3,text:"B",changed:true});
+console.log("Guardian workspace presentation rule checks passed");
