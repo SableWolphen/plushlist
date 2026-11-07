@@ -61,6 +61,10 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
     catch (_error) { return true; }
   });
   React.useEffect(() => {
+    try { document.documentElement.dataset.plushGentle = simpleToday ? "true" : "false"; }
+    catch (_error) { /* Optional presentation preference. */ }
+  }, [simpleToday]);
+  React.useEffect(() => {
     try { setSimpleToday(window.localStorage.getItem(`plushlife:today-simple:${userId || "guest"}`) !== "false"); }
     catch (_error) { setSimpleToday(true); }
   }, [userId]);

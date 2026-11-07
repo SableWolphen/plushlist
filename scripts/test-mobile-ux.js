@@ -131,6 +131,11 @@ checks.push(
   [read("assets/mobile-screen-fit.css").includes(".pl-storybook-simplicity button"), "Today simplicity toggle has a phone-sized touch target"]
 );
 
+checks.push(
+  [read("src/components/storybook-home.jsx").includes("dataset.plushGentle = simpleToday"), "Gentle preference affects presentation across tabs"],
+  [read("assets/mobile-screen-fit.css").includes(':root[data-plush-gentle="true"]'), "Gentle presentation styling is available"],
+  [read("src/components/gentle-onboarding.jsx").includes("You can explore everything else later"), "Onboarding reassures users about optional features"]
+);
 const failures = checks.filter(([ok]) => !ok).map(([, label]) => label);
 if (failures.length) {
   console.error("Mobile UX regression checks failed:\n- " + failures.join("\n- "));
