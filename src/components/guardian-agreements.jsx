@@ -27,6 +27,8 @@ export function AgreementWorkspace({client,user,link}) {
   const [taskBody,setTaskBody] = React.useState("");
   const [moodBody,setMoodBody] = React.useState("");
   const [shareMood,setShareMood] = React.useState(false);
+  const [moodPrompt,setMoodPrompt] = React.useState("");
+  const [taskView,setTaskView] = React.useState("active");
   const [assignee,setAssignee] = React.useState("me");
   const [area,setArea] = React.useState("tasks");
   const live = React.useRef(false);
@@ -103,7 +105,8 @@ export function AgreementWorkspace({client,user,link}) {
           <label>For <select aria-label="Task assignee" value={assignee} onChange={e=>setAssignee(e.target.value)}><option value="me">Me</option><option value="partner">The other person</option></select></label>
           <button type="button" disabled={!taskBody.trim()} onClick={()=>run("task",{p_agreement_id:current.id,p_action:"propose",p_body:taskBody.trim(),p_assignee:assignee==="me" ? user.id : partner},()=>setTaskBody(""))}>Suggest task</button>
         </fieldset>
-        {data.tasks.filter(t=>t.agreement_id===current.id).map(t=><article key={t.id}>
+        <label>Show tasks <select aria-label="Shared task view" value={taskView} onChange={e=>setTaskView(e.target.value)}><option value="active">Active suggestions and accepted tasks</option><option value="history">Completed and declined history</option><option value="all">All tasks</option></select></label>
+        {data.tasks.filter(t=>t.agreement_id===current.id && (taskView==="all" || (taskView==="history" ? ["completed","declined","withdrawn"].includes(t.status) : ["proposed","accepted"].includes(t.status)))).map(t=><article key={t.id}>
           <p style={{overflowWrap:"anywhere"}}>{t.body} · {t.status} · {t.assignee_user_id===user.id ? "for you" : "for the other person"}</p>
           {t.assignee_user_id===user.id && (t.status==="proposed" ? ["accept","decline"] : t.status==="accepted" ? ["complete"] : []).map(action=><button key={action} type="button" disabled={busy} onClick={()=>run("task",{p_agreement_id:current.id,p_action:action,p_id:t.id})}>{action=== "complete" ? "Mark complete" : action=== "accept" ? "Accept task" : "Decline task"}</button>)}
           {t.proposed_by===user.id && ["proposed","accepted"].includes(t.status) && <button type="button" disabled={busy} onClick={()=>run("task",{p_agreement_id:current.id,p_action:"withdraw",p_id:t.id})}>Withdraw task</button>}
@@ -111,9 +114,10 @@ export function AgreementWorkspace({client,user,link}) {
         </section>}
         {area==="moods" && <section aria-label="Moods"><h3>Mood check-in</h3><p>Each new entry is private unless you choose to share it with this person. Your existing mood history stays separate.</p>
         <fieldset disabled={busy}><legend>Write a check-in</legend>
+          <label>Optional gentle prompt <select aria-label="Mood prompt" value={moodPrompt} onChange={e=>setMoodPrompt(e.target.value)}><option value="">No prompt</option><option value="How am I feeling right now?">How am I feeling right now?</option><option value="What support would help today?">What support would help today?</option><option value="What went well today?">What went well today?</option></select></label>
           <textarea aria-label="Agreement mood check-in" maxLength={500} value={moodBody} onChange={e=>setMoodBody(e.target.value)}/>
           <label><input type="checkbox" checked={shareMood} onChange={e=>setShareMood(e.target.checked)}/> Share this entry with this person</label>
-          <button type="button" disabled={!moodBody.trim()} onClick={()=>run("mood",{p_agreement_id:current.id,p_action:"create",p_body:moodBody.trim(),p_shared:shareMood},()=>{setMoodBody("");setShareMood(false);})}>{shareMood ? "Save and share entry" : "Save private entry"}</button>
+          <button type="button" disabled={!moodBody.trim()} onClick={()=>run("mood",{p_agreement_id:current.id,p_action:"create",p_body:(moodPrompt ? moodPrompt+"\n" : "")+moodBody.trim(),p_shared:shareMood},()=>{setMoodBody("");setMoodPrompt("");setShareMood(false);})}>{shareMood ? "Save and share entry" : "Save private entry"}</button>
         </fieldset></section>}
       </>}
       {area==="moods" && !!data.moods.length && <h3>Check-in entries</h3>}
