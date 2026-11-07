@@ -13,10 +13,11 @@ const second = {...link,id:"relationship-b",label:"Person B"};
 const user = {id:"owner"};
 const calls=[];
 let rows=[];
+let taskRows=[],moodRows=[];
 let fail=false;
 const client={
   from(table){
-    const q={select(){return q},eq(){return q},in(){return q},order(){return q},limit(){return q},then(resolve,reject){calls.push({read:table});return Promise.resolve({data:table==="guardian_agreements"?rows:[],error:fail?Error("offline"):null}).then(resolve,reject)}};
+    const q={select(){return q},eq(){return q},in(){return q},order(){return q},limit(){return q},then(resolve,reject){calls.push({read:table});return Promise.resolve({data:table==="guardian_agreements"?rows:table==="guardian_agreement_tasks"?taskRows:moodRows,error:fail?Error("offline"):null}).then(resolve,reject)}};
     return q;
   },
   async rpc(name,args){calls.push({name,args});return {data:{},error:fail?Error("offline"):null};}
@@ -68,6 +69,20 @@ const button=(tree,label)=>tree.root.findAllByType("button").find(b=>b.children.
   await act(async()=>tree.root.findByProps({"aria-label":"Agreement mood check-in"}).props.onChange({target:{value:"Private feeling"}}));
   await act(async()=>{await button(tree,"Save private entry").props.onClick();await flush()});
   assert.equal(calls.filter(c=>c.name==="guardian_agreement_mood_action").at(-1).args.p_shared,false);
+  taskRows=[{id:"task",agreement_id:"agreement",body:"One shared task",status:"accepted",assignee_user_id:"owner"}];
+  moodRows=[{id:"private",agreement_id:"agreement",body:"PRIVATE diary text",shared:false,author_user_id:"owner"},{id:"shared",agreement_id:"agreement",body:"Intentionally shared",shared:true,author_user_id:"guardian"},{id:"elsewhere",agreement_id:"another",body:"Other relationship",shared:true}];
+  const writesBeforeNavigation=calls.filter(c=>c.name).length;
+  await act(async()=>{tree.update(React.createElement(AgreementWorkspace,{key:"embedded-overview",client,user,link,area:"overview"}));await flush()});
+  assert.ok(text(tree).includes("One shared task"));
+  assert.ok(text(tree).includes("Intentionally shared"));
+  assert.ok(!text(tree).includes("PRIVATE diary text"),"overview never surfaces private entries");
+  assert.ok(!text(tree).includes("Other relationship"),"overview scopes content to the selected agreement");
+  assert.equal(tree.root.findAllByProps({"aria-label":"Guardian workspace areas"}).length,0,"embedded workspace avoids duplicate navigation");
+  assert.equal(calls.filter(c=>c.name).length,writesBeforeNavigation,"view navigation never writes consent or sharing flags");
+  rows=[{...rows[0],status:"revoked"}];
+  await act(async()=>{await button(tree,"Refresh agreements").props.onClick();await flush()});
+  assert.ok(!text(tree).includes("Intentionally shared"),"revocation removes shared content from the overview");
+  taskRows=[];moodRows=[];
   fail=true;
   await act(async()=>{await button(tree,"Refresh agreements").props.onClick();await flush()});
   assert.ok(text(tree).includes("Agreements are unavailable"));

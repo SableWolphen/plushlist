@@ -467,7 +467,7 @@ export function SettingsPanel({ open, onClose, openDailyCheckIn, dailyCheckIn, p
 
 
   return (
-    <ToolPanel title="Settings" onClose={onClose}>
+    <ToolPanel inline title="Settings" onClose={onClose}>
       <div className="pl-settings-workspace" style={{ maxWidth: 620, margin: "0 auto" }}>
         {section !== "home" && <WorkspaceNavigation label="Settings sections" items={categories.filter(item => primaryCategoryIds.has(item[0])).map(([id,,title]) => [id,title === "Notifications & Reminders" ? "Reminders" : title === "Privacy & Data" ? "Privacy" : title])} value={sectionOwner} onChange={setSection} />}
         {pages[section] || home}

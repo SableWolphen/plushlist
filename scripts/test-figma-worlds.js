@@ -6,7 +6,7 @@ const app = fs.readFileSync('src/app-source.jsx', 'utf8');
 const manager = app.match(/const openTaskManager = \([^]*?\n  };/)[0];
 const changes = {};
 const context = {dayIdForDate,period:{date:'2026-09-29'},taskSectionsForDay: day => {changes.sectionDay=day;return ['Little things'];}};
-for(const key of ['NewTaskDay','NewTaskSection','NewTaskCustomSection','TaskAdvancedOpen','ManageTasks','Dashboard','TaskManagerView','TaskManagerRequest','TaskSearchQuery','SelectedProgressDate','Active'])context['set'+key]=value=>changes[key]=value;
+for(const key of ['WhatsChangedOpen','SettingsOpen','CheckInPopupOpen','JournalQuickOpen','NewTaskDay','NewTaskSection','NewTaskCustomSection','TaskAdvancedOpen','ManageTasks','Dashboard','TaskManagerView','TaskManagerRequest','TaskSearchQuery','SelectedProgressDate','Active'])context['set'+key]=value=>changes[key]=value;
 vm.runInNewContext('{'+manager+'\nopenTaskManager("2026-09-29");}',context);
 assert.equal(changes.NewTaskDay,'tue');
 assert.equal(changes.sectionDay,'tue');

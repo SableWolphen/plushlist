@@ -1,4 +1,4 @@
-import { guardianLanding } from "../navigation.mjs";
+import { GuardianSpaceHeader } from "./guardian-space-header.jsx";
 import { CozySharing, SharedCozyCard } from "./cozy-space.jsx";
 import { CozyRewardWishlist } from "./cozy-reward-wishlist.jsx";
 const LazyTogetherCorner = React.lazy(() => import("./together-corner.jsx").then((module) => ({ default: module.TogetherCorner })));
@@ -16,14 +16,13 @@ const LazyGuardianAgreements = React.lazy(() => import("./guardian-agreements.js
 // as a window global.
 import { ToolPanel } from "./shared.jsx";
 import { resolveSupportAction } from "../guardian-action-selection.mjs";
-import { CozyScene } from "./theme-world.jsx";
 import { openPlushGuardian, useGuardianState } from "./plush-guardian.jsx";
 import { guardianMode, guardianTypeLabel, guardianPersonName, guardianBotDisplayName } from "../guardian-mode.mjs";
 
 export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwnGuardian, supportViewMode, setSupportViewMode, isSupportAdult, selectedSupportName, guardianSupportRequests, supportOwnerId, updateGuardianSupportRequest, pendingSupportInvites, supportPeople, acceptSupportInvitation, declineSupportInvitation, canUseCaretakerDashboard, invitedSupportLinks, loadSupportOwner, loadSupportData, user, supportAchievements, period, ownerIsRestingToday, restDatesSet, todayRequiredDone, supportProgress, activeSupportLink, canViewSupportProgress, canViewSupportTasks, canViewSupportSchedule, canViewSupportMood, supportTrackerTasks = [], supportSchedules = [], supportScheduleExceptions = [], supportMoodSummary, supportProgressView, setSupportProgressView, supportTodayDayLabel, supportProgressReady = true, supportProgressLoading = false, supportDailyEssentialCount, supportScheduledTodayCount, displayedSupportPercent, displayedSupportCompleted, displayedSupportPossible, supportDailyEssentialCompleted, supportDailyEssentialKeys, supportScheduledTodayCompleted, supportScheduledTodayKeys, canSendSupportNotes, newNote, setNewNote, addSupportNote, suggestComfortTool, canAddSupportRewards, rewardTitle, setRewardTitle, rewardDetails, setRewardDetails, rewardTarget, setRewardTarget, rewardTargetPeriod, setRewardTargetPeriod, rewardApprovalRequired, setRewardApprovalRequired, addSupportReward, suggestedTask, setSuggestedTask, suggestedTaskDay, setSuggestedTaskDay, submitTaskSuggestion, inviteEmail, setInviteEmail, inviteSupportAdult, GUARDIAN_ROLE_PRESETS, guardianRolePreset, setGuardianRolePreset, ownedSupportLinks, supportRelationships, setSupportAdultActive, removeSupportAdult, updateCaretakerPermission, updateCareAgreement, supportRequestGuardian, setSupportRequestGuardian, supportRequestType, setSupportRequestType, supportRequestText, setSupportRequestText, sendGuardianSupportRequest, taskSuggestions, suggestionSectionsById, setSuggestionSectionsById, taskSectionsForDay, decideTaskSuggestion, supportMessage, supportRewards, supportWeeklyPercent, supportPercent, updateRewardStatus, supportNotes, setComfortToolOpen, deleteSupportNote, onOpenSettings, guardianLinksReady = false, onRetryGuardian, onOpenTasks }) {
   const [checkInDelay, setCheckInDelay] = React.useState("0");
   const [chosenGuardianArea, setGuardianArea] = React.useState(null);
-  const guardianArea = chosenGuardianArea || guardianLanding(supportViewMode, pendingSupportInvites.length > 0);
+  const guardianArea = chosenGuardianArea || (pendingSupportInvites.length > 0 ? "support" : "home");
   React.useEffect(() => { setGuardianArea(null); setCheckInDelay("0"); setSupportAction("note"); }, [user?.id, supportViewMode]);
   const [supportAction, setSupportAction] = React.useState("note");
   const botGuardian = useGuardianState(user?.id);
@@ -88,22 +87,12 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
               )});
   return (
           <ToolPanel inline title="💛 PlushSupport" displayTitle="Guardians" onClose={onClose}>
-          <div className="pl-guardian-content">
-          <CozyScene title="My Guardian" subtitle="Connect with someone you trust, if you want. PlushLife supports you either way." />
-          {supportViewMode === "mine" && <section className="pl-bot-guardian-entry" aria-label="Optional human Guardian" style={{padding:15,borderRadius:17,background:"var(--pl-theme-surface-2)",border:"1px solid var(--pl-theme-line)",color:"var(--pl-theme-ink)"}}>
-            <h2 style={{margin:"0 0 8px",fontSize:19}}>💛 Your trusted person</h2>
-            <p style={{fontSize:14,lineHeight:1.5,margin:"0 0 12px"}}>{mode === "checking"
-              ? "Checking your support connections…"
-              : mode === "person"
-                ? "Connected: " + guardianDisplayName + ". You control what they can see and do."
-                : "You don't need a Guardian to use PlushLife. Daily support, reminders, care and rewards are already part of the app."}</p>
-            {mode === "checking"
-              ? <button type="button" onClick={()=>onRetryGuardian?.()}>Retry connection</button>
-              : <div className="pl-guardian-unified-actions">
-                  <button type="button" onClick={()=>setGuardianArea("support")}><span>💌</span> {mode === "person" ? "Sharing & permissions" : "Invite someone"}</button>
-                  <button type="button" onClick={()=>setGuardianArea("together")}><span>🤝</span> Together</button>
-                </div>}
-          </section>}
+          <div className="pl-guardian-content pl-calm-guardian">
+          <GuardianSpaceHeader area={guardianArea} onSelect={setGuardianArea} loading={mode === "checking"}
+            relationshipLabel={supportViewMode === "caretaker" ? `Supporting ${selectedSupportName || "your trusted person"}` : mode === "person" ? `You & ${guardianDisplayName}` : "You don't need a Guardian to use PlushLife. Your space. Your pace."}
+            caretaker={supportViewMode === "caretaker"}
+            onSupport={() => { setSupportAction("note"); setGuardianArea("support"); }}
+            onRewards={() => { setSupportAction(canAddSupportRewards ? "reward" : "task"); setGuardianArea("support"); }}/>
           {canUseCaretakerDashboard && (
             <div className="pl-guardian-person-switcher" role="group" aria-label="Guardian views">
               <button type="button" aria-pressed={supportViewMode === "mine"} onClick={() => { setSupportViewMode("mine"); loadSupportOwner(user?.id); }}>🧸 My Support</button>
@@ -111,29 +100,11 @@ export function GuardianPanel({ client, open, onClose, isGuardianAccount, hasOwn
             </div>
           )}
             {supportMessage && <div role="status" style={{ marginTop: 10, fontSize: 14, color: "var(--pl-theme-muted,#8C6B9E)" }}>{supportMessage}</div>}
-          <section className="pl2-guardian-welcome" aria-label="Guardian home">
-            <span className="pl2-guardian-kicker">💜 YOUR GUARDIAN SPACE</span>
-            <h2>{supportViewMode === "caretaker" ? "Care, made simple" : "You're cared for ♡"}</h2>
-            <p>{supportViewMode === "caretaker" ? "Choose a gentle way to support someone, with their permission." : mode === "person" ? "Your trusted connection is here. You decide what to share." : "A little support is always available, with or without a human Guardian."}</p>
-            <div className="pl2-guardian-action-grid" role="group" aria-label="Guardian quick actions">
-              <button type="button" onClick={() => { setSupportAction("note"); setGuardianArea("support"); }} aria-pressed={guardianArea === "support" && visibleSupportAction === "note"}><span aria-hidden="true">💌</span><strong>Care & messages</strong><small>Check in and offer support</small></button>
-              <button type="button" onClick={() => { setSupportAction(canAddSupportRewards ? "reward" : "task"); setGuardianArea("support"); }} aria-pressed={guardianArea === "support" && visibleSupportAction === "reward"}><span aria-hidden="true">🎁</span><strong>Rewards & tasks</strong><small>Celebrate gentle progress</small></button>
-              <button type="button" onClick={() => setGuardianArea("together")} aria-pressed={guardianArea === "together"}><span aria-hidden="true">🤝</span><strong>Together</strong><small>Spend time in your shared space</small></button>
-              <button type="button" onClick={() => setGuardianArea("overview")} aria-pressed={guardianArea === "overview"}><span aria-hidden="true">🔒</span><strong>Sharing</strong><small>Review access and permissions</small></button>
-            </div>
-          </section>
-          <div className="pl-guardian-switcher" role="group" aria-label="Guardian sections">
-            {[["support","💛","Support"],["together","🤝","Together"],["overview","🔒","Sharing"]].map(([id,icon,label]) => (
-              <button key={id} type="button" aria-pressed={guardianArea === id} onClick={() => setGuardianArea(id)}>
-                <span aria-hidden="true">{icon}</span><span>{label}</span>
-              </button>
-            ))}
-          </div>
-          <p className="pl-guardian-intro" aria-live="polite">{guardianArea === "together" ? "Spend a little time together, at your pace." : guardianArea === "overview" ? "Choose what you share and who can help." : supportViewMode === "mine" ? "Ask for help and find your suggestions, rewards and notes here." : "Their progress and ways to help, together in one place."}</p>
+          {["home","tasks","checkins","reference","agreement"].includes(guardianArea) && <React.Suspense fallback={<p role="status">Opening your relationship workspace…</p>}>
+            <LazyGuardianAgreements embedded area={({home:"overview",tasks:"tasks",checkins:"moods",reference:"reference",agreement:"agreement"})[guardianArea]} key={user?.id + ":" + supportViewMode + ":" + supportOwnerId} client={client} user={user} ready={guardianLinksReady} links={supportViewMode === "mine" ? ownedSupportLinks : activeSupportLink ? [activeSupportLink] : []}/>
+          </React.Suspense>}
+          {["support","together","overview"].includes(guardianArea) && <button type="button" className="pl-calm-text-button pl-calm-return" onClick={()=>setGuardianArea("home")}>‹ Your shared space</button>}
           {guardianArea === "overview" && <section aria-label="Guardian sharing" className="pl-design-card">
-            <React.Suspense fallback={<p role="status">Opening optional agreements…</p>}>
-              <LazyGuardianAgreements key={user?.id + ":" + supportViewMode + ":" + supportOwnerId} client={client} user={user} ready={guardianLinksReady} links={supportViewMode === "mine" ? ownedSupportLinks : activeSupportLink ? [activeSupportLink] : []}/>
-            </React.Suspense>
             {supportViewMode === "mine" ? <>
                 <p className="pl-guardian-intro">Invite someone you trust. You choose what they see, and can pause access anytime.</p>
                 <details open={ownedSupportLinks.length === 0} style={{padding:12,borderRadius:12,border:"1px solid var(--pl-theme-line)",background:"var(--pl-theme-surface-2)"}}>

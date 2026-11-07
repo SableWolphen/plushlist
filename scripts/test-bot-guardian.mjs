@@ -53,7 +53,7 @@ assert.match(guardianTomorrowCopy("mommy").body,/Sweetheart/);
 assert.match(guardianTomorrowCopy("daddy").body,/Tomorrow/);
 const core=fs.readFileSync("src/components/plush-guardian-core.jsx","utf8");
 const settings=fs.readFileSync("src/components/plush-guardian-settings.jsx","utf8");
-const guardianPanel=fs.readFileSync("src/components/guardian-panel.jsx","utf8");
+const guardianPanel=fs.readFileSync("src/components/guardian-panel.jsx","utf8") + fs.readFileSync("src/components/guardian-space-header.jsx", "utf8");
 const worker=fs.readFileSync("src/worker.js","utf8");
 const app=fs.readFileSync("src/app-source.jsx","utf8");
 const native=fs.readFileSync("src/native-bridge.js","utf8");
