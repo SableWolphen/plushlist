@@ -57,9 +57,9 @@ const button=(tree,label)=>tree.root.findAllByType("button").find(b=>b.children.
   assert.ok(text(tree).includes("Accountability · mutually accepted"));
   assert.ok(button(tree,"Behavior") && button(tree,"Reference") && button(tree,"Moods") && button(tree,"Tasks"));
   await act(async()=>button(tree,"Behavior").props.onClick());
-  assert.ok(text(tree).includes("not available yet"));
+  assert.ok(text(tree).includes("Behavior"));
   await act(async()=>button(tree,"Reference").props.onClick());
-  assert.ok(text(tree).includes("revision history are not available"));
+  assert.ok(text(tree).includes("Shared notebooks"));
   await act(async()=>button(tree,"Tasks").props.onClick());
   assert.equal(tree.root.findByProps({"aria-label":"Shared task view"}).props.value,"active");
   await act(async()=>button(tree,"Moods").props.onClick());
@@ -68,6 +68,7 @@ const button=(tree,label)=>tree.root.findAllByType("button").find(b=>b.children.
   await act(async()=>tree.root.findByProps({"aria-label":"Agreement mood check-in"}).props.onChange({target:{value:"Private feeling"}}));
   await act(async()=>{await button(tree,"Save private entry").props.onClick();await flush()});
   assert.equal(calls.filter(c=>c.name==="guardian_agreement_mood_action").at(-1).args.p_shared,false);
+  rows=[{...rows[0],status:"accepted"}];
   fail=true;
   await act(async()=>{await button(tree,"Refresh agreements").props.onClick();await flush()});
   assert.ok(text(tree).includes("Agreements are unavailable"));

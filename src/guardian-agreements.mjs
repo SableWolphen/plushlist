@@ -24,3 +24,30 @@ export async function agreementAction(client, action, args = {}) {
   if (error) throw error;
   return data;
 }
+
+export async function loadGuardianWorkspace(client, agreementId) {
+  const tables = [
+    ["events","guardian_behavior_events","agreement_id",agreementId],
+    ["notebooks","guardian_shared_notebooks","agreement_id",agreementId],
+  ];
+  const result = {};
+  for (const [key,table,column,value] of tables) {
+    const {data,error}=await client.from(table).select("*").eq(column,value).order("created_at",{ascending:false}).limit(100);
+    if(error) throw error;
+    result[key]=data || [];
+  }
+  const ids=result.events.map(event=>event.id);
+  if(ids.length){
+    const {data,error}=await client.from("guardian_behavior_reviews").select("*").in("event_id",ids).order("created_at",{ascending:false}).limit(200);
+    if(error) throw error;
+    result.reviews=data||[];
+  } else result.reviews=[];
+  return result;
+}
+export async function guardianWorkspaceAction(client,kind,args){
+  const route={behavior:"guardian_behavior_action",notebook:"guardian_notebook_action"}[kind];
+  if(!route) throw new Error("Unknown Guardian workspace action");
+  const {data,error}=await client.rpc(route,args);
+  if(error) throw error;
+  return data;
+}
