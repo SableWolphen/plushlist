@@ -16,6 +16,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  guardian-database:
+    name: Guardian consent PostgreSQL and concurrency
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.6
+        env:
+          POSTGRES_DB: guardian_agreements_test
+          POSTGRES_PASSWORD: disposable-test-password
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify real database authorization and consent withdrawal races
+        env:
+          GUARDIAN_TEST_DATABASE_URL: postgresql://postgres:disposable-test-password@127.0.0.1:5432/guardian_agreements_test
+        run: node scripts/test-guardian-agreements.mjs
   test:
     name: App tests and web build
     runs-on: ubuntu-latest

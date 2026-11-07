@@ -24,8 +24,10 @@
   },
   "devDependencies": {
     "@capacitor/cli": "8.5.3",
+    "@electric-sql/pglite": "0.3.14",
     "@supabase/supabase-js": "^2.57.0",
     "esbuild": "^0.28.2",
+    "pg": "8.16.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-test-renderer": "18.3.1"

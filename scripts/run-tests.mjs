@@ -24,6 +24,7 @@ const repoRoot = path.resolve(scriptsDir, "..");
 
 // Order matters: it matches the original chained command.
 const TESTS = [
+  "test-guardian-agreements.mjs",
   "test-play-authorization.mjs",
   "test-progress-week.mjs",
   "test-service-worker-first-visit.mjs",
