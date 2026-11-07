@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: google-play-publish
@@ -43,7 +44,7 @@ jobs:
 
   publish:
     needs: gate
-    if: needs.gate.outputs.ready == 'true'
+    if: needs.gate.outputs.ready == 'true' && github.ref == 'refs/heads/main' && vars.PLAY_PRODUCTION_RELEASE_SHA == github.sha
     runs-on: ubuntu-latest
     env:
       RELEASE_SHA: ${{ github.sha }}
@@ -58,6 +59,12 @@ jobs:
         with:
           node-version: 22
           cache: npm
+
+      - name: Verify exact production release authorization
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLAY_PRODUCTION_RELEASE_SHA: ${{ vars.PLAY_PRODUCTION_RELEASE_SHA }}
+        run: node scripts/verify-play-authorization.mjs
 
       - name: Set up JDK
         uses: actions/setup-java@v5

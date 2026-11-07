@@ -20,7 +20,10 @@ check(auto.includes("workflow_call:") && !auto.includes("workflow_run:"), "autom
 check(codeql.includes("release-android:") && codeql.includes("analyze-source") && codeql.includes("analyze-android"), "CodeQL must call Android publishing only after all analysis jobs succeed");
 check(codeql.includes("github.event_name == 'push'") && codeql.includes("refs/heads/main") && codeql.includes("secrets: inherit"), "Android publishing must only receive secrets from trusted main pushes");
 check(!auto.includes("github.event.workflow_run.head_sha"), "automatic Play release must never use a workflow_run supplied SHA");
-check(auto.includes("[play-production]") && auto.includes("&& 'production' || vars.PLAY_AUTO_TRACK || 'alpha'"), "automatic Play release must require an explicit trusted commit marker for production and otherwise default to closed testing");
+check(auto.includes('PLAY_TRACK: production') && !auto.includes('vars.PLAY_AUTO_TRACK'), "automatic Play publishing must use production only");
+check(auto.includes('vars.PLAY_PRODUCTION_RELEASE_SHA == github.sha') && manual.includes('vars.PLAY_PRODUCTION_RELEASE_SHA == github.sha'), "all active publishers must require exact revision authorization");
+check([auto, manual].every(source => source.includes('node scripts/verify-play-authorization.mjs')), "active publishers must verify successful CodeQL for the exact main revision");
+check([historical44, historical45].every(source => !source.includes('upload-google-play@')), "historical builds must not publish to Play");
 check(auto.includes("group: google-play-publish") && manual.includes("group: google-play-publish") && historical44.includes("group: google-play-publish"), "all Play publishers must share one concurrency lock");
 check(!historical44.includes("push:\n") && historical44.includes("workflow_dispatch:"), "historical v44 release must stay manual-only");
 check(!historical45.includes("push:\n") && historical45.includes("workflow_dispatch:"), "historical v45 release must stay manual-only");

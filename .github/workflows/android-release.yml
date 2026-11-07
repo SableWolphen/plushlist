@@ -33,6 +33,7 @@ concurrency:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   build:
@@ -170,8 +171,15 @@ jobs:
           path: app-release-${{ env.RELEASE_VERSION_CODE }}.apk
           retention-days: 30
 
+      - name: Verify exact production release authorization
+        if: env.HAS_PLAY_SECRET == 'true' && github.ref == 'refs/heads/main' && vars.PLAY_PRODUCTION_RELEASE_SHA == github.sha
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLAY_PRODUCTION_RELEASE_SHA: ${{ vars.PLAY_PRODUCTION_RELEASE_SHA }}
+        run: node scripts/verify-play-authorization.mjs
+
       - name: Publish to Google Play
-        if: env.HAS_PLAY_SECRET == 'true'
+        if: env.HAS_PLAY_SECRET == 'true' && github.ref == 'refs/heads/main' && vars.PLAY_PRODUCTION_RELEASE_SHA == github.sha
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
