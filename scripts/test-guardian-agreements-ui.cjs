@@ -55,6 +55,15 @@ const button=(tree,label)=>tree.root.findAllByType("button").find(b=>b.children.
   rows=[{...rows[0],status:"accepted"}];
   await act(async()=>{tree.update(React.createElement(AgreementWorkspace,{key:"accepted",client,user,link}));await flush()});
   assert.ok(text(tree).includes("Accountability · mutually accepted"));
+  assert.ok(button(tree,"Behavior") && button(tree,"Reference") && button(tree,"Moods") && button(tree,"Tasks"));
+  await act(async()=>button(tree,"Behavior").props.onClick());
+  assert.ok(text(tree).includes("not available yet"));
+  await act(async()=>button(tree,"Reference").props.onClick());
+  assert.ok(text(tree).includes("revision history are not available"));
+  await act(async()=>button(tree,"Tasks").props.onClick());
+  assert.equal(tree.root.findByProps({"aria-label":"Shared task view"}).props.value,"active");
+  await act(async()=>button(tree,"Moods").props.onClick());
+  assert.equal(tree.root.findByProps({"aria-label":"Mood prompt"}).props.value,"");
   assert.equal(tree.root.findAllByType("input").find(i=>i.props.type==="checkbox").props.checked,false,"new check-in starts private");
   await act(async()=>tree.root.findByProps({"aria-label":"Agreement mood check-in"}).props.onChange({target:{value:"Private feeling"}}));
   await act(async()=>{await button(tree,"Save private entry").props.onClick();await flush()});
