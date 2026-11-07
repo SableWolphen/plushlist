@@ -29,6 +29,8 @@ export function AgreementWorkspace({client,user,link}) {
   const [shareMood,setShareMood] = React.useState(false);
   const [moodPrompt,setMoodPrompt] = React.useState("");
   const [taskView,setTaskView] = React.useState("active");
+  const [editingMood,setEditingMood] = React.useState(null);
+  const [editedMoodBody,setEditedMoodBody] = React.useState("");
   const [assignee,setAssignee] = React.useState("me");
   const [area,setArea] = React.useState("tasks");
   const live = React.useRef(false);
@@ -124,6 +126,7 @@ export function AgreementWorkspace({client,user,link}) {
       {area==="moods" && data.moods.map(m=><article key={m.id}>
         <p style={{overflowWrap:"anywhere"}}>{m.body} · {m.shared ? "Shared with this relationship" : "Private · only you"}</p>
         {m.author_user_id===user.id && <>
+          {accepted && m.agreement_id===current.id && (editingMood===m.id ? <div><textarea aria-label="Edit mood entry" maxLength={500} value={editedMoodBody} onChange={e=>setEditedMoodBody(e.target.value)}/><button type="button" disabled={busy || !editedMoodBody.trim()} onClick={()=>run("mood",{p_agreement_id:m.agreement_id,p_action:"edit",p_id:m.id,p_body:editedMoodBody.trim()},()=>{setEditingMood(null);setEditedMoodBody("");})}>Save mood edit</button><button type="button" onClick={()=>setEditingMood(null)}>Cancel edit</button></div> : <button type="button" disabled={busy} onClick={()=>{setEditingMood(m.id);setEditedMoodBody(m.body);}}>Edit entry</button>)}
           {(m.shared || (accepted && m.agreement_id===current.id)) && <button type="button" disabled={busy} onClick={()=>run("mood",{p_agreement_id:m.agreement_id,p_action:m.shared ? "unshare" : "share",p_id:m.id})}>{m.shared ? "Make private" : "Share with this person"}</button>}
           <button type="button" disabled={busy} onClick={()=>run("mood",{p_agreement_id:m.agreement_id,p_action:"delete",p_id:m.id})}>Delete entry</button>
         </>}
