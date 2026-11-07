@@ -68,6 +68,7 @@ const button=(tree,label)=>tree.root.findAllByType("button").find(b=>b.children.
   await act(async()=>tree.root.findByProps({"aria-label":"Agreement mood check-in"}).props.onChange({target:{value:"Private feeling"}}));
   await act(async()=>{await button(tree,"Save private entry").props.onClick();await flush()});
   assert.equal(calls.filter(c=>c.name==="guardian_agreement_mood_action").at(-1).args.p_shared,false);
+  rows=[{...rows[0],status:"accepted"}];
   fail=true;
   await act(async()=>{await button(tree,"Refresh agreements").props.onClick();await flush()});
   assert.ok(text(tree).includes("Agreements are unavailable"));
