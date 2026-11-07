@@ -22,7 +22,7 @@ export function behaviorScore(entry) {
 }
 
 export function isTaskDueToday(task, today) {
-  if (!task || !/^\\d{4}-\\d{2}-\\d{2}$/.test(today)) return false;
+  if (!task || !/^\d{4}-\d{2}-\d{2}$/.test(today)) return false;
   if (task.status !== "accepted" && task.status !== "completed") return false;
   return typeof task.due_date === "string" && task.due_date.slice(0,10) === today;
 }
