@@ -87,6 +87,21 @@ const button=(tree,label)=>tree.root.findAllByType('button').find(b=>b.children.
  }
  assert.equal((await save('today',{},true)).state.length,0,'Account switching must not show another account’s save');
  assert.equal((await save('today',{},false,'offline')).ok,false);
+ // Exercise the full task creator against a persisted store. Ordering is a
+ // secondary write: its failure must never delete a successfully saved task.
+ const createBody=source.slice(source.indexOf('  const addTrackerTask = async'),source.indexOf('  // Quick capture:',source.indexOf('  const addTrackerTask = async')));
+ async function createTask({orderError=false,orderThrows=false,switchAt=null}={}) {
+  const persisted=[],messages=[],shown=[];let updates=0;
+  const context={user:{id:'cozy'},currentAccountIdRef:{current:'cozy'},newTaskName:'Read a page',newTaskDay:'daily',newTaskSection:'Morning',newTaskCustomSection:'',newTaskSectionOptions:[],trackerTasks:[{task_key:'morning',day_id:'daily',section:'Morning',task:'Water',sort_order:1},{task_key:'evening',day_id:'daily',section:'Evening',task:'Rest',sort_order:2}],SUPPORTER_FEATURES_ENABLED:false,crypto:{randomUUID:()=> 'new'},newTaskKind:'regular',newTaskScheduleType:'weekly',newTaskScheduleDays:[],newTaskReminderTime:'',newTaskWhy:'',newTaskSoftLabel:'',newTaskTinyLabel:'',newTaskEstimatedMinutes:'',newTaskEssentialOnLow:false,encodeTaskDetail:x=>x,sectionIsOptional:()=>false,trackerProfile:{},period:{date:'2026-11-14'},dateForDayId:()=> '2026-11-14',setTaskMessage:x=>messages.push(x),setTrackerTasks:fn=>shown.push(...fn(context.trackerTasks))};
+  for(const name of ['setNewTaskName','setNewTaskKind','setNewTaskWhy','setNewTaskSoftLabel','setNewTaskTinyLabel','setNewTaskEstimatedMinutes','setNewTaskEssentialOnLow','setNewTaskScheduleDays','setNewTaskReminderTime','setNaturalScheduleText','setNaturalSchedulePreview','setNewTaskSection','setNewTaskCustomSection','setActive','setSelectedProgressDate'])context[name]=()=>{};
+  context.supabase={from:()=>({insert:async row=>{persisted.push(row);if(switchAt==='insert')context.currentAccountIdRef.current='other';return {error:null};},update(){updates++;const chain={eq(){return chain;},then(resolve,reject){if(switchAt==='order')context.currentAccountIdRef.current='other';return (orderThrows?Promise.reject(Error('offline')):Promise.resolve({error:orderError?Error('offline'):null})).then(resolve,reject);}};return chain;},delete(){throw Error('A saved task must not be deleted after an ordering failure');}})};
+  vm.createContext(context);vm.runInContext(createBody+';this.createTask=addTrackerTask;',context);await context.createTask();return {persisted,messages,shown,updates};
+ }
+ for(const options of [{orderError:true},{orderThrows:true},{}]){
+  const result=await createTask(options);assert.equal(result.persisted.length,1);assert(result.shown.some(x=>x.task==='Read a page'));assert.equal(result.updates,1);
+  assert.match(result.messages.at(-1),options.orderError||options.orderThrows?/Saved.*group order/:/Added/);
+ }
+ for(const boundary of ['insert','order']){const result=await createTask({switchAt:boundary});assert.equal(result.shown.length,0,'Do not publish old-account tasks after an account switch');if(boundary==='insert')assert.equal(result.updates,0);}
  // Android release safety: no legacy plugin and both code/resource optimization.
  const pkg=JSON.parse(fs.readFileSync('package.json'));assert(!pkg.dependencies['@capacitor/status-bar']);
  const config=JSON.parse(fs.readFileSync('capacitor.config.json'));assert.equal(config.plugins.SystemBars.insetsHandling,'css');assert(!config.plugins.Keyboard.resizeOnFullScreen);

@@ -843,7 +843,8 @@ function GlowUpTracker() {
   const [onboardingMode, setOnboardingMode] = useState("cozy");
   const [onboardingBusy, setOnboardingBusy] = useState(false);
   const [onboardingMessage, setOnboardingMessage] = useState("");
-  useEffect(() => { setOnboardingMode("cozy"); setOnboardingReason(null); setOnboardingMessage(""); }, [user?.id]);
+  const onboardingSaving = React.useRef(null);
+  useEffect(() => { onboardingSaving.current = null; setOnboardingBusy(false); setOnboardingMode("cozy"); setOnboardingReason(null); setOnboardingMessage(""); }, [user?.id]);
   const [privateNote, setPrivateNote] = useState("");
   const [privateNotePrompt, setPrivateNotePrompt] = useState("");
   const [privateNoteLoaded, setPrivateNoteLoaded] = useState(false);
@@ -2973,6 +2974,7 @@ function GlowUpTracker() {
   };
 
   const addTrackerTask = async () => {
+    if (!user) return;
     const task = newTaskName.trim();
     const section = newTaskSection === "__custom__"
       ? newTaskCustomSection.trim()
@@ -2999,6 +3001,7 @@ function GlowUpTracker() {
       setTaskMessage("No duplicate added — your current task is still there.");
       return;
     }
+    if (currentAccountIdRef.current !== user.id) return;
     if (SUPPORTER_FEATURES_ENABLED && !isSupporterAccount) {
       const combinedDayTaskCount = trackerTasks.filter((item) => item.day_id === "daily" || item.day_id === newTaskDay).length;
       if (combinedDayTaskCount >= FREE_TASK_LIMIT_PER_DAY) {
@@ -3032,10 +3035,12 @@ function GlowUpTracker() {
     };
     setTaskMessage("Adding task…");
     const { error } = await supabase.from("tracker_tasks").insert(row);
+    if (currentAccountIdRef.current !== user.id) return;
     if (error) {
       setTaskMessage("Couldn't add that task.");
       return;
     }
+    try { window.localStorage.removeItem(warmStartCacheKey(user.id, period.date)); } catch (_error) {}
     const measurableMatch = task.match(/\b(\d+(?:\.\d+)?)\s*(minutes?|mins?|pages?|glasses?|cups?|times?|reps?|steps?|miles?|km)\b/i);
     if (measurableMatch) {
       try {
@@ -3048,7 +3053,7 @@ function GlowUpTracker() {
     const normalizedDayTasks = [...dayTasks];
     normalizedDayTasks.splice(insertionIndex, 0, row);
     const normalizedWithOrder = normalizedDayTasks.map((item, index) => ({ ...item, sort_order: index + 1 }));
-    const orderResults = await Promise.all(normalizedWithOrder
+    const orderResults = await Promise.allSettled(normalizedWithOrder
       .filter((item) => item.task_key !== taskKey && Number(dayTasks.find((task) => task.task_key === item.task_key)?.sort_order) !== item.sort_order)
       .map((item) => supabase
         .from("tracker_tasks")
@@ -3057,12 +3062,10 @@ function GlowUpTracker() {
         .eq("task_key", item.task_key)
       )
     );
-    if (orderResults.some(({ error: orderError }) => orderError)) {
-      await supabase.from("tracker_tasks").delete().eq("user_id", user.id).eq("task_key", taskKey);
-      setTaskMessage("That group couldn't be reordered safely, so the new task was not kept.");
-      return;
-    }
+    if (currentAccountIdRef.current !== user.id) return;
+    const orderFailed = orderResults.some((result) => result.status === "rejected" || result.value?.error);
     if (!trackerProfile) {
+      try {
       const displayName = (user.email || "My").split("@")[0];
       const { data } = await supabase.from("tracker_profiles").upsert({
         user_id: user.id,
@@ -3071,8 +3074,11 @@ function GlowUpTracker() {
         account_type: "little",
         updated_at: new Date().toISOString(),
       }).select("display_name, show_personal_schedule, account_type").single();
+      if (currentAccountIdRef.current !== user.id) return;
       if (data) setTrackerProfile(data);
+      } catch (_error) { /* An optional profile refresh must not hide the saved task. */ }
     }
+    if (currentAccountIdRef.current !== user.id) return;
     setTrackerTasks((tasks) => [
       ...tasks.filter((item) => item.day_id !== newTaskDay),
       ...normalizedWithOrder,
@@ -3092,7 +3098,7 @@ function GlowUpTracker() {
     setNewTaskCustomSection("");
     setActive(newTaskDay);
     setSelectedProgressDate(dateForDayId(newTaskDay, period));
-    setTaskMessage(`Added “${task}” inside ${section} ✨`);
+    setTaskMessage(orderFailed ? `Saved “${task}”. Its group order couldn't be saved yet.` : `Added “${task}” inside ${section} ✨`);
   };
 
   // Quick capture: one-field brain dump from the top of Add & organize.
@@ -4145,7 +4151,6 @@ function GlowUpTracker() {
     setSettingsMessage(data.comfort_item_name ? "Comfort item saved 💛" : "Comfort item cleared.");
   };
 
-  const onboardingSaving = React.useRef(false);
   const completeOnboarding = async () => {
     if (!user || onboardingSaving.current) return;
     const displayName = displayNameDraft.trim().replace(/\s+/g, " ").slice(0, 40);
@@ -4154,7 +4159,8 @@ function GlowUpTracker() {
       setOnboardingStep(1);
       return;
     }
-    onboardingSaving.current = true;
+    const saveRequest = {};
+    onboardingSaving.current = saveRequest;
     setOnboardingBusy(true);
     try {
     setOnboardingMessage("Saving your space…");
@@ -4167,6 +4173,7 @@ function GlowUpTracker() {
       account_type: onboardingMode === "supporter" ? "caretaker" : "little",
       updated_at: new Date().toISOString(),
     }, { onConflict: "user_id" }).select("*").single();
+    if (currentAccountIdRef.current !== user.id) return;
     if (profileError) {
       setOnboardingMessage("Your space couldn't be saved yet. Please try again.");
       return;
@@ -4179,16 +4186,15 @@ function GlowUpTracker() {
           task: item.task, detail: "", sort_order: index, is_bonus: false, schedule_type: "weekly",
         }));
         const { error: starterError } = await supabase.from("tracker_tasks").insert(starterTasks);
+        if (currentAccountIdRef.current !== user.id) return;
         if (starterError) {setOnboardingMessage("Your starting tasks couldn't be saved. Please try again.");return;}
         setTrackerTasks(starterTasks);
       }
     }
     let softError = null;
     const reasonProfile = onboardingReason ? ONBOARDING_REASON_PROFILES[onboardingReason] : null;
-    const previousPreferences = preferences;
     // Let a brand-new person land on their own Today page first; the daily
     // check-in waits until tomorrow (it stays one tap away on Today).
-    onboardedOnDateRef.current = period.date;
     const next = {
       ...preferences,
       onboarding_complete: true,
@@ -4197,15 +4203,16 @@ function GlowUpTracker() {
       onboarding_reason: onboardingReason,
       ...(reasonProfile?.preferences || {}),
     };
-    setPreferences(next);
     const { error: preferencesError } = await supabase.from("app_preferences").upsert({ user_id: user.id, ...next, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+    if (currentAccountIdRef.current !== user.id) return;
     if (preferencesError) {
       // This flag controls whether onboarding shows again — a silent failure
       // here would mean it silently reappears next sign-in with no explanation.
-      setPreferences(previousPreferences);
       setOnboardingMessage("Your space is saved, but your settings couldn't be saved yet. Please try again.");
       return;
     }
+    setPreferences(next);
+    onboardedOnDateRef.current = period.date;
     if (onboardingReason === "burnout") {
       const recoveryCheckIn = {
         capacity: "low",
@@ -4222,6 +4229,7 @@ function GlowUpTracker() {
         ...recoveryCheckIn,
         updated_at: new Date().toISOString(),
       }, { onConflict: "user_id,check_date" });
+      if (currentAccountIdRef.current !== user.id) return;
       if (checkInError) {
         softError = "Your space is saved, but today's recovery check-in couldn't be saved yet.";
       } else {
@@ -4241,14 +4249,20 @@ function GlowUpTracker() {
       if (firstSupportedOwner) {
         setSupportViewMode("caretaker");
         await loadSupportOwner(firstSupportedOwner);
+        if (currentAccountIdRef.current !== user.id) return;
       } else {
         setSupportViewMode("mine");
       }
       setDashboard("guardian");
     }
     } catch (_) {
-      setOnboardingMessage("Your space couldn’t be saved yet. Your choices are still here; try again.");
-    } finally { onboardingSaving.current = false; setOnboardingBusy(false); }
+      if (currentAccountIdRef.current === user.id) setOnboardingMessage("Your space couldn’t be saved yet. Your choices are still here; try again.");
+    } finally {
+      if (onboardingSaving.current === saveRequest) {
+        onboardingSaving.current = null;
+        if (currentAccountIdRef.current === user.id) setOnboardingBusy(false);
+      }
+    }
   };
 
   const saveNativePushToken = async (token) => {
