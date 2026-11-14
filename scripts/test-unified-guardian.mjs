@@ -35,7 +35,7 @@ assert.match(guardianSuggestedReward(2,3),/effort/);
 assert.match(guardianSuggestedReward(3,3),/celebration/);
 
 const app=fs.readFileSync("src/app-source.jsx","utf8");
-const main=fs.readFileSync("src/components/guardian-panel.jsx","utf8");
+const main=fs.readFileSync("src/components/guardian-panel.jsx","utf8") + fs.readFileSync("src/components/guardian-space-header.jsx", "utf8");
 const host=fs.readFileSync("src/components/plush-guardian.jsx","utf8");
 const core=fs.readFileSync("src/components/plush-guardian-core.jsx","utf8");
 const tools=fs.readFileSync("src/components/plush-guardian-tools.jsx","utf8");
@@ -48,9 +48,9 @@ assert(app.includes("automaticReminders: false, routineNudges: false, tomorrowNu
 assert(app.includes("humanGuardianConnected={activeGuardianMode === \"person\"}"),"Human mode must reach automatic Guardian host");
 assert(host.includes("props.humanGuardianConnected") && host.includes("!props.guardianLinksReady"),"Deep-link bot panel must close and refuse old links when human Guardian connected");
 assert(main.includes('aria-label="Optional human Guardian"') && main.includes("guardianDisplayName"),"Human Guardian card identifies connected trusted person");
-assert(main.includes('setGuardianArea("support")') && main.includes('setGuardianArea("together")'),"Human invitations, permissions and Together remain reachable");
+assert(main.includes('setGuardianArea("support")') && main.includes('onSelect("together")'),"Human invitations, permissions and Together remain reachable");
 assert(main.includes('className="pl-human-guardian-rewards"'),"Human Guardian rewards remain accessible");
-assert(main.includes('["together","🤝","Together"]') && app.includes('openTaskManager(period.date, "today")'),"Tasks remain in Plan and shared routines remain in Together");
+assert(main.includes('Together space') && app.includes('openTaskManager(period.date, "today")'),"Tasks remain in Plan and shared routines remain in Together");
 assert(home.includes('goToDashboard?.("guardian")'),"Home should route to one Guardian interface");
 assert(settings.includes('aria-label="Guardian\'s name"'),"Automatic Guardian can have its own name");
 assert(core.includes('guardianBotDisplayName(state.prefs)'),"Automatic panel displays same chosen name");

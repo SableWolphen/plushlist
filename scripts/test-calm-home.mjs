@@ -9,4 +9,11 @@ assert.match(home, /<EveningGratitude\/><\/div><\/>\}/);
 assert.doesNotMatch(home, /className="pl-quick-paths"/, "Remove oversized duplicated navigation shortcuts");
 assert.match(html, /assets\/home-calm-layout\.css/);
 assert.match(css, /min-height: 52px/);
-console.log("Calm Home navigation and optional tools preserved.");
+
+const polish = fs.readFileSync("assets/cozy-visual-polish.css","utf8");
+assert.match(html, /assets\/cozy-visual-polish\.css/, "Cozy polish stylesheet should be loaded");
+assert.match(polish, /--pl-theme-accent/, "Use existing world/theme colors");
+assert.match(polish, /prefers-reduced-motion:reduce/, "Disable decorative movement when requested");
+assert.match(polish, /pl-storybook-mascot \.pl-theme-scene/, "Animate the existing theme-scene artwork only");
+assert.doesNotMatch(polish, /url\(/, "No external assets or replacement mascot");
+console.log("Calm Home navigation, optional tools and cozy polish preserved.");

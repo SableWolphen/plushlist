@@ -1,4 +1,5 @@
 import { CozySpace } from "./cozy-space.jsx";
+import { DesignIcon } from "./design-icon.jsx";
 import { CareHistory } from "./care-history.jsx";
 /*
  * Product-quality compatibility contract:
@@ -37,7 +38,7 @@ const pill = {
 function SituationButton({ option, selected, onClick }) {
   return (
     <button type="button" aria-pressed={selected} onClick={onClick} className={`pl-care-feeling ${selected ? "selected" : ""}`}>
-      <span className="pl-care-feeling-icon" aria-hidden="true">{option.icon}</span>
+      <span className="pl-care-feeling-icon" aria-hidden="true"><DesignIcon name={({anxious:"breathe",overwhelmed:"cloud",cannot_start:"sprout",need_food:"cup"})[option.id] || "care"}/></span>
       <span>{option.label}</span>
     </button>
   );
@@ -123,7 +124,7 @@ export function CarePanel(props) {
   const library = <ExistingCarePanel {...props} open={true} libraryOnly={true} hideNavigation={true} openCareSession={startCare} setSleepToolOpen={startSleep} />;
   return (
     <div data-plushcare-redesign="true" className="pl-care-shell">
-      <header className="pl3-care-head">
+      <header className="pl3-care-head pl-workspace-heading">
         <p>Care</p>
         <h1>How are you, really?</h1>
       </header>
@@ -182,7 +183,7 @@ export function CarePanel(props) {
         }
       `}</style>
 
-      <div role="group" aria-label="Care sections" className="pl-care-section-nav">
+      <div role="group" aria-label="Care sections" className="pl-care-section-nav pl-workspace-tabs">
         {[["quick", "Calm"], ["sleep", "Sleep"], ["paths", "Guided steps"], ["history", "History"]].map(([id, label]) => <button key={id} type="button" aria-pressed={id === "history" ? historyOpen : !historyOpen && props.careSection === id} onClick={() => { setHistoryOpen(id === "history"); if (id !== "history") props.setCareSection(id); }}>{label}</button>)}
       </div>
       {historyOpen && <section aria-label="Care history"><CareHistory {...props} /></section>}
@@ -195,7 +196,7 @@ export function CarePanel(props) {
 
         </div>
         <div className="pl-care-copy">Choose a feeling for one small next step, or take a breathing break.</div>
-        {breathTool && <button type="button" className="pl-care-soft-btn" onClick={() => startCare(breathTool.id)} style={{marginTop:10}}>🌿 Breathe</button>}
+        {breathTool && <button type="button" className="pl-care-soft-btn" aria-label="Breathe" onClick={() => startCare(breathTool.id)} style={{marginTop:10}}><DesignIcon name="breathe"/> Breathe</button>}
 
         <div className="pl-care-feelings">
           {visibleOptions.map((option) => <SituationButton key={option.id} option={option} selected={selectedSituationId === option.id} onClick={() => chooseSituation(option)} />)}
@@ -263,10 +264,8 @@ export function CarePanel(props) {
         </div>
       </section>}
       <section className="pl3-care-tools" aria-label="Care tools">
-        <button type="button" onClick={() => props.setCheckInPopupOpen?.(true)}><span className="pl3-care-tile pl3-tile-checkin" aria-hidden="true">💗</span><span><strong>Check in</strong><small>How are you feeling?</small></span></button>
-        <button type="button" onClick={() => props.openTodayJournal?.()}><span className="pl3-care-tile pl3-tile-journal" aria-hidden="true">📝</span><span><strong>Journal</strong><small>One line is enough</small></span></button>
-        <button type="button" onClick={() => { setCozyOpen(true); window.setTimeout(() => document.getElementById("pl-care-cozy-space")?.scrollIntoView?.({ behavior: "smooth", block: "start" }), 50); }}><span className="pl3-care-tile pl3-tile-cozy" aria-hidden="true">🧸</span><span><strong>Cozy Space</strong><small>Sit with your plush</small></span></button>
-        <button type="button" onClick={() => { setHistoryOpen(false); props.setCareSection("sleep"); window.scrollTo?.({ top: 0, behavior: "smooth" }); }}><span className="pl3-care-tile pl3-tile-sleep" aria-hidden="true">🌙</span><span><strong>Wind down</strong><small>For sleepy nights</small></span></button>
+        <button type="button" onClick={() => props.setCheckInPopupOpen?.(true)}><span className="pl3-care-tile pl3-tile-checkin" aria-hidden="true"><DesignIcon name="care"/></span><span><strong>Check in</strong><small>How are you feeling?</small></span></button>
+        <button type="button" onClick={() => props.openTodayJournal?.()}><span className="pl3-care-tile pl3-tile-journal" aria-hidden="true"><DesignIcon name="journal"/></span><span><strong>Journal</strong><small>One line is enough</small></span></button>
       </section>
       <section className="pl3-care-people" aria-label="Your people">
         <span className="pl3-care-people-icon" aria-hidden="true">💛</span>

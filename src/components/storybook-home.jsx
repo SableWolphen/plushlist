@@ -81,7 +81,7 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
   const [dayMessage, setDayMessage] = React.useState("");
   const captureRef = React.useRef(null);
   React.useEffect(() => { setExpanded(false); setDayMessage(""); }, [userId, period?.date, dayType]);
-  const cardStyle=id=>({order:companion.home.order.indexOf(id)+1,display:companion.home.hidden.includes(id)?"none":undefined});
+  const cardStyle=id=>({order:(companion.home.order.indexOf(id)+1)*10,display:companion.home.hidden.includes(id)?"none":undefined});
   const context=React.useContext(ThemeWorldContext);
   const nursery=world === "baby" || world === "baby-night";
   const caregiver=context.voice === "fatherly" ? "Daddy" : "Mommy";
@@ -120,7 +120,7 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
   };
   const openCapture=()=>{ const node=captureRef.current; if(!node) return; node.open=true; node.querySelector("input,textarea")?.focus?.(); };
   return <div className={darkMode ? "pl-storybook pl-storybook-dark pl2-storybook pl3-home" : "pl-storybook pl2-storybook pl3-home"} data-storybook-world={world}>
-    <div className="pl-storybook-simplicity"><span>One little step at a time</span><button type="button" aria-pressed={simpleToday} onClick={toggleSimpleToday}>{simpleToday ? "Show a little more" : "Keep it simple"}</button></div>
+
     <header className="pl-storybook-banner">
       {atmosphere.scene && <div className="pl-storybook-sky" aria-hidden="true"><img src={`./assets/worlds/${atmosphere.scene}.svg`} alt="" width="640" height="240" /></div>}
       <div className="pl-storybook-mascot" aria-label="Your original PlushLife teddy bear"><ThemeScene decorative focus outfit={selectedOutfit} /></div>
@@ -136,7 +136,7 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
     {next && <section className="pl3-next" aria-label="Next up">
       <p className="pl3-next-label">NEXT UP</p>
       <h2>{next.label}</h2>
-      {smallerText ? <p className="pl3-next-smaller"><strong>Smaller step:</strong> {smallerText}</p> : <p>One little thing. Everything else can wait.</p>}
+      {smallerText && <p className="pl3-next-smaller"><strong>Smaller step:</strong> {smallerText}</p>}
       <div className="pl3-next-actions">
         <button type="button" className="pl3-next-done" onClick={()=>toggle?.(next.key)}>✓ Done</button>
         {typeof pickEasierSuggestion === "function" && !smallerText && <button type="button" className="pl3-next-smaller-button" onClick={()=>pickEasierSuggestion(next.key)}>Make it smaller</button>}
@@ -160,7 +160,7 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
       {dayType !== "rest" && (expanded || total>visible.length) && <button type="button" className="pl-storybook-more" aria-expanded={expanded} onClick={()=>setExpanded(value=>!value)}>{expanded ? "Show fewer tasks" : `Show all ${total} tasks here`}</button>}
       <details ref={captureRef} className="pl-storybook-capture" key={`${userId}:${period?.date}`}><summary>＋ Add a task</summary><QuickCapture compact onQuickAdd={onQuickAdd} quickAddMessage={quickAddMessage} /></details>
     </section>
-    {schedulePreview && <details className="pl-storybook-schedule" style={{order:cardStyle("tasks").order + 0.5}}><summary>Today’s schedule{scheduleNext && <span className="pl-storybook-schedule-next"> · Next {window.PlushLifeSchedule?.formatTime12?.(scheduleNext.time) || scheduleNext.time} {scheduleNext.text}</span>}</summary>{schedulePreview}</details>}
+    {schedulePreview && <details className="pl-storybook-schedule" style={{order:cardStyle("tasks").order + 1}}><summary>Today’s schedule{scheduleNext && <span className="pl-storybook-schedule-next"> · Next {window.PlushLifeSchedule?.formatTime12?.(scheduleNext.time) || scheduleNext.time} {scheduleNext.text}</span>}</summary>{schedulePreview}</details>}
     <nav style={cardStyle("shortcuts")} className="pl-storybook-doors" aria-label="Your everyday actions">
       <button type="button" className="pl-storybook-door pl-door-checkin" onClick={()=>openDailyCheckIn?.()}><span className="pl-storybook-door-emoji" aria-hidden="true">💗</span><strong>Check in</strong></button>
       <button type="button" className="pl-storybook-door pl-door-journal" onClick={()=>openTodayJournal?.()}><span className="pl-storybook-door-emoji" aria-hidden="true">📝</span><strong>Journal</strong></button>
@@ -168,7 +168,7 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
       <button type="button" className="pl-storybook-door pl-door-focus" onClick={focus}><span className="pl-storybook-door-emoji" aria-hidden="true">⏱</span><strong>Focus</strong></button>
     </nav>
     {world === "baby-night" && <button type="button" className="pl-storybook-bedtime" onClick={()=>goToDashboard?.("guardian")}>🌙 Ready for my bedtime routine? <span aria-hidden="true">›</span></button>}
-    {(tomorrowPreviewRows.length > 0 || hasWeeklyStory) && <details className="pl-storybook-lookahead" style={{order:companion.home.order.length + 1}}>
+    {(tomorrowPreviewRows.length > 0 || hasWeeklyStory) && <details className="pl-storybook-lookahead" style={{order:(companion.home.order.length + 1)*10}}>
       <summary>📅 Looking ahead <span>Tomorrow & my week</span></summary>
       {tomorrowPreviewRows.length > 0 && <section className="pl-storybook-tomorrow">
         <h3>Tomorrow's little plan</h3>
@@ -185,6 +185,8 @@ export function StorybookHome({userId,world="soft",rows=[],viewDone={},period,pc
       </section>}
     </details>}
 
+
+    <div className="pl-storybook-simplicity" style={{order:(companion.home.order.length + 3)*10}}><span>One little step at a time</span><button type="button" aria-pressed={simpleToday} onClick={toggleSimpleToday}>{simpleToday ? "Show a little more" : "Keep it simple"}</button></div>
     <p style={cardStyle("kindness")} className="pl-storybook-kind-note">{copy.ending} ♡</p>
   </div>;
 }

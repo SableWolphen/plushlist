@@ -8,8 +8,8 @@ assert.equal(MAIN_DESTINATIONS.at(-1).id,"guardian","Guardian remains available 
 const app=get("src/app-source.jsx");
 assert.match(app,/MAIN_DESTINATIONS\.map\(\(\{id, label, icon\}\)/,"Bottom nav must render each destination");
 assert.match(app,/dashboard === "guardian"/,"Guardian destination must open the actual panel");
-const screen=get("src/components/guardian-panel.jsx");
-for(const area of ["support","together","overview"]) assert.match(screen,new RegExp('setGuardianArea\\("'+area+'"\\)'),"Guardian home routes to "+area);
+const screen=get("src/components/guardian-panel.jsx")+get("src/components/guardian-space-header.jsx");
+for(const area of ["support","together","overview"]) assert.match(screen,new RegExp('(?:setGuardianArea|onSelect)\\("'+area+'"\\)'),"Guardian home routes to "+area);
 assert.match(screen,/supportViewMode === "caretaker"/,"Guardian home must distinguish Guardian and Cozy roles");
 assert.match(screen,/canSendSupportNotes/);
 assert.match(screen,/canAddSupportRewards/);

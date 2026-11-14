@@ -154,7 +154,7 @@ export function DailyJournalPanel({ open, onVisible, onClose, dailyJournalPrompt
   }, [open, onVisible]);
   if (!open) return null;
   return (
-          <ToolPanel title={dailyJournalPromptOpen ? "Your daily PlushJournal prompt" : "PlushJournal"} onClose={onClose}>
+          <ToolPanel inline title={dailyJournalPromptOpen ? "Your daily PlushJournal prompt" : "PlushJournal"} onClose={onClose}>
             <div style={{ padding: "15px 16px", borderRadius: 16, background: "rgba(255,255,255,0.28)", border: "1px solid var(--pl-theme-line,#E9DDF6)" }}>
               <div style={{ marginBottom: 4, fontSize: 10.5, letterSpacing: "0.1em", fontWeight: 900, color: "var(--pl-theme-muted,#A65DC1)" }}>JOURNAL FOR {new Date(`${journalQuickOpenDate}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" }).toUpperCase()}</div>
               <div style={{ fontStyle: "italic", lineHeight: 1.5, fontSize: 12.5, color: "var(--pl-theme-muted,#8C6B9E)" }}>{journalDisplayedPrompt}</div>

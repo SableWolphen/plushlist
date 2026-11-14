@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";import fs from "node:fs";
-const guardian=fs.readFileSync("src/components/guardian-panel.jsx","utf8");
+const guardian=fs.readFileSync("src/components/guardian-panel.jsx","utf8") + fs.readFileSync("src/components/guardian-space-header.jsx", "utf8");
 const support=fs.readFileSync("src/components/plush-guardian-core.jsx","utf8");
 const settings=fs.readFileSync("src/components/plush-guardian-settings.jsx","utf8");
 assert.match(guardian,/aria-label="Optional human Guardian"/);

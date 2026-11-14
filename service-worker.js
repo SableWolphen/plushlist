@@ -1,5 +1,6 @@
 const CACHE_NAME = "plushlife-v84";
 const APP_SHELL = [
+  "./assets/calm-guardian.css",
   "./assets/figma/baby-happy.svg",
   "./assets/figma/baby-night-happy.svg",
   "./assets/figma/dino-happy.svg",
@@ -21,6 +22,11 @@ const APP_SHELL = [
   "./assets/figma/icon-plush.svg",
   "./assets/figma/pink.svg",
   "./assets/figma/icon-care.svg",
+  "./assets/figma/icon-journal.svg",
+  "./assets/figma/icon-breathe.svg",
+  "./assets/figma/icon-cloud.svg",
+  "./assets/figma/icon-sprout.svg",
+  "./assets/figma/icon-cup.svg",
   "./assets/figma/peach.svg",
   "./assets/figma/icon-tasks.svg",
   "./assets/figma/dino.svg",

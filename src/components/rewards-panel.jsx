@@ -28,15 +28,15 @@ export function RewardsPanel({ saveMessage, open, onClose, inline = false, selec
       {!unlocked && <small>{outfit.hint}</small>}
     </button>;
   };
-  return <ToolPanel title="🧸 Plush & Keepsakes" displayTitle="Plush" inline={inline} hideClose={inline} onClose={onClose}>
+  return <ToolPanel title="🧸 Plush & Keepsakes" displayTitle="Plush" inline={inline} hideClose={inline} hideHeader={inline} onClose={onClose}>
     <div className="pl-closet-shell">
-      <header className="pl2-rewards-intro"><span className="pl2-eyebrow">✨ LITTLE CELEBRATIONS</span><h2>Your cozy collection</h2><p>Every tiny win deserves a little sparkle. Your keepsakes stay yours.</p></header>
-      <CozyScene title="Your Plush" subtitle={copy["Your story is bigger than a streak."] || "Keep going! Each completed task helps your plush feel happier."} outfit={selectedOutfit} focus />
+      <header className="pl2-rewards-intro pl-workspace-heading"><p>Your collection</p><h1>Your Plush</h1><p>Little things worth keeping. Everything you earn stays yours.</p></header>
+      <CozyScene title={selectedOutfit.name} subtitle={copy["Your story is bigger than a streak."] || "Keep going! Each completed task helps your plush feel happier."} outfit={selectedOutfit} focus />
       <section className="pl-design-card pl-closet-summary">
-        <h2>Wearing · {selectedOutfit.name}</h2>
+        <h2>Your collection</h2>
         {saveMessage && <p role="status">{saveMessage}</p>}
         <p>{activityDaysTotal} caring days · {unlockedOutfits.length} outfits · {earnedBadgeIdSet.size} badges</p>
-        <div role="tablist" aria-label="Your collection" className="pl-collection-tabs">
+        <div role="tablist" aria-label="Your collection" className="pl-collection-tabs pl-workspace-tabs">
           {[["mascot", "Outfits"], ["badges", "Badges"], ["wins", "Memories"]].map(([id, label]) => <button type="button" key={id} role="tab" aria-selected={collectionTab === id} onClick={() => setCollectionTab(id)}>{label}</button>)}
         </div>
       </section>

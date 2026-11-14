@@ -4,7 +4,7 @@ import fs from "node:fs";
 import { buildSync } from "esbuild";
 
 const app = fs.readFileSync("src/app-source.jsx", "utf8");
-const guardian = fs.readFileSync("src/components/guardian-panel.jsx", "utf8");
+const guardian = fs.readFileSync("src/components/guardian-panel.jsx", "utf8") + fs.readFileSync("src/components/guardian-space-header.jsx", "utf8");
 const progress = fs.readFileSync("src/components/progress-panel-core.jsx", "utf8");
 const docs = fs.readFileSync("docs/plushlife-ui-source-of-truth.md", "utf8");
 const nav = app.split('<nav className="pl-app-bottom-nav" aria-label="Main navigation">')[1]?.split("</nav>")[0];
@@ -21,7 +21,7 @@ assert(fs.readFileSync("assets/figma/icon-guardian.svg", "utf8").includes("<svg"
 assert(guardian.includes('aria-label="Optional human Guardian"'), "Guardian needs a clear, unified support card");
 assert(guardian.includes("useGuardianState(user?.id)"), "Legacy support engine keeps account-scoped preferences");
 assert(guardian.includes("You don\'t need a Guardian to use PlushLife"), "Daily support is provided without a human Guardian");
-assert(guardian.indexOf('aria-label="Guardian support"') < guardian.indexOf('aria-label="Guardian sections"'), "Optional human Guardian card remains prominent above advanced sections");
+assert(guardian.indexOf('aria-label="Optional human Guardian"') < guardian.indexOf('aria-label="Guardian sections"'), "Optional human Guardian card remains prominent above advanced sections");
 assert(guardian.includes('mode === "person"') && guardian.includes('setGuardianArea("support")'), "Human Guardian invitation and permissions are accessible");
 assert(guardian.includes('guardianMode(ownedSupportLinks'), "Automatic mode must defer to an accepted human Guardian");
 assert(guardian.includes("<CozySharing links={ownedSupportLinks} />") && guardian.includes('guardianArea === "together"'), "Human Guardian and Together features stay intact");

@@ -1,0 +1,78 @@
+/* PlushLife visual polish. Theme-world colors remain the source of truth.
+   No navigation, account, permissions, data, mascot SVG, or business logic changes. */
+#main-content.pl-calm-shell {
+  --pl-polish-radius-card: 20px;
+  --pl-polish-radius-control: 14px;
+  --pl-polish-space: 12px;
+  --pl-polish-shadow: 0 8px 24px color-mix(in srgb, var(--pl-theme-ink) 7%, transparent);
+  --pl-polish-shadow-hover: 0 12px 28px color-mix(in srgb, var(--pl-theme-ink) 10%, transparent);
+}
+/* A consistent, readable text rhythm across real app surfaces. */
+#main-content.pl-calm-shell :is(.pl-storybook, .pl-calm-guardian, .pl-home-extras, .pl-unified-page-shell) {
+  font-family: Nunito, "Segoe UI", system-ui, sans-serif;
+  line-height: 1.5;
+}
+#main-content.pl-calm-shell :is(.pl-storybook, .pl-calm-guardian) :is(h1,h2,h3) {
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+#main-content.pl-calm-shell :is(.pl-storybook, .pl-calm-guardian) :is(p,li,small) {
+  overflow-wrap: anywhere;
+}
+/* Existing themes provide each card's fill, borders and accessible ink. */
+#main-content.pl-calm-shell :is(.pl-storybook-today,.pl-storybook-moods,.pl-home-extras,.pl-storybook-schedule) {
+  border-radius: var(--pl-polish-radius-card) !important;
+  box-shadow: var(--pl-polish-shadow);
+}
+#main-content.pl-calm-shell :is(.pl-storybook-today,.pl-storybook-moods) {
+  padding: clamp(14px,3.6vw,20px);
+}
+#main-content.pl-calm-shell .pl-storybook-banner {
+  border-radius: 24px;
+  padding: clamp(16px,4vw,22px);
+}
+#main-content.pl-calm-shell .pl-storybook-greeting h1 {
+  line-height: 1.2 !important;
+}
+/* Small actions should feel intentionally tactile, without moving layout. */
+#main-content.pl-calm-shell :is(.pl-storybook-check,.pl-storybook-more,.pl-storybook-add-task,.pl-storybook-door,.pl-home-tool-links button,.pl-home-extra-link) {
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+@media (hover:hover) and (pointer:fine) {
+  #main-content.pl-calm-shell :is(.pl-storybook-more,.pl-storybook-add-task,.pl-storybook-door,.pl-home-tool-links button,.pl-home-extra-link):hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--pl-polish-shadow-hover);
+  }
+}
+#main-content.pl-calm-shell .pl-storybook-check[aria-pressed="true"] {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--pl-theme-accent) 14%, transparent);
+}
+#main-content.pl-calm-shell :is(button,a,input,select,textarea,summary):focus-visible {
+  outline: 3px solid var(--pl-theme-accent) !important;
+  outline-offset: 3px;
+}
+#main-content.pl-calm-shell :is(.pl-storybook-list li,.pl-home-tool-links button) {
+  min-width: 0;
+}
+#main-content.pl-calm-shell .pl-storybook-list li {
+  min-height: 60px;
+}
+/* The existing original character is unchanged; a tiny presentation-only
+   entrance adds warmth and never takes over taps or the layout. */
+@keyframes pl-cozy-arrive {
+  from { opacity:.75; transform:translateY(5px) scale(.98); }
+  to { opacity:1; transform:translateY(0) scale(1); }
+}
+#main-content.pl-calm-shell .pl-storybook-mascot .pl-theme-scene {
+  animation:pl-cozy-arrive .45s ease-out both;
+}
+@media (max-width:390px) {
+  #main-content.pl-calm-shell .pl-storybook-banner {padding:14px}
+  #main-content.pl-calm-shell :is(.pl-storybook-today,.pl-storybook-moods) {padding:14px}
+  #main-content.pl-calm-shell .pl-storybook-greeting {min-width:0}
+}
+@media (prefers-reduced-motion:reduce) {
+  #main-content.pl-calm-shell .pl-storybook-mascot .pl-theme-scene {animation:none}
+  #main-content.pl-calm-shell :is(.pl-storybook-check,.pl-storybook-more,.pl-storybook-add-task,.pl-storybook-door,.pl-home-tool-links button,.pl-home-extra-link) {transition:none}
+  #main-content.pl-calm-shell :is(.pl-storybook-more,.pl-storybook-add-task,.pl-storybook-door,.pl-home-tool-links button,.pl-home-extra-link):hover {transform:none}
+}

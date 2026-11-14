@@ -1,3 +1,6 @@
+import { useInlinePageFocus } from "./hooks/use-inline-page-focus.js";
+import { CURRENT_CHANGELOG_VERSION } from "./release-notes.mjs";
+import { WhatsChanged } from "./components/whats-changed.jsx";
 import { guardianKey, readGuardian, saveGuardian, STATE_EVENT } from "./plush-guardian-model.mjs";
 import { guardianMode } from "./guardian-mode.mjs";
 import { awardEligibleRewards, autoGuardianGifts, trackRewardProgress } from "./guardian-auto-rewards.mjs";
@@ -603,14 +606,6 @@ const BILLING_PRODUCT_IDS = { monthly: "plushplus_monthly", yearly: "plushplus_y
 //   manageSubscription(): Promise<void>  // opens the platform's own subscription-management UI
 
 
-const CURRENT_CHANGELOG_VERSION = "2026-09-29-home-worlds";
-const CHANGELOG_ITEMS = [
-  "🧸 One matching lavender bear in every world, with dinosaur and nursery accessories.",
-  "🏡 Choose the cards and order on your Home in Settings → Personalize.",
-  "🌷 View all and Little Jobs open your task list or Habits directly.",
-  "💜 Nursery wording follows your Motherly · Mommy or Fatherly · Daddy choice.",
-  "📱 Five familiar tabs, with more room above the bottom gesture area.",
-];
 
 
 const NOTIFICATION_NUDGE_REASONS = [
@@ -920,6 +915,8 @@ function GlowUpTracker() {
   const [scheduleMessage, setScheduleMessage] = useState("");
   const [scheduleExceptionMessage, setScheduleExceptionMessage] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [whatsChangedOpen, setWhatsChangedOpen] = useState(false);
+  useEffect(() => { setWhatsChangedOpen(false); setSettingsOpen(false); setCheckInPopupOpen(false); setJournalQuickOpen(false); }, [user?.id]);
   const [classicMoreOpen, setClassicMoreOpen] = useState(false);
   const [headerMascotDancing, setHeaderMascotDancing] = useState(false);
   const [compactAppShell, setCompactAppShell] = useState(() => typeof window !== "undefined" && window.matchMedia?.("(max-width: 520px)").matches);
@@ -1130,6 +1127,12 @@ function GlowUpTracker() {
   const [restRangeDraft, setRestRangeDraft] = useState({ start: "", end: "" });
   const [essentialsPickerOpen, setEssentialsPickerOpen] = useState(false);
   const [checkInPopupOpen, setCheckInPopupOpen] = useState(false);
+  useInlinePageFocus(checkInPopupOpen ? "checkin" : whatsChangedOpen ? "updates" : settingsOpen ? "settings" : journalQuickOpen ? "journal" : null, () => {
+    if (checkInPopupOpen) { setCheckInPopupOpen(false); setCheckInPopupDismissedToday(true); }
+    else if (whatsChangedOpen) setWhatsChangedOpen(false);
+    else if (settingsOpen) setSettingsOpen(false);
+    else setJournalQuickOpen(false);
+  });
   const [checkInMoreMoodsOpen, setCheckInMoreMoodsOpen] = useState(false);
   const [checkInCustomizeOpen, setCheckInCustomizeOpen] = useState(false);
   useEffect(() => {
@@ -2245,38 +2248,8 @@ function GlowUpTracker() {
     return () => { alive = false; };
   }, [user, period.date]);
 
-  useEffect(() => {
-    if (!user || !preferences.onboarding_complete || !dailyCheckInLoaded) return;
-    if (dailyCheckIn.mood || dailyCheckIn.capacity || checkInPopupDismissedToday) return;
-    if (onboardedOnDateRef.current === period.date) return;
-    const timer = window.setTimeout(() => setCheckInPopupOpen(true), 450);
-    return () => window.clearTimeout(timer);
-  }, [user?.id, preferences.onboarding_complete, dailyCheckInLoaded, dailyCheckIn.mood, dailyCheckIn.capacity, checkInPopupDismissedToday, period.date]);
-
-  useEffect(() => {
-    if (!user || !preferences.onboarding_complete || journalHistoryStatus !== "ready") return;
-    // Someone who signs up in the evening has just finished onboarding; save the journal nudge for tomorrow.
-    if (onboardedOnDateRef.current === period.date) return;
-    const hour = new Date().getHours();
-    if (hour < 18 || reflectionHistory.some((entry) => entry.note_date === period.date)) return;
-    const storageKey = `plushlife:daily-journal-prompt:${user.id}:${period.date}`;
-    try {
-      if (window.localStorage.getItem(storageKey) === "shown") return;
-    } catch (_error) {}
-    // Do not mark this prompt as shown until the journal panel is actually
-    // visible. Higher-priority dialogs may already be open, and marking here
-    // would permanently swallow today's journal without the Cozy seeing it.
-    const timer = window.setTimeout(() => {
-      setJournalQuickOpenDate(period.date);
-      setPrivateNote("");
-      setPrivateNotePrompt("");
-      setPrivateNoteDraft("");
-      setPrivateNoteEditing(true);
-      setDailyJournalPromptOpen(true);
-      setJournalQuickOpen(true);
-    }, 900);
-    return () => window.clearTimeout(timer);
-  }, [user?.id, preferences.onboarding_complete, journalHistoryStatus, reflectionHistory, period.date]);
+  // Daily check-ins and journaling are opened intentionally from their page actions.
+  // Do not auto-open them when a person signs in or when the evening starts.
 
   useEffect(() => {
     setDailyCheckInHistory([]);
@@ -2834,6 +2807,7 @@ function GlowUpTracker() {
   const [taskManagerView, setTaskManagerView] = useState("today");
   const [taskManagerRequest, setTaskManagerRequest] = useState(0);
   const openTaskManager = (dayId = dayIdForDate(period.date), view = "today") => {
+    setWhatsChangedOpen(false); setSettingsOpen(false); setCheckInPopupOpen(false); setJournalQuickOpen(false);
     const selectedDay = /^\d{4}-\d{2}-\d{2}$/.test(dayId) ? dayIdForDate(dayId) : dayId;
     setSelectedProgressDate(/^\d{4}-\d{2}-\d{2}$/.test(dayId) ? dayId : period.date);
     setActive(selectedDay === "daily" ? dayIdForDate(period.date) : selectedDay);
@@ -6134,6 +6108,7 @@ function GlowUpTracker() {
   }, [user?.id, preferences.onboarding_complete, pendingSupportInvites.length, pendingInviteAutoOpenedFor]);
 
   const goToDashboard = (id) => {
+    setWhatsChangedOpen(false); setSettingsOpen(false); setCheckInPopupOpen(false); setJournalQuickOpen(false);
     setDashboard(id);
     if (id === "today") {
       setActive(dayIdForDate(period.date));
@@ -6152,6 +6127,7 @@ function GlowUpTracker() {
   useEffect(() => {
     // The mobile page scrolls above the navigation, independently of the body.
     document.getElementById("main-content")?.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [dashboard, collectionOpen]);
   const startCozyReset = async (profile) => { const available = rows.filter(row => !row.isBonus).map(row => row.key); const essentials = profile.essentials.filter(key => available.includes(key)); const okay = await saveDailyCheckIn({day_type:"tiny",soft_day:true,custom_essentials:essentials.length ? essentials : available.slice(0,3)}); if (okay && restDates.includes(period.date)) { const {error} = await supabase.from("rest_days").delete().eq("user_id",user.id).eq("rest_date",period.date); if(error) return false; setRestDates(dates=>dates.filter(date=>date!==period.date)); } if (okay && profile.reset_sound && soundscapePlaying !== profile.reset_sound) toggleSoundscape(profile.reset_sound); return okay; };
   const stepDashboard = (direction) => {
@@ -6523,22 +6499,20 @@ function GlowUpTracker() {
   } : baseVoice;
   const comfortItemName = trackerProfile?.comfort_item_name?.trim() || "a comfort item";
   const currentCopingOption = COPING_OPTIONS[copingPick].replace(/Tigger/gi, comfortItemName);
+  const inlineUtilityOpen = settingsOpen || whatsChangedOpen || checkInPopupOpen || journalQuickOpen;
   const autoPopupToShow = (() => {
-    // Daily care is time-sensitive. Never let release notes or weekly prompts
-    // hide today's check-in/journal. Lower-priority dialogs remain queued by
-    // their state and surface after the daily prompt closes.
+    // User-opened check-ins take priority; optional prompts stay inline.
     if (checkInPopupOpen) return "check_in";
     if (dailyJournalPromptOpen) return "daily_journal";
     if (weeklyKickoffOpen) return "weekly_kickoff";
     if (introIntentionOpen) return "intro_intention";
     if (celebrationOpen) return "celebration";
-    if (user && preferences.onboarding_complete && preferences.last_seen_changelog !== CURRENT_CHANGELOG_VERSION) return "changelog";
     if (notificationNudgeOpen) return "notification_nudge";
     return null;
   })();
 
   return (
-    <HabitStudioProvider key={user.id} userId={user.id} tasks={trackerTasks} rows={rows} done={done} history={habitHistory} date={period.date} editableDay={selectedProgressDate===period.date} onToggle={toggle}><CozyComfortContext.Provider value={cozyComfort}><CozyGuideSuggestions rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} onOpen={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard("care");}}/><ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit, unlockedIds: unlockedIdSet, rewardProgress: mascotRequirementProgress }}><div id="main-content" data-pl-world={activeWorld} tabIndex="-1" className={`${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
+    <HabitStudioProvider key={user.id} userId={user.id} tasks={trackerTasks} rows={rows} done={done} history={habitHistory} date={period.date} editableDay={selectedProgressDate===period.date} onToggle={toggle}><CozyComfortContext.Provider value={cozyComfort}><CozyGuideSuggestions rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} onOpen={()=>{window.__plushlifeOpenCozySpace=true;goToDashboard("care");}}/><ThemeWorldContext.Provider value={{ world: activeWorld, voice: preferences.baby_voice, outfit: selectedOutfit, unlockedIds: unlockedIdSet, rewardProgress: mascotRequirementProgress }}><div id="main-content" data-pl-world={activeWorld} data-pl-dark={preferences.dark_mode ? "true" : "false"} data-pl-inline-view={inlineUtilityOpen ? "true" : undefined} tabIndex="-1" className={`pl-calm-shell ${babyMode ? "baby-mode" : dinoTheme ? "dino-theme" : ""}${preferences.simple_mode ? " simple-mode" : ""}${dashboard === "guardian" ? " guardian-view" : ""}${collectionOpen ? " rewards-open" : ""} dashboard-${dashboard} appearance-${appearanceTheme}`} style={{
       minHeight: "100dvh",
       background: activeThemePalette.background,
       backgroundImage: appearanceTheme === "none" && !babyMode && !dinoTheme ? "none" : preferences.simple_mode && !preferences.dark_mode ? `
@@ -6591,10 +6565,11 @@ function GlowUpTracker() {
       <div className="pl-ambient-theme-layer" aria-hidden="true" />
       <aside className="pl-desktop-navigation" aria-label="Desktop navigation">
         <h2>PlushLife</h2>
-        {MAIN_DESTINATIONS.map(({id, label}) => <button type="button" key={id} aria-current={mainDestination(dashboard) === id && !collectionOpen ? "page" : undefined} onClick={() => { setCollectionOpen(false); if (id === "tasks") openTaskManager(period.date, "today"); else goToDashboard(id); }}>{label}</button>)}
+        {MAIN_DESTINATIONS.map(({id, label, icon}) => <button type="button" key={id} aria-current={mainDestination(dashboard) === id && !collectionOpen && !inlineUtilityOpen ? "page" : undefined} onClick={() => { setCollectionOpen(false); if (id === "tasks") openTaskManager(period.date, "today"); else goToDashboard(id); }}><DesignIcon name={icon}/>{label}</button>)}
         <div className="pl-navigation-personal" aria-label="Personal settings">
-          <button type="button" onClick={() => setCollectionOpen(true)}>My Plush</button>
-          <button type="button" onClick={() => setSettingsOpen(true)}>Settings</button>
+          <button type="button" onClick={() => { setWhatsChangedOpen(false); setSettingsOpen(false); setCheckInPopupOpen(false); setJournalQuickOpen(false); setCollectionOpen(true); }}>My Plush</button>
+          <button type="button" onClick={() => { setSettingsOpen(false); setCheckInPopupOpen(false); setJournalQuickOpen(false); setCollectionOpen(false); setWhatsChangedOpen(true); }} aria-current={whatsChangedOpen ? "page" : undefined}>What changed{preferences.last_seen_changelog !== CURRENT_CHANGELOG_VERSION && <span className="pl-calm-unread-dot" aria-label="Unread updates"/>}</button>
+          <button type="button" onClick={() => { setWhatsChangedOpen(false); setCheckInPopupOpen(false); setJournalQuickOpen(false); setSettingsOpen(true); }}>Settings</button>
         </div>
       </aside>
 
@@ -7070,7 +7045,7 @@ function GlowUpTracker() {
         </div>
       )}
       {autoPopupToShow === "weekly_kickoff" && (
-        <div role="dialog" aria-modal="true" aria-labelledby="weekly-kickoff-title" style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
+        <div role="region" className="pl-calm-inline-page" aria-labelledby="weekly-kickoff-title" tabIndex={-1}>
           <div style={{ width: "min(100%, 420px)", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
             <PopupCloseButton label="Close weekly check-in" onClick={() => { markWeeklyKickoffDone(period.weekStart); setWeeklyKickoffOpen(false); }} />
             <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>📮 A NEW WEEK BEGINS</div>
@@ -7113,21 +7088,6 @@ function GlowUpTracker() {
           </div>
         </div>
       )}
-      {autoPopupToShow === "changelog" && (
-        <div role="dialog" aria-modal="true" aria-labelledby="changelog-title" style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
-          <div style={{ width: "min(100%, 420px)", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
-            <PopupCloseButton label="Close what's new" onClick={() => updatePreference({ last_seen_changelog: CURRENT_CHANGELOG_VERSION })} />
-            <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>✨ WHAT'S NEW</div>
-            <div id="changelog-title" style={{ marginTop: 5, fontSize: 20, fontWeight: 900, color: "#75428C" }}>Here's what's changed</div>
-            <div style={{ marginTop: 12, display: "grid", gap: 9 }}>
-              {CHANGELOG_ITEMS.map((item) => (
-                <div key={item} style={{ fontSize: 13, lineHeight: 1.5, color: "#5B4B6B" }}>{item}</div>
-              ))}
-            </div>
-            <button type="button" onClick={() => updatePreference({ last_seen_changelog: CURRENT_CHANGELOG_VERSION })} style={{ marginTop: 16, width: "100%", padding: "11px 14px", borderRadius: 999, border: 0, background: "linear-gradient(135deg,#C75EDB,#D97DDC)", color: "white", fontWeight: 900, cursor: "pointer", boxShadow: "0 3px 0 #A34DB4" }}>Got it! 💛</button>
-          </div>
-        </div>
-      )}
       {shareCardOpen && (
         <div role="dialog" aria-modal="true" aria-labelledby="share-card-title" onClick={() => setShareCardOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
           <div onClick={(event) => event.stopPropagation()} style={{ width: "min(100%, 380px)" }}>
@@ -7160,104 +7120,6 @@ function GlowUpTracker() {
               </div>
               <button type="button" onClick={() => setShareCardOpen(false)} style={{ marginTop: 8, padding: "9px 16px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.4)", background: "transparent", color: "white", fontWeight: 800, cursor: "pointer" }}>Close</button>
             </div>
-          </div>
-        </div>
-      )}
-      {autoPopupToShow === "check_in" && (
-        <div role="dialog" aria-modal="true" aria-labelledby="checkin-popup-title" onClick={() => { setCheckInPopupOpen(false); setCheckInPopupDismissedToday(true); }} style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
-          <div onClick={(event) => event.stopPropagation()} style={{ width: "min(100%, 520px)", maxHeight: "min(88vh,760px)", overflowY: "auto", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div>
-                <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>{babyMode ? `🍼 ${babyCaregiverName.toUpperCase()} CHECK-IN` : "🎯 TODAY'S CHECK-IN"}</div>
-                <div id="checkin-popup-title" style={{ marginTop: 4, fontSize: 19, fontWeight: 900, color: "#75428C" }}>{babyMode ? "How does my little self feel?" : "How are you today?"}</div>
-                {babyMode && <div style={{ marginTop: 5, color: "#8C6B9E", fontSize: 11.5, lineHeight: 1.45 }}>Pick one feeling. We’ll shape today.</div>}
-                {babyMode && trackerProfile?.comfort_item_name?.trim() && <div style={{ marginTop: 6, padding: "6px 8px", borderRadius: 9, background: "#FFF8E8", color: "#806536", fontSize: 10.5, fontWeight: 800 }}>🧸 Is {trackerProfile.comfort_item_name.trim()} nearby?</div>}
-              </div>
-              <button type="button" onClick={() => { setCheckInPopupOpen(false); setCheckInPopupDismissedToday(true); }} aria-label="Close" style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>✕</button>
-            </div>
-            <div style={{ marginTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-              <div style={{ fontSize: 10.5, letterSpacing: "0.12em", color: "#8E4EAA", fontWeight: 900 }}>{babyMode ? `TELL ${babyCaregiverName.toUpperCase()} YOUR FEELING` : "HOW DO YOU FEEL?"}</div>
-              <button type="button" onClick={() => setCheckInMoreMoodsOpen((open) => !open)} style={{ padding: "4px 8px", borderRadius: 999, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>{checkInMoreMoodsOpen ? "Fewer" : "More feelings"}</button>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginTop: 7 }}>
-              {CHECKIN_MOODS.filter(([value]) => checkInMoreMoodsOpen || PRIMARY_CHECKIN_MOODS.includes(value) || dailyCheckIn.mood === value).map(([value, emoji, label]) => (
-                <button key={value} type="button" onClick={() => selectCheckInMood(value)} aria-pressed={dailyCheckIn.mood === value} style={{ padding: "9px 4px", borderRadius: 11, border: dailyCheckIn.mood === value ? "2px solid #A65DC1" : "1px solid #E3C9EC", background: dailyCheckIn.mood === value ? "#F7ECFB" : "white", cursor: "pointer", textAlign: "center" }}>
-                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ marginTop: 2, fontSize: 10, fontWeight: 800, color: "#6B5A7D" }}>{label}</div>
-                </button>
-              ))}
-            </div>
-            {dailyCheckIn.mood && dailyCheckIn.capacity && (
-              <div style={{ marginTop: 9, padding: "8px 10px", borderRadius: 10, background: "#F7ECFB", color: "#6B5A7D", fontSize: 11.5, lineHeight: 1.4 }}>
-                {babyMode ? `${babyCaregiverName}'s gentle guess` : "PlushLife's gentle guess"}: <strong>{DAY_TYPES.find(([value]) => value === dailyCheckIn.day_type)?.[2] || "Full"} Day</strong> · {CAPACITY_LABELS[dailyCheckIn.capacity]} capacity · {ENERGY_LEVELS.find(([value]) => value === dailyCheckIn.energy)?.[2] || "Steady"} energy
-              </div>
-            )}
-            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#4C8FE8", fontWeight: 900 }}>CHOOSE TODAY'S PLAN</div>
-            <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#6B7C99" }}>Pick the day size that fits. Progress stays safe.</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(88px,1fr))", gap: 7, marginTop: 7 }}>
-              {DAY_TYPES.map(([value, emoji, label, description]) => (
-                <button key={value} type="button" data-plushlife-day-type={value} onClick={() => selectDayType(value)} aria-pressed={dailyCheckIn.day_type === value} title={description} style={{ padding: "8px 5px", borderRadius: 11, border: dailyCheckIn.day_type === value ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: dailyCheckIn.day_type === value ? "#EAF4FF" : "white", cursor: "pointer" }}>
-                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ fontSize: 10.5, fontWeight: 900, color: "#4C6F98" }}>{label}</div>
-                </button>
-              ))}
-            </div>
-            <button type="button" onClick={() => setCheckInCustomizeOpen((open) => !open)} aria-expanded={checkInCustomizeOpen} style={{ marginTop: 12, width: "100%", padding: "8px 11px", borderRadius: 11, border: "1px solid #D9B8E8", background: "rgba(255,255,255,.72)", color: "#75428C", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>
-              {checkInCustomizeOpen ? "Hide extra options" : "Customize today · optional"} {checkInCustomizeOpen ? "⌃" : "⌄"}
-            </button>
-            {checkInCustomizeOpen && <>
-            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#318C79", fontWeight: 900 }}>ENERGY · OPTIONAL</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 7, marginTop: 7 }}>
-              {ENERGY_LEVELS.map(([value, emoji, label]) => (
-                <button key={value} type="button" onClick={() => saveDailyCheckIn({ energy: value })} aria-pressed={dailyCheckIn.energy === value} style={{ padding: "8px 4px", borderRadius: 11, border: dailyCheckIn.energy === value ? "2px solid #318C79" : "1px solid #CFE8E1", background: dailyCheckIn.energy === value ? "#EAF8F4" : "white", cursor: "pointer" }}>
-                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ fontSize: 10, fontWeight: 800, color: "#5E766F" }}>{label}</div>
-                </button>
-              ))}
-            </div>
-            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#A56D14", fontWeight: 900 }}>WHAT WOULD HELP? · OPTIONAL</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 7 }}>
-              {SUPPORT_PREFERENCES.map(([value, emoji, label]) => (
-                <button key={value} type="button" onClick={() => saveDailyCheckIn({ support_preference: dailyCheckIn.support_preference === value ? null : value })} aria-pressed={dailyCheckIn.support_preference === value} style={{ padding: "7px 9px", borderRadius: 999, border: dailyCheckIn.support_preference === value ? "2px solid #D4A017" : "1px solid #F0D99E", background: dailyCheckIn.support_preference === value ? "#FFF4CF" : "white", color: "#7B641E", fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>{emoji} {label}</button>
-              ))}
-            </div>
-            {dailyCheckIn.support_preference && SUPPORT_GUIDANCE[dailyCheckIn.support_preference] && (
-              <div style={{ marginTop: 9, padding: "9px 11px", borderRadius: 11, background: "#FFF9E9", border: "1px solid #F0D99E", color: "#6B5A3D", fontSize: 11.5, lineHeight: 1.45 }}>
-                {SUPPORT_GUIDANCE[dailyCheckIn.support_preference].text}
-                {SUPPORT_GUIDANCE[dailyCheckIn.support_preference].action && (
-                  <button type="button" onClick={() => {
-                    if (dailyCheckIn.support_preference === "comfort") {
-                      setCheckInPopupOpen(false);
-                      openCareSession("comfort_item");
-                    } else if (dailyCheckIn.support_preference === "practical") {
-                      setEssentialsPickerOpen(true);
-                    } else if (dailyCheckIn.support_preference === "company") {
-                      setCheckInPopupOpen(false);
-                      setDashboard("guardian");
-                    }
-                  }} style={{ display: "block", marginTop: 7, padding: "6px 9px", borderRadius: 8, border: "1px solid #D4A017", background: "white", color: "#8A6A21", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>
-                    {SUPPORT_GUIDANCE[dailyCheckIn.support_preference].action}
-                  </button>
-                )}
-              </div>
-            )}
-            {dailyCheckIn.capacity === "very_low" && !dailyCheckIn.soft_day && (
-              <div style={{ marginTop: 12, padding: "9px 11px", borderRadius: 10, background: "#FFF9E9", fontSize: 12.5, color: "#6B5A3D" }}>
-                That's okay. Today can be smaller. <button type="button" onClick={() => selectDayType("soft")} style={{ marginLeft: 4, padding: "4px 9px", borderRadius: 7, border: "1px solid #F0D99E", background: "white", color: "#A56D14", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>Start a Soft Day</button>
-              </div>
-            )}
-            {(dailyCheckIn.capacity === "very_low" || dailyCheckIn.capacity === "low") && (
-              <div style={{ marginTop: 13, paddingTop: 13, borderTop: "1px solid #E6D4F2" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                  <div style={{ fontSize: 10.5, fontWeight: 800, color: "#8C6B9E" }}>WHAT COUNTS TODAY</div>
-                  <button type="button" onClick={() => setEssentialsPickerOpen(true)} style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>{dailyCheckIn.custom_essentials?.length ? "✏️ Change" : "＋ Choose"}</button>
-                </div>
-                {dailyCheckIn.custom_essentials?.length ? (
-                  <div style={{ marginTop: 8, fontSize: 12, color: "#6B5A7D" }}>Showing just these {dailyCheckIn.custom_essentials.length} picks on your Today list.</div>
-                ) : (
-                  <div style={{ marginTop: 6, fontSize: 12, color: "#8C6B9E" }}>Pick a small handful of today's tasks — your Today list will simplify to just those.</div>
-                )}
-              </div>
-            )}
-            </>}
-            <button type="button" disabled={!dailyCheckIn.mood} onClick={() => { setCheckInPopupOpen(false); setCheckInPopupDismissedToday(true); }} style={{ marginTop: 16, width: "100%", padding: "10px 14px", borderRadius: 12, border: 0, background: dailyCheckIn.mood ? "#A65DC1" : "#D8C8E2", color: "white", fontWeight: 900, cursor: dailyCheckIn.mood ? "pointer" : "not-allowed" }}>{dailyCheckIn.mood ? (babyMode ? "All done for now 🍼" : "Looks good") : "Choose the closest feeling"}</button>
           </div>
         </div>
       )}
@@ -7322,7 +7184,7 @@ function GlowUpTracker() {
         </div>
       )}
       {autoPopupToShow === "notification_nudge" && (
-        <div role="dialog" aria-modal="true" aria-labelledby="notif-nudge-title" onClick={dismissNotificationNudge} style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
+        <div role="region" className="pl-calm-inline-page" aria-labelledby="notif-nudge-title" tabIndex={-1}>
           <div onClick={(event) => event.stopPropagation()} style={{ width: "min(100%, 380px)", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#F1FFF9 58%,#EBFBFF)", border: "2px solid #A9DFC4", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
             <PopupCloseButton label="Close notification suggestion" onClick={dismissNotificationNudge} />
             <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#268A50", fontWeight: 900 }}>🔔 JUST A THOUGHT</div>
@@ -7365,7 +7227,7 @@ function GlowUpTracker() {
         </div>
       )}
       {autoPopupToShow === "intro_intention" && (
-        <div role="dialog" aria-modal="true" aria-labelledby="intro-intention-title" style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
+        <div role="region" className="pl-calm-inline-page" aria-labelledby="intro-intention-title" tabIndex={-1}>
           <div style={{ width: "min(100%, 420px)", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
             <PopupCloseButton label="Close weekly intention" onClick={() => dismissIntroIntention(false)} />
             <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>✨ NEW</div>
@@ -7382,7 +7244,7 @@ function GlowUpTracker() {
         </div>
       )}
       {autoPopupToShow === "celebration" && (
-        <div role="dialog" aria-modal="true" aria-labelledby="day-complete-title" onClick={() => setCelebrationOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 18, background: "rgba(64,39,80,.46)", backdropFilter: "blur(5px)" }}>
+        <div role="region" className="pl-calm-inline-page" aria-labelledby="day-complete-title" tabIndex={-1}>
           {!preferences.reduced_motion && ["💛","✨","💜","⭐","🎀","✨","💛","🌟","💜","✨","⭐","🎀"].map((piece, index) => (
             <span key={index} className="celebration-confetti" style={{ left: `${5 + index * 8}%`, animationDelay: `${(index % 5) * 0.12}s`, fontSize: `${18 + index % 3 * 6}px` }}>{piece}</span>
           ))}
@@ -7582,6 +7444,106 @@ function GlowUpTracker() {
         }}
         className="plushlife-app-column"
         style={{ maxWidth: 640, margin: "0 auto", touchAction: "pan-y" }}>
+        <div className="pl-calm-mobile-top"><span>PlushLife</span><button type="button" onClick={() => { setSettingsOpen(false); setCheckInPopupOpen(false); setJournalQuickOpen(false); setCollectionOpen(false); setWhatsChangedOpen(true); }} aria-current={whatsChangedOpen ? "page" : undefined}>What changed{preferences.last_seen_changelog !== CURRENT_CHANGELOG_VERSION && <span className="pl-calm-unread-dot" aria-label="Unread updates"/>}</button></div>
+      {autoPopupToShow === "check_in" && (
+        <div role="region" className="pl-calm-inline-page" aria-labelledby="checkin-popup-title" tabIndex={-1}>
+          <div onClick={(event) => event.stopPropagation()} style={{ width: "min(100%, 520px)", maxHeight: "min(88vh,760px)", overflowY: "auto", padding: "22px 20px", borderRadius: 26, background: "linear-gradient(160deg,#FFFDFE,#FFF0FA 58%,#EBFBFF)", border: "2px solid #D994E7", boxShadow: "0 24px 80px rgba(61,35,78,.3)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "#A65DC1", fontWeight: 900 }}>{babyMode ? `🍼 ${babyCaregiverName.toUpperCase()} CHECK-IN` : "🎯 TODAY'S CHECK-IN"}</div>
+                <div id="checkin-popup-title" style={{ marginTop: 4, fontSize: 19, fontWeight: 900, color: "#75428C" }}>{babyMode ? "How does my little self feel?" : "How are you today?"}</div>
+                {babyMode && <div style={{ marginTop: 5, color: "#8C6B9E", fontSize: 11.5, lineHeight: 1.45 }}>Pick one feeling. We’ll shape today.</div>}
+                {babyMode && trackerProfile?.comfort_item_name?.trim() && <div style={{ marginTop: 6, padding: "6px 8px", borderRadius: 9, background: "#FFF8E8", color: "#806536", fontSize: 10.5, fontWeight: 800 }}>🧸 Is {trackerProfile.comfort_item_name.trim()} nearby?</div>}
+              </div>
+              <button type="button" onClick={() => { setCheckInPopupOpen(false); setCheckInPopupDismissedToday(true); }} aria-label="Close" style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, cursor: "pointer", flexShrink: 0 }}>✕</button>
+            </div>
+            <div style={{ marginTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+              <div style={{ fontSize: 10.5, letterSpacing: "0.12em", color: "#8E4EAA", fontWeight: 900 }}>{babyMode ? `TELL ${babyCaregiverName.toUpperCase()} YOUR FEELING` : "HOW DO YOU FEEL?"}</div>
+              <button type="button" onClick={() => setCheckInMoreMoodsOpen((open) => !open)} style={{ padding: "4px 8px", borderRadius: 999, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>{checkInMoreMoodsOpen ? "Fewer" : "More feelings"}</button>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginTop: 7 }}>
+              {CHECKIN_MOODS.filter(([value]) => checkInMoreMoodsOpen || PRIMARY_CHECKIN_MOODS.includes(value) || dailyCheckIn.mood === value).map(([value, emoji, label]) => (
+                <button key={value} type="button" onClick={() => selectCheckInMood(value)} aria-pressed={dailyCheckIn.mood === value} style={{ padding: "9px 4px", borderRadius: 11, border: dailyCheckIn.mood === value ? "2px solid #A65DC1" : "1px solid #E3C9EC", background: dailyCheckIn.mood === value ? "#F7ECFB" : "white", cursor: "pointer", textAlign: "center" }}>
+                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ marginTop: 2, fontSize: 10, fontWeight: 800, color: "#6B5A7D" }}>{label}</div>
+                </button>
+              ))}
+            </div>
+            {dailyCheckIn.mood && dailyCheckIn.capacity && (
+              <div style={{ marginTop: 9, padding: "8px 10px", borderRadius: 10, background: "#F7ECFB", color: "#6B5A7D", fontSize: 11.5, lineHeight: 1.4 }}>
+                {babyMode ? `${babyCaregiverName}'s gentle guess` : "PlushLife's gentle guess"}: <strong>{DAY_TYPES.find(([value]) => value === dailyCheckIn.day_type)?.[2] || "Full"} Day</strong> · {CAPACITY_LABELS[dailyCheckIn.capacity]} capacity · {ENERGY_LEVELS.find(([value]) => value === dailyCheckIn.energy)?.[2] || "Steady"} energy
+              </div>
+            )}
+            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#4C8FE8", fontWeight: 900 }}>CHOOSE TODAY'S PLAN</div>
+            <div style={{ marginTop: 4, fontSize: 11.5, lineHeight: 1.45, color: "#6B7C99" }}>Pick the day size that fits. Progress stays safe.</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(88px,1fr))", gap: 7, marginTop: 7 }}>
+              {DAY_TYPES.map(([value, emoji, label, description]) => (
+                <button key={value} type="button" data-plushlife-day-type={value} onClick={() => selectDayType(value)} aria-pressed={dailyCheckIn.day_type === value} title={description} style={{ padding: "8px 5px", borderRadius: 11, border: dailyCheckIn.day_type === value ? "2px solid #4C8FE8" : "1px solid #CFE4F5", background: dailyCheckIn.day_type === value ? "#EAF4FF" : "white", cursor: "pointer" }}>
+                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ fontSize: 10.5, fontWeight: 900, color: "#4C6F98" }}>{label}</div>
+                </button>
+              ))}
+            </div>
+            <button type="button" onClick={() => setCheckInCustomizeOpen((open) => !open)} aria-expanded={checkInCustomizeOpen} style={{ marginTop: 12, width: "100%", padding: "8px 11px", borderRadius: 11, border: "1px solid #D9B8E8", background: "rgba(255,255,255,.72)", color: "#75428C", fontWeight: 900, fontSize: 11.5, cursor: "pointer" }}>
+              {checkInCustomizeOpen ? "Hide extra options" : "Customize today · optional"} {checkInCustomizeOpen ? "⌃" : "⌄"}
+            </button>
+            {checkInCustomizeOpen && <>
+            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#318C79", fontWeight: 900 }}>ENERGY · OPTIONAL</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 7, marginTop: 7 }}>
+              {ENERGY_LEVELS.map(([value, emoji, label]) => (
+                <button key={value} type="button" onClick={() => saveDailyCheckIn({ energy: value })} aria-pressed={dailyCheckIn.energy === value} style={{ padding: "8px 4px", borderRadius: 11, border: dailyCheckIn.energy === value ? "2px solid #318C79" : "1px solid #CFE8E1", background: dailyCheckIn.energy === value ? "#EAF8F4" : "white", cursor: "pointer" }}>
+                  <div style={{ fontSize: 18 }}>{emoji}</div><div style={{ fontSize: 10, fontWeight: 800, color: "#5E766F" }}>{label}</div>
+                </button>
+              ))}
+            </div>
+            <div style={{ marginTop: 13, fontSize: 10.5, letterSpacing: "0.12em", color: "#A56D14", fontWeight: 900 }}>WHAT WOULD HELP? · OPTIONAL</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 7 }}>
+              {SUPPORT_PREFERENCES.map(([value, emoji, label]) => (
+                <button key={value} type="button" onClick={() => saveDailyCheckIn({ support_preference: dailyCheckIn.support_preference === value ? null : value })} aria-pressed={dailyCheckIn.support_preference === value} style={{ padding: "7px 9px", borderRadius: 999, border: dailyCheckIn.support_preference === value ? "2px solid #D4A017" : "1px solid #F0D99E", background: dailyCheckIn.support_preference === value ? "#FFF4CF" : "white", color: "#7B641E", fontWeight: 800, fontSize: 10.5, cursor: "pointer" }}>{emoji} {label}</button>
+              ))}
+            </div>
+            {dailyCheckIn.support_preference && SUPPORT_GUIDANCE[dailyCheckIn.support_preference] && (
+              <div style={{ marginTop: 9, padding: "9px 11px", borderRadius: 11, background: "#FFF9E9", border: "1px solid #F0D99E", color: "#6B5A3D", fontSize: 11.5, lineHeight: 1.45 }}>
+                {SUPPORT_GUIDANCE[dailyCheckIn.support_preference].text}
+                {SUPPORT_GUIDANCE[dailyCheckIn.support_preference].action && (
+                  <button type="button" onClick={() => {
+                    if (dailyCheckIn.support_preference === "comfort") {
+                      setCheckInPopupOpen(false);
+                      openCareSession("comfort_item");
+                    } else if (dailyCheckIn.support_preference === "practical") {
+                      setEssentialsPickerOpen(true);
+                    } else if (dailyCheckIn.support_preference === "company") {
+                      setCheckInPopupOpen(false);
+                      setDashboard("guardian");
+                    }
+                  }} style={{ display: "block", marginTop: 7, padding: "6px 9px", borderRadius: 8, border: "1px solid #D4A017", background: "white", color: "#8A6A21", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>
+                    {SUPPORT_GUIDANCE[dailyCheckIn.support_preference].action}
+                  </button>
+                )}
+              </div>
+            )}
+            {dailyCheckIn.capacity === "very_low" && !dailyCheckIn.soft_day && (
+              <div style={{ marginTop: 12, padding: "9px 11px", borderRadius: 10, background: "#FFF9E9", fontSize: 12.5, color: "#6B5A3D" }}>
+                That's okay. Today can be smaller. <button type="button" onClick={() => selectDayType("soft")} style={{ marginLeft: 4, padding: "4px 9px", borderRadius: 7, border: "1px solid #F0D99E", background: "white", color: "#A56D14", fontWeight: 800, fontSize: 11.5, cursor: "pointer" }}>Start a Soft Day</button>
+              </div>
+            )}
+            {(dailyCheckIn.capacity === "very_low" || dailyCheckIn.capacity === "low") && (
+              <div style={{ marginTop: 13, paddingTop: 13, borderTop: "1px solid #E6D4F2" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 800, color: "#8C6B9E" }}>WHAT COUNTS TODAY</div>
+                  <button type="button" onClick={() => setEssentialsPickerOpen(true)} style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid #D9B8E8", background: "white", color: "#8E4EAA", fontWeight: 900, fontSize: 11, cursor: "pointer" }}>{dailyCheckIn.custom_essentials?.length ? "✏️ Change" : "＋ Choose"}</button>
+                </div>
+                {dailyCheckIn.custom_essentials?.length ? (
+                  <div style={{ marginTop: 8, fontSize: 12, color: "#6B5A7D" }}>Showing just these {dailyCheckIn.custom_essentials.length} picks on your Today list.</div>
+                ) : (
+                  <div style={{ marginTop: 6, fontSize: 12, color: "#8C6B9E" }}>Pick a small handful of today's tasks — your Today list will simplify to just those.</div>
+                )}
+              </div>
+            )}
+            </>}
+            <button type="button" disabled={!dailyCheckIn.mood} onClick={() => { setCheckInPopupOpen(false); setCheckInPopupDismissedToday(true); }} style={{ marginTop: 16, width: "100%", padding: "10px 14px", borderRadius: 12, border: 0, background: dailyCheckIn.mood ? "#A65DC1" : "#D8C8E2", color: "white", fontWeight: 900, cursor: dailyCheckIn.mood ? "pointer" : "not-allowed" }}>{dailyCheckIn.mood ? (babyMode ? "All done for now 🍼" : "Looks good") : "Choose the closest feeling"}</button>
+          </div>
+        </div>
+      )}
+
         {/* Classic top sync strip from the original PlushList shell. */}
         {!compactAppShell && (user ? (
           <div className="classic-sync-strip" style={{ marginBottom: 7, display: "flex", justifyContent: "flex-end" }}>
@@ -7604,7 +7566,7 @@ function GlowUpTracker() {
             {signInMessage && <div style={{ marginTop: 8, fontSize: 12, color: "#8C6B9E" }}>{signInMessage}</div>}
           </div>
         )}
-        {!compactAppShell && dashboard !== "today" && <div className="plushlife-app-header" style={{ marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 9 }}>
+        {!inlineUtilityOpen && !compactAppShell && dashboard !== "today" && dashboard !== "guardian" && <div className="plushlife-app-header" style={{ marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 9 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 9.5, letterSpacing: "0.16em", color: "#B08AC7", fontWeight: 800 }}>{dinoTheme ? "ONE LITTLE STEP AT A TIME 🦕✨" : "ONE LITTLE STEP AT A TIME ✨"}</div>
             <h1 className="app-title" style={{ fontSize: 24, margin: "3px 0 0", fontWeight: 850, letterSpacing: "-0.02em", lineHeight: 1.05 }}>
@@ -7733,6 +7695,10 @@ function GlowUpTracker() {
           <button type="button" className="pl-heading-gear" onClick={() => setSettingsOpen(true)} aria-label="Settings"><DesignIcon name="gear" /></button>
         </header>}
 
+        {whatsChangedOpen && <WhatsChanged key={user.id} unread={preferences.last_seen_changelog !== CURRENT_CHANGELOG_VERSION} onMarkRead={() => savePreferences({...preferences,last_seen_changelog:CURRENT_CHANGELOG_VERSION})} onClose={() => setWhatsChangedOpen(false)}/>}
+        <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} openDailyCheckIn={() => { setSettingsOpen(false); setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); }} dailyCheckIn={dailyCheckIn} pct={pct} rows={rows} viewDone={viewDone} weeklyOverallPct={weeklyOverallPct} widgetSyncMsg={widgetSyncMsg} setWidgetSyncMsg={setWidgetSyncMsg} displayNameDraft={displayNameDraft} setDisplayNameDraft={setDisplayNameDraft} saveDisplayName={saveDisplayName} comfortItemDraft={comfortItemDraft} setComfortItemDraft={setComfortItemDraft} saveComfortItem={saveComfortItem} preferences={preferences} appearanceTheme={appearanceTheme} selectAppearanceTheme={selectAppearanceTheme} dinoTheme={dinoTheme} updatePreference={updatePreference} enableNotifications={enableNotifications} smartReminderSuggestion={smartReminderSuggestion} restDatesSet={restDatesSet} toggleRestToday={toggleRestToday} period={period} restRangeDraft={restRangeDraft} setRestRangeDraft={setRestRangeDraft} saveRestRange={saveRestRange} restDates={restDates} savePreferences={savePreferences} feedbackText={feedbackText} setFeedbackText={setFeedbackText} submitFeedback={submitFeedback} feedbackMessage={feedbackMessage} exportMyData={exportMyData} restoreFileInputRef={restoreFileInputRef} restoreFromBackup={restoreFromBackup} deleteAllCheckIns={deleteAllCheckIns} deleteAllReflections={deleteAllReflections} user={user} online={online} syncStatus={syncStatus} lastSyncedAt={lastSyncedAt} syncNow={syncNow} emailChangeDraft={emailChangeDraft} setEmailChangeDraft={setEmailChangeDraft} requestEmailChange={requestEmailChange} signingOut={signingOut} handleSignOut={handleSignOut} signOutOtherDevices={signOutOtherDevices} deleteMyAccount={deleteMyAccount} deviceBackupStatus={deviceBackupStatus} refreshDeviceBackup={refreshDeviceBackup} deviceBackupBusy={deviceBackupBusy} verifyDeviceBackupNow={verifyDeviceBackupNow} deviceBackupVerifyBusy={deviceBackupVerifyBusy} settingsMessage={settingsMessage} />
+        <DailyJournalPanel open={journalQuickOpen && (!dailyJournalPromptOpen || autoPopupToShow === "daily_journal")} onVisible={() => { if (!dailyJournalPromptOpen || !user?.id) return; try { window.localStorage.setItem(`plushlife:daily-journal-prompt:${user.id}:${period.date}`, "shown"); } catch (_error) {} }} onClose={() => { setJournalQuickOpen(false); setDailyJournalPromptOpen(false); setPrivateNoteEditing(false); }} dailyJournalPromptOpen={dailyJournalPromptOpen} journalQuickOpenDate={journalQuickOpenDate} journalDisplayedPrompt={journalDisplayedPrompt} privateNoteEditing={privateNoteEditing} setPrivateNoteEditing={setPrivateNoteEditing} privateNoteDraft={privateNoteDraft} setPrivateNoteDraft={setPrivateNoteDraft} savePrivateNote={savePrivateNote} privateNote={privateNote} privateNoteMessage={privateNoteMessage} />
+        <div className="pl-calm-main-pages" hidden={inlineUtilityOpen}>
                 {dashboard === "care" && <div className="pl-unified-page-content"><CarePanel comfortItem={trackerProfile?.comfort_item_name} supportNotes={supportNotes.filter(note => note.owner_user_id === user.id)} onOpenSettings={() => setSettingsOpen(true)} onReset={startCozyReset} onReminderTime={async time=>{const okay=await savePreferences({...preferences,reminder_times:[time]});return okay;}} dailyCheckInHistory={dailyCheckInHistory} reflectionHistory={reflectionHistory} checkInHistoryStatus={checkInHistoryStatus} journalHistoryStatus={journalHistoryStatus} retryCareHistory={retryCareHistory} setCheckInViewerDate={setCheckInViewerDate} setReflectionViewerDate={setReflectionViewerDate} openTodayJournal={openTodayJournal} CHECKIN_MOODS={CHECKIN_MOODS} onOpenSupport={() => goToDashboard("guardian")} open={dashboard === "care"} babyMode={babyMode} setCheckInPopupOpen={setCheckInPopupOpen} babyCaregiverName={babyCaregiverName} careSituationsExpanded={careSituationsExpanded} setCareSituationsExpanded={setCareSituationsExpanded} setCareMessage={setCareMessage} openCareSession={openCareSession} careMessage={careMessage} user={user} preferences={preferences} rows={rows} viewDone={viewDone} toggle={toggle} supabase={supabase} careSection={careSection} setCareSection={setCareSection} careSessionHistory={careSessionHistory} HELP_ME_NOW_OPTIONS={HELP_ME_NOW_OPTIONS} pathProgress={pathProgress} setSelectedCarePath={setSelectedCarePath} period={period} setSleepToolOpen={setSleepToolOpen} soundscapePlaying={soundscapePlaying} toggleSoundscape={toggleSoundscape} soundscapeVolume={soundscapeVolume} changeSoundscapeVolume={changeSoundscapeVolume} setSoundscapeSleepTimer={setSoundscapeSleepTimer} soundscapeTimerMinutes={soundscapeTimerMinutes} /></div>}
         <PlushGuardianHost user={user} guardianLinksReady={guardianLinksReady} humanGuardianConnected={activeGuardianMode === "person"} client={supabase} rows={rows} viewDone={viewDone} dailyCheckIn={dailyCheckIn} toggle={toggle} onQuickAdd={quickAddTrackerTask} onDayType={selectDayType} onSupport={text => { if(typeof text === "string") setSupportRequestText(text.slice(0,500)); goToDashboard("guardian"); }} onJournal={openTodayJournal} onEditTask={row => { openTaskManager(); if(row.sourceTask) startEditingTask(row.sourceTask); }} />
         <ProfilePanel open={profileOpen} onClose={() => setProfileOpen(false)} pendingSupportInvites={pendingSupportInvites} hasOwnGuardian={hasOwnGuardian} goToDashboard={goToDashboard} setSettingsOpen={setSettingsOpen} setSafetyOpen={setSafetyOpen} setHelpOpen={setHelpOpen} goToFeedback={goToFeedback} isAdminUser={isAdminUser} setAdminOpen={setAdminOpen} loadAdminData={loadAdminData} nativeBuildInfo={nativeBuildInfo} />
@@ -7749,7 +7715,6 @@ function GlowUpTracker() {
 
         <RewardsPanel inline={collectionOpen} open={collectionOpen} theme={activeWorld} onClose={() => setCollectionOpen(false)} FeatureTip={FeatureTip} selectedOutfit={selectedOutfit} mascotMood={mascotMood} activityDaysTotal={activityDaysTotal} preferences={preferences} mascotGrowth={mascotGrowth} careDaysTotal={careDaysTotal} unlockedOutfits={unlockedOutfits} earnedBadgeIdSet={earnedBadgeIdSet} BADGE_DEFS={BADGE_DEFS} unlockedIdSet={unlockedIdSet} mascotRequirementProgress={mascotRequirementProgress} saveMascotCollection={saveMascotCollection} mascotCollection={mascotCollection} savedBestStreak={savedBestStreak} collectionTab={collectionTab} setCollectionTab={setCollectionTab} winsJarEntries={winsJarEntries} saveMessage={mascotSaveMessage} />
 
-        <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} openDailyCheckIn={() => { setSettingsOpen(false); setCheckInPopupDismissedToday(false); setCheckInPopupOpen(true); }} dailyCheckIn={dailyCheckIn} pct={pct} rows={rows} viewDone={viewDone} weeklyOverallPct={weeklyOverallPct} widgetSyncMsg={widgetSyncMsg} setWidgetSyncMsg={setWidgetSyncMsg} displayNameDraft={displayNameDraft} setDisplayNameDraft={setDisplayNameDraft} saveDisplayName={saveDisplayName} comfortItemDraft={comfortItemDraft} setComfortItemDraft={setComfortItemDraft} saveComfortItem={saveComfortItem} preferences={preferences} appearanceTheme={appearanceTheme} selectAppearanceTheme={selectAppearanceTheme} dinoTheme={dinoTheme} updatePreference={updatePreference} enableNotifications={enableNotifications} smartReminderSuggestion={smartReminderSuggestion} restDatesSet={restDatesSet} toggleRestToday={toggleRestToday} period={period} restRangeDraft={restRangeDraft} setRestRangeDraft={setRestRangeDraft} saveRestRange={saveRestRange} restDates={restDates} savePreferences={savePreferences} feedbackText={feedbackText} setFeedbackText={setFeedbackText} submitFeedback={submitFeedback} feedbackMessage={feedbackMessage} exportMyData={exportMyData} restoreFileInputRef={restoreFileInputRef} restoreFromBackup={restoreFromBackup} deleteAllCheckIns={deleteAllCheckIns} deleteAllReflections={deleteAllReflections} user={user} online={online} syncStatus={syncStatus} lastSyncedAt={lastSyncedAt} syncNow={syncNow} emailChangeDraft={emailChangeDraft} setEmailChangeDraft={setEmailChangeDraft} requestEmailChange={requestEmailChange} signingOut={signingOut} handleSignOut={handleSignOut} signOutOtherDevices={signOutOtherDevices} deleteMyAccount={deleteMyAccount} deviceBackupStatus={deviceBackupStatus} refreshDeviceBackup={refreshDeviceBackup} deviceBackupBusy={deviceBackupBusy} verifyDeviceBackupNow={verifyDeviceBackupNow} deviceBackupVerifyBusy={deviceBackupVerifyBusy} settingsMessage={settingsMessage} />
 
         <AdminPanel open={isAdminUser && adminOpen} onClose={() => setAdminOpen(false)} loadAdminData={loadAdminData} adminMessage={adminMessage} adminStats={adminStats} adminOnline={adminOnline} adminFunnel={adminFunnel} SUPPORTER_FEATURES_ENABLED={SUPPORTER_FEATURES_ENABLED} supporterEmailDraft={supporterEmailDraft} setSupporterEmailDraft={setSupporterEmailDraft} setSupporterStatus={setSupporterStatus} supporterGrantMessage={supporterGrantMessage} reviewAccountRole={reviewAccountRole} setReviewAccountRole={setReviewAccountRole} reviewAccountEmail={reviewAccountEmail} setReviewAccountEmail={setReviewAccountEmail} reviewAccountPassword={reviewAccountPassword} setReviewAccountPassword={setReviewAccountPassword} createOrUpdateReviewAccount={createOrUpdateReviewAccount} reviewAccountMessage={reviewAccountMessage} adminFeedback={adminFeedback} resolveFeedback={resolveFeedback} adminErrors={adminErrors} clearAllErrors={clearAllErrors} devPreviewPlan={devPreviewPlan} setDevPreviewPlan={setDevPreviewPlan} />
 
@@ -7772,22 +7737,21 @@ function GlowUpTracker() {
 
         <ScheduleEditorPanel client={supabase} user={user} open={manageSchedule} onClose={() => setManageSchedule(false)} scheduleEditingDayId={scheduleEditingDayId} setScheduleEditDayId={setScheduleEditDayId} personalSchedules={personalSchedules} scheduleDraft={scheduleDraft} updateScheduleEntry={updateScheduleEntry} removeScheduleEntry={removeScheduleEntry} addScheduleEntry={addScheduleEntry} savePersonalSchedule={savePersonalSchedule} copyScheduleToAllDays={copyScheduleToAllDays} clearPersonalSchedule={clearPersonalSchedule} copyToDayIds={copyToDayIds} toggleCopyToDay={toggleCopyToDay} copyScheduleToSelectedDays={copyScheduleToSelectedDays} scheduleMessage={scheduleMessage} scheduleExceptionDraft={scheduleExceptionDraft} setScheduleExceptionDraft={setScheduleExceptionDraft} updateScheduleExceptionEntry={updateScheduleExceptionEntry} removeScheduleExceptionEntry={removeScheduleExceptionEntry} addScheduleExceptionEntry={addScheduleExceptionEntry} saveScheduleException={saveScheduleException} scheduleExceptionMessage={scheduleExceptionMessage} scheduleExceptions={scheduleExceptions} deleteScheduleException={deleteScheduleException} onOpenTasks={() => { setManageSchedule(false); openTaskManager(period.date, "today"); }} />
 
-        {user && dashboard === "guardian" && <button type="button" className="pl3-back-to-care" onClick={() => goToDashboard("care")}><span aria-hidden="true">‹</span> Care</button>}
+
         <GuardianPanel client={supabase} guardianLinksReady={guardianLinksReady} onRetryGuardian={() => loadSupportData(user)} onOpenTasks={() => openTaskManager(period.date,"today")} open={user && dashboard === "guardian"} onClose={() => setDashboard("today")} isGuardianAccount={isGuardianAccount} hasOwnGuardian={hasOwnGuardian} supportViewMode={supportViewMode} setSupportViewMode={setSupportViewMode} isSupportAdult={isSupportAdult} selectedSupportName={selectedSupportName} guardianSupportRequests={guardianSupportRequests} supportOwnerId={supportOwnerId} updateGuardianSupportRequest={updateGuardianSupportRequest} pendingSupportInvites={pendingSupportInvites} supportPeople={supportPeople} acceptSupportInvitation={acceptSupportInvitation} declineSupportInvitation={declineSupportInvitation} canUseCaretakerDashboard={canUseCaretakerDashboard} invitedSupportLinks={invitedSupportLinks} loadSupportOwner={loadSupportOwner} loadSupportData={loadSupportData} user={user} supportAchievements={supportAchievements} period={period} ownerIsRestingToday={ownerIsRestingToday} restDatesSet={restDatesSet} todayRequiredDone={todayRequiredDone} supportProgress={supportProgress} activeSupportLink={activeSupportLink} canViewSupportProgress={canViewSupportProgress} canViewSupportTasks={canViewSupportTasks} canViewSupportSchedule={canViewSupportSchedule} canViewSupportMood={canViewSupportMood} supportTrackerTasks={supportTrackerTasks} supportSchedules={supportSchedules} supportScheduleExceptions={supportScheduleExceptions} supportMoodSummary={supportMoodSummary} supportProgressView={supportProgressView} setSupportProgressView={setSupportProgressView} supportTodayDayLabel={supportTodayDayLabel} supportProgressReady={supportProgressReady} supportProgressLoading={supportProgressLoading} supportDailyEssentialCount={supportDailyEssentialCount} supportScheduledTodayCount={supportScheduledTodayCount} displayedSupportPercent={displayedSupportPercent} displayedSupportCompleted={displayedSupportCompleted} displayedSupportPossible={displayedSupportPossible} supportDailyEssentialCompleted={supportDailyEssentialCompleted} supportDailyEssentialKeys={supportDailyEssentialKeys} supportScheduledTodayCompleted={supportScheduledTodayCompleted} supportScheduledTodayKeys={supportScheduledTodayKeys} canSendSupportNotes={canSendSupportNotes} newNote={newNote} setNewNote={setNewNote} addSupportNote={addSupportNote} suggestComfortTool={suggestComfortTool} canAddSupportRewards={canAddSupportRewards} rewardTitle={rewardTitle} setRewardTitle={setRewardTitle} rewardDetails={rewardDetails} setRewardDetails={setRewardDetails} rewardTarget={rewardTarget} setRewardTarget={setRewardTarget} rewardTargetPeriod={rewardTargetPeriod} setRewardTargetPeriod={setRewardTargetPeriod} rewardApprovalRequired={rewardApprovalRequired} setRewardApprovalRequired={setRewardApprovalRequired} addSupportReward={addSupportReward} suggestedTask={suggestedTask} setSuggestedTask={setSuggestedTask} suggestedTaskDay={suggestedTaskDay} setSuggestedTaskDay={setSuggestedTaskDay} submitTaskSuggestion={submitTaskSuggestion} inviteEmail={inviteEmail} setInviteEmail={setInviteEmail} inviteSupportAdult={inviteSupportAdult} GUARDIAN_ROLE_PRESETS={GUARDIAN_ROLE_PRESETS} guardianRolePreset={guardianRolePreset} setGuardianRolePreset={setGuardianRolePreset} ownedSupportLinks={ownedSupportLinks} supportRelationships={supportRelationships} setSupportAdultActive={setSupportAdultActive} removeSupportAdult={removeSupportAdult} updateCaretakerPermission={updateCaretakerPermission} updateCareAgreement={updateCareAgreement} supportRequestGuardian={supportRequestGuardian} setSupportRequestGuardian={setSupportRequestGuardian} supportRequestType={supportRequestType} setSupportRequestType={setSupportRequestType} supportRequestText={supportRequestText} setSupportRequestText={setSupportRequestText} sendGuardianSupportRequest={sendGuardianSupportRequest} taskSuggestions={taskSuggestions} suggestionSectionsById={suggestionSectionsById} setSuggestionSectionsById={setSuggestionSectionsById} taskSectionsForDay={taskSectionsForDay} decideTaskSuggestion={decideTaskSuggestion} supportMessage={supportMessage} supportRewards={supportRewards} supportWeeklyPercent={supportWeeklyPercent} supportPercent={supportPercent} updateRewardStatus={updateRewardStatus} supportNotes={supportNotes} setComfortToolOpen={setComfortToolOpen} deleteSupportNote={deleteSupportNote} onOpenSettings={() => setSettingsOpen(true)} />
 
         <>
-        <DailyJournalPanel open={journalQuickOpen && (!dailyJournalPromptOpen || autoPopupToShow === "daily_journal")} onVisible={() => { if (!dailyJournalPromptOpen || !user?.id) return; try { window.localStorage.setItem(`plushlife:daily-journal-prompt:${user.id}:${period.date}`, "shown"); } catch (_error) {} }} onClose={() => { setJournalQuickOpen(false); setDailyJournalPromptOpen(false); setPrivateNoteEditing(false); }} dailyJournalPromptOpen={dailyJournalPromptOpen} journalQuickOpenDate={journalQuickOpenDate} journalDisplayedPrompt={journalDisplayedPrompt} privateNoteEditing={privateNoteEditing} setPrivateNoteEditing={setPrivateNoteEditing} privateNoteDraft={privateNoteDraft} setPrivateNoteDraft={setPrivateNoteDraft} savePrivateNote={savePrivateNote} privateNote={privateNote} privateNoteMessage={privateNoteMessage} />
         <TodayPanel displayName={trackerProfile?.display_name || displayNameDraft} quickAddTrackerTask={quickAddTrackerTask} quickAddMessage={quickAddMessage} onEditTask={startEditingTask} syncStatus={syncStatus} online={online} userId={user.id} rewardMoment={rewardMoment} onDismissReward={()=>setRewardMoment(null)} onWearReward={outfit=>{if(!unlockedIdSet.has(outfit.id))return;saveMascotCollection({...mascotCollection,unlockedIds:[...unlockedIdSet],selectedId:outfit.id});setRewardMoment(null);}} onCozyReset={startCozyReset} open={dashboard === "today"} returnGapDays={returnGapDays} returnBannerDismissed={returnBannerDismissed} setReturnBannerDismissed={setReturnBannerDismissed} voice={voice} setEssentialsPickerOpen={setEssentialsPickerOpen} selectDayType={selectDayType} wellbeingPatternInsight={wellbeingPatternInsight} todayDayId={todayDayId} hardDayBannerDismissed={hardDayBannerDismissed} setHardDayBannerDismissed={setHardDayBannerDismissed} dailyCheckIn={dailyCheckIn} restDatesSet={restDatesSet} period={period} toggleRestToday={toggleRestToday} nextStepTask={nextStepTask} FeatureTip={FeatureTip} day={day} babyMode={babyMode} nextStepHint={nextStepHint} toggle={toggle} pickEasierSuggestion={pickEasierSuggestion} nextStepMoreOpen={nextStepMoreOpen} setNextStepMoreOpen={setNextStepMoreOpen} setNextStepSkipped={setNextStepSkipped} setNextStepDismissedToday={setNextStepDismissedToday} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} weeklyIntentionMessage={weeklyIntentionMessage} todayCardIndex={todayCardIndex} setTodayCardIndex={setTodayCardIndex} taskWeekDates={taskWeekDates} selectedProgressDate={selectedProgressDate} selectTaskPreviewDate={selectTaskPreviewDate} isFutureView={isFutureView} selectedTaskDateLabel={selectedTaskDateLabel} todaySwipeStartX={todaySwipeStartX} todaySwipeStartY={todaySwipeStartY} selectedSchedule={homeSelectedSchedule} selectedScheduleExceptionEntries={homeScheduleExceptionEntries} scheduleDayId={scheduleDayId} manageSchedule={manageSchedule} setManageSchedule={setManageSchedule} active={active} rows={rows} viewDone={viewDone} openTaskManager={openTaskManager} todayRequiredDone={todayRequiredDone} todayRequiredKeys={todayRequiredKeys} activityDaysTotal={activityDaysTotal} careDaysTotal={careDaysTotal} babyCaregiverName={babyCaregiverName} trackerProfile={trackerProfile} openJournalForSelectedDate={openJournalForSelectedDate} isHistoricalView={isHistoricalView} focusHelperOpen={focusHelperOpen} setFocusHelperOpen={setFocusHelperOpen} pickRandomFocusTask={pickRandomFocusTask} setFocusSuggestionKey={setFocusSuggestionKey} focusedEssential={focusedEssential} focusChoices={focusChoices} selectedTaskViewIsRest={selectedTaskViewIsRest} pct={pct} requiredDoneCount={requiredDoneCount} requiredRows={requiredRows} preferences={preferences} doneCount={doneCount} focusModeShowAll={focusModeShowAll} setFocusModeShowAll={setFocusModeShowAll} isTaskPausedOnDate={isTaskPausedOnDate} openRow={openRow} setOpenRow={setOpenRow} celebrateKey={celebrateKey} pauseTrackerTask={pauseTrackerTask} resumeTrackerTask={resumeTrackerTask} taskListCollapsed={taskListCollapsed} setTaskListCollapsed={setTaskListCollapsed} recentlyCompletedKeys={recentlyCompletedKeys} moveTaskGroup={moveTaskGroup} startPointerTaskDrag={startPointerTaskDrag} movePointerTaskDrag={movePointerTaskDrag} endPointerTaskDrag={endPointerTaskDrag} cancelPointerTaskDrag={cancelPointerTaskDrag} moveTaskToTomorrow={moveTaskToTomorrow} completedTodayExpanded={completedTodayExpanded} setCompletedTodayExpanded={setCompletedTodayExpanded} tomorrowTasksCount={tomorrowTasksCount} weeklyHistory={weeklyHistory} dailyCheckInHistory={dailyCheckInHistory} tomorrowPreviewRows={tomorrowPreviewRows} tomorrowDateString={tomorrowDateString} selectedOutfit={selectedOutfit} appearanceTheme={appearanceTheme} dinoTheme={dinoTheme} calmQuickOpen={calmQuickOpen} setCalmQuickOpen={setCalmQuickOpen} currentCopingOption={currentCopingOption} reshuffle={reshuffle} setCareSection={setCareSection} goToDashboard={goToDashboard} setProfileOpen={setProfileOpen} setSettingsOpen={setSettingsOpen} openTodayJournal={openTodayJournal} openDailyCheckIn={() => setCheckInPopupOpen(true)} />
 
         {dashboard === "week" && <div className="pl-unified-page-content"><WeekPanel open={dashboard === "week"} openTodayJournal={openTodayJournal} weekCardIndex={weekCardIndex} setWeekCardIndex={setWeekCardIndex} weekSwipeStartX={weekSwipeStartX} weekSwipeStartY={weekSwipeStartY} reflectionCalendarMonth={reflectionCalendarMonth} setReflectionCalendarMonth={setReflectionCalendarMonth} reflectionMonthDate={reflectionMonthDate} reflectionMonthStart={reflectionMonthStart} reflectionMonthDays={reflectionMonthDays} reflectionDateSet={reflectionDateSet} dailyCheckInHistory={dailyCheckInHistory} restDatesSet={restDatesSet} selectedProgressDate={selectedProgressDate} setSelectedProgressDate={setSelectedProgressDate} dayCompletionPct={dayCompletionPct} setDayViewDate={setDayViewDate} setActive={setActive} setReflectionViewerDate={setReflectionViewerDate} setCheckInViewerDate={setCheckInViewerDate} reflectionHistory={reflectionHistory} journalHistoryExpanded={journalHistoryExpanded} setJournalHistoryExpanded={setJournalHistoryExpanded} weeklyIntentionHistory={weeklyIntentionHistory} weeklyIntentionHistoryExpanded={weeklyIntentionHistoryExpanded} setWeeklyIntentionHistoryExpanded={setWeeklyIntentionHistoryExpanded} period={period} calendarWeekOffset={calendarWeekOffset} setCalendarWeekOffset={setCalendarWeekOffset} calendarWeekPreviewDate={calendarWeekPreviewDate} setCalendarWeekPreviewDate={setCalendarWeekPreviewDate} trackerTasks={trackerTasks} dayViewDate={dayViewDate} dayViewExpanded={dayViewExpanded} setDayViewExpanded={setDayViewExpanded} longHistoryByDate={longHistoryByDate} isTaskPausedOnDate={isTaskPausedOnDate} markPastTasksDone={markPastTasksDone} done={done} toggle={toggle} isHistoricalView={isHistoricalView} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} CHECKIN_MOODS={CHECKIN_MOODS} /></div>}
 
         {dashboard === "progress" && <div className="pl-unified-page-content"><ProgressPanel open={dashboard === "progress"} user={user} progressView={progressView} setProgressView={setProgressView} weeklyIntentionEditing={weeklyIntentionEditing} setWeeklyIntentionEditing={setWeeklyIntentionEditing} weeklyIntentionDraft={weeklyIntentionDraft} setWeeklyIntentionDraft={setWeeklyIntentionDraft} weeklyIntentionText={weeklyIntentionText} saveWeeklyIntentionEdit={saveWeeklyIntentionEdit} hasWeeklyActivity={hasWeeklyActivity} goToDashboard={goToDashboard} onOpenPlush={() => setCollectionOpen(true)} weeklyOverallPct={weeklyOverallPct} weekOverWeekDelta={weekOverWeekDelta} preferences={preferences} weeklyEssentialPct={weeklyEssentialPct} weeklyOverallDone={weeklyOverallDone} weeklyOverallPossible={weeklyOverallPossible} weeklyBonusDone={weeklyBonusDone} caringDays={caringDays} weekDays={weekDays} weeklyEssentialDone={weeklyEssentialDone} careStory={careStory} careAreas={careAreas} openTaskManager={openTaskManager} patternInsightCards={patternInsightCards} insightCardIndex={insightCardIndex} setInsightCardIndex={setInsightCardIndex} weeklyHighlights={weeklyHighlights} period={period} goWriteWeeklyIntention={goWriteWeeklyIntention} setShareCardOpen={setShareCardOpen} progressDetailsOpen={progressDetailsOpen} setProgressDetailsOpen={setProgressDetailsOpen} TREND_WEEKS={TREND_WEEKS} TREND_MONTHS={TREND_MONTHS} currentMonthKey={currentMonthKey} monthlyOverallPct={monthlyOverallPct} monthOverMonthDelta={monthOverMonthDelta} monthlyTrendPoints={monthlyTrendPoints} tappedTrendMonth={tappedTrendMonth} setTappedTrendMonth={setTappedTrendMonth} monthlyMostConsistent={monthlyMostConsistent} currentMonthDates={currentMonthDates} weeklyTrendPoints={weeklyTrendPoints} tappedTrendWeek={tappedTrendWeek} setTappedTrendWeek={setTappedTrendWeek} habitTasks={habitTasks} habitGardenGrowthPct={habitGardenGrowthPct} habitGardenTotalCheckIns={habitGardenTotalCheckIns} habitGardenOpen={habitGardenOpen} setHabitGardenOpen={setHabitGardenOpen} littleWinHistory={habitHistory} littleWinCheckIns={dailyCheckInHistory} /></div>}
 
-        <nav className="pl-app-bottom-nav" aria-label="Main navigation">
-          {MAIN_DESTINATIONS.map(({id, label, icon}) => <button key={id} type="button" aria-current={mainDestination(dashboard) === id && !collectionOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); if (id === "tasks") openTaskManager(period.date, "today"); else goToDashboard(id); }}><DesignIcon name={icon} /><span>{label}</span></button>)}
-        </nav>
-
         </>
+        </div>
+        <nav className="pl-app-bottom-nav" aria-label="Main navigation">
+          {MAIN_DESTINATIONS.map(({id, label, icon}) => <button key={id} type="button" aria-current={mainDestination(dashboard) === id && !collectionOpen && !inlineUtilityOpen ? "page" : undefined} className="pl-app-nav-btn" onClick={() => { setCollectionOpen(false); if (id === "tasks") openTaskManager(period.date, "today"); else goToDashboard(id); }}><DesignIcon name={icon} /><span>{label}</span></button>)}
+        </nav>
           </>
         )}
         {false && user && (

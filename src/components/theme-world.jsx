@@ -24,9 +24,7 @@ export function ThemeScene({ world, className = "", decorative = false, outfit, 
   </span>;
 }
 
-export function DesignIcon({ name, className = "" }) {
-  return <span className={`pl-design-icon ${className}`} aria-hidden="true" style={{ maskImage: `url(./assets/figma/icon-${name}.svg)`, WebkitMaskImage: `url(./assets/figma/icon-${name}.svg)` }} />;
-}
+export { DesignIcon } from "./design-icon.jsx";
 
 export function CozyScene({ title, subtitle, world, outfit, focus = true }) {
   const copy = useThemeCopy();

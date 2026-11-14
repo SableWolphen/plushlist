@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { PGlite } from "@electric-sql/pglite";
+import { loadGuardianWorkspace } from "../src/guardian-agreements.mjs";
 
 // Real PostgreSQL semantics in a disposable local WASM database. Never connects
 // to the configured Supabase project, its users or its data.
@@ -84,6 +85,19 @@ try {
   await action("guardian_notebook_action",[a.id,"edit",noteId,null,"Second draft",1]);
   await assert.rejects(action("guardian_notebook_action",[a.id,"edit",noteId,null,"Stale overwrite",1]));
   check((await query("select version from guardian_shared_notebooks where id=$1",[noteId])).rows,[{version:2}]);
+  // Run the workspace loader's actual filters/orderings against the disposable
+  // schema so nonexistent columns cannot be hidden by permissive UI mocks.
+  const workspaceClient={from(table){
+    assert.ok(["guardian_behavior_events","guardian_shared_notebooks","guardian_behavior_reviews"].includes(table));
+    let column,value,many=false,sort,descending,limit;
+    const chain={select(){return chain;},eq(c,v){column=c;value=v;return chain;},in(c,v){column=c;value=v;many=true;return chain;},order(c,options){sort=c;descending=options.ascending===false;return chain;},limit(n){limit=n;return chain;},then(resolve,reject){
+      for(const identifier of [column,sort])assert.match(identifier,/^[a-z_]+$/);
+      return query(`select * from public.${table} where ${column} ${many?'= any($1::uuid[])':'= $1'} order by ${sort} ${descending?'desc':'asc'} limit $2`,[value,limit]).then(result=>({data:result.rows,error:null})).then(resolve,reject);
+    }};return chain;
+  }};
+  const workspace=await loadGuardianWorkspace(workspaceClient,a.id);
+  check(workspace.notebooks.map(n=>n.id),[noteId]);
+  check(workspace.events.map(e=>e.id),[eventId]);
   await as(owner);
   await assert.rejects(action("guardian_behavior_action",[a.id,"score",eventId,null,4,"Unauthorized"]));
   await action("guardian_notebook_action",[a.id,"edit",noteId,null,"Owner revision",2]);
@@ -96,10 +110,11 @@ try {
   await as(owner);
   await assert.rejects(task(a.id,"complete",t.id));
   check((await task(a.id,"accept",t.id)).status,"accepted");
-  await action("guardian_task_schedule",[a.id,t.id,"2026-11-10","weekly"]);
+  const {due,next_due}= (await query("select current_date::text as due,(current_date+7)::text as next_due")).rows[0];
+  await action("guardian_task_schedule",[a.id,t.id,due,"weekly"]);
   check((await query("select recurrence from guardian_agreement_tasks where id=$1",[t.id])).rows,[{recurrence:"weekly"}]);
   check((await task(a.id,"complete",t.id)).status,"completed");
-  check((await query("select due_on::text as due_on from guardian_agreement_tasks where recurrence_origin=$1",[t.id])).rows,[{due_on:"2026-11-17"}]);
+  check((await query("select due_on::text as due_on from guardian_agreement_tasks where recurrence_origin=$1",[t.id])).rows,[{due_on:next_due}]);
   await assert.rejects(task(a.id,"accept",t.id));
   const declined = await task(a.id,"propose",null,"Optional",guardian);
   const m = await mood(a.id,"create",null,"Feeling quiet today");
@@ -115,6 +130,14 @@ try {
   await as(guardian);
   check((await query("select body from guardian_agreement_moods")).rows,[{body:"Feeling calmer"}]);
   await as(other);
+  for(const table of ["guardian_behavior_events","guardian_behavior_reviews","guardian_shared_notebooks","guardian_notebook_revisions"]){
+    check((await query(`select * from public.${table}`)).rows,[]);
+    await denied(`delete from public.${table}`);
+    await denied(`update public.${table} set ${table==='guardian_notebook_revisions'?'version=version':'id=id'}`);
+  }
+  await assert.rejects(action("guardian_behavior_action",[a.id,"log",null,"Wrong person",null,""]));
+  await assert.rejects(action("guardian_notebook_action",[a.id,"edit",noteId,null,"Wrong person",3]));
+  await assert.rejects(action("guardian_task_schedule",[a.id,t.id,due,"daily"]));
   check((await query("select id from guardian_agreements")).rows,[]);
   check((await query("select id from guardian_agreement_tasks")).rows,[]);
   check((await query("select id from guardian_agreement_moods")).rows,[]);
@@ -131,6 +154,10 @@ try {
   await assert.rejects(mood(b.id,"share",m.id));
   await as(guardian);
   await revoke(a.id);
+  for(const table of ["guardian_behavior_events","guardian_behavior_reviews","guardian_shared_notebooks","guardian_notebook_revisions"])check((await query(`select * from public.${table}`)).rows,[]);
+  await assert.rejects(action("guardian_behavior_action",[a.id,"score",eventId,null,1,""]));
+  await assert.rejects(action("guardian_notebook_action",[a.id,"edit",noteId,null,"After withdrawal",3]));
+  await assert.rejects(action("guardian_task_schedule",[a.id,t.id,due,"daily"]));
   check((await query("select id from guardian_agreement_tasks")).rows,[]);
   check((await query("select id from guardian_agreement_moods")).rows,[]);
   await assert.rejects(accept(a.id));

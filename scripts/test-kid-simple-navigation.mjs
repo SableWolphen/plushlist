@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";import fs from "node:fs";
 const read=p=>fs.readFileSync(p,"utf8");
-const home=read("src/components/today-panel.jsx"),tasks=read("src/components/tasks-panel.jsx"),guardian=read("src/components/guardian-panel.jsx"),css=read("assets/kid-simple-navigation.css"),html=read("index.html");
+const home=read("src/components/today-panel.jsx"),tasks=read("src/components/tasks-panel.jsx"),guardian=read("src/components/guardian-panel.jsx")+read("src/components/guardian-space-header.jsx"),css=read("assets/kid-simple-navigation.css"),html=read("index.html");
 assert.doesNotMatch(home, /className="pl-quick-paths"/, "No duplicate shortcut grid above Home");
 const app=read("src/app-source.jsx");
 for (const label of ["Today","Plan","Care","Progress","Guardian"]) assert.ok(app.includes(label), "Bottom navigation retains "+label);

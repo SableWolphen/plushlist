@@ -1,0 +1,11 @@
+const fs=require('node:fs'),crypto=require('node:crypto');
+if(!fs.existsSync('www/assets/app.bundle.js'))throw Error('Run web:sync first');
+fs.copyFileSync('scripts/fixtures/mobile-preview-client.js','www/assets/mobile-preview-client.js');
+let html=fs.readFileSync('www/index.html','utf8');
+html=html.replace(/<link[^>]+supabase[^>]*>/g,'').replace(/<script[^>]+src="[^\"]*supabase[^>]*><\/script>/g,'<script src="./assets/mobile-preview-client.js"></script>');
+html=html.replace(/connect-src[^;]+;/,'connect-src \'self\'; worker-src \'none\';');
+html=html.replace('<title>PlushLife</title>','<title>PlushLife — full app design preview</title>');
+html=html.replace(/(href|src)="(\.\/assets\/[^\"]+\.(?:css|js))"/g,(_,attr,file)=>`${attr}="${file}?preview=${crypto.createHash('sha256').update(fs.readFileSync('www/'+file.replace('./',''))).digest('hex').slice(0,12)}"`);
+html=html.replace('<body>','<body><div style="text-align:center;background:#352b3e;color:#fff;padding:5px;font:700 11px Nunito,sans-serif">Design preview · sample data</div>');
+fs.writeFileSync('www/mobile-preview.html',html);
+console.log('Full app preview: /mobile-preview.html. In-memory sample account; remote requests blocked by CSP.');

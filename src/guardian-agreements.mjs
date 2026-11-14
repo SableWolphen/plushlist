@@ -27,12 +27,12 @@ export async function agreementAction(client, action, args = {}) {
 
 export async function loadGuardianWorkspace(client, agreementId) {
   const tables = [
-    ["events","guardian_behavior_events","agreement_id",agreementId],
-    ["notebooks","guardian_shared_notebooks","agreement_id",agreementId],
+    ["events","guardian_behavior_events","agreement_id",agreementId,"created_at"],
+    ["notebooks","guardian_shared_notebooks","agreement_id",agreementId,"updated_at"],
   ];
   const result = {};
-  for (const [key,table,column,value] of tables) {
-    const {data,error}=await client.from(table).select("*").eq(column,value).order("created_at",{ascending:false}).limit(100);
+  for (const [key,table,column,value,sortColumn] of tables) {
+    const {data,error}=await client.from(table).select("*").eq(column,value).order(sortColumn,{ascending:false}).limit(100);
     if(error) throw error;
     result[key]=data || [];
   }
