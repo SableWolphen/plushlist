@@ -214,6 +214,40 @@ try {
       await revoker.query("commit");
       assert.ok((await waiting).error,"acceptance queued behind revocation must fail");
       check((await query("select status from guardian_agreements where id=$1",[racing.id])).rows,[{status:"revoked"}]);
+      // The new mutation RPCs must also serialize behind consent withdrawal,
+      // including task completion that would otherwise create another occurrence.
+      for(const operation of ["behavior","notebook","schedule","complete","mood"]){
+        await as(owner);
+        const agreement=await propose();
+        await as(guardian);await accept(agreement.id);
+        await as(owner);
+        const event=await action("guardian_behavior_action",[agreement.id,"log",null,"Race fixture",null,""]);
+        const notebook=await action("guardian_notebook_action",[agreement.id,"create",null,"Race fixture","Original",null]);
+        const entry=await mood(agreement.id,"create",null,"Original mood");
+        const scheduled=await task(agreement.id,"propose",null,"Optional repeat",guardian);
+        await as(guardian);await task(agreement.id,"accept",scheduled.id);
+        await action("guardian_task_schedule",[agreement.id,scheduled.id,due,"weekly"]);
+        const requests={
+          behavior:[guardian,"select public.guardian_behavior_action($1,'score',$2,null,1,'')",[agreement.id,event.guardian_behavior_action]],
+          notebook:[owner,"select public.guardian_notebook_action($1,'edit',$2,null,'Changed',1)",[agreement.id,notebook.guardian_notebook_action]],
+          schedule:[guardian,"select public.guardian_task_schedule($1,$2,$3,'daily')",[agreement.id,scheduled.id,due]],
+          complete:[guardian,"select public.guardian_agreement_task_action($1,'complete',$2)",[agreement.id,scheduled.id]],
+          mood:[owner,"select public.guardian_agreement_mood_action($1,'edit',$2,'Changed',false)",[agreement.id,entry.id]],
+        };
+        const [actor,sql,args]=requests[operation];
+        await accepter.query("select set_config('request.jwt.claim.sub',$1,false)",[actor]);
+        await revoker.query("begin");
+        await revoker.query("select public.guardian_agreement_action('revoke',$1)",[agreement.id]);
+        let finished=false;
+        const write=accepter.query(sql,args).then(()=>({saved:true}),error=>({error})).finally(()=>{finished=true;});
+        await new Promise(resolve=>setTimeout(resolve,100));
+        check(finished,false);
+        await revoker.query("commit");
+        assert.ok((await write).error,operation+" queued behind withdrawal must fail");
+        await db.exec("reset role");
+        check((await query("select count(*)::int as count from guardian_agreement_tasks where recurrence_origin=$1",[scheduled.id])).rows,[{count:0}]);
+        check((await query("select version from guardian_shared_notebooks where id=$1",[notebook.guardian_notebook_action])).rows,[{version:1}]);
+      }
     } finally {
       await revoker.query("rollback");
       await revoker.end(); await accepter.end();
