@@ -1,11 +1,13 @@
 # PlushLife — cohesive cozy visual redesign
 
 ## Guardrails
-Keep the original mascot's purple outline, green spikes, orange tail, face and proportions. Keep existing Today / Plan / Care / Progress / Guardian bottom navigation, existing consent and sharing rules, accessible motion preferences, dark appearance, current free-beta access, and user history. Do not add database migrations, new SDKs, release-pipeline changes or notifications.
+Keep the original mascot's purple outline, green spikes, orange tail, face and proportions. Bottom navigation is Today / Plan / Care / Progress, with Guardian inside Care (owner decision, Nov 19). Keep existing consent and sharing rules, accessible motion preferences, dark appearance, current free-beta access, and user history. Do not add database migrations, new SDKs, release-pipeline changes or notifications.
 
 ## 1. Shared visual system — first implementation
 - The new `assets/cozy-visual-polish.css` adds consistent card radii, spacing, headline wrapping, focus states, subtle shadows and restrained tactile feedback.
 - Colors continue to resolve from the existing per-world `--pl-theme-*` variables. Do not hard-code one palette across all existing custom themes.
+- The default (soft) world uses the redesign canvas palette: ground #F7F2FB, surface #FFFFFF, soft #EFE4F8, ink #3B2A4A, muted #6E5A7E, line #E8DDF3, accent #6E4FA3.
+- Headings use the rounded Quicksand face through `--pl-heading-font`; body text stays Nunito.
 - Existing Nunito and Quicksand font files are reused; nothing is fetched from a third party.
 - The original theme-scene SVG only receives an optional, short entrance animation; `prefers-reduced-motion` disables it.
 - Mobile 390px and smaller retains compact padding and 44px+ interactive control sizes.
@@ -39,7 +41,7 @@ Keep the original mascot's purple outline, green spikes, orange tail, face and p
 ## Release acceptance
 1. CI passes full `npm test`, `npm run web:sync`, bundle budgets and Android packaging checks.
 2. Review 320/390/768/1440 widths, light/dark, every theme and reduced-motion.
-3. Validate tasks, recurring schedules, all five tabs, onboarding, save failure, authentication, privacy/revocation and offline recovery.
+3. Validate tasks, recurring schedules, all four tabs and Guardian inside Care, onboarding, save failure, authentication, privacy/revocation and offline recovery.
 4. Test Android on device and review the exact release commit before publishing. Cosmetic polish is not proof that Google Play production has been updated.
 
 The first PR ships only the low-risk shared CSS pass. Later interaction and content changes stay separate so they can be reviewed and tested without touching backend data.

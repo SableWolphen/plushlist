@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { MAIN_DESTINATIONS } from "../src/navigation.mjs";
+import { MAIN_DESTINATIONS, mainDestination } from "../src/navigation.mjs";
 const get = name => readFileSync(new URL("../"+name, import.meta.url),"utf8");
 const guardian = MAIN_DESTINATIONS.filter(item => item.id === "guardian");
-assert.equal(guardian.length,1,"Guardian must have exactly one dedicated destination");
-assert.equal(MAIN_DESTINATIONS.at(-1).id,"guardian","Guardian remains available as a bottom nav item");
+assert.equal(guardian.length,0,"Guardian lives inside Care rather than as its own bottom tab");
+assert.equal(mainDestination("guardian"),"care","Care stays selected while Guardian is open");
+assert.match(get("src/components/care-panel.jsx"),/Your trusted person[\s\S]*props\.onOpenSupport\?\.\(\)/,"Care's trusted person card opens Guardian");
+assert.match(get("src/app-source.jsx"),/className="pl3-back-to-care"/,"Guardian offers a way back to Care");
 const app=get("src/app-source.jsx");
 assert.match(app,/MAIN_DESTINATIONS\.map\(\(\{id, label, icon\}\)/,"Bottom nav must render each destination");
 assert.match(app,/dashboard === "guardian"/,"Guardian destination must open the actual panel");

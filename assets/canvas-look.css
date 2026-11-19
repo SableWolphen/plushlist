@@ -1,0 +1,23 @@
+/*
+ * Final touches from the PlushLife redesign canvas. Loaded last.
+ * Colours still come from each world's --pl-theme-* / --sb-* variables.
+ */
+
+/* Today header: plush tile, date and greeting sit on the page, without a banner card or decorative dots. */
+#main-content#main-content.pl-calm-shell[data-pl-world][data-pl-dark] .pl3-home .pl-storybook-banner{background:none!important;border:0!important;box-shadow:none!important;padding:4px 0!important;min-height:0!important}
+#main-content#main-content.pl-calm-shell[data-pl-world][data-pl-dark] .pl3-home .pl-storybook-banner .pl-storybook-sky{display:none!important}
+#main-content#main-content.pl-calm-shell[data-pl-world][data-pl-dark] .pl3-home .pl-storybook-banner .pl-storybook-mascot{background:var(--pl-theme-surface-2)!important;border-radius:22px!important}
+#main-content#main-content.pl-calm-shell[data-pl-world][data-pl-dark] .pl3-home .pl-storybook-banner .pl-storybook-settings{background:var(--pl-theme-surface)!important;border:1px solid var(--pl-theme-line)!important;color:var(--pl-theme-muted)!important}
+
+/* Energy picker: the chosen option is a soft lavender pill. */
+#main-content#main-content.pl-calm-shell[data-pl-world][data-pl-dark] .pl3-home .pl3-energy-options{background:var(--pl-theme-surface)!important;border:1px solid var(--pl-theme-line)!important}
+#main-content#main-content.pl-calm-shell[data-pl-world][data-pl-dark] .pl3-home .pl3-energy-options button[aria-pressed="true"]{background:var(--pl-theme-surface-2)!important;color:var(--pl-theme-ink)!important;box-shadow:none!important;font-weight:800!important}
+
+/* Next up: one solid accent card with a white Done button (light mode; dark mode keeps its readable tinted card). */
+#main-content#main-content.pl-calm-shell[data-pl-world][data-pl-dark="false"] .pl3-home .pl3-next{background:var(--pl-theme-accent)!important;border:0!important;color:var(--pl-theme-on-accent,#fff)!important;box-shadow:0 10px 26px color-mix(in srgb,var(--pl-theme-accent) 24%,transparent)!important}
+#main-content#main-content.pl-calm-shell[data-pl-world][data-pl-dark="false"] .pl3-home .pl3-next :is(.pl3-next-label,h2,p,strong){color:var(--pl-theme-on-accent,#fff)!important}
+#main-content#main-content.pl-calm-shell[data-pl-world][data-pl-dark="false"] .pl3-home .pl3-next .pl3-next-label{opacity:.85}
+#main-content#main-content.pl-calm-shell[data-pl-world][data-pl-dark="false"] .pl3-home .pl3-next p{opacity:.92}
+#main-content#main-content.pl-calm-shell[data-pl-world][data-pl-dark="false"] .pl3-home .pl3-next .pl3-next-done{background:var(--pl-theme-surface)!important;color:var(--pl-theme-ink)!important;border:0!important}
+#main-content#main-content.pl-calm-shell[data-pl-world][data-pl-dark="false"] .pl3-home .pl3-next .pl3-next-smaller-button{background:transparent!important;color:var(--pl-theme-on-accent,#fff)!important;border:1.5px solid color-mix(in srgb,var(--pl-theme-on-accent,#fff) 60%,transparent)!important}
+#main-content#main-content.pl-calm-shell[data-pl-world][data-pl-dark="false"] .pl3-home .pl3-next button:focus-visible{outline:3px solid var(--pl-theme-on-accent,#fff)!important;outline-offset:3px}

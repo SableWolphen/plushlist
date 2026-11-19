@@ -10,10 +10,11 @@ const docs = fs.readFileSync("docs/plushlife-ui-source-of-truth.md", "utf8");
 const nav = app.split('<nav className="pl-app-bottom-nav" aria-label="Main navigation">')[1]?.split("</nav>")[0];
 assert(nav, "Guardian and other destinations must use the actual mobile bottom navigation");
 
-assert.deepEqual(MAIN_DESTINATIONS.map(item=>item.label), ["Today","Plan","Care","Progress","Guardian"], "Five consistent destinations including dedicated Guardian");
+assert.deepEqual(MAIN_DESTINATIONS.map(item=>item.label), ["Today","Plan","Care","Progress"], "Four consistent destinations; Guardian lives in Care");
+assert(fs.readFileSync("src/components/care-panel.jsx","utf8").includes("props.onOpenSupport?.()"), "Care offers a clear way into Guardian");
 assert(fs.readFileSync("src/components/care-panel.jsx","utf8").includes("props.onOpenSupport?.()"), "Care offers a clear way into Guardian");
 assert(nav.includes('MAIN_DESTINATIONS.map'), "Bottom navigation uses the shared destination list");
-assert(nav.includes('mainDestination(dashboard) === id'), "Calendar selects Plan and Guardian retains a selected state");
+assert(nav.includes('mainDestination(dashboard) === id'), "Calendar selects Plan and Guardian keeps Care selected");
 assert(nav.includes('setCollectionOpen(false)') && nav.includes('goToDashboard(id)'), "Switching from a collection closes it and opens the destination");
 assert(fs.existsSync("assets/figma/icon-guardian.svg"), "Real Guardian tab icon must be included in the build");
 assert(fs.readFileSync("assets/figma/icon-guardian.svg", "utf8").includes("<svg"), "Guardian icon must have valid SVG content");

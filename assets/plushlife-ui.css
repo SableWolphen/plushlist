@@ -1232,7 +1232,7 @@
 #main-content.baby-mode .pl-app-bottom-nav,
 #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-app-bottom-nav{
   display:grid!important;
-  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
   position:fixed!important;
   left:12px!important;
   right:12px!important;
@@ -1455,7 +1455,7 @@
 #main-content.dino-theme .pl-app-bottom-nav,
 #main-content.baby-mode .pl-app-bottom-nav,
 #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-app-bottom-nav{
-  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
 }
 #main-content .pl-app-nav-add-inline{
   color:white!important;
@@ -1525,7 +1525,7 @@
 #main-content.dino-theme .pl-app-bottom-nav,
 #main-content.baby-mode .pl-app-bottom-nav,
 #main-content.appearance-soft:not(.dino-theme):not(.baby-mode) .pl-app-bottom-nav{
-  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
 }
 #main-content .pl-app-nav-add-inline{display:none!important;}
 #main-content .pl-header-add-button{
